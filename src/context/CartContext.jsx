@@ -8,7 +8,7 @@ import React, {
 
 const CartContext = createContext(null);
 
-const STORAGE_KEY = "emt.cart.v1";
+const STORAGE_KEY = "tiredrop.cart.v1";
 
 // Tires and wheels are priced per unit but almost always bought in sets,
 // so quantity lives on the line item and installation is opt-in per line.
@@ -22,13 +22,13 @@ function reducer(state, action) {
     case "add": {
       const { item, qty } = action;
       const existing = state.lines.find(
-        (l) => l.id === item.id && l.install === item.install
+        (l) => l.id === item.id && l.install === item.install,
       );
       if (existing) {
         return {
           ...state,
           lines: state.lines.map((l) =>
-            l === existing ? { ...l, qty: Math.min(l.qty + qty, 99) } : l
+            l === existing ? { ...l, qty: Math.min(l.qty + qty, 99) } : l,
           ),
         };
       }
@@ -44,7 +44,10 @@ function reducer(state, action) {
       };
 
     case "remove":
-      return { ...state, lines: state.lines.filter((l) => l.key !== action.key) };
+      return {
+        ...state,
+        lines: state.lines.filter((l) => l.key !== action.key),
+      };
 
     case "clear":
       return initialState;
@@ -87,9 +90,10 @@ export function CartProvider({ children }) {
     const subtotal = lines.reduce((n, l) => n + l.price * l.qty, 0);
     const installTotal = lines.reduce(
       (n, l) => n + (l.install ? l.installPrice * l.qty : 0),
-      0
+      0,
     );
-    // Free local delivery to the van once the order clears $500.
+    // Shipping is waived over $500. This is a placeholder rate: once the
+    // distributor APIs are wired, the carrier quote replaces it.
     const shipping = subtotal === 0 || subtotal >= 500 ? 0 : 29;
     const tax = Math.round((subtotal + installTotal) * 0.07 * 100) / 100;
     const total = subtotal + installTotal + shipping + tax;

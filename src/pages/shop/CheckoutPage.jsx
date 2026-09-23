@@ -465,6 +465,10 @@ export default function CheckoutPage() {
           trail={[{ label: "Cart", to: "/cart" }, { label: "Checkout" }]}
         />
         <div className="wrap py-14">
+          {/* Every other branch of this page opens with an h1. Without one
+              here the empty cart is a document whose first heading is an h3,
+              so nothing tells a screen reader what page this is. */}
+          <h1 className="h1 mb-8">Checkout</h1>
           <EmptyState
             icon={ShoppingCart}
             title="There's nothing to check out"

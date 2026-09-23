@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
 // Controlled filter panel shared by the tire and wheel catalogs.
@@ -287,12 +287,19 @@ export default function Filters({
   const close = () => onOpenChange?.(false);
   const clearAll = () => onChange({ ...EMPTY_FILTERS });
 
+  const closeButtonRef = useRef(null);
+
   // While the drawer is up it owns the screen: the page behind it must not
-  // scroll away underneath, and Escape has to dismiss it.
+  // scroll away underneath, and Escape has to dismiss it. It also declares
+  // `aria-modal`, which makes everything outside it inert to a screen reader
+  // — so focus has to move inside, or the user is left on a trigger their
+  // reader can no longer see.
   useEffect(() => {
     if (!open) return undefined;
     const previous = document.body.style.overflow;
+    const previouslyFocused = document.activeElement;
     document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
     const onKey = (e) => {
       if (e.key === "Escape") onOpenChange?.(false);
     };
@@ -300,6 +307,7 @@ export default function Filters({
     return () => {
       document.body.style.overflow = previous;
       document.removeEventListener("keydown", onKey);
+      if (previouslyFocused instanceof HTMLElement) previouslyFocused.focus();
     };
   }, [open, onOpenChange]);
 
@@ -352,6 +360,7 @@ export default function Filters({
             <div className="flex shrink-0 items-center justify-between gap-3 border-b border-ink/10 px-5 py-3">
               <h2 className="h3 text-[1.125rem]">Filter</h2>
               <button
+                ref={closeButtonRef}
                 type="button"
                 onClick={close}
                 aria-label="Close filters"

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import {
   ChevronDown,
@@ -101,13 +101,32 @@ function DesktopNav() {
 }
 
 function MobileDrawer({ open, onClose }) {
-  // Lock body scroll while the drawer is open.
+  const closeButtonRef = useRef(null);
+
+  // Lock body scroll while the drawer is open, and let Escape dismiss it —
+  // the filter drawer already does both, and a panel that covers the screen
+  // with no keyboard way out is a trap.
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
+    if (!open) return undefined;
+    const previous = document.body.style.overflow;
+    const previouslyFocused = document.activeElement;
+    document.body.style.overflow = "hidden";
+
+    // Focus has to move inside: the trigger that opened this sits behind the
+    // overlay, so leaving focus there strands a keyboard or screen-reader user
+    // outside the panel they just opened.
+    closeButtonRef.current?.focus();
+
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
     };
-  }, [open]);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      document.removeEventListener("keydown", onKey);
+      if (previouslyFocused instanceof HTMLElement) previouslyFocused.focus();
+    };
+  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -118,10 +137,16 @@ function MobileDrawer({ open, onClose }) {
         className="absolute inset-0 bg-ink/60"
         onClick={onClose}
       />
-      <div className="absolute right-0 top-0 flex h-full w-[86%] max-w-sm flex-col bg-bone shadow-lift">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site menu"
+        className="absolute right-0 top-0 flex h-full w-[86%] max-w-sm flex-col bg-bone shadow-lift"
+      >
         <div className="flex items-center justify-between border-b border-ink/10 px-5 py-4">
           <Logo className="h-11" />
           <button
+            ref={closeButtonRef}
             onClick={onClose}
             aria-label="Close menu"
             className="rounded-sm p-1.5 text-ink hover:bg-fog"
@@ -180,6 +205,11 @@ export default function Header() {
   const { count } = useCart();
   const { pathname } = useLocation();
 
+  // Stable identity: the drawer's effect depends on it, and a fresh closure
+  // every render would re-run that effect and yank focus back to the close
+  // button while the user is still tabbing through the menu.
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+
   // Close the drawer whenever navigation happens.
   useEffect(() => setMenuOpen(false), [pathname]);
 
@@ -227,7 +257,7 @@ export default function Header() {
         </div>
       </div>
 
-      <MobileDrawer open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <MobileDrawer open={menuOpen} onClose={closeMenu} />
     </>
   );
 }

@@ -371,7 +371,7 @@ export default function ShippingPage() {
 
         <div className="grid gap-5 lg:grid-cols-3">
           <div className="card p-6 md:p-8">
-            <AlertTriangle size={24} aria-hidden className="text-amber" />
+            <AlertTriangle size={24} aria-hidden className="text-amberInk" />
             <h3 className="h3 mt-4">It arrived damaged</h3>
             <p className="mt-3 text-sm leading-relaxed text-smoke">
               Look the shipment over before it goes anywhere near a wheel. A

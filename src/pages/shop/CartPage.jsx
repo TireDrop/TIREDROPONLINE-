@@ -52,7 +52,7 @@ const FREE_SHIP_AT = 500;
 const TAX_RATE = 0.07;
 const round2 = (n) => Math.round(n * 100) / 100;
 
-const PROMO_STORAGE_KEY = "emt.promo.v1";
+const PROMO_STORAGE_KEY = "tiredrop.promo.v1";
 
 /** Persists the applied code so checkout can show it on the review step. */
 export function savePromo(code) {

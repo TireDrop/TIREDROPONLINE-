@@ -304,7 +304,10 @@ export default function GalleryPage() {
                 role="tab"
                 type="button"
                 aria-selected={selected}
-                aria-controls={`panel-${tab.id}`}
+                // Only the selected panel is mounted, so only the selected
+                // tab can point at one — an aria-controls aimed at an id that
+                // is not in the document is a broken reference, not a hint.
+                aria-controls={selected ? `panel-${tab.id}` : undefined}
                 tabIndex={selected ? 0 : -1}
                 ref={(el) => {
                   tabRefs.current[tab.id] = el;

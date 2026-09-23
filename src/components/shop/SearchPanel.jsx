@@ -15,6 +15,10 @@ import {
 // The storefront's primary finder. Tab one narrows by vehicle, tab two by the
 // numbers stamped on the sidewall (or, on the wheel catalog, by rim size).
 // `?search=vehicle` / `?search=size` from the nav pre-selects a tab.
+//
+// Only the visible panel is mounted, so `aria-controls` is set on the selected
+// tab alone: pointing it at an id that is not in the document is a dangling
+// ARIA reference rather than a useful one.
 
 const SELECT = "field appearance-none bg-bone pr-8";
 
@@ -128,7 +132,9 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
           role="tab"
           id="finder-tab-vehicle"
           aria-selected={tab === "vehicle"}
-          aria-controls="finder-panel-vehicle"
+          {...(tab === "vehicle"
+            ? { "aria-controls": "finder-panel-vehicle" }
+            : null)}
           onClick={() => {
             setTab("vehicle");
             setError("");
@@ -143,7 +149,9 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
           role="tab"
           id="finder-tab-size"
           aria-selected={tab === "size"}
-          aria-controls="finder-panel-size"
+          {...(tab === "size"
+            ? { "aria-controls": "finder-panel-size" }
+            : null)}
           onClick={() => {
             setTab("size");
             setError("");

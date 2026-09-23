@@ -85,7 +85,7 @@ export const GOOGLE_PROFILE = {
   placeId: null,
   reviewUrl: null,
   searchUrl:
-    "https://www.google.com/maps/search/?api=1&query=Extreme+Mobile+Tires+Sunrise+FL",
+    "https://www.google.com/maps/search/?api=1&query=Extreme+Tires+Sunrise+FL",
   reviewsAreReal: false,
 };
 

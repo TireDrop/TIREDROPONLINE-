@@ -22,6 +22,12 @@ import { SERVICES, getService } from "../../data/services.js";
 const STEP_LABELS = ["Service", "Vehicle", "Location", "Time", "Contact"];
 const LAST_STEP = STEP_LABELS.length;
 
+// Manufacturers sell next year's models well before the year turns, so the
+// ceiling runs ahead of today. Derived rather than written down, because a
+// hardcoded year silently starts rejecting real cars — and checkout already
+// computes it this way, so the two pages agreed on nothing but the number.
+const MAX_MODEL_YEAR = new Date().getFullYear() + 2;
+
 // Arrival windows. The 4–6 PM slot only exists Mon–Fri; the shop closes at 4 on
 // Saturday and is closed Sunday, per BUSINESS.hours.
 const TIME_WINDOWS = [
@@ -104,9 +110,9 @@ function validateStep(step, form) {
     } else if (
       !/^\d{4}$/.test(form.year.trim()) ||
       year < 1960 ||
-      year > 2027
+      year > MAX_MODEL_YEAR
     ) {
-      errors.year = "Enter a four-digit year between 1960 and 2027.";
+      errors.year = `Enter a four-digit year between 1960 and ${MAX_MODEL_YEAR}.`;
     }
     if (!form.make.trim()) errors.make = "Enter the make, for example Toyota.";
     if (!form.model.trim())

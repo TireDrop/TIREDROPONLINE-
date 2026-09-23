@@ -103,7 +103,7 @@ export default function ProductCard({ product }) {
     <article className="card-hover group flex h-full flex-col overflow-hidden">
       <div className="relative flex items-center justify-center border-b border-ink/[0.05] bg-gradient-to-b from-bone to-fog p-5">
         {product.badge && (
-          <div className="absolute left-3 top-3">
+          <div className="absolute left-3 top-3 z-10">
             <Badge tone={BADGE_TONE[product.badge] || "soft"}>
               {product.badge}
             </Badge>
@@ -112,7 +112,12 @@ export default function ProductCard({ product }) {
 
         {isTire && (
           <label
-            className={`absolute right-2 top-2 flex min-h-[44px] min-w-[44px] items-center gap-1.5 rounded-sm border border-ink/10 bg-bone/95 px-2 shadow-card backdrop-blur-sm transition-colors ${
+            // `z-10` is load-bearing, not decoration. The art below scales on
+            // hover, and a transform promotes it into the positioned paint
+            // layer — where, coming later in the DOM, it lands on top of this
+            // control and swallows the click. Hovering the card made the
+            // compare box unclickable.
+            className={`absolute right-2 top-2 z-10 flex min-h-[44px] min-w-[44px] items-center gap-1.5 rounded-sm border border-ink/10 bg-bone/95 px-2 shadow-card backdrop-blur-sm transition-colors ${
               lockedOut ? "cursor-not-allowed opacity-60" : "cursor-pointer"
             }`}
             title={
@@ -142,11 +147,11 @@ export default function ProductCard({ product }) {
           accent={product.accent}
           size={168}
           label={`${product.brand} ${product.model}`}
-          className="h-auto w-[168px] max-w-full transition-transform duration-300 group-hover:scale-105"
+          className="pointer-events-none h-auto w-[168px] max-w-full transition-transform duration-300 group-hover:scale-105"
         />
 
         {product.rebate && (
-          <div className="absolute bottom-3 left-3">
+          <div className="absolute bottom-3 left-3 z-10">
             <Badge tone="amber">${product.rebate.amount} rebate</Badge>
           </div>
         )}

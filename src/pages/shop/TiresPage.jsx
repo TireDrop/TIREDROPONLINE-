@@ -141,6 +141,11 @@ export default function TiresPage() {
     patchParams({
       brands: value.brands,
       cats: value.categories,
+      // `category` is the readable entry point the home tiles link to, and it
+      // folds into the same filter as `cats`. Writing only `cats` would leave
+      // it behind in the URL, so the chip, the sidebar checkbox and "Clear
+      // all" would all appear to do nothing. Clear it on every write.
+      category: "",
       dia: value.diameters,
       minp: value.minPrice,
       maxp: value.maxPrice,
@@ -223,6 +228,7 @@ export default function TiresPage() {
     patchParams({
       brands: [],
       cats: [],
+      category: "",
       dia: [],
       minp: "",
       maxp: "",
