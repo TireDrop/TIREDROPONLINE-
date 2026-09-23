@@ -9,10 +9,12 @@ import {
   CircleDollarSign,
   CloudSun,
   Gauge,
+  ListChecks,
   MapPin,
   Package,
   PackageCheck,
   Phone,
+  Ruler,
   Snowflake,
   Store,
   Truck,
@@ -33,6 +35,29 @@ import BrandLogo from "../components/ui/BrandLogo.jsx";
 const yearsInBusiness = new Date().getFullYear() - BUSINESS.foundedYear;
 
 /* ---------------------------------- Hero --------------------------------- */
+
+// The three free tools, in the order a stuck shopper needs them: what size,
+// which tire, and whether they need tires at all.
+const TOOLS_LIST = [
+  {
+    to: "/tire-size",
+    label: "Decode my tire size",
+    copy: "Type what is on your sidewall and see every number explained, drawn to the proportions of your own tire. Compare two sizes and see what actually changes.",
+    Icon: Ruler,
+  },
+  {
+    to: "/find-my-tires",
+    label: "Find my tires",
+    copy: "Five questions about your car, your roads and your weather, and a shortlist that says plainly why each tire made it.",
+    Icon: ListChecks,
+  },
+  {
+    to: "/tire-check",
+    label: "Do I need tires yet?",
+    copy: "Check the tread with a coin you already have, and the age with the code on the sidewall. If they are fine, it says so.",
+    Icon: Gauge,
+  },
+];
 
 function Hero() {
   const navigate = useNavigate();
@@ -619,30 +644,43 @@ function LocalAdvantage() {
 
 /* -------------------------------- Promo band ------------------------------ */
 
-function PromoBand() {
+/* ---------------------------------- Proof --------------------------------- */
+
+function ToolsBand() {
   return (
-    <section className="bg-ink-wash">
-      <div aria-hidden className="hazard h-2.5" />
-      <div className="wrap flex flex-col items-center gap-5 py-12 text-center md:flex-row md:justify-between md:text-left">
-        <div>
-          <p className="eyebrow-dark mb-1.5">Current offers</p>
-          <h2 className="h2 text-bone">
-            Save on sets of four, shipping and rebates
-          </h2>
-          <p className="lede mt-2 text-bone/60">
-            Manufacturer rebates and store-wide codes, all in one place.
-          </p>
-        </div>
-        <Link to="/coupons" className="btn-primary shrink-0">
-          View deals
-          <ArrowRight size={17} aria-hidden />
-        </Link>
+    <Section className="bg-ink-wash">
+      <SectionHead
+        eyebrow="Free, no email required"
+        title="Not sure what you need? Start here"
+        lede="Three tools that answer the questions that stop people buying tires online. They work whether or not you buy anything from us."
+      />
+
+      <div className="mt-8 grid gap-3 sm:gap-4 lg:grid-cols-3">
+        {TOOLS_LIST.map(({ to, label, copy, Icon }) => (
+          <Link
+            key={to}
+            to={to}
+            className="group flex flex-col rounded-card border border-graphite bg-steel-wash p-5 transition-colors hover:border-volt/40 sm:p-6"
+          >
+            <Icon size={24} aria-hidden className="mb-4 text-volt" />
+            <h3 className="h3 text-bone">{label}</h3>
+            <p className="mt-2 flex-1 text-sm leading-relaxed text-bone/70">
+              {copy}
+            </p>
+            <span className="mt-4 flex items-center gap-1.5 font-display text-sm font-bold text-volt">
+              Open it
+              <ArrowRight
+                size={15}
+                aria-hidden
+                className="transition-transform group-hover:translate-x-1"
+              />
+            </span>
+          </Link>
+        ))}
       </div>
-    </section>
+    </Section>
   );
 }
-
-/* ---------------------------------- Proof --------------------------------- */
 
 function Proof() {
   const stats = [
@@ -758,18 +796,37 @@ export default function HomePage() {
         title="Tires & Wheels Shipped Nationwide"
         description="TireDrop is an online tire and wheel store shipping anywhere in the continental US. Ship to your address, or free to our South Florida shop where we install them. Powered by Extreme Tires."
       />
+      {/* Ordered against the sequence a tire buyer actually moves through:
+          can you fit my car, what does it cost, can I trust you, how do the
+          tires get on. Explanation earns its place after an offer, not
+          before one — a shopper who has not yet seen a price has no reason
+          to read four steps about delivery. */}
       <Hero />
       <TrustBar />
-      <ShopByCategory />
-      <DeliveryChoice />
-      <CategoryTiles />
-      <HowItWorks />
+
+      {/* Real products and real prices, third. This is the first proof that
+          there is a shop here at all, and it used to sit seventh, behind
+          five sections of explanation. */}
       <FeaturedTires />
       <RebateStrip />
-      <BrandStrip />
-      <PromoBand />
+
+      {/* For the shopper the four featured tires did not suit. */}
+      <ShopByCategory />
+      <DeliveryChoice />
+
+      {/* The way in for someone who cannot answer the finder because they do
+          not know their size — which is the single most common reason a tire
+          shopper leaves a site. */}
+      <ToolsBand />
+
+      {/* Trust, then the local pitch it underwrites. */}
       <Proof />
       <LocalAdvantage />
+
+      {/* Still undecided: the process, the rest of the store, the brands. */}
+      <HowItWorks />
+      <CategoryTiles />
+      <BrandStrip />
       <FinalCta />
     </>
   );
