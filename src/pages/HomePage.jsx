@@ -29,7 +29,6 @@ import { SET_SIZE, setPrice } from "../data/pricing.js";
 import ProductArt from "../components/shop/ProductArt.jsx";
 import ProductCard from "../components/shop/ProductCard.jsx";
 import SearchPanel from "../components/shop/SearchPanel.jsx";
-import Logo from "../components/layout/Logo.jsx";
 import { Seo, Section, SectionHead, Stars } from "../components/ui/index.jsx";
 import BrandLogo from "../components/ui/BrandLogo.jsx";
 
@@ -100,12 +99,6 @@ function Hero() {
           copy back together in the left half with the finder beside it. */}
       <div className="wrap relative grid gap-7 py-10 md:py-14 lg:grid-cols-[.9fr_1.1fr] lg:gap-x-12 lg:gap-y-6 lg:py-16">
         <div className="order-1 lg:col-start-1 lg:row-start-1 lg:self-end">
-          {/* The badge, at the one size on the site where it can be read.
-              The masthead carries the wordmark because a square mark shrunk
-              to a 44px bar loses its own name; here it has room to be the
-              thing it is. */}
-          <Logo className="mb-5 h-28 md:h-36 lg:h-44" variant="full" onDark />
-
           <p className="eyebrow-dark mb-3 flex items-center gap-2">
             <Truck size={16} aria-hidden />
             {BUSINESS.tagline}

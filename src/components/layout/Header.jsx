@@ -144,7 +144,7 @@ function MobileDrawer({ open, onClose }) {
         className="absolute right-0 top-0 flex h-full w-[86%] max-w-sm flex-col bg-bone shadow-lift"
       >
         <div className="flex items-center justify-between border-b border-ink/10 px-5 py-4">
-          <Logo className="h-11" />
+          <Logo className="h-12" variant="full" />
           <button
             ref={closeButtonRef}
             onClick={onClose}
@@ -219,8 +219,16 @@ export default function Header() {
 
       <div className="sticky top-0 z-40 border-b border-ink/10 bg-bone/95 backdrop-blur">
         <div className="wrap flex items-center justify-between gap-4">
-          <Link to="/" className="flex shrink-0 items-center py-3">
-            <Logo className="h-11 md:h-12" showParent />
+          {/* The full badge is square, so stacking the parent line under it
+              would make the masthead twice as tall as it needs to be. Set
+              beside it, the lockup stays one row and the mark keeps its
+              height. */}
+          <Link to="/" className="flex shrink-0 items-center gap-2.5 py-2.5">
+            <Logo className="h-14 md:h-16" variant="full" />
+            <span className="hidden whitespace-nowrap font-display text-[11px] uppercase leading-tight tracking-[0.12em] text-smoke sm:block">
+              Powered by
+              <span className="block text-extremeRed">Extreme Tires</span>
+            </span>
           </Link>
 
           <DesktopNav />
