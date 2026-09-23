@@ -21,6 +21,12 @@ import CheckoutPage from "./pages/shop/CheckoutPage.jsx";
 import CouponsPage from "./pages/shop/CouponsPage.jsx";
 import ComparePage from "./pages/shop/ComparePage.jsx";
 
+// Free tools. They answer the questions that stop someone buying tires
+// online — what size, which tire, and do I even need them yet.
+import TireSizePage from "./pages/tools/TireSizePage.jsx";
+import FindMyTiresPage from "./pages/tools/FindMyTiresPage.jsx";
+import TireCheckPage from "./pages/tools/TireCheckPage.jsx";
+
 // Services
 import MobileServicePage from "./pages/services/MobileServicePage.jsx";
 import AutoServicePage from "./pages/services/AutoServicePage.jsx";
@@ -61,6 +67,10 @@ export default function App() {
           <Route path="/wheels" element={<WheelsPage />} />
           <Route path="/wheels/:slug" element={<ProductPage kind="wheel" />} />
           <Route path="/compare" element={<ComparePage />} />
+
+          <Route path="/tire-size" element={<TireSizePage />} />
+          <Route path="/find-my-tires" element={<FindMyTiresPage />} />
+          <Route path="/tire-check" element={<TireCheckPage />} />
           <Route path="/commercial-tires" element={<CommercialTiresPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />

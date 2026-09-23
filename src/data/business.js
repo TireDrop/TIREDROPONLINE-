@@ -137,6 +137,16 @@ export const NAV = [
       { label: "Book Service", to: "/schedule" },
     ],
   },
+  {
+    label: "Tools",
+    to: "/tire-size",
+    children: [
+      { label: "Find My Tires", to: "/find-my-tires" },
+      { label: "Tire Size Decoder", to: "/tire-size" },
+      { label: "Compare Two Sizes", to: "/tire-size?compare=1" },
+      { label: "Do I Need Tires Yet?", to: "/tire-check" },
+    ],
+  },
   { label: "Deals", to: "/coupons" },
   {
     label: "More",
@@ -177,9 +187,18 @@ export const FOOTER_COLUMNS = [
     ],
   },
   {
+    title: "Free Tools",
+    links: [
+      { label: "Find My Tires", to: "/find-my-tires" },
+      { label: "Tire Size Decoder", to: "/tire-size" },
+      { label: "Compare Two Sizes", to: "/tire-size?compare=1" },
+      { label: "Do I Need Tires Yet?", to: "/tire-check" },
+      { label: "Tire Care Guides", to: "/tire-care" },
+    ],
+  },
+  {
     title: "Learn",
     links: [
-      { label: "Tire Care Guides", to: "/tire-care" },
       { label: "About TireDrop", to: "/about" },
       { label: "Reviews", to: "/reviews" },
       { label: "Financing", to: "/financing" },
