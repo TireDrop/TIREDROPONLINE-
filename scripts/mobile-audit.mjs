@@ -234,8 +234,23 @@ async function detectRouteMode() {
     ["path", `${BASE}/tires`],
     ["hash", `${BASE}/#/tires`],
   ]) {
-    await page.goto(url, { waitUntil: "networkidle" });
+    const response = await page.goto(url, { waitUntil: "networkidle" });
     await page.waitForTimeout(400);
+
+    // "The page changed" is not the same as "navigation worked". A static
+    // server with no SPA rewrite answers /tires with its own 404, which is
+    // certainly a different page from home — and taking that as success made
+    // every route fail afterwards with nothing pointing at the real cause.
+    const status = response?.status() ?? 0;
+    if (status >= 400) continue;
+
+    // The app has to have actually mounted. A server that answers 200 with a
+    // directory listing or a shell would otherwise pass here too.
+    const mounted = await page.evaluate(
+      () => (document.getElementById("root")?.childElementCount ?? 0) > 0,
+    );
+    if (!mounted) continue;
+
     if ((await fingerprint()) !== home) return { mode, home };
   }
   return { mode: null, home };
