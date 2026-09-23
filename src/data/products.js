@@ -39,7 +39,8 @@ export const TIRES = [
       amount: 70,
       brand: "Continental",
       expires: "2026-11-30",
-      terms: "Paid by Continental as a prepaid card after the claim is approved. Set of four required.",
+      terms:
+        "Paid by Continental as a prepaid card after the claim is approved. Set of four required.",
     },
     rating: 4.8,
     reviewCount: 412,
@@ -210,7 +211,8 @@ export const TIRES = [
       amount: 100,
       brand: "Continental",
       expires: "2026-10-31",
-      terms: "Paid by Continental as a prepaid card after the claim is approved. Set of four required.",
+      terms:
+        "Paid by Continental as a prepaid card after the claim is approved. Set of four required.",
     },
     rating: 4.9,
     reviewCount: 604,
@@ -258,7 +260,8 @@ export const TIRES = [
       amount: 80,
       brand: "Pirelli",
       expires: "2026-10-31",
-      terms: "Paid by Pirelli as a prepaid card after the claim is approved. Set of four required.",
+      terms:
+        "Paid by Pirelli as a prepaid card after the claim is approved. Set of four required.",
     },
     rating: 4.8,
     reviewCount: 158,
@@ -429,7 +432,8 @@ export const TIRES = [
       amount: 70,
       brand: "Continental",
       expires: "2026-11-30",
-      terms: "Paid by Continental as a prepaid card after the claim is approved. Set of four required.",
+      terms:
+        "Paid by Continental as a prepaid card after the claim is approved. Set of four required.",
     },
     rating: 4.7,
     reviewCount: 388,
@@ -805,7 +809,8 @@ export const TIRES = [
       amount: 90,
       brand: "Michelin",
       expires: "2026-12-15",
-      terms: "Paid by Michelin as a prepaid card after the claim is approved. Set of four required.",
+      terms:
+        "Paid by Michelin as a prepaid card after the claim is approved. Set of four required.",
     },
     rating: 4.8,
     reviewCount: 209,
@@ -881,7 +886,22 @@ export const TIRES = [
   },
 ];
 
-export const WHEELS = [
+// A wheel's accent colour is what ProductArt paints its spoke face with, so
+// it has to agree with the finish printed on the card — a "Matte Black" wheel
+// rendered in red is the kind of detail that tells a shopper nobody checked.
+// Deriving it from the finish below means the two cannot drift apart.
+const FINISH_COLOR = {
+  "Matte Black": "#24282E",
+  "Satin Black": "#2A2F35",
+  "Gloss Black Milled": "#14161A",
+  Gunmetal: "#5A6472",
+  Silver: "#A8AEB8",
+  Bronze: "#9A5B1E",
+  Machined: "#B9BFC7",
+  Chrome: "#CBD2DA",
+};
+
+const WHEEL_CATALOG = [
   {
     id: "w-enkei-tsv",
     slug: "enkei-ts-v-18x8-matte-black",
@@ -1352,6 +1372,11 @@ export const WHEELS = [
   },
 ];
 
+export const WHEELS = WHEEL_CATALOG.map((wheel) => ({
+  ...wheel,
+  accent: FINISH_COLOR[wheel.finish] ?? wheel.accent,
+}));
+
 /** Lookup used by both product routes. Returns undefined for unknown slugs. */
 export function getProduct(kind, slug) {
   const list = kind === "wheel" ? WHEELS : TIRES;
@@ -1423,7 +1448,7 @@ export const VEHICLE_DATA = {
   Hyundai: {
     Elantra: MODEL_YEARS,
     Sonata: MODEL_YEARS,
-    "Tucson": MODEL_YEARS,
+    Tucson: MODEL_YEARS,
     "Santa Fe": MODEL_YEARS,
   },
   Ram: {
@@ -1437,17 +1462,19 @@ export const VEHICLE_MAKES = Object.keys(VEHICLE_DATA);
 
 // Distinct tire size components, used to populate the size selector.
 export const TIRE_WIDTHS = [...new Set(TIRES.map((t) => t.width))].sort(
-  (a, b) => a - b
+  (a, b) => a - b,
 );
 export const TIRE_ASPECTS = [...new Set(TIRES.map((t) => t.aspect))].sort(
-  (a, b) => a - b
+  (a, b) => a - b,
 );
-export const TIRE_DIAMETERS = [...new Set(TIRES.map((t) => t.rimDiameter))].sort(
-  (a, b) => a - b
-);
-export const WHEEL_DIAMETERS = [
-  ...new Set(WHEELS.map((w) => w.diameter)),
+export const TIRE_DIAMETERS = [
+  ...new Set(TIRES.map((t) => t.rimDiameter)),
 ].sort((a, b) => a - b);
+export const WHEEL_DIAMETERS = [...new Set(WHEELS.map((w) => w.diameter))].sort(
+  (a, b) => a - b,
+);
 
 export const TIRE_BRAND_NAMES = [...new Set(TIRES.map((t) => t.brand))].sort();
-export const WHEEL_BRAND_NAMES = [...new Set(WHEELS.map((w) => w.brand))].sort();
+export const WHEEL_BRAND_NAMES = [
+  ...new Set(WHEELS.map((w) => w.brand)),
+].sort();

@@ -35,12 +35,27 @@
     @apply bg-fog text-ink font-sans antialiased;
   }
 
-  /* Condensed display face for every headline and stat. */
+  /* Headings are heavy and slightly expanded rather than condensed and
+     letter-spaced. The uppercase-plus-wide-tracking treatment is what every
+     template reaches for, and it flattens a page: every heading ends up the
+     same texture regardless of what it says. Weight and width carry the
+     hierarchy here instead, and the case is left alone so headlines read as
+     sentences. */
   h1,
   h2,
   h3,
   h4 {
-    @apply font-display uppercase tracking-tight;
+    @apply font-display;
+    font-variation-settings: "wdth" 108;
+    font-weight: 800;
+    letter-spacing: -0.018em;
+  }
+
+  /* Prices, ratings and spec figures line up in columns across cards and the
+     compare table, so their digits need equal widths. */
+  .tnum,
+  table {
+    font-variant-numeric: tabular-nums;
   }
 
   /* Visible focus ring for keyboard users on the brand accent. */
@@ -78,14 +93,18 @@
   }
 
   /* ---------- Buttons ---------- */
+  /* Mixed case, not uppercase-with-wide-tracking. A button that shouts in
+     tracked caps is the loudest tell of a templated site, and it also makes
+     longer labels wrap badly on a phone. Weight does the work instead. */
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-sm px-6 py-3
-           font-display text-base uppercase tracking-wide transition-colors
-           disabled:cursor-not-allowed disabled:opacity-50;
+           font-display text-[15px] font-bold leading-none tracking-[-0.005em]
+           transition-all duration-150 disabled:cursor-not-allowed
+           disabled:opacity-50;
   }
 
   .btn-primary {
-    @apply btn bg-drop text-bone hover:bg-dive;
+    @apply btn bg-drop text-bone shadow-glow hover:bg-dive hover:shadow-none;
   }
 
   .btn-dark {
@@ -93,55 +112,69 @@
   }
 
   .btn-outline {
-    @apply btn border-2 border-ink/20 bg-transparent text-ink hover:border-ink hover:bg-ink hover:text-bone;
+    @apply btn border border-ink/15 bg-bone text-ink shadow-card
+           hover:border-ink/30 hover:bg-fog;
   }
 
   .btn-ghost-light {
-    @apply btn border-2 border-bone/30 text-bone hover:border-bone hover:bg-bone hover:text-ink;
+    @apply btn border border-bone/25 bg-bone/5 text-bone backdrop-blur
+           hover:border-bone/60 hover:bg-bone/10;
   }
 
   .btn-sm {
-    @apply px-4 py-2 text-sm;
+    @apply px-4 py-2 text-[13px];
   }
 
   /* ---------- Surfaces ---------- */
   .card {
-    @apply rounded-sm border border-ink/10 bg-bone shadow-card;
+    @apply rounded-card border border-ink/[0.07] bg-bone shadow-card;
   }
 
   .card-hover {
-    @apply card transition-shadow hover:shadow-lift;
+    @apply card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift;
   }
 
   /* ---------- Type helpers ---------- */
+  /* Still uppercase, because an eyebrow needs to read as a label rather than
+     a sentence — but at a fraction of the tracking, and small enough that it
+     sits under the headline instead of competing with it. */
   .eyebrow {
-    @apply font-display text-sm uppercase tracking-[0.2em] text-drop;
+    @apply font-display text-[12px] font-bold uppercase tracking-[0.09em] text-drop;
   }
 
   .h1 {
-    @apply font-display text-4xl leading-[0.95] md:text-6xl;
+    @apply font-display text-[2.4rem] leading-[0.98] md:text-[4.25rem];
   }
 
   .h2 {
-    @apply font-display text-3xl leading-[1] md:text-5xl;
+    @apply font-display text-[1.9rem] leading-[1.02] md:text-[3rem];
   }
 
   .h3 {
-    @apply font-display text-xl md:text-2xl;
+    @apply font-display text-[1.2rem] leading-[1.15] md:text-[1.45rem];
+  }
+
+  /* The headline treatment for a dark hero: the mark's cyan only works on a
+     dark surface, so it is scoped to one. */
+  .h-accent {
+    @apply text-volt;
   }
 
   .lede {
-    @apply text-base leading-relaxed text-smoke md:text-lg;
+    @apply text-[1.0625rem] leading-[1.6] text-smoke md:text-[1.1875rem];
   }
 
   /* ---------- Forms ---------- */
   .label {
-    @apply mb-1.5 block font-display text-xs uppercase tracking-[0.15em] text-smoke;
+    @apply mb-1.5 block font-display text-[11px] font-bold uppercase
+           tracking-[0.07em] text-smoke;
   }
 
   .field {
-    @apply w-full rounded-sm border border-ink/15 bg-bone px-3.5 py-2.5 text-sm
-           text-ink placeholder:text-smoke/60 focus:border-drop;
+    @apply w-full rounded-sm border border-ink/[0.12] bg-bone px-3.5 py-2.5
+           text-[15px] text-ink shadow-[inset_0_1px_2px_rgba(7,14,26,.04)]
+           placeholder:text-smoke/60 focus:border-drop focus:ring-2
+           focus:ring-drop/15;
   }
 
   /* Diagonal hazard stripe used on promo bars and the mobile-service callout. */

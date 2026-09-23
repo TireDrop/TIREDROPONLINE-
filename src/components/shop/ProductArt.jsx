@@ -14,154 +14,218 @@ function ring(count, offset = 0) {
 }
 
 export function TireArt({
-  accent = "#E03A1E",
+  accent = "#C8102E",
   size = 200,
   label = "Tire illustration",
   className = "",
 }) {
   const uid = useId().replace(/:/g, "");
-  const rubber = `rubber-${uid}`;
-  const sheen = `sheen-${uid}`;
-  const treadClip = `tread-${uid}`;
+  const id = (n) => `${n}-${uid}`;
+
+  // Geometry for the three-quarter view. The far sidewall sits up and to the
+  // right of the near one; the crescent between them is the tread band, and
+  // drawing it that way is the whole reason this reads as a tire rather than
+  // a circle.
+  const NEAR_X = 104;
+  const FAR_X = 137;
+  const CY = 98;
+  const R = 84; // outer radius of the carcass
+  const RIM = 46; // the bead — where the sidewall would seat on a rim
+
+  // Tread blocks march around the visible crescent. They are drawn as
+  // quadrilaterals that narrow toward the far sidewall, which is what gives
+  // the band its curvature.
+  const treadBlocks = Array.from({ length: 22 }, (_, i) => {
+    const t = i / 22;
+    const a = (-78 + t * 156) * (Math.PI / 180); // the arc facing the viewer
+    const sin = Math.sin(a);
+    const cos = Math.cos(a);
+    const nx = NEAR_X + cos * R;
+    const ny = CY + sin * R;
+    const fx = FAR_X + cos * R;
+    const fy = CY + sin * R;
+    // Blocks foreshorten as they wrap away from the centre of the band.
+    const w = 5.2 * Math.max(0.25, cos);
+    const dx = -sin * w;
+    const dy = cos * w;
+    return {
+      key: i,
+      d: `M ${nx - dx} ${ny - dy} L ${fx - dx} ${fy - dy} L ${fx + dx} ${fy + dy} L ${nx + dx} ${ny + dy} Z`,
+      shade: 0.18 + cos * 0.22,
+    };
+  });
 
   return (
     <svg
-      viewBox={`0 0 ${VIEW} ${VIEW}`}
+      viewBox="0 0 240 200"
       width={size}
-      height={size}
+      height={size * (200 / 240)}
       role="img"
       aria-label={label}
       className={className}
     >
       <defs>
-        <radialGradient id={rubber} cx="38%" cy="30%" r="78%">
-          <stop offset="0%" stopColor="#3A4048" />
-          <stop offset="55%" stopColor="#1A1D21" />
-          <stop offset="100%" stopColor="#0B0C0E" />
+        {/* Rubber is a very dark warm grey, not black, and it is matte — so
+            the falloff is broad and the highlight is weak. */}
+        <radialGradient id={id("side")} cx="34%" cy="26%" r="86%">
+          <stop offset="0%" stopColor="#32373E" />
+          <stop offset="48%" stopColor="#1C2025" />
+          <stop offset="100%" stopColor="#0C0E11" />
         </radialGradient>
-        <linearGradient id={sheen} x1="0" y1="0" x2="0.4" y2="1">
-          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.26" />
-          <stop offset="45%" stopColor="#FFFFFF" stopOpacity="0.04" />
+        <linearGradient id={id("band")} x1="0" y1="0" x2="1" y2="0.35">
+          <stop offset="0%" stopColor="#23272D" />
+          <stop offset="45%" stopColor="#14171B" />
+          <stop offset="100%" stopColor="#0A0B0D" />
+        </linearGradient>
+        {/* The bore: the inside of the far sidewall, catching a little of the
+            same light and falling off fast. */}
+        <radialGradient id={id("bore")} cx="30%" cy="30%" r="85%">
+          <stop offset="0%" stopColor="#252A31" />
+          <stop offset="55%" stopColor="#111418" />
+          <stop offset="100%" stopColor="#050607" />
+        </radialGradient>
+        <radialGradient id={id("shadow")} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#070E1A" stopOpacity="0.34" />
+          <stop offset="100%" stopColor="#070E1A" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id={id("sheen")} x1="0.15" y1="0" x2="0.5" y2="1">
+          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.16" />
+          <stop offset="40%" stopColor="#FFFFFF" stopOpacity="0.03" />
           <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
         </linearGradient>
-        {/* Confines the tread blocks to the outer band of the carcass. */}
-        <clipPath id={treadClip}>
-          <path
-            d={`M ${C} 4 a 96 96 0 1 0 0.01 0 Z M ${C} 68 a 32 32 0 1 1 -0.01 0 Z`}
-            clipRule="evenodd"
-          />
-        </clipPath>
       </defs>
 
-      {/* Carcass */}
-      <circle cx={C} cy={C} r="96" fill={`url(#${rubber})`} />
+      {/* Contact shadow. Without something under it the tire floats, which is
+          the difference between a product shot and an icon. */}
+      <ellipse
+        cx={NEAR_X + 12}
+        cy="188"
+        rx="86"
+        ry="11"
+        fill={`url(#${id("shadow")})`}
+      />
 
-      {/* Tread blocks — two staggered rows plus circumferential grooves */}
-      <g clipPath={`url(#${treadClip})`} opacity="0.85">
-        {ring(26).map((deg) => (
-          <rect
-            key={`o${deg}`}
-            x={C - 4.5}
-            y="4"
-            width="9"
-            height="24"
-            rx="2"
-            fill="#4A515A"
-            opacity="0.55"
-            transform={`rotate(${deg} ${C} ${C})`}
-          />
-        ))}
-        {ring(26, 6.9).map((deg) => (
-          <rect
-            key={`i${deg}`}
-            x={C - 5.5}
-            y="30"
-            width="11"
-            height="22"
-            rx="2"
-            fill="#3C434B"
-            opacity="0.5"
-            transform={`rotate(${deg} ${C} ${C})`}
-          />
-        ))}
-      </g>
-      <circle
-        cx={C}
-        cy={C}
-        r="82"
+      {/* Far sidewall, then the tread band that connects it to the near one. */}
+      <circle cx={FAR_X} cy={CY} r={R} fill="#0A0B0D" />
+      <path
+        d={`M ${NEAR_X} ${CY - R} L ${FAR_X} ${CY - R} A ${R} ${R} 0 0 1 ${FAR_X} ${CY + R} L ${NEAR_X} ${CY + R} A ${R} ${R} 0 0 0 ${NEAR_X} ${CY - R} Z`}
+        fill={`url(#${id("band")})`}
+      />
+
+      {/* Tread. Two circumferential grooves and a row of blocks between. */}
+      {treadBlocks.map((b) => (
+        <path key={b.key} d={b.d} fill="#575F69" opacity={b.shade} />
+      ))}
+      <path
+        d={`M ${NEAR_X + 11} ${CY - R + 1} L ${FAR_X - 11} ${CY - R + 1} A ${R} ${R} 0 0 1 ${FAR_X - 11} ${CY + R - 1} L ${NEAR_X + 11} ${CY + R - 1}`}
         fill="none"
-        stroke="#0B0C0E"
+        stroke="#05060750"
         strokeWidth="3"
-        opacity="0.8"
-      />
-      <circle
-        cx={C}
-        cy={C}
-        r="70"
-        fill="none"
-        stroke="#0B0C0E"
-        strokeWidth="2.5"
-        opacity="0.7"
       />
 
-      {/* Sidewall */}
-      <circle cx={C} cy={C} r="62" fill="#131519" />
+      {/* Near sidewall — the face of the tire. */}
+      <circle cx={NEAR_X} cy={CY} r={R} fill={`url(#${id("side")})`} />
       <circle
-        cx={C}
-        cy={C}
-        r="62"
+        cx={NEAR_X}
+        cy={CY}
+        r={R}
         fill="none"
-        stroke="#000000"
-        strokeWidth="1.5"
-        opacity="0.6"
+        stroke="#000"
+        strokeWidth="1.2"
+        opacity="0.5"
       />
 
-      {/* Accent sidewall ring — the product's colour signature */}
+      {/* Shoulder step, then the raised lettering band every sidewall carries.
+          The marks are deliberately abstract: real moulded text would be a
+          brand claim we cannot make for a catalog we do not yet have. */}
       <circle
-        cx={C}
-        cy={C}
-        r="54"
+        cx={NEAR_X}
+        cy={CY}
+        r={R - 9}
         fill="none"
-        stroke={accent}
-        strokeWidth="3.5"
+        stroke="#000"
+        strokeWidth="6"
+        opacity="0.28"
       />
       <circle
-        cx={C}
-        cy={C}
-        r="47"
+        cx={NEAR_X}
+        cy={CY}
+        r={R - 22}
         fill="none"
-        stroke={accent}
-        strokeWidth="1.25"
+        stroke="#3A4149"
+        strokeWidth="1"
+        opacity="0.55"
+      />
+      {ring(30).map((deg) => (
+        <rect
+          key={`t${deg}`}
+          x={NEAR_X - 1}
+          y={CY - (R - 15)}
+          width="2"
+          height="5"
+          rx="1"
+          fill="#444B54"
+          opacity="0.5"
+          transform={`rotate(${deg} ${NEAR_X} ${CY})`}
+        />
+      ))}
+      <circle
+        cx={NEAR_X}
+        cy={CY}
+        r={R - 33}
+        fill="none"
+        stroke="#2B3037"
+        strokeWidth="7"
+        opacity="0.5"
+      />
+
+      {/* The centre is a hollow, not a wheel. We sell tires; a catalog shot of
+          a tire on an invented rim is the thing that gives away that nobody
+          photographed one. So the bore shows the inner wall of the far
+          sidewall, lit from the same side as everything else. */}
+      <circle cx={NEAR_X} cy={CY} r={RIM} fill="#07080A" />
+      <ellipse
+        cx={NEAR_X + 9}
+        cy={CY}
+        rx={RIM - 4}
+        ry={RIM - 2}
+        fill={`url(#${id("bore")})`}
+      />
+      <circle
+        cx={NEAR_X}
+        cy={CY}
+        r={RIM}
+        fill="none"
+        stroke="#000"
+        strokeWidth="2"
+        opacity="0.75"
+      />
+      {/* The bead — the steel-reinforced lip that seats against a rim. */}
+      <circle
+        cx={NEAR_X}
+        cy={CY}
+        r={RIM + 3}
+        fill="none"
+        stroke="#3E454E"
+        strokeWidth="1.2"
         opacity="0.45"
       />
 
-      {/* Hub suggestion so the centre does not read as a hole */}
-      <circle cx={C} cy={C} r="38" fill="#20242A" />
+      {/* A single coloured marking on the tread. Real tires carry one — a
+          balance or uniformity dot — and it is the one place a product's
+          accent belongs without pretending the rubber is any colour but
+          black. It also keeps the grid from reading as twenty identical
+          circles. */}
       <circle
-        cx={C}
-        cy={C}
-        r="38"
-        fill="none"
-        stroke="#0B0C0E"
-        strokeWidth="2"
+        cx={NEAR_X + (FAR_X - NEAR_X) / 2}
+        cy={CY - R + 5}
+        r="3.4"
+        fill={accent}
+        opacity="0.9"
       />
-      {ring(5, 36).map((deg) => (
-        <rect
-          key={`s${deg}`}
-          x={C - 3}
-          y={C - 34}
-          width="6"
-          height="26"
-          rx="3"
-          fill="#2E343C"
-          transform={`rotate(${deg} ${C} ${C})`}
-        />
-      ))}
-      <circle cx={C} cy={C} r="9" fill="#2E343C" />
-      <circle cx={C} cy={C} r="3.5" fill="#12151A" />
 
-      {/* Single light source, applied last so it sits over every layer */}
-      <circle cx={C} cy={C} r="96" fill={`url(#${sheen})`} />
+      {/* One light source, last, so it sits over every layer. */}
+      <circle cx={NEAR_X} cy={CY} r={R} fill={`url(#${id("sheen")})`} />
     </svg>
   );
 }
@@ -178,8 +242,7 @@ export function WheelArt({
   const sheen = `wsheen-${uid}`;
 
   // One tapered spoke drawn pointing up from the centre, then rotated.
-  const spoke =
-    "M -7 -24 L -14 -66 Q 0 -75 14 -66 L 7 -24 Q 0 -19 -7 -24 Z";
+  const spoke = "M -7 -24 L -14 -66 Q 0 -75 14 -66 L 7 -24 Q 0 -19 -7 -24 Z";
 
   return (
     <svg
