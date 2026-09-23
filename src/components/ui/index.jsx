@@ -5,7 +5,7 @@ import { ChevronRight, Star } from "lucide-react";
 /** Sets document.title + meta description per page. */
 export function Seo({ title, description }) {
   useEffect(() => {
-    document.title = `${title} | Extreme Mobile Tires`;
+    document.title = `${title} | TireDrop`;
     if (description) {
       let tag = document.querySelector('meta[name="description"]');
       if (!tag) {

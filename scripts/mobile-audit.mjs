@@ -140,19 +140,68 @@ page.on("console", (m) => {
 });
 page.on("pageerror", (e) => consoleErrors.push(`PAGEERROR ${e.message}`.slice(0, 120)));
 
+/** Identifies what is actually on screen, so we can prove navigation happened. */
+const fingerprint = () =>
+  page.evaluate(() => {
+    const h = document.querySelector("h1, h2");
+    return `${document.title}::${(h?.textContent ?? "").trim().slice(0, 60)}`;
+  });
+
+/**
+ * The app ships either BrowserRouter (clean paths) or HashRouter, depending on
+ * how it was built. Probe both against a known-distinct route rather than
+ * assuming — guessing wrong makes every route silently report "ok" because the
+ * SPA never re-renders.
+ */
+async function detectRouteMode() {
+  await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
+  await page.waitForTimeout(300);
+  const home = await fingerprint();
+
+  for (const [mode, url] of [
+    ["path", `${BASE}/tires`],
+    ["hash", `${BASE}/#/tires`],
+  ]) {
+    await page.goto(url, { waitUntil: "networkidle" });
+    await page.waitForTimeout(400);
+    if ((await fingerprint()) !== home) return { mode, home };
+  }
+  return { mode: null, home };
+}
+
+const { mode, home: homePrint } = await detectRouteMode();
+if (!mode) {
+  console.error(
+    "FATAL: neither /tires nor /#/tires changed the page.\n" +
+      "The audit cannot navigate, so every route would falsely report ok.\n" +
+      "Check the server is serving the built app at " + BASE
+  );
+  await browser.close();
+  process.exit(2);
+}
+const urlFor = (r) => (mode === "hash" ? `${BASE}/#${r}` : `${BASE}${r}`);
+console.log(`Routing mode detected: ${mode}`);
+
 let problems = 0;
+let notNavigated = 0;
 console.log(`Auditing ${ROUTES.length} routes at ${WIDTH}px\n`);
 
 for (const route of ROUTES) {
   const before = consoleErrors.length;
-  await page.goto(`${BASE}/#${route}`, { waitUntil: "networkidle" });
+  await page.goto(urlFor(route), { waitUntil: "networkidle" });
   await page.waitForTimeout(250);
+
+  // A non-home route that still looks like home means routing silently failed.
+  const print = await fingerprint();
+  const stuckOnHome = route !== "/" && print === homePrint;
+  if (stuckOnHome) notNavigated++;
 
   const r = await page.evaluate(collect, WIDTH);
   const name = route.replace(/\//g, "_") || "_home";
   await page.screenshot({ path: `${SHOTS}/${WIDTH}${name}.png`, fullPage: true });
 
   const issues = [];
+  if (stuckOnHome) issues.push("DID NOT NAVIGATE — page identical to home");
   if (r.docWidth > WIDTH + 1) issues.push(`H-SCROLL doc=${r.docWidth}px`);
   if (r.overflowCount) issues.push(`${r.overflowCount} overflowing`);
   if (r.smallTargetCount) issues.push(`${r.smallTargetCount} targets <24px`);
@@ -176,5 +225,11 @@ for (const route of ROUTES) {
 }
 
 console.log(`\n${ROUTES.length - problems}/${ROUTES.length} clean. Shots in ${SHOTS}`);
+if (notNavigated) {
+  console.error(
+    `\nWARNING: ${notNavigated} route(s) rendered the home page. ` +
+      "Those results mean nothing — fix routing before trusting this run."
+  );
+}
 await browser.close();
 process.exit(problems ? 1 : 0);
