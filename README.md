@@ -68,7 +68,7 @@ Mobile van installation is a further option for customers inside
 
 ```
 tiredrop/
-├── public/brand/            Brand assets (favicon; logo artwork pending)
+├── public/brand/            Logo artwork (WebP + PNG fallback) and favicon
 ├── docs/                    Meeting brief and project documents
 ├── scripts/mobile-audit.mjs Phone-width audit across every route
 ├── src/
@@ -79,9 +79,13 @@ tiredrop/
 │   ├── data/                Single source of truth. No page invents facts.
 │   │   ├── business.js      Brand, phone, shop, hours, nav, footer, areas
 │   │   ├── services.js      Service catalog (mobile vs in-shop)
-│   │   └── products.js      Tire + wheel catalog, vehicle fitment data
+│   │   ├── products.js      Tire + wheel catalog, vehicle fitment data
+│   │   ├── pricing.js       Set-of-four maths, rebates, delivery estimates
+│   │   └── tireRatings.js   Performance scores derived from published specs
 │   │
-│   ├── context/CartContext.jsx
+│   ├── context/
+│   │   ├── CartContext.jsx
+│   │   └── CompareContext.jsx
 │   │
 │   ├── components/
 │   │   ├── layout/          Header, Footer, Logo, MobileCallBar
@@ -108,6 +112,16 @@ tiredrop/
   mobile drawer, the footer and the HTML sitemap page.
 - **The design system lives in `index.css`**, composed from tokens defined in
   `tailwind.config.js`.
+- **Tires are priced in fours.** `data/pricing.js` owns that arithmetic, so the
+  card, the product page, the compare table and the cart cannot disagree about
+  what a set costs.
+- **Performance scores are derived, never invented.** `data/tireRatings.js`
+  computes them from specs the tire already publishes — the UTQG grades, the
+  speed rating, the tread depth, the load range, the 3PMSF certification and
+  the mileage warranty. Where a spec genuinely does not exist — winter tires
+  carry no UTQG treadwear grade, commercial LT tires are graded on another
+  scale — the axis returns `null` and the UI prints "Not rated" instead of a
+  number. Nothing here claims we road-tested anything.
 
 ---
 
@@ -146,6 +160,7 @@ Type: **Barlow Condensed** (`font-display`) for headings, uppercase.
 | `/tires`, `/tires/:slug`   | Tire catalog + product detail         |
 | `/wheels`, `/wheels/:slug` | Wheel catalog + product detail        |
 | `/commercial-tires`        | Fleet tires + quote request           |
+| `/compare`                 | Side-by-side tire comparison          |
 | `/cart`, `/checkout`       | Cart and checkout                     |
 | `/coupons`                 | Deals and rebates                     |
 | `/shipping`                | How shipping works                    |
@@ -182,23 +197,26 @@ AUDIT_WIDTH=390 npm run audit:mobile
 
 All of these need the client or a supplier:
 
-1. **Logo artwork.** The header renders a typographic wordmark. Drop a real
-   file at `public/brand/tiredrop.svg` (or `.png` with transparency) and it is
-   picked up automatically, everywhere.
-2. **Distributor integration.** ATD requires a functional, approved site before
+1. **Distributor integration.** ATD requires a functional, approved site before
    issuing API credentials. U.S. AutoForce is the second source and carries the
    brands ATD lost in 2025. Until both are wired, `data/products.js` is a
    representative catalog, not real inventory.
-3. **No product photography.** Tires and wheels render as generated SVG art in
+2. **Rebates are illustrative.** The five in `data/products.js` show the UI
+   working. Real promotions come from the distributor feeds and expire — do not
+   publish these.
+3. **Delivery dates are estimated,** not quoted. `data/pricing.js` models a 2pm
+   distributor cutoff and 2–4 business days in transit. Replace it with the
+   distributor's committed date once the API is live.
+4. **No product photography.** Tires and wheels render as generated SVG art in
    `components/shop/ProductArt.jsx`.
-4. **No payment processing.** Checkout collects the order and says a team member
+5. **No payment processing.** Checkout collects the order and says a team member
    will call to confirm. Wire a real processor before taking money.
-5. **Forms have no backend.** Contact, quote, booking, financing and review
+6. **Forms have no backend.** Contact, quote, booking, financing and review
    forms validate and confirm, but nothing is sent.
-6. **Reviews are illustrative** and structured-data markup is deliberately off
+7. **Reviews are illustrative** and structured-data markup is deliberately off
    until real ones exist.
-7. **Legal pages are drafts** and need the client's counsel — the business is
+8. **Legal pages are drafts** and need the client's counsel — the business is
    now a national retailer, which changes the terms materially.
-8. **Social links are placeholders** in the footer.
-9. **No TireDrop email address yet.** `BUSINESS.email` is `null` and every page
-   steers to the phone or the contact form until one exists.
+9. **Social links are placeholders** in the footer.
+10. **No TireDrop email address yet.** `BUSINESS.email` is `null` and every page
+    steers to the phone or the contact form until one exists.

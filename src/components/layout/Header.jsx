@@ -120,7 +120,7 @@ function MobileDrawer({ open, onClose }) {
       />
       <div className="absolute right-0 top-0 flex h-full w-[86%] max-w-sm flex-col bg-bone shadow-lift">
         <div className="flex items-center justify-between border-b border-ink/10 px-5 py-4">
-          <Logo className="h-9" />
+          <Logo className="h-11" />
           <button
             onClick={onClose}
             aria-label="Close menu"
@@ -190,7 +190,7 @@ export default function Header() {
       <div className="sticky top-0 z-40 border-b border-ink/10 bg-bone/95 backdrop-blur">
         <div className="wrap flex items-center justify-between gap-4">
           <Link to="/" className="flex shrink-0 items-center py-3">
-            <Logo showParent />
+            <Logo className="h-11 md:h-12" showParent />
           </Link>
 
           <DesktopNav />
