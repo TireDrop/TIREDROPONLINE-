@@ -142,6 +142,13 @@
     @apply font-display text-[12px] font-bold uppercase tracking-[0.09em] text-drop;
   }
 
+  /* The same eyebrow on a dark section. `drop` is only 3.4:1 on ink — fine as
+     a button fill, not as 12px text — so dark surfaces take the mark's cyan
+     instead, at 8.2:1. Use this rather than overriding the colour per page. */
+  .eyebrow-dark {
+    @apply eyebrow text-volt;
+  }
+
   .h1 {
     @apply font-display text-[2.4rem] leading-[0.98] md:text-[4.25rem];
   }

@@ -11,7 +11,7 @@ import reactHooks from "eslint-plugin-react-hooks";
 // needs eslint-plugin-react and its only finding here would be tidiness, not
 // correctness. Add it when there is a reason to.
 export default [
-  { ignores: ["dist/**", "node_modules/**"] },
+  { ignores: ["dist/**", "node_modules/**", ".scratch/**"] },
   js.configs.recommended,
   {
     files: ["src/**/*.{js,jsx}"],
