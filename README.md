@@ -1,0 +1,204 @@
+# TireDrop — tiredroponline.com
+
+National tire and wheel store. Tires are drop-shipped from distributors to
+anywhere in the continental US, or delivered free to the Extreme Tires shop in
+Sunrise, FL and installed there.
+
+**Powered by Extreme Tires** — the parent business, fitting tires in South
+Florida since 2007. TireDrop is its national storefront.
+
+> This project is self-contained. It shares a repository with, but is
+> completely independent of, the unrelated `cannavibe` app at the repo root.
+
+---
+
+## Quick start
+
+```bash
+cd tiredrop
+npm install
+npm run dev            # local dev server
+npm run build          # production build to dist/
+npm run preview        # serve the production build
+npm run audit:mobile   # phone-width audit across every route
+```
+
+## Stack
+
+| Concern    | Choice                                          |
+| ---------- | ----------------------------------------------- |
+| Build      | Vite 5                                          |
+| UI         | React 18                                        |
+| Routing    | react-router-dom 6 (real URLs, not state)       |
+| Styling    | Tailwind CSS 3 + a small component layer        |
+| Icons      | lucide-react                                    |
+| Cart state | React context + `localStorage`                  |
+| Hosting    | Vercel (`vercel.json` carries the SPA rewrite)  |
+
+---
+
+## The model
+
+```
+Customer buys on TireDrop
+        ↓
+   payment taken
+        ↓
+ ┌──────┴───────┐
+ ↓              ↓
+order to     order to
+distributor  Tire Guru (the shop's register)
+ ↓
+ships to the customer  ── or ──  ships free to the Sunrise shop → installed
+```
+
+Two fulfillment choices at checkout:
+
+1. **Ship to my address** — anywhere in the continental US.
+2. **Ship free to the store** — delivered to Sunrise, then fitted. South
+   Florida only, and the reason a local customer picks TireDrop over a
+   national-only competitor.
+
+Mobile van installation is a further option for customers inside
+`BUSINESS.installArea`.
+
+---
+
+## Project structure
+
+```
+tiredrop/
+├── public/brand/            Brand assets (favicon; logo artwork pending)
+├── docs/                    Meeting brief and project documents
+├── scripts/mobile-audit.mjs Phone-width audit across every route
+├── src/
+│   ├── main.jsx             Entry — router + cart provider
+│   ├── App.jsx              All routes in one place
+│   ├── index.css            Design system (tokens → component classes)
+│   │
+│   ├── data/                Single source of truth. No page invents facts.
+│   │   ├── business.js      Brand, phone, shop, hours, nav, footer, areas
+│   │   ├── services.js      Service catalog (mobile vs in-shop)
+│   │   └── products.js      Tire + wheel catalog, vehicle fitment data
+│   │
+│   ├── context/CartContext.jsx
+│   │
+│   ├── components/
+│   │   ├── layout/          Header, Footer, Logo, MobileCallBar
+│   │   ├── ui/              Seo, Section, PageHero, Breadcrumbs, Badge,
+│   │   │                    Stars, Accordion, EmptyState, BrandLogo
+│   │   └── shop/            ProductArt, ProductCard, Filters, SearchPanel
+│   │
+│   └── pages/
+│       ├── HomePage.jsx · ShippingPage.jsx · InstallPage.jsx
+│       ├── NotFoundPage.jsx
+│       ├── shop/            Tires, Wheels, Product, Commercial, Cart,
+│       │                    Checkout, Coupons
+│       ├── services/        MobileService, AutoService, ServiceDetail, Schedule
+│       └── support/         About, Locations, Contact, Reviews, Financing,
+│                            TireCare, Gallery, Sitemap, Legal
+```
+
+### Why this shape
+
+- **`src/data/` is authoritative.** The phone number, the shop address and the
+  hours live in exactly one file, so they cannot drift between the header, the
+  footer and the contact page.
+- **Navigation is generated.** `NAV` and `FOOTER_COLUMNS` drive the header, the
+  mobile drawer, the footer and the HTML sitemap page.
+- **The design system lives in `index.css`**, composed from tokens defined in
+  `tailwind.config.js`.
+
+---
+
+## Design system
+
+| Token         | Hex       | Use                                    |
+| ------------- | --------- | -------------------------------------- |
+| `ink`         | `#0A1628` | Deep navy, primary dark surface        |
+| `steel`       | `#122135` | Raised dark surface                    |
+| `graphite`    | `#24354C` | Borders on dark                        |
+| `smoke`       | `#667085` | Muted body copy                        |
+| `fog`         | `#F3F6FB` | Light page background                  |
+| `bone`        | `#FFFFFF` | Cards, light surfaces                  |
+| `drop`        | `#0B5FFF` | **Primary action / brand accent**      |
+| `dive`        | `#0A4FD8` | Accent hover                           |
+| `sky`         | `#E6EFFF` | Tinted surface, highlights             |
+| `extremeRed`  | `#D40C10` | Parent-brand references only           |
+| `extremeDeep` | `#A40104` | Parent-brand references only           |
+| `amber`       | `#F5A623` | Ratings, savings badges                |
+
+Blue reads calmer and more trustworthy than red for a national online store,
+which is why the brand moved to it. `drop` clears WCAG AA against white text at
+5.13:1. Extreme Tires' red is kept **only** for the "Powered by Extreme Tires"
+lockup — it is not a UI accent here.
+
+Type: **Barlow Condensed** (`font-display`) for headings, uppercase.
+**Inter** (`font-sans`) for body copy.
+
+---
+
+## Routes
+
+| Path                       | Page                                  |
+| -------------------------- | ------------------------------------- |
+| `/`                        | Home                                  |
+| `/tires`, `/tires/:slug`   | Tire catalog + product detail         |
+| `/wheels`, `/wheels/:slug` | Wheel catalog + product detail        |
+| `/commercial-tires`        | Fleet tires + quote request           |
+| `/cart`, `/checkout`       | Cart and checkout                     |
+| `/coupons`                 | Deals and rebates                     |
+| `/shipping`                | How shipping works                    |
+| `/install`                 | Ship to store & install               |
+| `/mobile-service`          | Mobile installation (South Florida)   |
+| `/auto-service`            | Shop services                         |
+| `/services/:slug`          | Individual service                    |
+| `/schedule`                | Booking form                          |
+| `/about` `/locations` `/contact` | About & support                 |
+| `/reviews` `/financing` `/tire-care` `/gallery` | Support          |
+| `/sitemap`                 | HTML sitemap (generated from nav)     |
+| `/terms` `/privacy` `/accessibility` | Legal documents             |
+| `*`                        | 404                                   |
+
+---
+
+## Mobile
+
+`npm run audit:mobile` drives Chromium over every route at phone width and
+reports horizontal overflow, tap targets under the WCAG 2.5.8 minimum of 24px,
+text below 11px, and console errors. Screenshots land in `/tmp/mobile-audit`.
+
+```bash
+npx vite preview --port 4173 &
+AUDIT_WIDTH=390 npm run audit:mobile
+```
+
+`AUDIT_WIDTH` accepts any width (360, 390 and 414 are the useful ones);
+`AUDIT_BASE` points it at a different server.
+
+---
+
+## Before go-live
+
+All of these need the client or a supplier:
+
+1. **Logo artwork.** The header renders a typographic wordmark. Drop a real
+   file at `public/brand/tiredrop.svg` (or `.png` with transparency) and it is
+   picked up automatically, everywhere.
+2. **Distributor integration.** ATD requires a functional, approved site before
+   issuing API credentials. U.S. AutoForce is the second source and carries the
+   brands ATD lost in 2025. Until both are wired, `data/products.js` is a
+   representative catalog, not real inventory.
+3. **No product photography.** Tires and wheels render as generated SVG art in
+   `components/shop/ProductArt.jsx`.
+4. **No payment processing.** Checkout collects the order and says a team member
+   will call to confirm. Wire a real processor before taking money.
+5. **Forms have no backend.** Contact, quote, booking, financing and review
+   forms validate and confirm, but nothing is sent.
+6. **Reviews are illustrative** and structured-data markup is deliberately off
+   until real ones exist.
+7. **Legal pages are drafts** and need the client's counsel — the business is
+   now a national retailer, which changes the terms materially.
+8. **Social links are placeholders** in the footer.
+9. **No TireDrop email address yet.** `BUSINESS.email` is `null` and every page
+   steers to the phone or the contact form until one exists.

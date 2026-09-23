@@ -1,0 +1,1040 @@
+<title>Extreme Tires Integration Brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    color-scheme: light;
+    --ground: #F5F3F0;
+    --surface: #FFFFFF;
+    --surface-sunk: #ECE9E4;
+    --ink: #17191C;
+    --ink-soft: #55595F;
+    --ink-faint: #8A8F96;
+    --rule: #DBD6CF;
+    --rule-firm: #C2BCB3;
+
+    --accent: #D40C10;
+    --accent-deep: #A40104;
+    --ask: #1D4ED8;
+    --good: #15803D;
+    --flag: #B91C1C;
+    --ask-wash: #E8EEFC;
+    --good-wash: #E6F2EA;
+    --flag-wash: #FBE9E9;
+    --alert-wash: #FEF6E7;
+    --alert: #92400E;
+
+    --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+    --body: "Inter", system-ui, -apple-system, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground: #131519;
+      --surface: #1B1E23;
+      --surface-sunk: #24282E;
+      --ink: #EDEBE8;
+      --ink-soft: #A8ADB4;
+      --ink-faint: #757B83;
+      --rule: #2F343B;
+      --rule-firm: #434A53;
+      --accent: #FF4B42;
+      --accent-deep: #FF6E63;
+      --ask: #7FA6FF;
+      --good: #5FC98A;
+      --flag: #FF7B74;
+      --ask-wash: #1B2436;
+      --good-wash: #16281E;
+      --flag-wash: #2E1A1A;
+      --alert-wash: #2B2418;
+      --alert: #E9B872;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground: #131519;
+    --surface: #1B1E23;
+    --surface-sunk: #24282E;
+    --ink: #EDEBE8;
+    --ink-soft: #A8ADB4;
+    --ink-faint: #757B83;
+    --rule: #2F343B;
+    --rule-firm: #434A53;
+    --accent: #FF4B42;
+    --accent-deep: #FF6E63;
+    --ask: #7FA6FF;
+    --good: #5FC98A;
+    --flag: #FF7B74;
+    --ask-wash: #1B2436;
+    --good-wash: #16281E;
+    --flag-wash: #2E1A1A;
+    --alert-wash: #2B2418;
+    --alert: #E9B872;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 0 72px;
+  }
+
+  .masthead { padding-block: 36px 22px; border-bottom: 3px solid var(--ink); }
+
+  .kicker {
+    font-family: var(--display);
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 8px;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(38px, 8vw, 62px);
+    font-weight: 700; line-height: 0.95;
+    letter-spacing: -0.01em; text-transform: uppercase;
+    text-wrap: balance; margin: 0 0 14px;
+  }
+
+  .standfirst { margin: 0; max-width: 62ch; color: var(--ink-soft); font-size: 16px; }
+
+  /* ---------- Headline findings ---------- */
+
+  .findings {
+    margin-top: 26px;
+    background: var(--alert-wash);
+    border: 1px solid var(--alert);
+    padding: 20px 22px;
+  }
+
+  .findings h2 {
+    color: var(--alert);
+    border-bottom-color: var(--alert);
+    margin-bottom: 14px;
+  }
+
+  .finding { padding-block: 13px; border-top: 1px solid color-mix(in srgb, var(--alert) 30%, transparent); }
+  .finding:first-of-type { border-top: none; padding-top: 0; }
+
+  .finding h3 {
+    font-family: var(--display);
+    font-size: 21px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.01em;
+    line-height: 1.15; margin: 0 0 5px;
+  }
+
+  .finding p { margin: 0 0 7px; font-size: 14px; color: var(--ink-soft); }
+  .finding p:last-child { margin-bottom: 0; }
+  .finding .verdict { color: var(--ink); font-weight: 500; }
+
+  /* ---------- Outcomes ---------- */
+
+  /* ---------- Run of show ---------- */
+
+  .runsheet { margin-top: 30px; }
+
+  .clock { margin: 0; padding: 0; list-style: none; display: grid; gap: 0; }
+
+  .clock li {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 16px;
+    align-items: baseline;
+    padding-block: 12px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .clock li:first-child { border-top: none; padding-top: 0; }
+
+  .clock .t {
+    font-family: var(--display);
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  .clock strong {
+    display: block;
+    font-family: var(--display);
+    font-size: 19px;
+    font-weight: 600;
+    text-transform: uppercase;
+    line-height: 1.15;
+  }
+
+  .clock strong + span { display: block; color: var(--ink-soft); font-size: 14px; margin-top: 2px; }
+
+  .outcomes { margin-block: 26px; padding: 0; list-style: none; display: grid; gap: 10px; }
+
+  .outcome {
+    display: grid; grid-template-columns: 34px 1fr; gap: 14px; align-items: start;
+    background: var(--surface); border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent); padding: 14px 16px;
+  }
+
+  .outcome-num {
+    font-family: var(--display); font-size: 26px; font-weight: 700;
+    line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums;
+  }
+
+  .outcome strong {
+    display: block; font-family: var(--display); font-size: 20px; font-weight: 600;
+    text-transform: uppercase; line-height: 1.15;
+  }
+
+  .outcome span { display: block; color: var(--ink-soft); font-size: 14px; margin-top: 2px; }
+
+  section { margin-top: 44px; }
+
+  h2 {
+    font-family: var(--display); font-size: 15px; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink);
+    margin: 0 0 4px; padding-bottom: 8px; border-bottom: 1px solid var(--rule-firm);
+  }
+
+  .section-note { margin: 10px 0 18px; color: var(--ink-soft); font-size: 14px; max-width: 64ch; }
+
+  .qs { display: grid; gap: 12px; }
+
+  .q { background: var(--surface); border: 1px solid var(--rule); padding: 15px 17px; }
+  .q-text { font-weight: 600; margin: 0 0 9px; text-wrap: balance; }
+  .why { margin: 0; color: var(--ink-soft); font-size: 14px; }
+  /* "What you're really asking" lead-in — the plain-English translation. */
+  .why b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- Brand status ---------- */
+
+  .brand-state { margin-top: 12px; display: grid; gap: 7px; }
+
+  .bs { padding: 9px 12px; border-left: 3px solid var(--rule-firm); background: var(--surface-sunk); }
+  .bs-out { border-left-color: var(--flag); }
+  .bs-in { border-left-color: var(--good); }
+  .bs-unknown { border-left-color: var(--alert); }
+
+  .bs-tag {
+    margin: 0 0 3px;
+    font-family: var(--display);
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+
+  .bs-out .bs-tag { color: var(--flag); }
+  .bs-in .bs-tag { color: var(--good); }
+  .bs-unknown .bs-tag { color: var(--alert); }
+
+  .bs p:last-child { margin: 0; font-size: 14px; color: var(--ink-soft); }
+
+  .answers { margin: 10px 0 0; display: grid; gap: 6px; }
+
+  .a {
+    display: grid; grid-template-columns: auto 1fr; gap: 9px;
+    align-items: baseline; font-size: 14px; padding: 7px 10px;
+  }
+
+  .a-good { background: var(--good-wash); }
+  .a-flag { background: var(--flag-wash); }
+
+  .a-tag {
+    font-family: var(--display); font-size: 12px; font-weight: 600;
+    letter-spacing: 0.13em; text-transform: uppercase; white-space: nowrap;
+  }
+
+  .a-good .a-tag { color: var(--good); }
+  .a-flag .a-tag { color: var(--flag); }
+
+  .never { background: var(--flag-wash); border: 1px solid var(--flag); padding: 18px 20px; }
+  .never h2 { color: var(--flag); border-bottom-color: var(--flag); }
+  .never ul { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 11px; }
+  .never li { display: grid; grid-template-columns: auto 1fr; gap: 11px; align-items: baseline; }
+  .never li::before { content: "✕"; color: var(--flag); font-weight: 700; }
+  .never b { font-weight: 600; }
+  .never span { color: var(--ink-soft); font-size: 14px; display: block; }
+
+  .scroller { overflow-x: auto; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 440px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+
+  thead th {
+    font-family: var(--display); font-size: 13px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-faint); border-bottom: 1px solid var(--rule-firm);
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  .pill {
+    display: inline-block; font-family: var(--display); font-size: 12px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; white-space: nowrap;
+  }
+
+  .pill-done { background: var(--good-wash); color: var(--good); }
+  .pill-wait { background: var(--ask-wash); color: var(--ask); }
+  .pill-block { background: var(--flag-wash); color: var(--flag); }
+
+  .say { background: var(--surface-sunk); border-left: 4px solid var(--ask); padding: 15px 18px; margin-top: 12px; }
+  .say p { margin: 0; font-size: 15px; font-style: italic; }
+  .say cite { display: block; margin-top: 8px; font-style: normal; font-size: 13px; color: var(--ink-faint); }
+
+  .conf {
+    display: inline-block; font-family: var(--display); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase; padding: 1px 6px;
+    background: var(--surface-sunk); color: var(--ink-faint); margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  footer {
+    margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule);
+    color: var(--ink-faint); font-size: 13px;
+  }
+
+  footer p { margin: 0 0 8px; max-width: 64ch; }
+
+  @media (max-width: 520px) {
+    .outcome { grid-template-columns: 28px 1fr; gap: 11px; }
+    .a { grid-template-columns: 1fr; gap: 2px; }
+  }
+
+  /* ---------- How it works ---------- */
+
+  .howto { margin-top: 28px; }
+
+  .flow {
+    margin-top: 16px;
+    padding: 18px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    overflow-x: auto;
+  }
+
+  .steps { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 0; }
+
+  .steps li {
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 14px;
+    align-items: baseline;
+    padding-block: 11px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .steps li:first-child { border-top: none; padding-top: 0; }
+
+  .steps .n {
+    font-family: var(--display);
+    font-size: 20px; font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .steps b { display: block; font-weight: 600; }
+  .steps span { display: block; color: var(--ink-soft); font-size: 14px; margin-top: 1px; }
+  .steps em { font-style: normal; color: var(--accent); font-weight: 600; }
+
+  .who {
+    margin-top: 16px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .who-row {
+    display: grid;
+    grid-template-columns: 116px 1fr;
+    gap: 14px;
+    align-items: baseline;
+    padding: 10px 12px;
+    background: var(--surface-sunk);
+    border-left: 3px solid var(--rule-firm);
+  }
+
+  .who-row b {
+    font-family: var(--display);
+    font-size: 17px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.02em;
+  }
+
+  .who-row span { color: var(--ink-soft); font-size: 14px; }
+  .who-atd { border-left-color: var(--accent); }
+  .who-tg { border-left-color: var(--ask); }
+  .who-you { border-left-color: var(--good); }
+
+  @media (max-width: 520px) {
+    .who-row { grid-template-columns: 1fr; gap: 2px; }
+    .steps li { grid-template-columns: 24px 1fr; gap: 10px; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <p class="kicker">Meeting reference · 23 September 2026</p>
+    <h1>Extreme Tires<br>Integration Brief</h1>
+    <p class="standfirst">
+      Selling ATD's tires on a site you own, installing them yourself, and moving
+      off Net Driven. Keep this open during the call.
+    </p>
+  </header>
+
+  <section class="howto">
+    <h2>How a sale actually works</h2>
+    <p class="section-note">
+      Everything in this brief serves one flow. Get this clear and the questions
+      answer themselves.
+    </p>
+
+    <div class="flow">
+<pre class="mermaid">
+flowchart LR
+  C[Customer buys<br/>on your site] --> P[Payment<br/>taken]
+  P --> O[Order sent<br/>to ATD]
+  P --> G[(Tire Guru<br/>your register)]
+  O --> D{Ships<br/>where?}
+  D -->|your shop| V[Van loads up]
+  D -->|their house| H[Waits in<br/>their garage]
+  V --> I[You install]
+  H --> I
+</pre>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <span class="n">1</span>
+        <span>
+          <b>Your site shows ATD's tires</b>
+          <span>You hold no stock for this. ATD's catalog — every tire, price, and how many are in the warehouse — feeds your site automatically. <em>This is the data you're asking for.</em></span>
+        </span>
+      </li>
+      <li>
+        <span class="n">2</span>
+        <span>
+          <b>A customer buys and pays you</b>
+          <span>Money hits your account at your retail price. Your margin is the gap between that and ATD's dealer cost.</span>
+        </span>
+      </li>
+      <li>
+        <span class="n">3</span>
+        <span>
+          <b>The order goes to ATD — and into Tire Guru</b>
+          <span>ATD so they ship it, Tire Guru so the sale is on your books and the shop floor sees the job. Ideally both automatic. If not, someone retypes every order twice — which is where mistakes come from.</span>
+        </span>
+      </li>
+      <li>
+        <span class="n">4</span>
+        <span>
+          <b>ATD ships the tires</b>
+          <span>To your shop, or straight to the customer. <em>This is the question that shapes your whole operation.</em></span>
+        </span>
+      </li>
+      <li>
+        <span class="n">5</span>
+        <span>
+          <b>You install them</b>
+          <span>The van goes out, or they come to Sunrise. <em>This is the part nobody online can copy</em> — it's why a customer picks you over Tire Rack.</span>
+        </span>
+      </li>
+    </ol>
+
+    <div class="who">
+      <div class="who-row who-atd">
+        <b>ATD</b>
+        <span>The supplier. Holds the tires, the catalog, the prices, and does the shipping. Nothing on the site works without their data.</span>
+      </div>
+      <div class="who-row who-tg">
+        <b>Tire Guru</b>
+        <span>Your register. Online orders land here so the sale is recorded and the install gets scheduled. Doesn't stock or ship anything — it's software, not a warehouse.</span>
+      </div>
+      <div class="who-row who-you">
+        <b>You</b>
+        <span>The storefront, the customer relationship, and the install. The install is the business. Everything else is plumbing.</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What Tire Guru actually needs to do</h2>
+    <p class="section-note">
+      Every tire on the site is drop-shipped from ATD — you're not selling shop
+      stock online. That makes the Tire Guru question much simpler than it looks.
+    </p>
+    <p class="section-note">
+      You need <b>one thing</b>: when someone buys online, that order should land in
+      Tire Guru by itself. Then the sale is on your books, the install is on the
+      schedule, and the shop floor sees the job without anyone re-keying it.
+    </p>
+    <p class="section-note">
+      That's the whole ask. Not live inventory, not a two-way sync — just orders
+      in. Worth knowing, because it's a much smaller request than it first sounds,
+      and a much harder one to say no to.
+    </p>
+  </section>
+
+  <div class="findings">
+    <h2>Read this first — three things that changed the picture</h2>
+
+    <div class="finding">
+      <h3>ATD went bankrupt and lost major brands</h3>
+      <p>
+        ATD filed Chapter 11 in October 2024 — its second bankruptcy in six years —
+        and was sold to its own lenders in March 2025. Michelin, BFGoodrich and
+        Uniroyal cut them off in July 2025. Goodyear pulled Cooper and Mastercraft.
+        Bridgestone also went.<span class="conf">Corroborated across outlets</span>
+      </p>
+      <p class="verdict">
+        Your four — Continental, Pirelli, Nexen, Nitto — are not on that list. But
+        get the current roster in writing, because your ads will pull searches for
+        tires they may not carry.
+      </p>
+    </div>
+
+    <div class="finding">
+      <h3>Net Driven is ATD's own website partner</h3>
+      <p>
+        Net Driven is a named ATD Preferred Website Provider. ATD also sells
+        <strong>Radius</strong>, its own online store product.<span class="conf">Verified</span>
+      </p>
+      <p class="verdict">
+        So you're asking ATD for raw data in order to leave ATD's partner and
+        compete with ATD's own product. Expect a nudge back toward both. That's
+        commercial interest, not bad faith — just be ready for it.
+      </p>
+    </div>
+
+    <div class="finding">
+      <h3>Tire Guru's public tools may only book appointments</h3>
+      <p>
+        Their published documentation shows appointment booking. No inventory, no
+        pricing, no orders.<span class="conf">Not found — confirm verbally</span>
+      </p>
+      <p class="verdict">
+        Tire Guru's owner also sells websites, so the same nudge applies. But you
+        only need orders going <em>in</em>, not inventory coming out — a smaller ask.
+        And two outside companies, Solid Commerce and Tireweb, publicly advertise
+        connecting Tire Guru to other websites. Name them and make Tire Guru confirm
+        or deny.
+      </p>
+    </div>
+  </div>
+
+  <section class="runsheet">
+    <h2>Thirty minutes — run of show</h2>
+    <p class="section-note">
+      There's more here than fits in half an hour. Don't try. Spend the room on the
+      answers that unblock the build and send the rest in writing, where you want
+      them on the record anyway.
+    </p>
+
+    <ol class="clock">
+      <li>
+        <span class="t">0–3</span>
+        <span>
+          <strong>Say why you're here</strong>
+          <span>"I'm building a site I own that sells more of your product. I need four answers today, I'll email the rest." Mention you're recording.</span>
+        </span>
+      </li>
+      <li>
+        <span class="t">3–14</span>
+        <span>
+          <strong>Walk the order, start to finish</strong>
+          <span>Can I get your data · where does it ship · can my site order automatically · which brands can I sell. Follow the tire from click to driveway.</span>
+        </span>
+      </li>
+      <li>
+        <span class="t">14–20</span>
+        <span>
+          <strong>Orders into Tire Guru</strong>
+          <span>Can an online order drop into my register by itself? If not, ask what would make it possible.</span>
+        </span>
+      </li>
+      <li>
+        <span class="t">20–26</span>
+        <span>
+          <strong>Chase the fuzzy one</strong>
+          <span>Whichever answer was vaguest, go back to it. Vague now means expensive later.</span>
+        </span>
+      </li>
+      <li>
+        <span class="t">26–30</span>
+        <span>
+          <strong>Repeat it back</strong>
+          <span>Say out loud what everyone agreed to, and who's sending what by when. It's on the recording, and it writes your follow-up email.</span>
+        </span>
+      </li>
+    </ol>
+  </section>
+
+  <ol class="outcomes">
+    <li class="outcome">
+      <span class="outcome-num">1</span>
+      <span>
+        <strong>Can I get ATD's tire data for my own site?</strong>
+        <span>Or only if I use their website product? Everything else depends on this one.</span>
+      </span>
+    </li>
+    <li class="outcome">
+      <span class="outcome-num">2</span>
+      <span>
+        <strong>Where do the tires ship?</strong>
+        <span>My shop or the customer's house — and can I pick per order?</span>
+      </span>
+    </li>
+    <li class="outcome">
+      <span class="outcome-num">3</span>
+      <span>
+        <strong>Can online orders land in Tire Guru automatically?</strong>
+        <span>So the sale is on the books and the install is scheduled without re-keying.</span>
+      </span>
+    </li>
+    <li class="outcome">
+      <span class="outcome-num">4</span>
+      <span>
+        <strong>Which tire brands can I actually order?</strong>
+        <span>ATD lost several big ones in 2025. Get the current list in an email.</span>
+      </span>
+    </li>
+  </ol>
+
+  <section>
+    <h2>Ask ATD — follow the order</h2>
+    <p class="section-note">
+      These run in the order a sale happens: catalog, price, order, ship, returns.
+      Asking them in sequence makes the conversation easy to follow and makes gaps
+      obvious.
+    </p>
+
+    <div class="qs">
+      <div class="q">
+        <p class="q-text">"If I build my own website, can I still get your tire data — or do I have to use yours?"</p>
+        <p class="why">
+          <b>Step 1 of the sale.</b> ATD has the list of every tire, its price, and how
+          many are in the warehouse. Your site has to read that automatically — nobody
+          is typing twenty thousand tires in by hand. But ATD sells its own website
+          product, so they may only hand the data to people using it.
+          <br><br>
+          If the answer is no, this project stops here. That's why it's first.
+        </p>
+        <div class="answers">
+          <p class="a a-good"><span class="a-tag">Good</span><span>"Yes — here's the spec and who to talk to."</span></p>
+          <p class="a a-flag"><span class="a-tag">Flag</span><span>Being steered to Radius or Net Driven as "the supported path." That's a sales answer, not an answer.</span></p>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="q-text">"Can you email me the full list of tire brands I can order from you right now?"</p>
+        <p class="why">
+          <b>What can I actually sell?</b> Ask for the whole list at once — name brands
+          one at a time and you'll get a yes to each while still not knowing what's
+          missing.
+        </p>
+
+        <div class="brand-state">
+          <div class="bs bs-out">
+            <p class="bs-tag">Gone from ATD in 2025</p>
+            <p>Michelin · BFGoodrich · Uniroyal · Cooper · Mastercraft · Mickey Thompson · Bridgestone</p>
+          </div>
+          <div class="bs bs-in">
+            <p class="bs-tag">Confirmed current</p>
+            <p>Nokian · Hercules and Ironman (ATD's own brands) · Giti / GT Radial</p>
+          </div>
+          <div class="bs bs-unknown">
+            <p class="bs-tag">Yours — likely fine, not confirmed</p>
+            <p>Continental · Pirelli · Nexen · Nitto. None appears in any de-authorization report, but no current published list confirms them either.</p>
+          </div>
+        </div>
+
+        <div class="answers">
+          <p class="a a-flag"><span class="a-tag">Note</span><span>Hercules and Ironman are ATD's own brands — they can't be pulled and pay ATD better. Expect them pushed. Fine, just know why.</span></p>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="q-text">"Does your data tell me which tires fit which cars?"</p>
+        <p class="why">
+          <b>Step 1, continued.</b> Does your data know a 2019 F-150 takes a 275/65R18?
+          That's called fitment, and it's what makes "shop by your vehicle" work — the
+          most-used feature on any tire site. Some suppliers include it, some sell it
+          separately, some don't have it. If ATD doesn't provide it, you buy it
+          elsewhere, and that's a cost nobody has budgeted.
+        </p>
+      </div>
+
+      <div class="q">
+        <p class="q-text">"When my website says a tire is in stock, is that right now — or is it last night's numbers?"</p>
+        <p class="why">
+          <b>Step 2 — can I trust what I'm selling?</b> If ATD only refreshes overnight,
+          your site could sell a tire at 4pm that sold out at 9am. Customer books the
+          install, the van shows up, no tire. Live numbers avoid that. Nightly is
+          workable, but then the site says "usually in stock" instead of promising.
+        </p>
+      </div>
+
+      <div class="q">
+        <p class="q-text">"Can my website send you an order by itself, or does somebody have to type it in?"</p>
+        <p class="why">
+          <b>Step 3 of the sale.</b> If it's not automatic, a staff member reads each web
+          order and retypes it into ATD's portal. That's where wrong sizes and missed
+          orders come from, and it's why shops stop trusting their own website.
+          Automatic ordering is the difference between a store and an expensive
+          brochure.
+        </p>
+      </div>
+
+      <div class="q">
+        <p class="q-text">"When a customer buys on my site, where does the tire actually ship — to my shop, or to their house?"</p>
+        <p class="why">
+          <b>Step 4 — and the one that shapes your whole operation.</b>
+          <br><br>
+          <b>To your shop:</b> you control it. Tires arrive at Sunrise, the van loads up,
+          you install on your schedule. This is what your mobile model is built around.
+          <br><br>
+          <b>To the customer's house:</b> they have to be home to take four tires, store
+          them in the garage, and you're coordinating two deliveries instead of one.
+          Some customers like it. Most would rather you just handled it.
+          <br><br>
+          Ask whether you can <b>choose per order</b> — shop for local installs, customer
+          for anyone outside your service area. That's the setup you want.
+        </p>
+        <div class="answers">
+          <p class="a a-good"><span class="a-tag">Good</span><span>"Either — you pick the destination when you place the order."</span></p>
+          <p class="a a-flag"><span class="a-tag">Flag</span><span>Shop-only when you wanted flexibility, or customer-only when your model is mobile install.</span></p>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="q-text">"Who pays the shipping, how long does it take, and what happens if a tire shows up wrong or damaged?"</p>
+        <p class="why">
+          <b>Step 5 — the parts that bite later.</b> Shipping cost decides whether you can
+          price against SimpleTire and Tire Rack. Delivery time decides what your site
+          can promise — "installed Thursday" and "installed sometime next week" are very
+          different offers.
+          <br><br>
+          Returns matter more than people expect. If the wrong size lands at a
+          customer's house, someone collects it, sends it back and reorders — and the
+          customer is looking at you, not ATD. Settle whose problem that is now.
+        </p>
+      </div>
+
+      <div class="q">
+        <p class="q-text">"Is there anything I have to sign or commit to in order to get this data?"</p>
+        <p class="why">
+          <b>The catch.</b> Data access often comes tied to a minimum monthly spend, an
+          exclusivity clause, or a term you can't exit. None of ATD's terms are published
+          anywhere, so the only way to know is to ask before you're invested.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Ask Tire Guru — getting orders in</h2>
+    <p class="section-note">
+      Tire Guru isn't a supplier. It's the software running your register, and the
+      only thing you need from it is for online orders to arrive by themselves. Be
+      specific — a vague "do you have an API" gets a vague yes.
+    </p>
+
+    <div class="qs">
+      <div class="q">
+        <p class="q-text">"When someone buys a tire on my website, can that order drop straight into Tire Guru?"</p>
+        <p class="why">
+          <b>Why this matters:</b> the order has to reach ATD so the tire ships, and it
+          has to reach Tire Guru so the sale is recorded and the install is on the
+          schedule. If Tire Guru can't take it automatically, somebody types every web
+          order in by hand — twice a day, every day, forever. That's where wrong sizes
+          and missed installs come from, and it's why shops stop trusting their own
+          website.
+          <br><br>
+          Their public documentation only shows appointment booking. Ask for the full
+          list of what their system can accept, in writing, not a verbal yes.
+        </p>
+        <div class="answers">
+          <p class="a a-good"><span class="a-tag">Best</span><span>Orders drop in automatically, install appointment and all.</span></p>
+          <p class="a a-good"><span class="a-tag">Workable</span><span>A scheduled import, or the appointment lands automatically and staff add the sale.</span></p>
+          <p class="a a-flag"><span class="a-tag">Limits it</span><span>Nothing goes in. Every online order gets typed in by hand.</span></p>
+        </div>
+      </div>
+
+      <div class="q">
+        <p class="q-text">"Solid Commerce and Tireweb both say they connect Tire Guru to outside websites. Do those work, and what do they cost?"</p>
+        <p class="why">
+          <b>Other people have already done this.</b> Both companies publicly advertise
+          connecting Tire Guru to websites it didn't build. Naming them makes "that
+          isn't possible" a much harder answer to give. If they confirm those work, you
+          have a path even if Tire Guru won't build one for you.
+        </p>
+      </div>
+
+      <div class="q">
+        <p class="q-text">"If I use a website you didn't build, will you still help me connect to it?"</p>
+        <p class="why">
+          <b>Are you going to help or slow me down?</b> Tire Guru sells its own websites,
+          and its parent company owns a web design agency too. Two reasons to prefer you
+          didn't do this. Not dishonest, just their business — but get the answer now, on
+          the record, not six months in when you need support.
+        </p>
+      </div>
+
+      <div class="q">
+        <p class="q-text">"What do I need from you to get started, and does it cost anything?"</p>
+        <p class="why">
+          <b>What does it take to begin?</b> Usually a key — a password that lets your
+          site talk to theirs — and somewhere safe to test before going live. If there's
+          a fee, find out today. No key means no build, whatever anyone promises.
+        </p>
+      </div>
+    </div>
+
+    <div class="say">
+      <p>"If orders can't drop into Tire Guru automatically, we launch anyway and key them in by hand until they can. I don't want that holding up the site."</p>
+      <cite>Worth saying out loud — it stops one unknown stalling the whole project.</cite>
+    </div>
+  </section>
+
+  <section>
+    <h2>Before you tell Net Driven anything</h2>
+    <p class="section-note">
+      No public Net Driven contract terms or offboarding policy were found, and no
+      reported exit disputes either — that's absence of information, not proof of a
+      clean exit. Your signed agreement is the only authority. Pull it out before
+      the call.
+    </p>
+
+    <div class="qs">
+      <div class="q">
+        <p class="q-text">"Whose name is my website address registered under — mine or yours?"</p>
+        <p class="why">
+          <b>Do I actually own extrememobiletires.com?</b> Website companies sometimes
+          register the domain in their own name. If Net Driven holds it, they control
+          whether you can move — and a routine switch becomes a negotiation.
+          <br><br>
+          <b>Check this yourself before the call</b>, in your registrar account. If it's
+          in your name, relax. If it isn't, fix that before you mention leaving.
+        </p>
+      </div>
+
+      <div class="q">
+        <p class="q-text">"Can you send me a copy of everything on my site — the page addresses, the text, the photos, and any customer messages?"</p>
+        <p class="why">
+          <b>Can I take my website with me?</b> The critical piece is the page addresses.
+          Google spent years learning that extrememobiletires.com/tires is your tire
+          page. If the new site uses different addresses and the old ones break, you drop
+          out of local search and the phone stops ringing. The old address list is what
+          lets us point them at the new ones.
+          <br><br>
+          Ask for it as routine housekeeping, not as an exit signal.
+        </p>
+      </div>
+
+      <div class="q">
+        <p class="q-text">"When does my contract end, when does it renew, and how much notice do I have to give?"</p>
+        <p class="why">
+          <b>When can I leave without paying for a year I don't want?</b> Most website
+          contracts renew automatically unless you give notice in a specific window. Miss
+          it and you're locked in another term. Know the dates before you schedule the
+          switch, so the new site goes live as the old contract ends.
+        </p>
+      </div>
+    </div>
+
+    <p class="section-note">
+      One structural note: Net Driven's tire catalog and pricing come through its
+      distributor partnerships, ATD's included. That feed belongs to the partner
+      program, not to you — so a site you own needs its own data source regardless.
+      That's the real reason this project needs ATD to say yes.
+    </p>
+  </section>
+
+  <section class="never">
+    <h2>Don't agree to</h2>
+    <ul>
+      <li>
+        <span>
+          <b>A developer registering accounts in their own name.</b>
+          <span>Hosting, domain, database, payments — all in Extreme Tires' name, developer invited as a collaborator. Recovering these from a former contractor is the most common way a small business loses its own website.</span>
+        </span>
+      </li>
+      <li>
+        <span>
+          <b>Source code living in someone else's repository.</b>
+          <span>Your account, your ownership, from the first day.</span>
+        </span>
+      </li>
+      <li>
+        <span>
+          <b>Switching the domain without a redirect map.</b>
+          <span>Net Driven has years of local ranking attached to specific page addresses. Export them and point them at the new pages before the switch, or the phone stops ringing.</span>
+        </span>
+      </li>
+      <li>
+        <span>
+          <b>Cancelling Net Driven on switch day.</b>
+          <span>Keep it live a month as the fallback, and export everything before it closes.</span>
+        </span>
+      </li>
+      <li>
+        <span>
+          <b>Tying the whole store to one supplier.</b>
+          <span>Two ATD bankruptcies in six years, and a brand roster that changed a lot in one year. Build so a second supplier drops in without starting over — U.S. AutoForce is the strongest option and carries the brands ATD lost. TireHub, NTW (Palm Beach Gardens) and K&amp;M Tire also serve Florida.</span>
+        </span>
+      </li>
+      <li>
+        <span>
+          <b>A timeline before ATD access is confirmed.</b>
+          <span>Any date quoted today is a guess until someone has pulled a real price out of a real ATD test account.</span>
+        </span>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Where the build stands</h2>
+    <p class="section-note">
+      The customer-facing site is already built and running — 24 pages, a working
+      application, not a mockup. Useful if anyone asks what exists.
+    </p>
+
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr><th>Piece</th><th>Status</th><th>Needs</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Storefront, services, booking, cart</td>
+            <td><span class="pill pill-done">Built</span></td>
+            <td>Carries over to the connected build</td>
+          </tr>
+          <tr>
+            <td>Core brands — Continental, Pirelli, Nexen, Nitto</td>
+            <td><span class="pill pill-done">Clear</span></td>
+            <td>None on ATD's de-authorized list</td>
+          </tr>
+          <tr>
+            <td>Michelin and Bridgestone commercial tires</td>
+            <td><span class="pill pill-block">At risk</span></td>
+            <td>Both dropped by ATD — second supplier, or remove</td>
+          </tr>
+          <tr>
+            <td>Tire &amp; wheel catalog</td>
+            <td><span class="pill pill-wait">Placeholder</span></td>
+            <td>Real catalog from ATD</td>
+          </tr>
+          <tr>
+            <td>Shop-by-vehicle fitment</td>
+            <td><span class="pill pill-block">Not built</span></td>
+            <td>Deliberately not invented — from ATD, or licensed</td>
+          </tr>
+          <tr>
+            <td>Live pricing &amp; stock</td>
+            <td><span class="pill pill-block">Blocked</span></td>
+            <td>ATD access</td>
+          </tr>
+          <tr>
+            <td>Automatic ordering to ATD</td>
+            <td><span class="pill pill-block">Blocked</span></td>
+            <td>ATD access</td>
+          </tr>
+          <tr>
+            <td>Orders landing in Tire Guru</td>
+            <td><span class="pill pill-block">Blocked</span></td>
+            <td>Tire Guru's answer</td>
+          </tr>
+          <tr>
+            <td>Taking payment online</td>
+            <td><span class="pill pill-wait">Deferred</span></td>
+            <td>Payment account in Extreme Tires' name</td>
+          </tr>
+          <tr>
+            <td>Product photography</td>
+            <td><span class="pill pill-wait">Missing</span></td>
+            <td>From the client — biggest visual upgrade available</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Your backup — and your leverage</h2>
+    <p class="section-note">
+      You are not stuck with ATD, and it helps to know that before you walk in.
+      <b>U.S. AutoForce</b> is the largest independent wholesale tire distributor in
+      the country — 75 distribution centers across 47 states, Florida included.
+    </p>
+
+    <div class="brand-state">
+      <div class="bs bs-in">
+        <p class="bs-tag">They carry what ATD lost</p>
+        <p>Goodyear · Michelin · Bridgestone · Cooper — plus Continental. Every brand ATD was cut off from in 2025.<span class="conf">From their own marketing</span></p>
+      </div>
+      <div class="bs bs-in">
+        <p class="bs-tag">Their integration is documented in public</p>
+        <p>API key sign-in, plus daily CSV feeds over FTP for products, inventory and pricing. Third-party connectors (Spark Shipping, Flxpoint, Tirewire) already support them. That is more than could be found for ATD anywhere public.<span class="conf">Verified via integration platforms</span></p>
+      </div>
+      <div class="bs bs-unknown">
+        <p class="bs-tag">Unknown</p>
+        <p>Pricing, terms, whether they would open an account for a shop this size, and how their Florida delivery compares. Worth one phone call.</p>
+      </div>
+    </div>
+
+    <p class="section-note">
+      <b>How to use this today:</b> don't lead with it, and don't threaten anyone. But
+      if ATD pushes you toward Radius, or gets vague about data access, you're
+      negotiating from a completely different position knowing a credible alternative
+      exists with a published integration path and the brands ATD can no longer ship.
+      That confidence tends to show without being said.
+    </p>
+
+    <p class="section-note">
+      The stronger long-term play is <b>both</b>. Build so a second supplier drops in
+      without a rewrite, then carry ATD and U.S. AutoForce together — you sell Michelin
+      and Goodyear again, and no single distributor's bad year takes your storefront
+      down with it. After two ATD bankruptcies in six years, that is not paranoia.
+    </p>
+
+    <div class="answers">
+      <p class="a a-flag"><span class="a-tag">Note</span><span>U.S. AutoForce sells its own dealer website widget, TIRESanytime. Same nudge as ATD's Radius and Tire Guru's websites — every one of these companies would rather sell you their storefront than feed yours. Expect it, and ask for the data anyway.</span></p>
+    </div>
+  </section>
+
+  <section>
+    <h2>The cheap way to de-risk this</h2>
+    <p class="section-note">
+      If the meeting ends without a clear commitment, propose this instead of a full
+      build: a short paid engagement that does nothing but connect to an ATD test
+      account and pull one real tire and one real live price. It proves the riskiest
+      assumption in the project for a fraction of the cost. If it works, commit with
+      confidence. If it doesn't, you've lost almost nothing — and you found out
+      before signing.
+    </p>
+  </section>
+
+  <footer>
+    <p>
+      Research came from search results; several corporate sites could not be read
+      directly. Anything marked <span class="conf">Not found</span> means no public
+      source was located — treat those as questions to ask, not settled facts.
+    </p>
+    <p>
+      Full technical detail is in the architecture and integration plan.
+    </p>
+  </footer>
+
+</div>

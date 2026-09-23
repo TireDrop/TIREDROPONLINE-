@@ -1,0 +1,574 @@
+import React from "react";
+import { Link } from "react-router-dom";
+import {
+  ArrowRight,
+  BadgeCheck,
+  CircleDollarSign,
+  MapPin,
+  Package,
+  PackageCheck,
+  Phone,
+  ShieldCheck,
+  Store,
+  Truck,
+  Wrench,
+} from "lucide-react";
+
+import { BUSINESS, TIRE_BRANDS } from "../data/business.js";
+import { MOBILE_SERVICES, SHOP_SERVICES } from "../data/services.js";
+import { TIRES } from "../data/products.js";
+import ProductCard from "../components/shop/ProductCard.jsx";
+import SearchPanel from "../components/shop/SearchPanel.jsx";
+import { Seo, Section, SectionHead, Stars } from "../components/ui/index.jsx";
+import BrandLogo from "../components/ui/BrandLogo.jsx";
+
+const yearsInBusiness = new Date().getFullYear() - BUSINESS.foundedYear;
+
+/* ---------------------------------- Hero --------------------------------- */
+
+function Hero() {
+  return (
+    <section className="relative overflow-hidden bg-ink text-bone">
+      {/* Tread-pattern wash behind the headline. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.07]"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(115deg, #fff 0 2px, transparent 2px 22px)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-40 top-1/2 hidden h-[560px] w-[560px] -translate-y-1/2 rounded-full border-[72px] border-graphite lg:block"
+      />
+
+      <div className="wrap relative grid gap-10 py-16 md:py-24 lg:grid-cols-[1.05fr_.95fr] lg:items-center">
+        <div>
+          <p className="eyebrow mb-4 flex items-center gap-2">
+            <Truck size={16} aria-hidden />
+            {BUSINESS.tagline}
+          </p>
+
+          <h1 className="h1">
+            Order tires online.
+            <span className="block text-drop">We ship them to you.</span>
+          </h1>
+
+          <p className="lede mt-5 max-w-xl text-bone/70">
+            {BUSINESS.name} is an online tire and wheel store shipping to any
+            address in {BUSINESS.shipping.area}. Pick your size, pick your
+            brand, and choose where it lands — your driveway, or free to our
+            shop in South Florida where we'll fit them for you.
+          </p>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to="/tires" className="btn-primary">
+              Shop Tires
+              <ArrowRight size={17} aria-hidden />
+            </Link>
+            <Link to="/shipping" className="btn-ghost-light">
+              How Shipping Works
+            </Link>
+          </div>
+
+          <ul className="mt-9 flex flex-wrap gap-x-7 gap-y-3 text-sm text-bone/65">
+            {[
+              { Icon: Truck, label: "Ships across the continental US" },
+              { Icon: Store, label: "Free ship-to-store in South Florida" },
+              {
+                Icon: ShieldCheck,
+                label: `${BUSINESS.poweredBy} since ${BUSINESS.foundedYear}`,
+              },
+            ].map(({ Icon, label }) => (
+              <li key={label} className="flex items-center gap-2">
+                <Icon size={16} aria-hidden className="text-amber" />
+                {label}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Fitment search is the primary conversion path — keep it in the hero. */}
+        <div className="rounded-sm bg-bone p-5 text-ink shadow-lift md:p-7">
+          <h2 className="h3 mb-1">Find your fit</h2>
+          <p className="mb-5 text-sm text-smoke">
+            Search by vehicle or by the size on your sidewall.
+          </p>
+          <SearchPanel />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ----------------------------- Delivery choice ---------------------------- */
+
+const DELIVERY = [
+  {
+    Icon: Package,
+    eyebrow: "Anywhere in the continental US",
+    title: "Ship it to me",
+    copy: "Your order is drop-shipped straight from the distributor to the address you give us — home, work, or your own installer. Shipping and delivery time are shown at checkout before you commit.",
+    to: "/shipping",
+    cta: "How shipping works",
+  },
+  {
+    Icon: Store,
+    eyebrow: "South Florida",
+    title: "Ship free to the shop — we'll fit them",
+    copy: `Send the order to ${BUSINESS.shop.name} at no charge, then book an install. Mounting, balancing, valve stems and disposal of the old set, all handled in the bay.`,
+    to: "/install",
+    cta: "Ship to store & install",
+  },
+];
+
+function DeliveryChoice() {
+  return (
+    <Section className="bg-bone">
+      <SectionHead
+        eyebrow="Two ways to get them"
+        title="You choose where the tires land"
+        lede="Same catalog, same prices. The only decision is whether they come to your door or to our door."
+      />
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        {DELIVERY.map(({ Icon, eyebrow, title, copy, to, cta }) => (
+          <div key={title} className="card flex flex-col p-7">
+            <div className="mb-4 flex items-center gap-2">
+              <Icon size={22} aria-hidden className="text-drop" />
+              <span className="font-display text-xs uppercase tracking-[0.2em] text-smoke">
+                {eyebrow}
+              </span>
+            </div>
+            <h3 className="h3">{title}</h3>
+            <p className="mt-2 flex-1 text-sm leading-relaxed text-smoke">
+              {copy}
+            </p>
+            <Link to={to} className="btn-outline btn-sm mt-6 self-start">
+              {cta}
+              <ArrowRight size={15} aria-hidden />
+            </Link>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/* ------------------------------ Category tiles ---------------------------- */
+
+const CATEGORIES = [
+  {
+    to: "/tires",
+    label: "Tires",
+    copy: "All-season, performance, truck and SUV — shipped from a roster of seven brands.",
+    Icon: BadgeCheck,
+  },
+  {
+    to: "/wheels",
+    label: "Wheels",
+    copy: "Alloy, forged and off-road wheels, fitment-checked before anything ships.",
+    Icon: BadgeCheck,
+  },
+  {
+    to: "/commercial-tires",
+    label: "Commercial & Fleet",
+    copy: "Load-rated sizes for vans and work trucks, shipped to the yard or to the shop.",
+    Icon: Truck,
+  },
+  {
+    to: "/auto-service",
+    label: "Service — South Florida",
+    copy: "Brakes, alignment, suspension and diagnostics at the Sunrise shop.",
+    Icon: Wrench,
+  },
+];
+
+function CategoryTiles() {
+  return (
+    <Section className="bg-fog">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {CATEGORIES.map(({ to, label, copy, Icon }) => (
+          <Link
+            key={to}
+            to={to}
+            className="card-hover group flex flex-col p-6 transition-colors hover:border-drop/40"
+          >
+            <Icon size={26} aria-hidden className="mb-4 text-drop" />
+            <h3 className="h3">{label}</h3>
+            <p className="mt-2 flex-1 text-sm leading-relaxed text-smoke">
+              {copy}
+            </p>
+            <span className="mt-4 flex items-center gap-1.5 font-display text-sm uppercase tracking-wide text-ink group-hover:text-drop">
+              Explore
+              <ArrowRight
+                size={15}
+                aria-hidden
+                className="transition-transform group-hover:translate-x-1"
+              />
+            </span>
+          </Link>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/* -------------------------------- How it works ---------------------------- */
+
+const STEPS = [
+  {
+    n: "01",
+    title: "Find your size",
+    copy: "Search by vehicle or by the numbers on your sidewall and compare the whole catalog.",
+  },
+  {
+    n: "02",
+    title: "Pick your delivery",
+    copy: "Ship to your address, or free to the shop if you're in South Florida.",
+  },
+  {
+    n: "03",
+    title: "We confirm and release it",
+    copy: "We check the fitment against your vehicle, then release the order to the distributor.",
+  },
+  {
+    n: "04",
+    title: "Fit them your way",
+    copy: "Use your own installer, or let us mount and balance them here in the bay.",
+  },
+];
+
+function HowItWorks() {
+  return (
+    <Section className="bg-bone">
+      <SectionHead
+        eyebrow="How it works"
+        title="Four steps from search to installed"
+        lede="No stock sitting in a warehouse waiting to age. Orders ship direct from the distributor network."
+        action={
+          <Link to="/shipping" className="btn-outline btn-sm">
+            Shipping details
+          </Link>
+        }
+      />
+
+      <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {STEPS.map((s) => (
+          <li key={s.n} className="card relative p-6">
+            <span className="font-display text-5xl leading-none text-drop/15">
+              {s.n}
+            </span>
+            <h3 className="h3 mt-3">{s.title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-smoke">{s.copy}</p>
+          </li>
+        ))}
+      </ol>
+    </Section>
+  );
+}
+
+/* ------------------------------ Featured tires ---------------------------- */
+
+function FeaturedTires() {
+  // The catalog is the source of truth; fall back gracefully if it is empty.
+  const featured = (TIRES ?? [])
+    .slice()
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 4);
+
+  if (featured.length === 0) return null;
+
+  return (
+    <Section className="bg-fog">
+      <SectionHead
+        eyebrow="Top rated"
+        title="Tires our customers keep coming back for"
+        action={
+          <Link to="/tires" className="btn-outline btn-sm">
+            Shop all tires
+            <ArrowRight size={15} aria-hidden />
+          </Link>
+        }
+      />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {featured.map((p) => (
+          <ProductCard key={p.id} product={p} />
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/* -------------------------------- Brand strip ----------------------------- */
+
+function BrandStrip() {
+  // Dark band so a single white-on-transparent logo file works here and in
+  // the footer without needing a second, dark-artwork variant.
+  return (
+    <section className="bg-ink py-10">
+      <div className="wrap flex flex-col items-center gap-6">
+        <p className="font-display text-xs uppercase tracking-[0.25em] text-bone/50">
+          Brands we ship and stand behind
+        </p>
+        <ul className="flex flex-wrap items-center justify-center gap-x-12 gap-y-5">
+          {TIRE_BRANDS.map((b) => (
+            <li key={b.slug}>
+              <Link
+                to={`/tires?brands=${encodeURIComponent(b.name)}`}
+                className="flex min-h-[44px] items-center"
+              >
+                <BrandLogo brand={b} className="h-9" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+/* ----------------------------- Local advantage ---------------------------- */
+
+function LocalAdvantage() {
+  return (
+    <Section className="bg-bone">
+      <SectionHead
+        eyebrow="South Florida only"
+        title="Local? We'll put them on for you"
+        lede={`Ship-to-store is free, and installation happens at ${BUSINESS.parent} in ${BUSINESS.shop.city} — or in your own driveway if the van is the easier answer.`}
+      />
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="card p-7">
+          <div className="mb-5 flex items-center gap-2">
+            <Wrench size={20} aria-hidden className="text-drop" />
+            <h3 className="h3">In the bay — {BUSINESS.shop.city}</h3>
+          </div>
+          <ul className="space-y-2.5">
+            {SHOP_SERVICES.map((s) => (
+              <li key={s.slug}>
+                <Link
+                  to={`/services/${s.slug}`}
+                  className="flex items-baseline justify-between gap-4 border-b border-ink/5 py-2 text-sm hover:text-drop"
+                >
+                  <span className="font-medium">{s.name}</span>
+                  <span className="shrink-0 text-xs text-smoke">
+                    from ${s.priceFrom} · {s.duration}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <Link to="/install" className="btn-primary btn-sm mt-6">
+            Ship to store &amp; install
+          </Link>
+        </div>
+
+        <div className="card p-7">
+          <div className="mb-5 flex items-center gap-2">
+            <Truck size={20} aria-hidden className="text-drop" />
+            <h3 className="h3">Mobile — Broward County</h3>
+          </div>
+          <ul className="space-y-2.5">
+            {MOBILE_SERVICES.map((s) => (
+              <li key={s.slug}>
+                <Link
+                  to={`/services/${s.slug}`}
+                  className="flex items-baseline justify-between gap-4 border-b border-ink/5 py-2 text-sm hover:text-drop"
+                >
+                  <span className="font-medium">{s.name}</span>
+                  <span className="shrink-0 text-xs text-smoke">
+                    from ${s.priceFrom} · {s.duration}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <Link to="/mobile-service" className="btn-outline btn-sm mt-6">
+            How the van works
+          </Link>
+        </div>
+      </div>
+
+      <p className="mt-10 text-center font-display text-xs uppercase tracking-[0.2em] text-smoke">
+        Install towns we cover
+      </p>
+      <ul className="mx-auto mt-4 flex max-w-3xl flex-wrap justify-center gap-2">
+        {BUSINESS.installArea.map((city) => (
+          <li
+            key={city}
+            className="rounded-sm border border-ink/10 bg-fog px-3.5 py-1.5 font-display text-sm uppercase tracking-wide text-ink"
+          >
+            {city}
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <a href={BUSINESS.phoneHref} className="btn-primary">
+          <Phone size={17} aria-hidden />
+          {BUSINESS.phone}
+        </a>
+        <Link to="/locations" className="btn-outline">
+          <MapPin size={17} aria-hidden />
+          Visit the {BUSINESS.shop.city} shop
+        </Link>
+      </div>
+    </Section>
+  );
+}
+
+/* -------------------------------- Promo band ------------------------------ */
+
+function PromoBand() {
+  return (
+    <section className="bg-ink">
+      <div aria-hidden className="hazard h-2.5" />
+      <div className="wrap flex flex-col items-center gap-5 py-12 text-center md:flex-row md:justify-between md:text-left">
+        <div>
+          <p className="eyebrow mb-1.5">Current offers</p>
+          <h2 className="h2 text-bone">
+            Save on sets of four, shipping and rebates
+          </h2>
+          <p className="lede mt-2 text-bone/60">
+            Manufacturer rebates and store-wide codes, all in one place.
+          </p>
+        </div>
+        <Link to="/coupons" className="btn-primary shrink-0">
+          View deals
+          <ArrowRight size={17} aria-hidden />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------------------------- Proof --------------------------------- */
+
+function Proof() {
+  const stats = [
+    { v: "48", l: "States we ship to" },
+    { v: `${TIRE_BRANDS.length}`, l: "Tire brands" },
+    { v: "2", l: "Distributor networks" },
+    { v: `${yearsInBusiness}+`, l: `Years of ${BUSINESS.parent}` },
+  ];
+
+  return (
+    <Section className="bg-fog">
+      <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+        <div>
+          <p className="eyebrow mb-2">Why {BUSINESS.name}</p>
+          <h2 className="h2">An online tire store with a real shop behind it</h2>
+          <p className="lede mt-4">
+            {BUSINESS.parent} opened in {BUSINESS.foundedYear} and has been
+            mounting tires in {BUSINESS.shop.city} ever since. {BUSINESS.name}{" "}
+            is the same crew selling online: orders drop-ship from the ATD and
+            U.S. AutoForce networks, so you get distributor pricing and a
+            catalog nobody could hold in a warehouse.
+          </p>
+
+          <dl className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-4 lg:grid-cols-2">
+            {stats.map((s) => (
+              <div key={s.l}>
+                <dt className="sr-only">{s.l}</dt>
+                <dd>
+                  <span className="block font-display text-4xl text-drop">
+                    {s.v}
+                  </span>
+                  <span className="mt-1 block text-xs uppercase tracking-wide text-smoke">
+                    {s.l}
+                  </span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+
+          <Link to="/about" className="btn-outline btn-sm mt-8">
+            Our story
+          </Link>
+        </div>
+
+        <div className="card p-7">
+          <div className="flex items-center justify-between gap-4 border-b border-ink/10 pb-5">
+            <div>
+              <p className="font-display text-sm uppercase tracking-[0.15em] text-smoke">
+                Customer rating
+              </p>
+              <p className="font-display text-4xl leading-none">4.8</p>
+            </div>
+            <Stars rating={4.8} size={20} />
+          </div>
+
+          <blockquote className="mt-5 text-sm leading-relaxed text-smoke">
+            “I ordered a set on a Tuesday night, had them sent to the shop, and
+            booked the install for the weekend. Cheaper than the quote I got
+            locally and I never had to guess at the size.”
+            <footer className="mt-3 font-display text-xs uppercase tracking-wide text-ink">
+              — Danielle R., Plantation
+            </footer>
+          </blockquote>
+
+          <Link to="/reviews" className="btn-outline btn-sm mt-6 w-full">
+            Read customer reviews
+          </Link>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+/* --------------------------------- Final CTA ------------------------------ */
+
+function FinalCta() {
+  return (
+    <Section className="bg-ink text-bone">
+      <div className="flex flex-col items-center gap-6 text-center">
+        <PackageCheck size={34} aria-hidden className="text-drop" />
+        <h2 className="h2 max-w-2xl">Find your size and pick your delivery</h2>
+        <p className="lede max-w-xl text-bone/65">
+          Search the catalog, add a set to your cart, and choose shipping or
+          free ship-to-store at checkout. Questions on fitment? Call us.
+        </p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <Link to="/tires" className="btn-primary">
+            Shop Tires
+            <ArrowRight size={17} aria-hidden />
+          </Link>
+          <a href={BUSINESS.phoneHref} className="btn-ghost-light">
+            <Phone size={17} aria-hidden />
+            Call {BUSINESS.phone}
+          </a>
+        </div>
+        <p className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-bone/45">
+          <CircleDollarSign size={14} aria-hidden />
+          {BUSINESS.poweredBy}
+        </p>
+      </div>
+    </Section>
+  );
+}
+
+/* ---------------------------------- Page ---------------------------------- */
+
+export default function HomePage() {
+  return (
+    <>
+      <Seo
+        title="Tires & Wheels Shipped Nationwide"
+        description="TireDrop is an online tire and wheel store shipping anywhere in the continental US. Ship to your address, or free to our South Florida shop where we install them. Powered by Extreme Tires."
+      />
+      <Hero />
+      <DeliveryChoice />
+      <CategoryTiles />
+      <HowItWorks />
+      <FeaturedTires />
+      <BrandStrip />
+      <PromoBand />
+      <Proof />
+      <LocalAdvantage />
+      <FinalCta />
+    </>
+  );
+}
