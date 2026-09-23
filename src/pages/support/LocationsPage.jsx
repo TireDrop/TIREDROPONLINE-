@@ -31,7 +31,7 @@ function MapPanel() {
         className="relative h-56 bg-ink sm:h-64"
         style={{
           backgroundImage:
-            "linear-gradient(135deg, #122135 0%, #0A1628 100%), repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 44px), repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 44px)",
+            "linear-gradient(135deg, #101C2E 0%, #070E1A 100%), repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 44px), repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 44px)",
           backgroundBlendMode: "normal, overlay, overlay",
         }}
       >

@@ -20,83 +20,83 @@ const GALLERY = [
     caption: "Order out the door — 4x Continental, shipped to Georgia",
     detail:
       "Picked from the distributor closest to the customer, boxed and on its way without passing through a warehouse of ours.",
-    tone: ["#0A1628", "#24354C"],
+    tone: ["#070E1A", "#22344C"],
   },
   {
     id: "g2",
     caption: "Ship to store — set checked in at the Sunrise counter",
     detail:
       "Size, load index and speed rating read off every sidewall and matched to the order before anyone books the install.",
-    tone: ["#24354C", "#0A1628"],
+    tone: ["#22344C", "#070E1A"],
   },
   {
     id: "g3",
     caption: "Install bay — full set fitted after a ship-to-store order",
     detail:
       "Mounted, balanced, new valve service and every lug torqued to spec.",
-    tone: ["#0B5FFF", "#0A4FD8"],
+    tone: ["#0068E8", "#0053C4"],
   },
   {
     id: "g4",
     caption: "Mobile install — driveway call, Plantation",
     detail:
       "Mat down, jack set, tire machine and balancer running off the van. The car never moved.",
-    tone: ["#122135", "#0A1628"],
+    tone: ["#101C2E", "#070E1A"],
   },
   {
     id: "g5",
     caption: "Wheel and tire package — staggered fitment, shipped",
     detail:
       "Offset and clearance confirmed with the customer first, then mounted and balanced as a package before it shipped.",
-    tone: ["#24354C", "#122135"],
+    tone: ["#22344C", "#101C2E"],
   },
   {
     id: "g6",
     caption: "Alignment rack — Sunrise shop",
     detail:
       "Post-install alignment with a before-and-after printout for the customer.",
-    tone: ["#F5A623", "#0A4FD8"],
+    tone: ["#F5A623", "#0053C4"],
   },
   {
     id: "g7",
     caption: "Fleet order — six work vans, Tamarac yard",
     detail:
       "Ordered online, shipped to the shop, fitted on site. Tread depths recorded per vehicle, one invoice.",
-    tone: ["#0A1628", "#122135"],
+    tone: ["#070E1A", "#101C2E"],
   },
   {
     id: "g8",
     caption: "Packaging check — freight damage caught at the counter",
     detail:
       "A scuffed box gets opened and inspected before it is handed over. If the tire is wrong, it goes back, not on your car.",
-    tone: ["#122135", "#0B5FFF"],
+    tone: ["#101C2E", "#0068E8"],
   },
   {
     id: "g9",
     caption: "Office-park flat repair — sedan, Fort Lauderdale",
     detail:
       "Screw through the tread. Dismounted, patch-plugged from the inside and rebalanced.",
-    tone: ["#0A1628", "#24354C"],
+    tone: ["#070E1A", "#22344C"],
   },
   {
     id: "g10",
     caption: "TPMS sensor replacement — SUV, Lauderhill",
     detail:
       "Dead sensor battery after eight years. Replaced in a work parking lot, light out.",
-    tone: ["#24354C", "#0A1628"],
+    tone: ["#22344C", "#070E1A"],
   },
   {
     id: "g11",
     caption: "Fitment call — sizes read off a door placard over the phone",
     detail:
       "Half the job is making sure the right tire gets ordered in the first place. That part happens before anything ships.",
-    tone: ["#122135", "#F5A623"],
+    tone: ["#101C2E", "#F5A623"],
   },
   {
     id: "g12",
     caption: "Brake service — front rotors and pads, Sunrise shop",
     detail: "Bay work, priced before the parts came out of the box.",
-    tone: ["#0A1628", "#122135"],
+    tone: ["#070E1A", "#101C2E"],
   },
 ];
 
