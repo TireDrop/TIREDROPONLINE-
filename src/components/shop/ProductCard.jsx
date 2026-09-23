@@ -101,9 +101,9 @@ export default function ProductCard({ product }) {
 
   return (
     <article className="card-hover group flex h-full flex-col overflow-hidden">
-      <div className="relative flex items-center justify-center border-b border-ink/[0.05] bg-gradient-to-b from-bone to-fog p-5">
+      <div className="relative flex items-center justify-center border-b border-ink/[0.05] bg-gradient-to-b from-bone to-fog p-3 sm:p-5">
         {product.badge && (
-          <div className="absolute left-3 top-3 z-10">
+          <div className="absolute left-2 top-2 z-10 sm:left-3 sm:top-3">
             <Badge tone={BADGE_TONE[product.badge] || "soft"}>
               {product.badge}
             </Badge>
@@ -117,7 +117,7 @@ export default function ProductCard({ product }) {
             // layer — where, coming later in the DOM, it lands on top of this
             // control and swallows the click. Hovering the card made the
             // compare box unclickable.
-            className={`absolute right-2 top-2 z-10 flex min-h-[44px] min-w-[44px] items-center gap-1.5 rounded-sm border border-ink/10 bg-bone/95 px-2 shadow-card backdrop-blur-sm transition-colors ${
+            className={`absolute right-2 top-2 z-10 hidden min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-sm border border-ink/10 bg-bone/95 px-1.5 shadow-card backdrop-blur-sm transition-colors sm:flex sm:px-2 ${
               lockedOut ? "cursor-not-allowed opacity-60" : "cursor-pointer"
             }`}
             title={
@@ -133,11 +133,11 @@ export default function ProductCard({ product }) {
               onChange={() => compare.toggle(product.slug)}
               className="accent-drop disabled:cursor-not-allowed"
             />
-            <span className="font-display text-[11px] font-bold uppercase tracking-[0.09em] text-ink">
+            <span className="hidden font-display text-[11px] font-bold uppercase tracking-[0.09em] text-ink sm:inline">
               Compare
             </span>
             <span className="sr-only">
-              {product.brand} {product.model}
+              Compare {product.brand} {product.model}
             </span>
           </label>
         )}
@@ -147,39 +147,41 @@ export default function ProductCard({ product }) {
           accent={product.accent}
           size={168}
           label={`${product.brand} ${product.model}`}
-          className="pointer-events-none h-auto w-[168px] max-w-full transition-transform duration-300 group-hover:scale-105"
+          className="pointer-events-none h-auto w-[112px] max-w-full transition-transform duration-300 group-hover:scale-105 sm:w-[168px]"
         />
 
         {product.rebate && (
-          <div className="absolute bottom-3 left-3 z-10">
+          <div className="absolute bottom-2 left-2 z-10 sm:bottom-3 sm:left-3">
             <Badge tone="amber">${product.rebate.amount} rebate</Badge>
           </div>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-4">
+      <div className="flex flex-1 flex-col p-3 sm:p-4">
         <p className="eyebrow text-[11px] tracking-[0.09em] text-smoke">
           {product.brand}
         </p>
         {/* A card title is the second line of a card, not a page headline —
             it carries the display face and the weight, not the size. */}
-        <h3 className="h3 mt-1 text-[1.0625rem] leading-[1.15] md:text-[1.15rem]">
+        <h3 className="h3 mt-1 text-[0.9375rem] leading-[1.2] sm:text-[1.0625rem] sm:leading-[1.15] md:text-[1.15rem]">
           <Link to={href} className="transition-colors hover:text-drop">
             {product.model}
           </Link>
         </h3>
-        <p className="tnum mt-1.5 text-xs text-smoke">{specLine(product)}</p>
+        <p className="tnum mt-1 text-[11px] leading-snug text-smoke sm:mt-1.5 sm:text-xs">
+          {specLine(product)}
+        </p>
 
-        <div className="mt-2.5">
+        <div className="mt-2 sm:mt-2.5">
           <Stars
             rating={product.rating}
             count={product.reviewCount}
-            size={13}
+            size={12}
           />
         </div>
 
         {ratings && (
-          <div className="mt-3 space-y-1.5">
+          <div className="mt-3 hidden space-y-1.5 sm:block">
             {CARD_AXES.map((axis) => (
               <RatingBar
                 key={axis.key}
@@ -192,9 +194,9 @@ export default function ProductCard({ product }) {
 
         {/* The price block is ruled off from the description above it, and
             every figure is tabular so the column of cards lines up. */}
-        <div className="mt-auto border-t border-ink/[0.07] pt-3.5">
-          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <span className="tnum font-display text-[1.75rem] font-bold leading-none tracking-[-0.02em] text-ink">
+        <div className="mt-auto border-t border-ink/[0.07] pt-3 sm:pt-3.5">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            <span className="tnum font-display text-[1.375rem] font-bold leading-none tracking-[-0.02em] text-ink sm:text-[1.75rem]">
               {money(bd.price)}
             </span>
             <span className="text-[11px] uppercase tracking-[0.09em] text-smoke">
@@ -202,7 +204,10 @@ export default function ProductCard({ product }) {
             </span>
             {setSaving > 0 && (
               <>
-                <span className="tnum text-sm text-smoke line-through">
+                {/* The struck list price is the first thing to go when the
+                    card is half as wide: the saving says the same thing in
+                    fewer characters. */}
+                <span className="tnum hidden text-sm text-smoke line-through sm:inline">
                   {money(bd.list)}
                 </span>
                 <span className="tnum font-display text-[12px] font-bold uppercase tracking-[0.06em] text-drop">
@@ -211,36 +216,67 @@ export default function ProductCard({ product }) {
               </>
             )}
           </div>
-          <p className="tnum mt-1.5 text-[11px] text-smoke">
-            {money(product.price)} each · install +{money(product.installPrice)}
-            /tire
+          <p className="tnum mt-1.5 text-[11px] leading-snug text-smoke">
+            {money(product.price)} each
+            <span className="hidden sm:inline">
+              {" "}
+              · install +{money(product.installPrice)}/tire
+            </span>
           </p>
 
           {bd.rebate > 0 && (
             <p className="tnum mt-2 rounded-sm bg-sky px-2 py-1.5 text-[11px] leading-snug text-ink">
-              − {money(bd.rebate)} mfr. rebate →{" "}
-              <span className="font-display font-bold">{money(bd.net)}</span>{" "}
-              after rebate
+              − {money(bd.rebate)}
+              <span className="hidden sm:inline"> mfr.</span> rebate →{" "}
+              <span className="font-display font-bold">{money(bd.net)}</span>
+              <span className="hidden sm:inline"> after rebate</span>
             </p>
           )}
 
-          <p className="mt-2.5 flex items-start gap-1.5 text-[11px] leading-snug text-smoke">
+          <p className="mt-2.5 hidden items-start gap-1.5 text-[11px] leading-snug text-smoke sm:flex">
             <Truck size={13} aria-hidden className="mt-px shrink-0" />
             <span>
               {shipsFree() ? "Ships free" : "Shipping calculated at checkout"} ·
               arrives {DELIVERY.earliest}–{DELIVERY.latest}
             </span>
           </p>
-          <p className={`mt-1.5 text-xs font-medium ${hint.tone}`}>
+          <p className={`mt-2 text-[11px] font-medium sm:text-xs ${hint.tone}`}>
             {hint.text}
           </p>
 
+          {/* On a phone the card is about 160px wide, and a floating control
+              over the artwork costs a quarter of that while covering the
+              product. Down here it gets a full row, its own label, and a tap
+              target that does not fight the image. */}
+          {isTire && (
+            <label
+              className={`mt-2.5 flex min-h-[44px] items-center gap-2 rounded-sm border border-ink/10 px-2.5 sm:hidden ${
+                lockedOut ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+              } ${selected ? "border-drop/40 bg-sky" : "bg-fog"}`}
+            >
+              <input
+                type="checkbox"
+                checked={selected}
+                disabled={lockedOut}
+                onChange={() => compare.toggle(product.slug)}
+                className="accent-drop disabled:cursor-not-allowed"
+              />
+              <span className="font-display text-[11px] font-bold uppercase tracking-[0.09em] text-ink">
+                Compare
+              </span>
+              <span className="sr-only">
+                {product.brand} {product.model}
+              </span>
+            </label>
+          )}
+
           <Link
             to={href}
-            className="btn-dark btn-sm mt-3.5 min-h-[44px] w-full"
+            className="btn-dark btn-sm mt-2.5 min-h-[44px] w-full px-2 sm:mt-3.5 sm:px-4"
             aria-label={`View details for ${product.brand} ${product.model}`}
           >
-            View Details
+            <span className="sm:hidden">View</span>
+            <span className="hidden sm:inline">View Details</span>
           </Link>
         </div>
       </div>

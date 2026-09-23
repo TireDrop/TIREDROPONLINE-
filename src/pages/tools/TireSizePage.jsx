@@ -919,7 +919,7 @@ function CatalogMatches({ geo, heading }) {
       </p>
 
       {matches.length > 0 ? (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
           {matches.slice(0, 8).map((tire) => (
             <ProductCard key={tire.slug} product={tire} />
           ))}
