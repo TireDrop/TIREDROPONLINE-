@@ -6,11 +6,59 @@
  *   node scripts/mobile-audit.mjs
  */
 import { chromium } from "playwright";
-import { existsSync, mkdirSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  openSync,
+  closeSync,
+  writeSync,
+  unlinkSync,
+  readFileSync,
+} from "node:fs";
 
 const BASE = process.env.AUDIT_BASE ?? "http://localhost:4173";
 const SHOTS = process.env.AUDIT_SHOTS ?? "/tmp/mobile-audit";
 const WIDTH = Number(process.env.AUDIT_WIDTH ?? 390);
+const LOCK = `${SHOTS}/.audit.lock`;
+
+// Two audits against one preview server contend for it, and the loser reports
+// a route as broken when the site is fine. That happened once and cost a
+// round of chasing a defect that was not there, so refuse to start rather
+// than produce a result nobody can trust.
+mkdirSync(SHOTS, { recursive: true });
+try {
+  const fd = openSync(LOCK, "wx");
+  writeSync(fd, String(process.pid));
+  closeSync(fd);
+} catch (err) {
+  if (err.code !== "EEXIST") throw err;
+  let owner = "unknown";
+  try {
+    owner = readFileSync(LOCK, "utf8").trim() || "unknown";
+  } catch {
+    /* the other run may be tearing down right now */
+  }
+  console.error(
+    `FATAL: another audit is already running (lock ${LOCK}, pid ${owner}).\n` +
+      "Concurrent runs share the preview server and produce false failures.\n" +
+      `Wait for it to finish, or delete the lock if it is stale.`,
+  );
+  process.exit(3);
+}
+const releaseLock = () => {
+  try {
+    unlinkSync(LOCK);
+  } catch {
+    /* already gone */
+  }
+};
+process.on("exit", releaseLock);
+for (const sig of ["SIGINT", "SIGTERM"]) {
+  process.on(sig, () => {
+    releaseLock();
+    process.exit(130);
+  });
+}
 
 const ROUTES = [
   "/",
@@ -152,8 +200,6 @@ const page = await browser.newPage({
   userAgent:
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
 });
-
-mkdirSync(SHOTS, { recursive: true });
 
 const consoleErrors = [];
 page.on("console", (m) => {
