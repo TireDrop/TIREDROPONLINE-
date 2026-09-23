@@ -68,9 +68,13 @@ function Hero() {
         className="pointer-events-none absolute -right-40 top-1/2 hidden h-[560px] w-[560px] -translate-y-1/2 rounded-full border-[72px] border-graphite lg:block"
       />
 
-      <div className="wrap relative grid gap-9 py-12 md:py-16 lg:grid-cols-[.9fr_1.1fr] lg:items-center lg:gap-12">
-        <div>
-          <p className="eyebrow mb-4 flex items-center gap-2">
+      {/* Three children, ordered headline → finder → supporting copy, so on a
+          phone the finder clears the fold instead of sitting under four lines
+          of prose. On a wide screen the explicit row/column placement puts the
+          copy back together in the left half with the finder beside it. */}
+      <div className="wrap relative grid gap-7 py-10 md:py-14 lg:grid-cols-[.9fr_1.1fr] lg:gap-x-12 lg:gap-y-6 lg:py-16">
+        <div className="order-1 lg:col-start-1 lg:row-start-1 lg:self-end">
+          <p className="eyebrow mb-3 flex items-center gap-2">
             <Truck size={16} aria-hidden />
             {BUSINESS.tagline}
           </p>
@@ -79,14 +83,29 @@ function Hero() {
             Order tires online.
             <span className="block text-drop">We ship them to you.</span>
           </h1>
+        </div>
 
-          <p className="lede mt-4 max-w-lg text-bone/70">
+        {/* The finder is the hero, not an accessory to it: it gets the wider
+            column, a ring that lifts it off the dark band, and first position
+            on a phone, because shopping by vehicle or by sidewall size is how
+            nearly every tire purchase starts. */}
+        <div className="order-2 rounded-sm bg-bone p-5 text-ink shadow-lift ring-4 ring-drop/25 md:p-7 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-center">
+          <p className="eyebrow mb-1.5">Start here</p>
+          <h2 className="h2 mb-1 text-3xl md:text-4xl">Find your fit</h2>
+          <p className="mb-5 text-sm text-smoke">
+            Shop by vehicle, or by the size stamped on your sidewall.
+          </p>
+          <SearchPanel onSearch={onSearch} />
+        </div>
+
+        <div className="order-3 lg:col-start-1 lg:row-start-2 lg:self-start">
+          <p className="lede max-w-lg text-bone/70">
             An online tire and wheel store shipping to any address in{" "}
             {BUSINESS.shipping.area} — or free to our South Florida shop, where
             we fit them for you.
           </p>
 
-          <div className="mt-7 flex flex-wrap gap-3">
+          <div className="mt-6 flex flex-wrap gap-3">
             <Link to="/tires" className="btn-primary">
               Shop Tires
               <ArrowRight size={17} aria-hidden />
@@ -96,24 +115,190 @@ function Hero() {
             </Link>
           </div>
 
-          <p className="mt-6 text-sm text-bone/55">
+          <p className="mt-5 text-sm text-bone/55">
             {BUSINESS.poweredBy} since {BUSINESS.foundedYear}.
           </p>
         </div>
-
-        {/* The finder is the hero, not an accessory to it: it gets the wider
-            column, a ring that lifts it off the dark band, and enough weight
-            that nobody arriving on a phone can scroll past it. */}
-        <div className="rounded-sm bg-bone p-5 text-ink shadow-lift ring-4 ring-drop/25 md:p-7">
-          <p className="eyebrow mb-1.5">Start here</p>
-          <h2 className="h2 mb-1 text-3xl md:text-4xl">Find your fit</h2>
-          <p className="mb-5 text-sm text-smoke">
-            Shop by vehicle, or by the size stamped on your sidewall.
-          </p>
-          <SearchPanel onSearch={onSearch} />
-        </div>
       </div>
     </section>
+  );
+}
+
+/* -------------------------------- Trust bar ------------------------------- */
+
+// The band every large tire retailer puts directly under the fold, because the
+// four questions a first-time online tire buyer has — what does shipping cost,
+// will you ship to me, who fits them, and how old is the rubber — all get
+// answered before they have to ask.
+
+const TRUST = [
+  {
+    Icon: Truck,
+    title: "Free shipping on every tire",
+    copy: "No minimum and no freight surcharge. The price on the tire is the price that ships.",
+  },
+  {
+    Icon: MapPin,
+    title: "Ships anywhere in the lower 48",
+    copy: `Any street address in ${BUSINESS.shipping.area} — home, work, or your own installer.`,
+  },
+  {
+    Icon: Store,
+    title: "Free ship-to-store & install",
+    copy: `Send the set to our ${BUSINESS.shop.city} shop at no charge and book the fitting.`,
+  },
+  {
+    Icon: CalendarCheck,
+    title: "Lab-fresh, DOT-dated",
+    copy: "Drop-shipped from the distributor, so nothing has been ageing on a shelf.",
+  },
+];
+
+function TrustBar() {
+  return (
+    <section className="border-b border-ink/10 bg-bone">
+      <ul className="wrap grid grid-cols-2 gap-x-5 gap-y-7 py-8 lg:grid-cols-4 lg:gap-x-8">
+        {TRUST.map(({ Icon, title, copy }) => (
+          <li key={title} className="flex flex-col gap-2">
+            <Icon size={24} aria-hidden className="text-drop" />
+            <p className="font-display text-base uppercase leading-tight tracking-wide">
+              {title}
+            </p>
+            <p className="text-xs leading-relaxed text-smoke">{copy}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/* ----------------------------- Shop by category --------------------------- */
+
+// Icons are keyed off the catalog's own category names, so a new category in
+// `products.js` still renders — it just falls back to the generic tire icon.
+const CATEGORY_ICONS = {
+  "All-Season": CloudSun,
+  Performance: Gauge,
+  "Truck & SUV": Truck,
+  Winter: Snowflake,
+  Commercial: Building2,
+};
+
+const CATEGORY_COPY = {
+  "All-Season": "The everyday set — grip, tread life and quiet in one tire.",
+  Performance: "Summer and ultra-high-performance rubber for a quick car.",
+  "Truck & SUV": "Highway and all-terrain sets rated for the weight you carry.",
+  Winter: "3PMSF compounds that stay soft when the road stops cooperating.",
+  Commercial: "Load-rated LT and van sizes for work trucks and fleets.",
+};
+
+function ShopByCategory() {
+  return (
+    <Section className="bg-bone">
+      <SectionHead
+        eyebrow="Shop by category"
+        title="Start with the kind of tire you need"
+        action={
+          <Link to="/tires" className="btn-outline btn-sm">
+            All tires
+            <ArrowRight size={15} aria-hidden />
+          </Link>
+        }
+      />
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {TIRE_CATEGORIES.map((category) => {
+          const Icon = CATEGORY_ICONS[category] ?? BadgeCheck;
+          return (
+            <Link
+              key={category}
+              to={`/tires?category=${encodeURIComponent(category)}`}
+              className="card-hover group flex flex-col p-5 transition-colors hover:border-drop/40"
+            >
+              <Icon size={24} aria-hidden className="mb-3 text-drop" />
+              <h3 className="font-display text-lg uppercase leading-tight">
+                {category}
+              </h3>
+              <p className="mt-2 flex-1 text-xs leading-relaxed text-smoke">
+                {CATEGORY_COPY[category]}
+              </p>
+              <span className="mt-4 flex items-center gap-1.5 font-display text-xs uppercase tracking-[0.12em] text-ink group-hover:text-drop">
+                Shop
+                <ArrowRight
+                  size={14}
+                  aria-hidden
+                  className="transition-transform group-hover:translate-x-1"
+                />
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </Section>
+  );
+}
+
+/* ----------------------------- Rebates & deals ---------------------------- */
+
+function RebateStrip() {
+  // Manufacturer rebates live on the product, so the strip is whatever the
+  // catalog is currently running rather than a hand-kept list that goes stale.
+  const rebated = (TIRES ?? []).filter((t) => t.rebate);
+  if (rebated.length === 0) return null;
+
+  return (
+    <Section className="bg-sky">
+      <SectionHead
+        eyebrow="Rebates & deals"
+        title="Money back from the manufacturer"
+        lede={`Prepaid-card rebates on a set of ${SET_SIZE}, claimed after your order ships. We send the form with your confirmation.`}
+        action={
+          <Link to="/coupons" className="btn-outline btn-sm">
+            All current offers
+            <ArrowRight size={15} aria-hidden />
+          </Link>
+        }
+      />
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {rebated.map((tire) => (
+          <Link
+            key={tire.id}
+            to={`/tires/${tire.slug}`}
+            className="card-hover group flex flex-col items-start p-5"
+          >
+            <ProductArt
+              kind="tire"
+              accent={tire.accent}
+              size={56}
+              label={`${tire.brand} ${tire.model}`}
+              className="mb-3"
+            />
+            <span className="font-display text-xs uppercase tracking-[0.15em] text-smoke">
+              {tire.brand}
+            </span>
+            <h3 className="font-display text-lg uppercase leading-tight">
+              {tire.model}
+            </h3>
+            <p className="mt-3 flex items-center gap-1.5 font-display text-sm uppercase tracking-wide text-drop">
+              <BadgePercent size={15} aria-hidden />
+              {tire.rebate.label}
+            </p>
+            <p className="mt-auto pt-3 text-xs text-smoke">
+              {money(setPrice(tire))} a set · {tire.size}
+            </p>
+            <span className="mt-3 flex items-center gap-1.5 font-display text-xs uppercase tracking-[0.12em] text-ink group-hover:text-drop">
+              See the deal
+              <ArrowRight
+                size={14}
+                aria-hidden
+                className="transition-transform group-hover:translate-x-1"
+              />
+            </span>
+          </Link>
+        ))}
+      </div>
+    </Section>
   );
 }
 
@@ -475,7 +660,9 @@ function Proof() {
       <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
         <div>
           <p className="eyebrow mb-2">Why {BUSINESS.name}</p>
-          <h2 className="h2">An online tire store with a real shop behind it</h2>
+          <h2 className="h2">
+            An online tire store with a real shop behind it
+          </h2>
           <p className="lede mt-4">
             {BUSINESS.parent} opened in {BUSINESS.foundedYear} and has been
             mounting tires in {BUSINESS.shop.city} ever since. {BUSINESS.name}{" "}
@@ -575,10 +762,13 @@ export default function HomePage() {
         description="TireDrop is an online tire and wheel store shipping anywhere in the continental US. Ship to your address, or free to our South Florida shop where we install them. Powered by Extreme Tires."
       />
       <Hero />
+      <TrustBar />
+      <ShopByCategory />
       <DeliveryChoice />
       <CategoryTiles />
       <HowItWorks />
       <FeaturedTires />
+      <RebateStrip />
       <BrandStrip />
       <PromoBand />
       <Proof />

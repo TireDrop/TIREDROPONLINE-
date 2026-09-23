@@ -97,9 +97,12 @@ export default function App() {
       <Footer />
 
       {/* Sits above the fixed call bar on phones. */}
+      {/* Keeps the end of the page clear of whatever is floating over the
+          bottom edge: the phone action bar always, the compare tray when it
+          has something in it. */}
       <div
         aria-hidden
-        className="h-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] lg:hidden"
+        className="h-[calc(var(--call-bar-h)+var(--compare-tray-h)+env(safe-area-inset-bottom))] lg:h-[var(--compare-tray-h)]"
       />
       <CompareTray />
       <MobileCallBar />

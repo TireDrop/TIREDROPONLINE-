@@ -90,7 +90,15 @@ export default function TiresPage() {
   const filters = useMemo(
     () => ({
       brands: listParam(params, "brands"),
-      categories: listParam(params, "cats"),
+      // `cats` is the internal multi-select the filter panel writes. `category`
+      // is the readable single-category entry point the home page tiles and any
+      // future campaign link use; both land in the same filter.
+      categories: [
+        ...new Set([
+          ...listParam(params, "cats"),
+          ...listParam(params, "category"),
+        ]),
+      ],
       diameters: listParam(params, "dia").map(Number),
       finishes: [],
       minPrice: params.get("minp") || "",
@@ -372,7 +380,7 @@ export default function TiresPage() {
                 clears the sticky site header — a 40px logo lockup, its
                 "Powered by" line and 12px of padding — so this bar parks
                 under the header instead of sitting on the breadcrumbs. */}
-            <div className="sticky top-[80px] z-30 -mx-5 mb-4 flex items-center gap-2 border-b border-ink/10 bg-bone/95 px-5 py-2 backdrop-blur md:-mx-8 md:px-8 lg:hidden">
+            <div className="sticky top-[var(--header-h)] z-30 -mx-5 mb-4 flex items-center gap-2 border-b border-ink/10 bg-bone/95 px-5 py-2 backdrop-blur md:-mx-8 md:px-8 lg:hidden">
               <button
                 type="button"
                 onClick={() => setFiltersOpen(true)}

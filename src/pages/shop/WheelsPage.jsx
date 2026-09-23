@@ -369,7 +369,7 @@ export default function WheelsPage() {
                 clears the sticky site header — a 40px logo lockup, its
                 "Powered by" line and 12px of padding — so this bar parks
                 under the header instead of sitting on the breadcrumbs. */}
-            <div className="sticky top-[80px] z-30 -mx-5 mb-4 flex items-center gap-2 border-b border-ink/10 bg-bone/95 px-5 py-2 backdrop-blur md:-mx-8 md:px-8 lg:hidden">
+            <div className="sticky top-[var(--header-h)] z-30 -mx-5 mb-4 flex items-center gap-2 border-b border-ink/10 bg-bone/95 px-5 py-2 backdrop-blur md:-mx-8 md:px-8 lg:hidden">
               <button
                 type="button"
                 onClick={() => setFiltersOpen(true)}

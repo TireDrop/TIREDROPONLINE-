@@ -141,7 +141,9 @@ function ColumnHead({ product, onRemove }) {
       scope="col"
       className="border-b border-ink/10 bg-bone px-3 pb-4 pt-3 align-top"
     >
-      <div className="relative flex flex-col items-center gap-2 text-center">
+      {/* Full height so the View button lines up across columns even when one
+          model name wraps to a second line. */}
+      <div className="relative flex h-full flex-col items-center gap-2 text-center">
         <button
           type="button"
           onClick={() => onRemove(product.slug)}
@@ -165,7 +167,7 @@ function ColumnHead({ product, onRemove }) {
         </span>
         <Link
           to={`/tires/${product.slug}`}
-          className="btn-outline btn-sm w-full font-normal"
+          className="btn-outline btn-sm mt-auto w-full font-normal"
         >
           View
         </Link>
@@ -207,7 +209,9 @@ export default function ComparePage() {
         title="Compare Tires Side by Side"
         description="Put up to four tires side by side — price for a set of four, rebates, ratings across six axes, warranty and the full spec sheet — and see which one wins each row."
       />
-      <Breadcrumbs trail={[{ label: "Tires", to: "/tires" }, { label: "Compare" }]} />
+      <Breadcrumbs
+        trail={[{ label: "Tires", to: "/tires" }, { label: "Compare" }]}
+      />
       <PageHero
         eyebrow="Side by side"
         title="Compare tires"

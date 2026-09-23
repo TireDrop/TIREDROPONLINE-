@@ -9,6 +9,22 @@
        spacer, the compare tray — reads this rather than repeating a number,
        because three copies of "68px" is three chances to drift. */
     --call-bar-h: 68px;
+
+    /* The sticky masthead's height, measured. Catalog pages park their own
+       sticky filter bar directly beneath it, and guessing this wrong leaves a
+       strip of page scrolling through the gap. The logo grows at `md`, so the
+       header does too. */
+    --header-h: 84px;
+
+    /* How much of the bottom edge the compare tray is covering. CompareTray
+       measures itself into this; zero whenever the tray is away. */
+    --compare-tray-h: 0px;
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --header-h: 88px;
+    }
   }
 
   html {

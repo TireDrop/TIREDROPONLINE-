@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { X } from "lucide-react";
 
@@ -39,11 +39,39 @@ export default function CompareTray() {
   const ready = count >= 2;
   const emptySlots = Math.max(0, max - picked.length);
 
+  // The tray floats over the page, so the page has to know how much of its
+  // bottom edge is covered or the last row of cards hides underneath. Publish
+  // the measured height rather than a guessed constant: the bar is one row on
+  // a phone, chips plus a helper line on a desktop, and it changes as tires
+  // come and go.
+  const barRef = useRef(null);
+  useEffect(() => {
+    const el = barRef.current;
+    const root = document.documentElement;
+    if (!el) return undefined;
+
+    const sync = () =>
+      root.style.setProperty(
+        "--compare-tray-h",
+        open ? `${el.offsetHeight}px` : "0px",
+      );
+
+    sync();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const observer = new ResizeObserver(sync);
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty("--compare-tray-h");
+    };
+  }, [open]);
+
   // `invisible` rather than unmounting: it keeps the chips and buttons out of
   // the tab order while the bar is away, and CSS holds visibility for the
   // length of the transition, so the slide-down still plays.
   return (
     <div
+      ref={barRef}
       className={`fixed inset-x-0 bottom-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] z-40 border-t border-graphite bg-ink text-bone transition-[transform,opacity,visibility] duration-300 lg:bottom-0 ${
         open
           ? "visible translate-y-0 opacity-100"

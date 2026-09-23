@@ -50,7 +50,11 @@ function collect(viewportWidth) {
 
   // An element only matters if nothing between it and the root clips it.
   const isClipped = (el) => {
-    for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+    for (
+      let p = el.parentElement;
+      p && p !== document.body;
+      p = p.parentElement
+    ) {
       const o = getComputedStyle(p);
       if (/hidden|clip|auto|scroll/.test(o.overflowX + o.overflow)) return true;
     }
@@ -81,7 +85,9 @@ function collect(viewportWidth) {
   // Only standalone controls need a comfortable tap height. A link inside a
   // sentence is expected to be text-sized and is not a defect.
   const smallTargets = [];
-  for (const el of document.querySelectorAll("a, button, input, select, textarea")) {
+  for (const el of document.querySelectorAll(
+    "a, button, input, select, textarea",
+  )) {
     const r = el.getBoundingClientRect();
     if (r.width === 0 || r.height === 0) continue;
     const display = getComputedStyle(el).display;
@@ -94,7 +100,9 @@ function collect(viewportWidth) {
       smallTargets.push({
         tag: el.tagName.toLowerCase(),
         h: Math.round(r.height),
-        text: (el.textContent ?? el.getAttribute("aria-label") ?? "").trim().slice(0, 40),
+        text: (el.textContent ?? el.getAttribute("aria-label") ?? "")
+          .trim()
+          .slice(0, 40),
       });
     }
   }
@@ -122,11 +130,21 @@ function collect(viewportWidth) {
 
 // The sandbox ships its own Chromium, which may not match the version this
 // playwright build expects. Point at it explicitly when it is present.
-const CHROME = process.env.AUDIT_CHROME ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
+const CHROME =
+  process.env.AUDIT_CHROME ??
+  "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 const browser = await chromium.launch({
   executablePath: existsSync(CHROME) ? CHROME : undefined,
 });
 const page = await browser.newPage({
+  // The sandbox routes egress through a MITM proxy whose CA this Chromium
+  // does not carry, so the Google Fonts stylesheet in index.html fails with
+  // ERR_CERT_AUTHORITY_INVALID and every route reports a console error that
+  // has nothing to do with the site. Accepting it here lets the fonts
+  // actually load, which also makes the text-size and tap-target
+  // measurements below reflect the real rendered page rather than a
+  // fallback face. This is a local audit harness, never shipped code.
+  ignoreHTTPSErrors: true,
   viewport: { width: WIDTH, height: 844 },
   deviceScaleFactor: 2,
   isMobile: true,
@@ -141,7 +159,9 @@ const consoleErrors = [];
 page.on("console", (m) => {
   if (m.type() === "error") consoleErrors.push(m.text().slice(0, 120));
 });
-page.on("pageerror", (e) => consoleErrors.push(`PAGEERROR ${e.message}`.slice(0, 120)));
+page.on("pageerror", (e) =>
+  consoleErrors.push(`PAGEERROR ${e.message}`.slice(0, 120)),
+);
 
 /** Identifies what is actually on screen, so we can prove navigation happened. */
 const fingerprint = () =>
@@ -177,7 +197,8 @@ if (!mode) {
   console.error(
     "FATAL: neither /tires nor /#/tires changed the page.\n" +
       "The audit cannot navigate, so every route would falsely report ok.\n" +
-      "Check the server is serving the built app at " + BASE
+      "Check the server is serving the built app at " +
+      BASE,
   );
   await browser.close();
   process.exit(2);
@@ -201,7 +222,10 @@ for (const route of ROUTES) {
 
   const r = await page.evaluate(collect, WIDTH);
   const name = route.replace(/\//g, "_") || "_home";
-  await page.screenshot({ path: `${SHOTS}/${WIDTH}${name}.png`, fullPage: true });
+  await page.screenshot({
+    path: `${SHOTS}/${WIDTH}${name}.png`,
+    fullPage: true,
+  });
 
   const issues = [];
   if (stuckOnHome) issues.push("DID NOT NAVIGATE — page identical to home");
@@ -216,7 +240,9 @@ for (const route of ROUTES) {
     problems++;
     console.log(`FAIL ${route}\n     ${issues.join(" | ")}`);
     for (const o of r.overflowing)
-      console.log(`       overflow <${o.tag}> ${o.left}..${o.right} "${o.text}" .${o.cls}`);
+      console.log(
+        `       overflow <${o.tag}> ${o.left}..${o.right} "${o.text}" .${o.cls}`,
+      );
     for (const t of r.smallTargets)
       console.log(`       small <${t.tag}> ${t.h}px "${t.text}"`);
     for (const t of r.tinyText)
@@ -227,11 +253,13 @@ for (const route of ROUTES) {
   }
 }
 
-console.log(`\n${ROUTES.length - problems}/${ROUTES.length} clean. Shots in ${SHOTS}`);
+console.log(
+  `\n${ROUTES.length - problems}/${ROUTES.length} clean. Shots in ${SHOTS}`,
+);
 if (notNavigated) {
   console.error(
     `\nWARNING: ${notNavigated} route(s) rendered the home page. ` +
-      "Those results mean nothing — fix routing before trusting this run."
+      "Those results mean nothing — fix routing before trusting this run.",
   );
 }
 await browser.close();
