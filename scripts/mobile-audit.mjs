@@ -15,7 +15,7 @@ const WIDTH = Number(process.env.AUDIT_WIDTH ?? 390);
 const ROUTES = [
   "/",
   "/tires",
-  "/tires/continental-extremecontact-dws06-plus-225-50r17",
+  "/tires/continental-truecontact-tour-215-60r16",
   "/wheels",
   "/commercial-tires",
   "/cart",

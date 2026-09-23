@@ -403,7 +403,7 @@ export default function TireCarePage() {
       <PageHero
         eyebrow="Tire Care Guides"
         title="Everything we end up explaining anyway"
-        lede={`The questions we answer at the counter every week, written out properly. No upsell attached — read it, do it yourself, or buy the tires and let someone else fit them.`}
+        lede="The questions we answer every week, written out properly. No upsell attached — read it, do it yourself, or buy the tires and have someone else fit them."
       >
         <div className="flex flex-wrap gap-3">
           <a href="#guides" className="btn-primary">

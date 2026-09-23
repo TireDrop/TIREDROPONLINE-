@@ -53,7 +53,7 @@ export default function Logo({
 
       {showParent && (
         <span
-          className={`mt-1 font-display text-[9px] uppercase tracking-[0.18em] ${
+          className={`mt-1 font-display text-[11px] uppercase tracking-[0.16em] ${
             onDark ? "text-bone/50" : "text-smoke"
           }`}
         >
