@@ -1,6 +1,13 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { CircleDot, Phone, Ruler, SearchX, X } from "lucide-react";
+import {
+  CircleDot,
+  Phone,
+  Ruler,
+  SearchX,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 
 import {
   Seo,
@@ -10,7 +17,10 @@ import {
   SectionHead,
   EmptyState,
 } from "../../components/ui/index.jsx";
-import Filters from "../../components/shop/Filters.jsx";
+import Filters, {
+  activeFilterChips,
+  countActiveFilters,
+} from "../../components/shop/Filters.jsx";
 import SearchPanel from "../../components/shop/SearchPanel.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
 import {
@@ -22,10 +32,10 @@ import {
 import { BUSINESS } from "../../data/business.js";
 
 const SORTS = [
-  { value: "best", label: "Best Selling" },
-  { value: "price-asc", label: "Price: Low to High" },
-  { value: "price-desc", label: "Price: High to Low" },
-  { value: "rating", label: "Top Rated" },
+  { value: "best", label: "Featured" },
+  { value: "price-asc", label: "Price: low to high" },
+  { value: "price-desc", label: "Price: high to low" },
+  { value: "rating", label: "Top rated" },
 ];
 
 const PRICE_MIN = Math.min(...WHEELS.map((w) => w.price));
@@ -73,13 +83,14 @@ function sortProducts(list, sort) {
       return out.sort((a, b) => b.rating - a.rating);
     default:
       return out.sort(
-        (a, b) => b.reviewCount * b.rating - a.reviewCount * a.rating
+        (a, b) => b.reviewCount * b.rating - a.reviewCount * a.rating,
       );
   }
 }
 
 export default function WheelsPage() {
   const [params, setParams] = useSearchParams();
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const view = params.get("view");
   const sort = params.get("sort") || "best";
 
@@ -93,7 +104,7 @@ export default function WheelsPage() {
       maxPrice: params.get("maxp") || "",
       minRating: Number(params.get("rating") || 0),
     }),
-    [params]
+    [params],
   );
 
   // On the wheel catalog the size tab reads width / bolt pattern / diameter.
@@ -109,7 +120,7 @@ export default function WheelsPage() {
   };
   const hasVehicle = Boolean(vehicle.year && vehicle.make && vehicle.model);
   const hasSize = Boolean(
-    sizeQuery.width || sizeQuery.bolt || sizeQuery.diameter
+    sizeQuery.width || sizeQuery.bolt || sizeQuery.diameter,
   );
 
   const patchParams = (patch) => {
@@ -161,7 +172,8 @@ export default function WheelsPage() {
     const min = Number(filters.minPrice) || 0;
     const max = Number(filters.maxPrice) || Infinity;
     const filtered = WHEELS.filter((w) => {
-      if (filters.brands.length && !filters.brands.includes(w.brand)) return false;
+      if (filters.brands.length && !filters.brands.includes(w.brand))
+        return false;
       if (filters.categories.length && !filters.categories.includes(w.category))
         return false;
       if (filters.diameters.length && !filters.diameters.includes(w.diameter))
@@ -179,6 +191,40 @@ export default function WheelsPage() {
     });
     return sortProducts(filtered, sort);
   }, [filters, sizeQuery.width, sizeQuery.bolt, sizeQuery.diameter, sort]);
+
+  const activeFilterCount = countActiveFilters(filters);
+  const sizeLabel = `${sizeQuery.diameter || "any"}x${
+    sizeQuery.width || "any"
+  }${sizeQuery.bolt ? ` · ${sizeQuery.bolt}` : ""}`;
+
+  const chips = activeFilterChips(filters).map((chip) => ({
+    id: chip.id,
+    label: chip.label,
+    onRemove: () => onFilterChange(chip.next),
+  }));
+  if (hasSize) {
+    chips.push({
+      id: "size",
+      label: sizeLabel,
+      onRemove: () => patchParams({ w: "", a: "", d: "" }),
+    });
+  }
+
+  // One URL write: two patches in a row would each build from the same
+  // `params` snapshot and the second would undo the first.
+  const clearAllFilters = () =>
+    patchParams({
+      brands: [],
+      cats: [],
+      dia: [],
+      fin: [],
+      minp: "",
+      maxp: "",
+      rating: "",
+      w: "",
+      a: "",
+      d: "",
+    });
 
   if (view === "fitment") {
     return (
@@ -294,11 +340,18 @@ export default function WheelsPage() {
           </div>
         )}
 
-        <div className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
+        {/* Block flow below `lg`: the sidebar is a drawer there, so the
+            aside renders nothing and a grid row would leave its gap behind
+            as dead space above the results. */}
+        <div className="lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8">
           <aside aria-label="Filter wheels">
             <Filters
               value={filters}
               onChange={onFilterChange}
+              open={filtersOpen}
+              onOpenChange={setFiltersOpen}
+              resultCount={results.length}
+              resultNoun={results.length === 1 ? "wheel" : "wheels"}
               facets={{
                 kind: "wheel",
                 brands: WHEEL_BRAND_NAMES,
@@ -312,23 +365,55 @@ export default function WheelsPage() {
           </aside>
 
           <div>
-            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {/* Filters and sort stay one tap away on a phone. The offset
+                clears the sticky site header — a 40px logo lockup, its
+                "Powered by" line and 12px of padding — so this bar parks
+                under the header instead of sitting on the breadcrumbs. */}
+            <div className="sticky top-[80px] z-30 -mx-5 mb-4 flex items-center gap-2 border-b border-ink/10 bg-bone/95 px-5 py-2 backdrop-blur md:-mx-8 md:px-8 lg:hidden">
+              <button
+                type="button"
+                onClick={() => setFiltersOpen(true)}
+                aria-expanded={filtersOpen}
+                className="btn-outline btn-sm h-11 min-w-0 flex-1"
+              >
+                <SlidersHorizontal size={16} aria-hidden />
+                <span className="truncate">
+                  Filters
+                  {activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+                </span>
+              </button>
+              <label htmlFor="wheel-sort-mobile" className="sr-only">
+                Sort by
+              </label>
+              <select
+                id="wheel-sort-mobile"
+                value={sort}
+                onChange={(e) => patchParams({ sort: e.target.value })}
+                className="field h-11 min-w-0 flex-1"
+              >
+                {SORTS.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-smoke" aria-live="polite">
-                Showing{" "}
-                <span className="font-semibold text-ink">{results.length}</span>{" "}
-                of {WHEELS.length} wheels
+                <span className="font-semibold text-ink">
+                  {results.length} {results.length === 1 ? "wheel" : "wheels"}
+                </span>{" "}
+                of {WHEELS.length}
                 {hasSize && (
                   <>
                     {" "}
                     matching{" "}
-                    <span className="font-semibold text-ink">
-                      {sizeQuery.diameter || "any"}x{sizeQuery.width || "any"}
-                      {sizeQuery.bolt ? ` · ${sizeQuery.bolt}` : ""}
-                    </span>
+                    <span className="font-semibold text-ink">{sizeLabel}</span>
                   </>
                 )}
               </p>
-              <div className="flex items-center gap-2">
+              <div className="hidden items-center gap-2 lg:flex">
                 <label
                   htmlFor="wheel-sort"
                   className="label mb-0 whitespace-nowrap"
@@ -349,6 +434,30 @@ export default function WheelsPage() {
                 </select>
               </div>
             </div>
+
+            {chips.length > 0 && (
+              <div className="mb-5 flex flex-wrap items-center gap-2">
+                {chips.map((chip) => (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    onClick={chip.onRemove}
+                    aria-label={`Remove filter ${chip.label}`}
+                    className="inline-flex min-h-[32px] items-center gap-1.5 rounded-sm border border-ink/15 bg-fog px-2.5 py-1 text-xs text-ink hover:border-ink"
+                  >
+                    {chip.label}
+                    <X size={13} aria-hidden className="text-smoke" />
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  className="min-h-[32px] px-1 font-display text-xs uppercase tracking-[0.15em] text-drop hover:text-dive"
+                >
+                  Clear all
+                </button>
+              </div>
+            )}
 
             {results.length === 0 ? (
               <EmptyState

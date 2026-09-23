@@ -3,6 +3,14 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* The phone action bar's height, less the safe-area inset it adds on
+       notched devices. Anything that has to sit clear of it — the page-end
+       spacer, the compare tray — reads this rather than repeating a number,
+       because three copies of "68px" is three chances to drift. */
+    --call-bar-h: 68px;
+  }
+
   html {
     scroll-behavior: smooth;
   }

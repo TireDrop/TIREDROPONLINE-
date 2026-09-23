@@ -1,12 +1,21 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Link, useParams } from "react-router-dom";
 import {
+  BadgePercent,
   Check,
   ChevronRight,
+  Gauge,
   Minus,
   PackageSearch,
   Phone,
   Plus,
+  Scale,
   ShieldCheck,
   ShoppingCart,
   Store,
@@ -28,6 +37,14 @@ import ProductCard from "../../components/shop/ProductCard.jsx";
 import { getProduct, TIRES, WHEELS } from "../../data/products.js";
 import { BUSINESS } from "../../data/business.js";
 import { useCart, money } from "../../context/CartContext.jsx";
+import { useCompare } from "../../context/CompareContext.jsx";
+import { RATING_AXES, ratingsFor } from "../../data/tireRatings.js";
+import {
+  SET_SIZE,
+  deliveryEstimate,
+  priceBreakdown,
+  shipsFree,
+} from "../../data/pricing.js";
 
 const BADGE_TONE = {
   "Best Seller": "drop",
@@ -35,39 +52,112 @@ const BADGE_TONE = {
   Rebate: "amber",
 };
 
+// One, a pair, a set, or a set plus a full-size spare. Four leads because that
+// is what the overwhelming majority of tire orders actually are.
+const QTY_PRESETS = [1, 2, SET_SIZE, SET_SIZE + 1];
+
+const MAX_QTY = 12;
+
 /** Four products from the same category, falling back to the same brand. */
 function relatedTo(product) {
   const pool = product.kind === "wheel" ? WHEELS : TIRES;
   const sameCategory = pool.filter(
-    (p) => p.id !== product.id && p.category === product.category
+    (p) => p.id !== product.id && p.category === product.category,
   );
   const rest = pool.filter(
-    (p) => p.id !== product.id && p.category !== product.category
+    (p) => p.id !== product.id && p.category !== product.category,
   );
   return [...sameCategory, ...rest].slice(0, 4);
+}
+
+/**
+ * One axis of the ratings panel.
+ *
+ * A null score means the spec that would produce it does not exist — a winter
+ * tire carries no UTQG treadwear grade — so it prints "Not rated" against an
+ * empty track. Drawing it as a zero would read as a terrible tire, which is
+ * the opposite of the truth.
+ */
+function RatingBar({ label, value }) {
+  const rated = value != null;
+  return (
+    <li>
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="text-sm text-ink">{label}</span>
+        <span
+          className={
+            rated ? "font-display text-base leading-none" : "text-xs text-smoke"
+          }
+        >
+          {rated ? `${value.toFixed(1)} / 10` : "Not rated"}
+        </span>
+      </div>
+      <div
+        aria-hidden
+        className="mt-1.5 flex h-2 w-full items-center overflow-hidden rounded-sm bg-ink/10"
+      >
+        {rated ? (
+          <div
+            className="h-full rounded-sm bg-drop"
+            style={{ width: `${Math.max(2, value * 10)}%` }}
+          />
+        ) : (
+          <span className="mx-auto block h-px w-4 bg-smoke/70" />
+        )}
+      </div>
+    </li>
+  );
 }
 
 export default function ProductPage({ kind = "tire" }) {
   const { slug } = useParams();
   const product = getProduct(kind, slug);
   const { addItem } = useCart();
+  const compare = useCompare();
 
   const isTire = kind !== "wheel";
   const unit = isTire ? "tire" : "wheel";
-  const [qty, setQty] = useState(4);
+  const [qty, setQty] = useState(SET_SIZE);
   const [install, setInstall] = useState(false);
   const [added, setAdded] = useState(false);
 
+  // The sticky bar only earns its place once the real buy box has scrolled
+  // away; before that it would cover the page for no reason.
+  const buyBoxRef = useRef(null);
+  const [buyBoxGone, setBuyBoxGone] = useState(false);
+
   // A new slug is a new product — reset the buy box.
   useEffect(() => {
-    setQty(4);
+    setQty(SET_SIZE);
     setInstall(false);
     setAdded(false);
   }, [slug]);
 
-  const related = useMemo(
-    () => (product ? relatedTo(product) : []),
-    [product]
+  useEffect(() => {
+    const el = buyBoxRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => setBuyBoxGone(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [slug, product]);
+
+  const related = useMemo(() => (product ? relatedTo(product) : []), [product]);
+
+  // Recomputed once per mount: the estimate depends on the clock, not on the
+  // shopper's choices, and re-deriving it on every keystroke would be noise.
+  const delivery = useMemo(() => deliveryEstimate(), []);
+
+  const ratings = useMemo(
+    () => (product && isTire ? ratingsFor(product) : null),
+    [product, isTire],
+  );
+
+  const clampQty = useCallback(
+    (n) => (Number.isFinite(n) ? Math.min(MAX_QTY, Math.max(1, n)) : 1),
+    [],
   );
 
   if (!product) {
@@ -84,7 +174,10 @@ export default function ProductPage({ kind = "tire" }) {
         />
         <Breadcrumbs
           trail={[
-            { label: isTire ? "Tires" : "Wheels", to: isTire ? "/tires" : "/wheels" },
+            {
+              label: isTire ? "Tires" : "Wheels",
+              to: isTire ? "/tires" : "/wheels",
+            },
             { label: "Not found" },
           ]}
         />
@@ -118,8 +211,13 @@ export default function ProductPage({ kind = "tire" }) {
     ? product.size
     : `${product.diameter}x${product.wheelWidth} · ${product.boltPattern}`;
   const savings = product.msrp - product.price;
-  const unitsTotal = product.price * qty;
-  const installTotal = install ? product.installPrice * qty : 0;
+  const bill = priceBreakdown(product, qty);
+  const installTotal = install ? bill.install : 0;
+  const orderTotal = bill.price + installTotal;
+  const inCompare = compare.has(product.slug);
+  const compareLocked = !inCompare && compare.isFull;
+  const shortOfSet = product.rebate ? SET_SIZE - qty : 0;
+  const plural = (n) => (n === 1 ? unit : `${unit}s`);
 
   const handleAdd = () => {
     addItem(
@@ -135,7 +233,7 @@ export default function ProductPage({ kind = "tire" }) {
         accent: product.accent,
         slug: product.slug,
       },
-      qty
+      qty,
     );
     setAdded(true);
   };
@@ -144,7 +242,7 @@ export default function ProductPage({ kind = "tire" }) {
     <>
       <Seo
         title={`${name} ${sizeLabel}`}
-        description={`${name} ${sizeLabel} — ${money(product.price)} each from TireDrop, shipped anywhere in the continental US or free to our South Florida shop for installation.`}
+        description={`${name} ${sizeLabel} — ${money(product.price * SET_SIZE)} for a set of ${SET_SIZE} from TireDrop, shipped anywhere in the continental US or free to our South Florida shop for installation.`}
       />
       <Breadcrumbs
         trail={[
@@ -152,7 +250,10 @@ export default function ProductPage({ kind = "tire" }) {
             label: isTire ? "Tires" : "Wheels",
             to: isTire ? "/tires" : "/wheels",
           },
-          { label: product.brand, to: `${isTire ? "/tires" : "/wheels"}?brands=${encodeURIComponent(product.brand)}` },
+          {
+            label: product.brand,
+            to: `${isTire ? "/tires" : "/wheels"}?brands=${encodeURIComponent(product.brand)}`,
+          },
           { label: product.model },
         ]}
       />
@@ -171,7 +272,7 @@ export default function ProductPage({ kind = "tire" }) {
           </div>
 
           {/* Buy box */}
-          <div>
+          <div ref={buyBoxRef}>
             <div className="flex flex-wrap items-center gap-2">
               <p className="eyebrow">{product.brand}</p>
               {product.badge && (
@@ -190,47 +291,77 @@ export default function ProductPage({ kind = "tire" }) {
               <Stars rating={product.rating} count={product.reviewCount} />
             </div>
 
+            {/* The headline is the set total, because that is the number a
+                shopper is comparing against the other tab they have open. */}
             <div className="mt-6 border-y border-ink/10 py-5">
-              <div className="flex flex-wrap items-baseline gap-3">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <span className="font-display text-4xl leading-none">
-                  {money(product.price)}
+                  {money(bill.price)}
                 </span>
-                <span className="text-sm text-smoke">per {unit}</span>
+                <span className="text-sm text-smoke">
+                  for {qty} {plural(qty)}
+                </span>
+              </div>
+              <p className="mt-2 text-sm text-smoke">
+                {money(product.price)} per {unit}
                 {savings > 0 && (
                   <>
-                    <span className="text-base text-smoke line-through">
+                    {" · "}
+                    <span className="line-through">
                       {money(product.msrp)}
-                    </span>
-                    <span className="font-display text-sm uppercase tracking-wide text-drop">
+                    </span>{" "}
+                    <span className="font-display uppercase tracking-wide text-drop">
                       Save {money(savings)} each
                     </span>
                   </>
                 )}
-              </div>
+              </p>
               <p className="mt-2 text-sm text-smoke">
                 {product.stock > 0
-                  ? `${product.stock} available to ship from our distributor network. Shipping and delivery time are shown at checkout.`
+                  ? `${product.stock} available to ship from our distributor network.`
                   : "Not available to ship right now — call us and we will source it."}
               </p>
             </div>
 
-            {/* Quantity */}
+            {/* Quantity. Presets first, because tapping "4" is faster than
+                four taps on a plus button, with free entry for oddities. */}
             <div className="mt-6">
               <span id="qty-label" className="label">
                 Quantity
               </span>
-              <div className="flex flex-wrap items-center gap-4">
-                <div
-                  className="inline-flex items-center rounded-sm border border-ink/15"
-                  role="group"
-                  aria-labelledby="qty-label"
-                >
+              <div
+                className="flex flex-wrap items-center gap-2"
+                role="group"
+                aria-labelledby="qty-label"
+              >
+                {QTY_PRESETS.map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setQty(n)}
+                    aria-pressed={qty === n}
+                    className={`min-h-[44px] min-w-[44px] rounded-sm border px-3 font-display text-base uppercase tracking-wide transition-colors ${
+                      qty === n
+                        ? "border-drop bg-drop text-bone"
+                        : "border-ink/15 bg-bone text-ink hover:border-ink"
+                    }`}
+                  >
+                    {n}
+                    {n === SET_SIZE && (
+                      <span className="ml-1.5 text-[11px] tracking-normal">
+                        set
+                      </span>
+                    )}
+                  </button>
+                ))}
+
+                <div className="inline-flex items-center rounded-sm border border-ink/15">
                   <button
                     type="button"
                     onClick={() => setQty((q) => Math.max(1, q - 1))}
                     disabled={qty <= 1}
                     aria-label="Decrease quantity"
-                    className="px-3 py-2.5 text-ink hover:text-drop disabled:opacity-40"
+                    className="flex min-h-[44px] min-w-[44px] items-center justify-center text-ink hover:text-drop disabled:opacity-40"
                   >
                     <Minus size={16} aria-hidden />
                   </button>
@@ -241,33 +372,34 @@ export default function ProductPage({ kind = "tire" }) {
                     id="qty-input"
                     type="number"
                     min="1"
-                    max="12"
+                    max={MAX_QTY}
                     inputMode="numeric"
                     value={qty}
-                    onChange={(e) => {
-                      const n = Number(e.target.value);
-                      setQty(Number.isFinite(n) ? Math.min(12, Math.max(1, n)) : 1);
-                    }}
-                    className="w-14 border-x border-ink/15 bg-bone py-2.5 text-center font-display text-lg"
+                    onChange={(e) => setQty(clampQty(Number(e.target.value)))}
+                    className="min-h-[44px] w-14 border-x border-ink/15 bg-bone text-center font-display text-lg"
                   />
                   <button
                     type="button"
-                    onClick={() => setQty((q) => Math.min(12, q + 1))}
-                    disabled={qty >= 12}
+                    onClick={() => setQty((q) => Math.min(MAX_QTY, q + 1))}
+                    disabled={qty >= MAX_QTY}
                     aria-label="Increase quantity"
-                    className="px-3 py-2.5 text-ink hover:text-drop disabled:opacity-40"
+                    className="flex min-h-[44px] min-w-[44px] items-center justify-center text-ink hover:text-drop disabled:opacity-40"
                   >
                     <Plus size={16} aria-hidden />
                   </button>
                 </div>
-                <p className="text-xs text-smoke">
-                  Most customers buy a full set of four.
-                </p>
               </div>
+              <p className="mt-2 text-xs text-smoke">
+                {qty === SET_SIZE + 1
+                  ? "A set of four plus a full-size spare."
+                  : "Most customers buy a full set of four."}
+              </p>
             </div>
 
             {/* Fulfillment choice. Option two is the local upsell and sets the
-                same `install` flag the cart has always carried. */}
+                same `install` flag the cart has always carried. Both options
+                carry a date, because "when does it get here" is the question
+                that decides the sale. */}
             <fieldset className="mt-6">
               <legend className="label">Delivery</legend>
               <div className="grid gap-3">
@@ -289,10 +421,20 @@ export default function ProductPage({ kind = "tire" }) {
                     <span className="block font-display text-base uppercase tracking-wide">
                       Ship it to me
                     </span>
+                    <span className="mt-1 flex items-start gap-2 text-sm font-medium text-ink">
+                      <Truck
+                        size={16}
+                        aria-hidden
+                        className="mt-0.5 shrink-0 text-drop"
+                      />
+                      <span className="min-w-0">
+                        {shipsFree() ? "Ships free, arrives" : "Arrives"}{" "}
+                        {delivery.earliest}–{delivery.latest}
+                      </span>
+                    </span>
                     <span className="mt-1 block text-sm text-smoke">
-                      Delivered to your address anywhere in{" "}
-                      {BUSINESS.shipping.area}. Shipping and delivery time are
-                      shown at checkout.
+                      Leaves the warehouse {delivery.shipsOn}, delivered to your
+                      address anywhere in {BUSINESS.shipping.area}.
                     </span>
                   </span>
                 </label>
@@ -313,40 +455,112 @@ export default function ProductPage({ kind = "tire" }) {
                   />
                   <span className="min-w-0">
                     <span className="block font-display text-base uppercase tracking-wide">
-                      Ship free to the shop and we&apos;ll fit them (+
+                      Ship to the shop and we&apos;ll fit them (+
                       {money(product.installPrice)} per {unit})
+                    </span>
+                    <span className="mt-1 flex items-start gap-2 text-sm font-medium text-ink">
+                      <Store
+                        size={16}
+                        aria-hidden
+                        className="mt-0.5 shrink-0 text-drop"
+                      />
+                      <span className="min-w-0">
+                        Free to {delivery.storeName} by {delivery.toStore},
+                        fitted there
+                      </span>
                     </span>
                     <span className="mt-1 block text-sm text-smoke">
                       {isTire
-                        ? `Free delivery to ${BUSINESS.shop.name}, then mounting, balancing, new valve stems and disposal of your old tires.`
-                        : `Free delivery to ${BUSINESS.shop.name}, then mounting, balancing, hub-centric rings and TPMS transfer.`}{" "}
-                      South Florida only.
+                        ? "Mounting, balancing, new valve stems and disposal of your old tires."
+                        : "Mounting, balancing, hub-centric rings and TPMS transfer."}{" "}
+                      South Florida only —{" "}
+                      {BUSINESS.installArea.slice(0, 4).join(", ")} and nearby.
                     </span>
                   </span>
                 </label>
               </div>
             </fieldset>
 
-            {/* Totals */}
-            <dl className="mt-5 space-y-1.5 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-smoke">
-                  {qty} × {unit}s
-                </dt>
-                <dd className="font-medium">{money(unitsTotal)}</dd>
+            {/* Price breakdown. List, what we charge, what the manufacturer
+                sends back — spelled out, because a rebate a shopper does not
+                notice is a rebate that never influenced the sale. */}
+            <dl className="mt-6 space-y-1.5 text-sm">
+              {bill.instantSaving > 0 && (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-smoke">
+                    List price, {qty} {plural(qty)}
+                  </dt>
+                  <dd className="text-smoke line-through">
+                    {money(bill.list)}
+                  </dd>
+                </div>
+              )}
+              <div className="flex justify-between gap-4">
+                <dt className="text-smoke">Your price</dt>
+                <dd className="font-medium">{money(bill.price)}</dd>
               </div>
-              <div className="flex justify-between">
+              {bill.instantSaving > 0 && (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-smoke">Instant saving</dt>
+                  <dd className="font-medium text-drop">
+                    − {money(bill.instantSaving)}
+                  </dd>
+                </div>
+              )}
+              <div className="flex justify-between gap-4">
                 <dt className="text-smoke">Installation at the shop</dt>
                 <dd className="font-medium">
                   {install ? money(installTotal) : "Not added"}
                 </dd>
               </div>
-              <div className="flex justify-between border-t border-ink/10 pt-2 font-display text-lg uppercase">
+              <div className="flex justify-between gap-4 border-t border-ink/10 pt-2 font-display text-lg uppercase">
                 <dt>Estimated total</dt>
-                <dd>{money(unitsTotal + installTotal)}</dd>
+                <dd>{money(orderTotal)}</dd>
               </div>
+
+              {product.rebate && bill.rebate > 0 && (
+                <>
+                  <div className="flex justify-between gap-4 pt-1">
+                    <dt className="text-smoke">
+                      {product.rebate.brand} mail-in rebate
+                    </dt>
+                    <dd className="font-medium text-drop">
+                      − {money(bill.rebate)}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-4 font-display text-lg font-bold uppercase text-drop">
+                    <dt>After rebate</dt>
+                    <dd>{money(orderTotal - bill.rebate)}</dd>
+                  </div>
+                </>
+              )}
             </dl>
-            <p className="mt-1 text-xs text-smoke">
+
+            {product.rebate && shortOfSet > 0 && (
+              <button
+                type="button"
+                onClick={() => setQty(SET_SIZE)}
+                className="mt-3 flex w-full items-start gap-2.5 rounded-sm border border-amber bg-amber/10 p-3 text-left text-sm"
+              >
+                <BadgePercent
+                  size={16}
+                  aria-hidden
+                  className="mt-0.5 shrink-0 text-ink"
+                />
+                <span className="min-w-0">
+                  Add {shortOfSet} more to qualify for the{" "}
+                  {money(product.rebate.amount)} {product.rebate.brand} rebate.
+                </span>
+              </button>
+            )}
+
+            {product.rebate && (
+              <p className="mt-2 text-xs text-smoke">
+                {product.rebate.terms} Offer ends {product.rebate.expires}.
+              </p>
+            )}
+
+            <p className="mt-2 text-xs text-smoke">
               Taxes and shipping are calculated at checkout.
             </p>
 
@@ -365,8 +579,7 @@ export default function ProductPage({ kind = "tire" }) {
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-ink/15 bg-fog p-3 text-sm">
                   <span className="flex items-center gap-2 text-ink">
                     <Check size={16} aria-hidden className="text-drop" />
-                    Added {qty} {unit}
-                    {qty === 1 ? "" : "s"} to your cart.
+                    Added {qty} {plural(qty)} to your cart.
                   </span>
                   <Link to="/cart" className="btn-dark btn-sm">
                     View cart
@@ -374,6 +587,30 @@ export default function ProductPage({ kind = "tire" }) {
                 </div>
               )}
             </div>
+
+            {isTire && (
+              <div className="mt-3">
+                <button
+                  type="button"
+                  onClick={() => compare.toggle(product.slug)}
+                  aria-pressed={inCompare}
+                  disabled={compareLocked}
+                  className={`flex min-h-[44px] w-full items-center justify-center gap-2 rounded-sm border px-4 font-display text-base uppercase tracking-wide transition-colors ${
+                    inCompare
+                      ? "border-drop bg-drop/5 text-drop"
+                      : "border-ink/15 text-ink hover:border-ink disabled:opacity-50"
+                  }`}
+                >
+                  <Scale size={16} aria-hidden />
+                  {inCompare ? "In your comparison" : "Compare this tire"}
+                </button>
+                <p className="mt-1.5 text-xs text-smoke">
+                  {compareLocked
+                    ? `Your comparison is full at ${compare.max} tires — remove one to swap this in.`
+                    : `${compare.count} of ${compare.max} picked for side-by-side comparison.`}
+                </p>
+              </div>
+            )}
 
             <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-xs text-smoke">
               <span className="inline-flex items-center gap-1.5">
@@ -419,27 +656,89 @@ export default function ProductPage({ kind = "tire" }) {
         </div>
       </div>
 
+      {/* Performance ratings. Derived from published specs, and labelled as
+          such — claiming a road test we never ran would be a lie a shopper
+          could catch. */}
+      {ratings && (
+        <Section className="bg-bone">
+          <div className="grid gap-10 lg:grid-cols-2">
+            <div>
+              <h2 className="h2 text-3xl md:text-4xl">How it rates</h2>
+              <p className="lede mt-3 text-sm md:text-base">
+                These scores are calculated from this tire&apos;s own published
+                specifications — UTQG treadwear, traction and temperature
+                grades, speed rating, tread depth, load range, 3PMSF winter
+                certification and the mileage warranty — not from road tests,
+                which TireDrop does not run.
+              </p>
+              <p className="mt-3 text-sm text-smoke">
+                Where a grade genuinely does not exist for this tire, the axis
+                reads &ldquo;Not rated&rdquo; rather than guessing a number.
+                Winter tires carry no UTQG treadwear grade and commercial
+                light-truck tires are graded on a different scale.
+              </p>
+              <Link to="/tire-care" className="btn-outline btn-sm mt-5">
+                <Gauge size={16} aria-hidden />
+                What these grades mean
+              </Link>
+            </div>
+
+            <div className="card p-5 md:p-6">
+              <ul className="space-y-4">
+                {RATING_AXES.map((axis) => (
+                  <RatingBar
+                    key={axis.key}
+                    label={axis.label}
+                    value={ratings[axis.key]}
+                  />
+                ))}
+              </ul>
+            </div>
+          </div>
+        </Section>
+      )}
+
       {/* Specs + features */}
       <Section>
         <div className="grid gap-10 lg:grid-cols-2">
           <div>
             <h2 className="h2 text-3xl md:text-4xl">Specifications</h2>
-            <dl className="mt-5 divide-y divide-ink/10 border-y border-ink/10">
-              {Object.entries(product.specs).map(([key, val]) => (
-                <div key={key} className="flex justify-between gap-6 py-3">
-                  <dt className="text-sm text-smoke">{key}</dt>
-                  <dd className="text-right text-sm font-medium text-ink">
-                    {val}
-                  </dd>
-                </div>
-              ))}
-              <div className="flex justify-between gap-6 py-3">
-                <dt className="text-sm text-smoke">Warranty</dt>
-                <dd className="text-right text-sm font-medium text-ink">
-                  {product.warranty || "Manufacturer limited warranty"}
-                </dd>
-              </div>
-            </dl>
+            {/* The table scrolls inside this box rather than widening the
+                page, which is what a long spec value would otherwise do on a
+                360px phone. */}
+            <div className="mt-5 overflow-x-auto">
+              <table className="w-full border-collapse text-sm">
+                <caption className="sr-only">
+                  {name} {sizeLabel} specifications
+                </caption>
+                <tbody className="divide-y divide-ink/10 border-y border-ink/10">
+                  {Object.entries(product.specs).map(([key, val]) => (
+                    <tr key={key}>
+                      <th
+                        scope="row"
+                        className="py-3 pr-4 text-left align-top font-normal text-smoke"
+                      >
+                        {key}
+                      </th>
+                      <td className="py-3 text-right align-top font-medium text-ink">
+                        {val}
+                      </td>
+                    </tr>
+                  ))}
+                  <tr>
+                    <th
+                      scope="row"
+                      className="py-3 pr-4 text-left align-top font-normal text-smoke"
+                    >
+                      Warranty
+                    </th>
+                    <td className="py-3 text-right align-top font-medium text-ink">
+                      {product.warranty || "Manufacturer limited warranty"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div>
@@ -492,6 +791,31 @@ export default function ProductPage({ kind = "tire" }) {
           ))}
         </div>
       </Section>
+
+      {/* Sticky phone buy bar. It sits on top of the global MobileCallBar
+          (fixed, `--call-bar-h` tall) rather than over it, so both stay tappable. */}
+      {buyBoxGone && product.stock > 0 && (
+        <div className="fixed inset-x-0 bottom-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] z-30 border-t border-ink/10 bg-bone/95 backdrop-blur lg:hidden">
+          <div className="flex items-center gap-3 px-4 py-2.5">
+            <div className="min-w-0">
+              <p className="font-display text-xl leading-none">
+                {money(bill.price)}
+              </p>
+              <p className="mt-1 truncate text-[11px] text-smoke">
+                {qty} {plural(qty)} · {money(product.price)} each
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleAdd}
+              className="btn-primary btn-sm ml-auto shrink-0 min-h-[44px]"
+            >
+              <ShoppingCart size={16} aria-hidden />
+              Add to cart
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

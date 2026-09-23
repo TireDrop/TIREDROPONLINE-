@@ -1,14 +1,19 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   BadgeCheck,
+  BadgePercent,
+  Building2,
+  CalendarCheck,
   CircleDollarSign,
+  CloudSun,
+  Gauge,
   MapPin,
   Package,
   PackageCheck,
   Phone,
-  ShieldCheck,
+  Snowflake,
   Store,
   Truck,
   Wrench,
@@ -16,7 +21,10 @@ import {
 
 import { BUSINESS, TIRE_BRANDS } from "../data/business.js";
 import { MOBILE_SERVICES, SHOP_SERVICES } from "../data/services.js";
-import { TIRES } from "../data/products.js";
+import { TIRES, TIRE_CATEGORIES } from "../data/products.js";
+import { money } from "../context/CartContext.jsx";
+import { SET_SIZE, setPrice } from "../data/pricing.js";
+import ProductArt from "../components/shop/ProductArt.jsx";
 import ProductCard from "../components/shop/ProductCard.jsx";
 import SearchPanel from "../components/shop/SearchPanel.jsx";
 import { Seo, Section, SectionHead, Stars } from "../components/ui/index.jsx";
@@ -27,6 +35,23 @@ const yearsInBusiness = new Date().getFullYear() - BUSINESS.foundedYear;
 /* ---------------------------------- Hero --------------------------------- */
 
 function Hero() {
+  const navigate = useNavigate();
+
+  // The finder used to sit here with nothing wired to it, so a submitted
+  // search went nowhere. Shopping by vehicle or by sidewall size is the entry
+  // path on every competitor, so it hands straight off to the catalog using
+  // the same query keys the tire listing reads back.
+  const onSearch = (payload) => {
+    const fields =
+      payload.type === "vehicle"
+        ? { vy: payload.year, vmk: payload.make, vmd: payload.model }
+        : { w: payload.width, a: payload.aspect, d: payload.diameter };
+    const query = new URLSearchParams(
+      Object.entries(fields).filter(([, value]) => value),
+    );
+    navigate(`/tires?${query.toString()}`);
+  };
+
   return (
     <section className="relative overflow-hidden bg-ink text-bone">
       {/* Tread-pattern wash behind the headline. */}
@@ -43,7 +68,7 @@ function Hero() {
         className="pointer-events-none absolute -right-40 top-1/2 hidden h-[560px] w-[560px] -translate-y-1/2 rounded-full border-[72px] border-graphite lg:block"
       />
 
-      <div className="wrap relative grid gap-10 py-16 md:py-24 lg:grid-cols-[1.05fr_.95fr] lg:items-center">
+      <div className="wrap relative grid gap-9 py-12 md:py-16 lg:grid-cols-[.9fr_1.1fr] lg:items-center lg:gap-12">
         <div>
           <p className="eyebrow mb-4 flex items-center gap-2">
             <Truck size={16} aria-hidden />
@@ -55,14 +80,13 @@ function Hero() {
             <span className="block text-drop">We ship them to you.</span>
           </h1>
 
-          <p className="lede mt-5 max-w-xl text-bone/70">
-            {BUSINESS.name} is an online tire and wheel store shipping to any
-            address in {BUSINESS.shipping.area}. Pick your size, pick your
-            brand, and choose where it lands — your own door, or free to our
-            shop in South Florida where we'll fit them for you.
+          <p className="lede mt-4 max-w-lg text-bone/70">
+            An online tire and wheel store shipping to any address in{" "}
+            {BUSINESS.shipping.area} — or free to our South Florida shop, where
+            we fit them for you.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-7 flex flex-wrap gap-3">
             <Link to="/tires" className="btn-primary">
               Shop Tires
               <ArrowRight size={17} aria-hidden />
@@ -72,30 +96,21 @@ function Hero() {
             </Link>
           </div>
 
-          <ul className="mt-9 flex flex-wrap gap-x-7 gap-y-3 text-sm text-bone/65">
-            {[
-              { Icon: Truck, label: "Ships across the continental US" },
-              { Icon: Store, label: "Free ship-to-store in South Florida" },
-              {
-                Icon: ShieldCheck,
-                label: `${BUSINESS.poweredBy} since ${BUSINESS.foundedYear}`,
-              },
-            ].map(({ Icon, label }) => (
-              <li key={label} className="flex items-center gap-2">
-                <Icon size={16} aria-hidden className="text-amber" />
-                {label}
-              </li>
-            ))}
-          </ul>
+          <p className="mt-6 text-sm text-bone/55">
+            {BUSINESS.poweredBy} since {BUSINESS.foundedYear}.
+          </p>
         </div>
 
-        {/* Fitment search is the primary conversion path — keep it in the hero. */}
-        <div className="rounded-sm bg-bone p-5 text-ink shadow-lift md:p-7">
-          <h2 className="h3 mb-1">Find your fit</h2>
+        {/* The finder is the hero, not an accessory to it: it gets the wider
+            column, a ring that lifts it off the dark band, and enough weight
+            that nobody arriving on a phone can scroll past it. */}
+        <div className="rounded-sm bg-bone p-5 text-ink shadow-lift ring-4 ring-drop/25 md:p-7">
+          <p className="eyebrow mb-1.5">Start here</p>
+          <h2 className="h2 mb-1 text-3xl md:text-4xl">Find your fit</h2>
           <p className="mb-5 text-sm text-smoke">
-            Search by vehicle or by the size on your sidewall.
+            Shop by vehicle, or by the size stamped on your sidewall.
           </p>
-          <SearchPanel />
+          <SearchPanel onSearch={onSearch} />
         </div>
       </div>
     </section>

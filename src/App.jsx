@@ -4,6 +4,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import Header from "./components/layout/Header.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import MobileCallBar from "./components/layout/MobileCallBar.jsx";
+import CompareTray from "./components/shop/CompareTray.jsx";
 import { ScrollToTop } from "./components/ui/index.jsx";
 
 import HomePage from "./pages/HomePage.jsx";
@@ -18,6 +19,7 @@ import CommercialTiresPage from "./pages/shop/CommercialTiresPage.jsx";
 import CartPage from "./pages/shop/CartPage.jsx";
 import CheckoutPage from "./pages/shop/CheckoutPage.jsx";
 import CouponsPage from "./pages/shop/CouponsPage.jsx";
+import ComparePage from "./pages/shop/ComparePage.jsx";
 
 // Services
 import MobileServicePage from "./pages/services/MobileServicePage.jsx";
@@ -58,6 +60,7 @@ export default function App() {
           <Route path="/tires/:slug" element={<ProductPage kind="tire" />} />
           <Route path="/wheels" element={<WheelsPage />} />
           <Route path="/wheels/:slug" element={<ProductPage kind="wheel" />} />
+          <Route path="/compare" element={<ComparePage />} />
           <Route path="/commercial-tires" element={<CommercialTiresPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
@@ -82,7 +85,10 @@ export default function App() {
           {/* Legal — one component, three documents */}
           <Route path="/terms" element={<LegalPage doc="terms" />} />
           <Route path="/privacy" element={<LegalPage doc="privacy" />} />
-          <Route path="/accessibility" element={<LegalPage doc="accessibility" />} />
+          <Route
+            path="/accessibility"
+            element={<LegalPage doc="accessibility" />}
+          />
 
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
@@ -91,7 +97,11 @@ export default function App() {
       <Footer />
 
       {/* Sits above the fixed call bar on phones. */}
-      <div aria-hidden className="h-[68px] lg:hidden" />
+      <div
+        aria-hidden
+        className="h-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] lg:hidden"
+      />
+      <CompareTray />
       <MobileCallBar />
     </div>
   );
