@@ -118,6 +118,9 @@ const TOPICS = [
   {
     id: "tire-pressure",
     nav: "Tire Pressure",
+    category: "Maintenance",
+    summary:
+      "The cheapest thing you can get right, and the one that drifts fastest. Where the real PSI number comes from, and why the sidewall is not it.",
     icon: CircleGauge,
     title: "Tire Pressure",
     why: "Pressure is the cheapest thing on this page and the one that changes the most. An underinflated tire flexes more, runs hotter and wears its shoulders off — and in Florida heat, hot plus low is how sidewalls fail on I-595. Overinflated is no better: less rubber on the road, a harsher ride and a strip of wear straight down the center. Correct pressure is also the single easiest way to get the fuel economy the car was designed to have.",
@@ -140,6 +143,9 @@ const TOPICS = [
   {
     id: "tire-rotation",
     nav: "Tire Rotation",
+    category: "Maintenance",
+    summary:
+      "Why the front tires die first, how often to move them around, and the patterns that differ by drivetrain.",
     icon: Repeat,
     title: "Tire Rotation",
     why: "Your tires do not wear evenly, because they are not doing the same job. On a front-wheel-drive car the fronts steer, brake hardest and carry the engine, so they can wear out roughly twice as fast as the rears. Rotation moves that wear around the vehicle so all four go down together. Skip it and you buy tires two at a time, more often, with a mismatched set in between — and on some all-wheel-drive systems, a big tread-depth mismatch is hard on the drivetrain itself.",
@@ -161,6 +167,9 @@ const TOPICS = [
   {
     id: "tire-balancing",
     nav: "Tire Balancing",
+    category: "Diagnosing",
+    summary:
+      "What that highway-speed shimmy is actually doing to your suspension, and when a rebalance is the fix.",
     icon: Disc3,
     title: "Tire Balancing",
     why: "A wheel and tire assembly is never perfectly even, and at highway speed a half-ounce of imbalance turns into a vibration you can feel in the steering wheel or the seat. That shake is not just annoying — it hammers wheel bearings, tie rod ends and shocks, and it scrubs cupped patches into the tread that never go away. Balancing spins the assembly on a calibrated machine and corrects the heavy spot with small weights.",
@@ -182,6 +191,9 @@ const TOPICS = [
   {
     id: "tread-depth",
     nav: "Tread Depth",
+    category: "Safety",
+    summary:
+      "The measurement that decides when a tire is finished. Penny test, quarter test and wear bars, explained.",
     icon: Ruler,
     title: "Tread Depth",
     why: "Tread exists to move water out from under the tire. On dry pavement worn tires can even feel fine — right up to the first hard afternoon storm, when there is nowhere for the water to go and the tire starts floating instead of gripping. Stopping distance in the wet grows dramatically as tread disappears. This is the measurement that decides when a tire is finished, no matter how good the sidewall looks.",
@@ -204,6 +216,9 @@ const TOPICS = [
   {
     id: "alignment",
     nav: "Alignment",
+    category: "Diagnosing",
+    summary:
+      "How a single pothole quietly eats a shoulder off a new set, and the symptoms worth acting on.",
     icon: Compass,
     title: "Wheel Alignment",
     why: "Alignment is the set of angles your wheels sit at relative to the road and to each other. Knock those angles out — a curb, a pothole on Oakland Park, a worn suspension bushing — and the tire gets dragged sideways a little on every rotation. That quietly grinds a shoulder off a brand-new set in a few thousand miles. It also shows up as a car that pulls, or a steering wheel that sits crooked while you drive straight.",
@@ -225,6 +240,9 @@ const TOPICS = [
   {
     id: "tpms",
     nav: "TPMS",
+    category: "Diagnosing",
+    summary:
+      "Steady light versus flashing light — two different problems on the same dashboard symbol.",
     icon: Radio,
     title: "TPMS (Tire Pressure Monitoring)",
     why: "Every light-duty vehicle sold in the US since the 2008 model year has a tire pressure monitoring system. Most use a sensor inside each wheel that radios pressure to the car. Those sensors have batteries sealed inside them, and after roughly five to ten years they die — which is why a lot of TPMS lights have nothing to do with your tires. Knowing which light you are looking at matters: a steady light means low pressure, while a light that flashes at startup and then stays on usually means the system itself has a fault.",
@@ -246,6 +264,9 @@ const TOPICS = [
   {
     id: "tire-replacement",
     nav: "Tire Replacement",
+    category: "Buying",
+    summary:
+      "Worn out, too old, or damaged beyond repair. How to tell which one you have, and what to replace it with.",
     icon: ShoppingCart,
     title: "Tire Replacement",
     why: "Tires get replaced for two reasons: they are worn out, or they are too old. Tread depth covers the first. The second catches people off guard — rubber ages even parked, and South Florida sun and heat speed that up. A six-year-old tire with plenty of tread can still be hard, cracked and unreliable. Damage is the third path: a sidewall puncture, a bulge, or a tear cannot be repaired safely, no matter what anyone tells you. Only punctures in the tread area, within a limited size, belong on the repair table.",
@@ -266,11 +287,52 @@ const TOPICS = [
   },
 ];
 
+const CATEGORIES = ["Maintenance", "Safety", "Diagnosing", "Buying"];
+
+// Topics the guide library is being extended with. Listed so the structure is
+// visible now; each one becomes a full entry above as it is written.
+const UPCOMING = [
+  "Reading a tire sidewall, number by number",
+  "All-season, summer and all-terrain: what the labels actually promise",
+  "Load index and speed rating, and when they matter",
+  "Wet braking, hydroplaning and rainy-season driving",
+  "Run-flats: what they cost you and what they buy you",
+  "Plus-sizing wheels without wrecking the ride",
+  "Torque specs, and why the tech uses a wrench instead of a gun",
+  "What to check the week after a new set goes on",
+  "Storing a seasonal set so it is still good next year",
+  "Towing and payload: choosing a truck tire honestly",
+];
+
+function GuideCard({ topic }) {
+  const Icon = topic.icon;
+  return (
+    <li className="card-hover flex flex-col p-6">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <Icon size={24} aria-hidden className="text-drop" />
+        <Badge tone="soft">{topic.category}</Badge>
+      </div>
+      <h3 className="h3">{topic.title}</h3>
+      <p className="mt-2 flex-1 text-sm leading-relaxed text-smoke">
+        {topic.summary}
+      </p>
+      <a
+        href={`#${topic.id}`}
+        className="mt-5 inline-flex min-h-[32px] items-center gap-1.5 font-display text-sm uppercase tracking-wide text-drop hover:text-dive"
+      >
+        Read the guide
+        <ArrowRight size={15} aria-hidden />
+      </a>
+    </li>
+  );
+}
+
 function TopicSection({ topic }) {
   const Icon = topic.icon;
 
   return (
     <article id={topic.id} className="scroll-mt-24 border-t border-ink/10 pt-12">
+      <p className="eyebrow mb-2">{topic.category}</p>
       <div className="mb-5 flex items-center gap-3">
         <Icon size={28} aria-hidden className="text-drop" />
         <h2 className="h2">{topic.title}</h2>
@@ -306,14 +368,24 @@ function TopicSection({ topic }) {
             <p className="text-sm leading-relaxed text-ink">{topic.cadence}</p>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-3">
-            {topic.links.map((link) => (
-              <Link key={link.to} to={link.to} className="btn-outline btn-sm">
-                {link.label}
-                <ArrowRight size={15} aria-hidden />
-              </Link>
-            ))}
+          <div className="mt-4">
+            <p className="mb-2 font-display text-xs uppercase tracking-[0.15em] text-smoke">
+              Rather we did it? (South Florida)
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {topic.links.map((link) => (
+                <Link key={link.to} to={link.to} className="btn-outline btn-sm">
+                  {link.label}
+                  <ArrowRight size={15} aria-hidden />
+                </Link>
+              ))}
+            </div>
           </div>
+
+          <p className="mt-4 text-xs leading-relaxed text-smoke">
+            Anywhere else in {BUSINESS.shipping.area}, buy the tires here and
+            have your own installer fit them.
+          </p>
         </div>
       </div>
     </article>
@@ -324,22 +396,27 @@ export default function TireCarePage() {
   return (
     <>
       <Seo
-        title="Tire Care Tips"
-        description="A plain-English guide to tire pressure, rotation, balancing, tread depth, alignment, TPMS and replacement — including the penny test and why the door placard beats the sidewall number."
+        title="Tire Care Guides"
+        description="Plain-English tire guides from a shop that has been fitting tires since 2007 — pressure, rotation, balancing, tread depth, alignment, TPMS and replacement, including the penny test and why the door placard beats the sidewall number."
       />
 
       <PageHero
-        eyebrow="Tire Care Tips"
-        title="Make your tires last. It is not complicated."
-        lede="Seven things decide whether a set of tires goes 30,000 miles or 60,000. Here is what each one does, what to check, and how often — no upsell attached."
+        eyebrow="Tire Care Guides"
+        title="Everything we end up explaining anyway"
+        lede={`The questions we answer at the counter every week, written out properly. No upsell attached — read it, do it yourself, or buy the tires and let someone else fit them.`}
       >
-        <a href={BUSINESS.phoneHref} className="btn-ghost-light">
-          <Phone size={18} aria-hidden />
-          Ask us: {BUSINESS.phone}
-        </a>
+        <div className="flex flex-wrap gap-3">
+          <a href="#guides" className="btn-primary">
+            Browse the guides
+          </a>
+          <a href={BUSINESS.phoneHref} className="btn-ghost-light">
+            <Phone size={18} aria-hidden />
+            Ask us: {BUSINESS.phone}
+          </a>
+        </div>
       </PageHero>
 
-      <Breadcrumbs trail={[{ label: "Tire Care Tips" }]} />
+      <Breadcrumbs trail={[{ label: "Tire Care Guides" }]} />
 
       {/* ---------- Jump nav ---------- */}
       <nav aria-label="Tire care topics" className="border-b border-ink/10 bg-fog">
@@ -362,11 +439,42 @@ export default function TireCarePage() {
         </div>
       </nav>
 
-      <Section className="bg-bone">
+      {/* ---------- Guide index ---------- */}
+      <Section className="bg-bone" id="guides">
+        <SectionHead
+          eyebrow="The Library"
+          title="Start with the one that brought you here"
+          lede="Every guide stands on its own. They are grouped by what you are trying to do: keep a set alive, stay safe on it, work out what is wrong, or buy the next one."
+        />
+
+        {CATEGORIES.map((category) => {
+          const inCategory = TOPICS.filter((t) => t.category === category);
+          if (inCategory.length === 0) return null;
+          return (
+            <div key={category} className="mb-12 last:mb-0">
+              <h3 className="mb-5 border-b border-ink/10 pb-3 font-display text-base uppercase tracking-[0.12em] text-ink">
+                {category}
+                <span className="ml-2 text-sm text-smoke">
+                  {inCategory.length}{" "}
+                  {inCategory.length === 1 ? "guide" : "guides"}
+                </span>
+              </h3>
+              <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {inCategory.map((topic) => (
+                  <GuideCard key={topic.id} topic={topic} />
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </Section>
+
+      {/* ---------- Five-minute check ---------- */}
+      <Section className="bg-fog">
         <SectionHead
           eyebrow="Start Here"
           title="The five-minute monthly check"
-          lede="If you only ever do one thing from this page, do this: once a month, cold tires, walk around the car."
+          lede="If you only ever do one thing from this library, do this: once a month, cold tires, walk around the car."
         />
 
         <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -387,33 +495,66 @@ export default function TireCarePage() {
             </li>
           ))}
         </ol>
+      </Section>
 
-        <div className="mt-14 space-y-12">
+      {/* ---------- Full guides ---------- */}
+      <Section className="bg-bone">
+        <div className="space-y-12">
           {TOPICS.map((topic) => (
             <TopicSection key={topic.id} topic={topic} />
           ))}
         </div>
       </Section>
 
+      {/* ---------- Being written ---------- */}
+      <Section className="bg-fog">
+        <SectionHead
+          eyebrow="In Progress"
+          title="Guides we are still writing"
+          lede="This library grows. These are the next ones on the bench — if one of them is the answer you need today, call and we will just tell you."
+        />
+
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {UPCOMING.map((title) => (
+            <li
+              key={title}
+              className="card flex items-start gap-2.5 px-5 py-4 text-sm text-smoke"
+            >
+              <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 bg-ink/20" />
+              {title}
+            </li>
+          ))}
+        </ul>
+
+        <p className="mt-6 text-sm text-smoke">
+          Something you want covered that is not on either list?{" "}
+          <Link to="/contact" className="underline hover:text-drop">
+            Tell us
+          </Link>{" "}
+          — the questions people actually ask are where these come from.
+        </p>
+      </Section>
+
       <section className="bg-ink py-14 text-bone md:py-20">
         <div className="wrap grid gap-8 md:grid-cols-[1.2fr_1fr] md:items-center">
           <div>
-            <p className="eyebrow mb-2">Rather not do it yourself?</p>
-            <h2 className="h2">We will check all of it in your driveway</h2>
+            <p className="eyebrow mb-2">{BUSINESS.tagline}</p>
+            <h2 className="h2">Read it, then buy the right ones</h2>
             <p className="lede mt-4 max-w-xl text-bone/70">
-              Pressure, tread, wear pattern, TPMS — the van can handle the
-              inspection and most of the fixes right where the car is parked.
-              Alignments and suspension work happen at the{" "}
-              {BUSINESS.address.city} shop.
+              Shipped to your door anywhere in {BUSINESS.shipping.area}, or free
+              to the {BUSINESS.shop.city} shop if you would rather we fit them.
+              Not sure which size or rating you need? Call and read us the door
+              placard.
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row md:flex-col">
-            <Link to="/schedule" className="btn-primary">
-              Book a Visit
+            <Link to="/tires" className="btn-primary">
+              Shop Tires
             </Link>
-            <Link to="/mobile-service" className="btn-ghost-light">
-              How mobile service works
-            </Link>
+            <a href={BUSINESS.phoneHref} className="btn-ghost-light">
+              <Phone size={18} aria-hidden />
+              {BUSINESS.phone}
+            </a>
           </div>
         </div>
       </section>

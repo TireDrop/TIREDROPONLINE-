@@ -81,7 +81,7 @@ function makeReference(date = new Date()) {
   for (let i = 0; i < 4; i += 1) {
     tail += alphabet[Math.floor(Math.random() * alphabet.length)];
   }
-  return `EMT-${stamp}-${tail}`;
+  return `TD-${stamp}-${tail}`;
 }
 
 function digitsOnly(value) {
@@ -249,13 +249,13 @@ function BookingSummary({ form }) {
       <SummaryRow term="Where">
         {form.locationType === "mobile" ? (
           <>
-            We come to you — {form.address}, {form.city}, {BUSINESS.address.state} {form.zip}
+            We come to you — {form.address}, {form.city}, {BUSINESS.shop.state} {form.zip}
             {form.parkingNotes && (
               <span className="block text-smoke">Parking: {form.parkingNotes}</span>
             )}
           </>
         ) : (
-          <>At the shop — {BUSINESS.address.full}</>
+          <>At the shop — {BUSINESS.shop.full}</>
         )}
       </SummaryRow>
       <SummaryRow term="When">
@@ -374,7 +374,7 @@ export default function SchedulePage() {
       <>
         <Seo
           title="Appointment Requested"
-          description="Your Extreme Mobile Tires appointment request is in. Here is your reference number and what happens next."
+          description={`Your ${BUSINESS.parent} appointment request is in. Here is your reference number and what happens next.`}
         />
         <PageHero
           eyebrow="You're on the schedule"
@@ -463,13 +463,13 @@ export default function SchedulePage() {
     <>
       <Seo
         title="Schedule Service"
-        description="Book mobile tire service at your home, office or jobsite, or an in-shop appointment in Sunrise, FL. Pick your service, vehicle, location and arrival window in about two minutes."
+        description={`Book an install for the tires you bought on ${BUSINESS.name}, or any service at the ${BUSINESS.shop.city}, FL shop. Choose mobile or in-shop, pick your vehicle and arrival window in about two minutes.`}
       />
 
       <PageHero
         eyebrow="Schedule"
         title="Book your appointment"
-        lede="Five quick steps. Pick the service, tell us about the vehicle, and choose where and when. A dispatcher confirms your two-hour window by phone."
+        lede={`Five quick steps. Pick the service, tell us about the vehicle, and choose where and when. Booking the fitting for tires you ordered on ${BUSINESS.name}? Choose Tire Installation — a dispatcher confirms your two-hour window by phone.`}
       >
         <a href={BUSINESS.phoneHref} className="btn-ghost-light btn-sm">
           <Phone size={16} aria-hidden />
@@ -497,8 +497,10 @@ export default function SchedulePage() {
                   What do you need done?
                 </h2>
                 <p className="mt-2 text-sm text-smoke">
-                  Prices below are starting points. We confirm the exact total for
-                  your vehicle before any work begins.
+                  Already bought tires on {BUSINESS.name}? Tire Installation is the
+                  one you want — whether they are on their way to the shop or
+                  already sitting in your garage. Prices below are starting points;
+                  we confirm the exact total for your vehicle before work begins.
                 </p>
 
                 <fieldset className="mt-6">
@@ -665,8 +667,8 @@ export default function SchedulePage() {
                           We come to you
                         </span>
                         <span className="mt-1 block text-xs text-smoke">
-                          Home, office or jobsite anywhere in our Broward service
-                          area.
+                          Home, office or jobsite anywhere in our South Florida
+                          install area.
                         </span>
                       </span>
                     </label>
@@ -694,8 +696,8 @@ export default function SchedulePage() {
                           I'll come to the shop
                         </span>
                         <span className="mt-1 block text-xs text-smoke">
-                          {BUSINESS.address.city}, {BUSINESS.address.state} — full
-                          bay equipment.
+                          {BUSINESS.shop.city}, {BUSINESS.shop.state} — your
+                          ship-to-store order and full bay equipment.
                         </span>
                       </span>
                     </label>
@@ -720,7 +722,7 @@ export default function SchedulePage() {
                       id="city"
                       label="City"
                       autoComplete="address-level2"
-                      placeholder={BUSINESS.serviceArea[0]}
+                      placeholder={BUSINESS.installArea[0]}
                       value={form.city}
                       onChange={update("city")}
                       error={errors.city}
@@ -730,7 +732,7 @@ export default function SchedulePage() {
                       label="ZIP code"
                       inputMode="numeric"
                       autoComplete="postal-code"
-                      placeholder={BUSINESS.address.zip}
+                      placeholder={BUSINESS.shop.zip}
                       value={form.zip}
                       onChange={update("zip")}
                       error={errors.zip}
@@ -757,9 +759,9 @@ export default function SchedulePage() {
                     </div>
                     <div className="sm:col-span-2 rounded-sm bg-fog p-4 text-xs leading-relaxed text-smoke">
                       <span className="font-display uppercase tracking-wide text-ink">
-                        Service area:
+                        Mobile install area:
                       </span>{" "}
-                      {BUSINESS.serviceArea.join(", ")}. Outside these cities? Book
+                      {BUSINESS.installArea.join(", ")}. Outside these cities? Book
                       anyway and call {BUSINESS.phone} — we will tell you straight
                       whether we can reach you.
                     </div>
@@ -768,10 +770,10 @@ export default function SchedulePage() {
                   <div className="mt-6 rounded-sm border border-ink/10 bg-fog p-5">
                     <p className="label">Shop address</p>
                     <address className="not-italic font-display text-lg uppercase tracking-wide text-ink">
-                      {BUSINESS.address.street}
+                      {BUSINESS.shop.street}
                       <br />
-                      {BUSINESS.address.city}, {BUSINESS.address.state}{" "}
-                      {BUSINESS.address.zip}
+                      {BUSINESS.shop.city}, {BUSINESS.shop.state}{" "}
+                      {BUSINESS.shop.zip}
                     </address>
                     <a
                       href={BUSINESS.mapsHref}
@@ -937,7 +939,7 @@ export default function SchedulePage() {
                       value={form.notes}
                       onChange={(e) => update("notes")(e.target.value)}
                       className="field"
-                      placeholder="Locking lug nuts, aftermarket wheels, spare is already on, noise you want us to listen for..."
+                      placeholder="TireDrop order number, locking lug nuts, aftermarket wheels, spare is already on, noise you want us to listen for..."
                     />
                   </div>
                 </div>

@@ -47,11 +47,11 @@ const FITMENT_STEPS = [
   },
   {
     title: "4. Center bore",
-    body: "The wheel's center hole should sit on the vehicle's hub. When the wheel bore is larger, hub-centric rings fill the gap — we include them with every install.",
+    body: "The wheel's center hole should sit on the vehicle's hub. When the wheel bore is larger, hub-centric rings fill the gap — they ship with the wheels.",
   },
   {
     title: "5. Brake clearance",
-    body: "Big factory calipers need spoke clearance. We check this before ordering so nothing comes off the truck that will not turn.",
+    body: "Big factory calipers need spoke clearance. We check this before your order is released so nothing ships that will not turn.",
   },
   {
     title: "6. Load rating",
@@ -185,12 +185,12 @@ export default function WheelsPage() {
       <>
         <Seo
           title="Wheel Fitment Guidance"
-          description="Bolt pattern, offset, center bore and load rating explained — how Extreme Mobile Tires spec wheels that actually fit your vehicle."
+          description="Bolt pattern, offset, center bore and load rating explained — how TireDrop specs wheels that actually fit your vehicle before they ship."
         />
         <PageHero
           eyebrow="Wheels"
           title="Fitment Guidance"
-          lede="Six numbers decide whether a wheel bolts on and clears everything. Here is what each one means, and what we check before anything is ordered."
+          lede="Six numbers decide whether a wheel bolts on and clears everything. Here is what each one means, and what we check before anything ships."
         />
         <Breadcrumbs
           trail={[{ label: "Wheels", to: "/wheels" }, { label: "Fitment" }]}
@@ -199,7 +199,7 @@ export default function WheelsPage() {
           <SectionHead
             eyebrow="Get it right the first time"
             title="What we check on every wheel order"
-            lede="Bring us the year, make, model and trim — plus a photo of the back of your current wheel if you have aftermarket already."
+            lede="Send us the year, make, model and trim — plus a photo of the back of your current wheel if you are already running aftermarket."
             action={
               <Link to="/wheels" className="btn-outline btn-sm">
                 Shop all wheels
@@ -223,7 +223,8 @@ export default function WheelsPage() {
               <h2 className="h3">Not sure what fits?</h2>
               <p className="mt-1 text-sm text-smoke">
                 Call {BUSINESS.phone} with your vehicle details and we will spec
-                a package — wheels, tires and mobile installation in one visit.
+                the package — wheels and tires together, shipped to you or free
+                to our South Florida shop for fitting.
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-3">
@@ -231,11 +232,8 @@ export default function WheelsPage() {
                 <Phone size={16} aria-hidden />
                 {BUSINESS.phone}
               </a>
-              <Link
-                to="/services/wheel-installation"
-                className="btn-outline btn-sm"
-              >
-                Wheel installation
+              <Link to="/shipping" className="btn-outline btn-sm">
+                How shipping works
               </Link>
             </div>
           </div>
@@ -248,12 +246,12 @@ export default function WheelsPage() {
     <>
       <Seo
         title="Shop Wheels"
-        description="Alloy, forged, off-road and truck wheels from Enkei, Method, Fuel, Vossen and more — mounted, balanced and fitted at your home or office."
+        description="Alloy, forged, off-road and truck wheels from Enkei, Method, Fuel, Vossen and more, shipped anywhere in the continental US or free to our South Florida shop."
       />
       <PageHero
         eyebrow="Wheels"
         title="Shop Wheels"
-        lede="Cast, flow-formed and forged wheels in the sizes Broward drivers actually run. Mobile wheel installation is $35 per wheel and includes hub-centric rings."
+        lede="Cast, flow-formed and forged wheels, fitment-checked before they ship. Send them to your address anywhere in the continental US, or free to our South Florida shop where we fit them for you."
       />
       <Breadcrumbs trail={[{ label: "Wheels" }]} />
 
@@ -271,8 +269,8 @@ export default function WheelsPage() {
               </p>
               <p className="mt-1 text-sm text-smoke">
                 Wheel fitment comes down to bolt pattern, offset and brake
-                clearance. Call us and we will confirm the package before you
-                order — see our{" "}
+                clearance. Call us and we will confirm the package before
+                anything ships — see our{" "}
                 <Link to="/wheels?view=fitment" className="text-drop underline">
                   fitment guidance
                 </Link>
@@ -356,7 +354,7 @@ export default function WheelsPage() {
               <EmptyState
                 icon={SearchX}
                 title="No wheels match those filters"
-                lede="We stock far more than we list. Tell us the look you want and your vehicle, and we will source the right bolt pattern and offset."
+                lede="The distributor catalog runs far deeper than this page. Tell us the look you want and your vehicle, and we will source the right bolt pattern and offset."
                 action={
                   <div className="flex flex-wrap justify-center gap-3">
                     <Link to="/wheels" className="btn-primary btn-sm">
@@ -389,13 +387,14 @@ export default function WheelsPage() {
                 <div>
                   <h2 className="h3">Wheel and tire packages</h2>
                   <p className="mt-1 text-sm text-smoke">
-                    Buy the wheels and tires together and we mount, balance and
-                    fit them at your place in one appointment.
+                    Buy the wheels and tires together and they ship as one
+                    order. In South Florida, send it free to the shop and we
+                    mount, balance and fit the whole package.
                   </p>
                 </div>
               </div>
-              <Link to="/mobile-service" className="btn-dark shrink-0">
-                Book mobile service
+              <Link to="/install" className="btn-dark shrink-0">
+                Ship to store &amp; install
               </Link>
             </div>
           </div>

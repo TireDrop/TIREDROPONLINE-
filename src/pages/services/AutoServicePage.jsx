@@ -6,6 +6,7 @@ import {
   MapPin,
   Phone,
   Stethoscope,
+  Store,
   Truck,
   Warehouse,
 } from "lucide-react";
@@ -18,10 +19,10 @@ import { SERVICES } from "../../data/services.js";
 const CATEGORY_ORDER = ["Tires", "Wheels", "Maintenance", "Repair", "Custom"];
 
 const CATEGORY_COPY = {
-  Tires: "Everything that happens between your wheel and the road. All of it mobile.",
-  Wheels: "Fitment, mounting and balancing for new wheel packages.",
-  Maintenance: "Routine work that keeps the miles cheap — done in your own parking spot.",
-  Repair: "Bay work at the Sunrise shop, where the lifts and alignment rack live.",
+  Tires: "Fitting the set you ordered, and everything that happens between your wheel and the road afterwards.",
+  Wheels: "Fitment, mounting and balancing for the wheel package you bought.",
+  Maintenance: "Routine work that keeps the miles cheap — in the bay or in your own parking spot.",
+  Repair: "Bay work at the Sunrise shop, where the lifts and the alignment rack live.",
   Custom: "Lift and leveling packages built around the tire and wheel setup you want.",
 };
 
@@ -179,37 +180,52 @@ export default function AutoServicePage() {
   return (
     <>
       <Seo
-        title="Auto Services in Sunrise, FL"
-        description="Tires, wheels, brakes, alignment, suspension, oil changes, TPMS and diagnostics from Extreme Mobile Tires. See which services our van brings to you and which happen at the Sunrise shop."
+        title={`Auto Services in ${BUSINESS.shop.city}, FL`}
+        description={`${BUSINESS.parent} in ${BUSINESS.shop.city} handles brakes, alignment, suspension, oil changes, TPMS and diagnostics alongside fitting the tires you bought on ${BUSINESS.name}. See what the van brings to you and what happens in the bay.`}
       />
 
       <PageHero
-        eyebrow="Auto Service"
-        title="Every service we offer, in one place"
-        lede={`Tire and maintenance work travels to you — ${mobileCount} of our services run straight out of the van. Brakes, alignment, suspension and lift kits need a lift and a rack, so those happen at the Sunrise shop.`}
+        eyebrow={`Local service — ${BUSINESS.shop.city}, FL`}
+        title="What the shop does besides fit your tires"
+        lede={`${BUSINESS.parent} has been working on cars in ${BUSINESS.shop.city} since ${BUSINESS.foundedYear}. ${mobileCount} of these services travel to you in a van; brakes, alignment, suspension and lift kits need a lift and a rack, so those happen in the bay.`}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link to="/schedule" className="btn-primary">
             Schedule Service
             <ArrowRight size={18} aria-hidden />
           </Link>
-          <Link to="/mobile-service" className="btn-ghost-light">
-            <Truck size={18} aria-hidden />
-            How mobile service works
+          <Link to="/install" className="btn-ghost-light">
+            <Store size={18} aria-hidden />
+            Ship to store &amp; install
           </Link>
         </div>
       </PageHero>
+
+      {/* ---------- Local-only notice ---------- */}
+      <div className="border-b border-ink/10 bg-sky">
+        <div className="wrap flex flex-wrap items-center gap-3 py-4 text-sm">
+          <MapPin size={18} aria-hidden className="text-drop" />
+          <p className="text-smoke">
+            <span className="font-display uppercase tracking-wide text-ink">
+              For local customers.
+            </span>{" "}
+            {BUSINESS.name} ships tires to {BUSINESS.shipping.area}. Everything on
+            this page happens in South Florida — at the {BUSINESS.shop.city} shop
+            or in your driveway.
+          </p>
+        </div>
+      </div>
 
       {/* ---------- Legend ---------- */}
       <div className="border-b border-ink/10 bg-bone">
         <div className="wrap flex flex-wrap items-center gap-x-6 gap-y-2 py-4 text-xs text-smoke">
           <span className="flex items-center gap-2">
             <Badge tone="drop">Mobile</Badge>
-            We come to your home, office or jobsite
+            The van comes to your home, office or jobsite
           </span>
           <span className="flex items-center gap-2">
             <Badge tone="soft">In-Shop</Badge>
-            Performed at {BUSINESS.address.street}, {BUSINESS.address.city}
+            Performed at {BUSINESS.shop.street}, {BUSINESS.shop.city}
           </span>
         </div>
       </div>
@@ -254,12 +270,11 @@ export default function AutoServicePage() {
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="card p-6">
             <Warehouse size={22} aria-hidden className="text-drop" />
-            <h3 className="h3 mt-4">The Sunrise shop</h3>
+            <h3 className="h3 mt-4">{BUSINESS.shop.name}</h3>
             <address className="mt-2 not-italic text-sm leading-relaxed text-smoke">
-              {BUSINESS.address.street}
+              {BUSINESS.shop.street}
               <br />
-              {BUSINESS.address.city}, {BUSINESS.address.state}{" "}
-              {BUSINESS.address.zip}
+              {BUSINESS.shop.city}, {BUSINESS.shop.state} {BUSINESS.shop.zip}
             </address>
             <a
               href={BUSINESS.mapsHref}
@@ -295,7 +310,8 @@ export default function AutoServicePage() {
             <h3 className="h3 mt-4">Book it now</h3>
             <p className="mt-2 flex-1 text-sm leading-relaxed text-smoke">
               Pick your service, your vehicle and your window online in about two
-              minutes — or call and talk it through with a dispatcher.
+              minutes — or call and talk it through with a dispatcher. Booking a
+              fitting for tires on their way here? Say so in the notes.
             </p>
             <div className="mt-6 flex flex-col gap-3">
               <Link to="/schedule" className="btn-primary btn-sm">
@@ -308,6 +324,21 @@ export default function AutoServicePage() {
               </a>
             </div>
           </div>
+        </div>
+
+        <div className="card mt-6 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm leading-relaxed text-smoke">
+            <span className="font-display text-base uppercase tracking-wide text-ink">
+              Buying tires on {BUSINESS.name}?
+            </span>{" "}
+            Choose free ship-to-store at checkout and they land here on the rack
+            with your name on them — then book the fitting around your week
+            instead of around a delivery.
+          </p>
+          <Link to="/mobile-service" className="btn-dark btn-sm shrink-0">
+            <Truck size={16} aria-hidden />
+            Mobile install
+          </Link>
         </div>
       </Section>
     </>

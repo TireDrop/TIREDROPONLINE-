@@ -30,14 +30,14 @@ function NotFoundPanel() {
     <>
       <Seo
         title="Service Not Found"
-        description="That service page does not exist. Browse every tire, wheel, maintenance and repair service Extreme Mobile Tires offers in Sunrise, FL."
+        description={`That service page does not exist. Browse every tire, wheel, maintenance and repair service ${BUSINESS.parent} offers in ${BUSINESS.shop.city}, FL.`}
       />
       <Breadcrumbs trail={[{ label: "Auto Service", to: "/auto-service" }, { label: "Not found" }]} />
       <Section className="bg-fog">
         <EmptyState
           icon={SearchX}
           title="We could not find that service"
-          lede="The link may be out of date. Everything we do — mobile and in-shop — is listed on the auto service page."
+          lede="The link may be out of date. Every local service — van and bay alike — is listed on the auto service page."
           action={
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link to="/auto-service" className="btn-primary btn-sm">
@@ -69,11 +69,11 @@ export default function ServiceDetailPage() {
   return (
     <>
       <Seo
-        title={`${service.name} in Sunrise & Broward County`}
+        title={`${service.name} in ${BUSINESS.shop.city} & Broward County`}
         description={`${service.blurb} From $${service.priceFrom} ${service.priceUnit}. ${
           service.mobile
-            ? "Performed at your home, office or jobsite by Extreme Mobile Tires."
-            : "Performed at the Extreme Mobile Tires shop in Sunrise, FL."
+            ? `Performed at your home, office or jobsite across South Florida by ${BUSINESS.parent}.`
+            : `Performed at the ${BUSINESS.parent} shop in ${BUSINESS.shop.city}, FL.`
         }`}
       />
 
@@ -121,10 +121,11 @@ export default function ServiceDetailPage() {
               <Truck size={18} aria-hidden className="text-drop" />
               <p className="text-smoke">
                 <span className="font-display uppercase tracking-wide text-ink">
-                  We come to you.
+                  Local service — we come to you.
                 </span>{" "}
-                This service is performed at your home, office or jobsite anywhere
-                in our Broward service area — or at the shop, your call.
+                The van performs this at your home, office or jobsite anywhere in
+                the South Florida install area, or you bring the vehicle to{" "}
+                {BUSINESS.shop.city}. Your call.
               </p>
             </>
           ) : (
@@ -134,8 +135,8 @@ export default function ServiceDetailPage() {
                 <span className="font-display uppercase tracking-wide text-ink">
                   In-shop only.
                 </span>{" "}
-                This one needs a lift and shop equipment, so it happens at{" "}
-                {BUSINESS.address.full}.
+                This one needs a lift and bay equipment, so it happens at{" "}
+                {BUSINESS.shop.full} — South Florida customers only.
               </p>
             </>
           )}
@@ -198,7 +199,9 @@ export default function ServiceDetailPage() {
             </p>
             <p className="mt-4 text-sm leading-relaxed text-smoke">
               Not sure what your vehicle needs? Call {BUSINESS.phone} with your
-              year, make and model and we will price it over the phone.
+              year, make and model and we will price it over the phone. Already
+              bought tires on {BUSINESS.name}? Say so when you book — this is the
+              appointment that puts them on.
             </p>
           </div>
 
@@ -206,8 +209,8 @@ export default function ServiceDetailPage() {
             <h3 className="h3">Ready to book?</h3>
             <p className="mt-2 text-sm leading-relaxed text-smoke">
               {service.mobile
-                ? "Pick a two-hour window and we will roll to your address."
-                : "Pick a window and we will have a bay open when you arrive."}
+                ? "Pick a two-hour window and the van rolls to your address."
+                : `Pick a window and there will be a bay open in ${BUSINESS.shop.city} when you arrive.`}
             </p>
             <div className="mt-5 flex flex-col gap-3">
               <Link
@@ -230,7 +233,7 @@ export default function ServiceDetailPage() {
                 className="mt-4 inline-flex items-center gap-1.5 text-xs text-smoke hover:text-drop"
               >
                 <MapPin size={14} aria-hidden />
-                {BUSINESS.address.full}
+                {BUSINESS.shop.full}
               </a>
             )}
           </div>

@@ -15,25 +15,25 @@ const HELPFUL_LINKS = [
     to: "/tires",
     icon: Circle,
     title: "Shop Tires",
-    copy: "Search by vehicle or by size and see what we can get on it this week.",
+    copy: "Search by vehicle or by size across seven brands and two distributor networks.",
   },
   {
     to: "/wheels",
     icon: Disc3,
     title: "Shop Wheels",
-    copy: "Fitment-checked wheels, mounted and balanced by the same crew.",
+    copy: "Alloy, forged and off-road wheels, fitment-checked before they ship.",
   },
   {
-    to: "/mobile-service",
+    to: "/shipping",
     icon: Truck,
-    title: "Mobile Service",
-    copy: "How the van works, what it carries and where it goes across Broward.",
+    title: "Shipping & Install",
+    copy: "Ship to your address, or free to our shop if you are in South Florida.",
   },
   {
-    to: "/schedule",
+    to: "/coupons",
     icon: CalendarClock,
-    title: "Schedule Service",
-    copy: "Pick a day and tell us where the vehicle will be parked.",
+    title: "Deals & Rebates",
+    copy: "Promo codes, set-of-four offers and manufacturer rebates in one place.",
   },
 ];
 
@@ -42,7 +42,7 @@ export default function NotFoundPage() {
     <>
       <Seo
         title="Page Not Found"
-        description={`That page is not here. Find tires, wheels, mobile service and scheduling for ${BUSINESS.name}, or call ${BUSINESS.phone}.`}
+        description={`That page is not here. Find tires, wheels, shipping and install options at ${BUSINESS.name}, or call ${BUSINESS.phone}.`}
       />
 
       <section className="bg-ink text-bone">

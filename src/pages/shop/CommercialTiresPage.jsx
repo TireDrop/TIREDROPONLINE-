@@ -26,13 +26,13 @@ const FLEET_TIRES = TIRES.filter((t) => t.category === "Commercial");
 const VALUE_PROPS = [
   {
     icon: Truck,
-    title: "We come to the yard",
-    body: "Our van services your vehicles where they are parked, so trucks are not driven across town for a tire and a driver is not paid to wait.",
+    title: "Shipped to your yard",
+    body: "Orders drop-ship from the distributor straight to your address, anywhere in the continental US. No counter trips, no driver paid to wait.",
   },
   {
     icon: Clock,
-    title: "Off-hours scheduling",
-    body: "Book a block before the route starts or after it ends. Downtime during billable hours is the real cost of a tire, not the tire.",
+    title: "Local? We fit them too",
+    body: "South Florida fleets can send the order free to our Sunrise shop, or book the van for a block before the route starts or after it ends.",
   },
   {
     icon: DollarSign,
@@ -47,7 +47,7 @@ const VALUE_PROPS = [
   {
     icon: CalendarClock,
     title: "Rotation on a schedule",
-    body: "We track tread depth per unit so replacements are planned around your calendar instead of a blowout on I-95.",
+    body: "Tell us your sizes and cycle and we keep the order list ready, so replacements are planned around your calendar instead of a blowout on the interstate.",
   },
   {
     icon: CheckCircle2,
@@ -117,12 +117,12 @@ export default function CommercialTiresPage() {
     <>
       <Seo
         title="Commercial & Fleet Tires"
-        description="Load-rated commercial tires for vans, box trucks and work fleets in Broward County — supplied and installed on site by Extreme Mobile Tires."
+        description="Load-rated commercial tires for vans, box trucks and work fleets from TireDrop — shipped anywhere in the continental US, or delivered free to our South Florida shop for fitting."
       />
       <PageHero
         eyebrow="Commercial"
         title="Fleet & Commercial Tires"
-        lede="Vans, box trucks, shuttles and contractor pickups. We stock the load-rated sizes your fleet runs and fit them in your yard, on your schedule."
+        lede="Vans, box trucks, shuttles and contractor pickups. We source the load-rated sizes your fleet runs and ship them wherever the trucks are — or fit them ourselves if you are in South Florida."
       >
         <div className="flex flex-wrap gap-3">
           <a href="#fleet-quote" className="btn-primary">
@@ -140,7 +140,7 @@ export default function CommercialTiresPage() {
         <SectionHead
           eyebrow="Why fleets call us"
           title="Downtime is the expensive part"
-          lede="A tire is a small line item. A truck sitting in a waiting room for three hours is not. Everything below is built around keeping units on the road."
+          lede="A tire is a small line item. A truck sitting in a waiting room for three hours is not. Everything below is built around keeping units on the road, wherever they run."
         />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {VALUE_PROPS.map(({ icon: Icon, title, body }) => (
@@ -155,8 +155,8 @@ export default function CommercialTiresPage() {
 
       <Section className="bg-bone">
         <SectionHead
-          eyebrow="In stock"
-          title="Commercial tires we carry"
+          eyebrow="In the catalog"
+          title="Commercial tires we ship"
           lede="Load Range E casings approved for dual fitment, priced per tire. Volume pricing applies to sets of eight or more."
           action={
             <Link to="/tires?cats=Commercial" className="btn-outline btn-sm">
@@ -177,7 +177,7 @@ export default function CommercialTiresPage() {
             <SectionHead
               eyebrow="Fleet quote"
               title="Request a quote"
-              lede="Tell us what you run and we will come back with per-tire pricing, on-site installation cost and the soonest window we can fit your yard."
+              lede="Tell us what you run and we will come back with per-tire pricing, delivery to your yard, and — if you are local — what it costs to have us fit them."
             />
 
             {submitted ? (
@@ -385,7 +385,7 @@ export default function CommercialTiresPage() {
             </dl>
 
             <h3 className="label mt-6">Shop address</h3>
-            <p className="text-sm text-smoke">{BUSINESS.address.full}</p>
+            <p className="text-sm text-smoke">{BUSINESS.shop.full}</p>
             <a
               href={BUSINESS.mapsHref}
               target="_blank"
@@ -395,9 +395,14 @@ export default function CommercialTiresPage() {
               Get directions
             </a>
 
-            <h3 className="label mt-6">Service area</h3>
+            <h3 className="label mt-6">Shipping</h3>
             <p className="text-sm leading-relaxed text-smoke">
-              {BUSINESS.serviceArea.join(", ")} and the rest of Broward County.
+              Fleet orders ship anywhere in {BUSINESS.shipping.area}.
+            </p>
+
+            <h3 className="label mt-6">On-site install</h3>
+            <p className="text-sm leading-relaxed text-smoke">
+              {BUSINESS.installArea.join(", ")} and the rest of Broward County.
             </p>
           </aside>
         </div>

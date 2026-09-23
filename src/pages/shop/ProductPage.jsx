@@ -9,6 +9,7 @@ import {
   Plus,
   ShieldCheck,
   ShoppingCart,
+  Store,
   Truck,
 } from "lucide-react";
 
@@ -54,13 +55,13 @@ export default function ProductPage({ kind = "tire" }) {
   const isTire = kind !== "wheel";
   const unit = isTire ? "tire" : "wheel";
   const [qty, setQty] = useState(4);
-  const [install, setInstall] = useState(true);
+  const [install, setInstall] = useState(false);
   const [added, setAdded] = useState(false);
 
   // A new slug is a new product — reset the buy box.
   useEffect(() => {
     setQty(4);
-    setInstall(true);
+    setInstall(false);
     setAdded(false);
   }, [slug]);
 
@@ -74,7 +75,7 @@ export default function ProductPage({ kind = "tire" }) {
       <>
         <Seo
           title="Product Not Found"
-          description="That product is no longer listed. Browse the current tire and wheel catalog from Extreme Mobile Tires."
+          description="That product is no longer listed. Browse the current TireDrop tire and wheel catalog, shipped anywhere in the continental US."
         />
         <PageHero
           eyebrow="404"
@@ -91,7 +92,7 @@ export default function ProductPage({ kind = "tire" }) {
           <EmptyState
             icon={PackageSearch}
             title="This listing is gone"
-            lede="Head back to the catalog, or call us with the size you need — we stock far more than we list online."
+            lede="Head back to the catalog, or call us with the size you need — the distributor catalog runs far deeper than this page."
             action={
               <div className="flex flex-wrap justify-center gap-3">
                 <Link
@@ -143,7 +144,7 @@ export default function ProductPage({ kind = "tire" }) {
     <>
       <Seo
         title={`${name} ${sizeLabel}`}
-        description={`${name} ${sizeLabel} — ${money(product.price)} each with mobile installation available anywhere in Broward County from Extreme Mobile Tires.`}
+        description={`${name} ${sizeLabel} — ${money(product.price)} each from TireDrop, shipped anywhere in the continental US or free to our South Florida shop for installation.`}
       />
       <Breadcrumbs
         trail={[
@@ -208,8 +209,8 @@ export default function ProductPage({ kind = "tire" }) {
               </div>
               <p className="mt-2 text-sm text-smoke">
                 {product.stock > 0
-                  ? `${product.stock} in stock at ${BUSINESS.address.city} — most orders installed within 48 hours.`
-                  : "Out of stock online — call us and we will source it."}
+                  ? `${product.stock} available to ship from our distributor network. Shipping and delivery time are shown at checkout.`
+                  : "Not available to ship right now — call us and we will source it."}
               </p>
             </div>
 
@@ -265,26 +266,66 @@ export default function ProductPage({ kind = "tire" }) {
               </div>
             </div>
 
-            {/* Mobile installation opt-in */}
-            <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-sm border border-ink/15 bg-fog p-4">
-              <input
-                type="checkbox"
-                checked={install}
-                onChange={(e) => setInstall(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 accent-drop"
-              />
-              <span>
-                <span className="block font-display text-base uppercase tracking-wide">
-                  Add mobile installation (+{money(product.installPrice)} per{" "}
-                  {unit})
-                </span>
-                <span className="mt-1 block text-sm text-smoke">
-                  {isTire
-                    ? "Mounting, balancing, new valve stems and disposal of your old tires — at your home, office or jobsite."
-                    : "Mounting, balancing, hub-centric rings and TPMS transfer — at your home, office or jobsite."}
-                </span>
-              </span>
-            </label>
+            {/* Fulfillment choice. Option two is the local upsell and sets the
+                same `install` flag the cart has always carried. */}
+            <fieldset className="mt-6">
+              <legend className="label">Delivery</legend>
+              <div className="grid gap-3">
+                <label
+                  htmlFor="fulfil-ship"
+                  className={`flex cursor-pointer items-start gap-3 rounded-sm border p-4 transition-colors ${
+                    install ? "border-ink/15 bg-bone" : "border-drop bg-drop/5"
+                  }`}
+                >
+                  <input
+                    id="fulfil-ship"
+                    type="radio"
+                    name="fulfillment"
+                    checked={!install}
+                    onChange={() => setInstall(false)}
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-drop"
+                  />
+                  <span className="min-w-0">
+                    <span className="block font-display text-base uppercase tracking-wide">
+                      Ship it to me
+                    </span>
+                    <span className="mt-1 block text-sm text-smoke">
+                      Delivered to your address anywhere in{" "}
+                      {BUSINESS.shipping.area}. Shipping and delivery time are
+                      shown at checkout.
+                    </span>
+                  </span>
+                </label>
+
+                <label
+                  htmlFor="fulfil-install"
+                  className={`flex cursor-pointer items-start gap-3 rounded-sm border p-4 transition-colors ${
+                    install ? "border-drop bg-drop/5" : "border-ink/15 bg-bone"
+                  }`}
+                >
+                  <input
+                    id="fulfil-install"
+                    type="radio"
+                    name="fulfillment"
+                    checked={install}
+                    onChange={() => setInstall(true)}
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-drop"
+                  />
+                  <span className="min-w-0">
+                    <span className="block font-display text-base uppercase tracking-wide">
+                      Ship free to the shop and we&apos;ll fit them (+
+                      {money(product.installPrice)} per {unit})
+                    </span>
+                    <span className="mt-1 block text-sm text-smoke">
+                      {isTire
+                        ? `Free delivery to ${BUSINESS.shop.name}, then mounting, balancing, new valve stems and disposal of your old tires.`
+                        : `Free delivery to ${BUSINESS.shop.name}, then mounting, balancing, hub-centric rings and TPMS transfer.`}{" "}
+                      South Florida only.
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
 
             {/* Totals */}
             <dl className="mt-5 space-y-1.5 text-sm">
@@ -295,7 +336,7 @@ export default function ProductPage({ kind = "tire" }) {
                 <dd className="font-medium">{money(unitsTotal)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-smoke">Mobile installation</dt>
+                <dt className="text-smoke">Installation at the shop</dt>
                 <dd className="font-medium">
                   {install ? money(installTotal) : "Not added"}
                 </dd>
@@ -306,7 +347,7 @@ export default function ProductPage({ kind = "tire" }) {
               </div>
             </dl>
             <p className="mt-1 text-xs text-smoke">
-              Taxes and any delivery fee are calculated at checkout.
+              Taxes and shipping are calculated at checkout.
             </p>
 
             <button
@@ -341,32 +382,34 @@ export default function ProductPage({ kind = "tire" }) {
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Truck size={14} aria-hidden className="text-drop" />
-                Free local delivery on orders over $500
+                Ships anywhere in {BUSINESS.shipping.area}
               </span>
             </div>
           </div>
         </div>
       </Section>
 
-      {/* Driveway install cross-sell */}
+      {/* Local install cross-sell — South Florida only, flagged as such. */}
       <div className="bg-ink text-bone">
         <div className="wrap flex flex-col gap-5 py-10 md:flex-row md:items-center md:justify-between">
           <div className="flex items-start gap-4">
-            <Truck size={30} aria-hidden className="mt-1 shrink-0 text-amber" />
+            <Store size={30} aria-hidden className="mt-1 shrink-0 text-amber" />
             <div>
+              <p className="eyebrow mb-1">South Florida</p>
               <h2 className="h2 text-3xl md:text-4xl">
-                We install at your driveway
+                Ship it free to the shop
               </h2>
               <p className="mt-2 max-w-xl text-sm text-bone/70">
-                Our van carries the mounting machine, the spin balancer and the
-                torque wrenches. You keep working, we swap the{" "}
-                {isTire ? "tires" : "wheels"} and haul the old ones away.
+                Local buyers can send the order to {BUSINESS.shop.name} at no
+                charge and book an install. We fit the{" "}
+                {isTire ? "tires" : "wheels"} and dispose of the old ones — or
+                send the van out to you instead.
               </p>
             </div>
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">
-            <Link to="/mobile-service" className="btn-primary">
-              How it works
+            <Link to="/install" className="btn-primary">
+              How install works
             </Link>
             <a href={BUSINESS.phoneHref} className="btn-ghost-light">
               <Phone size={18} aria-hidden />
@@ -417,8 +460,8 @@ export default function ProductPage({ kind = "tire" }) {
             <div className="card mt-6 p-5">
               <h3 className="h3">Questions before you buy?</h3>
               <p className="mt-1 text-sm text-smoke">
-                Call {BUSINESS.phone} during shop hours or stop by{" "}
-                {BUSINESS.address.full}.
+                Call {BUSINESS.phone} during shop hours, send a note through the
+                contact form, or stop by {BUSINESS.shop.full}.
               </p>
               <Link to="/contact" className="btn-outline btn-sm mt-4">
                 Contact us

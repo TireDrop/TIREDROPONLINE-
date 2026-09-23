@@ -8,10 +8,12 @@ import {
   Clock,
   Gauge,
   MapPin,
+  PackageCheck,
   Phone,
   Radio,
   Ruler,
   ShieldCheck,
+  Store,
   Truck,
   Wrench,
   X,
@@ -20,32 +22,33 @@ import {
 
 import { Accordion, Badge, PageHero, Section, SectionHead, Seo } from "../../components/ui/index.jsx";
 import { BUSINESS } from "../../data/business.js";
-import { MOBILE_SERVICES } from "../../data/services.js";
+import { MOBILE_SERVICES, getService } from "../../data/services.js";
+
+const install = getService("tire-installation");
 
 const STEPS = [
   {
+    icon: PackageCheck,
+    title: "Your order arrives",
+    body: `Order your tires on ${BUSINESS.name} and send them to your address or free to the ${BUSINESS.shop.city} shop. Already have tires sitting in the garage? That works too.`,
+  },
+  {
     icon: CalendarCheck,
-    title: "Book online or call",
+    title: "Book the van",
     body:
-      "Pick your service, your vehicle and the day that works. Takes about two minutes. Prefer a human? Call us and we will write it up for you.",
+      "Pick the service, the vehicle and the day that suits you. Takes about two minutes online. Prefer a human? Call and we will write it up for you.",
   },
   {
     icon: Phone,
     title: "We confirm a 2-hour window",
     body:
-      "A dispatcher confirms your appointment and locks in a two-hour arrival window, so you are not burning a whole day waiting on a van.",
-  },
-  {
-    icon: Truck,
-    title: "Van arrives fully equipped",
-    body:
-      "Tires, balancer, torque tools and power all roll up together. Your car never moves, and the work happens in your own parking spot.",
+      "A dispatcher confirms the appointment and locks in a two-hour arrival window, so you are not burning a whole day waiting on a van.",
   },
   {
     icon: Zap,
-    title: "You drive on new tires",
+    title: "Fitted where you parked",
     body:
-      "We torque to spec, set pressures, haul off the old rubber and take payment on the spot. You never left home.",
+      "Mounted, balanced, torqued to spec and pressures set — in your own driveway. Your old set leaves with us. You never went anywhere.",
   },
 ];
 
@@ -53,7 +56,7 @@ const VAN_KIT = [
   {
     icon: Gauge,
     name: "Calibrated spin balancer",
-    detail: "Dynamic balancing on board — the same machine standard the shop runs, not a bubble balancer.",
+    detail: "Dynamic balancing on board — the same machine standard the Sunrise bays run, not a bubble balancer.",
   },
   {
     icon: Wrench,
@@ -103,9 +106,28 @@ const COMPARISON = [
 
 const FAQ = [
   {
-    q: "Does mobile service cost more than coming to the shop?",
+    q: "Is mobile install available everywhere you ship?",
     a:
-      "No. Our mobile labor rates are the same rates we charge in the bay — tire installation starts at $25 per tire whether the van comes to you or you come to Sunrise. Within our Broward service area there is no trip fee on standard appointments.",
+      "No, and we will not pretend otherwise. " +
+      BUSINESS.name +
+      " ships tires to " +
+      BUSINESS.shipping.area +
+      ", but the vans are a South Florida service run out of the " +
+      BUSINESS.shop.city +
+      " shop. If you are outside the Broward cities listed on this page, your order ships to you and you take it to a fitter you trust.",
+  },
+  {
+    q: "I bought my tires here. Can the van bring them to me?",
+    a:
+      "That is exactly what it is for. Send the order free to the " +
+      BUSINESS.shop.city +
+      " shop at checkout, then book a mobile install — the van loads your set and brings it to your address. If you had them shipped to your house instead, leave them where they are and we will fit them there.",
+  },
+  {
+    q: "Does the van cost more than coming into the shop?",
+    a: install
+      ? `No. Mobile labor is billed at the same rate as the bay — tire installation starts at $${install.priceFrom} ${install.priceUnit} either way. Within the local install area there is no trip fee on standard appointments.`
+      : "No. Mobile labor is billed at the same rate as the bay, and within the local install area there is no trip fee on standard appointments.",
   },
   {
     q: "How much room does the van need?",
@@ -128,19 +150,11 @@ const FAQ = [
       "A four-tire installation runs about 45 to 75 minutes. A single flat repair is roughly 30 minutes, a rotation about 30, and a full-synthetic oil change 30 to 45. Your confirmation lists the estimate for the exact service you booked.",
   },
   {
-    q: "Do I have to be there while you work?",
-    a:
-      "You need to be there at the start to hand over the keys or unlock the vehicle, and at the end to approve the work and pay. In between, go back inside — most customers do. If you have to step out, leave a number and we will call before anything changes on the invoice.",
-  },
-  {
-    q: "How do I pay?",
-    a:
-      "We take card, tap-to-pay and cash at your vehicle, and we email the receipt before the van pulls off. Financing is available on larger tire and wheel packages — ask when you book.",
-  },
-  {
     q: "What if my vehicle needs work the van cannot do?",
     a:
-      "Brakes, alignment, suspension, lift kits and diagnostics are bay work — they need a lift and alignment rack, so they happen at our Sunrise shop. If the tech spots something like that in your driveway, you will hear it straight, with an estimate, and we will get you on the schedule at the shop.",
+      "Brakes, alignment, suspension, lift kits and diagnostics are bay work — they need a lift and an alignment rack, so they happen at the " +
+      BUSINESS.shop.city +
+      " shop. If the tech spots something like that in your driveway, you will hear it straight, with an estimate, and we will get you on the schedule there.",
   },
 ];
 
@@ -148,18 +162,18 @@ export default function MobileServicePage() {
   return (
     <>
       <Seo
-        title="Mobile Tire Service in Broward County"
-        description="Extreme Mobile Tires brings a fully equipped van to your home, office or jobsite in Sunrise and across Broward County for tire installation, balancing, repair, rotation, oil changes and TPMS."
+        title="Mobile Tire Installation in South Florida"
+        description={`Bought tires on ${BUSINESS.name}? ${BUSINESS.parent} brings a fully equipped van to your home, office or jobsite across Broward County to fit them — plus balancing, repair, rotation, oil changes and TPMS.`}
       />
 
       <PageHero
-        eyebrow="Mobile Tire & Auto Service"
-        title="We bring the shop to your driveway"
-        lede="A fully equipped van, a certified tech and your tires — parked where your car already is. Installation, balancing, repair, rotation, oil changes and TPMS, done at your home, office or jobsite across Broward County."
+        eyebrow="Mobile install — South Florida"
+        title="You bought the tires. We'll come fit them."
+        lede={`A fully equipped van, a technician who does this every day, and your new set — parked where your car already is. It is the bonus that comes with buying from a store whose parent company has been fitting tires in ${BUSINESS.shop.city} since ${BUSINESS.foundedYear}.`}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link to="/schedule" className="btn-primary">
-            Book Mobile Service
+            Book Mobile Install
             <ArrowRight size={18} aria-hidden />
           </Link>
           <a href={BUSINESS.phoneHref} className="btn-ghost-light">
@@ -170,7 +184,7 @@ export default function MobileServicePage() {
         <p className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-bone/60">
           <span className="flex items-center gap-1.5">
             <Check size={14} aria-hidden className="text-amber" />
-            Serving Broward since {BUSINESS.foundedYear}
+            {BUSINESS.poweredBy}, est. {BUSINESS.foundedYear}
           </span>
           <span className="flex items-center gap-1.5">
             <Check size={14} aria-hidden className="text-amber" />
@@ -183,12 +197,30 @@ export default function MobileServicePage() {
         </p>
       </PageHero>
 
+      {/* ---------- Local-only notice ---------- */}
+      <div className="border-b border-ink/10 bg-sky">
+        <div className="wrap flex flex-wrap items-center gap-3 py-4 text-sm">
+          <MapPin size={18} aria-hidden className="text-drop" />
+          <p className="text-smoke">
+            <span className="font-display uppercase tracking-wide text-ink">
+              Broward County only.
+            </span>{" "}
+            We ship tires to {BUSINESS.shipping.area}, but the vans work South
+            Florida. Outside the area?{" "}
+            <Link to="/shipping" className="text-drop underline hover:text-dive">
+              See how shipping works
+            </Link>
+            .
+          </p>
+        </div>
+      </div>
+
       {/* ---------- How it works ---------- */}
       <Section className="bg-bone">
         <SectionHead
           eyebrow="How it works"
-          title="Four steps. You never leave home."
-          lede="No drop-off, no shuttle, no waiting room. Here is exactly how a mobile appointment runs from the moment you book."
+          title="Order online. Fitted in your driveway."
+          lede="No drop-off, no shuttle, no waiting room. Here is exactly how it runs from the checkout page to the last lug nut."
         />
 
         <ol className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -207,6 +239,21 @@ export default function MobileServicePage() {
             </li>
           ))}
         </ol>
+
+        <div className="card mt-8 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm leading-relaxed text-smoke">
+            <span className="font-display text-base uppercase tracking-wide text-ink">
+              Rather come to us?
+            </span>{" "}
+            Free ship-to-store puts your order on the rack at the{" "}
+            {BUSINESS.shop.city} shop and you book a fitting whenever suits. Same
+            techs, same torque spec, full bay equipment.
+          </p>
+          <Link to="/install" className="btn-dark btn-sm shrink-0">
+            <Store size={16} aria-hidden />
+            Ship to store
+          </Link>
+        </div>
       </Section>
 
       {/* ---------- What the van does ---------- */}
@@ -254,16 +301,16 @@ export default function MobileServicePage() {
         </div>
       </Section>
 
-      {/* ---------- Service area ---------- */}
+      {/* ---------- Install area ---------- */}
       <Section className="bg-bone">
         <SectionHead
-          eyebrow="Service area"
-          title="Where we roll"
-          lede="Our fleet works out of Sunrise and covers Broward County daily. If your city is on this list, the van comes to you."
+          eyebrow="Install area"
+          title="Where the van rolls"
+          lede={`The fleet works out of ${BUSINESS.shop.city} and covers these Broward cities daily. If yours is on this list, we come to you.`}
         />
 
         <ul className="flex flex-wrap gap-2.5">
-          {BUSINESS.serviceArea.map((city) => (
+          {BUSINESS.installArea.map((city) => (
             <li
               key={city}
               className="flex items-center gap-1.5 rounded-sm border border-ink/10 bg-fog px-3.5 py-2 font-display text-sm uppercase tracking-wide text-ink"
@@ -277,12 +324,12 @@ export default function MobileServicePage() {
         <div className="card mt-8 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-relaxed text-smoke">
             <span className="font-display text-base uppercase tracking-wide text-ink">
-              Just outside Broward?
+              Just outside the area?
             </span>{" "}
-            Call us before you assume the answer is no. We regularly stretch past
-            the county line for fleet accounts, jobsites and full four-tire jobs —
-            a dispatcher will tell you straight whether we can get a van to you and
-            what it costs.
+            Call before you assume the answer is no. We regularly stretch past the
+            county line for fleet accounts, jobsites and full four-tire jobs — a
+            dispatcher will tell you straight whether we can get a van to you and
+            what it costs. Further afield, your tires still ship to your door.
           </p>
           <a href={BUSINESS.phoneHref} className="btn-dark btn-sm shrink-0">
             <Phone size={16} aria-hidden />
@@ -298,8 +345,8 @@ export default function MobileServicePage() {
           <h2 className="h2">A shop on four wheels</h2>
           <p className="lede mt-3 text-bone/70">
             Mobile does not mean stripped down. Every van carries the same
-            equipment our technicians use in the Sunrise bays — which is why the
-            work holds up the same way.
+            equipment the {BUSINESS.shop.city} bays use — which is why the work
+            holds up the same way.
           </p>
         </div>
 
@@ -332,7 +379,7 @@ export default function MobileServicePage() {
             <div className="flex items-center gap-2 bg-drop px-6 py-4 text-bone">
               <Truck size={18} aria-hidden />
               <h3 className="font-display text-lg uppercase tracking-wide">
-                Extreme Mobile Tires
+                Mobile install
               </h3>
             </div>
             <ul className="divide-y divide-ink/10">
@@ -369,7 +416,7 @@ export default function MobileServicePage() {
         <SectionHead
           eyebrow="Questions, answered"
           title="Before you book"
-          lede="The eight things customers ask us most about mobile service. If yours is not here, call and ask."
+          lede="The eight things local customers ask us most about mobile install. If yours is not here, call and ask."
         />
         <Accordion items={FAQ} />
       </Section>

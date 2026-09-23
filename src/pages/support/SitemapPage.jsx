@@ -13,7 +13,7 @@ import {
 
 // Pages that exist as routes but do not belong in the marketing navigation.
 const UTILITY_LINKS = [
-  { label: "Schedule Service", to: "/schedule" },
+  { label: "Book an Install", to: "/schedule" },
   { label: "Cart", to: "/cart" },
   { label: "Checkout", to: "/checkout" },
   { label: "Sitemap", to: "/sitemap" },
@@ -24,6 +24,20 @@ const LEGAL_LINKS = [
   { label: "Privacy Policy", to: "/privacy" },
   { label: "Your Privacy Choices", to: "/privacy#choices" },
   { label: "Accessibility Statement", to: "/accessibility" },
+];
+
+// Routes that must always appear somewhere on this page. They normally arrive
+// through NAV or FOOTER_COLUMNS; anything missing is listed on its own so a
+// nav change can never quietly drop a page out of the sitemap.
+const CORE_ROUTES = [
+  { label: "How Shipping Works", to: "/shipping" },
+  { label: "Ship to Store & Install", to: "/install" },
+  { label: "Mobile Installation", to: "/mobile-service" },
+  { label: "Tires", to: "/tires" },
+  { label: "Wheels", to: "/wheels" },
+  { label: "Tire Care Guides", to: "/tire-care" },
+  { label: `About ${BUSINESS.name}`, to: "/about" },
+  { label: "Contact", to: "/contact" },
 ];
 
 function LinkColumn({ title, links, icon: Icon }) {
@@ -38,7 +52,7 @@ function LinkColumn({ title, links, icon: Icon }) {
           <li key={`${link.to}-${link.label}`}>
             <Link
               to={link.to}
-              className="text-sm text-smoke transition-colors hover:text-drop"
+              className="flex min-h-[32px] items-center text-sm text-smoke transition-colors hover:text-drop"
             >
               {link.label}
             </Link>
@@ -76,11 +90,22 @@ export default function SitemapPage() {
     },
   ];
 
+  const listed = new Set(
+    [
+      ...navGroups.flatMap((g) => g.links),
+      ...FOOTER_COLUMNS.flatMap((c) => c.links),
+      ...UTILITY_LINKS,
+      ...LEGAL_LINKS,
+    ].map((link) => link.to)
+  );
+
+  const missing = CORE_ROUTES.filter((route) => !listed.has(route.to));
+
   return (
     <>
       <Seo
         title="Sitemap"
-        description={`Every page on the ${BUSINESS.name} website in one place — tires, wheels, mobile service, auto repair, support pages and legal documents.`}
+        description={`Every page on the ${BUSINESS.name} website in one place — tires, wheels, shipping, installation, guides, support pages and legal documents.`}
       />
 
       <PageHero
@@ -103,6 +128,10 @@ export default function SitemapPage() {
           {navGroups.map((group) => (
             <LinkColumn key={group.title} title={group.title} links={group.links} />
           ))}
+
+          {missing.length > 0 && (
+            <LinkColumn title="Also on the site" links={missing} />
+          )}
         </div>
       </Section>
 
@@ -111,7 +140,7 @@ export default function SitemapPage() {
         <SectionHead
           eyebrow="Service Pages"
           title="Every service we list"
-          lede="Mobile services travel to you. Shop services happen at the Sunrise bay."
+          lede={`Installation and repair happen in South Florida: the van travels to you around Broward, and the rest happens at the ${BUSINESS.shop.city} shop. Tires and wheels themselves ship anywhere in ${BUSINESS.shipping.area}.`}
         />
 
         <div className="grid gap-10 sm:grid-cols-2">
@@ -130,7 +159,7 @@ export default function SitemapPage() {
       <Section className="bg-bone">
         <SectionHead
           eyebrow="Everything Else"
-          title="Footer, account and legal pages"
+          title="Footer, ordering and legal pages"
         />
 
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
@@ -138,30 +167,32 @@ export default function SitemapPage() {
             <LinkColumn key={col.title} title={col.title} links={col.links} />
           ))}
 
-          <LinkColumn title="Shopping & Booking" links={UTILITY_LINKS} />
+          <LinkColumn title="Ordering & Booking" links={UTILITY_LINKS} />
           <LinkColumn title="Legal" links={LEGAL_LINKS} />
 
           <div>
             <h3 className="mb-4 flex items-center gap-2 border-b border-ink/10 pb-3 font-display text-base uppercase tracking-[0.12em] text-ink">
               <MapPin size={16} aria-hidden className="text-drop" />
-              Visit or Call
+              Call or Visit
             </h3>
+            <p className="mb-3 text-sm leading-relaxed text-smoke">
+              {BUSINESS.parent}, the shop behind {BUSINESS.name}:
+            </p>
             <address className="not-italic text-sm text-smoke">
-              {BUSINESS.address.street}
+              {BUSINESS.shop.street}
               <br />
-              {BUSINESS.address.city}, {BUSINESS.address.state}{" "}
-              {BUSINESS.address.zip}
+              {BUSINESS.shop.city}, {BUSINESS.shop.state} {BUSINESS.shop.zip}
             </address>
             <a
               href={BUSINESS.phoneHref}
-              className="mt-3 inline-flex items-center gap-2 font-display text-lg uppercase tracking-wide text-ink hover:text-drop"
+              className="mt-3 inline-flex min-h-[32px] items-center gap-2 font-display text-lg uppercase tracking-wide text-ink hover:text-drop"
             >
               <Phone size={16} aria-hidden />
               {BUSINESS.phone}
             </a>
             <div className="mt-5">
-              <Link to="/schedule" className="btn-primary btn-sm">
-                Schedule Service
+              <Link to="/tires" className="btn-primary btn-sm">
+                Shop Tires
               </Link>
             </div>
           </div>

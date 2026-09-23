@@ -26,16 +26,16 @@ import { BUSINESS } from "../../data/business.js";
 
 export const PROMOS = {
   MOBILE25: {
-    label: "$25 off mobile installation",
-    hint: "Applies to the installation line on any order with mobile install added.",
+    label: "$25 off installation",
+    hint: "Applies to the installation line on any order fitted at our South Florida shop.",
   },
   NEWCUSTOMER: {
     label: "10% off tires and wheels",
     hint: "First-time customers. Discount applies to the parts subtotal.",
   },
   FREEDELIVERY: {
-    label: "Free delivery",
-    hint: "Waives the $29 delivery fee on orders under $500.",
+    label: "Free shipping",
+    hint: "Waives the $29 shipping fee on orders under $500.",
   },
   FLEET15: {
     label: "15% off fleet orders",
@@ -99,7 +99,7 @@ export function evaluatePromo(raw, { subtotal = 0, installTotal = 0, shipping = 
         return {
           ...miss,
           error:
-            "MOBILE25 discounts mobile installation. Switch on installation for a set above, then apply it again.",
+            "MOBILE25 discounts installation. Switch a set above to ship-to-store install, then apply it again.",
         };
       }
       return hit({ installOff: Math.min(25, installTotal) });
@@ -114,7 +114,7 @@ export function evaluatePromo(raw, { subtotal = 0, installTotal = 0, shipping = 
       if (shipping <= 0) {
         return {
           ...miss,
-          error: `Good news — this order already clears ${money(FREE_SHIP_AT)}, so delivery is free without a code.`,
+          error: `Good news — this order already clears ${money(FREE_SHIP_AT)}, so shipping is free without a code.`,
         };
       }
       return hit({ freeShipping: true });
@@ -275,13 +275,14 @@ function CartLine({ line, setQty, remove, addItem }) {
               />
               <label htmlFor={toggleId} className="text-sm leading-snug text-ink">
                 <span className="font-display uppercase tracking-wide">
-                  Add mobile installation
+                  Ship free to the shop and we&apos;ll fit them
                 </span>{" "}
                 <span className="whitespace-nowrap text-drop">
                   (+{money(line.installPrice)} each)
                 </span>
                 <span className="mt-0.5 block text-xs text-smoke">
-                  Our van mounts, balances and torques at your home or office.
+                  South Florida only. Leave it off and this line ships to your
+                  address instead.
                 </span>
               </label>
             </div>
@@ -382,9 +383,21 @@ function PromoBox({ promo, onApply, onClear }) {
 }
 
 const TRUST = [
-  { icon: Truck, title: "Installed at your driveway", copy: "The van brings the shop to you — home, office or jobsite." },
-  { icon: ShieldCheck, title: "Road hazard available", copy: "Add coverage when our tech confirms your fitment." },
-  { icon: CalendarClock, title: "Serving Broward since 2007", copy: `Local crews, local numbers — call ${BUSINESS.phone}.` },
+  {
+    icon: Truck,
+    title: "Ships nationwide",
+    copy: `Drop-shipped to any address in ${BUSINESS.shipping.area}.`,
+  },
+  {
+    icon: ShieldCheck,
+    title: "Fitment checked first",
+    copy: "We match sizes to your vehicle before the order is released.",
+  },
+  {
+    icon: CalendarClock,
+    title: BUSINESS.poweredBy,
+    copy: `A real shop since ${BUSINESS.foundedYear} — call ${BUSINESS.phone}.`,
+  },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -433,17 +446,17 @@ export default function CartPage() {
     <>
       <Seo
         title="Your Cart"
-        description="Review your tire and wheel order, add mobile installation at your home or office, apply a promo code and check out with Extreme Mobile Tires in Sunrise, FL."
+        description="Review your TireDrop order, choose shipping to your address or free ship-to-store install in South Florida, apply a promo code and check out."
       />
       <Breadcrumbs trail={[{ label: "Cart" }]} />
 
       <div className="wrap py-10 md:py-14">
         <header className="mb-8 md:mb-10">
-          <p className="eyebrow mb-2">Experience Convenience</p>
+          <p className="eyebrow mb-2">{BUSINESS.tagline}</p>
           <h1 className="h1">Your Cart</h1>
           <p className="lede mt-3 max-w-2xl">
             {count > 0
-              ? `${count} ${count === 1 ? "item" : "items"} ready to roll. Add mobile installation to any line and we'll bring the shop to your driveway.`
+              ? `${count} ${count === 1 ? "item" : "items"} ready to ship. Local to South Florida? Switch any line to free ship-to-store and we'll fit it for you.`
               : "Nothing in here yet."}
           </p>
         </header>
@@ -452,7 +465,7 @@ export default function CartPage() {
           <EmptyState
             icon={ShoppingCart}
             title="Your cart is empty"
-            lede="Pick a set of tires or a new set of wheels and we'll handle the rest — including installation at your address."
+            lede="Pick a set of tires or a new set of wheels and we'll ship them anywhere in the continental US."
             action={
               <div className="flex flex-wrap justify-center gap-3">
                 <Link to="/tires" className="btn-primary">
@@ -485,10 +498,10 @@ export default function CartPage() {
                   Keep Shopping
                 </Link>
                 <Link
-                  to="/schedule"
+                  to="/install"
                   className="text-sm text-smoke underline underline-offset-4 transition-colors hover:text-drop"
                 >
-                  Or book a mobile service visit
+                  How ship-to-store install works
                 </Link>
               </div>
 
@@ -517,7 +530,7 @@ export default function CartPage() {
                   </div>
 
                   <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-smoke">Mobile installation</dt>
+                    <dt className="text-smoke">Installation at the shop</dt>
                     <dd className="font-display text-base">
                       {totals.installTotal > 0 ? money(totals.installTotal) : "—"}
                     </dd>
@@ -536,7 +549,7 @@ export default function CartPage() {
                   )}
 
                   <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-smoke">Delivery</dt>
+                    <dt className="text-smoke">Shipping</dt>
                     <dd className="font-display text-base">
                       {freeShipEarned ? (
                         <Badge tone="amber">Free</Badge>
@@ -556,12 +569,12 @@ export default function CartPage() {
                   <div className="mt-4 rounded-sm bg-fog p-3">
                     <p className="text-xs text-ink">
                       Add <span className="font-display text-drop">{money(toFreeShip)}</span> for
-                      free delivery.
+                      free shipping.
                     </p>
                     <div
                       className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink/10"
                       role="progressbar"
-                      aria-label="Progress toward free delivery"
+                      aria-label="Progress toward free shipping"
                       aria-valuemin={0}
                       aria-valuemax={FREE_SHIP_AT}
                       aria-valuenow={Math.min(subtotal, FREE_SHIP_AT)}
@@ -583,8 +596,8 @@ export default function CartPage() {
                   Checkout
                 </Link>
                 <p className="mt-3 text-center text-xs leading-relaxed text-smoke">
-                  No card is charged online. A tech confirms fitment and takes payment when the van
-                  is scheduled.
+                  No card is charged online. We confirm fitment and take payment by phone before
+                  anything ships.
                 </p>
 
                 <div className="mt-5">

@@ -6,8 +6,8 @@ import {
   Clock,
   MapPin,
   Navigation,
+  Package,
   Phone,
-  Truck,
 } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
 import {
@@ -19,11 +19,12 @@ import {
 } from "../../components/ui/index.jsx";
 
 const SUBJECTS = [
-  "General Question",
-  "Quote Request",
-  "Existing Appointment",
+  "Order Question",
+  "Shipping & Delivery",
+  "Returns & Warranty",
+  "Book an Install",
   "Commercial & Fleet",
-  "Feedback",
+  "Something Else",
 ];
 
 const EMPTY = {
@@ -61,7 +62,7 @@ function validate(values) {
   if (!values.message.trim()) {
     errors.message = "Add a few details so we can actually help.";
   } else if (values.message.trim().length < 15) {
-    errors.message = "A little more detail, please — vehicle, tire size, or what is going on.";
+    errors.message = "A little more detail, please — vehicle, tire size, or your order number.";
   }
 
   return errors;
@@ -107,11 +108,12 @@ function ContactForm() {
           at {values.email} or {values.phone}.
         </p>
         <p className="mt-3 text-sm leading-relaxed text-smoke">
-          If your vehicle is down right now, do not wait on the reply — call{" "}
+          If the car is down right now, or your order needs changing before it
+          ships, do not wait on the reply — call{" "}
           <a href={BUSINESS.phoneHref} className="text-drop underline">
             {BUSINESS.phone}
           </a>{" "}
-          and we will get a van routed to you.
+          and we will pull it up on the spot.
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3">
@@ -247,7 +249,7 @@ function ContactForm() {
             name="message"
             rows={6}
             className="field resize-y"
-            placeholder="Year, make and model, tire size if you have it, and where the vehicle will be parked."
+            placeholder="Order number if you have one. Otherwise: year, make and model, tire size, and whether you want it shipped to you or to the shop."
             value={values.message}
             onChange={update("message")}
             aria-invalid={errors.message ? "true" : undefined}
@@ -280,13 +282,13 @@ export default function ContactPage() {
     <>
       <Seo
         title="Contact Us"
-        description={`Call ${BUSINESS.name} at ${BUSINESS.phone}, visit the shop at ${BUSINESS.address.full}, or send a message and we will get back to you during business hours.`}
+        description={`Questions about an order, shipping, a return or booking an install? Call ${BUSINESS.name} at ${BUSINESS.phone} or send a message and a person at the ${BUSINESS.shop.city} shop will get back to you.`}
       />
 
       <PageHero
         eyebrow="Contact"
         title="Talk to a person who actually works here"
-        lede="Questions about fitment, pricing, an appointment you already booked, or a fleet you need covered — start here."
+        lede={`Orders, shipping, returns, fitment, an install appointment or a fleet — wherever you are in ${BUSINESS.shipping.area}, it is the same phone and the same people.`}
       >
         <a href={BUSINESS.phoneHref} className="btn-primary">
           <Phone size={18} aria-hidden />
@@ -302,19 +304,19 @@ export default function ContactPage() {
           <div>
             <SectionHead
               eyebrow="Reach Us"
-              title="Three ways to get an answer"
+              title="Two ways to get an answer"
             />
 
             <div className="card border-l-4 border-l-drop p-6">
               <h3 className="h3 mb-2 flex items-center gap-2">
-                <Truck size={20} aria-hidden className="text-drop" />
+                <Package size={20} aria-hidden className="text-drop" />
                 Fastest way to reach us
               </h3>
               <p className="text-sm leading-relaxed text-smoke">
-                Call. If you are sitting on a flat, stuck in an office lot, or
-                you need a van today, the phone beats the form every time — the
-                person who answers can see the route board and tell you what is
-                actually possible.
+                Call. If an order has already been placed, if you are sitting on
+                a flat, or you need something changed before it ships, the phone
+                beats the form every time — the person who answers can pull the
+                order up while you are talking.
               </p>
               <a href={BUSINESS.phoneHref} className="btn-primary btn-sm mt-5">
                 <Phone size={16} aria-hidden />
@@ -335,7 +337,13 @@ export default function ContactPage() {
                   {BUSINESS.phone}
                 </a>
                 <p className="mt-2 text-sm text-smoke">
-                  Quotes, scheduling, fitment questions and fleet accounts.
+                  Order status, shipping questions, returns, fitment advice,
+                  install appointments and fleet accounts.
+                </p>
+                <p className="mt-3 text-xs leading-relaxed text-smoke">
+                  We do not publish an email address, because email is where
+                  questions go to sit for two days. The phone and the form both
+                  reach the same people.
                 </p>
               </li>
 
@@ -344,11 +352,15 @@ export default function ContactPage() {
                   <MapPin size={20} aria-hidden className="text-drop" />
                   At the shop
                 </h3>
+                <p className="mb-3 text-sm leading-relaxed text-smoke">
+                  {BUSINESS.parent}, the shop behind {BUSINESS.name} — for
+                  pickups, installs and anything easier to explain in person.
+                </p>
                 <address className="not-italic text-sm text-ink">
-                  {BUSINESS.address.street}
+                  {BUSINESS.shop.street}
                   <br />
-                  {BUSINESS.address.city}, {BUSINESS.address.state}{" "}
-                  {BUSINESS.address.zip}
+                  {BUSINESS.shop.city}, {BUSINESS.shop.state}{" "}
+                  {BUSINESS.shop.zip}
                 </address>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <a
@@ -361,7 +373,7 @@ export default function ContactPage() {
                     Directions
                   </a>
                   <Link to="/locations" className="btn-outline btn-sm">
-                    Service area
+                    The shop & install area
                   </Link>
                 </div>
               </li>
@@ -393,6 +405,10 @@ export default function ContactPage() {
                     ))}
                   </tbody>
                 </table>
+                <p className="mt-4 text-xs leading-relaxed text-smoke">
+                  Eastern time. The store takes orders around the clock; people
+                  answer during the hours above.
+                </p>
               </li>
             </ul>
           </div>
@@ -402,7 +418,7 @@ export default function ContactPage() {
             <SectionHead
               eyebrow="Message Us"
               title="Not urgent? Write it down."
-              lede="Messages sent outside business hours get picked up the next morning we are open."
+              lede="Include an order number if you have one. Messages sent outside business hours get picked up the next morning we are open."
             />
             <ContactForm />
           </div>
@@ -412,16 +428,21 @@ export default function ContactPage() {
       <section className="bg-ink py-12 text-bone md:py-16">
         <div className="wrap flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="eyebrow mb-2">Ready when you are</p>
-            <h2 className="h2">Book it instead of asking about it</h2>
+            <p className="eyebrow mb-2">Before you write</p>
+            <h2 className="h2">A lot of it is already answered</h2>
             <p className="lede mt-3 max-w-xl text-bone/70">
-              If you already know what you need, the scheduler is quicker than
-              a message thread.
+              How shipping works, what ship-to-store costs, and what happens if
+              a tire shows up wrong — all written out, no hold music.
             </p>
           </div>
-          <Link to="/schedule" className="btn-primary shrink-0">
-            Schedule Service
-          </Link>
+          <div className="flex flex-col gap-3 sm:flex-row md:shrink-0">
+            <Link to="/shipping" className="btn-primary">
+              Shipping & Returns
+            </Link>
+            <Link to="/schedule" className="btn-ghost-light">
+              Book an Install
+            </Link>
+          </div>
         </div>
       </section>
     </>

@@ -23,21 +23,21 @@ import { BUSINESS, TIRE_BRANDS } from "../../data/business.js";
 const GROUPS = [
   {
     id: "tire",
-    label: "Tire Specials",
+    label: "Store Specials",
     icon: Truck,
-    lede: "Deals on the rubber itself — plus the delivery that gets it to your driveway.",
+    lede: "Deals on the rubber itself — plus the shipping that gets it to your door.",
   },
   {
     id: "service",
-    label: "Service Specials",
+    label: "Install Specials — South Florida",
     icon: Wrench,
-    lede: "Savings on the work the van does once it's parked in front of your house.",
+    lede: "For local customers: savings on the work we do once your order lands at the shop, or when the van comes out to you.",
   },
   {
     id: "rebate",
     label: "Manufacturer Rebates",
     icon: Mail,
-    lede: "Money back straight from the tire makers. We handle the paperwork with you at the appointment.",
+    lede: "Money back straight from the tire makers, across the whole brand roster — Michelin and Goodyear included. We walk you through the claim form.",
   },
 ];
 
@@ -47,7 +47,7 @@ const OFFERS = [
     id: "first-set",
     group: "tire",
     title: "10% Off Your First Set",
-    deal: "New to us? Take 10% off tires and wheels on your first order — any brand, any size we stock.",
+    deal: "New to us? Take 10% off tires and wheels on your first order — any brand, any size we can ship.",
     code: "NEWCUSTOMER",
     fine: "First-time customers only, one use per household. Applies to the parts subtotal; installation, taxes and disposal excluded. Cannot be combined with FLEET15.",
     expires: "December 31, 2026",
@@ -56,17 +56,17 @@ const OFFERS = [
   {
     id: "free-delivery",
     group: "tire",
-    title: "Free Delivery On Any Order",
-    deal: "Waives the $29 delivery fee on orders under $500. Orders at or above $500 already deliver free.",
+    title: "Free Shipping On Any Order",
+    deal: "Waives the $29 shipping fee on orders under $500. Orders at or above $500 already ship free.",
     code: "FREEDELIVERY",
-    fine: "Valid inside our Broward County service area. One use per order. Does not apply to freight-only commercial sizes.",
+    fine: "Valid on orders shipping anywhere in the continental US. One use per order. Does not apply to freight-only commercial sizes.",
     expires: "November 30, 2026",
   },
   {
     id: "fleet",
     group: "tire",
     title: "Fleet & Contractor Pricing — 15% Off",
-    deal: "Running work trucks, vans or a small fleet? Take 15% off any parts order of $1,000 or more.",
+    deal: "Running work trucks, vans or a small fleet? Take 15% off any parts order of $1,000 or more, shipped anywhere in the continental US.",
     code: "FLEET15",
     fine: "Parts subtotal of $1,000 or more before tax. Business orders only — we may ask for a company name at confirmation. Cannot be combined with NEWCUSTOMER.",
     expires: "December 31, 2026",
@@ -76,18 +76,18 @@ const OFFERS = [
     id: "buy-three",
     group: "tire",
     title: "Buy 3 Tires, Get The 4th Half Off",
-    deal: "On select passenger and light-truck sizes. Half off applies to the lowest-priced tire in the set.",
-    fine: "Select sizes only while stock lasts. Mention this offer when you book or when a tech calls to confirm your order. Not valid on commercial or trailer tires.",
+    deal: "On select passenger and light-truck sizes. Half off applies to the lowest-priced tire in the set, shipped or fitted.",
+    fine: "Select sizes only, while the promotion runs. Mention this offer when a tech calls to confirm your order. Not valid on commercial or trailer tires.",
     expires: "October 31, 2026",
   },
   /* ---------------- Service specials ---------------- */
   {
     id: "mobile-install",
     group: "service",
-    title: "$25 Off Mobile Installation",
-    deal: "Add installation to your cart and take $25 off the install line. The van comes to your home, office or jobsite.",
+    title: "$25 Off Installation",
+    deal: "Switch a line to free ship-to-store install and take $25 off the install line. South Florida customers only.",
     code: "MOBILE25",
-    fine: "Requires mobile installation on at least one line in your order. One use per order. Does not apply to shop-bay installs.",
+    fine: "Requires installation on at least one line in your order, fitted at our South Florida shop or by the mobile van. One use per order.",
     expires: "December 31, 2026",
     featured: true,
   },
@@ -95,23 +95,23 @@ const OFFERS = [
     id: "flat-repair",
     group: "service",
     title: "Free Flat Repair With Any 4-Tire Install",
-    deal: "Pick up a nail in the first year after we install four tires? We plug and patch it on-site at no charge.",
-    fine: "One repair per set, within 12 months of installation. Repairable punctures in the tread area only — sidewall damage and run-flat separations excluded. Inside our service area.",
+    deal: "Pick up a nail in the first year after we install four tires? We plug and patch it at no charge.",
+    fine: "Local installs only. One repair per set, within 12 months of installation. Repairable punctures in the tread area only — sidewall damage and run-flat separations excluded.",
     expires: "December 31, 2026",
   },
   {
     id: "oil-change",
     group: "service",
     title: "$20 Off A Mobile Oil Change",
-    deal: "Full-synthetic oil and a new filter, done in your driveway while you keep working.",
-    fine: "Up to 5 quarts of full-synthetic; additional quarts and specialty filters billed at cost. Mention this offer when you book. Diesel and heavy-duty applications quoted separately.",
+    deal: "Full-synthetic oil and a new filter, done in your driveway while you keep working. South Florida only.",
+    fine: "Mobile service area only. Up to 5 quarts of full-synthetic; additional quarts and specialty filters billed at cost. Mention this offer when you book. Diesel and heavy-duty applications quoted separately.",
     expires: "November 15, 2026",
   },
   {
     id: "brakes",
     group: "service",
     title: "$30 Off Brake Pads & Rotors",
-    deal: "Per axle, on any pad-and-rotor replacement booked with a tire or wheel order.",
+    deal: "Per axle, on any pad-and-rotor replacement booked with a tire or wheel order. South Florida only.",
     fine: "Per axle, parts and labor. Must be booked at the same time as a tire or wheel purchase. Brake work is performed at the Sunrise shop.",
     expires: "December 15, 2026",
   },
@@ -297,18 +297,18 @@ export default function CouponsPage() {
     <>
       <Seo
         title="Coupons & Current Offers"
-        description="Live tire specials, mobile service discounts and manufacturer rebates from Extreme Mobile Tires in Sunrise, FL. Copy a promo code and use it at checkout."
+        description="Live tire specials, free-shipping codes, set-of-four deals and manufacturer rebates from TireDrop. Copy a promo code and use it at checkout."
       />
       <Breadcrumbs trail={[{ label: "Coupons" }]} />
 
       <PageHero
         eyebrow="Current Offers"
-        title="Coupons & Rebates"
-        lede="Real money off real work. Copy a code straight into your cart, or mention the offer when a tech calls to confirm your order."
+        title="Deals & Rebates"
+        lede="Real money off a real order. Copy a code straight into your cart, or mention the offer when a tech calls to confirm it."
       >
         <div className="flex flex-wrap gap-3">
-          <Link to="/schedule" className="btn-primary">
-            Book Mobile Service
+          <Link to="/tires" className="btn-primary">
+            Shop Tires
           </Link>
           <a href={BUSINESS.phoneHref} className="btn-ghost-light">
             <Phone size={16} aria-hidden />
@@ -421,8 +421,8 @@ export default function CouponsPage() {
                   copy: "Offers without a code get applied by hand. Say the offer name when a team member calls to confirm fitment and take payment.",
                 },
                 {
-                  title: "Claim your rebate at the appointment",
-                  copy: "Manufacturer rebates are submitted to the tire maker, not to us. The tech leaves you an itemized invoice and walks you through the claim form.",
+                  title: "Claim your rebate after the sale",
+                  copy: "Manufacturer rebates are submitted to the tire maker, not to us. You get an itemized invoice with the order, and we walk you through the claim form.",
                 },
               ].map((s, i) => (
                 <li key={s.title} className="flex gap-4">
@@ -447,8 +447,8 @@ export default function CouponsPage() {
                 line, never taxes, disposal fees or shop supplies.
               </li>
               <li>
-                Offers apply to in-stock items inside our Broward County service area and can't be
-                applied to an order that has already been completed and paid.
+                Offers apply to orders shipping within the continental US and can't be applied to
+                an order that has already been completed and paid.
               </li>
               <li>
                 Manufacturer rebates are funded and fulfilled by the tire maker. Qualifying lines,
@@ -456,8 +456,9 @@ export default function CouponsPage() {
                 confirm eligibility before you buy.
               </li>
               <li>
-                Mobile installation offers require an address we can safely work at — a level, paved
-                surface with room for the van and one working side of the vehicle.
+                Installation offers are South Florida only. Mobile installs also need an address we
+                can safely work at — a level, paved surface with room for the van and one working
+                side of the vehicle.
               </li>
               <li>
                 Prices, availability and offers are subject to change. Where an offer conflicts with
@@ -481,19 +482,19 @@ export default function CouponsPage() {
           <p className="eyebrow mb-2">{BUSINESS.tagline}</p>
           <h2 className="h2">Ready to put an offer to work?</h2>
           <p className="lede mx-auto mt-3 max-w-xl text-bone/70">
-            Book a window that fits your day and we'll bring the shop to your driveway. Serving
-            Broward County since {BUSINESS.foundedYear}.
+            Find your size, drop a code in the cart and pick your delivery. {BUSINESS.poweredBy}{" "}
+            since {BUSINESS.foundedYear}.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
-            <Link to="/schedule" className="btn-primary">
-              Schedule Service
+            <Link to="/tires" className="btn-primary">
+              Shop Tires
             </Link>
             <a href={BUSINESS.phoneHref} className="btn-ghost-light">
               <Phone size={16} aria-hidden />
               Call {BUSINESS.phone}
             </a>
-            <Link to="/tires" className="btn-ghost-light">
-              Shop Tires
+            <Link to="/wheels" className="btn-ghost-light">
+              Shop Wheels
             </Link>
           </div>
         </div>

@@ -33,40 +33,40 @@ const REVIEWS = [
     name: "Marisol R.",
     rating: 5,
     date: "August 28, 2026",
-    service: "Mobile Tire Installation",
-    body: "Four new tires in my own driveway in Plantation while I was on a work call. Tech laid down a mat, worked clean, torqued everything by hand and showed me the old tread next to the new. I never moved the car.",
+    service: "Ship to Store & Install",
+    body: "Ordered four Continentals and had them sent to the shop instead of my house. They called when the order landed, checked the sizes against what I bought, and fitted them the same week. Never had to wrestle tires into my trunk.",
   },
   {
     id: 2,
     name: "Devon P.",
     rating: 5,
     date: "August 19, 2026",
-    service: "Mobile Tire Repair",
-    body: "Picked up a screw in the rear tire at the office park off Oakland Park. Called at 9, van was there before lunch. They pulled the tire, patched it from the inside and rebalanced it. Back to my desk in half an hour.",
+    service: "Shipped Order",
+    body: "Bought a set for a Civic and shipped them to my place in Ohio. Boxed properly, right sizes, no scuffs on the sidewalls. My own shop mounted them and said they looked exactly like what I paid for.",
   },
   {
     id: 3,
     name: "Alina K.",
     rating: 5,
     date: "August 6, 2026",
-    service: "Tire Balancing",
-    body: "Had a shimmy at highway speed for months and two other places told me it was normal. These guys rebalanced all four in my building's garage and it is dead smooth now. Wish I had called sooner.",
+    service: "Fitment Help",
+    body: "I had no idea what the load index on my SUV was supposed to be. Called, read the door placard to them over the phone, and they told me which of the two options they would actually put on their own truck. Ordered that one.",
   },
   {
     id: 4,
     name: "Rob T.",
     rating: 4,
     date: "July 30, 2026",
-    service: "Mobile Tire Installation",
-    body: "Good work and fair price on a set for my F-150. Arrival window was a little wide and they landed at the back end of it, but they called ahead so I could plan around it. Job itself was clean.",
+    service: "Shipped Order",
+    body: "Good price on a set for my F-150 and the order was right. The tracking updates were thinner than I would like, so I called for a status and got a straight answer. Would buy again, just wish the emails said more.",
   },
   {
     id: 5,
     name: "Grace N.",
     rating: 5,
     date: "July 22, 2026",
-    service: "Tire Rotation",
-    body: "Standing rotation appointment every few months at my house in Davie. Same tech most times, which I like. He checks pressures, looks at the brakes while he is in there and tells me straight when something is getting close.",
+    service: "Mobile Installation",
+    body: "Standing rotation appointment at my house in Davie. Same tech most times, which I like. He checks pressures, looks at the brakes while he is in there and tells me straight when something is getting close.",
   },
   {
     id: 6,
@@ -74,39 +74,39 @@ const REVIEWS = [
     rating: 5,
     date: "July 9, 2026",
     service: "Commercial & Fleet",
-    body: "We run six work vans out of a yard in Tamarac. They come to us on a schedule instead of us losing a van for a day. One invoice, no downtime. That alone is worth the call.",
+    body: "We run six work vans out of a yard in Tamarac. Tires get ordered online, shipped to the shop, and they come to us to fit them. One invoice, no downtime. That alone is worth the call.",
   },
   {
     id: 7,
     name: "Priya S.",
     rating: 5,
     date: "June 27, 2026",
-    service: "Mobile Tire Repair",
-    body: "Flat in the driveway on a Saturday morning with a car seat still buckled in the back. They came out, fixed it properly instead of selling me a new tire, and were gone in under 40 minutes. Honest people.",
+    service: "Returns & Support",
+    body: "I ordered the wrong size — my fault entirely, I read the spare instead of the front. They walked me through the return, got the right set on the way, and nobody made me feel like an idiot about it.",
   },
   {
     id: 8,
     name: "Cameron W.",
     rating: 4,
     date: "June 15, 2026",
-    service: "Wheel Alignment",
-    body: "Alignment at the Sunrise shop after I put new tires on. Steering is centered again and they showed me the before and after printout. Only reason it is not five is the wait — it was busy that morning.",
+    service: "Ship to Store & Install",
+    body: "Tires shipped to the Sunrise shop and I added an alignment while it was on the rack. Steering is centered again and they showed me the before and after printout. Only reason it is not five is the wait — it was busy that morning.",
   },
   {
     id: 9,
     name: "Yvonne A.",
     rating: 5,
     date: "June 3, 2026",
-    service: "Mobile Tire Installation",
-    body: "Ordered tires through them, they showed up at my mother's place in Lauderhill and did the whole set in her carport. She is 78 and did not have to sit in a waiting room. That is the whole reason I called.",
+    service: "Mobile Installation",
+    body: "Ordered tires through the site for my mother in Lauderhill and had the van do the install in her carport. She is 78 and did not have to sit in a waiting room. That is the whole reason I bought from them.",
   },
   {
     id: 10,
     name: "Jared L.",
     rating: 3,
     date: "May 24, 2026",
-    service: "Mobile Tire Installation",
-    body: "The install was solid and the tech knew his stuff. The scheduling got crossed and I had to call twice to confirm the day, which was frustrating. They did own it and knocked something off the bill.",
+    service: "Shipped Order",
+    body: "The tires themselves were spot on. One of the four was on a separate delivery and nobody warned me, so I sat there thinking my order was short. They sorted it out on the phone in five minutes, but a heads up would have saved the worry.",
   },
   {
     id: 11,
@@ -121,24 +121,24 @@ const REVIEWS = [
     name: "Andres V.",
     rating: 5,
     date: "April 29, 2026",
-    service: "Mobile Tire Installation",
-    body: "Jobsite call in Weston. Truck was sitting on a shredded tire and we had crews waiting. They rolled in, swapped two tires on the spot and we did not lose the afternoon.",
+    service: "Wheel & Tire Package",
+    body: "Bought a staggered wheel and tire package for a build in Texas. They double-checked offset and clearance with me before the order went through and caught that my first pick would have rubbed. Saved me a very expensive mistake.",
   },
   {
     id: 13,
     name: "Leah F.",
     rating: 2,
     date: "April 14, 2026",
-    service: "Quote Request",
-    body: "Quoted one size, then the tire was not in stock and the replacement option was more than I wanted to spend. To be fair they did not push me and offered to order the original, but I needed it that week.",
+    service: "Shipped Order",
+    body: "The size I wanted turned out to be unavailable after I ordered, and the alternative cost more than I planned to spend. To be fair they called instead of swapping it quietly, and refunded me without any argument — but I still ended up buying elsewhere that week.",
   },
   {
     id: 14,
     name: "Omar H.",
     rating: 5,
     date: "April 2, 2026",
-    service: "Brake Repair",
-    body: "Brought it into the Sunrise shop for brakes. They called before doing anything extra, sent me a price for the rotors and let me decide. No surprises on the final bill, which is rarer than it should be.",
+    service: "Shop Service",
+    body: "Brought it into the Sunrise shop for brakes after buying tires from them online. They called before doing anything extra, sent me a price for the rotors and let me decide. No surprises on the final bill, which is rarer than it should be.",
   },
 ];
 
@@ -200,13 +200,13 @@ function LeaveReview() {
         <CheckCircle2 size={32} aria-hidden className="mb-4 text-drop" />
         <h3 className="h3">Thank you — that means a lot.</h3>
         <p className="mt-3 text-sm leading-relaxed text-smoke">
-          We read every one of these. If something in your visit needs fixing,
-          call the shop at{" "}
+          We read every one of these. If something about your order or your
+          install still needs fixing, call us at{" "}
           <a href={BUSINESS.phoneHref} className="text-drop underline">
             {BUSINESS.phone}
           </a>{" "}
-          and ask for the service coordinator — we would rather solve it than
-          read about it later.
+          and ask for customer care — we would rather solve it than read about
+          it later.
         </p>
         <a
           href={GOOGLE_REVIEWS_HREF}
@@ -225,7 +225,7 @@ function LeaveReview() {
     <form noValidate onSubmit={handleSubmit} className="card p-6 md:p-8">
       <h3 className="h3 mb-2">Leave a Review</h3>
       <p className="mb-6 text-sm text-smoke">
-        Had work done by us? Tell us how it went.
+        Bought tires from us, or had them fitted? Tell us how it went.
       </p>
 
       <fieldset
@@ -275,7 +275,7 @@ function LeaveReview() {
         id="review-body"
         rows={5}
         className="field resize-y"
-        placeholder="What did we do, where were you, and how did it go?"
+        placeholder="What did you order, was it shipped or fitted, and how did it go?"
         value={text}
         onChange={(e) => {
           setText(e.target.value);
@@ -323,13 +323,13 @@ export default function ReviewsPage() {
     <>
       <Seo
         title="Customer Reviews"
-        description={`See what Broward County drivers say about ${BUSINESS.name} — mobile tire installs, driveway flat repairs and shop work in ${BUSINESS.address.city}, FL.`}
+        description={`What customers say about ${BUSINESS.name} — tires shipped across the country, ship-to-store orders fitted in ${BUSINESS.shop.city}, FL, and mobile installs around Broward County.`}
       />
 
       <PageHero
         eyebrow="Reviews"
-        title="What Broward drivers say"
-        lede="Driveway installs, office-park flat repairs, fleet calls and shop work. The good, and the ones where we had to make something right."
+        title="Shipped, fitted, and everything after"
+        lede="Orders that went out to driveways in other states, sets fitted at the shop, van calls around Broward. The good ones, and the ones where we had to put something right."
       >
         <a href={BUSINESS.phoneHref} className="btn-ghost-light">
           <Phone size={18} aria-hidden />
@@ -361,6 +361,10 @@ export default function ReviewsPage() {
               Review us on Google
               <ExternalLink size={14} aria-hidden />
             </a>
+            <p className="mt-4 text-xs leading-relaxed text-smoke">
+              The Google listing belongs to {BUSINESS.parent}, the shop behind{" "}
+              {BUSINESS.name}.
+            </p>
           </div>
 
           <div className="card p-6 md:p-8">
@@ -395,8 +399,9 @@ export default function ReviewsPage() {
 
             <p className="mt-6 flex items-start gap-2 text-xs leading-relaxed text-smoke">
               <Truck size={15} aria-hidden className="mt-px shrink-0 text-drop" />
-              Most of these came from mobile calls — driveways, office lots and
-              jobsites across {BUSINESS.serviceArea.length} Broward cities.
+              These span both halves of the business: orders shipped out to
+              customers across {BUSINESS.shipping.area}, and tires fitted here
+              in {BUSINESS.shop.city} or at an address around Broward.
             </p>
           </div>
         </div>
@@ -474,14 +479,14 @@ export default function ReviewsPage() {
             <SectionHead
               eyebrow="Your Turn"
               title="Leave a review"
-              lede="Feedback is how a family shop gets better. Tell us what went right — and tell us what did not, so we can fix it."
+              lede="Feedback is how a family shop gets better, online or in the bay. Tell us what went right — and what did not, so we can fix it."
             />
             <div className="card p-6">
               <h3 className="h3 mb-3">Something go wrong?</h3>
               <p className="text-sm leading-relaxed text-smoke">
-                Call the shop before you post. Most complaints we hear are
-                things we can still put right — a re-torque, a rebalance, a
-                billing question. We would rather earn the stars back.
+                Call us before you post. Most complaints we hear are things we
+                can still put right — a wrong size, a damaged box, a re-torque,
+                a billing question. We would rather earn the stars back.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 <a href={BUSINESS.phoneHref} className="btn-primary btn-sm">

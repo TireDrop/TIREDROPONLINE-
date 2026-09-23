@@ -1,3 +1,18 @@
+// NOTE FOR THE BUILD TEAM: this is plain-language boilerplate written for a
+// national online tire and wheel retailer that drop-ships from distributors.
+// It has not been reviewed by an attorney, and several specifics are written
+// as "the window shown at checkout" or "as stated on your order confirmation"
+// precisely because they must not be invented. Before launch, have counsel
+// review the whole document and pin down at least:
+//   - the legal entity name and state of formation behind TireDrop
+//   - the return window in days, who pays return shipping, and any restocking
+//     fee, then state the numbers here and on the checkout page
+//   - the deadline for reporting shipping damage, shortages or wrong items
+//   - when title and risk of loss pass on a drop-shipped order
+//   - warranty administration: which claims the manufacturer handles directly
+//   - whether an arbitration or class-action waiver clause is wanted
+//   - state-specific privacy rights language (CA, VA, CO and others)
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { Phone, ShieldCheck } from "lucide-react";
@@ -15,81 +30,146 @@ const DOCS = {
   terms: {
     title: "Terms of Use",
     eyebrow: "Legal",
-    seoDescription: `The terms that apply to using the ${BUSINESS.name} website, booking service and buying tires and wheels.`,
-    lede: "The ground rules for using this website and for the work we do. Written to be read, not to be skimmed past.",
+    seoDescription: `The terms that apply to buying tires and wheels from ${BUSINESS.name} — ordering, pricing, shipping, returns, installation and Florida governing law.`,
+    lede: "The ground rules for buying from this site and for the work we do on your vehicle. Written to be read, not to be skimmed past.",
     sections: [
       {
-        id: "acceptance",
-        heading: "1. Using this site",
+        id: "who-we-are",
+        heading: "1. Who you are buying from",
         paragraphs: [
-          `This website is operated by ${BUSINESS.name}, a tire and auto service business located at ${BUSINESS.address.full}. By browsing the site, requesting a quote, booking an appointment or placing an order, you are agreeing to the terms on this page.`,
-          "Please use the site for its intended purpose: learning about our services, shopping for tires and wheels, and arranging work on your vehicle. Do not attempt to interfere with the site, scrape it at scale, or submit information that is not yours to submit.",
+          `${BUSINESS.name} is the online tire and wheel store of ${BUSINESS.parent}, the tire shop at ${BUSINESS.shop.full}. Orders placed on this site are fulfilled by shipping direct from our distributors — we do not hold stock of our own.`,
+          `We sell to customers throughout ${BUSINESS.shipping.area}. Installation, whether at the shop or from one of our mobile vans, is available only in South Florida. Those are two different things, and this document treats them as such.`,
+          `Questions about anything here: call ${BUSINESS.phone} during business hours, or use the contact form. There is no email address to write to — the phone and the form are the channels.`,
+        ],
+      },
+      {
+        id: "using-the-site",
+        heading: "2. Using this site",
+        paragraphs: [
+          "By browsing the site, adding to a cart, placing an order or booking an appointment, you are agreeing to the terms on this page.",
+          "Please use the site for its intended purpose: researching tires and wheels, buying them, and arranging work on your vehicle. Do not attempt to interfere with the site, scrape it at scale, resell access to it, or submit information that is not yours to submit.",
+          "You must be at least 18 years old and able to enter a contract to place an order.",
+        ],
+      },
+      {
+        id: "orders",
+        heading: "3. Placing an order, and when it is accepted",
+        paragraphs: [
+          "Adding something to the cart does not reserve it. When you complete checkout you are making an offer to buy, and we accept that offer when the order is confirmed as placed with the distributor. Until then, no contract exists between us.",
+          "We may decline or cancel an order — before or after payment — if the item turns out to be unavailable, if a price or specification was listed in error, if we cannot verify the payment or the shipping address, or if the order looks fraudulent. If we do, you get a full refund of anything you have paid, and we will tell you why.",
+          "Every order gets an order number. Quote it when you call; it is the fastest way for us to find you.",
         ],
       },
       {
         id: "pricing",
-        heading: "2. Product information, pricing and availability",
+        heading: "4. Prices, product information and availability",
         paragraphs: [
-          "We try hard to keep prices, specifications, fitment details and stock counts accurate. Even so, tire pricing moves, inventory turns over daily, and mistakes happen. Nothing on this site is a guaranteed offer to sell at a listed price.",
-          "If a price or availability turns out to be wrong after you place an order, we will contact you, explain the difference and give you the choice to proceed, pick an alternative or cancel for a full refund of anything you have paid. We will not quietly substitute a different tire, size, load rating or speed rating without telling you first.",
-          "Images and illustrations on this site may be representative rather than exact. When fitment matters, confirm it with us before you buy — a quick call is faster than a return.",
+          "We try hard to keep prices, specifications, fitment details and availability accurate. Even so, tire pricing moves, distributor stock turns over daily, and mistakes happen. Nothing on this site is a guaranteed offer to sell at a listed price.",
+          "If a price or availability turns out to be wrong after you order, we will contact you, explain the difference, and give you the choice to proceed, pick an alternative or cancel for a full refund. We will not quietly substitute a different brand, size, load index or speed rating without telling you first.",
+          "Prices are in US dollars and do not include taxes, which are calculated at checkout where they apply. Images are representative: tread patterns, sidewall markings and wheel finishes can vary between production runs.",
+          "Promotions, coupons and rebates each have their own terms, and cannot be combined unless we say so. Manufacturer rebates are administered by the manufacturer, not by us.",
+        ],
+      },
+      {
+        id: "fitment",
+        heading: "5. Fitment is a shared job",
+        paragraphs: [
+          "You are responsible for ordering the correct size, load index and speed rating for your vehicle. The numbers on the placard inside your driver's door are the reference, not what happens to be on the car now — a previous owner or shop may have fitted something else.",
+          "We will help. Call us before you order and we will read a fitment through with you, and we would rather talk you out of the wrong tire than process the return afterward. That help is advice given in good faith; it does not shift responsibility for the final choice, or replace your owner's manual or the vehicle manufacturer's specifications.",
+          "Wheel fitment — diameter, width, offset, bolt pattern, center bore and brake clearance — is unforgiving. Tell us about lift kits, big brake kits, spacers or anything non-standard before you buy.",
+        ],
+      },
+      {
+        id: "shipping",
+        heading: "6. Shipping and delivery",
+        paragraphs: [
+          `We ship to street addresses in ${BUSINESS.shipping.area}. We do not currently ship to Alaska, Hawaii, US territories or international destinations.`,
+          "Shipping method, cost and the estimated delivery window are shown at checkout and on your order confirmation. Estimates are estimates: they come from the distributor and the carrier, and weather, freight backlogs and delivery exceptions can move them. We do not promise a delivery date on this page, and neither should anyone else.",
+          "Orders can ship from more than one distributor location, so it is normal for a set of four to arrive in more than one delivery. If part of your order lands and the rest has not, call us before you worry.",
+          "Someone should be available to receive the shipment. If a delivery is refused or goes unclaimed and comes back to the distributor, we will refund the order less any shipping and return costs actually charged to us.",
+        ],
+      },
+      {
+        id: "ship-to-store",
+        heading: "7. Free ship-to-store and pickup",
+        paragraphs: [
+          `You can send an order to the shop at ${BUSINESS.shop.full} instead of to your own address, at no shipping cost to you. We sign for it, check what arrived against what you bought, and call you to arrange the install or the pickup.`,
+          "Please wait for that call before driving over — an order is not ready until we have physically checked it in. Bring your order number and photo ID when you collect.",
+          "We will hold a ship-to-store order for a reasonable period after we tell you it has arrived. If it goes uncollected and unarranged well beyond that, call us; we will work something out rather than let it sit indefinitely, but we cannot store orders forever.",
         ],
       },
       {
         id: "appointments",
-        heading: "3. Appointments, mobile service and cancellations",
+        heading: "8. Installation appointments",
         paragraphs: [
-          "Appointment times are scheduled windows, not guarantees to the minute. Traffic across Broward County, weather and the job in front of yours all move the clock. If we are running behind, we would rather call you than leave you waiting.",
-          "Mobile service needs a safe, legal, reasonably level place to work beside the vehicle, and enough room to jack it up and run equipment. If the location is unsafe — soft ground, a steep slope, a spot where we cannot work without risking you, us or the vehicle — our technician may decline to perform the work there and we will help you find an alternative, including bringing the vehicle to the Sunrise shop.",
-          `Plans change; we understand that. Please give us as much notice as you can if you need to cancel or move an appointment — call ${BUSINESS.phone} during business hours. Repeated no-shows on mobile calls may mean we ask for confirmation before dispatching a van in future, since a wasted trip is a route slot another customer needed.`,
-          "Special-order tires and wheels are ordered specifically for your vehicle. Once the order is placed, cancellation may be limited by our supplier's terms. We will tell you if that applies before we order anything.",
+          "Installation is available at the Sunrise shop, and by mobile van within our South Florida install area. Appointment times are scheduled windows, not guarantees to the minute — traffic, weather and the job in front of yours all move the clock. If we are running behind, we would rather call you than leave you waiting.",
+          "Mobile service needs a safe, legal, reasonably level place to work beside the vehicle, with room to jack it up and run equipment. If the location is not safe — soft ground, a steep slope, a spot where working would risk you, us or the vehicle — the technician may decline to work there, and we will help you find an alternative, including bringing the vehicle to the shop.",
+          `Plans change; we understand that. Give us as much notice as you can if you need to cancel or move an appointment — call ${BUSINESS.phone} during business hours. Repeated no-shows on mobile calls may mean we ask for confirmation before dispatching a van in future, since a wasted trip is a slot another customer needed.`,
+          "We will tell you before the work starts if a vehicle needs something beyond what you booked — a seized lug, a TPMS sensor that has died, a wheel that will not come clean. Nothing extra happens without your approval.",
         ],
       },
       {
-        id: "payment",
-        heading: "4. Orders and payment",
+        id: "returns",
+        heading: "9. Returns, cancellations and refunds",
         paragraphs: [
-          "Payment is due when the work is completed unless we have agreed otherwise in writing, such as on a commercial or fleet account. Quotes are estimates based on what we know at the time; if we find additional work is needed, we will contact you for approval before doing it.",
-          "Financing, where offered, is provided by a third-party lender under their own terms. We do not make credit decisions and we do not set rates. See our financing page for the details before you apply.",
+          "If you want to cancel, call as early as you can. Once an order has been placed with the distributor or has shipped, it can no longer simply be stopped, and it has to be handled as a return.",
+          "To be returnable, tires and wheels must be unused and uninstalled, in original condition, with any labels, chalk marks and packaging intact. Once a tire has been mounted on a wheel it is not returnable, even if it was never driven on — that is the distributor's rule, not one we invented, and it is why the fitment conversation matters.",
+        ],
+        list: [
+          "The return window and any restocking fee are stated at checkout and on your order confirmation. Check them before you buy, and call us if anything is unclear.",
+          "Return shipping on a change-of-mind return is generally the customer's cost; if we sent the wrong thing, it is ours.",
+          "Special orders and custom wheel or tire packages may not be returnable once placed. We will say so before we order.",
+          "Refunds go back to the original payment method. If you financed the order, the refund is credited against your balance with the lender and may take a billing cycle to appear.",
+          "Do not send anything back before you speak to us. Returns need to be authorized and routed to the right place, or they can be refused on arrival.",
+        ],
+      },
+      {
+        id: "damaged",
+        heading: "10. Damaged, incorrect or missing items",
+        paragraphs: [
+          "Inspect what arrives. If the packaging is badly damaged, note it with the driver if you can, and either way photograph it before you unwrap anything.",
+          "Call us promptly — within the reporting period stated on your order confirmation — if something arrives damaged, if the wrong item was sent, or if part of the order is missing. Carriers and distributors both impose deadlines on these claims, and a late report can cost you the claim entirely.",
+          "When it is our error or a shipping problem, we sort it out: a replacement sent, or a refund, at no extra cost to you. Keep the packaging until it is resolved — the claim may require it.",
         ],
       },
       {
         id: "warranties",
-        heading: "5. Workmanship, tires and warranties",
+        heading: "11. Workmanship, tires and warranties",
         paragraphs: [
           "We stand behind the work our technicians perform. If something we installed was not done right, tell us promptly and give us the chance to inspect it and put it right.",
-          "Tires, wheels and parts carry whatever manufacturer warranty the maker provides. Those warranties come from the manufacturer, not from us, and their terms, exclusions and claim processes are theirs. We will help you file a claim and will tell you honestly what we think it is worth pursuing.",
-          "Normal wear, road hazard damage, curb and pothole impacts, improper inflation, alignment issues we did not cause, and damage from continuing to drive on a failing tire are not workmanship issues. Beyond any express warranty we give you in writing, services are provided as-is to the extent Florida law permits.",
-        ],
-      },
-      {
-        id: "third-party",
-        heading: "6. Links and third-party services",
-        paragraphs: [
-          "This site may link to other companies — manufacturers, mapping providers, payment processors, financing partners. We do not control those sites, and their terms and privacy practices are their own. Read them when it matters to you.",
+          "Tires, wheels and parts carry whatever warranty the manufacturer provides. Those warranties come from the manufacturer, not from us, and their terms, exclusions and claim processes are theirs. Mileage warranties in particular usually require documented rotations and correct inflation. We will help you file a claim and will tell you honestly what we think it is worth pursuing.",
+          "Normal wear, road hazard damage, curb and pothole impacts, improper inflation, alignment problems we did not cause, racing or off-road use, and damage from continuing to drive on a failing tire are not workmanship issues. Beyond any express warranty given to you in writing, products and services are provided as-is to the extent Florida law permits.",
         ],
       },
       {
         id: "liability",
-        heading: "7. Limitation of liability",
+        heading: "12. Limitation of liability",
         paragraphs: [
-          "To the fullest extent allowed by Florida law, our liability arising out of the use of this website, or out of any single service transaction, is limited to the amount you paid us for the service or product at issue.",
-          "We are not liable for indirect or consequential losses — lost income, missed appointments, rental costs or downtime — arising from a delay, a scheduling change or a site outage. Nothing in these terms limits any liability that cannot lawfully be limited, including for personal injury caused by negligence.",
+          "To the fullest extent allowed by Florida law, our liability arising out of the use of this website, or out of any single order or service transaction, is limited to the amount you paid us for the product or service at issue.",
+          "We are not liable for indirect or consequential losses — lost income, missed appointments, rental costs, towing or downtime — arising from a delivery delay, a scheduling change or a site outage. Nothing in these terms limits any liability that cannot lawfully be limited, including for personal injury caused by negligence.",
+        ],
+      },
+      {
+        id: "third-party",
+        heading: "13. Links and third-party services",
+        paragraphs: [
+          "This site relies on other companies — distributors, carriers, manufacturers, mapping, payment processing and financing. We do not control their sites or their systems, and their terms and privacy practices are their own. Read them when it matters to you.",
         ],
       },
       {
         id: "governing-law",
-        heading: "8. Governing law",
+        heading: "14. Governing law",
         paragraphs: [
-          "These terms are governed by the laws of the State of Florida, without regard to its conflict-of-law rules. Any dispute that cannot be worked out directly will be brought in the state or federal courts located in Broward County, Florida, and you and we agree to that venue.",
+          "These terms are governed by the laws of the State of Florida, without regard to its conflict-of-law rules, and without regard to where in the country you happen to be when you order.",
+          "Any dispute that cannot be worked out directly will be brought in the state or federal courts located in Broward County, Florida, and you and we agree to that venue.",
           "We would much rather sort a problem out over the phone than in a courtroom. Call us first.",
         ],
       },
       {
         id: "changes",
-        heading: "9. Changes to these terms",
+        heading: "15. Changes to these terms",
         paragraphs: [
-          "We may update these terms as the business changes. The revision date at the top of this page tells you when it was last touched. Continuing to use the site after an update means the current version applies.",
+          "We may update these terms as the business changes. The revision date at the top of this page tells you when it was last touched, and the terms that apply to your order are the ones published when you placed it.",
         ],
       },
     ],
@@ -98,31 +178,33 @@ const DOCS = {
   privacy: {
     title: "Privacy Policy",
     eyebrow: "Legal",
-    seoDescription: `How ${BUSINESS.name} collects, uses and protects customer information, and how to ask us to delete it.`,
+    seoDescription: `How ${BUSINESS.name} collects, uses and protects customer information when you order tires online or have them installed, and how to ask us to delete it.`,
     lede: "What we collect, why we collect it, who else touches it, and how to tell us to stop. Plain language, no dark patterns.",
     sections: [
       {
         id: "what-we-collect",
         heading: "1. What we collect",
         paragraphs: [
-          "We collect what we need to quote work, schedule it, perform it and follow up afterward. In practice that means:",
+          "We collect what we need to sell you tires, get them to you, fit them if you want that, and follow up afterward. In practice that means:",
         ],
         list: [
-          "Contact details you give us: name, phone number, email address and the service address where you want the van to meet you",
-          "Vehicle information: year, make, model, tire and wheel sizes, and notes about the work performed",
-          "Appointment and order history, including what we quoted and what we did",
+          "Contact details you give us: name, phone number and email address",
+          "Addresses: the billing address for your payment, and the shipping address the order goes to — or the shop, if you chose ship-to-store",
+          "Vehicle information: year, make, model, tire and wheel sizes, and notes about any work performed",
+          "Order history: what you bought, what it cost, what we quoted and what we did",
+          "Payment information, handled by our payment processor — we do not store full card numbers",
           "Messages you send through the contact form or leave on the phone",
           "Basic technical information your browser sends automatically, such as device type, browser and general location, used to keep the site working",
         ],
         after: [
-          "We do not ask for information we have no use for, and we do not require an account to browse the site or call the shop.",
+          "We do not ask for information we have no use for, and you do not need an account to browse the site or call us.",
         ],
       },
       {
         id: "how-we-use-it",
         heading: "2. How we use it",
         paragraphs: [
-          "To answer your question, build a quote, route a van to the right address, perform the work, take payment and handle any follow-up or warranty claim. We also use aggregate, non-identifying information to understand which pages people actually use so we can improve the site.",
+          "To answer your question, price an order, place it with the distributor, get it shipped to the right address, take payment, book an install, and handle any return, claim or warranty question afterward. We also use aggregate, non-identifying information to understand which pages people actually use, so we can improve the site.",
           "If you ask us to, we may send occasional service reminders — a rotation coming due, for example. You can tell us to stop at any time and we will.",
         ],
       },
@@ -130,7 +212,7 @@ const DOCS = {
         id: "cookies",
         heading: "3. Cookies and site analytics",
         paragraphs: [
-          "This site uses a small number of cookies and similar browser storage. Some are strictly necessary — they remember what is in your cart and keep the checkout working. Others, if enabled, help us measure traffic in aggregate so we know which pages are worth improving.",
+          "This site uses a small number of cookies and similar browser storage. Some are strictly necessary — they remember what is in your cart and keep checkout working. Others, if enabled, help us measure traffic in aggregate so we know which pages are worth improving.",
           "You can block or delete cookies in your browser settings. Strictly necessary cookies cannot be turned off without breaking parts of the site, such as the cart. We do not use cookies to build advertising profiles about you across unrelated websites.",
         ],
       },
@@ -141,9 +223,11 @@ const DOCS = {
           "A short list, and only where there is a reason:",
         ],
         list: [
-          "Payment processors, to take card payments securely — we do not store full card numbers ourselves",
+          "Distributors, who receive the shipping address and order details because they are the ones packing and dispatching your tires",
+          "Shipping carriers, for delivery and tracking",
+          "Payment processors, to take card payments securely",
           "Financing providers, if you choose to apply; your application goes to them under their own privacy policy, not ours",
-          "Suppliers and manufacturers, when a special order or a warranty claim requires it",
+          "Manufacturers, when a warranty claim requires it",
           "Service providers that host this website and keep it running",
           "Law enforcement or regulators, where we are legally required to respond",
         ],
@@ -155,17 +239,17 @@ const DOCS = {
         id: "retention",
         heading: "5. How long we keep it",
         paragraphs: [
-          "Service and transaction records are kept as long as we need them for warranty, accounting and tax purposes. Contact-form messages are kept while the conversation is live and for a reasonable period after. When information is no longer needed for a legitimate business or legal reason, we dispose of it.",
+          "Order, service and transaction records are kept as long as we need them for warranty, accounting and tax purposes. Contact-form messages are kept while the conversation is live and for a reasonable period after. When information is no longer needed for a legitimate business or legal reason, we dispose of it.",
         ],
       },
       {
         id: "choices",
         heading: "6. Your Privacy Choices",
         paragraphs: [
-          "You have real choices here, and exercising them will not change how we treat you as a customer.",
+          "You have real choices here, and exercising them will not change how we treat you as a customer. Depending on the state you live in, some of these may also be rights you can enforce — we apply them to everyone rather than sorting customers by ZIP code.",
         ],
         list: [
-          "Ask what we hold. Call us and we will tell you what customer records are associated with your name, phone number or vehicle.",
+          "Ask what we hold. Call us and we will tell you what customer records are associated with your name, phone number, order number or vehicle.",
           "Ask us to correct it. If a phone number, address or vehicle detail is wrong, we will fix it.",
           "Ask us to delete it. Call and request deletion. We will remove what we are not required to keep for warranty, accounting or legal reasons, and we will tell you plainly what we had to retain and why.",
           "Opt out of reminders. Say the word on the phone, or reply to any message asking to stop, and we will take you off the reminder list.",
@@ -173,28 +257,28 @@ const DOCS = {
           "We do not sell personal information or share it for cross-context behavioral advertising, so there is nothing for you to opt out of on that front.",
         ],
         after: [
-          `To use any of these, call ${BUSINESS.phone} during business hours or send a message through our contact form. We may need to confirm a couple of details to be sure we are talking to the right person before we change or delete a record.`,
+          `To use any of these, call ${BUSINESS.phone} during business hours or send a message through our contact form. We may need to confirm a couple of details — an order number, say — to be sure we are talking to the right person before we change or delete a record.`,
         ],
       },
       {
         id: "security",
         heading: "7. Security",
         paragraphs: [
-          "We take sensible steps to protect customer information, and we limit access to the people who need it to do the job. No website or business can promise perfect security, and we are not going to pretend otherwise. If something goes wrong in a way that affects you, we will tell you.",
+          "We take sensible steps to protect customer information, and we limit access to the people who need it to do the job. Payment details are handled by our processor rather than kept by us. No website or business can promise perfect security, and we are not going to pretend otherwise. If something goes wrong in a way that affects you, we will tell you.",
         ],
       },
       {
         id: "children",
         heading: "8. Children",
         paragraphs: [
-          "This site is meant for adults arranging vehicle service. We do not knowingly collect information from children. If you believe a child has given us information, call us and we will remove it.",
+          "This site is meant for adults buying tires and arranging vehicle service. We do not knowingly collect information from children. If you believe a child has given us information, call us and we will remove it.",
         ],
       },
       {
         id: "privacy-changes",
         heading: "9. Changes to this policy",
         paragraphs: [
-          "If our practices change, we will update this page and change the revision date at the top. Questions about anything here are welcome — call the shop and ask.",
+          "If our practices change, we will update this page and change the revision date at the top. Questions about anything here are welcome — call and ask.",
         ],
       },
     ],
@@ -211,7 +295,7 @@ const DOCS = {
         heading: "1. Our commitment",
         paragraphs: [
           "We are working to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 at Level AA. That standard is our target for this site, and we treat it as a continuing obligation rather than a box to tick once.",
-          "Accessibility work is never truly finished. As we add pages, photography and features, we check them against the same standard.",
+          "This matters more, not less, for an online store: if the only way to buy a set of tires from us is through this website, the website has to work for everybody. As we add pages, product photography and features, we check them against the same standard.",
         ],
       },
       {
@@ -234,7 +318,7 @@ const DOCS = {
         id: "limitations",
         heading: "3. Known limitations",
         paragraphs: [
-          "Being honest about the gaps is part of the job. Content supplied by third parties — mapping, payment and financing tools — is not fully under our control, and its accessibility depends on those providers. Media added over time may briefly appear before captions or full descriptions are in place.",
+          "Being honest about the gaps is part of the job. Content supplied by third parties — mapping, payment, carrier tracking and financing tools — is not fully under our control, and its accessibility depends on those providers. Product data comes from distributor catalogs, so a specification table may occasionally read awkwardly with a screen reader. Media added over time may briefly appear before captions or full descriptions are in place.",
           "If you hit something that does not work, that is information we want. It is usually the fastest route to a fix.",
         ],
       },
@@ -242,15 +326,16 @@ const DOCS = {
         id: "report",
         heading: "4. Report a barrier",
         paragraphs: [
-          `If any part of this site blocks you, call us at ${BUSINESS.phone} during business hours and tell us what happened. It helps if you can mention the page, the browser or assistive technology you were using, and what you were trying to do — but call even if you cannot, and we will work it out together.`,
+          `If any part of this site blocks you, call ${BUSINESS.phone} during business hours and tell us what happened. It helps if you can mention the page, the browser or assistive technology you were using, and what you were trying to do — but call even if you cannot, and we will work it out together.`,
           "We aim to respond to accessibility reports promptly, and to tell you what we are doing about it rather than leave you guessing. If a fix will take time, we will find a way to get you what you needed in the meantime.",
         ],
       },
       {
-        id: "in-person",
-        heading: "5. Service, not just the website",
+        id: "another-way",
+        heading: "5. You can always just call",
         paragraphs: [
-          `Accessibility is not only a web issue. Our whole model is bringing service to where you already are — if getting to the ${BUSINESS.address.city} shop is difficult for any reason, the van can come to your home, your office or wherever the vehicle is parked. Call us and say what you need; we will work around it.`,
+          `If the website is difficult for you to use for any reason, the phone is a full alternative, not a consolation prize. Call ${BUSINESS.phone} and we will look up fitment, read you the options, take the order and arrange the shipping — the same order you would have placed online, placed by a person instead.`,
+          `Locally, accessibility is not only a web issue either. If getting to the ${BUSINESS.shop.city} shop is difficult, the mobile van covers our South Florida install area and can come to your home or workplace. Call and say what you need; we will work around it.`,
         ],
       },
     ],
@@ -287,7 +372,7 @@ export default function LegalPage({ doc = "terms" }) {
                 <li key={s.id}>
                   <a
                     href={`#${s.id}`}
-                    className="text-sm text-smoke transition-colors hover:text-drop"
+                    className="flex min-h-[32px] items-center text-sm text-smoke transition-colors hover:text-drop"
                   >
                     {s.heading}
                   </a>
@@ -298,8 +383,8 @@ export default function LegalPage({ doc = "terms" }) {
             <div className="card mt-6 p-5">
               <ShieldCheck size={20} aria-hidden className="mb-3 text-drop" />
               <p className="text-xs leading-relaxed text-smoke">
-                Questions about any of this? Call the shop — a person will
-                answer and explain it.
+                Questions about any of this? Call — a person will answer and
+                explain it.
               </p>
               <a href={BUSINESS.phoneHref} className="btn-outline btn-sm mt-4">
                 <Phone size={15} aria-hidden />
@@ -317,15 +402,16 @@ export default function LegalPage({ doc = "terms" }) {
             <div className="card mb-10 border-l-4 border-l-drop p-6">
               <p className="text-sm leading-relaxed text-smoke">
                 This document is written to be understood, not to hide anything
-                in the fine print. It is general information about how we
-                operate — it is not legal advice, and it does not replace any
-                written agreement or invoice we give you. If something here is
-                unclear or does not seem to match your situation, please contact
-                the shop at{" "}
+                in the fine print. It is general information about how{" "}
+                {BUSINESS.name} operates — it is not legal advice, and it does
+                not replace the terms shown at checkout, your order
+                confirmation, or any written agreement or invoice we give you.
+                Where those are more specific, they govern. If something here is
+                unclear or does not seem to match your situation, call{" "}
                 <a href={BUSINESS.phoneHref} className="text-drop underline">
                   {BUSINESS.phone}
                 </a>{" "}
-                or through our{" "}
+                or use our{" "}
                 <Link to="/contact" className="text-drop underline">
                   contact form
                 </Link>{" "}
@@ -375,10 +461,11 @@ export default function LegalPage({ doc = "terms" }) {
               <address className="not-italic text-sm leading-relaxed text-smoke">
                 {BUSINESS.name}
                 <br />
-                {BUSINESS.address.street}
+                {BUSINESS.poweredBy}
                 <br />
-                {BUSINESS.address.city}, {BUSINESS.address.state}{" "}
-                {BUSINESS.address.zip}
+                {BUSINESS.shop.street}
+                <br />
+                {BUSINESS.shop.city}, {BUSINESS.shop.state} {BUSINESS.shop.zip}
                 <br />
                 <a
                   href={BUSINESS.phoneHref}

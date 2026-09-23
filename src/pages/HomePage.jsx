@@ -58,7 +58,7 @@ function Hero() {
           <p className="lede mt-5 max-w-xl text-bone/70">
             {BUSINESS.name} is an online tire and wheel store shipping to any
             address in {BUSINESS.shipping.area}. Pick your size, pick your
-            brand, and choose where it lands — your driveway, or free to our
+            brand, and choose where it lands — your own door, or free to our
             shop in South Florida where we'll fit them for you.
           </p>
 

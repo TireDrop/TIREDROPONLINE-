@@ -8,6 +8,8 @@ import {
   FileText,
   Info,
   Phone,
+  Store,
+  Truck,
   Wallet,
 } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
@@ -21,39 +23,62 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
+const PAY_METHODS = [
+  {
+    icon: CreditCard,
+    title: "Card at checkout",
+    copy: "Major credit and debit cards, processed by our payment provider. Your card details go to them, not to us — we never see or store a full card number.",
+  },
+  {
+    icon: Wallet,
+    title: "Financing through a lender",
+    copy: "A third-party financing provider can spread the cost over time. They review the application, they approve or decline it, and they set the rate and the term.",
+  },
+  {
+    icon: Store,
+    title: "In person at the shop",
+    copy: `Paying for an install, an add-on service or a ship-to-store order at the counter in ${BUSINESS.shop.city}? Cards work there too, and so does cash.`,
+  },
+  {
+    icon: Truck,
+    title: "Fleet and commercial",
+    copy: "Running several vehicles? Call us about how billing can be arranged for a fleet account rather than paying order by order.",
+  },
+];
+
 const PLANS = [
   {
-    name: "90-Day Option",
-    tag: "Short term",
+    name: "Short term",
+    tag: "Small orders",
     highlight: false,
     summary:
-      "Spread a smaller repair or a single tire over about three months of scheduled payments.",
+      "Spread one or two tires, or a single install, over a few months of scheduled payments.",
     points: [
-      "Best for repairs and one-or-two tire purchases",
+      "Best for a single tire, a pair, or an install appointment",
       "Short payment schedule, decided at approval",
-      "No effect on the price you pay us for the work",
+      "The price of the tires does not change because you financed them",
     ],
     note: "Costs and any fees are set by the lender, not by us.",
   },
   {
-    name: "6-Month Plan",
+    name: "Promotional period",
     tag: "Most common",
     highlight: true,
     summary:
-      "Some lender programs offer no interest if the balance is paid in full within the promotional window on purchases over a set amount.",
+      "Some lender programs offer no interest if the balance is paid in full within a promotional window on purchases over a set amount.",
     points: [
-      "Typically aimed at full sets of tires or wheels",
+      "Typically aimed at a full set of four, or tires plus install",
       "Promotional terms apply only if you meet them exactly",
       "Interest can be charged back if the balance is not cleared in time",
     ],
-    note: "Promotional offers change. Ask us what is available the day you apply.",
+    note: "Promotional offers change. Ask what is available the day you apply.",
   },
   {
-    name: "12-Month Plan",
-    tag: "Bigger jobs",
+    name: "Longer term",
+    tag: "Bigger orders",
     highlight: false,
     summary:
-      "Fixed monthly payments over a longer term for larger tickets — a full set plus alignment, or tires and brakes together.",
+      "Fixed monthly payments over a longer term for larger tickets — a wheel and tire package, or a set plus alignment and brakes.",
     points: [
       "Lower monthly payment, longer commitment",
       "Interest usually applies for the whole term",
@@ -69,52 +94,56 @@ const REQUIREMENTS = [
   "Proof of a steady income source",
   "An active checking account or debit card for payments",
   "A working phone number and email for the lender's verification step",
-  "To be at least 18 years old and a Florida resident (or able to show a US address)",
+  "To be at least 18 years old, with a billing address in the United States",
 ];
 
 const STEPS = [
   {
-    title: "Get your number first",
-    copy: "Call us or send the form below with the vehicle and what it needs. We put a real price on the job — parts, labor, disposal and tax — before anybody applies for anything.",
+    title: "Build the order first",
+    copy: "Put the tires or wheels in the cart, or call us and we will price it with you — including the install, if you are having it fitted. You need a real number before financing means anything.",
   },
   {
     title: "Apply with the lender",
-    copy: "We hand you off to a third-party financing provider. The application is theirs, the decision is theirs, and the information goes to them — not to us.",
+    copy: "Financing is handled by a third-party provider. The application is theirs, the decision is theirs, and the information you enter goes to them — not to us.",
   },
   {
-    title: "Review what you were actually offered",
-    copy: "If you are approved, read the amount, the term, the rate and any fees before you accept. Ask questions. Walking away at this point costs you nothing.",
+    title: "Read what you were actually offered",
+    copy: "If you are approved, check the amount, the term, the rate and any fees before you accept. Ask questions. Walking away at this point costs you nothing.",
   },
   {
-    title: "We do the work",
-    copy: "Once financing is settled, we schedule it — the van at your driveway or the bay in Sunrise — and the balance is handled through your plan.",
+    title: "The order goes through",
+    copy: `Once payment is settled, the order is placed: shipped to your address, or sent free to the ${BUSINESS.shop.city} shop so we can fit it.`,
   },
 ];
 
 const FAQ = [
   {
     q: "Do you decide who gets approved?",
-    a: "No. We are a tire and auto shop, not a lender. Applications go to a third-party financing company that makes its own decision using its own criteria. We find out the outcome at roughly the same time you do.",
+    a: "No. We sell tires and wheels; we are not a lender. Applications go to a third-party financing company that makes its own decision using its own criteria. We find out the outcome at roughly the same time you do.",
   },
   {
     q: "Will applying affect my credit?",
-    a: "That depends on the provider and the program. Some run a soft inquiry to pre-qualify and a hard inquiry only if you accept an offer. The lender has to disclose this to you during the application — read that part carefully before you submit.",
+    a: "That depends on the provider and the program. Some run a soft inquiry to pre-qualify and a hard inquiry only if you accept an offer. The lender has to disclose this during the application — read that part carefully before you submit.",
+  },
+  {
+    q: "Can I finance an order that ships to my house?",
+    a: "Yes. Financing covers the purchase, not the destination. A set shipped to an address three states away and a set fitted in Sunrise are paid for the same way.",
   },
   {
     q: "What if I am declined?",
-    a: "Nothing changes on our side and we do not treat you any differently. You can still pay by card, and we can often re-quote the job in stages — safety-critical work now, the rest later.",
-  },
-  {
-    q: "Can I use financing for mobile service?",
-    a: "Yes. Financing covers the work, not the location. A driveway install in Weston and a bay job in Sunrise can both be paid the same way.",
+    a: "Nothing changes on our side and we do not treat you any differently. You can still pay by card, and we can often re-work the order — the safety-critical tires now, the rest later.",
   },
   {
     q: "Can I pay it off early?",
     a: "Most plans allow it, and on a promotional no-interest offer paying early is usually the entire point. Confirm the details in your lender agreement, since early-payoff rules come from them.",
   },
   {
+    q: "What if I return part of a financed order?",
+    a: "Refunds go back through the way you paid, so a refund on a financed order is credited against your balance with the lender. That can take a billing cycle or two to show up on their side, and any interest already charged is between you and them. Our return terms are on the terms page.",
+  },
+  {
     q: "What payment methods do you take if I skip financing?",
-    a: "Major credit and debit cards, plus cash at the shop. If you are booking a fleet or commercial account, call and ask about invoicing.",
+    a: "Major credit and debit cards at checkout, and cards or cash in person at the shop. If you are running a fleet, call and ask how billing can be arranged.",
   },
 ];
 
@@ -183,9 +212,10 @@ function ApplicationForm() {
         <CheckCircle2 size={34} aria-hidden className="mb-4 text-drop" />
         <h3 className="h3">Request received.</h3>
         <p className="mt-3 text-sm leading-relaxed text-smoke">
-          Thanks, {values.name.split(" ")[0]}. Someone from the shop will call
-          you at {values.phone} during business hours to confirm the job, quote
-          it properly, and point you to the financing provider's application.
+          Thanks, {values.name.split(" ")[0]}. Someone will call you at{" "}
+          {values.phone} during business hours to confirm what you are buying,
+          price it properly, and point you to the financing provider's
+          application.
         </p>
         <p className="mt-3 text-sm leading-relaxed text-smoke">
           This is not an application and it is not an approval — it only starts
@@ -216,8 +246,8 @@ function ApplicationForm() {
     <form noValidate onSubmit={handleSubmit} className="card p-6 md:p-8">
       <h3 className="h3 mb-1">Start a financing conversation</h3>
       <p className="mb-6 text-sm text-smoke">
-        This goes to the shop, not to a lender. No credit check happens here.
-        All fields are required.
+        This goes to us, not to a lender. No credit check happens here. All
+        fields are required.
       </p>
 
       <div className="grid gap-5 sm:grid-cols-2">
@@ -315,13 +345,13 @@ export default function FinancingPage() {
     <>
       <Seo
         title="Financing & Payment Options"
-        description={`Payment plans and financing options for tires, wheels and repairs at ${BUSINESS.name}. Approval and terms come from a third-party lender.`}
+        description={`How to pay for tires and wheels at ${BUSINESS.name} — cards at checkout, in person at the ${BUSINESS.shop.city} shop, or financing through a third-party lender who sets the terms.`}
       />
 
       <PageHero
         eyebrow="Financing"
         title="Tires now. Pay over time."
-        lede="Nobody plans for a blown tire in the middle of the month. If paying all at once does not work, there are financing options — with terms set by a third-party lender, explained plainly here."
+        lede="Nobody plans for a blown tire in the middle of the month. Here is every way you can pay for an order — including financing, where the terms are set by a third-party lender, not by us."
       >
         <div className="flex flex-wrap gap-3">
           <a href="#apply" className="btn-primary">
@@ -336,12 +366,41 @@ export default function FinancingPage() {
 
       <Breadcrumbs trail={[{ label: "Financing" }]} />
 
-      {/* ---------- Plans ---------- */}
+      {/* ---------- Ways to pay ---------- */}
       <Section className="bg-bone">
+        <SectionHead
+          eyebrow="Ways To Pay"
+          title="Four ways an order gets paid for"
+          lede="Most customers use the first one. The rest exist because not every order is a card swipe."
+        />
+
+        <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {PAY_METHODS.map(({ icon: Icon, title, copy }) => (
+            <li key={title} className="card p-6">
+              <Icon size={26} aria-hidden className="mb-4 text-drop" />
+              <h3 className="h3">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-smoke">{copy}</p>
+            </li>
+          ))}
+        </ul>
+
+        <p className="mt-6 text-sm leading-relaxed text-smoke">
+          We would rather under-promise here than list a payment method that
+          turns out not to work at checkout. If you want to know exactly what is
+          accepted and which financing program is running today, call{" "}
+          <a href={BUSINESS.phoneHref} className="underline hover:text-drop">
+            {BUSINESS.phone}
+          </a>{" "}
+          before you order.
+        </p>
+      </Section>
+
+      {/* ---------- Plans ---------- */}
+      <Section className="bg-fog">
         <SectionHead
           eyebrow="Plan Options"
           title="Three shapes a plan usually takes"
-          lede="These are the kinds of programs financing providers commonly offer for auto work. What you are actually offered depends on the lender and on your application."
+          lede="These are the kinds of programs financing providers commonly offer for tire and wheel purchases. What you are actually offered depends on the lender and on your application."
         />
 
         <ul className="grid gap-5 lg:grid-cols-3">
@@ -388,7 +447,7 @@ export default function FinancingPage() {
       </Section>
 
       {/* ---------- Requirements + steps ---------- */}
-      <Section className="bg-fog">
+      <Section className="bg-bone">
         <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-14">
           <div>
             <SectionHead
@@ -477,13 +536,13 @@ export default function FinancingPage() {
               </p>
               <p>
                 <span className="text-bone">Prices are separate.</span> What you
-                pay us for tires, parts and labor does not change based on how
-                you pay. Financing costs, if any, are between you and the
-                lender.
+                pay us for tires, wheels, shipping and labor does not change
+                based on how you pay. Financing costs, if any, are between you
+                and the lender.
               </p>
               <p>
                 <span className="text-bone">Questions are free.</span> If any of
-                this is unclear, call the shop at{" "}
+                this is unclear, call us at{" "}
                 <a href={BUSINESS.phoneHref} className="text-amber underline">
                   {BUSINESS.phone}
                 </a>{" "}
@@ -496,13 +555,13 @@ export default function FinancingPage() {
       </section>
 
       {/* ---------- Application form ---------- */}
-      <Section className="bg-bone" id="apply">
+      <Section className="bg-fog" id="apply">
         <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-14">
           <div>
             <SectionHead
               eyebrow="Get Started"
               title="Tell us what you need covered"
-              lede="Send this over and we will call you with a real quote and the financing options available that week."
+              lede="Send this over and we will call you with a real price for the order and whatever financing options are running that week."
             />
 
             <ul className="space-y-4">
@@ -518,7 +577,7 @@ export default function FinancingPage() {
                 <p className="text-sm leading-relaxed text-smoke">
                   <span className="text-ink">We call during business hours.</span>{" "}
                   Sent at night or on Sunday? You will hear from us the next day
-                  we are open.
+                  we are open. Eastern time.
                 </p>
               </li>
               <li className="card flex gap-4 p-5">
@@ -540,10 +599,10 @@ export default function FinancingPage() {
       </Section>
 
       {/* ---------- FAQ ---------- */}
-      <Section className="bg-fog">
+      <Section className="bg-bone">
         <SectionHead
           eyebrow="FAQ"
-          title="Questions we get at the counter"
+          title="Questions we get on the phone"
           align="center"
         />
         <div className="mx-auto max-w-3xl">

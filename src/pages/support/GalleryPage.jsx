@@ -11,97 +11,98 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
-// Placeholder artwork only — no customer photography has been supplied yet.
-// Each tile is a CSS gradient plus an SVG tread motif, captioned with the job.
+// Placeholder artwork only — no photography has been supplied yet. Each tile
+// is a CSS gradient plus an SVG tread motif, captioned with the job or order
+// it stands for. Swap these for real photos as they come in.
 const GALLERY = [
   {
     id: "g1",
-    caption: "Mobile install — 4x Continental on an F-150, Plantation",
-    detail: "Driveway call. Old set off, new set mounted, balanced and torqued in about an hour.",
-    tone: ["#1A1D21", "#2A2F35"],
+    caption: "Order out the door — 4x Continental, shipped to Georgia",
+    detail: "Picked from the distributor closest to the customer, boxed and on its way without passing through a warehouse of ours.",
+    tone: ["#0A1628", "#24354C"],
   },
   {
     id: "g2",
-    caption: "Office-park flat repair — sedan, Fort Lauderdale",
-    detail: "Screw through the tread. Dismounted, patch-plugged from the inside and rebalanced.",
-    tone: ["#2A2F35", "#0E0F11"],
+    caption: "Ship to store — set checked in at the Sunrise counter",
+    detail: "Size, load index and speed rating read off every sidewall and matched to the order before anyone books the install.",
+    tone: ["#24354C", "#0A1628"],
   },
   {
     id: "g3",
-    caption: "Van at work — driveway setup, Sunrise",
-    detail: "Mat down, jack set, tire machine and balancer running off the van.",
-    tone: ["#E03A1E", "#B82A12"],
+    caption: "Install bay — full set fitted after a ship-to-store order",
+    detail: "Mounted, balanced, new valve service and every lug torqued to spec.",
+    tone: ["#0B5FFF", "#0A4FD8"],
   },
   {
     id: "g4",
-    caption: "Fleet rotation — six work vans, Tamarac yard",
-    detail: "Scheduled service run. Rotated, pressures set, tread depths recorded per vehicle.",
-    tone: ["#1A1D21", "#0E0F11"],
+    caption: "Mobile install — driveway call, Plantation",
+    detail: "Mat down, jack set, tire machine and balancer running off the van. The car never moved.",
+    tone: ["#122135", "#0A1628"],
   },
   {
     id: "g5",
-    caption: "Wheel and tire package — staggered fitment, Weston",
-    detail: "New wheels mounted and balanced, TPMS sensors transferred and relearned.",
-    tone: ["#2A2F35", "#1A1D21"],
+    caption: "Wheel and tire package — staggered fitment, shipped",
+    detail: "Offset and clearance confirmed with the customer first, then mounted and balanced as a package before it shipped.",
+    tone: ["#24354C", "#122135"],
   },
   {
     id: "g6",
     caption: "Alignment rack — Sunrise shop",
     detail: "Post-install alignment with a before-and-after printout for the customer.",
-    tone: ["#F5A623", "#B82A12"],
+    tone: ["#F5A623", "#0A4FD8"],
   },
   {
     id: "g7",
-    caption: "Jobsite call — dual-rear-wheel truck, Davie",
-    detail: "Shredded tire replaced on site so the crew did not lose the afternoon.",
-    tone: ["#0E0F11", "#2A2F35"],
+    caption: "Fleet order — six work vans, Tamarac yard",
+    detail: "Ordered online, shipped to the shop, fitted on site. Tread depths recorded per vehicle, one invoice.",
+    tone: ["#0A1628", "#122135"],
   },
   {
     id: "g8",
-    caption: "Road-force style balance — four wheels, Coral Springs",
-    detail: "Chasing a highway-speed shimmy. Old weights cleaned off, wheels rebalanced.",
-    tone: ["#1A1D21", "#E03A1E"],
+    caption: "Packaging check — freight damage caught at the counter",
+    detail: "A scuffed box gets opened and inspected before it is handed over. If the tire is wrong, it goes back, not on your car.",
+    tone: ["#122135", "#0B5FFF"],
   },
   {
     id: "g9",
-    caption: "Brake service — front rotors and pads, Sunrise shop",
-    detail: "Bay work. Priced before the parts came out of the box.",
-    tone: ["#2A2F35", "#0E0F11"],
+    caption: "Office-park flat repair — sedan, Fort Lauderdale",
+    detail: "Screw through the tread. Dismounted, patch-plugged from the inside and rebalanced.",
+    tone: ["#0A1628", "#24354C"],
   },
   {
     id: "g10",
     caption: "TPMS sensor replacement — SUV, Lauderhill",
     detail: "Dead sensor battery after eight years. Replaced in a work parking lot, light out.",
-    tone: ["#0E0F11", "#1A1D21"],
+    tone: ["#24354C", "#0A1628"],
   },
   {
     id: "g11",
-    caption: "Tire haul-out — end of a fleet day",
-    detail: "Old casings loaded up and disposed of properly. Nothing left in your lot.",
-    tone: ["#2A2F35", "#F5A623"],
+    caption: "Fitment call — sizes read off a door placard over the phone",
+    detail: "Half the job is making sure the right tire gets ordered in the first place. That part happens before anything ships.",
+    tone: ["#122135", "#F5A623"],
   },
   {
     id: "g12",
-    caption: "Commercial set — light truck tires, Miramar",
-    detail: "Load-rated replacements sourced and fitted on site, one invoice for the fleet.",
-    tone: ["#1A1D21", "#2A2F35"],
+    caption: "Brake service — front rotors and pads, Sunrise shop",
+    detail: "Bay work, priced before the parts came out of the box.",
+    tone: ["#0A1628", "#122135"],
   },
 ];
 
 const VIDEOS = [
   {
     id: "v1",
-    title: "What actually happens on a mobile tire install",
+    title: "What happens between checkout and your driveway",
     duration: "3:40",
     description:
-      "Start to finish in a driveway: how we set up, what the van carries, and what you are supposed to see us do before we torque a wheel.",
+      "Where the tires come from, who picks them, and what to check the moment the boxes land at your door.",
   },
   {
     id: "v2",
     title: "Reading your door-jamb placard",
     duration: "1:55",
     description:
-      "Where to find your real PSI, why the sidewall number is not it, and how to check pressure cold without guessing.",
+      "Where to find your real PSI and tire size, why the sidewall number is not it, and how to order the right set without guessing.",
   },
   {
     id: "v3",
@@ -112,10 +113,10 @@ const VIDEOS = [
   },
   {
     id: "v4",
-    title: "Why your steering wheel shakes at 60",
-    duration: "4:05",
+    title: "Ship to your house, or ship to the shop?",
+    duration: "2:30",
     description:
-      "Balance versus alignment versus a bent wheel — how to tell them apart before you pay for the wrong fix.",
+      "Who each option suits, what ship-to-store costs, and how the install gets booked once the order lands.",
   },
   {
     id: "v5",
@@ -126,10 +127,10 @@ const VIDEOS = [
   },
   {
     id: "v6",
-    title: "TPMS lights: steady versus flashing",
-    duration: "2:20",
+    title: "Why your steering wheel shakes at 60",
+    duration: "4:05",
     description:
-      "Two very different problems on the same dashboard symbol, and what each one usually costs to sort out.",
+      "Balance versus alignment versus a bent wheel — how to tell them apart before you pay for the wrong fix.",
   },
 ];
 
@@ -147,7 +148,7 @@ const TIPS = [
     kicker: "Tread",
     title: "Penny test, quarter test and wear bars",
     excerpt:
-      "Three ways to answer the only question that matters in a Florida downpour: is there still enough tread to move water?",
+      "Three ways to answer the only question that matters in a downpour: is there still enough tread to move water?",
     to: "/tire-care#tread-depth",
   },
   {
@@ -161,7 +162,7 @@ const TIPS = [
   {
     id: "t4",
     kicker: "Alignment",
-    title: "What a pothole on Oakland Park really costs",
+    title: "What one bad pothole really costs",
     excerpt:
       "A knocked-out alignment can shave a shoulder off a new set in a few thousand miles. Here is how to spot it early.",
     to: "/tire-care#alignment",
@@ -176,10 +177,10 @@ const TIPS = [
   },
   {
     id: "t6",
-    kicker: "Replacement",
+    kicker: "Buying",
     title: "Old tires with good tread are still old tires",
     excerpt:
-      "How to read the DOT date code, and why South Florida sun ages rubber faster than mileage does.",
+      "How to read the DOT date code, and why heat and sun age rubber faster than mileage does.",
     to: "/tire-care#tire-replacement",
   },
 ];
@@ -251,13 +252,13 @@ export default function GalleryPage() {
     <>
       <Seo
         title="News & Gallery"
-        description={`Work from the vans and the ${BUSINESS.address.city} shop — mobile installs, driveway repairs and fleet calls — plus how-to videos and tire care tips from ${BUSINESS.name}.`}
+        description={`Orders going out, sets being fitted at the ${BUSINESS.shop.city} shop and mobile installs around Broward — plus how-to videos and tire care tips from ${BUSINESS.name}.`}
       />
 
       <PageHero
         eyebrow="News & Gallery"
         title="The work, up close"
-        lede="Driveways, office lots, jobsites and the bay in Sunrise. Plus the videos and tips we end up repeating at the counter every week."
+        lede={`Orders heading out across ${BUSINESS.shipping.area}, sets fitted in the ${BUSINESS.shop.city} bay, and vans working driveways around Broward. Plus the videos and tips we end up repeating every week.`}
       >
         <a href={BUSINESS.phoneHref} className="btn-ghost-light">
           <Phone size={18} aria-hidden />
@@ -312,17 +313,14 @@ export default function GalleryPage() {
           >
             <SectionHead
               eyebrow="Gallery"
-              title="Jobs from around Broward"
-              lede="Captions describe the job each tile stands for. Photography from these calls is being collected now."
+              title="Orders out, tires on"
+              lede="Captions describe the order or the job each tile stands for. Photography is being collected now — these are placeholders until it lands."
             />
 
             <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {GALLERY.map((item) => (
                 <li key={item.id} className="card-hover overflow-hidden">
-                  <PlaceholderArt
-                    tone={item.tone}
-                    label={BUSINESS.shortName}
-                  />
+                  <PlaceholderArt tone={item.tone} label={BUSINESS.name} />
                   <div className="p-5">
                     <h3 className="font-display text-lg uppercase leading-tight tracking-wide text-ink">
                       {item.caption}
@@ -348,7 +346,7 @@ export default function GalleryPage() {
             <SectionHead
               eyebrow="Videos"
               title="How-tos we are filming"
-              lede="Short, no-nonsense walkthroughs of the questions we answer most. These are in production — call us in the meantime and we will just explain it."
+              lede="Short, no-nonsense walkthroughs of the questions we answer most, for customers ordering online and for customers standing at the counter. These are in production — call us in the meantime and we will just explain it."
             />
 
             <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -385,10 +383,11 @@ export default function GalleryPage() {
             <div className="card mt-8 flex flex-col gap-4 border-l-4 border-l-drop p-6 sm:flex-row sm:items-center sm:justify-between">
               <p className="max-w-xl text-sm leading-relaxed text-smoke">
                 <span className="text-ink">Want the short version now?</span>{" "}
-                Every topic above is written out in full on the tire care page.
+                Every topic above is written out in full in the tire care
+                guides.
               </p>
               <Link to="/tire-care" className="btn-outline btn-sm shrink-0">
-                Read the guide
+                Read the guides
                 <ArrowRight size={15} aria-hidden />
               </Link>
             </div>
@@ -406,7 +405,7 @@ export default function GalleryPage() {
             <SectionHead
               eyebrow="Tire Tips"
               title="Short reads that save tires"
-              lede="The advice we give at the counter, written down so you can check it in your own driveway."
+              lede="The advice we give on the phone, written down so you can check it in your own driveway — wherever that driveway is."
             />
 
             <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -435,16 +434,17 @@ export default function GalleryPage() {
         <div className="wrap grid gap-8 md:grid-cols-[1.2fr_1fr] md:items-center">
           <div>
             <p className="eyebrow mb-2">{BUSINESS.tagline}</p>
-            <h2 className="h2">Your driveway could be the next one</h2>
+            <h2 className="h2">Your order could be the next one out</h2>
             <p className="lede mt-4 max-w-xl text-bone/70">
-              Tell us where the vehicle sits and what it needs. The van handles
-              tires on site; the {BUSINESS.address.city} shop takes the rest.
+              Tires shipped anywhere in {BUSINESS.shipping.area}, free to the{" "}
+              {BUSINESS.shop.city} shop if you want them fitted, and the van for
+              driveways around Broward.
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row md:flex-col">
-            <Link to="/schedule" className="btn-primary">
+            <Link to="/tires" className="btn-primary">
               <Truck size={18} aria-hidden />
-              Book Mobile Service
+              Shop Tires
             </Link>
             <a href={BUSINESS.phoneHref} className="btn-ghost-light">
               <Phone size={18} aria-hidden />

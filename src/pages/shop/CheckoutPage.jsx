@@ -73,24 +73,25 @@ const PROPERTY_TYPES = [
   "Jobsite, lot or warehouse",
 ];
 
+// Order matters: shipping is the default path, the two local options follow.
 const FULFILLMENT = [
   {
-    value: "mobile",
-    icon: Truck,
-    title: "Mobile installation at my location",
-    copy: "The van rolls to your home, office or jobsite and installs on the spot.",
+    value: "ship",
+    icon: Package,
+    title: "Ship to my address",
+    copy: `Delivered anywhere in ${BUSINESS.shipping.area}. Shipping and delivery time are confirmed before payment.`,
   },
   {
     value: "shop",
     icon: Building2,
-    title: "Install at the Sunrise shop",
-    copy: "Drop in and we'll mount, balance and torque in the bay.",
+    title: "Ship free to the shop — we'll fit them",
+    copy: `Free delivery to ${BUSINESS.shop.name}, then book an install in the bay. South Florida.`,
   },
   {
-    value: "ship",
-    icon: Package,
-    title: "Ship tires to me, no install",
-    copy: "Parts only, delivered to your door. You handle the install.",
+    value: "mobile",
+    icon: Truck,
+    title: "Mobile install at my address",
+    copy: "South Florida only. The van comes to your home, office or jobsite and fits them there.",
   },
 ];
 
@@ -109,7 +110,7 @@ function validateContact(f) {
   if (!f.email.trim()) e.email = "Enter an email so we can send your confirmation.";
   else if (!EMAIL_RE.test(f.email.trim())) e.email = "That email doesn't look right — check for a typo.";
   const phone = digitsOnly(f.phone);
-  if (!phone) e.phone = "Enter a phone number — a tech calls before dispatch.";
+  if (!phone) e.phone = "Enter a phone number — we call to confirm before your order ships.";
   else if (phone.length !== 10 && !(phone.length === 11 && phone.startsWith("1")))
     e.phone = "Enter a 10-digit US phone number, area code first.";
   return e;
@@ -117,7 +118,7 @@ function validateContact(f) {
 
 function validateInstall(f) {
   const e = {};
-  if (!f.fulfillment) e.fulfillment = "Choose how you want the tires handled.";
+  if (!f.fulfillment) e.fulfillment = "Choose how you want your order delivered.";
 
   const needsAddress = f.fulfillment === "mobile" || f.fulfillment === "ship";
   if (needsAddress) {
@@ -165,7 +166,7 @@ function validateReview(f) {
 
 const STEPS = [
   { id: "contact", label: "Contact", icon: User, validate: validateContact },
-  { id: "install", label: "Installation", icon: Truck, validate: validateInstall },
+  { id: "install", label: "Delivery", icon: Package, validate: validateInstall },
   { id: "vehicle", label: "Vehicle", icon: Car, validate: validateVehicle },
   { id: "review", label: "Review", icon: ClipboardList, validate: validateReview },
 ];
@@ -267,7 +268,7 @@ function OrderSummary({ lines, totals, promoCode }) {
               </p>
               <p className="mt-0.5 text-xs text-smoke">
                 {l.size ? `${l.size} · ` : ""}Qty {l.qty}
-                {l.install ? " · Mobile installation" : ""}
+                {l.install ? " · Install at the shop" : ""}
               </p>
             </div>
             <span className="shrink-0 font-display text-base">
@@ -279,14 +280,14 @@ function OrderSummary({ lines, totals, promoCode }) {
       <dl className="mt-4 space-y-2.5 text-sm">
         <SummaryRow term={<>Tires & wheels</>} value={money(totals.subtotal)} />
         <SummaryRow
-          term="Mobile installation"
+          term="Installation at the shop"
           value={totals.installTotal > 0 ? money(totals.installTotal) : "—"}
         />
         {totals.discount > 0 && (
           <SummaryRow term={`Discount (${promoCode})`} value={`−${money(totals.discount)}`} accent />
         )}
         <SummaryRow
-          term="Delivery"
+          term="Shipping"
           value={totals.shipping === 0 ? "FREE" : money(totals.shipping)}
         />
         <SummaryRow term="Sales tax (7%)" value={money(totals.tax)} />
@@ -304,7 +305,7 @@ const EMPTY_FORM = {
   lastName: "",
   email: "",
   phone: "",
-  fulfillment: "mobile",
+  fulfillment: "ship",
   street: "",
   city: "",
   zip: "",
@@ -319,12 +320,12 @@ const EMPTY_FORM = {
   agree: false,
 };
 
-/** EMT-YYMMDD-XXXX — short enough to read over the phone. */
+/** TD-YYMMDD-XXXX — short enough to read over the phone. */
 function makeOrderRef() {
   const d = new Date();
   const stamp = toISODate(d).slice(2).replace(/-/g, "");
   const tail = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `EMT-${stamp}-${tail}`;
+  return `TD-${stamp}-${tail}`;
 }
 
 /* ------------------------------------------------------------------ */
@@ -403,14 +404,14 @@ export default function CheckoutPage() {
       <>
         <Seo
           title="Checkout"
-          description="Complete your tire and wheel order with Extreme Mobile Tires — mobile installation across Broward County or pickup at our Sunrise shop."
+          description="Complete your TireDrop order — shipped anywhere in the continental US, or free to our South Florida shop for installation."
         />
         <Breadcrumbs trail={[{ label: "Cart", to: "/cart" }, { label: "Checkout" }]} />
         <div className="wrap py-14">
           <EmptyState
             icon={ShoppingCart}
             title="There's nothing to check out"
-            lede="Your cart is empty. Add a set of tires or wheels and we'll get the van scheduled."
+            lede="Your cart is empty. Add a set of tires or wheels and we'll get them moving."
             action={
               <div className="flex flex-wrap justify-center gap-3">
                 <Link to="/tires" className="btn-primary">
@@ -437,7 +438,7 @@ export default function CheckoutPage() {
       <>
         <Seo
           title="Order Received"
-          description="Your Extreme Mobile Tires order is in. A team member will call to confirm fitment, lock in your appointment window and take payment."
+          description="Your TireDrop order is in. We call to confirm fitment, lock in delivery or your install window, and take payment."
         />
         <Breadcrumbs trail={[{ label: "Cart", to: "/cart" }, { label: "Order Received" }]} />
 
@@ -448,11 +449,11 @@ export default function CheckoutPage() {
               <div className="min-w-0">
                 <p className="eyebrow mb-1">Order received</p>
                 <h1 className="h1" tabIndex={-1} ref={headingRef}>
-                  You're on the schedule
+                  Your order is in
                 </h1>
                 <p className="lede mt-3">
-                  Thanks, {f.firstName}. Nothing has been charged yet — a team member calls to
-                  confirm fitment and take payment before the van rolls.
+                  Thanks, {f.firstName}. Nothing has been charged yet — we call to confirm fitment
+                  and take payment before anything ships.
                 </p>
               </div>
             </div>
@@ -472,25 +473,25 @@ export default function CheckoutPage() {
                   {[
                     {
                       title: "We confirm your fitment",
-                      copy: `A tech checks the sizes against your ${f.year} ${f.make} ${f.model} before anything ships.`,
+                      copy: `We check the sizes against your ${f.year} ${f.make} ${f.model} before the order is released to the distributor.`,
                     },
                     {
                       title: "We call you back",
-                      copy: `Expect a call at ${f.phone} within one business day to lock the window and take payment.`,
+                      copy: `Expect a call at ${f.phone} within one business day to confirm delivery and take payment.`,
                     },
                     {
                       title: ship
-                        ? "Your tires ship out"
+                        ? "Your order ships out"
                         : mobile
                         ? "The van comes to you"
-                        : "You roll into the shop",
+                        : "We fit them at the shop",
                       copy: ship
-                        ? `Tires go out to ${f.street}, ${f.city} ${f.zip} once payment clears.`
+                        ? `Your order ships to ${f.street}, ${f.city} ${f.zip} once payment clears. Tracking follows by phone.`
                         : mobile
                         ? `We arrive at ${f.street}, ${f.city} ${f.zip} on ${formatLongDate(
                             f.date
                           )}, ${windowLabel(f.timeWindow)}.`
-                        : `Meet us at ${BUSINESS.address.full} on ${formatLongDate(
+                        : `Your order ships free to ${BUSINESS.shop.full}. Meet us there on ${formatLongDate(
                             f.date
                           )}, ${windowLabel(f.timeWindow)}.`,
                     },
@@ -509,7 +510,7 @@ export default function CheckoutPage() {
 
                 <div className="mt-6 border-t border-ink/10 pt-5">
                   <p className="text-sm leading-relaxed text-smoke">
-                    Need to change the date, the address or the sizes? Call{" "}
+                    Need to change the address, the date or the sizes? Call{" "}
                     <a href={BUSINESS.phoneHref} className="font-display text-ink hover:text-drop">
                       {BUSINESS.phone}
                     </a>{" "}
@@ -551,17 +552,17 @@ export default function CheckoutPage() {
     <>
       <Seo
         title="Checkout"
-        description="Complete your tire and wheel order with Extreme Mobile Tires — mobile installation across Broward County, shop install in Sunrise, or shipping with no install."
+        description="Complete your TireDrop order — shipped to your address anywhere in the continental US, or free to our South Florida shop for installation."
       />
       <Breadcrumbs trail={[{ label: "Cart", to: "/cart" }, { label: "Checkout" }]} />
 
       <div className="wrap py-10 md:py-14">
         <header className="mb-8">
-          <p className="eyebrow mb-2">Experience Convenience</p>
+          <p className="eyebrow mb-2">{BUSINESS.tagline}</p>
           <h1 className="h1">Checkout</h1>
           <p className="lede mt-3 max-w-2xl">
             Four quick steps. No card fields — we confirm fitment and take payment over the phone
-            before a tech is dispatched.
+            before your order is released.
           </p>
         </header>
 
@@ -616,7 +617,7 @@ export default function CheckoutPage() {
                 <StepHeading
                   step={1}
                   title="Who are we meeting?"
-                  lede="We call before dispatch, so a number you actually answer matters more than anything else on this page."
+                  lede="We call before your order goes out, so a number you actually answer matters more than anything else on this page."
                   headingRef={headingRef}
                 />
                 <div className="grid gap-5 sm:grid-cols-2">
@@ -656,7 +657,7 @@ export default function CheckoutPage() {
                     value={form.phone}
                     onChange={onInput}
                     error={errors.phone}
-                    hint="A tech texts when the van is 20 minutes out."
+                    hint="We text delivery updates and, for local installs, when the van is close."
                   />
                 </div>
               </section>
@@ -667,13 +668,13 @@ export default function CheckoutPage() {
               <section>
                 <StepHeading
                   step={2}
-                  title="Where do the tires go?"
-                  lede="We come to you across Broward County, or you can meet the crew at the shop."
+                  title="Where should this go?"
+                  lede="Ship it anywhere in the continental US, or — if you are in South Florida — send it free to our shop and let us fit it."
                   headingRef={headingRef}
                 />
 
                 <fieldset className="mb-7">
-                  <legend className="label mb-2">Service option</legend>
+                  <legend className="label mb-2">Delivery option</legend>
                   <div className="grid gap-3">
                     {FULFILLMENT.map(({ value, icon: Icon, title, copy }) => (
                       <label
@@ -720,9 +721,13 @@ export default function CheckoutPage() {
                     <MapPin size={20} aria-hidden className="mt-0.5 shrink-0 text-drop" />
                     <div className="min-w-0">
                       <p className="font-display text-base uppercase tracking-wide">
-                        {BUSINESS.name}
+                        {BUSINESS.shop.name}
                       </p>
-                      <p className="mt-1 text-sm text-smoke">{BUSINESS.address.full}</p>
+                      <p className="mt-1 text-sm text-smoke">{BUSINESS.shop.full}</p>
+                      <p className="mt-2 text-xs leading-relaxed text-smoke">
+                        Shipping to the shop is free. We call when your order lands and confirm the
+                        install window below.
+                      </p>
                       <ul className="mt-3 space-y-0.5 text-xs text-smoke">
                         {BUSINESS.hours.map((h) => (
                           <li key={h.days}>
@@ -815,7 +820,7 @@ export default function CheckoutPage() {
 
                 {(form.fulfillment === "mobile" || form.fulfillment === "shop") && (
                   <fieldset>
-                    <legend className="label mb-2">Preferred appointment</legend>
+                    <legend className="label mb-2">Preferred install appointment</legend>
                     <div className="grid gap-5 sm:grid-cols-2">
                       <TextField
                         id="date"
@@ -850,8 +855,8 @@ export default function CheckoutPage() {
                       </SelectField>
                     </div>
                     <p className="mt-3 text-xs leading-relaxed text-smoke">
-                      Windows are requests, not guarantees. Dispatch confirms the exact arrival time
-                      when they call.
+                      Windows are requests, not guarantees. We confirm the exact time on the call,
+                      once your order has landed.
                     </p>
                   </fieldset>
                 )}
@@ -864,7 +869,7 @@ export default function CheckoutPage() {
                 <StepHeading
                   step={3}
                   title="What are we working on?"
-                  lede="Fitment gets confirmed against your vehicle before the van is dispatched — no surprises in the driveway."
+                  lede="Fitment gets confirmed against your vehicle before anything ships — no surprises when the box arrives."
                   headingRef={headingRef}
                 />
                 <div className="grid gap-5 sm:grid-cols-2">
@@ -906,11 +911,11 @@ export default function CheckoutPage() {
                   <Car size={20} aria-hidden className="mt-0.5 shrink-0 text-drop" />
                   <p className="text-sm leading-relaxed text-smoke">
                     <span className="font-display uppercase tracking-wide text-ink">
-                      Fitment is confirmed before dispatch.
+                      Fitment is confirmed before we ship.
                     </span>{" "}
                     A tech matches your sizes, load rating and TPMS setup to this vehicle. If
-                    anything on your order doesn't fit, we call you with options before we load the
-                    van — you are never charged for the wrong tire.
+                    anything on your order doesn't fit, we call you with options before the order
+                    is released — you are never charged for the wrong tire.
                   </p>
                 </div>
               </section>
@@ -937,7 +942,7 @@ export default function CheckoutPage() {
                     ]}
                   />
                   <ReviewBlock
-                    title="Installation"
+                    title="Delivery"
                     onEdit={() => setStepIndex(1)}
                     rows={[
                       [
@@ -945,7 +950,7 @@ export default function CheckoutPage() {
                         FULFILLMENT.find((o) => o.value === form.fulfillment)?.title || "—",
                       ],
                       form.fulfillment === "shop"
-                        ? ["Location", BUSINESS.address.full]
+                        ? ["Ships to", BUSINESS.shop.full]
                         : ["Address", `${form.street}, ${form.city} ${form.zip}`],
                       form.fulfillment === "mobile" && ["Property", form.propertyType],
                       form.fulfillment === "mobile" &&
@@ -960,7 +965,7 @@ export default function CheckoutPage() {
                     rows={[
                       ["Vehicle", `${form.year} ${form.make} ${form.model}`],
                       form.trim.trim() && ["Trim", form.trim.trim()],
-                      ["Fitment", "Confirmed by a tech before the van is dispatched"],
+                      ["Fitment", "Confirmed by a tech before your order ships"],
                     ].filter(Boolean)}
                   />
                 </div>
@@ -975,9 +980,9 @@ export default function CheckoutPage() {
                       <p className="mt-1 text-sm leading-relaxed text-smoke">
                         When you place this order, a team member calls you at{" "}
                         <span className="text-ink">{form.phone || "the number you gave us"}</span>{" "}
-                        within one business day to confirm fitment and your window, then takes
-                        payment over the phone or in person at the appointment. We never ask for
-                        card details by email or text.
+                        within one business day to confirm fitment and delivery, then takes payment
+                        over the phone or in person at the appointment. We never ask for card
+                        details by email or text.
                       </p>
                     </div>
                   </div>
@@ -995,8 +1000,9 @@ export default function CheckoutPage() {
                     />
                     <div className="min-w-0">
                       <label htmlFor="agree" className="text-sm leading-relaxed text-ink">
-                        I understand this order is a request, and that Extreme Mobile Tires will
-                        call me to confirm fitment and collect payment before any work is scheduled.
+                        I understand this order is a request, and that {BUSINESS.name} will call me
+                        to confirm fitment and collect payment before anything ships or is
+                        scheduled.
                       </label>
                       {errors.agree && (
                         <p id="agree-error" role="alert" className="mt-1 text-xs text-drop">
@@ -1048,8 +1054,8 @@ export default function CheckoutPage() {
             <div className="lg:sticky lg:top-24">
               <OrderSummary lines={safeLines} totals={totals} promoCode={promo?.code || ""} />
               <p className="mt-4 text-xs leading-relaxed text-smoke">
-                Prices include mounting, balancing, new valve stems and disposal of your old tires
-                on any line with installation added.{" "}
+                Mounting, balancing, new valve stems and disposal of your old tires are included
+                on any line set to install at the shop.{" "}
                 <Link to="/cart" className="text-ink underline hover:text-drop">
                   Edit your cart
                 </Link>
