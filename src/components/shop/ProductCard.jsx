@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Truck } from "lucide-react";
+import { Check, ShoppingCart, Truck } from "lucide-react";
 
 import { Badge, Stars } from "../ui/index.jsx";
-import { money } from "../../context/CartContext.jsx";
+import { money, useCart } from "../../context/CartContext.jsx";
 import { useCompare } from "../../context/CompareContext.jsx";
 import {
   SET_SIZE,
@@ -98,6 +98,36 @@ export default function ProductCard({ product }) {
   const compare = useCompare();
   const selected = compare.has(product.slug);
   const lockedOut = compare.isFull && !selected;
+
+  // Adding from the grid removes a page load from the funnel. A shopper who
+  // already knows the tire had to open the product page, add, and come back
+  // just to buy the thing they were looking at. The set of four is what goes
+  // in, because that is the quantity the headline price is quoting.
+  const { addItem } = useCart();
+  const [added, setAdded] = useState(false);
+  const inStock = product.stock > 0;
+
+  const addSet = () => {
+    addItem(
+      {
+        id: product.id,
+        kind: product.kind,
+        name: `${product.brand} ${product.model}`,
+        brand: product.brand,
+        size: isTire
+          ? product.size
+          : `${product.diameter}x${product.wheelWidth}`,
+        price: product.price,
+        installPrice: product.installPrice,
+        install: false,
+        accent: product.accent,
+        slug: product.slug,
+      },
+      SET_SIZE,
+    );
+    setAdded(true);
+    window.setTimeout(() => setAdded(false), 2200);
+  };
 
   return (
     <article className="card-hover group flex h-full flex-col overflow-hidden">
@@ -270,14 +300,47 @@ export default function ProductCard({ product }) {
             </label>
           )}
 
-          <Link
-            to={href}
-            className="btn-dark btn-sm mt-2.5 min-h-[44px] w-full px-2 sm:mt-3.5 sm:px-4"
-            aria-label={`View details for ${product.brand} ${product.model}`}
-          >
-            <span className="sm:hidden">View</span>
-            <span className="hidden sm:inline">View Details</span>
-          </Link>
+          <div className="mt-2.5 flex flex-col gap-2 sm:mt-3.5">
+            <button
+              type="button"
+              onClick={addSet}
+              disabled={!inStock}
+              className="btn-primary btn-sm min-h-[44px] w-full px-2 sm:px-4"
+              aria-label={`Add a set of ${SET_SIZE} ${product.brand} ${product.model} to the cart`}
+            >
+              {added ? (
+                <>
+                  <Check size={15} aria-hidden />
+                  Added
+                </>
+              ) : (
+                <>
+                  <ShoppingCart size={15} aria-hidden />
+                  <span className="sm:hidden">Add 4</span>
+                  <span className="hidden sm:inline">
+                    Add set of {SET_SIZE}
+                  </span>
+                </>
+              )}
+            </button>
+
+            <Link
+              to={href}
+              className="btn-outline btn-sm min-h-[44px] w-full px-2 sm:px-4"
+              aria-label={`View details for ${product.brand} ${product.model}`}
+            >
+              <span className="sm:hidden">Details</span>
+              <span className="hidden sm:inline">View Details</span>
+            </Link>
+          </div>
+
+          {/* Announced rather than only shown, so the confirmation reaches a
+              shopper who is not watching the button. */}
+          <span aria-live="polite" className="sr-only">
+            {added
+              ? `Set of ${SET_SIZE} ${product.brand} ${product.model} added to your cart`
+              : ""}
+          </span>
         </div>
       </div>
     </article>

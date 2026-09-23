@@ -579,6 +579,42 @@ export default function CartPage() {
               <div className="card p-6 lg:sticky lg:top-24">
                 <h2 className="h3">Order Summary</h2>
 
+                {/* Shipping is already waived over the threshold; the cart
+                    just never said so. Naming the gap in money is the whole
+                    lever — "$41 to go" is a decision, "orders over $500 ship
+                    free" is a policy nobody does arithmetic against. */}
+                {totals.subtotal > 0 &&
+                  (totals.shipping > 0 ? (
+                    <div className="mt-4 rounded-sm bg-sky p-3">
+                      <p className="text-[13px] leading-snug text-ink">
+                        <span className="font-display font-bold">
+                          {money(FREE_SHIP_AT - totals.subtotal)} to go
+                        </span>{" "}
+                        and the {money(totals.shipping)} shipping comes off.
+                      </p>
+                      <span
+                        aria-hidden
+                        className="mt-2 block h-1.5 overflow-hidden rounded-full bg-ink/[0.08]"
+                      >
+                        <span
+                          className="block h-full rounded-full bg-drop transition-[width] duration-300"
+                          style={{
+                            width: `${Math.min(100, (totals.subtotal / FREE_SHIP_AT) * 100)}%`,
+                          }}
+                        />
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="mt-4 flex items-start gap-1.5 rounded-sm bg-sky p-3 text-[13px] leading-snug text-ink">
+                      <Check
+                        size={15}
+                        aria-hidden
+                        className="mt-px shrink-0 text-drop"
+                      />
+                      Shipping is free on this order.
+                    </p>
+                  ))}
+
                 <dl className="tnum mt-5 space-y-3 text-sm">
                   <div className="flex items-baseline justify-between gap-4">
                     <dt className="text-smoke">Tires &amp; wheels</dt>
