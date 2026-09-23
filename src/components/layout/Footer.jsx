@@ -144,7 +144,7 @@ export default function Footer() {
       <div className="border-t border-graphite">
         <div className="wrap flex flex-col items-center justify-between gap-3 py-5 text-xs text-bone/50 md:flex-row">
           <div className="flex items-center gap-3">
-            <Logo className="h-10 shrink-0" onDark />
+            <Logo className="h-16 shrink-0" variant="full" onDark />
             <p>
               © {year} {BUSINESS.name} · {BUSINESS.poweredBy}, serving drivers
               since {BUSINESS.foundedYear}
