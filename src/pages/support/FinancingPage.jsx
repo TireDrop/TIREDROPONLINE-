@@ -152,7 +152,8 @@ const EMPTY = { name: "", email: "", phone: "", amount: "" };
 function validate(values) {
   const errors = {};
 
-  if (!values.name.trim()) errors.name = "Enter the name that will be on the application.";
+  if (!values.name.trim())
+    errors.name = "Enter the name that will be on the application.";
 
   if (!values.email.trim()) {
     errors.email = "We need an email to follow up.";
@@ -173,7 +174,8 @@ function validate(values) {
   } else if (Number.isNaN(amount) || amount <= 0) {
     errors.amount = "Enter the amount in dollars, numbers only.";
   } else if (amount > 25000) {
-    errors.amount = "For anything this size, call us directly and we will walk through it.";
+    errors.amount =
+      "For anything this size, call us directly and we will walk through it.";
   }
 
   return errors;
@@ -266,7 +268,9 @@ function ApplicationForm() {
             aria-invalid={errors.name ? "true" : undefined}
             aria-describedby={errors.name ? "fin-name-error" : undefined}
           />
-          {errors.name && <FieldError id="fin-name-error">{errors.name}</FieldError>}
+          {errors.name && (
+            <FieldError id="fin-name-error">{errors.name}</FieldError>
+          )}
         </div>
 
         <div>
@@ -285,7 +289,9 @@ function ApplicationForm() {
             aria-invalid={errors.phone ? "true" : undefined}
             aria-describedby={errors.phone ? "fin-phone-error" : undefined}
           />
-          {errors.phone && <FieldError id="fin-phone-error">{errors.phone}</FieldError>}
+          {errors.phone && (
+            <FieldError id="fin-phone-error">{errors.phone}</FieldError>
+          )}
         </div>
 
         <div>
@@ -303,7 +309,9 @@ function ApplicationForm() {
             aria-invalid={errors.email ? "true" : undefined}
             aria-describedby={errors.email ? "fin-email-error" : undefined}
           />
-          {errors.email && <FieldError id="fin-email-error">{errors.email}</FieldError>}
+          {errors.email && (
+            <FieldError id="fin-email-error">{errors.email}</FieldError>
+          )}
         </div>
 
         <div>
@@ -413,10 +421,14 @@ export default function FinancingPage() {
             >
               <div className="mb-4 flex items-center justify-between gap-3">
                 <h3 className="h3">{plan.name}</h3>
-                <Badge tone={plan.highlight ? "drop" : "soft"}>{plan.tag}</Badge>
+                <Badge tone={plan.highlight ? "drop" : "soft"}>
+                  {plan.tag}
+                </Badge>
               </div>
 
-              <p className="text-sm leading-relaxed text-smoke">{plan.summary}</p>
+              <p className="text-sm leading-relaxed text-smoke">
+                {plan.summary}
+              </p>
 
               <ul className="mt-5 flex-1 space-y-2.5 text-sm text-ink">
                 {plan.points.map((point) => (
@@ -461,7 +473,7 @@ export default function FinancingPage() {
                   <li key={item} className="flex items-start gap-2.5">
                     <span
                       aria-hidden
-                      className="mt-2 h-1.5 w-1.5 shrink-0 bg-drop"
+                      className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-drop"
                     />
                     {item}
                   </li>
@@ -503,13 +515,13 @@ export default function FinancingPage() {
       </Section>
 
       {/* ---------- Disclosure ---------- */}
-      <section className="bg-ink py-14 text-bone md:py-20">
+      <section className="bg-ink-wash py-14 text-bone md:py-20">
         <div className="wrap">
           <div className="max-w-3xl">
-            <p className="eyebrow mb-2">Terms, In Plain Language</p>
+            <p className="eyebrow-dark mb-2">Terms, In Plain Language</p>
             <h2 className="h2">The part you should actually read</h2>
 
-            <div className="mt-6 space-y-4 text-sm leading-relaxed text-bone/70">
+            <div className="mt-7 max-w-[68ch] space-y-5 text-[15px] leading-[1.75] text-bone/70">
               <p>
                 <span className="text-bone">
                   We are not a bank and we are not a lender.
@@ -522,11 +534,11 @@ export default function FinancingPage() {
               <p>
                 <span className="text-bone">Rates and APR vary.</span> The
                 annual percentage rate you are offered depends on the provider's
-                program and on their review of your application. Some promotional
-                plans advertise no interest if the full balance is paid within
-                the promotional period — if it is not, interest may be charged
-                on the original amount from the date of purchase. That is the
-                detail people miss most often.
+                program and on their review of your application. Some
+                promotional plans advertise no interest if the full balance is
+                paid within the promotional period — if it is not, interest may
+                be charged on the original amount from the date of purchase.
+                That is the detail people miss most often.
               </p>
               <p>
                 <span className="text-bone">Read the agreement.</span> Your
@@ -543,7 +555,7 @@ export default function FinancingPage() {
               <p>
                 <span className="text-bone">Questions are free.</span> If any of
                 this is unclear, call us at{" "}
-                <a href={BUSINESS.phoneHref} className="text-amber underline">
+                <a href={BUSINESS.phoneHref} className="text-volt underline">
                   {BUSINESS.phone}
                 </a>{" "}
                 before you sign anything. We would rather explain it twice than
@@ -573,15 +585,25 @@ export default function FinancingPage() {
                 </p>
               </li>
               <li className="card flex gap-4 p-5">
-                <CalendarClock size={22} aria-hidden className="shrink-0 text-drop" />
+                <CalendarClock
+                  size={22}
+                  aria-hidden
+                  className="shrink-0 text-drop"
+                />
                 <p className="text-sm leading-relaxed text-smoke">
-                  <span className="text-ink">We call during business hours.</span>{" "}
+                  <span className="text-ink">
+                    We call during business hours.
+                  </span>{" "}
                   Sent at night or on Sunday? You will hear from us the next day
                   we are open. Eastern time.
                 </p>
               </li>
               <li className="card flex gap-4 p-5">
-                <CreditCard size={22} aria-hidden className="shrink-0 text-drop" />
+                <CreditCard
+                  size={22}
+                  aria-hidden
+                  className="shrink-0 text-drop"
+                />
                 <p className="text-sm leading-relaxed text-smoke">
                   <span className="text-ink">Cards work too.</span> Financing is
                   an option, never a requirement. See current{" "}

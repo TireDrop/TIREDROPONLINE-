@@ -55,21 +55,26 @@ function stockHint(stock) {
  */
 function RatingBar({ label, value }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="w-[62px] shrink-0 text-[11px] text-smoke">{label}</span>
+    <div className="flex items-center gap-2.5">
+      <span className="w-[62px] shrink-0 text-[11px] leading-none text-smoke">
+        {label}
+      </span>
       {value === null ? (
-        <span className="flex-1 text-[11px] text-smoke/60" title="Not rated">
+        <span
+          className="flex-1 text-[11px] leading-none text-smoke"
+          title="Not rated"
+        >
           — not rated
         </span>
       ) : (
         <>
-          <span className="h-[3px] flex-1 rounded-full bg-ink/10">
+          <span className="h-[4px] flex-1 overflow-hidden rounded-full bg-ink/[0.08]">
             <span
               className="block h-full rounded-full bg-drop"
               style={{ width: `${value * 10}%` }}
             />
           </span>
-          <span className="w-[22px] shrink-0 text-right font-display text-[11px] text-ink">
+          <span className="tnum w-[22px] shrink-0 text-right font-display text-[11px] font-bold leading-none text-ink">
             {value.toFixed(1)}
           </span>
         </>
@@ -96,7 +101,7 @@ export default function ProductCard({ product }) {
 
   return (
     <article className="card-hover group flex h-full flex-col overflow-hidden">
-      <div className="relative flex items-center justify-center bg-fog p-5">
+      <div className="relative flex items-center justify-center border-b border-ink/[0.05] bg-gradient-to-b from-bone to-fog p-5">
         {product.badge && (
           <div className="absolute left-3 top-3">
             <Badge tone={BADGE_TONE[product.badge] || "soft"}>
@@ -107,7 +112,7 @@ export default function ProductCard({ product }) {
 
         {isTire && (
           <label
-            className={`absolute right-2 top-2 flex min-h-[44px] min-w-[44px] items-center gap-1.5 rounded-sm border border-ink/10 bg-bone/95 px-2 ${
+            className={`absolute right-2 top-2 flex min-h-[44px] min-w-[44px] items-center gap-1.5 rounded-sm border border-ink/10 bg-bone/95 px-2 shadow-card backdrop-blur-sm transition-colors ${
               lockedOut ? "cursor-not-allowed opacity-60" : "cursor-pointer"
             }`}
             title={
@@ -123,7 +128,7 @@ export default function ProductCard({ product }) {
               onChange={() => compare.toggle(product.slug)}
               className="accent-drop disabled:cursor-not-allowed"
             />
-            <span className="font-display text-[11px] uppercase tracking-[0.1em] text-ink">
+            <span className="font-display text-[11px] font-bold uppercase tracking-[0.09em] text-ink">
               Compare
             </span>
             <span className="sr-only">
@@ -148,17 +153,19 @@ export default function ProductCard({ product }) {
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        <p className="eyebrow text-[11px] tracking-[0.18em] text-smoke">
+        <p className="eyebrow text-[11px] tracking-[0.09em] text-smoke">
           {product.brand}
         </p>
-        <h3 className="h3 mt-0.5 leading-tight">
-          <Link to={href} className="hover:text-drop">
+        {/* A card title is the second line of a card, not a page headline —
+            it carries the display face and the weight, not the size. */}
+        <h3 className="h3 mt-1 text-[1.0625rem] leading-[1.15] md:text-[1.15rem]">
+          <Link to={href} className="transition-colors hover:text-drop">
             {product.model}
           </Link>
         </h3>
-        <p className="mt-1 text-xs text-smoke">{specLine(product)}</p>
+        <p className="tnum mt-1.5 text-xs text-smoke">{specLine(product)}</p>
 
-        <div className="mt-2">
+        <div className="mt-2.5">
           <Stars
             rating={product.rating}
             count={product.reviewCount}
@@ -178,49 +185,54 @@ export default function ProductCard({ product }) {
           </div>
         )}
 
-        <div className="mt-auto pt-4">
+        {/* The price block is ruled off from the description above it, and
+            every figure is tabular so the column of cards lines up. */}
+        <div className="mt-auto border-t border-ink/[0.07] pt-3.5">
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <span className="font-display text-2xl leading-none text-ink">
+            <span className="tnum font-display text-[1.75rem] font-bold leading-none tracking-[-0.02em] text-ink">
               {money(bd.price)}
             </span>
-            <span className="text-[11px] uppercase tracking-[0.12em] text-smoke">
+            <span className="text-[11px] uppercase tracking-[0.09em] text-smoke">
               set of {SET_SIZE}
             </span>
             {setSaving > 0 && (
               <>
-                <span className="text-sm text-smoke line-through">
+                <span className="tnum text-sm text-smoke line-through">
                   {money(bd.list)}
                 </span>
-                <span className="font-display text-xs uppercase tracking-wide text-drop">
+                <span className="tnum font-display text-[12px] font-bold uppercase tracking-[0.06em] text-drop">
                   Save {money(setSaving)}
                 </span>
               </>
             )}
           </div>
-          <p className="mt-1 text-[11px] text-smoke">
+          <p className="tnum mt-1.5 text-[11px] text-smoke">
             {money(product.price)} each · install +{money(product.installPrice)}
             /tire
           </p>
 
           {bd.rebate > 0 && (
-            <p className="mt-1.5 rounded-sm bg-sky px-2 py-1 text-[11px] text-ink">
+            <p className="tnum mt-2 rounded-sm bg-sky px-2 py-1.5 text-[11px] leading-snug text-ink">
               − {money(bd.rebate)} mfr. rebate →{" "}
-              <span className="font-display">{money(bd.net)}</span> after rebate
+              <span className="font-display font-bold">{money(bd.net)}</span>{" "}
+              after rebate
             </p>
           )}
 
-          <p className="mt-2 flex items-start gap-1.5 text-[11px] text-smoke">
-            <Truck size={13} aria-hidden className="mt-0.5 shrink-0" />
+          <p className="mt-2.5 flex items-start gap-1.5 text-[11px] leading-snug text-smoke">
+            <Truck size={13} aria-hidden className="mt-px shrink-0" />
             <span>
               {shipsFree() ? "Ships free" : "Shipping calculated at checkout"} ·
               arrives {DELIVERY.earliest}–{DELIVERY.latest}
             </span>
           </p>
-          <p className={`mt-1.5 text-xs ${hint.tone}`}>{hint.text}</p>
+          <p className={`mt-1.5 text-xs font-medium ${hint.tone}`}>
+            {hint.text}
+          </p>
 
           <Link
             to={href}
-            className="btn-dark btn-sm mt-3 min-h-[44px] w-full"
+            className="btn-dark btn-sm mt-3.5 min-h-[44px] w-full"
             aria-label={`View details for ${product.brand} ${product.model}`}
           >
             View Details

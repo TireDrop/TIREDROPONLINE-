@@ -11,7 +11,13 @@ import {
   Warehouse,
 } from "lucide-react";
 
-import { Badge, PageHero, Section, SectionHead, Seo } from "../../components/ui/index.jsx";
+import {
+  Badge,
+  PageHero,
+  Section,
+  SectionHead,
+  Seo,
+} from "../../components/ui/index.jsx";
 import { BUSINESS } from "../../data/business.js";
 import { SERVICES } from "../../data/services.js";
 
@@ -19,11 +25,15 @@ import { SERVICES } from "../../data/services.js";
 const CATEGORY_ORDER = ["Tires", "Wheels", "Maintenance", "Repair", "Custom"];
 
 const CATEGORY_COPY = {
-  Tires: "Fitting the set you ordered, and everything that happens between your wheel and the road afterwards.",
+  Tires:
+    "Fitting the set you ordered, and everything that happens between your wheel and the road afterwards.",
   Wheels: "Fitment, mounting and balancing for the wheel package you bought.",
-  Maintenance: "Routine work that keeps the miles cheap — in the bay or in your own parking spot.",
-  Repair: "Bay work at the Sunrise shop, where the lifts and the alignment rack live.",
-  Custom: "Lift and leveling packages built around the tire and wheel setup you want.",
+  Maintenance:
+    "Routine work that keeps the miles cheap — in the bay or in your own parking spot.",
+  Repair:
+    "Bay work at the Sunrise shop, where the lifts and the alignment rack live.",
+  Custom:
+    "Lift and leveling packages built around the tire and wheel setup you want.",
 };
 
 function groupByCategory(services) {
@@ -33,7 +43,7 @@ function groupByCategory(services) {
     groups.get(service.category).push(service);
   });
   return [...groups.entries()].sort(
-    (a, b) => CATEGORY_ORDER.indexOf(a[0]) - CATEGORY_ORDER.indexOf(b[0])
+    (a, b) => CATEGORY_ORDER.indexOf(a[0]) - CATEGORY_ORDER.indexOf(b[0]),
   );
 }
 
@@ -59,11 +69,9 @@ function ServiceCard({ service }) {
           <Clock size={14} aria-hidden />
           {service.duration}
         </span>
-        <span className="font-display text-lg uppercase text-ink">
+        <span className="font-display text-lg text-ink">
           From ${service.priceFrom}
-          <span className="ml-1 text-xs tracking-wide text-smoke">
-            {service.priceUnit}
-          </span>
+          <span className="ml-1 text-xs text-smoke">{service.priceUnit}</span>
         </span>
       </div>
     </Link>
@@ -75,9 +83,9 @@ function SymptomMatcher() {
   const symptoms = useMemo(
     () =>
       SERVICES.flatMap((service) =>
-        service.symptoms.map((symptom) => ({ symptom, service }))
+        service.symptoms.map((symptom) => ({ symptom, service })),
       ),
-    []
+    [],
   );
   const [activeIndex, setActiveIndex] = useState(null);
   const match = activeIndex === null ? null : symptoms[activeIndex];
@@ -127,15 +135,15 @@ function SymptomMatcher() {
             <dl className="mt-5 grid grid-cols-2 gap-4 border-t border-ink/10 pt-4 text-sm">
               <div>
                 <dt className="label">Typical time</dt>
-                <dd className="font-display text-base uppercase text-ink">
+                <dd className="font-display text-base text-ink">
                   {match.service.duration}
                 </dd>
               </div>
               <div>
                 <dt className="label">Starting at</dt>
-                <dd className="font-display text-base uppercase text-ink">
+                <dd className="font-display text-base text-ink">
                   From ${match.service.priceFrom}{" "}
-                  <span className="text-xs tracking-wide text-smoke">
+                  <span className="text-xs text-smoke">
                     {match.service.priceUnit}
                   </span>
                 </dd>
@@ -162,9 +170,10 @@ function SymptomMatcher() {
             <Stethoscope size={28} aria-hidden className="text-ink/20" />
             <h3 className="h3 mt-4">Describe the problem</h3>
             <p className="mt-2 text-sm leading-relaxed text-smoke">
-              Choose the symptom that sounds closest to what you are dealing with
-              and we will point you at the right service. Nothing matching? Call
-              us at {BUSINESS.phone} and describe it — we have heard it before.
+              Choose the symptom that sounds closest to what you are dealing
+              with and we will point you at the right service. Nothing matching?
+              Call us at {BUSINESS.phone} and describe it — we have heard it
+              before.
             </p>
           </div>
         )}
@@ -206,12 +215,12 @@ export default function AutoServicePage() {
         <div className="wrap flex flex-wrap items-center gap-3 py-4 text-sm">
           <MapPin size={18} aria-hidden className="text-drop" />
           <p className="text-smoke">
-            <span className="font-display uppercase tracking-wide text-ink">
+            <span className="font-display font-bold text-ink">
               For local customers.
             </span>{" "}
-            {BUSINESS.name} ships tires to {BUSINESS.shipping.area}. Everything on
-            this page happens in South Florida — at the {BUSINESS.shop.city} shop
-            or in your driveway.
+            {BUSINESS.name} ships tires to {BUSINESS.shipping.area}. Everything
+            on this page happens in South Florida — at the {BUSINESS.shop.city}{" "}
+            shop or in your driveway.
           </p>
         </div>
       </div>
@@ -250,9 +259,9 @@ export default function AutoServicePage() {
       ))}
 
       {/* ---------- Symptom matcher ---------- */}
-      <Section className="bg-ink text-bone">
+      <Section className="bg-ink-wash text-bone">
         <div className="mb-8 max-w-2xl md:mb-12">
-          <p className="eyebrow mb-2">Not sure what you need?</p>
+          <p className="eyebrow-dark mb-2">Not sure what you need?</p>
           <h2 className="h2">Tell us the symptom</h2>
           <p className="lede mt-3 text-bone/70">
             You do not have to know the name of the repair. Pick the thing your
@@ -260,7 +269,7 @@ export default function AutoServicePage() {
           </p>
         </div>
 
-        <div className="rounded-sm bg-bone p-6 text-ink md:p-8">
+        <div className="rounded-card bg-bone p-6 text-ink shadow-lift md:p-8">
           <SymptomMatcher />
         </div>
       </Section>
@@ -280,7 +289,7 @@ export default function AutoServicePage() {
               href={BUSINESS.mapsHref}
               target="_blank"
               rel="noreferrer"
-              className="mt-4 inline-flex min-h-[36px] items-center gap-1.5 font-display text-sm uppercase tracking-wide text-drop hover:text-dive"
+              className="mt-4 inline-flex min-h-[36px] items-center gap-1.5 font-display text-sm font-bold text-drop hover:text-dive"
             >
               <MapPin size={15} aria-hidden />
               Get directions
@@ -296,7 +305,7 @@ export default function AutoServicePage() {
                   key={row.days}
                   className="flex items-baseline justify-between gap-4 border-b border-ink/10 pb-2 last:border-0"
                 >
-                  <dt className="font-display uppercase tracking-wide text-ink">
+                  <dt className="font-display font-bold text-ink">
                     {row.days}
                   </dt>
                   <dd className="text-smoke">{row.time}</dd>
@@ -309,9 +318,10 @@ export default function AutoServicePage() {
             <Phone size={22} aria-hidden className="text-drop" />
             <h3 className="h3 mt-4">Book it now</h3>
             <p className="mt-2 flex-1 text-sm leading-relaxed text-smoke">
-              Pick your service, your vehicle and your window online in about two
-              minutes — or call and talk it through with a dispatcher. Booking a
-              fitting for tires on their way here? Say so in the notes.
+              Pick your service, your vehicle and your window online in about
+              two minutes — or call and talk it through with a dispatcher.
+              Booking a fitting for tires on their way here? Say so in the
+              notes.
             </p>
             <div className="mt-6 flex flex-col gap-3">
               <Link to="/schedule" className="btn-primary btn-sm">
@@ -328,7 +338,7 @@ export default function AutoServicePage() {
 
         <div className="card mt-6 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-relaxed text-smoke">
-            <span className="font-display text-base uppercase tracking-wide text-ink">
+            <span className="font-display text-[15px] font-bold text-ink">
               Buying tires on {BUSINESS.name}?
             </span>{" "}
             Choose free ship-to-store at checkout and they land here on the rack

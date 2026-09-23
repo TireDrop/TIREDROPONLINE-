@@ -51,7 +51,7 @@ function bestIndex(values, direction = "high") {
 
 function BestMark() {
   return (
-    <span className="mt-1 inline-flex items-center gap-1 rounded-sm bg-drop px-1.5 py-0.5 font-display text-[11px] uppercase tracking-[0.12em] text-bone">
+    <span className="mt-1 inline-flex items-center gap-1 rounded-sm bg-drop px-1.5 py-0.5 font-display text-[11px] uppercase tracking-[0.09em] text-bone">
       <Check size={11} aria-hidden />
       Best
     </span>
@@ -66,7 +66,7 @@ function GroupRow({ label, span }) {
     <tr className="bg-ink text-bone">
       <th
         scope="row"
-        className="sticky left-0 z-20 bg-ink px-3 py-2 text-left font-display text-xs uppercase tracking-[0.18em]"
+        className="sticky left-0 z-20 bg-ink px-3 py-2 text-left font-display text-xs uppercase tracking-[0.09em]"
       >
         {label}
       </th>
@@ -86,7 +86,7 @@ function Row({ label, cells, bestAt = -1, tint = false }) {
     <tr className={bg}>
       <th
         scope="row"
-        className={`sticky left-0 z-10 ${bg} border-b border-r border-ink/10 px-3 py-3 text-left align-top font-display text-xs uppercase tracking-[0.12em] text-smoke`}
+        className={`sticky left-0 z-10 ${bg} border-b border-r border-ink/10 px-3 py-3 text-left align-top font-display text-xs uppercase tracking-[0.09em] text-smoke`}
       >
         {label}
       </th>
@@ -159,10 +159,10 @@ function ColumnHead({ product, onRemove }) {
           size={64}
           label={`${product.brand} ${product.model}`}
         />
-        <span className="font-display text-xs uppercase tracking-[0.15em] text-smoke">
+        <span className="font-display text-xs uppercase tracking-[0.09em] text-smoke">
           {product.brand}
         </span>
-        <span className="font-display text-base uppercase leading-tight text-ink">
+        <span className="font-display text-base font-bold leading-tight text-ink">
           {product.model}
         </span>
         <Link
@@ -313,7 +313,10 @@ export default function ComparePage() {
                 label={`Set of ${SET_SIZE}`}
                 bestAt={bestIndex(setPrices, "low")}
                 cells={setPrices.map((p, i) => (
-                  <span key={i} className="font-display text-xl">
+                  <span
+                    key={i}
+                    className="font-display text-xl font-bold tracking-tight"
+                  >
                     {money(p)}
                   </span>
                 ))}
@@ -392,7 +395,7 @@ export default function ComparePage() {
               <tr className="bg-bone">
                 <th
                   scope="row"
-                  className="sticky left-0 z-10 bg-bone border-r border-ink/10 px-3 py-4 text-left font-display text-xs uppercase tracking-[0.12em] text-smoke"
+                  className="sticky left-0 z-10 bg-bone border-r border-ink/10 px-3 py-4 text-left font-display text-xs uppercase tracking-[0.09em] text-smoke"
                 >
                   Buy
                 </th>

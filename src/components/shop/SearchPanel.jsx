@@ -67,24 +67,24 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
   const years = useMemo(() => {
     const set = new Set();
     Object.values(VEHICLE_DATA).forEach((models) =>
-      Object.values(models).forEach((list) => list.forEach((y) => set.add(y)))
+      Object.values(models).forEach((list) => list.forEach((y) => set.add(y))),
     );
     return [...set].sort((a, b) => b - a);
   }, []);
 
   const models = useMemo(
     () => (make ? Object.keys(VEHICLE_DATA[make] || {}) : []),
-    [make]
+    [make],
   );
 
   const isWheel = kind === "wheel";
   const boltPatterns = useMemo(
     () => [...new Set(WHEELS.map((w) => w.boltPattern))].sort(),
-    []
+    [],
   );
   const wheelWidths = useMemo(
     () => [...new Set(WHEELS.map((w) => w.wheelWidth))].sort((a, b) => a - b),
-    []
+    [],
   );
 
   const sizeTabLabel = isWheel ? "Shop by Wheel Size" : "Shop by Tire Size";
@@ -105,7 +105,7 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
       setError(
         isWheel
           ? "Pick at least a diameter to search wheel sizes."
-          : "Pick at least one number from your sidewall to search."
+          : "Pick at least one number from your sidewall to search.",
       );
       return;
     }
@@ -114,14 +114,14 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
   };
 
   const tabClass = (id) =>
-    `flex flex-1 items-center justify-center gap-2 px-4 py-3.5 font-display text-sm uppercase tracking-[0.12em] transition-colors md:text-base ${
+    `flex min-h-[48px] flex-1 items-center justify-center gap-2 border-t-[3px] px-3 py-3.5 font-display text-[14px] font-bold leading-tight tracking-[-0.008em] transition-colors md:px-4 md:text-[15px] ${
       tab === id
-        ? "bg-bone text-ink"
-        : "bg-steel text-bone/70 hover:bg-graphite hover:text-bone"
+        ? "border-drop bg-bone text-ink"
+        : "border-transparent bg-steel text-bone/70 hover:bg-graphite hover:text-bone"
     }`;
 
   return (
-    <div className="overflow-hidden rounded-sm border border-ink/10 bg-bone shadow-lift">
+    <div className="overflow-hidden rounded-card border border-ink/10 bg-bone shadow-lift">
       <div role="tablist" aria-label="Product finder" className="flex">
         <button
           type="button"
@@ -155,7 +155,7 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
         </button>
       </div>
 
-      <div className="p-5 md:p-6">
+      <div className="bg-bone p-5 md:p-6">
         {tab === "vehicle" ? (
           <form
             id="finder-panel-vehicle"
@@ -163,7 +163,7 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
             aria-labelledby="finder-tab-vehicle"
             onSubmit={submitVehicle}
           >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Field
                 id="finder-year"
                 label="Year"
@@ -192,14 +192,15 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
                 placeholder={make ? "Select model" : "Select a make first"}
                 disabled={!make}
               />
-              <div className="flex items-end">
-                <button type="submit" className="btn-primary w-full">
-                  <Search size={18} aria-hidden />
-                  Find {isWheel ? "Wheels" : "Tires"}
-                </button>
-              </div>
             </div>
-            <p className="mt-3 text-xs text-smoke">
+            <button
+              type="submit"
+              className="btn-primary mt-4 min-h-[48px] w-full whitespace-nowrap sm:w-auto"
+            >
+              <Search size={18} aria-hidden />
+              Find {isWheel ? "Wheels" : "Tires"}
+            </button>
+            <p className="mt-3 text-xs leading-relaxed text-smoke">
               We match your vehicle to the sizes we stock, then install at your
               home or office. Not sure? Call us and read the sidewall to us.
             </p>
@@ -211,7 +212,7 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
             aria-labelledby="finder-tab-size"
             onSubmit={submitSize}
           >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Field
                 id="finder-width"
                 label={isWheel ? "Wheel Width" : "Width"}
@@ -236,14 +237,15 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
                 options={isWheel ? WHEEL_DIAMETERS : TIRE_DIAMETERS}
                 placeholder="Any diameter"
               />
-              <div className="flex items-end">
-                <button type="submit" className="btn-primary w-full">
-                  <Search size={18} aria-hidden />
-                  Search Sizes
-                </button>
-              </div>
             </div>
-            <p className="mt-3 text-xs text-smoke">
+            <button
+              type="submit"
+              className="btn-primary mt-4 min-h-[48px] w-full whitespace-nowrap sm:w-auto"
+            >
+              <Search size={18} aria-hidden />
+              Search Sizes
+            </button>
+            <p className="mt-3 text-xs leading-relaxed text-smoke">
               {isWheel
                 ? "Wheel sizes read diameter by width, e.g. 18x8.5. Bolt pattern is stamped on the back of your current wheel."
                 : "Your size is printed on the sidewall, e.g. 225/50R17 — that is a 225 width, 50 aspect ratio and a 17 inch rim."}
@@ -252,7 +254,10 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
         )}
 
         {error && (
-          <p role="alert" className="mt-3 text-sm font-medium text-drop">
+          <p
+            role="alert"
+            className="mt-3 rounded-sm bg-sky px-3 py-2 text-sm font-medium text-ink"
+          >
             {error}
           </p>
         )}

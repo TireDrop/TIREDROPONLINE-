@@ -62,7 +62,8 @@ function validate(values) {
   if (!values.message.trim()) {
     errors.message = "Add a few details so we can actually help.";
   } else if (values.message.trim().length < 15) {
-    errors.message = "A little more detail, please — vehicle, tire size, or your order number.";
+    errors.message =
+      "A little more detail, please — vehicle, tire size, or your order number.";
   }
 
   return errors;
@@ -210,7 +211,9 @@ function ContactForm() {
 
         <fieldset
           className="sm:col-span-2"
-          aria-describedby={errors.subject ? "contact-subject-error" : undefined}
+          aria-describedby={
+            errors.subject ? "contact-subject-error" : undefined
+          }
         >
           <legend className="label">What is this about? *</legend>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -225,7 +228,7 @@ function ContactForm() {
                     value={subject}
                     checked={values.subject === subject}
                     onChange={update("subject")}
-                    className="h-4 w-4 accent-drop"
+                    className="accent-drop"
                     aria-invalid={errors.subject ? "true" : undefined}
                   />
                   <label htmlFor={id} className="text-sm text-ink">
@@ -253,7 +256,9 @@ function ContactForm() {
             value={values.message}
             onChange={update("message")}
             aria-invalid={errors.message ? "true" : undefined}
-            aria-describedby={errors.message ? "contact-message-error" : undefined}
+            aria-describedby={
+              errors.message ? "contact-message-error" : undefined
+            }
           />
           {errors.message && (
             <FieldError id="contact-message-error">{errors.message}</FieldError>
@@ -302,10 +307,7 @@ export default function ContactPage() {
         <div className="grid gap-10 lg:grid-cols-[1fr_1.25fr] lg:gap-14">
           {/* ---------- Contact methods ---------- */}
           <div>
-            <SectionHead
-              eyebrow="Reach Us"
-              title="Two ways to get an answer"
-            />
+            <SectionHead eyebrow="Reach Us" title="Two ways to get an answer" />
 
             <div className="card border-l-4 border-l-drop p-6">
               <h3 className="h3 mb-2 flex items-center gap-2">
@@ -332,7 +334,7 @@ export default function ContactPage() {
                 </h3>
                 <a
                   href={BUSINESS.phoneHref}
-                  className="font-display text-2xl uppercase tracking-wide text-ink hover:text-drop"
+                  className="font-display text-2xl text-ink hover:text-drop"
                 >
                   {BUSINESS.phone}
                 </a>
@@ -390,7 +392,7 @@ export default function ContactPage() {
                       <tr key={h.days}>
                         <th
                           scope="row"
-                          className="py-2 text-left font-display text-base font-normal uppercase tracking-wide text-ink"
+                          className="py-2 text-left font-display text-base font-normal text-ink"
                         >
                           {h.days}
                         </th>
@@ -425,10 +427,10 @@ export default function ContactPage() {
         </div>
       </Section>
 
-      <section className="bg-ink py-12 text-bone md:py-16">
+      <section className="bg-ink-wash py-12 text-bone md:py-16">
         <div className="wrap flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="eyebrow mb-2">Before you write</p>
+            <p className="eyebrow-dark mb-2">Before you write</p>
             <h2 className="h2">A lot of it is already answered</h2>
             <p className="lede mt-3 max-w-xl text-bone/70">
               How shipping works, what ship-to-store costs, and what happens if

@@ -1,12 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import {
-  CalendarClock,
-  Circle,
-  Disc3,
-  Phone,
-  Truck,
-} from "lucide-react";
+import { CalendarClock, Circle, Disc3, Phone, Truck } from "lucide-react";
 import { BUSINESS } from "../data/business.js";
 import { Seo } from "../components/ui/index.jsx";
 
@@ -45,13 +39,13 @@ export default function NotFoundPage() {
         description={`That page is not here. Find tires, wheels, shipping and install options at ${BUSINESS.name}, or call ${BUSINESS.phone}.`}
       />
 
-      <section className="bg-ink text-bone">
+      <section className="bg-ink-wash text-bone">
         <div className="wrap py-16 md:py-24">
-          <p className="eyebrow mb-3">Error 404</p>
+          <p className="eyebrow-dark mb-3">Error 404</p>
 
           <p
             aria-hidden
-            className="font-display text-[5rem] leading-[0.85] text-drop sm:text-[8rem] md:text-[11rem]"
+            className="font-display text-[5rem] leading-[0.85] text-volt sm:text-[8rem] md:text-[11rem]"
           >
             404
           </p>
@@ -62,8 +56,8 @@ export default function NotFoundPage() {
 
           <p className="lede mt-5 max-w-xl text-bone/70">
             The page you were looking for moved, got renamed, or never existed.
-            Nothing you did wrong. Here is where most people were headed
-            anyway — or call us and we will point you straight at it.
+            Nothing you did wrong. Here is where most people were headed anyway
+            — or call us and we will point you straight at it.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">

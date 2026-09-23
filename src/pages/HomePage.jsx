@@ -53,7 +53,7 @@ function Hero() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-ink text-bone">
+    <section className="relative overflow-hidden bg-ink-wash text-bone">
       {/* Tread-pattern wash behind the headline. */}
       <div
         aria-hidden
@@ -74,14 +74,14 @@ function Hero() {
           copy back together in the left half with the finder beside it. */}
       <div className="wrap relative grid gap-7 py-10 md:py-14 lg:grid-cols-[.9fr_1.1fr] lg:gap-x-12 lg:gap-y-6 lg:py-16">
         <div className="order-1 lg:col-start-1 lg:row-start-1 lg:self-end">
-          <p className="eyebrow mb-3 flex items-center gap-2">
+          <p className="eyebrow-dark mb-3 flex items-center gap-2">
             <Truck size={16} aria-hidden />
             {BUSINESS.tagline}
           </p>
 
           <h1 className="h1">
             Order tires online.
-            <span className="block text-drop">We ship them to you.</span>
+            <span className="block text-volt">We ship them to you.</span>
           </h1>
         </div>
 
@@ -89,7 +89,7 @@ function Hero() {
             column, a ring that lifts it off the dark band, and first position
             on a phone, because shopping by vehicle or by sidewall size is how
             nearly every tire purchase starts. */}
-        <div className="order-2 rounded-sm bg-bone p-5 text-ink shadow-lift ring-4 ring-drop/25 md:p-7 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-center">
+        <div className="order-2 rounded-card bg-bone p-5 text-ink shadow-lift ring-4 ring-volt/25 md:p-7 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-center">
           <p className="eyebrow mb-1.5">Start here</p>
           <h2 className="h2 mb-1 text-3xl md:text-4xl">Find your fit</h2>
           <p className="mb-5 text-sm text-smoke">
@@ -160,10 +160,10 @@ function TrustBar() {
       <ul className="wrap grid grid-cols-2 gap-x-5 gap-y-7 py-8 lg:grid-cols-4 lg:gap-x-8">
         {TRUST.map(({ Icon, title, copy }) => (
           <li key={title} className="flex flex-col gap-2">
-            <Icon size={24} aria-hidden className="text-drop" />
-            <p className="font-display text-base uppercase leading-tight tracking-wide">
+            <Icon size={22} aria-hidden className="text-drop" />
+            <h3 className="text-balance text-[15px] leading-snug md:text-base">
               {title}
-            </p>
+            </h3>
             <p className="text-xs leading-relaxed text-smoke">{copy}</p>
           </li>
         ))}
@@ -216,13 +216,11 @@ function ShopByCategory() {
               className="card-hover group flex flex-col p-5 transition-colors hover:border-drop/40"
             >
               <Icon size={24} aria-hidden className="mb-3 text-drop" />
-              <h3 className="font-display text-lg uppercase leading-tight">
-                {category}
-              </h3>
+              <h3 className="text-lg leading-tight">{category}</h3>
               <p className="mt-2 flex-1 text-xs leading-relaxed text-smoke">
                 {CATEGORY_COPY[category]}
               </p>
-              <span className="mt-4 flex items-center gap-1.5 font-display text-xs uppercase tracking-[0.12em] text-ink group-hover:text-drop">
+              <span className="mt-4 flex items-center gap-1.5 font-display text-[13px] font-bold text-ink group-hover:text-drop">
                 Shop
                 <ArrowRight
                   size={14}
@@ -274,20 +272,18 @@ function RebateStrip() {
               label={`${tire.brand} ${tire.model}`}
               className="mb-3"
             />
-            <span className="font-display text-xs uppercase tracking-[0.15em] text-smoke">
+            <span className="font-display text-xs font-bold uppercase tracking-[0.09em] text-smoke">
               {tire.brand}
             </span>
-            <h3 className="font-display text-lg uppercase leading-tight">
-              {tire.model}
-            </h3>
-            <p className="mt-3 flex items-center gap-1.5 font-display text-sm uppercase tracking-wide text-drop">
+            <h3 className="text-lg leading-tight">{tire.model}</h3>
+            <p className="mt-3 flex items-center gap-1.5 font-display text-sm font-bold text-drop">
               <BadgePercent size={15} aria-hidden />
               {tire.rebate.label}
             </p>
             <p className="mt-auto pt-3 text-xs text-smoke">
               {money(setPrice(tire))} a set · {tire.size}
             </p>
-            <span className="mt-3 flex items-center gap-1.5 font-display text-xs uppercase tracking-[0.12em] text-ink group-hover:text-drop">
+            <span className="mt-3 flex items-center gap-1.5 font-display text-[13px] font-bold text-ink group-hover:text-drop">
               See the deal
               <ArrowRight
                 size={14}
@@ -327,6 +323,7 @@ function DeliveryChoice() {
   return (
     <Section className="bg-bone">
       <SectionHead
+        align="center"
         eyebrow="Two ways to get them"
         title="You choose where the tires land"
         lede="Same catalog, same prices. The only decision is whether they come to your door or to our door."
@@ -337,7 +334,7 @@ function DeliveryChoice() {
           <div key={title} className="card flex flex-col p-7">
             <div className="mb-4 flex items-center gap-2">
               <Icon size={22} aria-hidden className="text-drop" />
-              <span className="font-display text-xs uppercase tracking-[0.2em] text-smoke">
+              <span className="font-display text-xs font-bold uppercase tracking-[0.09em] text-smoke">
                 {eyebrow}
               </span>
             </div>
@@ -400,7 +397,7 @@ function CategoryTiles() {
             <p className="mt-2 flex-1 text-sm leading-relaxed text-smoke">
               {copy}
             </p>
-            <span className="mt-4 flex items-center gap-1.5 font-display text-sm uppercase tracking-wide text-ink group-hover:text-drop">
+            <span className="mt-4 flex items-center gap-1.5 font-display text-sm font-bold text-ink group-hover:text-drop">
               Explore
               <ArrowRight
                 size={15}
@@ -507,9 +504,9 @@ function BrandStrip() {
   // Dark band so a single white-on-transparent logo file works here and in
   // the footer without needing a second, dark-artwork variant.
   return (
-    <section className="bg-ink py-10">
+    <section className="bg-ink-wash py-10">
       <div className="wrap flex flex-col items-center gap-6">
-        <p className="font-display text-xs uppercase tracking-[0.25em] text-bone/50">
+        <p className="font-display text-xs font-bold uppercase tracking-[0.09em] text-bone/60">
           Brands we ship and stand behind
         </p>
         <ul className="flex flex-wrap items-center justify-center gap-x-12 gap-y-5">
@@ -592,14 +589,14 @@ function LocalAdvantage() {
         </div>
       </div>
 
-      <p className="mt-10 text-center font-display text-xs uppercase tracking-[0.2em] text-smoke">
+      <p className="mt-10 text-center font-display text-xs font-bold uppercase tracking-[0.09em] text-smoke">
         Install towns we cover
       </p>
       <ul className="mx-auto mt-4 flex max-w-3xl flex-wrap justify-center gap-2">
         {BUSINESS.installArea.map((city) => (
           <li
             key={city}
-            className="rounded-sm border border-ink/10 bg-fog px-3.5 py-1.5 font-display text-sm uppercase tracking-wide text-ink"
+            className="rounded-sm border border-ink/10 bg-fog px-3.5 py-1.5 font-display text-sm font-semibold text-ink"
           >
             {city}
           </li>
@@ -624,11 +621,11 @@ function LocalAdvantage() {
 
 function PromoBand() {
   return (
-    <section className="bg-ink">
+    <section className="bg-ink-wash">
       <div aria-hidden className="hazard h-2.5" />
       <div className="wrap flex flex-col items-center gap-5 py-12 text-center md:flex-row md:justify-between md:text-left">
         <div>
-          <p className="eyebrow mb-1.5">Current offers</p>
+          <p className="eyebrow-dark mb-1.5">Current offers</p>
           <h2 className="h2 text-bone">
             Save on sets of four, shipping and rebates
           </h2>
@@ -679,7 +676,7 @@ function Proof() {
                   <span className="block font-display text-4xl text-drop">
                     {s.v}
                   </span>
-                  <span className="mt-1 block text-xs uppercase tracking-wide text-smoke">
+                  <span className="mt-1 block text-[13px] leading-snug text-smoke">
                     {s.l}
                   </span>
                 </dd>
@@ -695,7 +692,7 @@ function Proof() {
         <div className="card p-7">
           <div className="flex items-center justify-between gap-4 border-b border-ink/10 pb-5">
             <div>
-              <p className="font-display text-sm uppercase tracking-[0.15em] text-smoke">
+              <p className="font-display text-sm font-semibold text-smoke">
                 Customer rating
               </p>
               <p className="font-display text-4xl leading-none">4.8</p>
@@ -707,7 +704,7 @@ function Proof() {
             “I ordered a set on a Tuesday night, had them sent to the shop, and
             booked the install for the weekend. Cheaper than the quote I got
             locally and I never had to guess at the size.”
-            <footer className="mt-3 font-display text-xs uppercase tracking-wide text-ink">
+            <footer className="mt-3 font-display text-[13px] font-bold text-ink">
               — Danielle R., Plantation
             </footer>
           </blockquote>
@@ -725,9 +722,9 @@ function Proof() {
 
 function FinalCta() {
   return (
-    <Section className="bg-ink text-bone">
+    <Section className="bg-ink-wash text-bone">
       <div className="flex flex-col items-center gap-6 text-center">
-        <PackageCheck size={34} aria-hidden className="text-drop" />
+        <PackageCheck size={34} aria-hidden className="text-volt" />
         <h2 className="h2 max-w-2xl">Find your size and pick your delivery</h2>
         <p className="lede max-w-xl text-bone/65">
           Search the catalog, add a set to your cart, and choose shipping or
@@ -743,7 +740,7 @@ function FinalCta() {
             Call {BUSINESS.phone}
           </a>
         </div>
-        <p className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-bone/45">
+        <p className="flex items-center gap-2 font-display text-xs font-bold uppercase tracking-[0.09em] text-bone/60">
           <CircleDollarSign size={14} aria-hidden />
           {BUSINESS.poweredBy}
         </p>

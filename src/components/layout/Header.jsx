@@ -16,12 +16,12 @@ import Logo from "./Logo.jsx";
 /** Thin utility strip above the masthead: phone, address, mobile-service pitch. */
 function UtilityBar() {
   return (
-    <div className="bg-ink text-bone">
+    <div className="bg-ink bg-steel-wash text-bone">
       <div className="wrap flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-2 text-xs">
         {/* Calling is the primary action on a phone — keep it comfortably tappable. */}
         <a
           href={BUSINESS.phoneHref}
-          className="-my-1 flex min-h-[32px] items-center gap-1.5 py-1 font-display text-sm tracking-wide hover:text-amber"
+          className="-my-1 flex min-h-[32px] items-center gap-1.5 py-1 font-display text-sm font-bold tracking-[-0.005em] transition-colors hover:text-amber"
         >
           <Phone size={13} aria-hidden />
           {BUSINESS.phone}
@@ -34,7 +34,7 @@ function UtilityBar() {
 
         <span className="flex items-center gap-1.5 text-amber">
           <Truck size={13} aria-hidden />
-          <span className="font-display tracking-wide">
+          <span className="font-display font-bold tracking-[-0.005em]">
             Free ship-to-store &amp; install in South Florida
           </span>
         </span>
@@ -62,10 +62,10 @@ function DesktopNav() {
                 to={item.to}
                 end={item.to === "/"}
                 className={({ isActive }) =>
-                  `flex h-full items-center gap-1 px-4 py-5 font-display text-[15px] uppercase tracking-wide transition-colors ${
+                  `relative flex h-full items-center gap-1 px-3.5 py-5 font-display text-[14px] font-bold uppercase tracking-[0.015em] transition-colors after:absolute after:inset-x-3.5 after:bottom-0 after:h-[3px] after:rounded-t-sm after:transition-colors ${
                     isActive
-                      ? "text-drop"
-                      : "text-ink hover:text-drop"
+                      ? "text-drop after:bg-drop"
+                      : "text-ink after:bg-transparent hover:text-drop hover:after:bg-drop/30"
                   }`
                 }
                 onFocus={() => hasMenu && setOpenIdx(i)}
@@ -76,13 +76,13 @@ function DesktopNav() {
               </NavLink>
 
               {hasMenu && openIdx === i && (
-                <div className="absolute left-0 top-full z-40 w-64 border border-ink/10 bg-bone py-2 shadow-lift">
+                <div className="absolute left-0 top-full z-40 w-64 overflow-hidden rounded-b-card border border-t-0 border-ink/10 bg-bone py-2 shadow-lift">
                   <ul>
                     {item.children.map((child) => (
                       <li key={child.label}>
                         <Link
                           to={child.to}
-                          className="block px-4 py-2 text-sm text-ink hover:bg-fog hover:text-drop"
+                          className="block px-4 py-2.5 text-sm text-ink transition-colors hover:bg-fog hover:text-drop"
                           onClick={() => setOpenIdx(null)}
                         >
                           {child.label}
@@ -137,7 +137,7 @@ function MobileDrawer({ open, onClose }) {
                 <Link
                   to={item.to}
                   onClick={onClose}
-                  className="block py-2.5 font-display text-lg uppercase text-ink"
+                  className="block py-2.5 font-display text-[15px] font-bold uppercase tracking-[0.015em] text-ink"
                 >
                   {item.label}
                 </Link>
@@ -148,7 +148,7 @@ function MobileDrawer({ open, onClose }) {
                         <Link
                           to={child.to}
                           onClick={onClose}
-                          className="block py-1.5 text-sm text-smoke hover:text-drop"
+                          className="block py-1.5 text-sm text-smoke transition-colors hover:text-drop"
                         >
                           {child.label}
                         </Link>
@@ -196,18 +196,21 @@ export default function Header() {
           <DesktopNav />
 
           <div className="flex items-center gap-1.5">
-            <Link to="/tires" className="btn-primary btn-sm hidden xl:inline-flex">
+            <Link
+              to="/tires"
+              className="btn-primary btn-sm ml-1.5 hidden whitespace-nowrap xl:inline-flex"
+            >
               Shop Tires
             </Link>
 
             <Link
               to="/cart"
-              className="relative rounded-sm p-2.5 text-ink hover:bg-fog"
+              className="relative rounded-sm p-2.5 text-ink transition-colors hover:bg-fog hover:text-drop"
               aria-label={`Cart, ${count} item${count === 1 ? "" : "s"}`}
             >
               <ShoppingCart size={21} aria-hidden />
               {count > 0 && (
-                <span className="absolute right-0.5 top-0.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-drop px-1 text-[10px] font-bold text-bone">
+                <span className="tnum absolute right-0.5 top-0.5 flex h-[19px] min-w-[19px] items-center justify-center rounded-full bg-drop px-1 text-[11px] font-bold leading-none text-bone ring-2 ring-bone">
                   {count}
                 </span>
               )}
@@ -216,7 +219,7 @@ export default function Header() {
             <button
               onClick={() => setMenuOpen(true)}
               aria-label="Open menu"
-              className="rounded-sm p-2.5 text-ink hover:bg-fog lg:hidden"
+              className="rounded-sm p-2.5 text-ink transition-colors hover:bg-fog hover:text-drop lg:hidden"
             >
               <Menu size={22} aria-hidden />
             </button>

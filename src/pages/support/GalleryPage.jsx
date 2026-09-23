@@ -18,67 +18,78 @@ const GALLERY = [
   {
     id: "g1",
     caption: "Order out the door — 4x Continental, shipped to Georgia",
-    detail: "Picked from the distributor closest to the customer, boxed and on its way without passing through a warehouse of ours.",
+    detail:
+      "Picked from the distributor closest to the customer, boxed and on its way without passing through a warehouse of ours.",
     tone: ["#0A1628", "#24354C"],
   },
   {
     id: "g2",
     caption: "Ship to store — set checked in at the Sunrise counter",
-    detail: "Size, load index and speed rating read off every sidewall and matched to the order before anyone books the install.",
+    detail:
+      "Size, load index and speed rating read off every sidewall and matched to the order before anyone books the install.",
     tone: ["#24354C", "#0A1628"],
   },
   {
     id: "g3",
     caption: "Install bay — full set fitted after a ship-to-store order",
-    detail: "Mounted, balanced, new valve service and every lug torqued to spec.",
+    detail:
+      "Mounted, balanced, new valve service and every lug torqued to spec.",
     tone: ["#0B5FFF", "#0A4FD8"],
   },
   {
     id: "g4",
     caption: "Mobile install — driveway call, Plantation",
-    detail: "Mat down, jack set, tire machine and balancer running off the van. The car never moved.",
+    detail:
+      "Mat down, jack set, tire machine and balancer running off the van. The car never moved.",
     tone: ["#122135", "#0A1628"],
   },
   {
     id: "g5",
     caption: "Wheel and tire package — staggered fitment, shipped",
-    detail: "Offset and clearance confirmed with the customer first, then mounted and balanced as a package before it shipped.",
+    detail:
+      "Offset and clearance confirmed with the customer first, then mounted and balanced as a package before it shipped.",
     tone: ["#24354C", "#122135"],
   },
   {
     id: "g6",
     caption: "Alignment rack — Sunrise shop",
-    detail: "Post-install alignment with a before-and-after printout for the customer.",
+    detail:
+      "Post-install alignment with a before-and-after printout for the customer.",
     tone: ["#F5A623", "#0A4FD8"],
   },
   {
     id: "g7",
     caption: "Fleet order — six work vans, Tamarac yard",
-    detail: "Ordered online, shipped to the shop, fitted on site. Tread depths recorded per vehicle, one invoice.",
+    detail:
+      "Ordered online, shipped to the shop, fitted on site. Tread depths recorded per vehicle, one invoice.",
     tone: ["#0A1628", "#122135"],
   },
   {
     id: "g8",
     caption: "Packaging check — freight damage caught at the counter",
-    detail: "A scuffed box gets opened and inspected before it is handed over. If the tire is wrong, it goes back, not on your car.",
+    detail:
+      "A scuffed box gets opened and inspected before it is handed over. If the tire is wrong, it goes back, not on your car.",
     tone: ["#122135", "#0B5FFF"],
   },
   {
     id: "g9",
     caption: "Office-park flat repair — sedan, Fort Lauderdale",
-    detail: "Screw through the tread. Dismounted, patch-plugged from the inside and rebalanced.",
+    detail:
+      "Screw through the tread. Dismounted, patch-plugged from the inside and rebalanced.",
     tone: ["#0A1628", "#24354C"],
   },
   {
     id: "g10",
     caption: "TPMS sensor replacement — SUV, Lauderhill",
-    detail: "Dead sensor battery after eight years. Replaced in a work parking lot, light out.",
+    detail:
+      "Dead sensor battery after eight years. Replaced in a work parking lot, light out.",
     tone: ["#24354C", "#0A1628"],
   },
   {
     id: "g11",
     caption: "Fitment call — sizes read off a door placard over the phone",
-    detail: "Half the job is making sure the right tire gets ordered in the first place. That part happens before anything ships.",
+    detail:
+      "Half the job is making sure the right tire gets ordered in the first place. That part happens before anything ships.",
     tone: ["#122135", "#F5A623"],
   },
   {
@@ -211,9 +222,16 @@ function PlaceholderArt({ tone, label }) {
             fill="#FFFFFF"
           />
         ))}
-        <rect x="0" y="54" width="200" height="3" fill="#FFFFFF" opacity="0.5" />
+        <rect
+          x="0"
+          y="54"
+          width="200"
+          height="3"
+          fill="#FFFFFF"
+          opacity="0.5"
+        />
       </svg>
-      <span className="absolute bottom-3 left-4 font-display text-xs uppercase tracking-[0.22em] text-bone/70">
+      <span className="absolute bottom-3 left-4 font-display text-xs font-bold uppercase tracking-[0.09em] text-bone/70">
         {label}
       </span>
     </div>
@@ -236,7 +254,8 @@ export default function GalleryPage() {
     let next = null;
 
     if (event.key === "ArrowRight") next = (index + 1) % TABS.length;
-    else if (event.key === "ArrowLeft") next = (index - 1 + TABS.length) % TABS.length;
+    else if (event.key === "ArrowLeft")
+      next = (index - 1 + TABS.length) % TABS.length;
     else if (event.key === "Home") next = 0;
     else if (event.key === "End") next = TABS.length - 1;
 
@@ -291,7 +310,7 @@ export default function GalleryPage() {
                   tabRefs.current[tab.id] = el;
                 }}
                 onClick={() => setActive(tab.id)}
-                className={`-mb-px border-b-2 px-5 py-3 font-display text-lg uppercase tracking-wide transition-colors ${
+                className={`-mb-px border-b-2 px-5 py-3 font-display text-lg transition-colors ${
                   selected
                     ? "border-drop text-drop"
                     : "border-transparent text-smoke hover:text-ink"
@@ -312,7 +331,6 @@ export default function GalleryPage() {
             tabIndex={0}
           >
             <SectionHead
-              eyebrow="Gallery"
               title="Orders out, tires on"
               lede="Captions describe the order or the job each tile stands for. Photography is being collected now — these are placeholders until it lands."
             />
@@ -322,7 +340,7 @@ export default function GalleryPage() {
                 <li key={item.id} className="card-hover overflow-hidden">
                   <PlaceholderArt tone={item.tone} label={BUSINESS.name} />
                   <div className="p-5">
-                    <h3 className="font-display text-lg uppercase leading-tight tracking-wide text-ink">
+                    <h3 className="font-display text-[1.0625rem] leading-snug text-ink">
                       {item.caption}
                     </h3>
                     <p className="mt-2 text-sm leading-relaxed text-smoke">
@@ -344,7 +362,6 @@ export default function GalleryPage() {
             tabIndex={0}
           >
             <SectionHead
-              eyebrow="Videos"
               title="How-tos we are filming"
               lede="Short, no-nonsense walkthroughs of the questions we answer most, for customers ordering online and for customers standing at the counter. These are in production — call us in the meantime and we will just explain it."
             />
@@ -354,19 +371,23 @@ export default function GalleryPage() {
                 <li key={video.id} className="card overflow-hidden">
                   <div
                     aria-hidden
-                    className="relative flex h-40 items-center justify-center bg-ink"
+                    className="relative flex h-40 items-center justify-center bg-steel-wash"
                   >
                     <span className="flex h-14 w-14 items-center justify-center rounded-full bg-drop">
-                      <Play size={22} className="ml-0.5 fill-bone text-bone" />
+                      <Play
+                        size={22}
+                        aria-hidden
+                        className="ml-0.5 fill-bone text-bone"
+                      />
                     </span>
-                    <span className="absolute bottom-3 right-4 flex items-center gap-1.5 font-display text-xs uppercase tracking-[0.15em] text-bone/70">
-                      <Clock size={13} />
+                    <span className="absolute bottom-3 right-4 flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-[0.09em] text-bone/70">
+                      <Clock size={13} aria-hidden />
                       {video.duration}
                     </span>
                   </div>
 
                   <div className="p-5">
-                    <h3 className="font-display text-lg uppercase leading-tight tracking-wide text-ink">
+                    <h3 className="font-display text-[1.0625rem] leading-snug text-ink">
                       {video.title}
                     </h3>
                     <p className="mt-2 text-sm leading-relaxed text-smoke">
@@ -403,7 +424,6 @@ export default function GalleryPage() {
             tabIndex={0}
           >
             <SectionHead
-              eyebrow="Tire Tips"
               title="Short reads that save tires"
               lede="The advice we give on the phone, written down so you can check it in your own driveway — wherever that driveway is."
             />
@@ -418,7 +438,7 @@ export default function GalleryPage() {
                   </p>
                   <Link
                     to={tip.to}
-                    className="mt-5 inline-flex items-center gap-1.5 font-display text-sm uppercase tracking-wide text-drop hover:text-dive"
+                    className="mt-5 inline-flex min-h-[32px] items-center gap-1.5 font-display text-sm font-bold text-drop hover:text-dive"
                   >
                     Read the tip
                     <ArrowRight size={15} aria-hidden />
@@ -430,10 +450,10 @@ export default function GalleryPage() {
         )}
       </Section>
 
-      <section className="bg-steel py-14 text-bone md:py-20">
+      <section className="bg-steel-wash py-14 text-bone md:py-20">
         <div className="wrap grid gap-8 md:grid-cols-[1.2fr_1fr] md:items-center">
           <div>
-            <p className="eyebrow mb-2">{BUSINESS.tagline}</p>
+            <p className="eyebrow-dark mb-2">{BUSINESS.tagline}</p>
             <h2 className="h2">Your order could be the next one out</h2>
             <p className="lede mt-4 max-w-xl text-bone/70">
               Tires shipped anywhere in {BUSINESS.shipping.area}, free to the{" "}

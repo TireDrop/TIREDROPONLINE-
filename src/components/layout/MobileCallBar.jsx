@@ -15,17 +15,22 @@ import { BUSINESS } from "../../data/business.js";
 export default function MobileCallBar() {
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-40 min-h-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] border-t border-graphite bg-ink/95 backdrop-blur lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 min-h-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] border-t border-graphite bg-ink/95 shadow-[0_-10px_28px_-12px_rgba(7,14,26,.55)] backdrop-blur lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
+      {/* Shopping is the conversion, so it takes the wider share of the row
+          and the lit button; calling keeps a full-height target beside it. */}
       <div className="flex gap-2 px-3 py-2.5">
-        <Link to="/tires" className="btn-primary flex-1 py-3 text-[15px]">
+        <Link
+          to="/tires"
+          className="btn-primary min-h-[46px] flex-[3] whitespace-nowrap py-3 text-[15px]"
+        >
           <ShoppingCart size={17} aria-hidden />
           Shop Tires
         </Link>
         <a
           href={BUSINESS.phoneHref}
-          className="btn-ghost-light flex-1 py-3 text-[15px]"
+          className="btn-ghost-light min-h-[46px] flex-[2] whitespace-nowrap py-3 text-[15px]"
           aria-label={`Call TireDrop at ${BUSINESS.phone}`}
         >
           <Phone size={17} aria-hidden />

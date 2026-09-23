@@ -291,7 +291,7 @@ export default function TiresPage() {
                       {items.length} model{items.length === 1 ? "" : "s"} ·{" "}
                       {categories.join(", ")}
                     </p>
-                    <p className="mt-2 font-display text-sm uppercase tracking-wide text-drop">
+                    <p className="tnum mt-2 font-display text-sm font-bold text-drop">
                       From {money(from)} each
                     </p>
                   </div>
@@ -326,7 +326,7 @@ export default function TiresPage() {
           <div className="card mb-8 flex flex-col gap-3 border-l-4 border-l-drop p-5 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="eyebrow mb-1">Your vehicle</p>
-              <p className="font-display text-xl uppercase">
+              <p className="font-display text-xl font-bold">
                 {vehicle.year} {vehicle.make} {vehicle.model}
               </p>
               <p className="mt-1 text-sm text-smoke">
@@ -463,7 +463,7 @@ export default function TiresPage() {
                 <button
                   type="button"
                   onClick={clearAllFilters}
-                  className="min-h-[32px] px-1 font-display text-xs uppercase tracking-[0.15em] text-drop hover:text-dive"
+                  className="min-h-[32px] px-1 font-display text-xs font-bold text-drop hover:text-dive"
                 >
                   Clear all
                 </button>
@@ -496,7 +496,7 @@ export default function TiresPage() {
             )}
 
             <div className="hazard mt-10 rounded-sm p-1">
-              <div className="flex flex-col items-start gap-4 bg-ink p-6 text-bone md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col items-start gap-4 rounded-sm bg-steel-wash p-6 text-bone md:flex-row md:items-center md:justify-between">
                 <div className="flex items-start gap-3">
                   <Truck
                     size={28}

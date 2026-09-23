@@ -19,7 +19,11 @@ export default function BrandLogo({ brand, className = "h-8" }) {
 
   if (!brand.logo || failed) {
     return (
-      <span className="font-display text-xl uppercase tracking-[0.18em] text-bone/45 transition-colors hover:text-bone">
+      // A manufacturer wordmark set in tracked caps is a placeholder trying
+      // to look like a logo and fooling nobody. Heavy and tight reads as a
+      // deliberate typographic lockup instead, and at /70 it is legible
+      // rather than a grey smudge.
+      <span className="whitespace-nowrap font-display text-lg font-extrabold tracking-[-0.02em] text-bone/70 transition-colors hover:text-bone md:text-xl">
         {brand.name}
       </span>
     );

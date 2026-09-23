@@ -56,7 +56,12 @@ const VALUE_PROPS = [
   },
 ];
 
-const FLEET_SIZES = ["1–5 vehicles", "6–15 vehicles", "16–40 vehicles", "40+ vehicles"];
+const FLEET_SIZES = [
+  "1–5 vehicles",
+  "6–15 vehicles",
+  "16–40 vehicles",
+  "40+ vehicles",
+];
 
 const EMPTY_FORM = {
   company: "",
@@ -74,10 +79,12 @@ function validate(form) {
   if (!form.contact.trim()) errors.contact = "Tell us who we should ask for.";
 
   const digits = form.phone.replace(/\D/g, "");
-  if (!form.phone.trim()) errors.phone = "A phone number gets you a faster quote.";
+  if (!form.phone.trim())
+    errors.phone = "A phone number gets you a faster quote.";
   else if (digits.length < 10) errors.phone = "Enter a 10-digit phone number.";
 
-  if (!form.email.trim()) errors.email = "Enter an email for the written quote.";
+  if (!form.email.trim())
+    errors.email = "Enter an email for the written quote.";
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim()))
     errors.email = "That email address does not look right.";
 
@@ -101,8 +108,7 @@ export default function CommercialTiresPage() {
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
-  const set = (key) => (e) =>
-    setForm((f) => ({ ...f, [key]: e.target.value }));
+  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -138,6 +144,7 @@ export default function CommercialTiresPage() {
 
       <Section>
         <SectionHead
+          align="center"
           eyebrow="Why fleets call us"
           title="Downtime is the expensive part"
           lede="A tire is a small line item. A truck sitting in a waiting room for three hours is not. Everything below is built around keeping units on the road, wherever they run."
@@ -189,10 +196,10 @@ export default function CommercialTiresPage() {
                 />
                 <h3 className="h3">Quote request received</h3>
                 <p className="mt-2 text-sm leading-relaxed text-smoke">
-                  Thanks, {form.contact.trim() || "there"} — we have your details
-                  for {form.company.trim()}. A fleet specialist will follow up at{" "}
-                  {form.phone.trim()} or {form.email.trim()} during shop hours,
-                  usually the same business day.
+                  Thanks, {form.contact.trim() || "there"} — we have your
+                  details for {form.company.trim()}. A fleet specialist will
+                  follow up at {form.phone.trim()} or {form.email.trim()} during
+                  shop hours, usually the same business day.
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-smoke">
                   Need it sooner? Call {BUSINESS.phone} and ask for fleet
@@ -217,7 +224,11 @@ export default function CommercialTiresPage() {
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} noValidate className="card p-6 md:p-8">
+              <form
+                onSubmit={handleSubmit}
+                noValidate
+                className="card p-6 md:p-8"
+              >
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div>
                     <label htmlFor="company" className="label">
@@ -352,12 +363,15 @@ export default function CommercialTiresPage() {
                   </div>
                 </div>
 
-                <button type="submit" className="btn-primary mt-6 w-full sm:w-auto">
+                <button
+                  type="submit"
+                  className="btn-primary mt-6 w-full sm:w-auto"
+                >
                   Request fleet quote
                 </button>
                 <p className="mt-3 text-xs text-smoke">
-                  We use these details to price your quote and schedule service —
-                  nothing else.
+                  We use these details to price your quote and schedule service
+                  — nothing else.
                 </p>
               </form>
             )}
@@ -369,7 +383,10 @@ export default function CommercialTiresPage() {
               Prefer to handle it on the phone? Call during shop hours and we
               will price your list while you are on the line.
             </p>
-            <a href={BUSINESS.phoneHref} className="btn-primary btn-sm mt-4 w-full">
+            <a
+              href={BUSINESS.phoneHref}
+              className="btn-primary btn-sm mt-4 w-full"
+            >
               <Phone size={16} aria-hidden />
               {BUSINESS.phone}
             </a>

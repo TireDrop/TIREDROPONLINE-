@@ -31,7 +31,7 @@ const TEAM = [
   {
     name: "Yani",
     role: "Orders & Customer Care",
-    bio: "Handles the questions that come in from across the country — fitment, order status, returns, and the ones that start with \"I have no idea what size I need.\"",
+    bio: 'Handles the questions that come in from across the country — fitment, order status, returns, and the ones that start with "I have no idea what size I need."',
   },
   {
     name: "Keisha",
@@ -84,10 +84,16 @@ const DIFFERENTIATORS = [
 ];
 
 const STATS = [
-  { value: `${YEARS_IN_BUSINESS}+`, label: "Years fitting tires in South Florida" },
+  {
+    value: `${YEARS_IN_BUSINESS}+`,
+    label: "Years fitting tires in South Florida",
+  },
   { value: "48", label: "Continental US states we ship to" },
   { value: `${TIRE_BRANDS.length}`, label: "Tire brands in the catalog" },
-  { value: `${BUSINESS.installArea.length}`, label: "Broward towns the vans cover" },
+  {
+    value: `${BUSINESS.installArea.length}`,
+    label: "Broward towns the vans cover",
+  },
 ];
 
 function TimelineItem({ year, title, copy }) {
@@ -140,7 +146,7 @@ export default function AboutPage() {
               lede="Most online tire stores are a catalog with a checkout button attached. This one is attached to a shop that has been mounting tires for nearly two decades."
             />
 
-            <div className="space-y-5 text-base leading-relaxed text-smoke">
+            <div className="max-w-[68ch] space-y-5 text-[1.0625rem] leading-[1.7] text-smoke">
               <p>
                 {BUSINESS.parent} opened in {BUSINESS.foundedYear} as one truck,
                 a compressor and a phone that rang at all hours. The idea was
@@ -177,7 +183,7 @@ export default function AboutPage() {
               <Badge tone="soft">The lockup</Badge>
               <span>
                 You will see{" "}
-                <span className="font-display uppercase tracking-[0.12em] text-extremeRed">
+                <span className="font-display text-[12px] font-bold uppercase tracking-[0.09em] text-extremeRed">
                   {BUSINESS.poweredBy}
                 </span>{" "}
                 on this site. That is the parent business — the shop, the vans
@@ -214,7 +220,7 @@ export default function AboutPage() {
       </Section>
 
       {/* ---------- By the numbers ---------- */}
-      <section className="bg-ink py-12 text-bone md:py-16">
+      <section className="bg-ink-wash py-12 text-bone md:py-16">
         <div className="wrap">
           <h2 className="sr-only">{BUSINESS.name} by the numbers</h2>
           <dl className="grid grid-cols-2 gap-8 md:grid-cols-4">
@@ -232,7 +238,7 @@ export default function AboutPage() {
               </div>
             ))}
           </dl>
-          <p className="mt-8 text-xs text-bone/40">
+          <p className="mt-8 text-xs text-bone/60">
             Figures are directional and illustrative — a plain sense of scale,
             not an audited count.
           </p>
@@ -287,10 +293,7 @@ export default function AboutPage() {
         <div className="mt-10 flex flex-wrap items-center gap-3">
           <Badge tone="soft">Brands in the catalog</Badge>
           {TIRE_BRANDS.map((b) => (
-            <span
-              key={b.slug}
-              className="font-display text-lg uppercase tracking-[0.14em] text-ink/55"
-            >
+            <span key={b.slug} className="font-display text-lg text-ink/70">
               {b.name}
             </span>
           ))}
@@ -298,10 +301,10 @@ export default function AboutPage() {
       </Section>
 
       {/* ---------- CTA ---------- */}
-      <section className="bg-steel py-14 text-bone md:py-20">
+      <section className="bg-steel-wash py-14 text-bone md:py-20">
         <div className="wrap grid gap-8 md:grid-cols-[1.2fr_1fr] md:items-center">
           <div>
-            <p className="eyebrow mb-2">{BUSINESS.tagline}</p>
+            <p className="eyebrow-dark mb-2">{BUSINESS.tagline}</p>
             <h2 className="h2">Tell us the vehicle. We will find the tire.</h2>
             <p className="lede mt-4 max-w-xl text-bone/70">
               Shipping anywhere in {BUSINESS.shipping.area}, free to the{" "}

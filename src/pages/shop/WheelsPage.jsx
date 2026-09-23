@@ -310,7 +310,7 @@ export default function WheelsPage() {
           <div className="card mb-8 flex flex-col gap-3 border-l-4 border-l-drop p-5 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="eyebrow mb-1">Your vehicle</p>
-              <p className="font-display text-xl uppercase">
+              <p className="font-display text-xl font-bold">
                 {vehicle.year} {vehicle.make} {vehicle.model}
               </p>
               <p className="mt-1 text-sm text-smoke">
@@ -452,7 +452,7 @@ export default function WheelsPage() {
                 <button
                   type="button"
                   onClick={clearAllFilters}
-                  className="min-h-[32px] px-1 font-display text-xs uppercase tracking-[0.15em] text-drop hover:text-dive"
+                  className="min-h-[32px] px-1 font-display text-xs font-bold text-drop hover:text-dive"
                 >
                   Clear all
                 </button>

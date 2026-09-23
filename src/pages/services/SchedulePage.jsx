@@ -93,24 +93,32 @@ function validateStep(step, form) {
   const service = getService(form.service);
 
   if (step === 1 && !form.service) {
-    errors.service = "Choose the service you need so we send the right tech and parts.";
+    errors.service =
+      "Choose the service you need so we send the right tech and parts.";
   }
 
   if (step === 2) {
     const year = Number(form.year);
     if (!form.year.trim()) {
       errors.year = "Enter your vehicle's model year.";
-    } else if (!/^\d{4}$/.test(form.year.trim()) || year < 1960 || year > 2027) {
+    } else if (
+      !/^\d{4}$/.test(form.year.trim()) ||
+      year < 1960 ||
+      year > 2027
+    ) {
       errors.year = "Enter a four-digit year between 1960 and 2027.";
     }
     if (!form.make.trim()) errors.make = "Enter the make, for example Toyota.";
-    if (!form.model.trim()) errors.model = "Enter the model, for example Camry.";
+    if (!form.model.trim())
+      errors.model = "Enter the model, for example Camry.";
   }
 
   if (step === 3 && form.locationType === "mobile") {
-    if (!form.address.trim()) errors.address = "We need a street address to route the van.";
+    if (!form.address.trim())
+      errors.address = "We need a street address to route the van.";
     if (!form.city.trim()) errors.city = "Enter the city.";
-    if (!/^\d{5}$/.test(form.zip.trim())) errors.zip = "Enter a five-digit ZIP code.";
+    if (!/^\d{5}$/.test(form.zip.trim()))
+      errors.zip = "Enter a five-digit ZIP code.";
   }
 
   if (step === 4) {
@@ -149,7 +157,12 @@ function validateStep(step, form) {
   }
 
   // Defensive: a non-mobile service can never be booked as a mobile visit.
-  if (step === 3 && service && !service.mobile && form.locationType !== "shop") {
+  if (
+    step === 3 &&
+    service &&
+    !service.mobile &&
+    form.locationType !== "shop"
+  ) {
     errors.locationType = "This service is in-shop only.";
   }
 
@@ -160,7 +173,11 @@ function validateStep(step, form) {
 function FieldError({ id, message }) {
   if (!message) return null;
   return (
-    <p id={id} role="alert" className="mt-1.5 flex items-start gap-1.5 text-xs text-drop">
+    <p
+      id={id}
+      role="alert"
+      className="mt-1.5 flex items-start gap-1.5 text-xs text-drop"
+    >
       <AlertCircle size={14} aria-hidden className="mt-px shrink-0" />
       {message}
     </p>
@@ -172,7 +189,9 @@ function TextField({ id, label, value, onChange, error, optional, ...rest }) {
     <div>
       <label htmlFor={id} className="label">
         {label}
-        {optional && <span className="ml-1 normal-case tracking-normal">(optional)</span>}
+        {optional && (
+          <span className="ml-1 normal-case tracking-normal">(optional)</span>
+        )}
       </label>
       <input
         id={id}
@@ -207,13 +226,17 @@ function ProgressBar({ step }) {
                 done || current ? "bg-drop" : "bg-ink/15"
               }`}
             />
-            <span className="flex items-center gap-1.5 truncate font-display text-xs uppercase tracking-[0.12em]">
+            <span className="flex items-center gap-1.5 truncate font-display text-[13px] font-bold tracking-[-0.005em]">
               {done ? (
                 <Check size={13} aria-hidden className="shrink-0 text-drop" />
               ) : (
-                <span className={current ? "text-drop" : "text-smoke"}>{number}.</span>
+                <span className={current ? "text-drop" : "text-smoke"}>
+                  {number}.
+                </span>
               )}
-              <span className={current ? "text-ink" : "text-smoke"}>{label}</span>
+              <span className={current ? "text-ink" : "text-smoke"}>
+                {label}
+              </span>
               {done && <span className="sr-only">completed</span>}
             </span>
           </li>
@@ -240,7 +263,9 @@ function BookingSummary({ form }) {
   return (
     <dl>
       <SummaryRow term="Service">
-        {service ? `${service.name} — from $${service.priceFrom} ${service.priceUnit}` : "—"}
+        {service
+          ? `${service.name} — from $${service.priceFrom} ${service.priceUnit}`
+          : "—"}
       </SummaryRow>
       <SummaryRow term="Vehicle">
         {[form.year, form.make, form.model].filter(Boolean).join(" ")}
@@ -249,9 +274,12 @@ function BookingSummary({ form }) {
       <SummaryRow term="Where">
         {form.locationType === "mobile" ? (
           <>
-            We come to you — {form.address}, {form.city}, {BUSINESS.shop.state} {form.zip}
+            We come to you — {form.address}, {form.city}, {BUSINESS.shop.state}{" "}
+            {form.zip}
             {form.parkingNotes && (
-              <span className="block text-smoke">Parking: {form.parkingNotes}</span>
+              <span className="block text-smoke">
+                Parking: {form.parkingNotes}
+              </span>
             )}
           </>
         ) : (
@@ -353,13 +381,13 @@ export default function SchedulePage() {
     // Re-check every step so nothing slips through via keyboard navigation.
     const all = [1, 2, 3, 4, 5].reduce(
       (acc, n) => ({ ...acc, ...validateStep(n, form) }),
-      {}
+      {},
     );
     const keys = Object.keys(all).filter((k) => all[k]);
     if (keys.length) {
       setErrors(all);
       const firstStep = [1, 2, 3, 4, 5].find(
-        (n) => Object.keys(validateStep(n, form)).length > 0
+        (n) => Object.keys(validateStep(n, form)).length > 0,
       );
       setStep(firstStep || 1);
       return;
@@ -387,15 +415,17 @@ export default function SchedulePage() {
               <h2
                 ref={headingRef}
                 tabIndex={-1}
-                className="flex items-center gap-2.5 font-display text-2xl uppercase focus:outline-none"
+                className="flex items-center gap-2.5 font-display text-2xl focus:outline-none"
               >
                 <CheckCircle2 size={24} aria-hidden className="text-drop" />
                 Confirmation
               </h2>
 
-              <div className="mt-5 rounded-sm bg-ink px-5 py-4 text-bone">
-                <p className="label mb-1 text-bone/50">Reference number</p>
-                <p className="font-display text-3xl tracking-wide">{reference}</p>
+              <div className="mt-5 rounded-card bg-ink-wash px-5 py-5 text-bone">
+                <p className="label mb-1.5 text-volt">Reference number</p>
+                <p className="font-display text-3xl tracking-tight">
+                  {reference}
+                </p>
                 <p className="mt-2 text-xs text-bone/60">
                   Keep this handy — it is the fastest way for us to pull up your
                   appointment.
@@ -411,8 +441,8 @@ export default function SchedulePage() {
                 <h3 className="h3">What happens next</h3>
                 <ol className="mt-4 space-y-3 text-sm leading-relaxed text-smoke">
                   <li className="flex gap-3">
-                    <span className="font-display text-drop">01</span>
-                    A dispatcher calls to confirm your window and the exact price
+                    <span className="font-display text-drop">01</span>A
+                    dispatcher calls to confirm your window and the exact price
                     for your vehicle.
                   </li>
                   <li className="flex gap-3">
@@ -434,7 +464,7 @@ export default function SchedulePage() {
                   Need to move or cancel this appointment? Call{" "}
                   <a
                     href={BUSINESS.phoneHref}
-                    className="font-display uppercase tracking-wide text-drop hover:text-dive"
+                    className="font-display font-bold text-drop hover:text-dive"
                   >
                     {BUSINESS.phone}
                   </a>{" "}
@@ -481,7 +511,11 @@ export default function SchedulePage() {
         <div className="mx-auto max-w-3xl">
           <ProgressBar step={step} />
 
-          <form onSubmit={handleSubmit} noValidate className="card mt-8 p-6 md:p-8">
+          <form
+            onSubmit={handleSubmit}
+            noValidate
+            className="card mt-8 p-6 md:p-8"
+          >
             <p className="eyebrow mb-1">
               Step {step} of {LAST_STEP}
             </p>
@@ -497,10 +531,11 @@ export default function SchedulePage() {
                   What do you need done?
                 </h2>
                 <p className="mt-2 text-sm text-smoke">
-                  Already bought tires on {BUSINESS.name}? Tire Installation is the
-                  one you want — whether they are on their way to the shop or
-                  already sitting in your garage. Prices below are starting points;
-                  we confirm the exact total for your vehicle before work begins.
+                  Already bought tires on {BUSINESS.name}? Tire Installation is
+                  the one you want — whether they are on their way to the shop
+                  or already sitting in your garage. Prices below are starting
+                  points; we confirm the exact total for your vehicle before
+                  work begins.
                 </p>
 
                 <fieldset className="mt-6">
@@ -510,7 +545,9 @@ export default function SchedulePage() {
                     tabIndex={-1}
                     className="grid gap-3 sm:grid-cols-2"
                     aria-invalid={errors.service ? "true" : undefined}
-                    aria-describedby={errors.service ? "service-error" : undefined}
+                    aria-describedby={
+                      errors.service ? "service-error" : undefined
+                    }
                   >
                     {SERVICES.map((item) => {
                       const selected = form.service === item.slug;
@@ -531,11 +568,11 @@ export default function SchedulePage() {
                             value={item.slug}
                             checked={selected}
                             onChange={() => pickService(item.slug)}
-                            className="mt-1 h-4 w-4 shrink-0 accent-drop"
+                            className="mt-1 shrink-0 accent-drop"
                           />
                           <span className="min-w-0">
                             <span className="flex flex-wrap items-center gap-2">
-                              <span className="font-display text-base uppercase tracking-wide text-ink">
+                              <span className="font-display text-[15px] font-bold text-ink">
                                 {item.name}
                               </span>
                               {item.mobile ? (
@@ -545,7 +582,8 @@ export default function SchedulePage() {
                               )}
                             </span>
                             <span className="mt-1 block text-xs text-smoke">
-                              {item.duration} · from ${item.priceFrom} {item.priceUnit}
+                              {item.duration} · from ${item.priceFrom}{" "}
+                              {item.priceUnit}
                             </span>
                           </span>
                         </label>
@@ -560,12 +598,16 @@ export default function SchedulePage() {
             {/* ---------- Step 2: vehicle ---------- */}
             {step === 2 && (
               <>
-                <h2 ref={headingRef} tabIndex={-1} className="h3 focus:outline-none">
+                <h2
+                  ref={headingRef}
+                  tabIndex={-1}
+                  className="h3 focus:outline-none"
+                >
                   Tell us about the vehicle
                 </h2>
                 <p className="mt-2 text-sm text-smoke">
-                  This is how we load the right parts, lug sockets and torque specs
-                  before the van rolls out.
+                  This is how we load the right parts, lug sockets and torque
+                  specs before the van rolls out.
                 </p>
 
                 <div className="mt-6 grid gap-5 sm:grid-cols-2">
@@ -608,8 +650,8 @@ export default function SchedulePage() {
 
                 <p className="mt-5 text-xs leading-relaxed text-smoke">
                   Tire size is printed on the sidewall and on the sticker inside
-                  your driver's door. Do not have it? Leave it blank — we will pull
-                  the factory fitment from your year, make and model.
+                  your driver's door. Do not have it? Leave it blank — we will
+                  pull the factory fitment from your year, make and model.
                 </p>
               </>
             )}
@@ -617,20 +659,29 @@ export default function SchedulePage() {
             {/* ---------- Step 3: location ---------- */}
             {step === 3 && (
               <>
-                <h2 ref={headingRef} tabIndex={-1} className="h3 focus:outline-none">
+                <h2
+                  ref={headingRef}
+                  tabIndex={-1}
+                  className="h3 focus:outline-none"
+                >
                   Where should we do the work?
                 </h2>
 
                 {lockedToShop && (
-                  <div className="mt-4 flex items-start gap-3 rounded-sm border border-amber/40 bg-amber/10 p-4">
-                    <Lock size={18} aria-hidden className="mt-0.5 shrink-0 text-ink" />
+                  <div className="mt-4 flex items-start gap-3 rounded-card border border-amber/40 bg-amber/10 p-4">
+                    <Lock
+                      size={18}
+                      aria-hidden
+                      className="mt-0.5 shrink-0 text-ink"
+                    />
                     <p className="text-sm leading-relaxed text-ink">
-                      <span className="font-display uppercase tracking-wide">
+                      <span className="font-display font-bold">
                         {service.name} is in-shop only.
                       </span>{" "}
-                      It needs a lift and equipment the van cannot carry, so this
-                      appointment is set for our Sunrise shop. Need tire work at
-                      your place instead? Go back and pick a mobile service.
+                      It needs a lift and equipment the van cannot carry, so
+                      this appointment is set for our Sunrise shop. Need tire
+                      work at your place instead? Go back and pick a mobile
+                      service.
                     </p>
                   </div>
                 )}
@@ -641,7 +692,9 @@ export default function SchedulePage() {
                     id="locationType"
                     tabIndex={-1}
                     className="grid gap-3 sm:grid-cols-2"
-                    aria-describedby={errors.locationType ? "locationType-error" : undefined}
+                    aria-describedby={
+                      errors.locationType ? "locationType-error" : undefined
+                    }
                   >
                     <label
                       htmlFor="location-mobile"
@@ -659,10 +712,10 @@ export default function SchedulePage() {
                         checked={form.locationType === "mobile"}
                         disabled={lockedToShop}
                         onChange={() => update("locationType")("mobile")}
-                        className="mt-1 h-4 w-4 shrink-0 accent-drop"
+                        className="mt-1 shrink-0 accent-drop"
                       />
                       <span>
-                        <span className="flex items-center gap-2 font-display text-base uppercase tracking-wide text-ink">
+                        <span className="flex items-center gap-2 font-display text-[15px] font-bold text-ink">
                           <Truck size={16} aria-hidden className="text-drop" />
                           We come to you
                         </span>
@@ -688,11 +741,15 @@ export default function SchedulePage() {
                         value="shop"
                         checked={form.locationType === "shop"}
                         onChange={() => update("locationType")("shop")}
-                        className="mt-1 h-4 w-4 shrink-0 accent-drop"
+                        className="mt-1 shrink-0 accent-drop"
                       />
                       <span>
-                        <span className="flex items-center gap-2 font-display text-base uppercase tracking-wide text-ink">
-                          <Warehouse size={16} aria-hidden className="text-drop" />
+                        <span className="flex items-center gap-2 font-display text-[15px] font-bold text-ink">
+                          <Warehouse
+                            size={16}
+                            aria-hidden
+                            className="text-drop"
+                          />
                           I'll come to the shop
                         </span>
                         <span className="mt-1 block text-xs text-smoke">
@@ -702,7 +759,10 @@ export default function SchedulePage() {
                       </span>
                     </label>
                   </div>
-                  <FieldError id="locationType-error" message={errors.locationType} />
+                  <FieldError
+                    id="locationType-error"
+                    message={errors.locationType}
+                  />
                 </fieldset>
 
                 {form.locationType === "mobile" ? (
@@ -740,7 +800,9 @@ export default function SchedulePage() {
                     <div className="sm:col-span-2">
                       <label htmlFor="parkingNotes" className="label">
                         Parking &amp; access notes{" "}
-                        <span className="normal-case tracking-normal">(optional)</span>
+                        <span className="normal-case tracking-normal">
+                          (optional)
+                        </span>
                       </label>
                       <textarea
                         id="parkingNotes"
@@ -752,24 +814,24 @@ export default function SchedulePage() {
                         placeholder="Gate code, building number, which space the car is in, low-clearance garage, etc."
                       />
                       <p className="mt-1.5 text-xs text-smoke">
-                        We need one parking space beside your vehicle and about ten
-                        feet of working room. Gated community? Put the gate code or
-                        call-up name here.
+                        We need one parking space beside your vehicle and about
+                        ten feet of working room. Gated community? Put the gate
+                        code or call-up name here.
                       </p>
                     </div>
-                    <div className="sm:col-span-2 rounded-sm bg-fog p-4 text-xs leading-relaxed text-smoke">
-                      <span className="font-display uppercase tracking-wide text-ink">
+                    <div className="sm:col-span-2 rounded-card bg-fog p-4 text-xs leading-relaxed text-smoke">
+                      <span className="font-display font-bold text-ink">
                         Mobile install area:
                       </span>{" "}
-                      {BUSINESS.installArea.join(", ")}. Outside these cities? Book
-                      anyway and call {BUSINESS.phone} — we will tell you straight
-                      whether we can reach you.
+                      {BUSINESS.installArea.join(", ")}. Outside these cities?
+                      Book anyway and call {BUSINESS.phone} — we will tell you
+                      straight whether we can reach you.
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-6 rounded-sm border border-ink/10 bg-fog p-5">
+                  <div className="mt-6 rounded-card border border-ink/10 bg-fog p-5">
                     <p className="label">Shop address</p>
-                    <address className="not-italic font-display text-lg uppercase tracking-wide text-ink">
+                    <address className="not-italic font-display text-lg text-ink">
                       {BUSINESS.shop.street}
                       <br />
                       {BUSINESS.shop.city}, {BUSINESS.shop.state}{" "}
@@ -786,7 +848,10 @@ export default function SchedulePage() {
                     </a>
                     <dl className="mt-4 space-y-1.5 border-t border-ink/10 pt-4 text-sm">
                       {BUSINESS.hours.map((row) => (
-                        <div key={row.days} className="flex justify-between gap-4">
+                        <div
+                          key={row.days}
+                          className="flex justify-between gap-4"
+                        >
                           <dt className="text-ink">{row.days}</dt>
                           <dd className="text-smoke">{row.time}</dd>
                         </div>
@@ -800,7 +865,11 @@ export default function SchedulePage() {
             {/* ---------- Step 4: time ---------- */}
             {step === 4 && (
               <>
-                <h2 ref={headingRef} tabIndex={-1} className="h3 focus:outline-none">
+                <h2
+                  ref={headingRef}
+                  tabIndex={-1}
+                  className="h3 focus:outline-none"
+                >
                   Pick your day and window
                 </h2>
                 <p className="mt-2 text-sm text-smoke">
@@ -826,7 +895,10 @@ export default function SchedulePage() {
                   />
                   <FieldError id="date-error" message={errors.date} />
                   {!errors.date && (
-                    <p id="date-hint" className="mt-1.5 flex items-center gap-1.5 text-xs text-smoke">
+                    <p
+                      id="date-hint"
+                      className="mt-1.5 flex items-center gap-1.5 text-xs text-smoke"
+                    >
                       <CalendarDays size={13} aria-hidden />
                       Monday – Saturday. Closed Sunday.
                     </p>
@@ -861,11 +933,15 @@ export default function SchedulePage() {
                             checked={selected}
                             disabled={unavailable}
                             onChange={() => update("window")(slot.value)}
-                            className="h-4 w-4 shrink-0 accent-drop"
+                            className="shrink-0 accent-drop"
                           />
                           <span className="min-w-0">
-                            <span className="flex items-center gap-2 font-display text-base uppercase tracking-wide text-ink">
-                              <Clock size={15} aria-hidden className="text-drop" />
+                            <span className="flex items-center gap-2 font-display text-[15px] font-bold text-ink">
+                              <Clock
+                                size={15}
+                                aria-hidden
+                                className="text-drop"
+                              />
                               {slot.label}
                             </span>
                             {unavailable && (
@@ -886,7 +962,11 @@ export default function SchedulePage() {
             {/* ---------- Step 5: contact + review ---------- */}
             {step === 5 && (
               <>
-                <h2 ref={headingRef} tabIndex={-1} className="h3 focus:outline-none">
+                <h2
+                  ref={headingRef}
+                  tabIndex={-1}
+                  className="h3 focus:outline-none"
+                >
                   How do we reach you?
                 </h2>
                 <p className="mt-2 text-sm text-smoke">
@@ -930,7 +1010,9 @@ export default function SchedulePage() {
                   <div className="sm:col-span-2">
                     <label htmlFor="notes" className="label">
                       Anything else we should know{" "}
-                      <span className="normal-case tracking-normal">(optional)</span>
+                      <span className="normal-case tracking-normal">
+                        (optional)
+                      </span>
                     </label>
                     <textarea
                       id="notes"
@@ -947,8 +1029,8 @@ export default function SchedulePage() {
                 <div className="mt-8 border-t border-ink/10 pt-6">
                   <h3 className="h3">Review before you send</h3>
                   <p className="mt-2 text-sm text-smoke">
-                    Check it over. Anything wrong, step back and fix it — nothing
-                    is locked in until a dispatcher confirms by phone.
+                    Check it over. Anything wrong, step back and fix it —
+                    nothing is locked in until a dispatcher confirms by phone.
                   </p>
                   <div className="mt-4">
                     <BookingSummary form={form} />
@@ -960,7 +1042,11 @@ export default function SchedulePage() {
             {/* ---------- Navigation ---------- */}
             <div className="mt-8 flex flex-col-reverse gap-3 border-t border-ink/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
               {step > 1 ? (
-                <button type="button" onClick={goBack} className="btn-outline btn-sm">
+                <button
+                  type="button"
+                  onClick={goBack}
+                  className="btn-outline btn-sm"
+                >
                   <ArrowLeft size={16} aria-hidden />
                   Back
                 </button>
@@ -969,7 +1055,11 @@ export default function SchedulePage() {
               )}
 
               {step < LAST_STEP ? (
-                <button type="button" onClick={goNext} className="btn-primary btn-sm">
+                <button
+                  type="button"
+                  onClick={goNext}
+                  className="btn-primary btn-sm"
+                >
                   Next: {STEP_LABELS[step]}
                   <ArrowRight size={16} aria-hidden />
                 </button>
@@ -986,7 +1076,7 @@ export default function SchedulePage() {
             Need it today, or stuck on the side of the road? Call{" "}
             <a
               href={BUSINESS.phoneHref}
-              className="font-display uppercase tracking-wide text-drop hover:text-dive"
+              className="font-display font-bold text-drop hover:text-dive"
             >
               {BUSINESS.phone}
             </a>{" "}

@@ -12,7 +12,13 @@ import {
   Wrench,
 } from "lucide-react";
 
-import { Seo, PageHero, Breadcrumbs, Section, Badge } from "../../components/ui/index.jsx";
+import {
+  Seo,
+  PageHero,
+  Breadcrumbs,
+  Section,
+  Badge,
+} from "../../components/ui/index.jsx";
 import { BUSINESS, TIRE_BRANDS } from "../../data/business.js";
 
 /* ------------------------------------------------------------------ */
@@ -192,7 +198,7 @@ function CodeButton({ code, status, onCopy }) {
   return (
     <div className="mt-4">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-sm border-2 border-dashed border-ink/25 bg-fog px-3 py-1.5 font-display text-lg uppercase tracking-[0.18em] text-ink">
+        <span className="rounded-sm border-2 border-dashed border-ink/25 bg-fog px-3 py-1.5 font-display text-lg font-bold uppercase tracking-normal text-ink">
           {code}
         </span>
         <button
@@ -201,14 +207,18 @@ function CodeButton({ code, status, onCopy }) {
           className="btn-dark btn-sm"
           aria-label={`Copy promo code ${code}`}
         >
-          {state?.ok ? <Check size={15} aria-hidden /> : <Copy size={15} aria-hidden />}
+          {state?.ok ? (
+            <Check size={15} aria-hidden />
+          ) : (
+            <Copy size={15} aria-hidden />
+          )}
           {state?.ok ? "Copied" : "Copy code"}
         </button>
       </div>
       {state && !state.ok && (
         <p className="mt-2 text-xs leading-relaxed text-drop">
-          Your browser blocked the clipboard. Write down <strong>{code}</strong> and paste it in
-          your cart.
+          Your browser blocked the clipboard. Write down <strong>{code}</strong>{" "}
+          and paste it in your cart.
         </p>
       )}
     </div>
@@ -243,9 +253,11 @@ function OfferCard({ offer, status, onCopy }) {
           </p>
         )}
 
-        <p className="mt-4 flex-1 text-xs leading-relaxed text-smoke">{offer.fine}</p>
+        <p className="mt-4 flex-1 text-xs leading-relaxed text-smoke">
+          {offer.fine}
+        </p>
 
-        <p className="mt-4 flex items-center gap-1.5 border-t border-ink/10 pt-4 font-display text-xs uppercase tracking-[0.15em] text-smoke">
+        <p className="mt-4 flex items-center gap-1.5 border-t border-ink/10 pt-4 font-display text-xs font-semibold text-smoke">
           <CalendarClock size={13} aria-hidden />
           Expires {offer.expires}
         </p>
@@ -258,7 +270,10 @@ function OfferCard({ offer, status, onCopy }) {
 /*  Page                                                               */
 /* ------------------------------------------------------------------ */
 
-const TABS = [{ id: "all", label: "All Offers" }, ...GROUPS.map((g) => ({ id: g.id, label: g.label }))];
+const TABS = [
+  { id: "all", label: "All Offers" },
+  ...GROUPS.map((g) => ({ id: g.id, label: g.label })),
+];
 
 export default function CouponsPage() {
   const [active, setActive] = useState("all");
@@ -291,7 +306,8 @@ export default function CouponsPage() {
     tabRefs.current[next]?.focus();
   }
 
-  const shownGroups = active === "all" ? GROUPS : GROUPS.filter((g) => g.id === active);
+  const shownGroups =
+    active === "all" ? GROUPS : GROUPS.filter((g) => g.id === active);
 
   return (
     <>
@@ -341,7 +357,7 @@ export default function CouponsPage() {
                   tabIndex={selected ? 0 : -1}
                   onClick={() => setActive(tab.id)}
                   onKeyDown={(e) => onTabKeyDown(e, i)}
-                  className={`rounded-sm px-4 py-2 font-display text-sm uppercase tracking-wide transition-colors ${
+                  className={`rounded-sm px-4 py-2 font-display text-sm font-bold transition-colors ${
                     selected
                       ? "bg-ink text-bone"
                       : "border border-ink/15 bg-bone text-ink hover:border-ink/40"
@@ -354,18 +370,31 @@ export default function CouponsPage() {
           </div>
 
           <p aria-live="polite" className="sr-only">
-            {status ? (status.ok ? `${status.code} copied to your clipboard` : `Could not copy ${status.code}`) : ""}
+            {status
+              ? status.ok
+                ? `${status.code} copied to your clipboard`
+                : `Could not copy ${status.code}`
+              : ""}
           </p>
         </div>
 
-        <div id="offer-panel" role="tabpanel" aria-labelledby={`tab-${active}`} tabIndex={-1}>
+        <div
+          id="offer-panel"
+          role="tabpanel"
+          aria-labelledby={`tab-${active}`}
+          tabIndex={-1}
+        >
           {shownGroups.map((group) => {
             const offers = OFFERS.filter((o) => o.group === group.id);
             const Icon = group.icon;
             return (
               <section key={group.id} className="mb-14 last:mb-0">
                 <div className="mb-6 flex items-start gap-3">
-                  <Icon size={24} aria-hidden className="mt-1 shrink-0 text-drop" />
+                  <Icon
+                    size={24}
+                    aria-hidden
+                    className="mt-1 shrink-0 text-drop"
+                  />
                   <div className="min-w-0">
                     <h2 className="h2">{group.label}</h2>
                     <p className="lede mt-2 max-w-2xl">{group.lede}</p>
@@ -373,14 +402,14 @@ export default function CouponsPage() {
                 </div>
 
                 {group.id === "rebate" && (
-                  <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-sm bg-ink px-5 py-4">
-                    <span className="font-display text-xs uppercase tracking-[0.2em] text-bone/60">
+                  <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-card bg-steel-wash px-5 py-4">
+                    <span className="font-display text-xs uppercase tracking-[0.09em] text-bone/70">
                       Rebate brands
                     </span>
                     {TIRE_BRANDS.map((b) => (
                       <span
                         key={b.slug}
-                        className="font-display text-lg uppercase tracking-wide text-bone"
+                        className="font-display text-lg font-bold text-bone"
                       >
                         {b.name}
                       </span>
@@ -430,8 +459,10 @@ export default function CouponsPage() {
                     {i + 1}
                   </span>
                   <div className="min-w-0">
-                    <p className="font-display text-lg uppercase tracking-wide">{s.title}</p>
-                    <p className="mt-1 text-sm leading-relaxed text-smoke">{s.copy}</p>
+                    <p className="font-display text-lg font-bold">{s.title}</p>
+                    <p className="mt-1 text-sm leading-relaxed text-smoke">
+                      {s.copy}
+                    </p>
                   </div>
                 </li>
               ))}
@@ -443,30 +474,37 @@ export default function CouponsPage() {
             <h2 className="h3 mt-4">The fine print, all of it</h2>
             <ul className="mt-4 space-y-3 text-sm leading-relaxed text-smoke">
               <li>
-                One promo code per order. Codes discount the parts subtotal or the installation
-                line, never taxes, disposal fees or shop supplies.
+                One promo code per order. Codes discount the parts subtotal or
+                the installation line, never taxes, disposal fees or shop
+                supplies.
               </li>
               <li>
-                Offers apply to orders shipping within the continental US and can't be applied to
-                an order that has already been completed and paid.
+                Offers apply to orders shipping within the continental US and
+                can't be applied to an order that has already been completed and
+                paid.
               </li>
               <li>
-                Manufacturer rebates are funded and fulfilled by the tire maker. Qualifying lines,
-                amounts and submission windows are set by them and can change without notice. We
-                confirm eligibility before you buy.
+                Manufacturer rebates are funded and fulfilled by the tire maker.
+                Qualifying lines, amounts and submission windows are set by them
+                and can change without notice. We confirm eligibility before you
+                buy.
               </li>
               <li>
-                Installation offers are South Florida only. Mobile installs also need an address we
-                can safely work at — a level, paved surface with room for the van and one working
-                side of the vehicle.
+                Installation offers are South Florida only. Mobile installs also
+                need an address we can safely work at — a level, paved surface
+                with room for the van and one working side of the vehicle.
               </li>
               <li>
-                Prices, availability and offers are subject to change. Where an offer conflicts with
-                a quoted price, the quote a tech gives you on the confirmation call governs.
+                Prices, availability and offers are subject to change. Where an
+                offer conflicts with a quoted price, the quote a tech gives you
+                on the confirmation call governs.
               </li>
               <li>
                 Questions on any of this? Call{" "}
-                <a href={BUSINESS.phoneHref} className="text-ink underline hover:text-drop">
+                <a
+                  href={BUSINESS.phoneHref}
+                  className="text-ink underline hover:text-drop"
+                >
                   {BUSINESS.phone}
                 </a>{" "}
                 — someone at the shop will tell you straight.
@@ -477,13 +515,13 @@ export default function CouponsPage() {
       </Section>
 
       {/* CTA */}
-      <section className="bg-ink text-bone">
+      <section className="bg-ink-wash text-bone">
         <div className="wrap py-14 text-center md:py-20">
-          <p className="eyebrow mb-2">{BUSINESS.tagline}</p>
+          <p className="eyebrow-dark mb-2">{BUSINESS.tagline}</p>
           <h2 className="h2">Ready to put an offer to work?</h2>
           <p className="lede mx-auto mt-3 max-w-xl text-bone/70">
-            Find your size, drop a code in the cart and pick your delivery. {BUSINESS.poweredBy}{" "}
-            since {BUSINESS.foundedYear}.
+            Find your size, drop a code in the cart and pick your delivery.{" "}
+            {BUSINESS.poweredBy} since {BUSINESS.foundedYear}.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link to="/tires" className="btn-primary">

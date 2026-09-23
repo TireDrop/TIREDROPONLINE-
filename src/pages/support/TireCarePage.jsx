@@ -57,9 +57,7 @@ function PennyTest() {
     <div className="card mt-6 border-l-4 border-l-drop p-6">
       <div className="mb-4 flex items-center gap-2">
         <Coins size={20} aria-hidden className="text-drop" />
-        <h4 className="font-display text-lg uppercase tracking-wide">
-          The penny test
-        </h4>
+        <h4 className="font-display text-lg">The penny test</h4>
       </div>
 
       <ol className="space-y-3 text-sm leading-relaxed text-smoke">
@@ -202,7 +200,7 @@ const TOPICS = [
       "Find the wear bars — the flat rubber ribs between the grooves. Flush with the tread means done",
       "Compare left to right; a big difference usually means alignment trouble",
       "Watch the inside shoulder especially, since that edge hides and wears first",
-      "Replace at 2/32\" at the absolute latest, and consider it well before that in a rainy climate",
+      'Replace at 2/32" at the absolute latest, and consider it well before that in a rainy climate',
       "Look at age too: rubber over six years old can be hard and cracked with tread left",
     ],
     cadence:
@@ -318,7 +316,7 @@ function GuideCard({ topic }) {
       </p>
       <a
         href={`#${topic.id}`}
-        className="mt-5 inline-flex min-h-[32px] items-center gap-1.5 font-display text-sm uppercase tracking-wide text-drop hover:text-dive"
+        className="mt-5 inline-flex min-h-[32px] items-center gap-1.5 font-display text-sm font-bold text-drop hover:text-dive"
       >
         Read the guide
         <ArrowRight size={15} aria-hidden />
@@ -331,7 +329,10 @@ function TopicSection({ topic }) {
   const Icon = topic.icon;
 
   return (
-    <article id={topic.id} className="scroll-mt-24 border-t border-ink/10 pt-12">
+    <article
+      id={topic.id}
+      className="scroll-mt-24 border-t border-ink/10 pt-14 md:pt-16"
+    >
       <p className="eyebrow mb-2">{topic.category}</p>
       <div className="mb-5 flex items-center gap-3">
         <Icon size={28} aria-hidden className="text-drop" />
@@ -340,7 +341,9 @@ function TopicSection({ topic }) {
 
       <div className="grid gap-8 lg:grid-cols-[1.15fr_1fr]">
         <div>
-          <p className="text-base leading-relaxed text-smoke">{topic.why}</p>
+          <p className="max-w-[68ch] text-[1.0625rem] leading-[1.75] text-smoke">
+            {topic.why}
+          </p>
           {topic.extra}
         </div>
 
@@ -349,7 +352,10 @@ function TopicSection({ topic }) {
             <h3 className="h3 mb-4">Checklist</h3>
             <ul className="space-y-2.5">
               {topic.checklist.map((item) => (
-                <li key={item} className="flex items-start gap-2.5 text-sm text-ink">
+                <li
+                  key={item}
+                  className="flex items-start gap-2.5 text-sm text-ink"
+                >
                   <CheckCircle2
                     size={16}
                     aria-hidden
@@ -362,16 +368,14 @@ function TopicSection({ topic }) {
           </div>
 
           <div className="card mt-4 bg-fog p-6">
-            <h3 className="mb-2 font-display text-sm uppercase tracking-[0.15em] text-smoke">
+            <h3 className="mb-2 font-display text-sm font-bold text-smoke">
               How often
             </h3>
             <p className="text-sm leading-relaxed text-ink">{topic.cadence}</p>
           </div>
 
           <div className="mt-4">
-            <p className="mb-2 font-display text-xs uppercase tracking-[0.15em] text-smoke">
-              Rather we did it? (South Florida)
-            </p>
+            <p className="label">Rather we did it? (South Florida)</p>
             <div className="flex flex-wrap gap-3">
               {topic.links.map((link) => (
                 <Link key={link.to} to={link.to} className="btn-outline btn-sm">
@@ -419,9 +423,12 @@ export default function TireCarePage() {
       <Breadcrumbs trail={[{ label: "Tire Care Guides" }]} />
 
       {/* ---------- Jump nav ---------- */}
-      <nav aria-label="Tire care topics" className="border-b border-ink/10 bg-fog">
+      <nav
+        aria-label="Tire care topics"
+        className="border-b border-ink/10 bg-fog"
+      >
         <div className="wrap py-5">
-          <h2 className="mb-3 font-display text-xs uppercase tracking-[0.2em] text-smoke">
+          <h2 className="mb-3 font-display text-sm font-bold text-smoke">
             Jump to a topic
           </h2>
           <ul className="flex flex-wrap gap-2">
@@ -429,7 +436,7 @@ export default function TireCarePage() {
               <li key={t.id}>
                 <a
                   href={`#${t.id}`}
-                  className="inline-block rounded-sm border border-ink/15 bg-bone px-3.5 py-2 font-display text-sm uppercase tracking-wide text-ink transition-colors hover:border-drop hover:text-drop"
+                  className="inline-block rounded-sm border border-ink/15 bg-bone px-3.5 py-2 font-display text-sm font-bold text-ink transition-colors hover:border-drop hover:text-drop"
                 >
                   {t.nav}
                 </a>
@@ -452,7 +459,7 @@ export default function TireCarePage() {
           if (inCategory.length === 0) return null;
           return (
             <div key={category} className="mb-12 last:mb-0">
-              <h3 className="mb-5 border-b border-ink/10 pb-3 font-display text-base uppercase tracking-[0.12em] text-ink">
+              <h3 className="mb-5 border-b border-ink/10 pb-3 font-display text-xl text-ink">
                 {category}
                 <span className="ml-2 text-sm text-smoke">
                   {inCategory.length}{" "}
@@ -475,6 +482,7 @@ export default function TireCarePage() {
           eyebrow="Start Here"
           title="The five-minute monthly check"
           lede="If you only ever do one thing from this library, do this: once a month, cold tires, walk around the car."
+          align="center"
         />
 
         <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -499,7 +507,7 @@ export default function TireCarePage() {
 
       {/* ---------- Full guides ---------- */}
       <Section className="bg-bone">
-        <div className="space-y-12">
+        <div className="space-y-16 md:space-y-20">
           {TOPICS.map((topic) => (
             <TopicSection key={topic.id} topic={topic} />
           ))}
@@ -520,7 +528,10 @@ export default function TireCarePage() {
               key={title}
               className="card flex items-start gap-2.5 px-5 py-4 text-sm text-smoke"
             >
-              <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 bg-ink/20" />
+              <span
+                aria-hidden
+                className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-drop/40"
+              />
               {title}
             </li>
           ))}
@@ -535,10 +546,10 @@ export default function TireCarePage() {
         </p>
       </Section>
 
-      <section className="bg-ink py-14 text-bone md:py-20">
+      <section className="bg-ink-wash py-14 text-bone md:py-20">
         <div className="wrap grid gap-8 md:grid-cols-[1.2fr_1fr] md:items-center">
           <div>
-            <p className="eyebrow mb-2">{BUSINESS.tagline}</p>
+            <p className="eyebrow-dark mb-2">{BUSINESS.tagline}</p>
             <h2 className="h2">Read it, then buy the right ones</h2>
             <p className="lede mt-4 max-w-xl text-bone/70">
               Shipped to your door anywhere in {BUSINESS.shipping.area}, or free

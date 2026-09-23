@@ -9,7 +9,7 @@ const SOURCES = [`${BASE}brand/tiredrop.webp`, `${BASE}brand/tiredrop.png`];
 function ParentLine({ onDark }) {
   return (
     <span
-      className={`mt-1 whitespace-nowrap font-display text-[11px] uppercase leading-none tracking-[0.16em] ${
+      className={`mt-1 whitespace-nowrap font-display text-[11px] uppercase leading-none tracking-[0.12em] ${
         onDark ? "text-bone/50" : "text-smoke"
       }`}
     >

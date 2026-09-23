@@ -259,9 +259,12 @@ export default function ProductPage({ kind = "tire" }) {
       />
 
       <Section>
-        <div className="grid gap-10 lg:grid-cols-2">
-          {/* Product art */}
-          <div className="card flex items-center justify-center bg-fog p-8">
+        <div className="grid items-start gap-10 lg:grid-cols-2">
+          {/* Product art. It sticks on a desktop so the tire stays in view
+              while the buy box, ratings and spec table scroll past it — the
+              column is far taller than the art, and stretching the panel to
+              match just floats the product in an empty box. */}
+          <div className="card flex items-center justify-center bg-fog p-8 lg:sticky lg:top-[calc(var(--header-h)+1.5rem)]">
             <ProductArt
               kind={product.kind}
               accent={product.accent}
@@ -282,7 +285,7 @@ export default function ProductPage({ kind = "tire" }) {
               )}
             </div>
             <h1 className="h1 mt-1">{product.model}</h1>
-            <p className="mt-2 font-display text-lg uppercase tracking-wide text-smoke">
+            <p className="tnum mt-2 font-display text-lg text-smoke">
               {sizeLabel}
               {isTire && ` · ${product.loadIndex}${product.speedRating}`}
             </p>
@@ -295,7 +298,7 @@ export default function ProductPage({ kind = "tire" }) {
                 shopper is comparing against the other tab they have open. */}
             <div className="mt-6 border-y border-ink/10 py-5">
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <span className="font-display text-4xl leading-none">
+                <span className="tnum font-display text-4xl leading-none tracking-tight">
                   {money(bill.price)}
                 </span>
                 <span className="text-sm text-smoke">
@@ -310,7 +313,7 @@ export default function ProductPage({ kind = "tire" }) {
                     <span className="line-through">
                       {money(product.msrp)}
                     </span>{" "}
-                    <span className="font-display uppercase tracking-wide text-drop">
+                    <span className="font-display font-bold text-drop">
                       Save {money(savings)} each
                     </span>
                   </>
@@ -340,7 +343,7 @@ export default function ProductPage({ kind = "tire" }) {
                     type="button"
                     onClick={() => setQty(n)}
                     aria-pressed={qty === n}
-                    className={`min-h-[44px] min-w-[44px] rounded-sm border px-3 font-display text-base uppercase tracking-wide transition-colors ${
+                    className={`tnum min-h-[44px] min-w-[44px] rounded-sm border px-3 font-display text-base font-bold transition-colors ${
                       qty === n
                         ? "border-drop bg-drop text-bone"
                         : "border-ink/15 bg-bone text-ink hover:border-ink"
@@ -418,7 +421,7 @@ export default function ProductPage({ kind = "tire" }) {
                     className="mt-0.5 h-4 w-4 shrink-0 accent-drop"
                   />
                   <span className="min-w-0">
-                    <span className="block font-display text-base uppercase tracking-wide">
+                    <span className="block font-display text-base font-bold">
                       Ship it to me
                     </span>
                     <span className="mt-1 flex items-start gap-2 text-sm font-medium text-ink">
@@ -454,7 +457,7 @@ export default function ProductPage({ kind = "tire" }) {
                     className="mt-0.5 h-4 w-4 shrink-0 accent-drop"
                   />
                   <span className="min-w-0">
-                    <span className="block font-display text-base uppercase tracking-wide">
+                    <span className="block font-display text-base font-bold">
                       Ship to the shop and we&apos;ll fit them (+
                       {money(product.installPrice)} per {unit})
                     </span>
@@ -484,7 +487,7 @@ export default function ProductPage({ kind = "tire" }) {
             {/* Price breakdown. List, what we charge, what the manufacturer
                 sends back — spelled out, because a rebate a shopper does not
                 notice is a rebate that never influenced the sale. */}
-            <dl className="mt-6 space-y-1.5 text-sm">
+            <dl className="tnum mt-6 space-y-1.5 text-sm">
               {bill.instantSaving > 0 && (
                 <div className="flex justify-between gap-4">
                   <dt className="text-smoke">
@@ -513,7 +516,7 @@ export default function ProductPage({ kind = "tire" }) {
                   {install ? money(installTotal) : "Not added"}
                 </dd>
               </div>
-              <div className="flex justify-between gap-4 border-t border-ink/10 pt-2 font-display text-lg uppercase">
+              <div className="flex justify-between gap-4 border-t border-ink/10 pt-2 font-display text-lg font-bold">
                 <dt>Estimated total</dt>
                 <dd>{money(orderTotal)}</dd>
               </div>
@@ -528,7 +531,7 @@ export default function ProductPage({ kind = "tire" }) {
                       − {money(bill.rebate)}
                     </dd>
                   </div>
-                  <div className="flex justify-between gap-4 font-display text-lg font-bold uppercase text-drop">
+                  <div className="flex justify-between gap-4 font-display text-lg font-bold text-drop">
                     <dt>After rebate</dt>
                     <dd>{money(orderTotal - bill.rebate)}</dd>
                   </div>
@@ -595,7 +598,7 @@ export default function ProductPage({ kind = "tire" }) {
                   onClick={() => compare.toggle(product.slug)}
                   aria-pressed={inCompare}
                   disabled={compareLocked}
-                  className={`flex min-h-[44px] w-full items-center justify-center gap-2 rounded-sm border px-4 font-display text-base uppercase tracking-wide transition-colors ${
+                  className={`flex min-h-[44px] w-full items-center justify-center gap-2 rounded-sm border px-4 font-display text-base font-bold transition-colors ${
                     inCompare
                       ? "border-drop bg-drop/5 text-drop"
                       : "border-ink/15 text-ink hover:border-ink disabled:opacity-50"
@@ -627,12 +630,12 @@ export default function ProductPage({ kind = "tire" }) {
       </Section>
 
       {/* Local install cross-sell — South Florida only, flagged as such. */}
-      <div className="bg-ink text-bone">
+      <div className="bg-ink-wash text-bone">
         <div className="wrap flex flex-col gap-5 py-10 md:flex-row md:items-center md:justify-between">
           <div className="flex items-start gap-4">
             <Store size={30} aria-hidden className="mt-1 shrink-0 text-amber" />
             <div>
-              <p className="eyebrow mb-1">South Florida</p>
+              <p className="eyebrow-dark mb-1">South Florida</p>
               <h2 className="h2 text-3xl md:text-4xl">
                 Ship it free to the shop
               </h2>
@@ -798,7 +801,7 @@ export default function ProductPage({ kind = "tire" }) {
         <div className="fixed inset-x-0 bottom-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] z-30 border-t border-ink/10 bg-bone/95 backdrop-blur lg:hidden">
           <div className="flex items-center gap-3 px-4 py-2.5">
             <div className="min-w-0">
-              <p className="font-display text-xl leading-none">
+              <p className="tnum font-display text-xl leading-none">
                 {money(bill.price)}
               </p>
               <p className="mt-1 truncate text-[11px] text-smoke">

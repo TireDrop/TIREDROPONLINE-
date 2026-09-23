@@ -219,9 +219,7 @@ const DOCS = {
       {
         id: "third-parties",
         heading: "4. Who else sees your information",
-        paragraphs: [
-          "A short list, and only where there is a reason:",
-        ],
+        paragraphs: ["A short list, and only where there is a reason:"],
         list: [
           "Distributors, who receive the shipping address and order details because they are the ones packing and dispatching your tires",
           "Shipping carriers, for delivery and tracking",
@@ -301,9 +299,7 @@ const DOCS = {
       {
         id: "what-we-do",
         heading: "2. What we have built in",
-        paragraphs: [
-          "Practical measures applied across the site include:",
-        ],
+        paragraphs: ["Practical measures applied across the site include:"],
         list: [
           "Semantic headings and landmarks so screen readers can navigate the structure",
           "Keyboard access to every interactive control, with a visible focus indicator",
@@ -364,7 +360,7 @@ export default function LegalPage({ doc = "terms" }) {
             aria-label={`${content.title} contents`}
             className="lg:sticky lg:top-24 lg:self-start"
           >
-            <h2 className="mb-3 font-display text-xs uppercase tracking-[0.2em] text-smoke">
+            <h2 className="mb-3 font-display text-sm font-bold text-smoke">
               On this page
             </h2>
             <ul className="space-y-2">
@@ -394,13 +390,11 @@ export default function LegalPage({ doc = "terms" }) {
           </nav>
 
           {/* ---------- Document body ---------- */}
-          <article className="max-w-3xl">
-            <p className="mb-6 font-display text-xs uppercase tracking-[0.2em] text-smoke">
-              Last updated: {LAST_UPDATED}
-            </p>
+          <article className="max-w-[68ch]">
+            <p className="label mb-6">Last updated: {LAST_UPDATED}</p>
 
             <div className="card mb-10 border-l-4 border-l-drop p-6">
-              <p className="text-sm leading-relaxed text-smoke">
+              <p className="text-[15px] leading-[1.75] text-smoke">
                 This document is written to be understood, not to hide anything
                 in the fine print. It is general information about how{" "}
                 {BUSINESS.name} operates — it is not legal advice, and it does
@@ -419,27 +413,34 @@ export default function LegalPage({ doc = "terms" }) {
               </p>
             </div>
 
-            <div className="space-y-10">
+            <div className="space-y-12">
               {content.sections.map((section) => (
-                <section key={section.id} id={section.id} className="scroll-mt-24">
-                  <h2 className="h3 mb-3">{section.heading}</h2>
+                <section
+                  key={section.id}
+                  id={section.id}
+                  className="scroll-mt-24"
+                >
+                  <h2 className="h3 mb-4">{section.heading}</h2>
 
                   {section.paragraphs?.map((p) => (
-                    <p key={p} className="mb-3 text-sm leading-relaxed text-smoke">
+                    <p
+                      key={p}
+                      className="mb-4 text-[15px] leading-[1.75] text-smoke"
+                    >
                       {p}
                     </p>
                   ))}
 
                   {section.list && (
-                    <ul className="mb-3 space-y-2.5">
+                    <ul className="mb-4 space-y-3">
                       {section.list.map((item) => (
                         <li
                           key={item}
-                          className="flex items-start gap-2.5 text-sm leading-relaxed text-smoke"
+                          className="flex items-start gap-2.5 text-[15px] leading-[1.75] text-smoke"
                         >
                           <span
                             aria-hidden
-                            className="mt-2 h-1.5 w-1.5 shrink-0 bg-drop"
+                            className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-drop"
                           />
                           {item}
                         </li>
@@ -448,7 +449,10 @@ export default function LegalPage({ doc = "terms" }) {
                   )}
 
                   {section.after?.map((p) => (
-                    <p key={p} className="mb-3 text-sm leading-relaxed text-smoke">
+                    <p
+                      key={p}
+                      className="mb-4 text-[15px] leading-[1.75] text-smoke"
+                    >
                       {p}
                     </p>
                   ))}
@@ -469,7 +473,7 @@ export default function LegalPage({ doc = "terms" }) {
                 <br />
                 <a
                   href={BUSINESS.phoneHref}
-                  className="mt-2 inline-block font-display text-lg uppercase tracking-wide text-ink hover:text-drop"
+                  className="mt-2 inline-block font-display text-lg text-ink hover:text-drop"
                 >
                   {BUSINESS.phone}
                 </a>

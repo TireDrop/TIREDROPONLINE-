@@ -14,7 +14,12 @@ import {
   X,
 } from "lucide-react";
 
-import { Seo, Breadcrumbs, EmptyState, Badge } from "../../components/ui/index.jsx";
+import {
+  Seo,
+  Breadcrumbs,
+  EmptyState,
+  Badge,
+} from "../../components/ui/index.jsx";
 import { useCart, money } from "../../context/CartContext.jsx";
 import ProductArt from "../../components/shop/ProductArt.jsx";
 import { BUSINESS } from "../../data/business.js";
@@ -71,9 +76,20 @@ export function readSavedPromo() {
  * Validates a code against the current cart and returns the discount split.
  * Returns `{ ok: false, error }` with customer-facing copy when it doesn't apply.
  */
-export function evaluatePromo(raw, { subtotal = 0, installTotal = 0, shipping = 0 } = {}) {
-  const code = String(raw || "").trim().toUpperCase();
-  const miss = { ok: false, code, subtotalOff: 0, installOff: 0, freeShipping: false };
+export function evaluatePromo(
+  raw,
+  { subtotal = 0, installTotal = 0, shipping = 0 } = {},
+) {
+  const code = String(raw || "")
+    .trim()
+    .toUpperCase();
+  const miss = {
+    ok: false,
+    code,
+    subtotalOff: 0,
+    installOff: 0,
+    freeShipping: false,
+  };
 
   if (!code) return { ...miss, error: "Enter a promo code first." };
   if (!PROMOS[code]) {
@@ -106,7 +122,11 @@ export function evaluatePromo(raw, { subtotal = 0, installTotal = 0, shipping = 
 
     case "NEWCUSTOMER":
       if (subtotal <= 0) {
-        return { ...miss, error: "Add tires or wheels to your cart before applying NEWCUSTOMER." };
+        return {
+          ...miss,
+          error:
+            "Add tires or wheels to your cart before applying NEWCUSTOMER.",
+        };
       }
       return hit({ subtotalOff: round2(subtotal * 0.1) });
 
@@ -124,7 +144,7 @@ export function evaluatePromo(raw, { subtotal = 0, installTotal = 0, shipping = 
         return {
           ...miss,
           error: `FLEET15 starts at ${money(1000)} in tires and wheels. You're ${money(
-            round2(1000 - subtotal)
+            round2(1000 - subtotal),
           )} short of it.`,
         };
       }
@@ -204,7 +224,8 @@ function QtyStepper({ line, setQty }) {
 }
 
 function CartLine({ line, setQty, remove, addItem }) {
-  const href = line.kind === "wheel" ? `/wheels/${line.slug}` : `/tires/${line.slug}`;
+  const href =
+    line.kind === "wheel" ? `/wheels/${line.slug}` : `/tires/${line.slug}`;
   const toggleId = `install-${line.key}`;
 
   // Installation is part of the line's identity, so flipping it means
@@ -228,7 +249,7 @@ function CartLine({ line, setQty, remove, addItem }) {
       <div className="min-w-0">
         <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2">
           <div className="min-w-0">
-            <p className="font-display text-xs uppercase tracking-[0.18em] text-smoke">
+            <p className="font-display text-xs uppercase tracking-[0.09em] text-smoke">
               {line.brand}
             </p>
             <h2 className="h3 mt-0.5">
@@ -243,8 +264,8 @@ function CartLine({ line, setQty, remove, addItem }) {
             )}
           </div>
 
-          <div className="text-right">
-            <p className="font-display text-2xl leading-none">
+          <div className="tnum text-right">
+            <p className="font-display text-2xl leading-none tracking-tight">
               {money(line.price * line.qty)}
             </p>
             <p className="mt-1 text-xs text-smoke">{money(line.price)} each</p>
@@ -273,8 +294,11 @@ function CartLine({ line, setQty, remove, addItem }) {
                 onChange={toggleInstall}
                 className="mt-0.5 h-4 w-4 shrink-0 accent-drop"
               />
-              <label htmlFor={toggleId} className="text-sm leading-snug text-ink">
-                <span className="font-display uppercase tracking-wide">
+              <label
+                htmlFor={toggleId}
+                className="text-sm leading-snug text-ink"
+              >
+                <span className="font-display font-bold">
                   Ship free to the shop and we&apos;ll fit them
                 </span>{" "}
                 <span className="whitespace-nowrap text-drop">
@@ -318,9 +342,13 @@ function PromoBox({ promo, onApply, onClear }) {
       <div className="border-t border-ink/10 pt-5">
         <div className="flex items-start justify-between gap-3 rounded-sm border border-drop/30 bg-drop/5 p-3">
           <div className="flex min-w-0 items-start gap-2.5">
-            <Check size={16} aria-hidden className="mt-0.5 shrink-0 text-drop" />
+            <Check
+              size={16}
+              aria-hidden
+              className="mt-0.5 shrink-0 text-drop"
+            />
             <div className="min-w-0">
-              <p className="font-display text-sm uppercase tracking-wide text-ink">
+              <p className="font-display text-sm font-bold text-ink">
                 {promo.code} applied
               </p>
               <p className="text-xs text-smoke">{promo.label}</p>
@@ -366,7 +394,11 @@ function PromoBox({ promo, onApply, onClear }) {
         </button>
       </div>
       {error ? (
-        <p id="promo-error" role="alert" className="mt-2 text-xs leading-relaxed text-drop">
+        <p
+          id="promo-error"
+          role="alert"
+          className="mt-2 text-xs leading-relaxed text-drop"
+        >
           {error}
         </p>
       ) : (
@@ -405,24 +437,46 @@ const TRUST = [
 /* ------------------------------------------------------------------ */
 
 export default function CartPage() {
-  const { lines, count, subtotal, installTotal, shipping, addItem, setQty, remove } = useCart();
+  const {
+    lines,
+    count,
+    subtotal,
+    installTotal,
+    shipping,
+    addItem,
+    setQty,
+    remove,
+  } = useCart();
   const safeLines = Array.isArray(lines) ? lines : [];
 
   const [promo, setPromo] = useState(() => {
     const saved = readSavedPromo();
-    return saved ? { ok: true, code: saved, label: PROMOS[saved]?.label || "", subtotalOff: 0, installOff: 0, freeShipping: false } : null;
+    return saved
+      ? {
+          ok: true,
+          code: saved,
+          label: PROMOS[saved]?.label || "",
+          subtotalOff: 0,
+          installOff: 0,
+          freeShipping: false,
+        }
+      : null;
   });
 
   // Re-run the saved code against the live cart so a changed cart can invalidate it.
   const applied = useMemo(() => {
     if (!promo?.code) return null;
-    const result = evaluatePromo(promo.code, { subtotal, installTotal, shipping });
+    const result = evaluatePromo(promo.code, {
+      subtotal,
+      installTotal,
+      shipping,
+    });
     return result.ok ? result : null;
   }, [promo, subtotal, installTotal, shipping]);
 
   const totals = useMemo(
     () => summarize({ subtotal, installTotal, shipping }, applied),
-    [subtotal, installTotal, shipping, applied]
+    [subtotal, installTotal, shipping, applied],
   );
 
   function handleApply(raw) {
@@ -509,10 +563,12 @@ export default function CartPage() {
                 {TRUST.map(({ icon: Icon, title, copy }) => (
                   <div key={title} className="card p-4">
                     <Icon size={20} aria-hidden className="text-drop" />
-                    <p className="mt-3 font-display text-base uppercase leading-tight tracking-wide">
+                    <p className="mt-3 font-display text-base font-bold leading-tight">
                       {title}
                     </p>
-                    <p className="mt-1 text-xs leading-relaxed text-smoke">{copy}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-smoke">
+                      {copy}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -523,16 +579,20 @@ export default function CartPage() {
               <div className="card p-6 lg:sticky lg:top-24">
                 <h2 className="h3">Order Summary</h2>
 
-                <dl className="mt-5 space-y-3 text-sm">
+                <dl className="tnum mt-5 space-y-3 text-sm">
                   <div className="flex items-baseline justify-between gap-4">
                     <dt className="text-smoke">Tires &amp; wheels</dt>
-                    <dd className="font-display text-base">{money(totals.subtotal)}</dd>
+                    <dd className="font-display text-base">
+                      {money(totals.subtotal)}
+                    </dd>
                   </div>
 
                   <div className="flex items-baseline justify-between gap-4">
                     <dt className="text-smoke">Installation at the shop</dt>
                     <dd className="font-display text-base">
-                      {totals.installTotal > 0 ? money(totals.installTotal) : "—"}
+                      {totals.installTotal > 0
+                        ? money(totals.installTotal)
+                        : "—"}
                     </dd>
                   </div>
 
@@ -561,15 +621,20 @@ export default function CartPage() {
 
                   <div className="flex items-baseline justify-between gap-4">
                     <dt className="text-smoke">Sales tax (7%)</dt>
-                    <dd className="font-display text-base">{money(totals.tax)}</dd>
+                    <dd className="font-display text-base">
+                      {money(totals.tax)}
+                    </dd>
                   </div>
                 </dl>
 
                 {!freeShipEarned && toFreeShip > 0 && (
                   <div className="mt-4 rounded-sm bg-fog p-3">
                     <p className="text-xs text-ink">
-                      Add <span className="font-display text-drop">{money(toFreeShip)}</span> for
-                      free shipping.
+                      Add{" "}
+                      <span className="font-display text-drop">
+                        {money(toFreeShip)}
+                      </span>{" "}
+                      for free shipping.
                     </p>
                     <div
                       className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink/10"
@@ -581,34 +646,49 @@ export default function CartPage() {
                     >
                       <div
                         className="h-full bg-drop"
-                        style={{ width: `${Math.min(100, (subtotal / FREE_SHIP_AT) * 100)}%` }}
+                        style={{
+                          width: `${Math.min(100, (subtotal / FREE_SHIP_AT) * 100)}%`,
+                        }}
                       />
                     </div>
                   </div>
                 )}
 
                 <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-ink/10 pt-5">
-                  <span className="font-display text-lg uppercase tracking-wide">Total</span>
-                  <span className="font-display text-3xl leading-none">{money(totals.total)}</span>
+                  <span className="font-display text-lg font-bold">Total</span>
+                  <span className="tnum font-display text-3xl leading-none tracking-tight">
+                    {money(totals.total)}
+                  </span>
                 </div>
 
                 <Link to="/checkout" className="btn-primary mt-5 w-full">
                   Checkout
                 </Link>
                 <p className="mt-3 text-center text-xs leading-relaxed text-smoke">
-                  No card is charged online. We confirm fitment and take payment by phone before
-                  anything ships.
+                  No card is charged online. We confirm fitment and take payment
+                  by phone before anything ships.
                 </p>
 
                 <div className="mt-5">
-                  <PromoBox promo={applied} onApply={handleApply} onClear={handleClear} />
+                  <PromoBox
+                    promo={applied}
+                    onApply={handleApply}
+                    onClear={handleClear}
+                  />
                 </div>
 
                 <div className="mt-6 flex items-start gap-2.5 border-t border-ink/10 pt-5">
-                  <Wrench size={16} aria-hidden className="mt-0.5 shrink-0 text-smoke" />
+                  <Wrench
+                    size={16}
+                    aria-hidden
+                    className="mt-0.5 shrink-0 text-smoke"
+                  />
                   <p className="text-xs leading-relaxed text-smoke">
                     Questions on fitment or load rating? Call{" "}
-                    <a href={BUSINESS.phoneHref} className="text-ink underline hover:text-drop">
+                    <a
+                      href={BUSINESS.phoneHref}
+                      className="text-ink underline hover:text-drop"
+                    >
                       {BUSINESS.phone}
                     </a>{" "}
                     and talk to a tech before you check out.

@@ -72,7 +72,7 @@ export default function CompareTray() {
   return (
     <div
       ref={barRef}
-      className={`fixed inset-x-0 bottom-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] z-40 border-t border-graphite bg-ink text-bone transition-[transform,opacity,visibility] duration-300 lg:bottom-0 ${
+      className={`fixed inset-x-0 bottom-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] z-40 border-t border-graphite bg-steel bg-steel-wash text-bone shadow-[0_-12px_32px_-16px_rgba(7,14,26,.7)] transition-[transform,opacity,visibility] duration-300 lg:bottom-0 ${
         open
           ? "visible translate-y-0 opacity-100"
           : "invisible translate-y-full opacity-0"
@@ -80,7 +80,7 @@ export default function CompareTray() {
     >
       {/* Narrower gutter than `wrap` so the compact phone row clears 360px. */}
       <div className="mx-auto flex w-full max-w-site items-center gap-2 px-3 py-2 md:gap-4 md:px-8 md:py-3">
-        <p className="min-w-0 truncate font-display text-[11px] uppercase tracking-[0.12em] text-bone/70 md:hidden">
+        <p className="tnum min-w-0 truncate font-display text-[11px] font-bold uppercase tracking-[0.09em] text-bone/70 md:hidden">
           {ready ? `${count} of ${max}` : "Pick at least 2"}
         </p>
 
@@ -88,7 +88,7 @@ export default function CompareTray() {
           {picked.map((tire) => (
             <li
               key={tire.slug}
-              className="flex min-w-0 flex-1 items-center gap-1 rounded-sm border border-graphite bg-steel py-1 pl-2.5 pr-1"
+              className="flex min-w-0 flex-1 items-center gap-1 rounded-sm border border-graphite bg-ink/40 py-1 pl-2.5 pr-1"
             >
               <span className="min-w-0 flex-1 truncate text-[11px] leading-tight text-bone">
                 <span className="text-bone/60">{tire.brand}</span> {tire.model}
@@ -106,7 +106,7 @@ export default function CompareTray() {
           {Array.from({ length: emptySlots }, (_, i) => (
             <li
               key={`slot-${i}`}
-              className="flex h-[34px] flex-1 items-center justify-center rounded-sm border border-dashed border-graphite text-[11px] text-bone/40"
+              className="flex h-[34px] flex-1 items-center justify-center rounded-sm border border-dashed border-graphite text-[11px] text-bone/50"
             >
               Add a tire
             </li>
@@ -117,20 +117,23 @@ export default function CompareTray() {
           <button
             type="button"
             onClick={clear}
-            className="flex min-h-[44px] shrink-0 items-center px-2 font-display text-[11px] uppercase tracking-[0.12em] text-bone/60 hover:text-bone md:text-[13px]"
+            className="flex min-h-[44px] shrink-0 items-center whitespace-nowrap px-2 font-display text-[12px] font-bold text-bone/70 transition-colors hover:text-bone md:text-[13px]"
           >
             Clear all
           </button>
 
           {ready ? (
-            <Link to="/compare" className="btn-primary btn-sm min-h-[44px]">
+            <Link
+              to="/compare"
+              className="btn-primary btn-sm min-h-[44px] whitespace-nowrap"
+            >
               Compare ({count})
             </Link>
           ) : (
             <button
               type="button"
               disabled
-              className="btn-primary btn-sm min-h-[44px]"
+              className="btn-primary btn-sm min-h-[44px] whitespace-nowrap"
               title="Pick at least 2 tires to compare"
             >
               Compare ({count})
@@ -140,7 +143,7 @@ export default function CompareTray() {
       </div>
 
       {!ready && (
-        <p className="hidden pb-2 text-center text-[11px] text-bone/50 md:block">
+        <p className="hidden pb-2 text-center text-[11px] text-bone/55 md:block">
           Pick at least 2 tires to compare them side by side
         </p>
       )}

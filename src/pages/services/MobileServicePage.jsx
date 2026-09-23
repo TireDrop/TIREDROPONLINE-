@@ -20,7 +20,14 @@ import {
   Zap,
 } from "lucide-react";
 
-import { Accordion, Badge, PageHero, Section, SectionHead, Seo } from "../../components/ui/index.jsx";
+import {
+  Accordion,
+  Badge,
+  PageHero,
+  Section,
+  SectionHead,
+  Seo,
+} from "../../components/ui/index.jsx";
 import { BUSINESS } from "../../data/business.js";
 import { MOBILE_SERVICES, getService } from "../../data/services.js";
 
@@ -35,20 +42,17 @@ const STEPS = [
   {
     icon: CalendarCheck,
     title: "Book the van",
-    body:
-      "Pick the service, the vehicle and the day that suits you. Takes about two minutes online. Prefer a human? Call and we will write it up for you.",
+    body: "Pick the service, the vehicle and the day that suits you. Takes about two minutes online. Prefer a human? Call and we will write it up for you.",
   },
   {
     icon: Phone,
     title: "We confirm a 2-hour window",
-    body:
-      "A dispatcher confirms the appointment and locks in a two-hour arrival window, so you are not burning a whole day waiting on a van.",
+    body: "A dispatcher confirms the appointment and locks in a two-hour arrival window, so you are not burning a whole day waiting on a van.",
   },
   {
     icon: Zap,
     title: "Fitted where you parked",
-    body:
-      "Mounted, balanced, torqued to spec and pressures set — in your own driveway. Your old set leaves with us. You never went anywhere.",
+    body: "Mounted, balanced, torqued to spec and pressures set — in your own driveway. Your old set leaves with us. You never went anywhere.",
   },
 ];
 
@@ -56,52 +60,78 @@ const VAN_KIT = [
   {
     icon: Gauge,
     name: "Calibrated spin balancer",
-    detail: "Dynamic balancing on board — the same machine standard the Sunrise bays run, not a bubble balancer.",
+    detail:
+      "Dynamic balancing on board — the same machine standard the Sunrise bays run, not a bubble balancer.",
   },
   {
     icon: Wrench,
     name: "Tire changer & bead breaker",
-    detail: "Mounts everything from a compact 15\" to a 22\" truck wheel without scratching the finish.",
+    detail:
+      'Mounts everything from a compact 15" to a 22" truck wheel without scratching the finish.',
   },
   {
     icon: ShieldCheck,
     name: "Calibrated torque wrenches",
-    detail: "Every lug goes back to your manufacturer's spec in a star pattern. No rattle guns left to guess.",
+    detail:
+      "Every lug goes back to your manufacturer's spec in a star pattern. No rattle guns left to guess.",
   },
   {
     icon: Radio,
     name: "TPMS programmer",
-    detail: "Scans, relearns and programs sensors so the dashboard light goes out before we leave.",
+    detail:
+      "Scans, relearns and programs sensors so the dashboard light goes out before we leave.",
   },
   {
     icon: Ruler,
     name: "Tread depth gauges & inflation",
-    detail: "Depth measured at every corner and pressures set to the door-placard number.",
+    detail:
+      "Depth measured at every corner and pressures set to the door-placard number.",
   },
   {
     icon: Truck,
     name: "Tire cart, floor jack & stands",
-    detail: "Rated jack, stands and a cart so heavy assemblies get handled safely on your driveway.",
+    detail:
+      "Rated jack, stands and a cart so heavy assemblies get handled safely on your driveway.",
   },
   {
     icon: Zap,
     name: "Onboard power & lighting",
-    detail: "Generator and work lights mean we do not need your outlet, your garage or daylight.",
+    detail:
+      "Generator and work lights mean we do not need your outlet, your garage or daylight.",
   },
   {
     icon: Ban,
     name: "Old tire haul-off",
-    detail: "Your old set leaves with us and gets recycled. Nothing gets left at the curb.",
+    detail:
+      "Your old set leaves with us and gets recycled. Nothing gets left at the curb.",
   },
 ];
 
 const COMPARISON = [
-  { us: "Work happens where your car is parked", them: "Drive over and hope the bay is open" },
-  { us: "A two-hour window you actually pick", them: "\"Should be a couple hours\" with no promise" },
-  { us: "You keep working, cooking or sleeping", them: "You sit in a lobby with bad coffee" },
-  { us: "No second vehicle or ride needed", them: "Someone has to drop you off and pick you up" },
-  { us: "Flat tire? We come to the flat", them: "You put the donut on first, then drive on it" },
-  { us: "Old tires hauled away and recycled", them: "Disposal fee tacked on at the register" },
+  {
+    us: "Work happens where your car is parked",
+    them: "Drive over and hope the bay is open",
+  },
+  {
+    us: "A two-hour window you actually pick",
+    them: '"Should be a couple hours" with no promise',
+  },
+  {
+    us: "You keep working, cooking or sleeping",
+    them: "You sit in a lobby with bad coffee",
+  },
+  {
+    us: "No second vehicle or ride needed",
+    them: "Someone has to drop you off and pick you up",
+  },
+  {
+    us: "Flat tire? We come to the flat",
+    them: "You put the donut on first, then drive on it",
+  },
+  {
+    us: "Old tires hauled away and recycled",
+    them: "Disposal fee tacked on at the register",
+  },
 ];
 
 const FAQ = [
@@ -131,23 +161,19 @@ const FAQ = [
   },
   {
     q: "How much room does the van need?",
-    a:
-      "One standard parking space next to your vehicle and about ten feet of clearance on the work side. A driveway, a flat stretch of street, an office lot or a jobsite staging area all work. We do not need your garage and we do not need a lift.",
+    a: "One standard parking space next to your vehicle and about ten feet of clearance on the work side. A driveway, a flat stretch of street, an office lot or a jobsite staging area all work. We do not need your garage and we do not need a lift.",
   },
   {
     q: "What happens if it rains?",
-    a:
-      "South Florida rain is part of the job. Short afternoon showers rarely stop us — the van carries lighting and cover for the work area. If there is lightning or sustained heavy rain, we call you, pause the job and reschedule at the front of the next available window. You are never charged for weather.",
+    a: "South Florida rain is part of the job. Short afternoon showers rarely stop us — the van carries lighting and cover for the work area. If there is lightning or sustained heavy rain, we call you, pause the job and reschedule at the front of the next available window. You are never charged for weather.",
   },
   {
     q: "Can you come to an apartment or condo complex?",
-    a:
-      "Yes, and we do it every week. Some complexes want the van checked in at the gate or ask that work happen in a visitor space rather than a covered garage. Tell us the complex name and any gate code or call-up instructions when you book and we will handle it with management on arrival.",
+    a: "Yes, and we do it every week. Some complexes want the van checked in at the gate or ask that work happen in a visitor space rather than a covered garage. Tell us the complex name and any gate code or call-up instructions when you book and we will handle it with management on arrival.",
   },
   {
     q: "How long does a mobile appointment take?",
-    a:
-      "A four-tire installation runs about 45 to 75 minutes. A single flat repair is roughly 30 minutes, a rotation about 30, and a full-synthetic oil change 30 to 45. Your confirmation lists the estimate for the exact service you booked.",
+    a: "A four-tire installation runs about 45 to 75 minutes. A single flat repair is roughly 30 minutes, a rotation about 30, and a full-synthetic oil change 30 to 45. Your confirmation lists the estimate for the exact service you booked.",
   },
   {
     q: "What if my vehicle needs work the van cannot do?",
@@ -202,12 +228,15 @@ export default function MobileServicePage() {
         <div className="wrap flex flex-wrap items-center gap-3 py-4 text-sm">
           <MapPin size={18} aria-hidden className="text-drop" />
           <p className="text-smoke">
-            <span className="font-display uppercase tracking-wide text-ink">
+            <span className="font-display font-bold text-ink">
               Broward County only.
             </span>{" "}
             We ship tires to {BUSINESS.shipping.area}, but the vans work South
             Florida. Outside the area?{" "}
-            <Link to="/shipping" className="text-drop underline hover:text-dive">
+            <Link
+              to="/shipping"
+              className="text-drop underline hover:text-dive"
+            >
               See how shipping works
             </Link>
             .
@@ -235,19 +264,21 @@ export default function MobileServicePage() {
                 </span>
               </div>
               <h3 className="h3 mt-5">{step.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-smoke">{step.body}</p>
+              <p className="mt-2 text-sm leading-relaxed text-smoke">
+                {step.body}
+              </p>
             </li>
           ))}
         </ol>
 
         <div className="card mt-8 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-relaxed text-smoke">
-            <span className="font-display text-base uppercase tracking-wide text-ink">
+            <span className="font-display text-[15px] font-bold text-ink">
               Rather come to us?
             </span>{" "}
             Free ship-to-store puts your order on the rack at the{" "}
-            {BUSINESS.shop.city} shop and you book a fitting whenever suits. Same
-            techs, same torque spec, full bay equipment.
+            {BUSINESS.shop.city} shop and you book a fitting whenever suits.
+            Same techs, same torque spec, full bay equipment.
           </p>
           <Link to="/install" className="btn-dark btn-sm shrink-0">
             <Store size={16} aria-hidden />
@@ -289,9 +320,9 @@ export default function MobileServicePage() {
                   <Clock size={14} aria-hidden />
                   {service.duration}
                 </span>
-                <span className="font-display text-lg uppercase text-ink">
+                <span className="font-display text-lg text-ink">
                   From ${service.priceFrom}
-                  <span className="ml-1 text-xs tracking-wide text-smoke">
+                  <span className="ml-1 text-xs text-smoke">
                     {service.priceUnit}
                   </span>
                 </span>
@@ -313,7 +344,7 @@ export default function MobileServicePage() {
           {BUSINESS.installArea.map((city) => (
             <li
               key={city}
-              className="flex items-center gap-1.5 rounded-sm border border-ink/10 bg-fog px-3.5 py-2 font-display text-sm uppercase tracking-wide text-ink"
+              className="flex items-center gap-1.5 rounded-sm border border-ink/10 bg-fog px-3.5 py-2 font-display text-sm font-bold text-ink"
             >
               <MapPin size={14} aria-hidden className="text-drop" />
               {city}
@@ -323,13 +354,14 @@ export default function MobileServicePage() {
 
         <div className="card mt-8 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-relaxed text-smoke">
-            <span className="font-display text-base uppercase tracking-wide text-ink">
+            <span className="font-display text-[15px] font-bold text-ink">
               Just outside the area?
             </span>{" "}
-            Call before you assume the answer is no. We regularly stretch past the
-            county line for fleet accounts, jobsites and full four-tire jobs — a
-            dispatcher will tell you straight whether we can get a van to you and
-            what it costs. Further afield, your tires still ship to your door.
+            Call before you assume the answer is no. We regularly stretch past
+            the county line for fleet accounts, jobsites and full four-tire jobs
+            — a dispatcher will tell you straight whether we can get a van to
+            you and what it costs. Further afield, your tires still ship to your
+            door.
           </p>
           <a href={BUSINESS.phoneHref} className="btn-dark btn-sm shrink-0">
             <Phone size={16} aria-hidden />
@@ -339,9 +371,9 @@ export default function MobileServicePage() {
       </Section>
 
       {/* ---------- What's in the van ---------- */}
-      <Section className="bg-ink text-bone">
+      <Section className="bg-ink-wash text-bone">
         <div className="mb-8 max-w-2xl md:mb-12">
-          <p className="eyebrow mb-2">What's in the van</p>
+          <p className="eyebrow-dark mb-2">What's in the van</p>
           <h2 className="h2">A shop on four wheels</h2>
           <p className="lede mt-3 text-bone/70">
             Mobile does not mean stripped down. Every van carries the same
@@ -353,8 +385,8 @@ export default function MobileServicePage() {
         <ul className="grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
           {VAN_KIT.map((item) => (
             <li key={item.name} className="border-t border-graphite pt-5">
-              <item.icon size={22} aria-hidden className="text-drop" />
-              <h3 className="mt-3 font-display text-lg uppercase tracking-wide">
+              <item.icon size={22} aria-hidden className="text-volt" />
+              <h3 className="mt-3 font-display text-[1.0625rem]">
                 {item.name}
               </h3>
               <p className="mt-1.5 text-sm leading-relaxed text-bone/60">
@@ -378,14 +410,16 @@ export default function MobileServicePage() {
           <div className="card overflow-hidden">
             <div className="flex items-center gap-2 bg-drop px-6 py-4 text-bone">
               <Truck size={18} aria-hidden />
-              <h3 className="font-display text-lg uppercase tracking-wide">
-                Mobile install
-              </h3>
+              <h3 className="font-display text-lg">Mobile install</h3>
             </div>
             <ul className="divide-y divide-ink/10">
               {COMPARISON.map((row) => (
                 <li key={row.us} className="flex items-start gap-3 px-6 py-4">
-                  <Check size={18} aria-hidden className="mt-0.5 shrink-0 text-drop" />
+                  <Check
+                    size={18}
+                    aria-hidden
+                    className="mt-0.5 shrink-0 text-drop"
+                  />
                   <span className="text-sm text-ink">{row.us}</span>
                 </li>
               ))}
@@ -395,14 +429,18 @@ export default function MobileServicePage() {
           <div className="card overflow-hidden">
             <div className="flex items-center gap-2 bg-ink/5 px-6 py-4 text-smoke">
               <Clock size={18} aria-hidden />
-              <h3 className="font-display text-lg uppercase tracking-wide">
+              <h3 className="font-display text-lg">
                 The traditional tire stop
               </h3>
             </div>
             <ul className="divide-y divide-ink/10">
               {COMPARISON.map((row) => (
                 <li key={row.them} className="flex items-start gap-3 px-6 py-4">
-                  <X size={18} aria-hidden className="mt-0.5 shrink-0 text-smoke/60" />
+                  <X
+                    size={18}
+                    aria-hidden
+                    className="mt-0.5 shrink-0 text-smoke/60"
+                  />
                   <span className="text-sm text-smoke">{row.them}</span>
                 </li>
               ))}
@@ -422,10 +460,10 @@ export default function MobileServicePage() {
       </Section>
 
       {/* ---------- Closing CTA ---------- */}
-      <Section className="bg-steel text-bone">
+      <Section className="bg-steel-wash text-bone">
         <div className="flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-xl">
-            <p className="eyebrow mb-2">{BUSINESS.tagline}</p>
+            <p className="eyebrow-dark mb-2">{BUSINESS.tagline}</p>
             <h2 className="h2">Stop planning your day around a tire shop</h2>
             <p className="lede mt-3 text-bone/70">
               Tell us the vehicle and the address. We will bring the tires, the

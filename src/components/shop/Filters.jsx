@@ -96,7 +96,7 @@ export function activeFilterChips(value = {}) {
 function FilterGroup({ title, children }) {
   return (
     <fieldset className="border-t border-ink/10 py-5 first:border-t-0 first:pt-0">
-      <legend className="label mb-3 p-0">{title}</legend>
+      <legend className="label mb-2.5 p-0 text-ink/70">{title}</legend>
       {children}
     </fieldset>
   );
@@ -104,7 +104,7 @@ function FilterGroup({ title, children }) {
 
 function CheckRow({ label, checked, onChange, name }) {
   return (
-    <label className="flex min-h-[36px] cursor-pointer items-center gap-2.5 py-1.5 text-sm text-ink">
+    <label className="flex min-h-[36px] cursor-pointer items-center gap-2.5 py-1.5 text-sm text-ink transition-colors hover:text-drop">
       <input
         type="checkbox"
         name={name}
@@ -225,10 +225,10 @@ function FilterFacets({ idPrefix, value, onChange, facets }) {
                 type="button"
                 aria-pressed={active}
                 onClick={() => toggleIn("diameters", d)}
-                className={`min-h-[36px] min-w-[44px] rounded-sm border px-3 py-1.5 font-display text-sm uppercase transition-colors ${
+                className={`tnum min-h-[36px] min-w-[44px] rounded-sm border px-3 py-1.5 font-display text-sm font-bold transition-colors ${
                   active
-                    ? "border-drop bg-drop text-bone"
-                    : "border-ink/15 text-ink hover:border-ink"
+                    ? "border-drop bg-drop text-bone shadow-glow"
+                    : "border-ink/15 text-ink hover:border-ink hover:bg-fog"
                 }`}
               >
                 {d}"
@@ -307,12 +307,19 @@ export default function Filters({
     <>
       <div className="card hidden p-5 lg:block">
         <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="h3">Filter</h2>
+          <h2 className="h3 flex items-center gap-2 text-[1.125rem]">
+            Filter
+            {activeCount > 0 && (
+              <span className="tnum inline-flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-drop px-1.5 text-[11px] font-bold leading-none text-bone">
+                {activeCount}
+              </span>
+            )}
+          </h2>
           {activeCount > 0 && (
             <button
               type="button"
               onClick={clearAll}
-              className="min-h-[24px] font-display text-xs uppercase tracking-[0.15em] text-drop hover:text-dive"
+              className="min-h-[24px] font-display text-[13px] font-bold text-drop underline-offset-4 hover:text-dive hover:underline"
             >
               Clear all
             </button>
@@ -343,7 +350,7 @@ export default function Filters({
             className="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col bg-bone shadow-lift"
           >
             <div className="flex shrink-0 items-center justify-between gap-3 border-b border-ink/10 px-5 py-3">
-              <h2 className="h3">Filter</h2>
+              <h2 className="h3 text-[1.125rem]">Filter</h2>
               <button
                 type="button"
                 onClick={close}
@@ -365,19 +372,19 @@ export default function Filters({
 
             {/* The footer is pinned so the two things a shopper wants next —
                 see the results, or start over — are never a scroll away. */}
-            <div className="flex shrink-0 items-center gap-3 border-t border-ink/10 bg-bone px-5 py-3">
+            <div className="flex shrink-0 items-center gap-3 border-t border-ink/10 bg-bone px-5 py-3 shadow-[0_-8px_20px_-14px_rgba(7,14,26,.4)]">
               <button
                 type="button"
                 onClick={clearAll}
                 disabled={activeCount === 0}
-                className="btn-outline btn-sm h-11 flex-1"
+                className="btn-outline btn-sm h-11 flex-1 whitespace-nowrap"
               >
                 Clear all
               </button>
               <button
                 type="button"
                 onClick={close}
-                className="btn-primary btn-sm h-11 flex-1"
+                className="btn-primary btn-sm h-11 flex-1 whitespace-nowrap"
               >
                 Show {resultCount} {resultNoun}
               </button>

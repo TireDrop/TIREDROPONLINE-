@@ -34,8 +34,7 @@ const STEPS = [
   {
     icon: ShoppingCart,
     title: "Pick ship to store at checkout",
-    body:
-      "Same order, same tires — you just choose the shop as the delivery address instead of your own. It is free, so nothing is added to your total for shipping.",
+    body: "Same order, same tires — you just choose the shop as the delivery address instead of your own. It is free, so nothing is added to your total for shipping.",
   },
   {
     icon: PackageCheck,
@@ -45,14 +44,12 @@ const STEPS = [
   {
     icon: CalendarCheck,
     title: "You book a fitting",
-    body:
-      "Pick a day and an arrival window online, or call and a dispatcher writes it up. Book ahead of the delivery if you like — the shop will hold the set until you come in.",
+    body: "Pick a day and an arrival window online, or call and a dispatcher writes it up. Book ahead of the delivery if you like — the shop will hold the set until you come in.",
   },
   {
     icon: Wrench,
     title: "They go on properly",
-    body:
-      "Mounted, balanced, torqued to your manufacturer's spec, TPMS handled and your old set taken away for recycling. You drive out on them.",
+    body: "Mounted, balanced, torqued to your manufacturer's spec, TPMS handled and your old set taken away for recycling. You drive out on them.",
   },
 ];
 
@@ -60,14 +57,12 @@ const WHY = [
   {
     icon: Home,
     title: "Nowhere to put four tires",
-    body:
-      "A set of four takes up most of a garage bay and they are heavy, awkward and filthy to move. Sending them to the shop means they never come off the truck at your house at all.",
+    body: "A set of four takes up most of a garage bay and they are heavy, awkward and filthy to move. Sending them to the shop means they never come off the truck at your house at all.",
   },
   {
     icon: Truck,
     title: "No second trip",
-    body:
-      "Shipping home means loading the set back into your car and driving them somewhere anyway. Ship to store and delivery and installation are the same stop.",
+    body: "Shipping home means loading the set back into your car and driving them somewhere anyway. Ship to store and delivery and installation are the same stop.",
   },
   {
     icon: Wrench,
@@ -77,8 +72,7 @@ const WHY = [
   {
     icon: Check,
     title: "The old set is our problem",
-    body:
-      "Your worn tires stay at the shop and get recycled. You are not stacking them by the bins or driving them to a disposal site.",
+    body: "Your worn tires stay at the shop and get recycled. You are not stacking them by the bins or driving them to a disposal site.",
   },
 ];
 
@@ -115,20 +109,17 @@ const FAQ = [
   },
   {
     q: "What does the installation itself cost?",
-    a:
-      install
-        ? `Tire installation starts at $${install.priceFrom} ${install.priceUnit} and takes about ${install.duration} for a set. What you actually pay depends on wheel size, run-flats, TPMS work and anything seized, and the shop confirms the total with you before a tool comes out.`
-        : "The shop confirms the exact installation total with you before any work starts.",
+    a: install
+      ? `Tire installation starts at $${install.priceFrom} ${install.priceUnit} and takes about ${install.duration} for a set. What you actually pay depends on wheel size, run-flats, TPMS work and anything seized, and the shop confirms the total with you before a tool comes out.`
+      : "The shop confirms the exact installation total with you before any work starts.",
   },
   {
     q: "How will I know my tires have arrived?",
-    a:
-      "The shop calls you when your order is checked in and on the rack. If you have already booked a fitting, they confirm that the set is there ahead of your appointment.",
+    a: "The shop calls you when your order is checked in and on the rack. If you have already booked a fitting, they confirm that the set is there ahead of your appointment.",
   },
   {
     q: "Can I book the fitting before the tires get there?",
-    a:
-      "Yes, and most people do. Book the appointment when you order and the shop will match it up with the delivery. If the shipment runs late, someone calls you to move the booking rather than leaving you to turn up for nothing.",
+    a: "Yes, and most people do. Book the appointment when you order and the shop will match it up with the delivery. If the shipment runs late, someone calls you to move the booking rather than leaving you to turn up for nothing.",
   },
   {
     q: "How long will the shop hold my tires?",
@@ -153,8 +144,7 @@ const FAQ = [
   },
   {
     q: "Can you install tires I did not buy from TireDrop?",
-    a:
-      "Yes — the shop fits customer-supplied tires and wheels the same way. Book a tire installation appointment and bring them in, or have them shipped to the shop and mention it when you book so they know what to expect.",
+    a: "Yes — the shop fits customer-supplied tires and wheels the same way. Book a tire installation appointment and bring them in, or have them shipped to the shop and mention it when you book so they know what to expect.",
   },
 ];
 
@@ -209,12 +199,15 @@ export default function InstallPage() {
         <div className="wrap flex flex-wrap items-center gap-3 py-4 text-sm">
           <MapPin size={18} aria-hidden className="text-drop" />
           <p className="text-smoke">
-            <span className="font-display uppercase tracking-wide text-ink">
+            <span className="font-display font-bold text-ink">
               This one is local.
             </span>{" "}
-            Ship-to-store and installation happen at the {BUSINESS.shop.city} shop
-            in South Florida. Everywhere else in the continental US,{" "}
-            <Link to="/shipping" className="text-drop underline hover:text-dive">
+            Ship-to-store and installation happen at the {BUSINESS.shop.city}{" "}
+            shop in South Florida. Everywhere else in the continental US,{" "}
+            <Link
+              to="/shipping"
+              className="text-drop underline hover:text-dive"
+            >
               your order ships to your address
             </Link>
             .
@@ -242,7 +235,9 @@ export default function InstallPage() {
                 </span>
               </div>
               <h3 className="h3 mt-5">{step.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-smoke">{step.body}</p>
+              <p className="mt-2 text-sm leading-relaxed text-smoke">
+                {step.body}
+              </p>
             </li>
           ))}
         </ol>
@@ -250,13 +245,13 @@ export default function InstallPage() {
         {install && (
           <div className="card mt-8 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm leading-relaxed text-smoke">
-              <span className="font-display text-base uppercase tracking-wide text-ink">
+              <span className="font-display text-base font-bold text-ink">
                 Installation from ${install.priceFrom} {install.priceUnit}.
               </span>{" "}
               That covers dismounting and disposing of the old set, mounting and
-              balancing the new one, valve stems, torque to spec and a TPMS reset
-              where your vehicle has it. The shop confirms your exact total before
-              any work starts.
+              balancing the new one, valve stems, torque to spec and a TPMS
+              reset where your vehicle has it. The shop confirms your exact
+              total before any work starts.
             </p>
             <Link
               to="/services/tire-installation"
@@ -282,7 +277,9 @@ export default function InstallPage() {
             <div key={item.title} className="card p-6">
               <item.icon size={22} aria-hidden className="text-drop" />
               <h3 className="h3 mt-4">{item.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-smoke">{item.body}</p>
+              <p className="mt-2 text-sm leading-relaxed text-smoke">
+                {item.body}
+              </p>
             </div>
           ))}
         </div>
@@ -291,14 +288,19 @@ export default function InstallPage() {
           <div className="card overflow-hidden">
             <div className="flex items-center gap-2 bg-drop px-6 py-4 text-bone">
               <Store size={18} aria-hidden />
-              <h3 className="font-display text-lg uppercase tracking-wide">
-                Ship to the store
-              </h3>
+              <h3 className="text-lg">Ship to the store</h3>
             </div>
             <ul className="divide-y divide-ink/10">
               {COMPARISON.map((row) => (
-                <li key={row.store} className="flex items-start gap-3 px-6 py-4">
-                  <Check size={18} aria-hidden className="mt-0.5 shrink-0 text-drop" />
+                <li
+                  key={row.store}
+                  className="flex items-start gap-3 px-6 py-4"
+                >
+                  <Check
+                    size={18}
+                    aria-hidden
+                    className="mt-0.5 shrink-0 text-drop"
+                  />
                   <span className="text-sm text-ink">{row.store}</span>
                 </li>
               ))}
@@ -308,14 +310,16 @@ export default function InstallPage() {
           <div className="card overflow-hidden">
             <div className="flex items-center gap-2 bg-ink/5 px-6 py-4 text-smoke">
               <Home size={18} aria-hidden />
-              <h3 className="font-display text-lg uppercase tracking-wide">
-                Ship to your house
-              </h3>
+              <h3 className="text-lg">Ship to your house</h3>
             </div>
             <ul className="divide-y divide-ink/10">
               {COMPARISON.map((row) => (
                 <li key={row.home} className="flex items-start gap-3 px-6 py-4">
-                  <X size={18} aria-hidden className="mt-0.5 shrink-0 text-smoke/60" />
+                  <X
+                    size={18}
+                    aria-hidden
+                    className="mt-0.5 shrink-0 text-smoke/60"
+                  />
                   <span className="text-sm text-smoke">{row.home}</span>
                 </li>
               ))}
@@ -336,7 +340,7 @@ export default function InstallPage() {
           {BUSINESS.installArea.map((city) => (
             <li
               key={city}
-              className="flex items-center gap-1.5 rounded-sm border border-ink/10 bg-fog px-3.5 py-2 font-display text-sm uppercase tracking-wide text-ink"
+              className="flex items-center gap-1.5 rounded-sm border border-ink/10 bg-fog px-3.5 py-2 font-display text-sm font-semibold text-ink"
             >
               <MapPin size={14} aria-hidden className="text-drop" />
               {city}
@@ -346,12 +350,12 @@ export default function InstallPage() {
 
         <div className="card mt-8 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-relaxed text-smoke">
-            <span className="font-display text-base uppercase tracking-wide text-ink">
+            <span className="font-display text-base font-bold text-ink">
               Rather not come in at all?
             </span>{" "}
             Local customers can have the van do it instead — your tires get
-            collected at the shop and fitted where your car is already parked, at
-            home, at work or on a jobsite. Same techs, same torque spec.
+            collected at the shop and fitted where your car is already parked,
+            at home, at work or on a jobsite. Same techs, same torque spec.
           </p>
           <Link to="/mobile-service" className="btn-dark btn-sm shrink-0">
             <Truck size={16} aria-hidden />
@@ -361,9 +365,9 @@ export default function InstallPage() {
       </Section>
 
       {/* ---------- Shop details ---------- */}
-      <Section className="bg-ink text-bone">
+      <Section className="bg-ink-wash text-bone">
         <div className="mb-8 max-w-2xl md:mb-12">
-          <p className="eyebrow mb-2">The shop</p>
+          <p className="eyebrow-dark mb-2">The shop</p>
           <h2 className="h2">{BUSINESS.shop.name}</h2>
           <p className="lede mt-3 text-bone/70">
             {BUSINESS.parent} has run this shop since {BUSINESS.foundedYear}. It
@@ -373,11 +377,9 @@ export default function InstallPage() {
         </div>
 
         <div className="grid gap-5 lg:grid-cols-3">
-          <div className="rounded-sm border border-graphite bg-steel p-6">
-            <MapPin size={22} aria-hidden className="text-drop" />
-            <h3 className="mt-4 font-display text-xl uppercase tracking-wide">
-              Address
-            </h3>
+          <div className="rounded-card border border-graphite bg-steel-wash p-6">
+            <MapPin size={22} aria-hidden className="text-volt" />
+            <h3 className="h3 mt-4">Address</h3>
             <address className="mt-2 not-italic text-sm leading-relaxed text-bone/70">
               {BUSINESS.shop.street}
               <br />
@@ -387,25 +389,23 @@ export default function InstallPage() {
               href={BUSINESS.mapsHref}
               target="_blank"
               rel="noreferrer"
-              className="mt-4 inline-flex min-h-[36px] items-center gap-1.5 font-display text-sm uppercase tracking-wide text-drop hover:text-dive"
+              className="mt-4 inline-flex min-h-[44px] items-center gap-1.5 font-display text-sm font-bold text-volt hover:text-bone"
             >
               <MapPin size={15} aria-hidden />
               Get directions
             </a>
           </div>
 
-          <div className="rounded-sm border border-graphite bg-steel p-6">
-            <Clock size={22} aria-hidden className="text-drop" />
-            <h3 className="mt-4 font-display text-xl uppercase tracking-wide">
-              Hours
-            </h3>
+          <div className="rounded-card border border-graphite bg-steel-wash p-6">
+            <Clock size={22} aria-hidden className="text-volt" />
+            <h3 className="h3 mt-4">Hours</h3>
             <dl className="mt-3 space-y-2 text-sm">
               {BUSINESS.hours.map((row) => (
                 <div
                   key={row.days}
                   className="flex items-baseline justify-between gap-4 border-b border-graphite pb-2 last:border-0"
                 >
-                  <dt className="font-display uppercase tracking-wide text-bone">
+                  <dt className="font-display font-semibold text-bone">
                     {row.days}
                   </dt>
                   <dd className="text-bone/60">{row.time}</dd>
@@ -414,17 +414,18 @@ export default function InstallPage() {
             </dl>
           </div>
 
-          <div className="flex flex-col rounded-sm border border-graphite bg-steel p-6">
-            <CalendarCheck size={22} aria-hidden className="text-drop" />
-            <h3 className="mt-4 font-display text-xl uppercase tracking-wide">
-              Book your fitting
-            </h3>
+          <div className="flex flex-col rounded-card border border-graphite bg-steel-wash p-6">
+            <CalendarCheck size={22} aria-hidden className="text-volt" />
+            <h3 className="h3 mt-4">Book your fitting</h3>
             <p className="mt-2 flex-1 text-sm leading-relaxed text-bone/70">
               Pick a service, a day and an arrival window online in about two
               minutes — or call and talk it through with a dispatcher.
             </p>
             <div className="mt-6 flex flex-col gap-3">
-              <Link to="/schedule?service=tire-installation" className="btn-primary btn-sm">
+              <Link
+                to="/schedule?service=tire-installation"
+                className="btn-primary btn-sm"
+              >
                 Book an install
                 <ArrowRight size={16} aria-hidden />
               </Link>
@@ -440,6 +441,7 @@ export default function InstallPage() {
       {/* ---------- FAQ ---------- */}
       <Section className="bg-fog">
         <SectionHead
+          align="center"
           eyebrow="Questions, answered"
           title="Before you choose ship to store"
           lede="What local customers ask most. Anything else, call and ask — someone at the shop will know."
@@ -448,17 +450,17 @@ export default function InstallPage() {
       </Section>
 
       {/* ---------- Closing CTA ---------- */}
-      <Section className="bg-steel text-bone">
+      <Section className="bg-steel-wash text-bone">
         <div className="flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-xl">
-            <p className="eyebrow mb-2">
+            <p className="eyebrow-dark mb-2">
               <Badge tone="drop">Free</Badge>{" "}
               <span className="ml-1">Ship to store</span>
             </p>
             <h2 className="h2">Buy them here. Fit them here.</h2>
             <p className="lede mt-3 text-bone/70">
-              Find your size, send the order to {BUSINESS.shop.city}, and book the
-              day that suits you. The only thing you carry is the key.
+              Find your size, send the order to {BUSINESS.shop.city}, and book
+              the day that suits you. The only thing you carry is the key.
             </p>
           </div>
           <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">

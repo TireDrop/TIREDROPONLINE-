@@ -15,10 +15,20 @@ import {
   User,
 } from "lucide-react";
 
-import { Seo, Breadcrumbs, EmptyState, Badge } from "../../components/ui/index.jsx";
+import {
+  Seo,
+  Breadcrumbs,
+  EmptyState,
+  Badge,
+} from "../../components/ui/index.jsx";
 import { useCart, money } from "../../context/CartContext.jsx";
 import { BUSINESS } from "../../data/business.js";
-import { evaluatePromo, readSavedPromo, savePromo, summarize } from "./CartPage.jsx";
+import {
+  evaluatePromo,
+  readSavedPromo,
+  savePromo,
+  summarize,
+} from "./CartPage.jsx";
 
 /* ------------------------------------------------------------------ */
 /*  Scheduling helpers — the shop is closed Sundays per BUSINESS.hours */
@@ -63,7 +73,8 @@ function windowsForDate(iso) {
   return day === 6 ? TIME_WINDOWS.filter((w) => !w.weekdayOnly) : TIME_WINDOWS;
 }
 
-const windowLabel = (value) => TIME_WINDOWS.find((w) => w.value === value)?.label || "";
+const windowLabel = (value) =>
+  TIME_WINDOWS.find((w) => w.value === value)?.label || "";
 
 const PROPERTY_TYPES = [
   "Single-family home",
@@ -107,28 +118,38 @@ function validateContact(f) {
   const e = {};
   if (!f.firstName.trim()) e.firstName = "Enter your first name.";
   if (!f.lastName.trim()) e.lastName = "Enter your last name.";
-  if (!f.email.trim()) e.email = "Enter an email so we can send your confirmation.";
-  else if (!EMAIL_RE.test(f.email.trim())) e.email = "That email doesn't look right — check for a typo.";
+  if (!f.email.trim())
+    e.email = "Enter an email so we can send your confirmation.";
+  else if (!EMAIL_RE.test(f.email.trim()))
+    e.email = "That email doesn't look right — check for a typo.";
   const phone = digitsOnly(f.phone);
-  if (!phone) e.phone = "Enter a phone number — we call to confirm before your order ships.";
-  else if (phone.length !== 10 && !(phone.length === 11 && phone.startsWith("1")))
+  if (!phone)
+    e.phone =
+      "Enter a phone number — we call to confirm before your order ships.";
+  else if (
+    phone.length !== 10 &&
+    !(phone.length === 11 && phone.startsWith("1"))
+  )
     e.phone = "Enter a 10-digit US phone number, area code first.";
   return e;
 }
 
 function validateInstall(f) {
   const e = {};
-  if (!f.fulfillment) e.fulfillment = "Choose how you want your order delivered.";
+  if (!f.fulfillment)
+    e.fulfillment = "Choose how you want your order delivered.";
 
   const needsAddress = f.fulfillment === "mobile" || f.fulfillment === "ship";
   if (needsAddress) {
     if (!f.street.trim()) e.street = "Enter the street address.";
     if (!f.city.trim()) e.city = "Enter the city.";
     if (!f.zip.trim()) e.zip = "Enter a ZIP code.";
-    else if (!ZIP_RE.test(f.zip.trim())) e.zip = "Enter a 5-digit ZIP code, like 33351.";
+    else if (!ZIP_RE.test(f.zip.trim()))
+      e.zip = "Enter a 5-digit ZIP code, like 33351.";
   }
   if (f.fulfillment === "mobile" && !f.propertyType) {
-    e.propertyType = "Tell us what kind of property so the tech brings the right gear.";
+    e.propertyType =
+      "Tell us what kind of property so the tech brings the right gear.";
   }
 
   const needsDate = f.fulfillment === "mobile" || f.fulfillment === "shop";
@@ -151,7 +172,11 @@ function validateVehicle(f) {
   const e = {};
   const maxYear = new Date().getFullYear() + 2;
   if (!f.year.trim()) e.year = "Enter the vehicle year.";
-  else if (!/^\d{4}$/.test(f.year.trim()) || Number(f.year) < 1960 || Number(f.year) > maxYear)
+  else if (
+    !/^\d{4}$/.test(f.year.trim()) ||
+    Number(f.year) < 1960 ||
+    Number(f.year) > maxYear
+  )
     e.year = `Enter a 4-digit year between 1960 and ${maxYear}.`;
   if (!f.make.trim()) e.make = "Enter the make, like Toyota or Ford.";
   if (!f.model.trim()) e.model = "Enter the model, like Camry or F-150.";
@@ -160,15 +185,26 @@ function validateVehicle(f) {
 
 function validateReview(f) {
   const e = {};
-  if (!f.agree) e.agree = "Please confirm you understand payment is taken by phone.";
+  if (!f.agree)
+    e.agree = "Please confirm you understand payment is taken by phone.";
   return e;
 }
 
 const STEPS = [
   { id: "contact", label: "Contact", icon: User, validate: validateContact },
-  { id: "install", label: "Delivery", icon: Package, validate: validateInstall },
+  {
+    id: "install",
+    label: "Delivery",
+    icon: Package,
+    validate: validateInstall,
+  },
   { id: "vehicle", label: "Vehicle", icon: Car, validate: validateVehicle },
-  { id: "review", label: "Review", icon: ClipboardList, validate: validateReview },
+  {
+    id: "review",
+    label: "Review",
+    icon: ClipboardList,
+    validate: validateReview,
+  },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -187,7 +223,9 @@ function TextField({ id, label, error, hint, className = "", ...rest }) {
         id={id}
         name={id}
         aria-invalid={error ? "true" : undefined}
-        aria-describedby={[errId, hintId].filter(Boolean).join(" ") || undefined}
+        aria-describedby={
+          [errId, hintId].filter(Boolean).join(" ") || undefined
+        }
         className={`field ${error ? "border-drop" : ""}`}
         {...rest}
       />
@@ -249,7 +287,9 @@ function SummaryRow({ term, value, accent = false }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
       <dt className={accent ? "text-drop" : "text-smoke"}>{term}</dt>
-      <dd className={`font-display text-base ${accent ? "text-drop" : ""}`}>{value}</dd>
+      <dd className={`font-display text-base ${accent ? "text-drop" : ""}`}>
+        {value}
+      </dd>
     </div>
   );
 }
@@ -261,7 +301,10 @@ function OrderSummary({ lines, totals, promoCode }) {
       <h3 className="h3">Order Summary</h3>
       <ul className="mt-4 divide-y divide-ink/10 border-y border-ink/10">
         {lines.map((l) => (
-          <li key={l.key} className="flex items-start justify-between gap-4 py-3">
+          <li
+            key={l.key}
+            className="flex items-start justify-between gap-4 py-3"
+          >
             <div className="min-w-0">
               <p className="text-sm text-ink">
                 {l.brand} {l.name}
@@ -271,20 +314,26 @@ function OrderSummary({ lines, totals, promoCode }) {
                 {l.install ? " · Install at the shop" : ""}
               </p>
             </div>
-            <span className="shrink-0 font-display text-base">
-              {money(l.price * l.qty + (l.install ? l.installPrice * l.qty : 0))}
+            <span className="tnum shrink-0 font-display text-base">
+              {money(
+                l.price * l.qty + (l.install ? l.installPrice * l.qty : 0),
+              )}
             </span>
           </li>
         ))}
       </ul>
-      <dl className="mt-4 space-y-2.5 text-sm">
+      <dl className="tnum mt-4 space-y-2.5 text-sm">
         <SummaryRow term={<>Tires & wheels</>} value={money(totals.subtotal)} />
         <SummaryRow
           term="Installation at the shop"
           value={totals.installTotal > 0 ? money(totals.installTotal) : "—"}
         />
         {totals.discount > 0 && (
-          <SummaryRow term={`Discount (${promoCode})`} value={`−${money(totals.discount)}`} accent />
+          <SummaryRow
+            term={`Discount (${promoCode})`}
+            value={`−${money(totals.discount)}`}
+            accent
+          />
         )}
         <SummaryRow
           term="Shipping"
@@ -293,8 +342,10 @@ function OrderSummary({ lines, totals, promoCode }) {
         <SummaryRow term="Sales tax (7%)" value={money(totals.tax)} />
       </dl>
       <div className="mt-4 flex items-baseline justify-between gap-4 border-t border-ink/10 pt-4">
-        <span className="font-display text-lg uppercase tracking-wide">Total</span>
-        <span className="font-display text-3xl leading-none">{money(totals.total)}</span>
+        <span className="font-display text-lg font-bold">Total</span>
+        <span className="tnum font-display text-3xl leading-none tracking-tight">
+          {money(totals.total)}
+        </span>
       </div>
     </div>
   );
@@ -351,7 +402,7 @@ export default function CheckoutPage() {
 
   const totals = useMemo(
     () => summarize({ subtotal, installTotal, shipping }, promo),
-    [subtotal, installTotal, shipping, promo]
+    [subtotal, installTotal, shipping, promo],
   );
 
   // Move focus to the new step heading so screen readers and keyboards follow along.
@@ -367,7 +418,9 @@ export default function CheckoutPage() {
 
   function goNext() {
     const found = STEPS[stepIndex].validate(form);
-    const clean = Object.fromEntries(Object.entries(found).filter(([, v]) => v));
+    const clean = Object.fromEntries(
+      Object.entries(found).filter(([, v]) => v),
+    );
     setErrors(clean);
     if (Object.keys(clean).length > 0) return;
 
@@ -377,7 +430,9 @@ export default function CheckoutPage() {
     }
 
     // Placing the order re-checks every step, in case an edit round-trip broke one.
-    const broken = STEPS.findIndex((s) => Object.values(s.validate(form)).some(Boolean));
+    const broken = STEPS.findIndex((s) =>
+      Object.values(s.validate(form)).some(Boolean),
+    );
     if (broken !== -1) {
       setErrors(STEPS[broken].validate(form));
       setStepIndex(broken);
@@ -406,7 +461,9 @@ export default function CheckoutPage() {
           title="Checkout"
           description="Complete your TireDrop order — shipped anywhere in the continental US, or free to our South Florida shop for installation."
         />
-        <Breadcrumbs trail={[{ label: "Cart", to: "/cart" }, { label: "Checkout" }]} />
+        <Breadcrumbs
+          trail={[{ label: "Cart", to: "/cart" }, { label: "Checkout" }]}
+        />
         <div className="wrap py-14">
           <EmptyState
             icon={ShoppingCart}
@@ -440,20 +497,26 @@ export default function CheckoutPage() {
           title="Order Received"
           description="Your TireDrop order is in. We call to confirm fitment, lock in delivery or your install window, and take payment."
         />
-        <Breadcrumbs trail={[{ label: "Cart", to: "/cart" }, { label: "Order Received" }]} />
+        <Breadcrumbs
+          trail={[{ label: "Cart", to: "/cart" }, { label: "Order Received" }]}
+        />
 
         <div className="wrap py-12 md:py-16">
           <div className="mx-auto max-w-3xl">
             <div className="flex items-start gap-4">
-              <CheckCircle2 size={36} aria-hidden className="mt-1 shrink-0 text-drop" />
+              <CheckCircle2
+                size={36}
+                aria-hidden
+                className="mt-1 shrink-0 text-drop"
+              />
               <div className="min-w-0">
                 <p className="eyebrow mb-1">Order received</p>
                 <h1 className="h1" tabIndex={-1} ref={headingRef}>
                   Your order is in
                 </h1>
                 <p className="lede mt-3">
-                  Thanks, {f.firstName}. Nothing has been charged yet — we call to confirm fitment
-                  and take payment before anything ships.
+                  Thanks, {f.firstName}. Nothing has been charged yet — we call
+                  to confirm fitment and take payment before anything ships.
                 </p>
               </div>
             </div>
@@ -461,7 +524,9 @@ export default function CheckoutPage() {
             <div className="card mt-8 flex flex-wrap items-center justify-between gap-4 p-5">
               <div>
                 <p className="label mb-1">Order reference</p>
-                <p className="font-display text-3xl leading-none">{placed.ref}</p>
+                <p className="font-display text-3xl leading-none">
+                  {placed.ref}
+                </p>
               </div>
               <Badge tone="amber">Awaiting confirmation call</Badge>
             </div>
@@ -483,17 +548,17 @@ export default function CheckoutPage() {
                       title: ship
                         ? "Your order ships out"
                         : mobile
-                        ? "The van comes to you"
-                        : "We fit them at the shop",
+                          ? "The van comes to you"
+                          : "We fit them at the shop",
                       copy: ship
                         ? `Your order ships to ${f.street}, ${f.city} ${f.zip} once payment clears. Tracking follows by phone.`
                         : mobile
-                        ? `We arrive at ${f.street}, ${f.city} ${f.zip} on ${formatLongDate(
-                            f.date
-                          )}, ${windowLabel(f.timeWindow)}.`
-                        : `Your order ships free to ${BUSINESS.shop.full}. Meet us there on ${formatLongDate(
-                            f.date
-                          )}, ${windowLabel(f.timeWindow)}.`,
+                          ? `We arrive at ${f.street}, ${f.city} ${f.zip} on ${formatLongDate(
+                              f.date,
+                            )}, ${windowLabel(f.timeWindow)}.`
+                          : `Your order ships free to ${BUSINESS.shop.full}. Meet us there on ${formatLongDate(
+                              f.date,
+                            )}, ${windowLabel(f.timeWindow)}.`,
                     },
                   ].map((s, i) => (
                     <li key={s.title} className="flex gap-3">
@@ -501,8 +566,12 @@ export default function CheckoutPage() {
                         {i + 1}
                       </span>
                       <div className="min-w-0">
-                        <p className="font-display text-base uppercase tracking-wide">{s.title}</p>
-                        <p className="mt-0.5 text-sm leading-relaxed text-smoke">{s.copy}</p>
+                        <p className="font-display text-base font-bold">
+                          {s.title}
+                        </p>
+                        <p className="mt-0.5 text-sm leading-relaxed text-smoke">
+                          {s.copy}
+                        </p>
                       </div>
                     </li>
                   ))}
@@ -511,7 +580,10 @@ export default function CheckoutPage() {
                 <div className="mt-6 border-t border-ink/10 pt-5">
                   <p className="text-sm leading-relaxed text-smoke">
                     Need to change the address, the date or the sizes? Call{" "}
-                    <a href={BUSINESS.phoneHref} className="font-display text-ink hover:text-drop">
+                    <a
+                      href={BUSINESS.phoneHref}
+                      className="font-display text-ink hover:text-drop"
+                    >
                       {BUSINESS.phone}
                     </a>{" "}
                     and give them reference {placed.ref}.
@@ -554,23 +626,29 @@ export default function CheckoutPage() {
         title="Checkout"
         description="Complete your TireDrop order — shipped to your address anywhere in the continental US, or free to our South Florida shop for installation."
       />
-      <Breadcrumbs trail={[{ label: "Cart", to: "/cart" }, { label: "Checkout" }]} />
+      <Breadcrumbs
+        trail={[{ label: "Cart", to: "/cart" }, { label: "Checkout" }]}
+      />
 
       <div className="wrap py-10 md:py-14">
         <header className="mb-8">
           <p className="eyebrow mb-2">{BUSINESS.tagline}</p>
           <h1 className="h1">Checkout</h1>
           <p className="lede mt-3 max-w-2xl">
-            Four quick steps. No card fields — we confirm fitment and take payment over the phone
-            before your order is released.
+            Four quick steps. No card fields — we confirm fitment and take
+            payment over the phone before your order is released.
           </p>
         </header>
 
         {/* Progress */}
-        <nav aria-label="Checkout progress" className="mb-8 border-y border-ink/10 py-4">
+        <nav
+          aria-label="Checkout progress"
+          className="mb-8 border-y border-ink/10 py-4"
+        >
           <ol className="flex flex-wrap items-center gap-x-2 gap-y-3 sm:gap-x-4">
             {STEPS.map((s, i) => {
-              const state = i < stepIndex ? "done" : i === stepIndex ? "current" : "todo";
+              const state =
+                i < stepIndex ? "done" : i === stepIndex ? "current" : "todo";
               return (
                 <li key={s.id} className="flex items-center gap-2">
                   <span
@@ -579,22 +657,29 @@ export default function CheckoutPage() {
                       state === "done"
                         ? "bg-ink text-bone"
                         : state === "current"
-                        ? "bg-drop text-bone"
-                        : "bg-ink/10 text-smoke"
+                          ? "bg-drop text-bone"
+                          : "bg-ink/10 text-smoke"
                     }`}
                   >
-                    {state === "done" ? <CheckCircle2 size={15} /> : i + 1}
+                    {state === "done" ? (
+                      <CheckCircle2 size={15} aria-hidden />
+                    ) : (
+                      i + 1
+                    )}
                   </span>
                   <span
                     aria-current={state === "current" ? "step" : undefined}
-                    className={`font-display text-sm uppercase tracking-wide ${
+                    className={`font-display text-sm font-bold ${
                       state === "todo" ? "text-smoke" : "text-ink"
                     }`}
                   >
                     {s.label}
                   </span>
                   {i < STEPS.length - 1 && (
-                    <span aria-hidden className="hidden h-px w-6 bg-ink/15 sm:block" />
+                    <span
+                      aria-hidden
+                      className="hidden h-px w-6 bg-ink/15 sm:block"
+                    />
                   )}
                 </li>
               );
@@ -694,12 +779,18 @@ export default function CheckoutPage() {
                           checked={form.fulfillment === value}
                           onChange={onInput}
                           aria-invalid={errors.fulfillment ? "true" : undefined}
-                          aria-describedby={errors.fulfillment ? "fulfillment-error" : undefined}
+                          aria-describedby={
+                            errors.fulfillment ? "fulfillment-error" : undefined
+                          }
                           className="mt-1 h-4 w-4 shrink-0 accent-drop"
                         />
-                        <Icon size={20} aria-hidden className="mt-0.5 shrink-0 text-drop" />
+                        <Icon
+                          size={20}
+                          aria-hidden
+                          className="mt-0.5 shrink-0 text-drop"
+                        />
                         <span className="min-w-0">
-                          <span className="block font-display text-base uppercase tracking-wide">
+                          <span className="block font-display text-base font-bold">
                             {title}
                           </span>
                           <span className="mt-0.5 block text-sm leading-relaxed text-smoke">
@@ -710,7 +801,11 @@ export default function CheckoutPage() {
                     ))}
                   </div>
                   {errors.fulfillment && (
-                    <p id="fulfillment-error" role="alert" className="mt-2 text-xs text-drop">
+                    <p
+                      id="fulfillment-error"
+                      role="alert"
+                      className="mt-2 text-xs text-drop"
+                    >
                       {errors.fulfillment}
                     </p>
                   )}
@@ -718,20 +813,27 @@ export default function CheckoutPage() {
 
                 {form.fulfillment === "shop" && (
                   <div className="card mb-7 flex items-start gap-3 p-5">
-                    <MapPin size={20} aria-hidden className="mt-0.5 shrink-0 text-drop" />
+                    <MapPin
+                      size={20}
+                      aria-hidden
+                      className="mt-0.5 shrink-0 text-drop"
+                    />
                     <div className="min-w-0">
-                      <p className="font-display text-base uppercase tracking-wide">
+                      <p className="font-display text-base font-bold">
                         {BUSINESS.shop.name}
                       </p>
-                      <p className="mt-1 text-sm text-smoke">{BUSINESS.shop.full}</p>
+                      <p className="mt-1 text-sm text-smoke">
+                        {BUSINESS.shop.full}
+                      </p>
                       <p className="mt-2 text-xs leading-relaxed text-smoke">
-                        Shipping to the shop is free. We call when your order lands and confirm the
-                        install window below.
+                        Shipping to the shop is free. We call when your order
+                        lands and confirm the install window below.
                       </p>
                       <ul className="mt-3 space-y-0.5 text-xs text-smoke">
                         {BUSINESS.hours.map((h) => (
                           <li key={h.days}>
-                            <span className="text-ink">{h.days}</span> · {h.time}
+                            <span className="text-ink">{h.days}</span> ·{" "}
+                            {h.time}
                           </li>
                         ))}
                       </ul>
@@ -747,11 +849,16 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                {(form.fulfillment === "mobile" || form.fulfillment === "ship") && (
+                {(form.fulfillment === "mobile" ||
+                  form.fulfillment === "ship") && (
                   <div className="mb-7 grid gap-5 sm:grid-cols-2">
                     <TextField
                       id="street"
-                      label={form.fulfillment === "ship" ? "Shipping address" : "Street address"}
+                      label={
+                        form.fulfillment === "ship"
+                          ? "Shipping address"
+                          : "Street address"
+                      }
                       autoComplete="street-address"
                       className="sm:col-span-2"
                       value={form.street}
@@ -809,8 +916,12 @@ export default function CheckoutPage() {
                             aria-describedby="accessNotes-hint"
                             className="field resize-y"
                           />
-                          <p id="accessNotes-hint" className="mt-1 text-xs text-smoke">
-                            The van needs about one parking space plus room to work on one side.
+                          <p
+                            id="accessNotes-hint"
+                            className="mt-1 text-xs text-smoke"
+                          >
+                            The van needs about one parking space plus room to
+                            work on one side.
                           </p>
                         </div>
                       </>
@@ -818,9 +929,12 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                {(form.fulfillment === "mobile" || form.fulfillment === "shop") && (
+                {(form.fulfillment === "mobile" ||
+                  form.fulfillment === "shop") && (
                   <fieldset>
-                    <legend className="label mb-2">Preferred install appointment</legend>
+                    <legend className="label mb-2">
+                      Preferred install appointment
+                    </legend>
                     <div className="grid gap-5 sm:grid-cols-2">
                       <TextField
                         id="date"
@@ -831,9 +945,9 @@ export default function CheckoutPage() {
                         onChange={(e) => {
                           set("date", e.target.value);
                           // The late window disappears on Saturdays — drop a stale pick.
-                          const stillValid = windowsForDate(e.target.value).some(
-                            (w) => w.value === form.timeWindow
-                          );
+                          const stillValid = windowsForDate(
+                            e.target.value,
+                          ).some((w) => w.value === form.timeWindow);
                           if (!stillValid) set("timeWindow", "");
                         }}
                         error={errors.date}
@@ -855,8 +969,8 @@ export default function CheckoutPage() {
                       </SelectField>
                     </div>
                     <p className="mt-3 text-xs leading-relaxed text-smoke">
-                      Windows are requests, not guarantees. We confirm the exact time on the call,
-                      once your order has landed.
+                      Windows are requests, not guarantees. We confirm the exact
+                      time on the call, once your order has landed.
                     </p>
                   </fieldset>
                 )}
@@ -908,14 +1022,19 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="card mt-7 flex items-start gap-3 p-5">
-                  <Car size={20} aria-hidden className="mt-0.5 shrink-0 text-drop" />
+                  <Car
+                    size={20}
+                    aria-hidden
+                    className="mt-0.5 shrink-0 text-drop"
+                  />
                   <p className="text-sm leading-relaxed text-smoke">
-                    <span className="font-display uppercase tracking-wide text-ink">
+                    <span className="font-display font-bold text-ink">
                       Fitment is confirmed before we ship.
                     </span>{" "}
-                    A tech matches your sizes, load rating and TPMS setup to this vehicle. If
-                    anything on your order doesn't fit, we call you with options before the order
-                    is released — you are never charged for the wrong tire.
+                    A tech matches your sizes, load rating and TPMS setup to
+                    this vehicle. If anything on your order doesn't fit, we call
+                    you with options before the order is released — you are
+                    never charged for the wrong tire.
                   </p>
                 </div>
               </section>
@@ -947,16 +1066,32 @@ export default function CheckoutPage() {
                     rows={[
                       [
                         "Option",
-                        FULFILLMENT.find((o) => o.value === form.fulfillment)?.title || "—",
+                        FULFILLMENT.find((o) => o.value === form.fulfillment)
+                          ?.title || "—",
                       ],
                       form.fulfillment === "shop"
                         ? ["Ships to", BUSINESS.shop.full]
-                        : ["Address", `${form.street}, ${form.city} ${form.zip}`],
-                      form.fulfillment === "mobile" && ["Property", form.propertyType],
+                        : [
+                            "Address",
+                            `${form.street}, ${form.city} ${form.zip}`,
+                          ],
+                      form.fulfillment === "mobile" && [
+                        "Property",
+                        form.propertyType,
+                      ],
                       form.fulfillment === "mobile" &&
-                        form.accessNotes.trim() && ["Access notes", form.accessNotes.trim()],
-                      form.fulfillment !== "ship" && ["Date", formatLongDate(form.date)],
-                      form.fulfillment !== "ship" && ["Window", windowLabel(form.timeWindow)],
+                        form.accessNotes.trim() && [
+                          "Access notes",
+                          form.accessNotes.trim(),
+                        ],
+                      form.fulfillment !== "ship" && [
+                        "Date",
+                        formatLongDate(form.date),
+                      ],
+                      form.fulfillment !== "ship" && [
+                        "Window",
+                        windowLabel(form.timeWindow),
+                      ],
                     ].filter(Boolean)}
                   />
                   <ReviewBlock
@@ -965,24 +1100,34 @@ export default function CheckoutPage() {
                     rows={[
                       ["Vehicle", `${form.year} ${form.make} ${form.model}`],
                       form.trim.trim() && ["Trim", form.trim.trim()],
-                      ["Fitment", "Confirmed by a tech before your order ships"],
+                      [
+                        "Fitment",
+                        "Confirmed by a tech before your order ships",
+                      ],
                     ].filter(Boolean)}
                   />
                 </div>
 
                 <div className="mt-7 rounded-sm border-2 border-ink/15 bg-bone p-5">
                   <div className="flex items-start gap-3">
-                    <Phone size={20} aria-hidden className="mt-0.5 shrink-0 text-drop" />
+                    <Phone
+                      size={20}
+                      aria-hidden
+                      className="mt-0.5 shrink-0 text-drop"
+                    />
                     <div className="min-w-0">
-                      <p className="font-display text-base uppercase tracking-wide">
+                      <p className="font-display text-base font-bold">
                         No card is charged on this site
                       </p>
                       <p className="mt-1 text-sm leading-relaxed text-smoke">
                         When you place this order, a team member calls you at{" "}
-                        <span className="text-ink">{form.phone || "the number you gave us"}</span>{" "}
-                        within one business day to confirm fitment and delivery, then takes payment
-                        over the phone or in person at the appointment. We never ask for card
-                        details by email or text.
+                        <span className="text-ink">
+                          {form.phone || "the number you gave us"}
+                        </span>{" "}
+                        within one business day to confirm fitment and delivery,
+                        then takes payment over the phone or in person at the
+                        appointment. We never ask for card details by email or
+                        text.
                       </p>
                     </div>
                   </div>
@@ -995,17 +1140,26 @@ export default function CheckoutPage() {
                       checked={form.agree}
                       onChange={(e) => set("agree", e.target.checked)}
                       aria-invalid={errors.agree ? "true" : undefined}
-                      aria-describedby={errors.agree ? "agree-error" : undefined}
+                      aria-describedby={
+                        errors.agree ? "agree-error" : undefined
+                      }
                       className="mt-0.5 h-4 w-4 shrink-0 accent-drop"
                     />
                     <div className="min-w-0">
-                      <label htmlFor="agree" className="text-sm leading-relaxed text-ink">
-                        I understand this order is a request, and that {BUSINESS.name} will call me
-                        to confirm fitment and collect payment before anything ships or is
-                        scheduled.
+                      <label
+                        htmlFor="agree"
+                        className="text-sm leading-relaxed text-ink"
+                      >
+                        I understand this order is a request, and that{" "}
+                        {BUSINESS.name} will call me to confirm fitment and
+                        collect payment before anything ships or is scheduled.
                       </label>
                       {errors.agree && (
-                        <p id="agree-error" role="alert" className="mt-1 text-xs text-drop">
+                        <p
+                          id="agree-error"
+                          role="alert"
+                          className="mt-1 text-xs text-drop"
+                        >
                           {errors.agree}
                         </p>
                       )}
@@ -1052,10 +1206,14 @@ export default function CheckoutPage() {
           {/* Summary rail */}
           <aside aria-label="Order summary" className="min-w-0">
             <div className="lg:sticky lg:top-24">
-              <OrderSummary lines={safeLines} totals={totals} promoCode={promo?.code || ""} />
+              <OrderSummary
+                lines={safeLines}
+                totals={totals}
+                promoCode={promo?.code || ""}
+              />
               <p className="mt-4 text-xs leading-relaxed text-smoke">
-                Mounting, balancing, new valve stems and disposal of your old tires are included
-                on any line set to install at the shop.{" "}
+                Mounting, balancing, new valve stems and disposal of your old
+                tires are included on any line set to install at the shop.{" "}
                 <Link to="/cart" className="text-ink underline hover:text-drop">
                   Edit your cart
                 </Link>
@@ -1073,7 +1231,7 @@ function ReviewBlock({ title, rows, onEdit }) {
   return (
     <div className="py-5">
       <div className="mb-3 flex items-center justify-between gap-4">
-        <h3 className="font-display text-lg uppercase tracking-wide">{title}</h3>
+        <h3 className="font-display text-lg font-bold">{title}</h3>
         <button
           type="button"
           onClick={onEdit}
@@ -1085,7 +1243,9 @@ function ReviewBlock({ title, rows, onEdit }) {
       <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-[160px_minmax(0,1fr)]">
         {rows.map(([term, value]) => (
           <React.Fragment key={term}>
-            <dt className="text-xs uppercase tracking-[0.15em] text-smoke">{term}</dt>
+            <dt className="text-xs uppercase tracking-[0.09em] text-smoke">
+              {term}
+            </dt>
             <dd className="text-sm text-ink">{value || "—"}</dd>
           </React.Fragment>
         ))}

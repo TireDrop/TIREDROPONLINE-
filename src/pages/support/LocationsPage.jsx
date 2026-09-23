@@ -39,8 +39,8 @@ function MapPanel() {
         <div className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 bg-amber/40" />
         <div className="absolute inset-y-0 left-1/3 w-[3px] bg-bone/15" />
         <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
-          <MapPin size={34} className="fill-drop text-drop" />
-          <span className="mt-1 font-display text-xs uppercase tracking-[0.18em] text-bone/70">
+          <MapPin size={34} aria-hidden className="fill-drop text-drop" />
+          <span className="mt-1 font-display text-xs font-bold uppercase tracking-[0.09em] text-bone/70">
             {BUSINESS.shop.city}
           </span>
         </div>
@@ -48,7 +48,7 @@ function MapPanel() {
 
       <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-display text-lg uppercase">{BUSINESS.shop.name}</p>
+          <p className="font-display text-lg">{BUSINESS.shop.name}</p>
           <p className="mt-1 text-sm text-smoke">{BUSINESS.shop.full}</p>
         </div>
         <a
@@ -131,6 +131,7 @@ export default function LocationsPage() {
           eyebrow="Getting Them On"
           title="Three ways this ends with tires on the car"
           lede="Only two of them involve driving to Sunrise, and one of those is us driving to you."
+          align="center"
         />
 
         <ul className="grid gap-5 md:grid-cols-3">
@@ -165,7 +166,11 @@ export default function LocationsPage() {
 
               <address className="not-italic">
                 <div className="flex gap-3">
-                  <MapPin size={20} aria-hidden className="mt-0.5 shrink-0 text-drop" />
+                  <MapPin
+                    size={20}
+                    aria-hidden
+                    className="mt-0.5 shrink-0 text-drop"
+                  />
                   <div>
                     <p className="text-base text-ink">{BUSINESS.shop.street}</p>
                     <p className="text-base text-ink">
@@ -176,10 +181,14 @@ export default function LocationsPage() {
                 </div>
 
                 <div className="mt-4 flex gap-3">
-                  <Phone size={20} aria-hidden className="mt-0.5 shrink-0 text-drop" />
+                  <Phone
+                    size={20}
+                    aria-hidden
+                    className="mt-0.5 shrink-0 text-drop"
+                  />
                   <a
                     href={BUSINESS.phoneHref}
-                    className="font-display text-xl uppercase tracking-wide text-ink hover:text-drop"
+                    className="font-display text-xl text-ink hover:text-drop"
                   >
                     {BUSINESS.phone}
                   </a>
@@ -223,7 +232,7 @@ export default function LocationsPage() {
                     <tr key={h.days}>
                       <th
                         scope="row"
-                        className="py-2.5 text-left font-display text-base font-normal uppercase tracking-wide text-ink"
+                        className="py-2.5 text-left font-display text-base font-normal text-ink"
                       >
                         {h.days}
                       </th>
@@ -299,7 +308,10 @@ export default function LocationsPage() {
             <ul className="mt-4 space-y-2 text-sm text-ink">
               {shopWork.map((name) => (
                 <li key={name} className="flex items-start gap-2">
-                  <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 bg-drop" />
+                  <span
+                    aria-hidden
+                    className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-drop"
+                  />
                   {name}
                 </li>
               ))}
@@ -350,7 +362,10 @@ export default function LocationsPage() {
           <ul className="space-y-2 text-sm text-ink">
             {vanWork.map((name) => (
               <li key={name} className="flex items-start gap-2">
-                <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 bg-drop" />
+                <span
+                  aria-hidden
+                  className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-drop"
+                />
                 {name}
               </li>
             ))}
@@ -378,10 +393,10 @@ export default function LocationsPage() {
       </Section>
 
       {/* ---------- CTA ---------- */}
-      <section className="bg-ink py-12 text-bone md:py-16">
+      <section className="bg-ink-wash py-12 text-bone md:py-16">
         <div className="wrap flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="eyebrow mb-2">{BUSINESS.poweredBy}</p>
+            <p className="eyebrow-dark mb-2">{BUSINESS.poweredBy}</p>
             <h2 className="h2">Buy the tires first. Decide the rest after.</h2>
             <p className="lede mt-3 max-w-xl text-bone/70">
               You can change your mind about shipping to your door or to the

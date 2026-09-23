@@ -5,13 +5,7 @@
 
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  CheckCircle2,
-  ExternalLink,
-  Phone,
-  Star,
-  Truck,
-} from "lucide-react";
+import { CheckCircle2, ExternalLink, Phone, Star, Truck } from "lucide-react";
 import { BUSINESS, googleReviewHref } from "../../data/business.js";
 import {
   Badge,
@@ -156,7 +150,7 @@ function ReviewCard({ review }) {
     <li className="card p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-display text-lg uppercase tracking-wide text-ink">
+          <p className="font-display text-[1.0625rem] text-ink">
             {review.name}
           </p>
           <p className="text-xs text-smoke">{review.date}</p>
@@ -343,7 +337,7 @@ export default function ReviewsPage() {
       <Section className="bg-bone">
         <div className="grid gap-6 lg:grid-cols-[320px_1fr] lg:gap-10">
           <div className="card flex flex-col items-center justify-center p-8 text-center">
-            <p className="font-display text-6xl leading-none text-ink">
+            <p className="tnum font-display text-6xl leading-none text-ink">
               {average.toFixed(1)}
             </p>
             <div className="mt-3">
@@ -376,16 +370,16 @@ export default function ReviewsPage() {
                 const pct = total ? Math.round((count / total) * 100) : 0;
                 return (
                   <li key={star} className="flex items-center gap-3">
-                    <span className="w-14 shrink-0 font-display text-sm uppercase tracking-wide text-ink">
+                    <span className="w-14 shrink-0 font-display text-sm font-bold text-ink">
                       {star} star
                     </span>
                     <span
-                      className="h-2.5 flex-1 overflow-hidden rounded-sm bg-ink/10"
+                      className="h-2.5 flex-1 overflow-hidden rounded-full bg-ink/10"
                       role="img"
                       aria-label={`${star} star: ${count} of ${total} reviews, ${pct} percent`}
                     >
                       <span
-                        className="block h-full bg-amber"
+                        className="block h-full rounded-full bg-amber"
                         style={{ width: `${pct}%` }}
                       />
                     </span>
@@ -398,7 +392,11 @@ export default function ReviewsPage() {
             </ul>
 
             <p className="mt-6 flex items-start gap-2 text-xs leading-relaxed text-smoke">
-              <Truck size={15} aria-hidden className="mt-px shrink-0 text-drop" />
+              <Truck
+                size={15}
+                aria-hidden
+                className="mt-px shrink-0 text-drop"
+              />
               These span both halves of the business: orders shipped out to
               customers across {BUSINESS.shipping.area}, and tires fitted here
               in {BUSINESS.shop.city} or at an address around Broward.
@@ -428,7 +426,7 @@ export default function ReviewsPage() {
                 type="button"
                 aria-pressed={active}
                 onClick={() => setFilter(f.value)}
-                className={`rounded-sm border px-4 py-2 font-display text-sm uppercase tracking-wide transition-colors ${
+                className={`min-h-[40px] rounded-sm border px-4 py-2 font-display text-sm font-bold transition-colors ${
                   active
                     ? "border-drop bg-drop text-bone"
                     : "border-ink/15 bg-bone text-ink hover:border-ink"

@@ -1,6 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Clock, Facebook, Instagram, MapPin, Phone, Youtube } from "lucide-react";
+import {
+  Clock,
+  Facebook,
+  Instagram,
+  MapPin,
+  Phone,
+  Youtube,
+} from "lucide-react";
 import { BUSINESS, FOOTER_COLUMNS, TIRE_BRANDS } from "../../data/business.js";
 import BrandLogo from "../ui/BrandLogo.jsx";
 import Logo from "./Logo.jsx";
@@ -12,7 +19,10 @@ function BrandStrip() {
       <ul className="wrap flex flex-wrap items-center justify-center gap-x-10 gap-y-5">
         {TIRE_BRANDS.map((b) => (
           <li key={b.slug}>
-            <Link to={`/tires?brands=${encodeURIComponent(b.name)}`} className="flex min-h-[44px] items-center">
+            <Link
+              to={`/tires?brands=${encodeURIComponent(b.name)}`}
+              className="flex min-h-[44px] items-center opacity-80 transition-opacity hover:opacity-100"
+            >
               <BrandLogo brand={b} className="h-8" />
             </Link>
           </li>
@@ -26,13 +36,13 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto bg-ink text-bone">
+    <footer className="mt-auto bg-ink bg-ink-wash text-bone">
       <BrandStrip />
 
       <div className="wrap grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-4">
         {FOOTER_COLUMNS.map((col) => (
           <div key={col.title}>
-            <h3 className="mb-4 font-display text-sm uppercase tracking-[0.2em] text-amber">
+            <h3 className="mb-4 font-display text-[15px] text-amber">
               {col.title}
             </h3>
             <ul className="space-y-2">
@@ -52,18 +62,16 @@ export default function Footer() {
 
         {/* Visit & Contact column — built from live business data. */}
         <div>
-          <h3 className="mb-4 font-display text-sm uppercase tracking-[0.2em] text-amber">
+          <h3 className="mb-4 font-display text-[15px] text-amber">
             The Shop Behind Us
           </h3>
 
           <ul className="space-y-4 text-sm">
             <li>
-              <p className="mb-1 font-display uppercase tracking-wide text-bone/45">
-                Phone Number
-              </p>
+              <p className="label mb-1.5 text-bone/55">Phone Number</p>
               <a
                 href={BUSINESS.phoneHref}
-                className="-my-1 flex min-h-[36px] items-center gap-2 py-1 font-display text-lg text-bone hover:text-amber"
+                className="-my-1 flex min-h-[36px] items-center gap-2 py-1 font-display text-lg font-bold tracking-[-0.012em] text-bone transition-colors hover:text-amber"
               >
                 <Phone size={15} aria-hidden />
                 {BUSINESS.phone}
@@ -71,7 +79,7 @@ export default function Footer() {
             </li>
 
             <li>
-              <p className="mb-1 font-display uppercase tracking-wide text-bone/45">
+              <p className="label mb-1.5 text-bone/55">
                 Ship to store &amp; install
               </p>
               <a
@@ -86,19 +94,22 @@ export default function Footer() {
                   <br />
                   {BUSINESS.shop.street}
                   <br />
-                  {BUSINESS.shop.city}, {BUSINESS.shop.state} {BUSINESS.shop.zip}
+                  {BUSINESS.shop.city}, {BUSINESS.shop.state}{" "}
+                  {BUSINESS.shop.zip}
                 </span>
               </a>
             </li>
 
             <li>
-              <p className="mb-1 font-display uppercase tracking-wide text-bone/45">
-                Shop Hours
-              </p>
+              <p className="label mb-1.5 text-bone/55">Shop Hours</p>
               <ul className="space-y-0.5 text-bone/65">
                 {BUSINESS.hours.map((h) => (
                   <li key={h.days} className="flex items-start gap-2">
-                    <Clock size={15} aria-hidden className="mt-0.5 shrink-0 opacity-0 first:opacity-100" />
+                    <Clock
+                      size={15}
+                      aria-hidden
+                      className="mt-0.5 shrink-0 opacity-0 first:opacity-100"
+                    />
                     <span>
                       <span className="text-bone">{h.days}:</span> {h.time}
                     </span>
@@ -108,9 +119,7 @@ export default function Footer() {
             </li>
 
             <li>
-              <p className="mb-2 font-display uppercase tracking-wide text-bone/45">
-                Socials
-              </p>
+              <p className="label mb-2 text-bone/55">Socials</p>
               <div className="flex gap-2">
                 {[
                   { Icon: Facebook, label: "Facebook" },
@@ -121,7 +130,7 @@ export default function Footer() {
                     key={label}
                     href="#"
                     aria-label={label}
-                    className="rounded-sm border border-graphite p-2 text-bone/65 transition-colors hover:border-bone hover:text-bone"
+                    className="flex h-10 w-10 items-center justify-center rounded-sm border border-graphite text-bone/65 transition-colors hover:border-bone hover:bg-bone/5 hover:text-bone"
                   >
                     <Icon size={16} aria-hidden />
                   </a>

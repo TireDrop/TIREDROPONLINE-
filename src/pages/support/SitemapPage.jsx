@@ -43,7 +43,7 @@ const CORE_ROUTES = [
 function LinkColumn({ title, links, icon: Icon }) {
   return (
     <div>
-      <h3 className="mb-4 flex items-center gap-2 border-b border-ink/10 pb-3 font-display text-base uppercase tracking-[0.12em] text-ink">
+      <h3 className="mb-4 flex items-center gap-2 border-b border-ink/10 pb-3 font-display text-lg text-ink">
         {Icon && <Icon size={16} aria-hidden className="text-drop" />}
         {title}
       </h3>
@@ -96,7 +96,7 @@ export default function SitemapPage() {
       ...FOOTER_COLUMNS.flatMap((c) => c.links),
       ...UTILITY_LINKS,
       ...LEGAL_LINKS,
-    ].map((link) => link.to)
+    ].map((link) => link.to),
   );
 
   const missing = CORE_ROUTES.filter((route) => !listed.has(route.to));
@@ -126,7 +126,11 @@ export default function SitemapPage() {
 
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
           {navGroups.map((group) => (
-            <LinkColumn key={group.title} title={group.title} links={group.links} />
+            <LinkColumn
+              key={group.title}
+              title={group.title}
+              links={group.links}
+            />
           ))}
 
           {missing.length > 0 && (
@@ -171,7 +175,7 @@ export default function SitemapPage() {
           <LinkColumn title="Legal" links={LEGAL_LINKS} />
 
           <div>
-            <h3 className="mb-4 flex items-center gap-2 border-b border-ink/10 pb-3 font-display text-base uppercase tracking-[0.12em] text-ink">
+            <h3 className="mb-4 flex items-center gap-2 border-b border-ink/10 pb-3 font-display text-lg text-ink">
               <MapPin size={16} aria-hidden className="text-drop" />
               Call or Visit
             </h3>
@@ -185,7 +189,7 @@ export default function SitemapPage() {
             </address>
             <a
               href={BUSINESS.phoneHref}
-              className="mt-3 inline-flex min-h-[32px] items-center gap-2 font-display text-lg uppercase tracking-wide text-ink hover:text-drop"
+              className="mt-3 inline-flex min-h-[32px] items-center gap-2 font-display text-lg text-ink hover:text-drop"
             >
               <Phone size={16} aria-hidden />
               {BUSINESS.phone}
