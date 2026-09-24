@@ -1,0 +1,1041 @@
+{% comment %}
+  Financing page. Ported from the React FinancingPage (src/pages/support/FinancingPage.jsx).
+  The form is an interest / pre-qualification enquiry sent through Shopify's
+  native contact form, not a credit application. The page names no lender and
+  quotes no rate, APR or monthly payment.
+  Fields: contact[name], contact[email], contact[phone], contact[Amount needed (USD)],
+  plus a hidden contact[Enquiry] so the inbox can tell it apart.
+{% endcomment %}
+{%- liquid
+  assign tdp_digits = section.settings.phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
+  assign tdp_tel = 'tel:+1' | append: tdp_digits
+-%}
+<div class="tdp tdp-fin">
+  <div class="tdp-hero">
+    <div class="tdp-hero__line" aria-hidden="true"></div>
+    <div class="tdp-wrap tdp-hero__inner">
+      {%- if section.settings.hero_eyebrow != blank -%}
+        <p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.hero_eyebrow }}</p>
+      {%- endif -%}
+      <h1 class="tdp-h1">{{ section.settings.hero_title }}</h1>
+      {%- if section.settings.hero_lede != blank -%}
+        <p class="tdp-hero__lede">{{ section.settings.hero_lede }}</p>
+      {%- endif -%}
+      <div class="tdp-hero__actions">
+        {%- if section.settings.hero_cta_label != blank -%}<a href="#apply" class="tdp-btn tdp-btn--primary">{{ section.settings.hero_cta_label }}</a>{%- endif -%}
+        <a href="{{ tdp_tel }}" class="tdp-btn tdp-btn--ghost"><svg class="tdp-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.phone }}</a>
+  </div>
+    </div>
+  </div>
+
+  <nav class="tdp-crumbs" aria-label="Breadcrumb">
+    <ol class="tdp-wrap">
+      <li><a href="{{ routes.root_url }}">Home</a></li>
+      <li><svg class="tdp-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6"/></svg><span aria-current="page">{{ section.settings.crumb }}</span></li>
+    </ol>
+  </nav>
+
+  <section class="tdp-sec tdp-bone">
+    <div class="tdp-wrap">
+      <div class="tdp-head">
+      <div class="tdp-head__text">
+        {%- if section.settings.pay_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.pay_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.pay_title }}</h2>
+        {%- if section.settings.pay_lede != blank -%}<p class="tdp-lede">{{ section.settings.pay_lede }}</p>{%- endif -%}
+      </div>
+    </div>
+      <ul class="tdp-grid tdp-sm2 tdp-lg4">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'method' -%}
+            <li class="tdp-card tdp-p6" {{ block.shopify_attributes }}>
+              {%- case block.settings.icon -%}{%- when 'credit-card' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>{%- when 'wallet' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>{%- when 'store' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/></svg>{%- when 'truck' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>{%- when 'phone' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{%- when 'file-text' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>{%- endcase -%}
+              <h3 class="tdp-h3">{{ block.settings.title }}</h3>
+              <p class="tdp-small tdp-fin__gap2">{{ block.settings.copy }}</p>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+      {%- if section.settings.pay_note != blank -%}
+        <p class="tdp-small tdp-fin__gap6">{{ section.settings.pay_note }} <a href="{{ tdp_tel }}" class="tdp-fin__u">{{ section.settings.phone }}</a> before you order.</p>
+      {%- endif -%}
+    </div>
+  </section>
+
+  <section class="tdp-sec tdp-fog">
+    <div class="tdp-wrap">
+      <div class="tdp-head">
+      <div class="tdp-head__text">
+        {%- if section.settings.plans_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.plans_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.plans_title }}</h2>
+        {%- if section.settings.plans_lede != blank -%}<p class="tdp-lede">{{ section.settings.plans_lede }}</p>{%- endif -%}
+      </div>
+    </div>
+      <ul class="tdp-grid tdp-lg3">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'plan' -%}
+            <li class="tdp-card tdp-p6 tdp-fin__plan{% if block.settings.highlight %} is-highlight{% endif %}" {{ block.shopify_attributes }}>
+              <div class="tdp-fin__planhead">
+                <h3 class="tdp-h3">{{ block.settings.name }}</h3>
+                {%- if block.settings.tag != blank -%}<span class="tdp-badge {% if block.settings.highlight %}tdp-badge--drop{% else %}tdp-badge--soft{% endif %}">{{ block.settings.tag }}</span>{%- endif -%}
+              </div>
+              <p class="tdp-small">{{ block.settings.summary }}</p>
+              {%- assign tdp_points = block.settings.points | newline_to_br | split: '<br />' -%}
+              <ul class="tdp-checks tdp-fin__points">
+                {%- for point in tdp_points -%}{%- assign t = point | strip -%}{%- if t != blank -%}<li><svg class="tdp-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>{{ t }}</span></li>{%- endif -%}{%- endfor -%}
+              </ul>
+              {%- if block.settings.note != blank -%}<p class="tdp-xs tdp-fin__foot">{{ block.settings.note }}</p>{%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+      {%- if section.settings.plans_note != blank -%}
+        <p class="tdp-small tdp-fin__info"><svg class="tdp-ic tdp-drop" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span>{{ section.settings.plans_note }}</span></p>
+      {%- endif -%}
+    </div>
+  </section>
+
+  <section class="tdp-sec tdp-bone">
+    <div class="tdp-wrap tdp-fin__two">
+      <div>
+        <div class="tdp-head"><div class="tdp-head__text">
+          {%- if section.settings.req_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.req_eyebrow }}</p>{%- endif -%}
+          <h2 class="tdp-h2">{{ section.settings.req_title }}</h2>
+        </div></div>
+        <div class="tdp-card tdp-p6">
+          <svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+          {%- assign tdp_reqs = section.settings.requirements | newline_to_br | split: '<br />' -%}
+          <ul class="tdp-bullets tdp-fin__reqs">
+            {%- for item in tdp_reqs -%}{%- assign t = item | strip -%}{%- if t != blank -%}<li><span class="tdp-dot" aria-hidden="true"></span>{{ t }}</li>{%- endif -%}{%- endfor -%}
+          </ul>
+          {%- if section.settings.req_note != blank -%}<p class="tdp-xs tdp-fin__foot">{{ section.settings.req_note }}</p>{%- endif -%}
+        </div>
+      </div>
+      <div>
+        <div class="tdp-head"><div class="tdp-head__text">
+          {%- if section.settings.steps_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.steps_eyebrow }}</p>{%- endif -%}
+          <h2 class="tdp-h2">{{ section.settings.steps_title }}</h2>
+        </div></div>
+        <ol class="tdp-fin__steps">
+          {%- assign tdp_n = 0 -%}
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'step' -%}
+              {%- assign tdp_n = tdp_n | plus: 1 -%}
+              <li class="tdp-card tdp-p6 tdp-fin__step" {{ block.shopify_attributes }}>
+                <span class="tdp-fin__num" aria-hidden="true">{{ tdp_n }}</span>
+                <div>
+                  <h3 class="tdp-h3">{{ block.settings.title }}</h3>
+                  <p class="tdp-small tdp-fin__gap2">{{ block.settings.copy }}</p>
+                </div>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="tdp-ink tdp-fin__terms">
+    <div class="tdp-wrap">
+      <div class="tdp-fin__termsin">
+        {%- if section.settings.terms_eyebrow != blank -%}<p class="tdp-eyebrow tdp-eyebrow--dark tdp-eyebrow--plain">{{ section.settings.terms_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.terms_title }}</h2>
+        <div class="tdp-fin__termlist">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'term' -%}
+              <p {{ block.shopify_attributes }}><strong>{{ block.settings.lead }}</strong> {{ block.settings.copy }}</p>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tdp-sec tdp-fog" id="apply">
+    <div class="tdp-wrap tdp-fin__two">
+      <div>
+        <div class="tdp-head">
+      <div class="tdp-head__text">
+        {%- if section.settings.apply_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.apply_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.apply_title }}</h2>
+        {%- if section.settings.apply_lede != blank -%}<p class="tdp-lede">{{ section.settings.apply_lede }}</p>{%- endif -%}
+      </div>
+    </div>
+        <ul class="tdp-fin__points3">
+          {%- if section.settings.apply_point1 != blank -%}<li class="tdp-card"><svg class="tdp-ic tdp-drop" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg><p class="tdp-small">{{ section.settings.apply_point1 }}</p></li>{%- endif -%}
+          {%- if section.settings.apply_point2 != blank -%}<li class="tdp-card"><svg class="tdp-ic tdp-drop" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h5"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg><p class="tdp-small">{{ section.settings.apply_point2 }}</p></li>{%- endif -%}
+          {%- if section.settings.apply_point3 != blank -%}<li class="tdp-card"><svg class="tdp-ic tdp-drop" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg><p class="tdp-small">{{ section.settings.apply_point3 }}</p></li>{%- endif -%}
+        </ul>
+      </div>
+
+      {%- form 'contact', id: 'tdp-fin-form', class: 'tdp-fin__form' -%}
+        {%- if form.posted_successfully? -%}
+          <div class="tdp-card tdp-bl-drop tdp-fin__result" role="status" tabindex="-1">
+            <svg class="tdp-ic tdp-drop tdp-fin__resultic" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            <h3 class="tdp-h3">{{ section.settings.success_title }}</h3>
+            <p class="tdp-small tdp-fin__gap3">{{ section.settings.success_copy }}</p>
+            <p class="tdp-small tdp-fin__gap3">{{ section.settings.success_note }}</p>
+            <div class="tdp-actions tdp-fin__gap6">
+              <a href="{{ tdp_tel }}" class="tdp-btn tdp-btn--primary tdp-btn--sm"><svg class="tdp-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.success_call_label }}</a>
+              <a href="{{ request.path | default: '/pages/financing' }}#apply" class="tdp-btn tdp-btn--outline tdp-btn--sm">{{ section.settings.success_again_label }}</a>
+            </div>
+          </div>
+        {%- else -%}
+          <div class="tdp-card tdp-fin__card">
+            {%- if form.errors -%}
+              <div class="tdp-card tdp-bl-amber tdp-p6 tdp-formerr" role="alert">
+                <h3 class="tdp-h3 tdp-h3-ic"><svg class="tdp-ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.error_title }}</h3>
+                <p class="tdp-small tdp-fin__gap3">{{ section.settings.error_copy }} <a href="{{ tdp_tel }}" class="tdp-drop">{{ section.settings.phone }}</a></p>
+                <div class="tdp-small tdp-ink-text">{{ form.errors | default_errors }}</div>
+              </div>
+            {%- endif -%}
+            <h3 class="tdp-h3 tdp-fin__formtitle">{{ section.settings.form_title }}</h3>
+            <p class="tdp-small tdp-fin__formintro">{{ section.settings.form_intro }}</p>
+            <input type="hidden" name="contact[Enquiry]" value="Financing — interest / pre-qualification enquiry (not an application)">
+            <input type="hidden" name="contact[body]" value="Financing enquiry sent from the financing page.">
+            <div class="tdp-fin__fields">
+              <div>
+                <label class="tdp-label" for="tdp-fin-name">{{ section.settings.label_name }}</label>
+                <input id="tdp-fin-name" class="tdp-field" type="text" name="contact[name]" autocomplete="name" required placeholder="{{ section.settings.ph_name }}" value="{{ form.name }}"
+                  data-tdp-check="tdp-fin-name-error" data-err-required="Enter the name that will be on the application.">
+                <p class="tdp-err" id="tdp-fin-name-error" hidden><svg class="tdp-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg><span></span></p>
+              </div>
+              <div>
+                <label class="tdp-label" for="tdp-fin-phone">{{ section.settings.label_phone }}</label>
+                <input id="tdp-fin-phone" class="tdp-field" type="tel" inputmode="tel" name="contact[phone]" autocomplete="tel" required placeholder="{{ section.settings.ph_phone }}" value="{{ form.phone }}"
+                  data-tdp-check="tdp-fin-phone-error" data-err-required="A phone number is required." data-err-phone="Enter a 10-digit phone number, area code included.">
+                <p class="tdp-err" id="tdp-fin-phone-error" hidden><svg class="tdp-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg><span></span></p>
+              </div>
+              <div>
+                <label class="tdp-label" for="tdp-fin-email">{{ section.settings.label_email }}</label>
+                <input id="tdp-fin-email" class="tdp-field" type="email" name="contact[email]" autocomplete="email" required spellcheck="false" autocapitalize="off" placeholder="{{ section.settings.ph_email }}" value="{{ form.email }}"
+                  {% if form.errors contains 'email' %}aria-invalid="true" {% endif %}data-tdp-check="tdp-fin-email-error" data-err-required="We need an email to follow up." data-err-email="That email address does not look complete.">
+                <p class="tdp-err" id="tdp-fin-email-error" hidden><svg class="tdp-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg><span></span></p>
+              </div>
+              <div>
+                <label class="tdp-label" for="tdp-fin-amount">{{ section.settings.label_amount }}</label>
+                <input id="tdp-fin-amount" class="tdp-field" type="text" inputmode="decimal" name="contact[Amount needed (USD)]" required placeholder="{{ section.settings.ph_amount }}" aria-describedby="tdp-fin-amount-hint"
+                  data-tdp-check="tdp-fin-amount-error" data-tdp-hint="tdp-fin-amount-hint" data-err-required="Roughly how much do you need to cover?" data-err-amount="Enter the amount in dollars, numbers only." data-max="25000" data-err-max="For anything this size, call us directly and we will walk through it.">
+                <p class="tdp-err" id="tdp-fin-amount-error" hidden><svg class="tdp-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg><span></span></p>
+                {%- if section.settings.amount_hint != blank -%}<p class="tdp-xs tdp-fin__hint" id="tdp-fin-amount-hint">{{ section.settings.amount_hint }}</p>{%- endif -%}
+              </div>
+            </div>
+            <button type="submit" class="tdp-btn tdp-btn--primary tdp-fin__submit" data-sending="Sending…">{{ section.settings.submit_label }}</button>
+          </div>
+        {%- endif -%}
+      {%- endform -%}
+    </div>
+  </section>
+
+  <section class="tdp-sec tdp-bone">
+    <div class="tdp-wrap">
+      <div class="tdp-head tdp-head--center"><div class="tdp-head__text">
+        {%- if section.settings.faq_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.faq_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.faq_title }}</h2>
+      </div></div>
+      <div class="tdp-fin__faq">
+        <div class="tdp-fin__acc">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'faq' -%}
+              <details {{ block.shopify_attributes }}>
+                <summary>{{ block.settings.q }}<svg class="tdp-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6"/></svg></summary>
+                <p class="tdp-small">{{ block.settings.a }}</p>
+              </details>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+        {%- if section.settings.faq_note != blank -%}
+          <p class="tdp-small tdp-fin__faqnote">{{ section.settings.faq_note }} <a href="{{ tdp_tel }}">{{ section.settings.phone }}</a>.</p>
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  (function () {
+    // Mirrors the React form's validation messages. Without JavaScript the
+    // browser's own required/type checks still apply and Shopify validates the email.
+    var form = document.getElementById('tdp-fin-form');
+    if (!form || form.getAttribute('data-tdp-ready')) return;
+    form.setAttribute('data-tdp-ready', '1');
+    form.noValidate = true;
+    var checks = form.querySelectorAll('[data-tdp-check]');
+    var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    function valueOf(el) {
+      if (el.tagName === 'FIELDSET') {
+        var picked = el.querySelector('input:checked');
+        return picked ? picked.value : '';
+      }
+      return el.value.trim();
+    }
+    function show(el, msg) {
+      var box = document.getElementById(el.getAttribute('data-tdp-check'));
+      var target = el.tagName === 'FIELDSET' ? el.querySelectorAll('input') : [el];
+      var hint = el.getAttribute('data-tdp-hint');
+      for (var i = 0; i < target.length; i++) {
+        if (msg) target[i].setAttribute('aria-invalid', 'true'); else target[i].removeAttribute('aria-invalid');
+      }
+      if (box) {
+        box.hidden = !msg;
+        box.querySelector('span').textContent = msg || '';
+      }
+      var hintEl = hint && document.getElementById(hint);
+      if (hintEl) hintEl.hidden = !!msg;
+      var ids = [msg ? box && box.id : hint].filter(Boolean).join(' ');
+      if (el.tagName === 'FIELDSET') { if (msg) el.setAttribute('aria-describedby', ids); else el.removeAttribute('aria-describedby'); }
+      else if (ids) el.setAttribute('aria-describedby', ids); else el.removeAttribute('aria-describedby');
+    }
+    function check(el) {
+      var v = valueOf(el), d = el.dataset, msg = '';
+      if (!v) msg = d.errRequired || '';
+      else if (d.errEmail && !EMAIL.test(v)) msg = d.errEmail;
+      else if (d.errPhone && v.replace(/\D/g, '').length < 10) msg = d.errPhone;
+      else if (d.errMin && v.length < Number(d.min || 0)) msg = d.errMin;
+      else if (d.errAmount) {
+        var n = Number(v.replace(/[$,\s]/g, ''));
+        if (isNaN(n) || n <= 0) msg = d.errAmount;
+        else if (d.errMax && n > Number(d.max || Infinity)) msg = d.errMax;
+      }
+      show(el, msg);
+      return !msg;
+    }
+    form.addEventListener('submit', function (event) {
+      var first = null;
+      for (var i = 0; i < checks.length; i++) {
+        if (!check(checks[i]) && !first) first = checks[i];
+      }
+      if (first) {
+        event.preventDefault();
+        (first.tagName === 'FIELDSET' ? first.querySelector('input') : first).focus();
+        return;
+      }
+      var btn = form.querySelector('[type="submit"]');
+      if (btn) {
+        if (btn.getAttribute('aria-disabled') === 'true') { event.preventDefault(); return; }
+        btn.setAttribute('aria-disabled', 'true');
+        btn.textContent = btn.getAttribute('data-sending') || btn.textContent;
+      }
+    });
+    for (var i = 0; i < checks.length; i++) {
+      (function (el) {
+        el.addEventListener(el.tagName === 'FIELDSET' ? 'change' : 'input', function () {
+          // Clear an error as soon as the customer starts fixing it.
+          var box = document.getElementById(el.getAttribute('data-tdp-check'));
+          if (box && !box.hidden) show(el, '');
+        });
+      })(checks[i]);
+    }
+  })();
+
+  (function () {
+    var done = document.querySelector('#tdp-fin-form [role="status"]');
+    if (done && /contact_posted=true/.test(location.search)) done.focus();
+  })();
+</script>
+
+<style>
+  /* Page kit, shared by the td-page-* sections Agent E owns. Each section carries its own copy so it stays self-contained. */
+  .tdp { color: #070E1A; font-family: var(--font-body--family, inherit); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .tdp *, .tdp *::before, .tdp *::after { box-sizing: border-box; }
+  .tdp :where(h1, h2, h3, h4, p, ul, ol, dl, dd, dt, figure, blockquote, table, fieldset, legend, address) { margin: 0; padding: 0; }
+  .tdp :where(ul, ol) { list-style: none; }
+  .tdp :where(address) { font-style: normal; }
+  .tdp :where(fieldset) { border: 0; min-width: 0; }
+  .tdp :where(a) { color: inherit; }
+  .tdp :where(h1, h2, h3, h4) {
+    font-family: var(--font-heading--family, inherit); font-weight: 800; letter-spacing: -.018em;
+    font-variation-settings: "wdth" 108; color: inherit; text-transform: none;
+  }
+  .tdp :where(a, button, input, select, textarea, summary):focus-visible { outline: 2px solid #0068E8; outline-offset: 2px; }
+
+  .tdp-wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding-left: 1rem; padding-right: 1rem; }
+  .tdp-sec { padding: 3.5rem 0; }
+  .tdp-bone { background: #FFFFFF; }
+  .tdp-fog { background: #F4F6FA; }
+  /* Dark bands pin their text colour rather than inheriting body ink. */
+  .tdp-ink { background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); color: #FFFFFF; }
+  .tdp-ink :where(h1, h2, h3), .tdp-steel :where(h1, h2, h3) { color: #FFFFFF; }
+
+  .tdp-h1 { font-size: 2.4rem; line-height: .98; }
+  .tdp-h1, .tdp-head .tdp-h2 { text-wrap: balance; }
+  .tdp-h2 { font-size: 1.9rem; line-height: 1.02; }
+  .tdp-h3 { font-size: 1.2rem; line-height: 1.15; }
+  .tdp-eyebrow {
+    display: flex; align-items: center; gap: .625rem; margin-bottom: .625rem;
+    font-family: var(--font-heading--family, inherit); font-size: 12px; font-weight: 700; line-height: 1.4;
+    text-transform: uppercase; letter-spacing: .09em; color: #0068E8;
+  }
+  .tdp-eyebrow--plain { display: block; }
+  .tdp-rule { flex: none; height: 1px; width: 1.5rem; background: rgba(0,104,232,.45); }
+  .tdp-eyebrow--dark { color: #00B4FC; }
+  .tdp-eyebrow--dark .tdp-rule { background: rgba(0,180,252,.5); }
+  .tdp-label {
+    display: block; margin-bottom: .375rem; font-family: var(--font-heading--family, inherit);
+    font-size: 11px; font-weight: 700; line-height: 1.4; text-transform: uppercase; letter-spacing: .07em; color: #586274;
+  }
+  .tdp-lede { font-size: 1.0625rem; line-height: 1.6; color: #586274; }
+  .tdp-ink .tdp-lede, .tdp-steel .tdp-lede { color: rgba(255,255,255,.7); }
+  .tdp-small { font-size: .875rem; line-height: 1.625; color: #586274; }
+  .tdp-xs { font-size: .75rem; line-height: 1.625; color: #586274; }
+  .tdp-ink-text { color: #070E1A; }
+  .tdp-drop { color: #0068E8; }
+  .tdp-small a, .tdp-xs a, .tdp-lede a { text-underline-offset: 2px; }
+  .tdp-small a:hover, .tdp-xs a:hover { color: #0068E8; }
+
+  .tdp-head { margin-bottom: 2rem; }
+  .tdp-head__text { max-width: 42rem; }
+  .tdp-head .tdp-lede { margin-top: 1rem; max-width: 36rem; }
+  .tdp-head--center { text-align: center; }
+  .tdp-head--center .tdp-head__text { margin: 0 auto; }
+  .tdp-head--center .tdp-eyebrow { justify-content: center; }
+  .tdp-head--center .tdp-lede { margin-left: auto; margin-right: auto; }
+
+  /* Masthead */
+  .tdp-hero { position: relative; overflow: hidden; background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); color: #FFFFFF; }
+  .tdp-hero__line { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(0,180,252,.35), transparent); }
+  .tdp-hero__inner { position: relative; padding-top: 3.5rem; padding-bottom: 3.5rem; }
+  .tdp-hero .tdp-eyebrow { color: #00B4FC; margin-bottom: .75rem; }
+  .tdp-hero .tdp-rule { background: rgba(0,180,252,.55); }
+  .tdp-hero .tdp-h1 { max-width: 56rem; color: #FFFFFF; }
+  .tdp-hero__lede { margin-top: 1.25rem; max-width: 42rem; font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.7); }
+  .tdp-hero__actions { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: .75rem; }
+
+  /* Breadcrumbs */
+  .tdp-crumbs { background: #FFFFFF; border-bottom: 1px solid rgba(7,14,26,.1); }
+  .tdp-crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: .375rem; padding-top: 2px; padding-bottom: 2px; font-size: 12px; color: #586274; }
+  .tdp-crumbs li { display: flex; align-items: center; gap: .375rem; }
+  .tdp-crumbs a { display: flex; align-items: center; min-height: 44px; text-decoration: none; color: #586274; }
+  .tdp-crumbs a:hover { color: #0068E8; }
+  .tdp-crumbs [aria-current] { color: #070E1A; }
+  .tdp-crumbs svg { color: rgba(88,98,116,.5); }
+
+  /* Buttons. 44px minimum so every one clears the tap-target floor. */
+  .tdp-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px;
+    padding: .75rem 1.5rem; border-radius: 6px; border: 1px solid transparent; cursor: pointer;
+    font-family: var(--font-heading--family, inherit); font-size: 15px; font-weight: 700; line-height: 1;
+    letter-spacing: -.005em; text-decoration: none; text-align: center; transition: background-color .15s, border-color .15s, box-shadow .15s, color .15s;
+  }
+  .tdp-btn--sm { padding: .5rem 1rem; font-size: 13px; }
+  .tdp-btn--primary { background: #0068E8; color: #FFFFFF; box-shadow: 0 4px 14px -2px rgba(0,104,232,.35); }
+  .tdp-btn--primary:hover { background: #0053C4; box-shadow: none; }
+  .tdp-btn--outline { border-color: rgba(7,14,26,.15); background: #FFFFFF; color: #070E1A; box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .tdp-btn--outline:hover { border-color: rgba(7,14,26,.3); background: #F4F6FA; }
+  .tdp-btn--ghost { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.05); color: #FFFFFF; }
+  .tdp-btn--ghost:hover { border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.1); }
+
+  /* Surfaces */
+  .tdp-card { background: #FFFFFF; border: 1px solid rgba(7,14,26,.07); border-radius: 12px; box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .tdp-p6 { padding: 1.5rem; }
+  .tdp-bl-drop { border-left: 4px solid #0068E8; }
+  .tdp-bl-amber { border-left: 4px solid #F5A623; }
+  .tdp-badge {
+    display: inline-flex; align-items: center; border-radius: 6px; padding: .25rem .5rem;
+    font-family: var(--font-heading--family, inherit); font-size: 11px; font-weight: 700; line-height: 1.1;
+    text-transform: uppercase; letter-spacing: .09em;
+  }
+  .tdp-badge--soft { background: rgba(7,14,26,.06); color: #070E1A; box-shadow: inset 0 0 0 1px rgba(7,14,26,.1); }
+  .tdp-badge--drop { background: #0068E8; color: #FFFFFF; }
+  .tdp-ic { flex: none; display: inline-block; vertical-align: middle; }
+  .tdp-ic-lead { display: block; margin-bottom: 1rem; color: #0068E8; }
+  .tdp-h3-ic { display: flex; align-items: center; gap: .5rem; }
+  .tdp-h3-ic svg { color: #0068E8; }
+
+  .tdp-grid { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); }
+  .tdp-bullets > li { display: flex; align-items: flex-start; gap: .5rem; }
+  .tdp-bullets > li + li { margin-top: .5rem; }
+  .tdp-dot { flex: none; margin-top: .5rem; height: 6px; width: 6px; border-radius: 999px; background: #0068E8; }
+  .tdp-checks > li { display: flex; align-items: flex-start; gap: .5rem; font-size: .875rem; line-height: 1.43; color: #070E1A; }
+  .tdp-checks > li + li { margin-top: .625rem; }
+  .tdp-checks svg { margin-top: 2px; color: #0068E8; }
+  .tdp-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+
+  /* Forms */
+  .tdp-field {
+    display: block; width: 100%; min-height: 44px; margin: 0; border-radius: 6px; border: 1px solid rgba(7,14,26,.12);
+    background: #FFFFFF; padding: .625rem .875rem; font: inherit; font-size: 15px; line-height: 1.5; color: #070E1A;
+    box-shadow: inset 0 1px 2px rgba(7,14,26,.04); appearance: none;
+  }
+  .tdp-field::placeholder { color: rgba(88,98,116,.6); }
+  .tdp-field:focus { outline: none; border-color: #0068E8; box-shadow: 0 0 0 3px rgba(0,104,232,.15); }
+  .tdp-field[aria-invalid="true"] { border-color: #0068E8; }
+  textarea.tdp-field { resize: vertical; }
+  .tdp-err { margin-top: .375rem; display: flex; align-items: flex-start; gap: .375rem; font-size: .75rem; line-height: 1.5; color: #0068E8; }
+  .tdp-err svg { margin-top: 1px; }
+  .tdp-err[hidden] { display: none; }
+  .tdp-formerr { margin-bottom: 1.25rem; }
+  .tdp-formerr ul { margin-top: .5rem; padding-left: 1.1rem; list-style: disc; }
+  .tdp-formerr .errors ul { margin: .5rem 0 0; }
+
+  @media (min-width: 640px) {
+    .tdp-sm2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 768px) {
+    .tdp-wrap { padding-left: 2rem; padding-right: 2rem; }
+    .tdp-sec { padding: 5rem 0; }
+    .tdp-h1 { font-size: 4.25rem; }
+    .tdp-h2 { font-size: 3rem; }
+    .tdp-h3 { font-size: 1.45rem; }
+    .tdp-lede { font-size: 1.1875rem; }
+    .tdp-head { margin-bottom: 3rem; }
+    .tdp-hero__inner { padding-top: 5rem; padding-bottom: 5rem; }
+    .tdp-hero__lede { font-size: 1.25rem; }
+  }
+  @media (min-width: 1024px) {
+    .tdp-lg3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tdp-lg4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tdp *, .tdp *::before, .tdp *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+
+  .tdp-fin__gap2 { margin-top: .5rem; }
+  .tdp-fin__gap3 { margin-top: .75rem; }
+  .tdp-fin__gap6 { margin-top: 1.5rem; }
+  .tdp-fin__u { text-decoration: underline; }
+  .tdp-fin__plan { display: flex; flex-direction: column; }
+  .tdp-fin__plan.is-highlight { border-color: #0068E8; box-shadow: 0 0 0 1px #0068E8, 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .tdp-fin__planhead { margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+  .tdp-fin__points { margin-top: 1.25rem; flex: 1; }
+  .tdp-fin__foot { margin-top: 1.25rem; border-top: 1px solid rgba(7,14,26,.1); padding-top: 1rem; }
+  .tdp-fin__info { margin-top: 1.5rem; display: flex; align-items: flex-start; gap: .5rem; }
+  .tdp-fin__info svg { margin-top: 2px; }
+  .tdp-fin__two { display: grid; gap: 2.5rem; }
+  .tdp-fin__reqs { font-size: .875rem; color: #070E1A; }
+  .tdp-fin__reqs > li { gap: .625rem; }
+  .tdp-fin__reqs > li + li { margin-top: .75rem; }
+  .tdp-fin__steps > li + li { margin-top: 1rem; }
+  .tdp-fin__step { display: flex; gap: 1rem; }
+  .tdp-fin__num { display: flex; flex: none; height: 2.5rem; width: 2.5rem; align-items: center; justify-content: center; border-radius: 6px; background: #070E1A; font-family: var(--font-heading--family, inherit); font-size: 1.25rem; color: #F5A623; }
+  .tdp-fin__terms { padding: 3.5rem 0; }
+  .tdp-fin__termsin { max-width: 48rem; }
+  .tdp-fin__termlist { margin-top: 1.75rem; max-width: 68ch; font-size: 15px; line-height: 1.75; color: rgba(255,255,255,.72); }
+  .tdp-fin__termlist p + p { margin-top: 1.25rem; }
+  .tdp-fin__termlist strong { font-weight: 400; color: #FFFFFF; }
+  .tdp-fin__termlist a { color: #00B4FC; text-decoration: underline; }
+  .tdp-fin__points3 > li { display: flex; gap: 1rem; padding: 1.25rem; }
+  .tdp-fin__points3 > li + li { margin-top: 1rem; }
+  .tdp-fin__points3 strong { font-weight: 400; color: #070E1A; }
+  .tdp-fin__card { padding: 1.5rem; }
+  .tdp-fin__formtitle { margin-bottom: .25rem; }
+  .tdp-fin__formintro { margin-bottom: 1.5rem; }
+  .tdp-fin__fields { display: grid; gap: 1.25rem; }
+  .tdp-fin__hint { margin-top: .375rem; }
+  .tdp-fin__hint[hidden] { display: none; }
+  .tdp-fin__submit { margin-top: 1.75rem; width: 100%; }
+  .tdp-fin__submit[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+  .tdp-fin__result { padding: 1.5rem; }
+  .tdp-fin__result:focus { outline: none; }
+  .tdp-fin__resultic { display: block; margin-bottom: 1rem; }
+  .tdp-fin__faq { max-width: 48rem; margin: 0 auto; }
+  .tdp-fin__acc { border-top: 1px solid rgba(7,14,26,.1); border-bottom: 1px solid rgba(7,14,26,.1); }
+  .tdp-fin__acc details + details { border-top: 1px solid rgba(7,14,26,.1); }
+  .tdp-fin__acc details { padding: .25rem 0; }
+  .tdp-fin__acc summary {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 44px; padding: .75rem 0; cursor: pointer; list-style: none;
+    font-family: var(--font-heading--family, inherit); font-weight: 700; font-size: 1.0625rem; line-height: 1.375; letter-spacing: -.012em; color: #070E1A;
+  }
+  .tdp-fin__acc summary::-webkit-details-marker { display: none; }
+  .tdp-fin__acc summary:hover { color: #0068E8; }
+  .tdp-fin__acc summary svg { color: #0068E8; transition: transform .15s; }
+  .tdp-fin__acc details[open] summary svg { transform: rotate(90deg); }
+  .tdp-fin__acc details p { padding-bottom: 1rem; }
+  .tdp-fin__faqnote { margin-top: 2rem; text-align: center; }
+  .tdp-fin__faqnote a { text-decoration: underline; }
+  .tdp-fin__faqnote a:hover { color: #0068E8; }
+  @media (min-width: 640px) {
+    .tdp-fin__fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tdp-fin__submit { width: auto; }
+  }
+  @media (min-width: 768px) {
+    .tdp-fin__terms { padding: 5rem 0; }
+    .tdp-fin__card, .tdp-fin__result { padding: 2rem; }
+    .tdp-fin__acc summary { font-size: 1.15rem; }
+  }
+  @media (min-width: 1024px) {
+    .tdp-fin__two { grid-template-columns: 1fr 1.1fr; gap: 3.5rem; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "TireDrop page: Financing",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Page header"
+    },
+    {
+      "type": "text",
+      "id": "hero_eyebrow",
+      "label": "Eyebrow",
+      "default": "Financing"
+    },
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Heading",
+      "default": "Tires now. Pay over time."
+    },
+    {
+      "type": "textarea",
+      "id": "hero_lede",
+      "label": "Supporting copy",
+      "default": "Nobody plans for a blown tire in the middle of the month. Here is every way you can pay for an order — including financing, where the terms are set by a third-party lender, not by us."
+    },
+    {
+      "type": "text",
+      "id": "crumb",
+      "label": "Breadcrumb label",
+      "default": "Financing"
+    },
+    {
+      "type": "text",
+      "id": "hero_cta_label",
+      "label": "Button (jumps to the form)",
+      "default": "Start a Request"
+    },
+    {
+      "type": "header",
+      "content": "Contact details"
+    },
+    {
+      "type": "text",
+      "id": "phone",
+      "label": "Phone number",
+      "default": "(954) 773-1896",
+      "info": "Shown as written; the call link is built from its digits."
+    },
+    {
+      "type": "header",
+      "content": "Ways to pay"
+    },
+    {
+      "type": "text",
+      "id": "pay_eyebrow",
+      "label": "Eyebrow",
+      "default": "Ways To Pay"
+    },
+    {
+      "type": "text",
+      "id": "pay_title",
+      "label": "Heading",
+      "default": "Four ways an order gets paid for"
+    },
+    {
+      "type": "textarea",
+      "id": "pay_lede",
+      "label": "Supporting copy",
+      "default": "Most customers use the first one. The rest exist because not every order is a card swipe."
+    },
+    {
+      "type": "textarea",
+      "id": "pay_note",
+      "label": "Note under the cards (the phone number is appended)",
+      "default": "We would rather under-promise here than list a payment method that turns out not to work at checkout. If you want to know exactly what is accepted and which financing program is running today, call"
+    },
+    {
+      "type": "header",
+      "content": "Plan shapes"
+    },
+    {
+      "type": "text",
+      "id": "plans_eyebrow",
+      "label": "Eyebrow",
+      "default": "Plan Options"
+    },
+    {
+      "type": "text",
+      "id": "plans_title",
+      "label": "Heading",
+      "default": "Three shapes a plan usually takes"
+    },
+    {
+      "type": "textarea",
+      "id": "plans_lede",
+      "label": "Supporting copy",
+      "default": "These are the kinds of programs financing providers commonly offer for tire and wheel purchases. What you are actually offered depends on the lender and on your application."
+    },
+    {
+      "type": "textarea",
+      "id": "plans_note",
+      "label": "Note under the plans",
+      "default": "We do not quote rates, approval odds or monthly payments on this page, because we do not set them. Ask us what programs are running the day you buy, and read the lender's offer before you accept it."
+    },
+    {
+      "type": "header",
+      "content": "Before you apply"
+    },
+    {
+      "type": "text",
+      "id": "req_eyebrow",
+      "label": "Eyebrow",
+      "default": "Before You Apply"
+    },
+    {
+      "type": "text",
+      "id": "req_title",
+      "label": "Heading",
+      "default": "What you will likely need"
+    },
+    {
+      "type": "textarea",
+      "id": "requirements",
+      "label": "Requirements (one per line)",
+      "default": "A valid, government-issued photo ID\nA Social Security number or ITIN, if the lender asks for one\nProof of a steady income source\nAn active checking account or debit card for payments\nA working phone number and email for the lender's verification step\nTo be at least 18 years old, with a billing address in the United States"
+    },
+    {
+      "type": "textarea",
+      "id": "req_note",
+      "label": "Requirements note",
+      "default": "Requirements come from the financing provider and can differ by program. This list is a general guide, not a checklist we control."
+    },
+    {
+      "type": "header",
+      "content": "How it works"
+    },
+    {
+      "type": "text",
+      "id": "steps_eyebrow",
+      "label": "Eyebrow",
+      "default": "How It Works"
+    },
+    {
+      "type": "text",
+      "id": "steps_title",
+      "label": "Heading",
+      "default": "Four steps, start to finish"
+    },
+    {
+      "type": "header",
+      "content": "Terms in plain language"
+    },
+    {
+      "type": "text",
+      "id": "terms_eyebrow",
+      "label": "Eyebrow",
+      "default": "Terms, In Plain Language"
+    },
+    {
+      "type": "text",
+      "id": "terms_title",
+      "label": "Heading",
+      "default": "The part you should actually read"
+    },
+    {
+      "type": "header",
+      "content": "Request form"
+    },
+    {
+      "type": "text",
+      "id": "apply_eyebrow",
+      "label": "Eyebrow",
+      "default": "Get Started"
+    },
+    {
+      "type": "text",
+      "id": "apply_title",
+      "label": "Heading",
+      "default": "Tell us what you need covered"
+    },
+    {
+      "type": "textarea",
+      "id": "apply_lede",
+      "label": "Supporting copy",
+      "default": "Send this over and we will call you with a real price for the order and whatever financing options are running that week."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "apply_point1",
+      "label": "Point 1",
+      "default": "<strong>No credit check here.</strong> This form does not touch your credit and is not an application."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "apply_point2",
+      "label": "Point 2",
+      "default": "<strong>We talk during business hours.</strong> Sent at night or on Sunday? You will hear from us the next day we are open. Eastern time."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "apply_point3",
+      "label": "Point 3",
+      "default": "<strong>Cards work too.</strong> Financing is an option, never a requirement."
+    },
+    {
+      "type": "text",
+      "id": "form_title",
+      "label": "Form heading",
+      "default": "Start a financing conversation"
+    },
+    {
+      "type": "text",
+      "id": "form_intro",
+      "label": "Form intro",
+      "default": "This goes to us, not to a lender. No credit check happens here. All fields are required."
+    },
+    {
+      "type": "text",
+      "id": "label_name",
+      "label": "Name label",
+      "default": "Full name"
+    },
+    {
+      "type": "text",
+      "id": "ph_name",
+      "label": "Name placeholder",
+      "default": "Alex Moreno"
+    },
+    {
+      "type": "text",
+      "id": "label_phone",
+      "label": "Phone label",
+      "default": "Phone"
+    },
+    {
+      "type": "text",
+      "id": "ph_phone",
+      "label": "Phone placeholder",
+      "default": "(954) 555-0188"
+    },
+    {
+      "type": "text",
+      "id": "label_email",
+      "label": "Email label",
+      "default": "Email"
+    },
+    {
+      "type": "text",
+      "id": "ph_email",
+      "label": "Email placeholder",
+      "default": "you@example.com"
+    },
+    {
+      "type": "text",
+      "id": "label_amount",
+      "label": "Amount label",
+      "default": "Amount needed (USD)"
+    },
+    {
+      "type": "text",
+      "id": "ph_amount",
+      "label": "Amount placeholder",
+      "default": "850"
+    },
+    {
+      "type": "text",
+      "id": "amount_hint",
+      "label": "Amount hint",
+      "default": "A rough estimate is fine — we will quote the real number."
+    },
+    {
+      "type": "text",
+      "id": "submit_label",
+      "label": "Send button",
+      "default": "Send Request"
+    },
+    {
+      "type": "text",
+      "id": "success_title",
+      "label": "Sent: heading",
+      "default": "Request received."
+    },
+    {
+      "type": "textarea",
+      "id": "success_copy",
+      "label": "Sent: copy",
+      "default": "Thanks. Someone will call you during the hours the shop is open, to confirm what you are buying, price it properly, and point you to whichever financing program is running. If you would rather not wait for the call, the number below reaches the same people."
+    },
+    {
+      "type": "textarea",
+      "id": "success_note",
+      "label": "Sent: note",
+      "default": "This is not an application and it is not an approval — it only starts the conversation. Any credit decision is made by a third-party lender under their own terms."
+    },
+    {
+      "type": "text",
+      "id": "success_call_label",
+      "label": "Sent: call button",
+      "default": "Call instead"
+    },
+    {
+      "type": "text",
+      "id": "success_again_label",
+      "label": "Sent: second button",
+      "default": "Start over"
+    },
+    {
+      "type": "text",
+      "id": "error_title",
+      "label": "Not sent: heading",
+      "default": "We could not get that through just now."
+    },
+    {
+      "type": "textarea",
+      "id": "error_copy",
+      "label": "Not sent: copy",
+      "default": "Your request did not go through, so no call is queued. Fix what is marked below and send it again — or call, and whoever answers can price the order and tell you which financing program is running that day."
+    },
+    {
+      "type": "header",
+      "content": "FAQ"
+    },
+    {
+      "type": "text",
+      "id": "faq_eyebrow",
+      "label": "Eyebrow",
+      "default": "FAQ"
+    },
+    {
+      "type": "text",
+      "id": "faq_title",
+      "label": "Heading",
+      "default": "Questions we get on the phone"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "faq_note",
+      "label": "Note under the questions",
+      "default": "Still unsure? <a href=\"/pages/contact\">Send us a message</a> or call"
+    }
+  ],
+  "max_blocks": 50,
+  "blocks": [
+    {
+      "type": "method",
+      "name": "Way to pay",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            {
+              "value": "credit-card",
+              "label": "Card"
+            },
+            {
+              "value": "wallet",
+              "label": "Wallet"
+            },
+            {
+              "value": "store",
+              "label": "Store"
+            },
+            {
+              "value": "truck",
+              "label": "Truck"
+            },
+            {
+              "value": "phone",
+              "label": "Phone"
+            },
+            {
+              "value": "file-text",
+              "label": "Document"
+            }
+          ],
+          "default": "credit-card"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "textarea",
+          "id": "copy",
+          "label": "Copy"
+        }
+      ]
+    },
+    {
+      "type": "plan",
+      "name": "Plan shape",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name"
+        },
+        {
+          "type": "text",
+          "id": "tag",
+          "label": "Badge"
+        },
+        {
+          "type": "checkbox",
+          "id": "highlight",
+          "label": "Highlight this plan",
+          "default": false
+        },
+        {
+          "type": "textarea",
+          "id": "summary",
+          "label": "Summary"
+        },
+        {
+          "type": "textarea",
+          "id": "points",
+          "label": "Points (one per line)"
+        },
+        {
+          "type": "textarea",
+          "id": "note",
+          "label": "Footnote"
+        }
+      ]
+    },
+    {
+      "type": "step",
+      "name": "Step",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "textarea",
+          "id": "copy",
+          "label": "Copy"
+        }
+      ]
+    },
+    {
+      "type": "term",
+      "name": "Plain-language term",
+      "settings": [
+        {
+          "type": "text",
+          "id": "lead",
+          "label": "Lead-in (bold)"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "copy",
+          "label": "Copy"
+        }
+      ]
+    },
+    {
+      "type": "faq",
+      "name": "Question",
+      "settings": [
+        {
+          "type": "text",
+          "id": "q",
+          "label": "Question"
+        },
+        {
+          "type": "textarea",
+          "id": "a",
+          "label": "Answer"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

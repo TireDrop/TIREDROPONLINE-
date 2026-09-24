@@ -1,0 +1,827 @@
+{% comment %}
+  Tire care guides. Ported from the React TireCarePage (src/pages/support/TireCarePage.jsx).
+  Each guide is a block; the index, the jump navigation and the full articles
+  are all built from the same blocks, so they cannot drift apart. The React
+  per-service links (/services/...) point at the auto-service page, which is
+  where those services live on this store.
+{% endcomment %}
+{%- liquid
+  assign tdp_digits = section.settings.phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
+  assign tdp_tel = 'tel:+1' | append: tdp_digits
+-%}
+{%- assign tdp_cats = section.settings.categories | newline_to_br | split: '<br />' -%}
+<div class="tdp tdp-care">
+  <div class="tdp-hero">
+    <div class="tdp-hero__line" aria-hidden="true"></div>
+    <div class="tdp-wrap tdp-hero__inner">
+      {%- if section.settings.hero_eyebrow != blank -%}
+        <p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.hero_eyebrow }}</p>
+      {%- endif -%}
+      <h1 class="tdp-h1">{{ section.settings.hero_title }}</h1>
+      {%- if section.settings.hero_lede != blank -%}
+        <p class="tdp-hero__lede">{{ section.settings.hero_lede }}</p>
+      {%- endif -%}
+      <div class="tdp-hero__actions">
+        {%- if section.settings.hero_cta_label != blank -%}<a href="#guides" class="tdp-btn tdp-btn--primary">{{ section.settings.hero_cta_label }}</a>{%- endif -%}
+        <a href="{{ tdp_tel }}" class="tdp-btn tdp-btn--ghost"><svg class="tdp-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.hero_call_label }} {{ section.settings.phone }}</a>
+  </div>
+    </div>
+  </div>
+
+  <nav class="tdp-crumbs" aria-label="Breadcrumb">
+    <ol class="tdp-wrap">
+      <li><a href="{{ routes.root_url }}">Home</a></li>
+      <li><svg class="tdp-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6"/></svg><span aria-current="page">{{ section.settings.crumb }}</span></li>
+    </ol>
+  </nav>
+
+  <nav class="tdp-fog tdp-care__jump" aria-labelledby="tdp-care-jump">
+    <div class="tdp-wrap">
+      <h2 class="tdp-care__jumptitle" id="tdp-care-jump">{{ section.settings.jump_title }}</h2>
+      <ul class="tdp-care__chips">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'topic' and block.settings.anchor != blank -%}
+            <li><a href="#{{ block.settings.anchor | handleize }}">{{ block.settings.nav | default: block.settings.title }}</a></li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+  </nav>
+
+  <section class="tdp-sec tdp-bone" id="guides">
+    <div class="tdp-wrap">
+      <div class="tdp-head">
+      <div class="tdp-head__text">
+        {%- if section.settings.library_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.library_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.library_title }}</h2>
+        {%- if section.settings.library_lede != blank -%}<p class="tdp-lede">{{ section.settings.library_lede }}</p>{%- endif -%}
+      </div>
+    </div>
+      {%- for cat in tdp_cats -%}
+        {%- assign c = cat | strip -%}
+        {%- if c == blank -%}{%- continue -%}{%- endif -%}
+        {%- assign n = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- assign bc = block.settings.category | strip -%}
+          {%- if block.type == 'topic' and bc == c -%}{%- assign n = n | plus: 1 -%}{%- endif -%}
+        {%- endfor -%}
+        {%- if n == 0 -%}{%- continue -%}{%- endif -%}
+        <div class="tdp-care__cat">
+          <h3 class="tdp-care__cattitle">{{ c }}<span>{{ n }} {% if n == 1 %}guide{% else %}guides{% endif %}</span></h3>
+          <ul class="tdp-grid tdp-sm2 tdp-lg3">
+            {%- for block in section.blocks -%}
+              {%- assign bc = block.settings.category | strip -%}
+              {%- if block.type == 'topic' and bc == c -%}
+                <li class="tdp-card tdp-card--hover tdp-p6 tdp-care__card">
+                  <div class="tdp-care__cardtop">
+                    {%- case block.settings.icon -%}{%- when 'circle-gauge' -%}<svg class="tdp-ic tdp-drop" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15.6 2.7a10 10 0 1 0 5.7 5.7"/><circle cx="12" cy="12" r="2"/><path d="M13.4 10.6 19 5"/></svg>{%- when 'repeat' -%}<svg class="tdp-ic tdp-drop" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>{%- when 'disc-3' -%}<svg class="tdp-ic tdp-drop" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M6 12c0-1.7.7-3.2 1.8-4.2"/><circle cx="12" cy="12" r="2"/><path d="M18 12c0 1.7-.7 3.2-1.8 4.2"/></svg>{%- when 'ruler' -%}<svg class="tdp-ic tdp-drop" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/></svg>{%- when 'compass' -%}<svg class="tdp-ic tdp-drop" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/><circle cx="12" cy="12" r="10"/></svg>{%- when 'radio' -%}<svg class="tdp-ic tdp-drop" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>{%- when 'shopping-cart' -%}<svg class="tdp-ic tdp-drop" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>{%- when 'wrench' -%}<svg class="tdp-ic tdp-drop" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>{%- endcase -%}
+                    <span class="tdp-badge tdp-badge--soft">{{ block.settings.category }}</span>
+                  </div>
+                  <h4 class="tdp-h3">{{ block.settings.title }}</h4>
+                  <p class="tdp-small tdp-care__grow">{{ block.settings.summary }}</p>
+                  <a href="#{{ block.settings.anchor | handleize }}" class="tdp-textlink">{{ section.settings.guide_link_label }}<span class="tdp-sr">: {{ block.settings.title }}</span><svg class="tdp-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endfor -%}
+    </div>
+  </section>
+
+  <section class="tdp-sec tdp-fog">
+    <div class="tdp-wrap">
+      <div class="tdp-head tdp-head--center">
+      <div class="tdp-head__text">
+        {%- if section.settings.check_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.check_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.check_title }}</h2>
+        {%- if section.settings.check_lede != blank -%}<p class="tdp-lede">{{ section.settings.check_lede }}</p>{%- endif -%}
+      </div>
+    </div>
+      {%- assign tdp_steps = section.settings.check_steps | newline_to_br | split: '<br />' -%}
+      <ol class="tdp-grid tdp-sm2 tdp-lg4 tdp-care__steps">
+        {%- assign k = 0 -%}
+        {%- for step in tdp_steps -%}{%- assign t = step | strip -%}{%- if t != blank -%}
+          {%- assign k = k | plus: 1 -%}
+          <li class="tdp-card tdp-care__step">
+            <span class="tdp-care__num" aria-hidden="true">{% if k < 10 %}0{% endif %}{{ k }}</span>
+            <p>{{ t }}</p>
+          </li>
+        {%- endif -%}{%- endfor -%}
+      </ol>
+    </div>
+  </section>
+
+  <section class="tdp-sec tdp-bone">
+    <div class="tdp-wrap tdp-care__articles">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'topic' -%}
+          <article id="{{ block.settings.anchor | handleize }}" class="tdp-care__article" {{ block.shopify_attributes }}>
+            <p class="tdp-eyebrow tdp-eyebrow--plain">{{ block.settings.category }}</p>
+            <div class="tdp-care__titlerow">
+              {%- case block.settings.icon -%}{%- when 'circle-gauge' -%}<svg class="tdp-ic tdp-drop" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15.6 2.7a10 10 0 1 0 5.7 5.7"/><circle cx="12" cy="12" r="2"/><path d="M13.4 10.6 19 5"/></svg>{%- when 'repeat' -%}<svg class="tdp-ic tdp-drop" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>{%- when 'disc-3' -%}<svg class="tdp-ic tdp-drop" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M6 12c0-1.7.7-3.2 1.8-4.2"/><circle cx="12" cy="12" r="2"/><path d="M18 12c0 1.7-.7 3.2-1.8 4.2"/></svg>{%- when 'ruler' -%}<svg class="tdp-ic tdp-drop" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/></svg>{%- when 'compass' -%}<svg class="tdp-ic tdp-drop" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/><circle cx="12" cy="12" r="10"/></svg>{%- when 'radio' -%}<svg class="tdp-ic tdp-drop" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>{%- when 'shopping-cart' -%}<svg class="tdp-ic tdp-drop" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>{%- when 'wrench' -%}<svg class="tdp-ic tdp-drop" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>{%- endcase -%}
+              <h2 class="tdp-h2">{{ block.settings.title }}</h2>
+            </div>
+            <div class="tdp-care__cols">
+              <div>
+                <p class="tdp-care__why">{{ block.settings.why }}</p>
+                {%- if block.settings.extra == 'psi' -%}
+                  <div class="tdp-card tdp-p6 tdp-bl-amber tdp-care__extra">
+                    <span class="tdp-badge tdp-badge--amber">{{ section.settings.psi_badge }}</span>
+                    <p class="tdp-small tdp-care__p4">{{ section.settings.psi_p1 }}</p>
+                    <p class="tdp-small tdp-care__p3">{{ section.settings.psi_p2 }}</p>
+                    <p class="tdp-small tdp-care__p3">{{ section.settings.psi_p3 }}</p>
+                  </div>
+                {%- elsif block.settings.extra == 'penny' -%}
+                  <div class="tdp-card tdp-p6 tdp-bl-drop tdp-care__extra">
+                    <div class="tdp-care__pennyhead"><svg class="tdp-ic tdp-drop" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg><h3 class="tdp-care__pennytitle">{{ section.settings.penny_title }}</h3></div>
+                    {%- assign tdp_penny = section.settings.penny_steps | newline_to_br | split: '<br />' -%}
+                    <ol class="tdp-care__penny">
+                      {%- assign k = 0 -%}
+                      {%- for step in tdp_penny -%}{%- assign t = step | strip -%}{%- if t != blank -%}
+                        {%- assign k = k | plus: 1 -%}
+                        <li><span aria-hidden="true">{{ k }}</span><p>{{ t }}</p></li>
+                      {%- endif -%}{%- endfor -%}
+                    </ol>
+                    {%- if section.settings.penny_note != blank -%}<p class="tdp-xs tdp-care__pennynote">{{ section.settings.penny_note }}</p>{%- endif -%}
+                  </div>
+                {%- endif -%}
+              </div>
+              <div>
+                <div class="tdp-card tdp-p6">
+                  <h3 class="tdp-h3 tdp-care__listtitle">{{ section.settings.checklist_title }}</h3>
+                  {%- assign tdp_items = block.settings.checklist | newline_to_br | split: '<br />' -%}
+                  <ul class="tdp-checks">
+                    {%- for item in tdp_items -%}{%- assign t = item | strip -%}{%- if t != blank -%}<li><svg class="tdp-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>{{ t }}</span></li>{%- endif -%}{%- endfor -%}
+                  </ul>
+                </div>
+                {%- if block.settings.cadence != blank -%}
+                  <div class="tdp-card tdp-p6 tdp-care__cadence">
+                    <h3 class="tdp-care__cadtitle">{{ section.settings.cadence_title }}</h3>
+                    <p>{{ block.settings.cadence }}</p>
+                  </div>
+                {%- endif -%}
+                {%- if block.settings.link1_label != blank or block.settings.link2_label != blank -%}
+                  <div class="tdp-care__links">
+                    <p class="tdp-label">{{ section.settings.links_label }}</p>
+                    <div class="tdp-actions">
+                      {%- if block.settings.link1_label != blank -%}<a href="{{ block.settings.link1 | default: '/pages/auto-service' }}" class="tdp-btn tdp-btn--outline tdp-btn--sm">{{ block.settings.link1_label }}<svg class="tdp-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>{%- endif -%}
+                      {%- if block.settings.link2_label != blank -%}<a href="{{ block.settings.link2 | default: '/pages/auto-service' }}" class="tdp-btn tdp-btn--outline tdp-btn--sm">{{ block.settings.link2_label }}<svg class="tdp-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>{%- endif -%}
+                    </div>
+                  </div>
+                {%- endif -%}
+                {%- if section.settings.elsewhere_note != blank -%}<p class="tdp-xs tdp-care__elsewhere">{{ section.settings.elsewhere_note }}</p>{%- endif -%}
+              </div>
+            </div>
+          </article>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </section>
+
+  <section class="tdp-sec tdp-fog">
+    <div class="tdp-wrap">
+      <div class="tdp-head">
+      <div class="tdp-head__text">
+        {%- if section.settings.upcoming_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.upcoming_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.upcoming_title }}</h2>
+        {%- if section.settings.upcoming_lede != blank -%}<p class="tdp-lede">{{ section.settings.upcoming_lede }}</p>{%- endif -%}
+      </div>
+    </div>
+      {%- assign tdp_up = section.settings.upcoming_list | newline_to_br | split: '<br />' -%}
+      <ul class="tdp-grid tdp-sm2 tdp-lg3 tdp-care__upcoming">
+        {%- for item in tdp_up -%}{%- assign t = item | strip -%}{%- if t != blank -%}
+          <li class="tdp-card"><span class="tdp-dot" aria-hidden="true"></span>{{ t }}</li>
+        {%- endif -%}{%- endfor -%}
+      </ul>
+      {%- if section.settings.upcoming_note != blank -%}<p class="tdp-small tdp-care__upnote">{{ section.settings.upcoming_note }}</p>{%- endif -%}
+    </div>
+  </section>
+
+  <section class="tdp-ink tdp-care__cta">
+    <div class="tdp-wrap tdp-care__ctagrid">
+      <div>
+        {%- if section.settings.cta_eyebrow != blank -%}<p class="tdp-eyebrow tdp-eyebrow--dark tdp-eyebrow--plain">{{ section.settings.cta_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.cta_title }}</h2>
+        {%- if section.settings.cta_lede != blank -%}<p class="tdp-lede tdp-care__ctalede">{{ section.settings.cta_lede }}</p>{%- endif -%}
+      </div>
+      <div class="tdp-care__ctabtns">
+        <a href="{{ section.settings.cta_link | default: '/collections/tires' }}" class="tdp-btn tdp-btn--primary">{{ section.settings.cta_label }}</a>
+        <a href="{{ tdp_tel }}" class="tdp-btn tdp-btn--ghost"><svg class="tdp-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.phone }}</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<style>
+  /* Page kit, shared by the td-page-* sections Agent E owns. Each section carries its own copy so it stays self-contained. */
+  .tdp { color: #070E1A; font-family: var(--font-body--family, inherit); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .tdp *, .tdp *::before, .tdp *::after { box-sizing: border-box; }
+  .tdp :where(h1, h2, h3, h4, p, ul, ol, dl, dd, dt, figure, blockquote, table, fieldset, legend, address) { margin: 0; padding: 0; }
+  .tdp :where(ul, ol) { list-style: none; }
+  .tdp :where(address) { font-style: normal; }
+  .tdp :where(fieldset) { border: 0; min-width: 0; }
+  .tdp :where(a) { color: inherit; }
+  .tdp :where(h1, h2, h3, h4) {
+    font-family: var(--font-heading--family, inherit); font-weight: 800; letter-spacing: -.018em;
+    font-variation-settings: "wdth" 108; color: inherit; text-transform: none;
+  }
+  .tdp :where(a, button, input, select, textarea, summary):focus-visible { outline: 2px solid #0068E8; outline-offset: 2px; }
+  .tdp-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+  .tdp-wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding-left: 1rem; padding-right: 1rem; }
+  .tdp-sec { padding: 3.5rem 0; }
+  .tdp-bone { background: #FFFFFF; }
+  .tdp-fog { background: #F4F6FA; }
+  /* Dark bands pin their text colour rather than inheriting body ink. */
+  .tdp-ink { background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); color: #FFFFFF; }
+  .tdp-ink :where(h1, h2, h3), .tdp-steel :where(h1, h2, h3) { color: #FFFFFF; }
+
+  .tdp-h1 { font-size: 2.4rem; line-height: .98; }
+  .tdp-h1, .tdp-head .tdp-h2 { text-wrap: balance; }
+  .tdp-h2 { font-size: 1.9rem; line-height: 1.02; }
+  .tdp-h3 { font-size: 1.2rem; line-height: 1.15; }
+  .tdp-eyebrow {
+    display: flex; align-items: center; gap: .625rem; margin-bottom: .625rem;
+    font-family: var(--font-heading--family, inherit); font-size: 12px; font-weight: 700; line-height: 1.4;
+    text-transform: uppercase; letter-spacing: .09em; color: #0068E8;
+  }
+  .tdp-eyebrow--plain { display: block; }
+  .tdp-rule { flex: none; height: 1px; width: 1.5rem; background: rgba(0,104,232,.45); }
+  .tdp-eyebrow--dark { color: #00B4FC; }
+  .tdp-eyebrow--dark .tdp-rule { background: rgba(0,180,252,.5); }
+  .tdp-label {
+    display: block; margin-bottom: .375rem; font-family: var(--font-heading--family, inherit);
+    font-size: 11px; font-weight: 700; line-height: 1.4; text-transform: uppercase; letter-spacing: .07em; color: #586274;
+  }
+  .tdp-lede { font-size: 1.0625rem; line-height: 1.6; color: #586274; }
+  .tdp-ink .tdp-lede, .tdp-steel .tdp-lede { color: rgba(255,255,255,.7); }
+  .tdp-small { font-size: .875rem; line-height: 1.625; color: #586274; }
+  .tdp-xs { font-size: .75rem; line-height: 1.625; color: #586274; }
+  .tdp-drop { color: #0068E8; }
+  .tdp-small a, .tdp-xs a, .tdp-lede a { text-underline-offset: 2px; }
+  .tdp-small a:hover, .tdp-xs a:hover { color: #0068E8; }
+
+  .tdp-head { margin-bottom: 2rem; }
+  .tdp-head__text { max-width: 42rem; }
+  .tdp-head .tdp-lede { margin-top: 1rem; max-width: 36rem; }
+  .tdp-head--center { text-align: center; }
+  .tdp-head--center .tdp-head__text { margin: 0 auto; }
+  .tdp-head--center .tdp-eyebrow { justify-content: center; }
+  .tdp-head--center .tdp-lede { margin-left: auto; margin-right: auto; }
+
+  /* Masthead */
+  .tdp-hero { position: relative; overflow: hidden; background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); color: #FFFFFF; }
+  .tdp-hero__line { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(0,180,252,.35), transparent); }
+  .tdp-hero__inner { position: relative; padding-top: 3.5rem; padding-bottom: 3.5rem; }
+  .tdp-hero .tdp-eyebrow { color: #00B4FC; margin-bottom: .75rem; }
+  .tdp-hero .tdp-rule { background: rgba(0,180,252,.55); }
+  .tdp-hero .tdp-h1 { max-width: 56rem; color: #FFFFFF; }
+  .tdp-hero__lede { margin-top: 1.25rem; max-width: 42rem; font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.7); }
+  .tdp-hero__actions { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: .75rem; }
+
+  /* Breadcrumbs */
+  .tdp-crumbs { background: #FFFFFF; border-bottom: 1px solid rgba(7,14,26,.1); }
+  .tdp-crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: .375rem; padding-top: 2px; padding-bottom: 2px; font-size: 12px; color: #586274; }
+  .tdp-crumbs li { display: flex; align-items: center; gap: .375rem; }
+  .tdp-crumbs a { display: flex; align-items: center; min-height: 44px; text-decoration: none; color: #586274; }
+  .tdp-crumbs a:hover { color: #0068E8; }
+  .tdp-crumbs [aria-current] { color: #070E1A; }
+  .tdp-crumbs svg { color: rgba(88,98,116,.5); }
+
+  /* Buttons. 44px minimum so every one clears the tap-target floor. */
+  .tdp-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px;
+    padding: .75rem 1.5rem; border-radius: 6px; border: 1px solid transparent; cursor: pointer;
+    font-family: var(--font-heading--family, inherit); font-size: 15px; font-weight: 700; line-height: 1;
+    letter-spacing: -.005em; text-decoration: none; text-align: center; transition: background-color .15s, border-color .15s, box-shadow .15s, color .15s;
+  }
+  .tdp-btn--sm { padding: .5rem 1rem; font-size: 13px; }
+  .tdp-btn--primary { background: #0068E8; color: #FFFFFF; box-shadow: 0 4px 14px -2px rgba(0,104,232,.35); }
+  .tdp-btn--primary:hover { background: #0053C4; box-shadow: none; }
+  .tdp-btn--outline { border-color: rgba(7,14,26,.15); background: #FFFFFF; color: #070E1A; box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .tdp-btn--outline:hover { border-color: rgba(7,14,26,.3); background: #F4F6FA; }
+  .tdp-btn--ghost { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.05); color: #FFFFFF; }
+  .tdp-btn--ghost:hover { border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.1); }
+  .tdp-textlink { display: inline-flex; align-items: center; gap: .375rem; min-height: 44px; font-family: var(--font-heading--family, inherit); font-size: .875rem; font-weight: 700; color: #0068E8; text-decoration: none; }
+  .tdp-textlink:hover { color: #0053C4; }
+
+  /* Surfaces */
+  .tdp-card { background: #FFFFFF; border: 1px solid rgba(7,14,26,.07); border-radius: 12px; box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .tdp-card--hover { transition: transform .2s, box-shadow .2s; }
+  .tdp-card--hover:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(7,14,26,.05), 0 2px 4px rgba(7,14,26,.06), 0 18px 38px -10px rgba(7,14,26,.20); }
+  .tdp-p6 { padding: 1.5rem; }
+  .tdp-bl-drop { border-left: 4px solid #0068E8; }
+  .tdp-bl-amber { border-left: 4px solid #F5A623; }
+  .tdp-badge {
+    display: inline-flex; align-items: center; border-radius: 6px; padding: .25rem .5rem;
+    font-family: var(--font-heading--family, inherit); font-size: 11px; font-weight: 700; line-height: 1.1;
+    text-transform: uppercase; letter-spacing: .09em;
+  }
+  .tdp-badge--soft { background: rgba(7,14,26,.06); color: #070E1A; box-shadow: inset 0 0 0 1px rgba(7,14,26,.1); }
+  .tdp-badge--amber { background: #F5A623; color: #070E1A; }
+  .tdp-ic { flex: none; display: inline-block; vertical-align: middle; }
+
+  .tdp-grid { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); }
+  .tdp-dot { flex: none; margin-top: .5rem; height: 6px; width: 6px; border-radius: 999px; background: #0068E8; }
+  .tdp-checks > li { display: flex; align-items: flex-start; gap: .5rem; font-size: .875rem; line-height: 1.43; color: #070E1A; }
+  .tdp-checks > li + li { margin-top: .625rem; }
+  .tdp-checks svg { margin-top: 2px; color: #0068E8; }
+  .tdp-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+
+  @media (min-width: 640px) {
+    .tdp-sm2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 768px) {
+    .tdp-wrap { padding-left: 2rem; padding-right: 2rem; }
+    .tdp-sec { padding: 5rem 0; }
+    .tdp-h1 { font-size: 4.25rem; }
+    .tdp-h2 { font-size: 3rem; }
+    .tdp-h3 { font-size: 1.45rem; }
+    .tdp-lede { font-size: 1.1875rem; }
+    .tdp-head { margin-bottom: 3rem; }
+    .tdp-hero__inner { padding-top: 5rem; padding-bottom: 5rem; }
+    .tdp-hero__lede { font-size: 1.25rem; }
+  }
+  @media (min-width: 1024px) {
+    .tdp-lg3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tdp-lg4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tdp *, .tdp *::before, .tdp *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+
+  .tdp-care__jump { border-bottom: 1px solid rgba(7,14,26,.1); }
+  .tdp-care__jump .tdp-wrap { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+  .tdp-care__jumptitle { margin-bottom: .75rem; font-size: .875rem; font-weight: 700; line-height: 1.43; color: #586274; }
+  .tdp-care__chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .tdp-care__chips a {
+    display: inline-flex; align-items: center; min-height: 44px; padding: .5rem .875rem; border-radius: 6px; border: 1px solid rgba(7,14,26,.15);
+    background: #FFFFFF; font-family: var(--font-heading--family, inherit); font-size: .875rem; font-weight: 700; color: #070E1A; text-decoration: none; transition: border-color .15s, color .15s;
+  }
+  .tdp-care__chips a:hover { border-color: #0068E8; color: #0068E8; }
+  #guides, .tdp-care__article { scroll-margin-top: 6rem; }
+  .tdp-care__cat + .tdp-care__cat { margin-top: 3rem; }
+  .tdp-care__cattitle { margin-bottom: 1.25rem; border-bottom: 1px solid rgba(7,14,26,.1); padding-bottom: .75rem; font-size: 1.25rem; line-height: 1.4; color: #070E1A; }
+  .tdp-care__cattitle span { margin-left: .5rem; font-size: .875rem; color: #586274; }
+  .tdp-care__card { display: flex; flex-direction: column; }
+  .tdp-care__cardtop { margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+  .tdp-care__grow { margin-top: .5rem; flex: 1; }
+  .tdp-care__card .tdp-textlink { margin-top: .75rem; }
+  .tdp-care__steps { gap: 1rem; }
+  .tdp-care__step { padding: 1.25rem; }
+  .tdp-care__num { display: block; margin-bottom: .75rem; font-family: var(--font-heading--family, inherit); font-size: 1.875rem; line-height: 1; color: #0068E8; }
+  .tdp-care__step p { font-size: .875rem; line-height: 1.625; color: #070E1A; }
+  .tdp-care__article { border-top: 1px solid rgba(7,14,26,.1); padding-top: 3.5rem; }
+  .tdp-care__article + .tdp-care__article { margin-top: 4rem; }
+  .tdp-care__titlerow { margin-bottom: 1.25rem; display: flex; align-items: center; gap: .75rem; }
+  .tdp-care__cols { display: grid; gap: 2rem; }
+  .tdp-care__why { max-width: 68ch; font-size: 1.0625rem; line-height: 1.75; color: #586274; }
+  .tdp-care__extra { margin-top: 1.5rem; }
+  .tdp-care__p4 { margin-top: 1rem; }
+  .tdp-care__p3 { margin-top: .75rem; }
+  .tdp-care__extra strong { font-weight: 400; color: #070E1A; }
+  .tdp-care__pennyhead { margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem; }
+  .tdp-care__pennytitle { font-size: 1.125rem; line-height: 1.4; }
+  .tdp-care__penny li { display: flex; gap: .75rem; font-size: .875rem; line-height: 1.625; color: #586274; }
+  .tdp-care__penny li + li { margin-top: .75rem; }
+  .tdp-care__penny li > span { display: flex; flex: none; height: 1.5rem; width: 1.5rem; align-items: center; justify-content: center; border-radius: 6px; background: #070E1A; font-family: var(--font-heading--family, inherit); font-size: .875rem; color: #F5A623; }
+  .tdp-care__pennynote { margin-top: 1rem; border-top: 1px solid rgba(7,14,26,.1); padding-top: 1rem; }
+  .tdp-care__listtitle { margin-bottom: 1rem; }
+  .tdp-care__cadence { margin-top: 1rem; background: #F4F6FA; }
+  .tdp-care__cadtitle { margin-bottom: .5rem; font-size: .875rem; font-weight: 700; line-height: 1.43; color: #586274; }
+  .tdp-care__cadence p { font-size: .875rem; line-height: 1.625; color: #070E1A; }
+  .tdp-care__links { margin-top: 1rem; }
+  .tdp-care__elsewhere { margin-top: 1rem; }
+  .tdp-care__upcoming { gap: .75rem; }
+  .tdp-care__upcoming li { display: flex; align-items: flex-start; gap: .625rem; padding: 1rem 1.25rem; font-size: .875rem; line-height: 1.43; color: #586274; }
+  .tdp-care__upcoming .tdp-dot { background: rgba(0,104,232,.4); }
+  .tdp-care__upnote { margin-top: 1.5rem; }
+  .tdp-care__upnote a { text-decoration: underline; }
+  .tdp-care__upnote a:hover { color: #0068E8; }
+  .tdp-care__cta { padding: 3.5rem 0; }
+  .tdp-care__ctagrid { display: grid; gap: 2rem; }
+  .tdp-care__ctalede { margin-top: 1rem; max-width: 36rem; }
+  .tdp-care__ctabtns { display: flex; flex-direction: column; gap: .75rem; }
+  @media (min-width: 640px) {
+    .tdp-care__ctabtns { flex-direction: row; }
+  }
+  @media (min-width: 768px) {
+    .tdp-care__article { padding-top: 4rem; }
+    .tdp-care__article + .tdp-care__article { margin-top: 5rem; }
+    .tdp-care__cta { padding: 5rem 0; }
+    .tdp-care__ctagrid { grid-template-columns: 1.2fr 1fr; align-items: center; }
+    .tdp-care__ctabtns { flex-direction: column; }
+  }
+  @media (min-width: 1024px) {
+    .tdp-care__cols { grid-template-columns: 1.15fr 1fr; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "TireDrop page: Tire care",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Page header"
+    },
+    {
+      "type": "text",
+      "id": "hero_eyebrow",
+      "label": "Eyebrow",
+      "default": "Tire Care Guides"
+    },
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Heading",
+      "default": "Everything we end up explaining anyway"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_lede",
+      "label": "Supporting copy",
+      "default": "The questions we answer every week, written out properly. No upsell attached — read it, do it yourself, or buy the tires and have someone else fit them."
+    },
+    {
+      "type": "text",
+      "id": "crumb",
+      "label": "Breadcrumb label",
+      "default": "Tire Care Guides"
+    },
+    {
+      "type": "text",
+      "id": "hero_cta_label",
+      "label": "Button (jumps to the guides)",
+      "default": "Browse the guides"
+    },
+    {
+      "type": "text",
+      "id": "hero_call_label",
+      "label": "Call button (the number is appended)",
+      "default": "Ask us:"
+    },
+    {
+      "type": "header",
+      "content": "Contact details"
+    },
+    {
+      "type": "text",
+      "id": "phone",
+      "label": "Phone number",
+      "default": "(954) 773-1896",
+      "info": "Shown as written; the call link is built from its digits."
+    },
+    {
+      "type": "header",
+      "content": "Jump navigation"
+    },
+    {
+      "type": "text",
+      "id": "jump_title",
+      "label": "Heading",
+      "default": "Jump to a topic"
+    },
+    {
+      "type": "header",
+      "content": "Guide index"
+    },
+    {
+      "type": "text",
+      "id": "library_eyebrow",
+      "label": "Eyebrow",
+      "default": "The Library"
+    },
+    {
+      "type": "text",
+      "id": "library_title",
+      "label": "Heading",
+      "default": "Start with the one that brought you here"
+    },
+    {
+      "type": "textarea",
+      "id": "library_lede",
+      "label": "Supporting copy",
+      "default": "Every guide stands on its own. They are grouped by what you are trying to do: keep a set alive, stay safe on it, work out what is wrong, or buy the next one."
+    },
+    {
+      "type": "textarea",
+      "id": "categories",
+      "label": "Categories, in order (one per line)",
+      "default": "Maintenance\nSafety\nDiagnosing\nBuying",
+      "info": "Each guide's category must match one of these exactly."
+    },
+    {
+      "type": "text",
+      "id": "guide_link_label",
+      "label": "Card link label",
+      "default": "Read the guide"
+    },
+    {
+      "type": "header",
+      "content": "Five-minute check"
+    },
+    {
+      "type": "text",
+      "id": "check_eyebrow",
+      "label": "Eyebrow",
+      "default": "Start Here"
+    },
+    {
+      "type": "text",
+      "id": "check_title",
+      "label": "Heading",
+      "default": "The five-minute monthly check"
+    },
+    {
+      "type": "textarea",
+      "id": "check_lede",
+      "label": "Supporting copy",
+      "default": "If you only ever do one thing from this library, do this: once a month, cold tires, walk around the car."
+    },
+    {
+      "type": "textarea",
+      "id": "check_steps",
+      "label": "Steps (one per line)",
+      "default": "Check pressure on all four plus the spare, against the door placard.\nLook at tread depth — penny test, and find the wear bars.\nScan the sidewalls for cuts, cracks or bulges.\nNote anything new: a pull, a shimmy, a warning light."
+    },
+    {
+      "type": "header",
+      "content": "Inside each guide"
+    },
+    {
+      "type": "text",
+      "id": "checklist_title",
+      "label": "Checklist heading",
+      "default": "Checklist"
+    },
+    {
+      "type": "text",
+      "id": "cadence_title",
+      "label": "Cadence heading",
+      "default": "How often"
+    },
+    {
+      "type": "text",
+      "id": "links_label",
+      "label": "Service links label",
+      "default": "Rather we did it? (South Florida)"
+    },
+    {
+      "type": "text",
+      "id": "elsewhere_note",
+      "label": "Note under the links",
+      "default": "Anywhere else in the continental United States, buy the tires here and have your own installer fit them."
+    },
+    {
+      "type": "header",
+      "content": "PSI callout (tire pressure guide)"
+    },
+    {
+      "type": "text",
+      "id": "psi_badge",
+      "label": "Badge",
+      "default": "PSI: where the real number comes from"
+    },
+    {
+      "type": "textarea",
+      "id": "psi_p1",
+      "label": "Paragraph 1",
+      "default": "Open the driver's door and look at the placard on the door jamb. That sticker is the number your vehicle's engineers chose for your car, at its weight, on its suspension — front and rear, plus the spare. It is the source of truth."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "psi_p2",
+      "label": "Paragraph 2",
+      "default": "The big number molded into the tire sidewall is <strong>not</strong> your target. That is the maximum pressure the tire is rated to hold, not the pressure it should run at. Filling to the sidewall number gives you a hard ride, a narrow contact patch and tread that wears out down the middle."
+    },
+    {
+      "type": "textarea",
+      "id": "psi_p3",
+      "label": "Paragraph 3",
+      "default": "One more South Florida detail: check pressure cold, before you drive. Heat from a highway run or an afternoon in a parking lot can add several PSI, and topping off a hot tire leaves it low the next morning."
+    },
+    {
+      "type": "header",
+      "content": "Penny test (tread depth guide)"
+    },
+    {
+      "type": "text",
+      "id": "penny_title",
+      "label": "Heading",
+      "default": "The penny test"
+    },
+    {
+      "type": "textarea",
+      "id": "penny_steps",
+      "label": "Steps (one per line)",
+      "default": "Turn a penny so Lincoln's head points down into the tread.\nPush it into a groove — try several spots across the tire, not just one.\nIf you can see the top of Lincoln's head, you are at or below 2/32\" — legally worn out and done. Replace the tire.\nIf the tread covers part of his head, you have some life left — but start planning, especially before rainy season."
+    },
+    {
+      "type": "textarea",
+      "id": "penny_note",
+      "label": "Note",
+      "default": "A quarter is the stricter version of the same trick: if the tread reaches Washington's head you are around 4/32\", which is where wet braking really starts falling off. In Florida rain, we would rather you use the quarter."
+    },
+    {
+      "type": "header",
+      "content": "Guides being written"
+    },
+    {
+      "type": "text",
+      "id": "upcoming_eyebrow",
+      "label": "Eyebrow",
+      "default": "In Progress"
+    },
+    {
+      "type": "text",
+      "id": "upcoming_title",
+      "label": "Heading",
+      "default": "Guides we are still writing"
+    },
+    {
+      "type": "textarea",
+      "id": "upcoming_lede",
+      "label": "Supporting copy",
+      "default": "This library grows. These are the next ones on the bench — if one of them is the answer you need today, call and we will just tell you."
+    },
+    {
+      "type": "textarea",
+      "id": "upcoming_list",
+      "label": "Titles (one per line)",
+      "default": "Reading a tire sidewall, number by number\nAll-season, summer and all-terrain: what the labels actually promise\nLoad index and speed rating, and when they matter\nWet braking, hydroplaning and rainy-season driving\nRun-flats: what they cost you and what they buy you\nPlus-sizing wheels without wrecking the ride\nTorque specs, and why the tech uses a wrench instead of a gun\nWhat to check the week after a new set goes on\nStoring a seasonal set so it is still good next year\nTowing and payload: choosing a truck tire honestly"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "upcoming_note",
+      "label": "Note",
+      "default": "Something you want covered that is not on either list? <a href=\"/pages/contact\">Tell us</a> — the questions people actually ask are where these come from."
+    },
+    {
+      "type": "header",
+      "content": "Closing band"
+    },
+    {
+      "type": "text",
+      "id": "cta_eyebrow",
+      "label": "Eyebrow",
+      "default": "Tires shipped. Or installed."
+    },
+    {
+      "type": "text",
+      "id": "cta_title",
+      "label": "Heading",
+      "default": "Read it, then buy the right ones"
+    },
+    {
+      "type": "textarea",
+      "id": "cta_lede",
+      "label": "Supporting copy",
+      "default": "Shipped to your door anywhere in the continental United States, or free to the Sunrise shop if you would rather we fit them. Not sure which size or rating you need? Call and read us the door placard."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button",
+      "default": "Shop Tires"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button link"
+    }
+  ],
+  "max_blocks": 50,
+  "blocks": [
+    {
+      "type": "topic",
+      "name": "Guide",
+      "settings": [
+        {
+          "type": "text",
+          "id": "anchor",
+          "label": "Anchor id",
+          "info": "Lower case with hyphens, e.g. tire-pressure. Links elsewhere point at #anchor."
+        },
+        {
+          "type": "text",
+          "id": "nav",
+          "label": "Jump-nav label"
+        },
+        {
+          "type": "text",
+          "id": "category",
+          "label": "Category"
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            {
+              "value": "circle-gauge",
+              "label": "Gauge"
+            },
+            {
+              "value": "repeat",
+              "label": "Rotation"
+            },
+            {
+              "value": "disc-3",
+              "label": "Disc"
+            },
+            {
+              "value": "ruler",
+              "label": "Ruler"
+            },
+            {
+              "value": "compass",
+              "label": "Compass"
+            },
+            {
+              "value": "radio",
+              "label": "Radio"
+            },
+            {
+              "value": "shopping-cart",
+              "label": "Cart"
+            },
+            {
+              "value": "wrench",
+              "label": "Wrench"
+            }
+          ],
+          "default": "circle-gauge"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "textarea",
+          "id": "summary",
+          "label": "Card summary"
+        },
+        {
+          "type": "textarea",
+          "id": "why",
+          "label": "Why it matters"
+        },
+        {
+          "type": "textarea",
+          "id": "checklist",
+          "label": "Checklist (one per line)"
+        },
+        {
+          "type": "textarea",
+          "id": "cadence",
+          "label": "How often"
+        },
+        {
+          "type": "select",
+          "id": "extra",
+          "label": "Extra panel",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "psi",
+              "label": "PSI callout"
+            },
+            {
+              "value": "penny",
+              "label": "Penny test"
+            }
+          ],
+          "default": "none"
+        },
+        {
+          "type": "text",
+          "id": "link1_label",
+          "label": "Service link 1 label"
+        },
+        {
+          "type": "url",
+          "id": "link1",
+          "label": "Service link 1"
+        },
+        {
+          "type": "text",
+          "id": "link2_label",
+          "label": "Service link 2 label"
+        },
+        {
+          "type": "url",
+          "id": "link2",
+          "label": "Service link 2"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

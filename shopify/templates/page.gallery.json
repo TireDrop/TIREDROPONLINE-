@@ -26,6 +26,7 @@
         "cta_title": "Your order could be the next one out",
         "cta_lede": "Tires shipped anywhere in the continental United States, free to the Sunrise shop if you want them fitted, and the van for driveways around Broward.",
         "cta_label": "Shop Tires",
+        "tips_page": "shopify://pages/tire-care",
         "videos_note_link": "shopify://pages/tire-care",
         "cta_link": "shopify://collections/tires"
       },
@@ -174,7 +175,7 @@
             "kicker": "Pressure",
             "title": "The monthly five-minute tire check",
             "excerpt": "Cold tires, a real gauge, the door placard and a walk around the car. It catches most problems before they cost you a tire.",
-            "link": "/pages/tire-care#tire-pressure"
+            "anchor": "tire-pressure"
           }
         },
         "tip_2": {
@@ -183,7 +184,7 @@
             "kicker": "Tread",
             "title": "Penny test, quarter test and wear bars",
             "excerpt": "Three ways to answer the only question that matters in a downpour: is there still enough tread to move water?",
-            "link": "/pages/tire-care#tread-depth"
+            "anchor": "tread-depth"
           }
         },
         "tip_3": {
@@ -192,7 +193,7 @@
             "kicker": "Rotation",
             "title": "Why front tires die first",
             "excerpt": "Steering, braking and engine weight all land on the same two tires. Rotation is how you stop buying them in pairs.",
-            "link": "/pages/tire-care#tire-rotation"
+            "anchor": "tire-rotation"
           }
         },
         "tip_4": {
@@ -201,7 +202,7 @@
             "kicker": "Alignment",
             "title": "What one bad pothole really costs",
             "excerpt": "A knocked-out alignment can shave a shoulder off a new set in a few thousand miles. Here is how to spot it early.",
-            "link": "/pages/tire-care#alignment"
+            "anchor": "alignment"
           }
         },
         "tip_5": {
@@ -210,7 +211,7 @@
             "kicker": "TPMS",
             "title": "Your TPMS light is not always about pressure",
             "excerpt": "Sensors have batteries, and batteries die. Steady light and flashing light mean two different things.",
-            "link": "/pages/tire-care#tpms"
+            "anchor": "tpms"
           }
         },
         "tip_6": {
@@ -219,7 +220,7 @@
             "kicker": "Buying",
             "title": "Old tires with good tread are still old tires",
             "excerpt": "How to read the DOT date code, and why heat and sun age rubber faster than mileage does.",
-            "link": "/pages/tire-care#tire-replacement"
+            "anchor": "tire-replacement"
           }
         }
       },

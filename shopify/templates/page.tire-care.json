@@ -1,0 +1,194 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-page-tire-care",
+      "settings": {
+        "hero_eyebrow": "Tire Care Guides",
+        "hero_title": "Everything we end up explaining anyway",
+        "hero_lede": "The questions we answer every week, written out properly. No upsell attached — read it, do it yourself, or buy the tires and have someone else fit them.",
+        "crumb": "Tire Care Guides",
+        "hero_cta_label": "Browse the guides",
+        "hero_call_label": "Ask us:",
+        "phone": "(954) 773-1896",
+        "jump_title": "Jump to a topic",
+        "library_eyebrow": "The Library",
+        "library_title": "Start with the one that brought you here",
+        "library_lede": "Every guide stands on its own. They are grouped by what you are trying to do: keep a set alive, stay safe on it, work out what is wrong, or buy the next one.",
+        "categories": "Maintenance\nSafety\nDiagnosing\nBuying",
+        "guide_link_label": "Read the guide",
+        "check_eyebrow": "Start Here",
+        "check_title": "The five-minute monthly check",
+        "check_lede": "If you only ever do one thing from this library, do this: once a month, cold tires, walk around the car.",
+        "check_steps": "Check pressure on all four plus the spare, against the door placard.\nLook at tread depth — penny test, and find the wear bars.\nScan the sidewalls for cuts, cracks or bulges.\nNote anything new: a pull, a shimmy, a warning light.",
+        "checklist_title": "Checklist",
+        "cadence_title": "How often",
+        "links_label": "Rather we did it? (South Florida)",
+        "elsewhere_note": "Anywhere else in the continental United States, buy the tires here and have your own installer fit them.",
+        "psi_badge": "PSI: where the real number comes from",
+        "psi_p1": "Open the driver's door and look at the placard on the door jamb. That sticker is the number your vehicle's engineers chose for your car, at its weight, on its suspension — front and rear, plus the spare. It is the source of truth.",
+        "psi_p2": "The big number molded into the tire sidewall is <strong>not</strong> your target. That is the maximum pressure the tire is rated to hold, not the pressure it should run at. Filling to the sidewall number gives you a hard ride, a narrow contact patch and tread that wears out down the middle.",
+        "psi_p3": "One more South Florida detail: check pressure cold, before you drive. Heat from a highway run or an afternoon in a parking lot can add several PSI, and topping off a hot tire leaves it low the next morning.",
+        "penny_title": "The penny test",
+        "penny_steps": "Turn a penny so Lincoln's head points down into the tread.\nPush it into a groove — try several spots across the tire, not just one.\nIf you can see the top of Lincoln's head, you are at or below 2/32\" — legally worn out and done. Replace the tire.\nIf the tread covers part of his head, you have some life left — but start planning, especially before rainy season.",
+        "penny_note": "A quarter is the stricter version of the same trick: if the tread reaches Washington's head you are around 4/32\", which is where wet braking really starts falling off. In Florida rain, we would rather you use the quarter.",
+        "upcoming_eyebrow": "In Progress",
+        "upcoming_title": "Guides we are still writing",
+        "upcoming_lede": "This library grows. These are the next ones on the bench — if one of them is the answer you need today, call and we will just tell you.",
+        "upcoming_list": "Reading a tire sidewall, number by number\nAll-season, summer and all-terrain: what the labels actually promise\nLoad index and speed rating, and when they matter\nWet braking, hydroplaning and rainy-season driving\nRun-flats: what they cost you and what they buy you\nPlus-sizing wheels without wrecking the ride\nTorque specs, and why the tech uses a wrench instead of a gun\nWhat to check the week after a new set goes on\nStoring a seasonal set so it is still good next year\nTowing and payload: choosing a truck tire honestly",
+        "upcoming_note": "Something you want covered that is not on either list? <a href=\"/pages/contact\">Tell us</a> — the questions people actually ask are where these come from.",
+        "cta_eyebrow": "Tires shipped. Or installed.",
+        "cta_title": "Read it, then buy the right ones",
+        "cta_lede": "Shipped to your door anywhere in the continental United States, or free to the Sunrise shop if you would rather we fit them. Not sure which size or rating you need? Call and read us the door placard.",
+        "cta_label": "Shop Tires",
+        "cta_link": "shopify://collections/tires"
+      },
+      "blocks": {
+        "topic_1": {
+          "type": "topic",
+          "settings": {
+            "anchor": "tire-pressure",
+            "nav": "Tire Pressure",
+            "category": "Maintenance",
+            "icon": "circle-gauge",
+            "title": "Tire Pressure",
+            "summary": "The cheapest thing you can get right, and the one that drifts fastest. Where the real PSI number comes from, and why the sidewall is not it.",
+            "why": "Pressure is the cheapest thing on this page and the one that changes the most. An underinflated tire flexes more, runs hotter and wears its shoulders off — and in Florida heat, hot plus low is how sidewalls fail on I-595. Overinflated is no better: less rubber on the road, a harsher ride and a strip of wear straight down the center. Correct pressure is also the single easiest way to get the fuel economy the car was designed to have.",
+            "checklist": "Check all four tires cold — parked at least three hours, or before your first drive\nRead the driver's door-jamb placard for your target PSI, front and rear\nUse a real gauge, not the one bolted to a gas-station hose\nDo not forget the spare — it loses air sitting still\nRe-check after a big temperature swing or a cold front\nLook at the valve stems while you are down there; cracked rubber leaks",
+            "cadence": "Once a month, and before any long drive. Any time the low-pressure light comes on, check it that day.",
+            "extra": "psi",
+            "link1_label": "Tire Repair",
+            "link1": "shopify://pages/auto-service",
+            "link2_label": "TPMS Service",
+            "link2": "shopify://pages/auto-service"
+          }
+        },
+        "topic_2": {
+          "type": "topic",
+          "settings": {
+            "anchor": "tire-rotation",
+            "nav": "Tire Rotation",
+            "category": "Maintenance",
+            "icon": "repeat",
+            "title": "Tire Rotation",
+            "summary": "Why the front tires die first, how often to move them around, and the patterns that differ by drivetrain.",
+            "why": "Your tires do not wear evenly, because they are not doing the same job. On a front-wheel-drive car the fronts steer, brake hardest and carry the engine, so they can wear out roughly twice as fast as the rears. Rotation moves that wear around the vehicle so all four go down together. Skip it and you buy tires two at a time, more often, with a mismatched set in between — and on some all-wheel-drive systems, a big tread-depth mismatch is hard on the drivetrain itself.",
+            "checklist": "Follow the rotation pattern in your owner's manual — it differs by drivetrain\nDirectional tires stay on their own side; staggered setups may not rotate at all\nRe-torque the lug nuts to spec, in a star pattern, every single time\nSet pressures afterward, since front and rear targets can differ\nHave the tech note tread depth at each corner so you can track wear\nAsk about odd wear patterns — they usually point at alignment or a worn part",
+            "cadence": "Every 5,000 to 7,500 miles for most vehicles — easy to remember if you pair it with an oil change.",
+            "extra": "none",
+            "link1_label": "Tire Rotation",
+            "link1": "shopify://pages/auto-service",
+            "link2_label": "Oil Change",
+            "link2": "shopify://pages/auto-service"
+          }
+        },
+        "topic_3": {
+          "type": "topic",
+          "settings": {
+            "anchor": "tire-balancing",
+            "nav": "Tire Balancing",
+            "category": "Diagnosing",
+            "icon": "disc-3",
+            "title": "Tire Balancing",
+            "summary": "What that highway-speed shimmy is actually doing to your suspension, and when a rebalance is the fix.",
+            "why": "A wheel and tire assembly is never perfectly even, and at highway speed a half-ounce of imbalance turns into a vibration you can feel in the steering wheel or the seat. That shake is not just annoying — it hammers wheel bearings, tie rod ends and shocks, and it scrubs cupped patches into the tread that never go away. Balancing spins the assembly on a calibrated machine and corrects the heavy spot with small weights.",
+            "checklist": "Balance every tire when it is mounted — new tire, new balance\nRebalance after any repair, since a patch adds weight inside the tire\nFeel where the vibration lives: steering wheel usually means front, seat means rear\nAsk for the wheels to be cleaned of old weights and corrosion first\nIf a fresh balance does not fix it, look at a bent wheel or a separated belt\nCurb strikes and potholes are worth a re-check even if nothing looks wrong",
+            "cadence": "With every new tire, after every repair, and any time a vibration shows up above about 45 mph.",
+            "extra": "none",
+            "link1_label": "Tire Balancing",
+            "link1": "shopify://pages/auto-service",
+            "link2_label": "Tire Repair",
+            "link2": "shopify://pages/auto-service"
+          }
+        },
+        "topic_4": {
+          "type": "topic",
+          "settings": {
+            "anchor": "tread-depth",
+            "nav": "Tread Depth",
+            "category": "Safety",
+            "icon": "ruler",
+            "title": "Tread Depth",
+            "summary": "The measurement that decides when a tire is finished. Penny test, quarter test and wear bars, explained.",
+            "why": "Tread exists to move water out from under the tire. On dry pavement worn tires can even feel fine — right up to the first hard afternoon storm, when there is nowhere for the water to go and the tire starts floating instead of gripping. Stopping distance in the wet grows dramatically as tread disappears. This is the measurement that decides when a tire is finished, no matter how good the sidewall looks.",
+            "checklist": "Check tread in several spots across each tire, inside edge included\nFind the wear bars — the flat rubber ribs between the grooves. Flush with the tread means done\nCompare left to right; a big difference usually means alignment trouble\nWatch the inside shoulder especially, since that edge hides and wears first\nReplace at 2/32\" at the absolute latest, and consider it well before that in a rainy climate\nLook at age too: rubber over six years old can be hard and cracked with tread left",
+            "cadence": "Eyeball it monthly when you check pressure; measure it properly at every rotation.",
+            "extra": "penny",
+            "link1_label": "Tire Installation",
+            "link1": "shopify://pages/auto-service",
+            "link2_label": "Shop Tires",
+            "link2": "shopify://collections/tires"
+          }
+        },
+        "topic_5": {
+          "type": "topic",
+          "settings": {
+            "anchor": "alignment",
+            "nav": "Alignment",
+            "category": "Diagnosing",
+            "icon": "compass",
+            "title": "Wheel Alignment",
+            "summary": "How a single pothole quietly eats a shoulder off a new set, and the symptoms worth acting on.",
+            "why": "Alignment is the set of angles your wheels sit at relative to the road and to each other. Knock those angles out — a curb, a pothole on Oakland Park, a worn suspension bushing — and the tire gets dragged sideways a little on every rotation. That quietly grinds a shoulder off a brand-new set in a few thousand miles. It also shows up as a car that pulls, or a steering wheel that sits crooked while you drive straight.",
+            "checklist": "Align whenever you put on a new set — protect the investment on day one\nGet it checked after a real curb hit or a pothole that made you wince\nSymptoms to act on: pulling, off-center steering wheel, or a new tire squeal in turns\nAsk for the before-and-after printout and keep it\nHave worn tie rods, ball joints or bushings replaced first — otherwise it will not hold\nUneven inside-edge wear is the classic alignment tell",
+            "cadence": "At least once a year, with every new set of tires, and immediately after any hard impact.",
+            "extra": "none",
+            "link1_label": "Wheel Alignment",
+            "link1": "shopify://pages/auto-service",
+            "link2_label": "Suspension Repair",
+            "link2": "shopify://pages/auto-service"
+          }
+        },
+        "topic_6": {
+          "type": "topic",
+          "settings": {
+            "anchor": "tpms",
+            "nav": "TPMS",
+            "category": "Diagnosing",
+            "icon": "radio",
+            "title": "TPMS (Tire Pressure Monitoring)",
+            "summary": "Steady light versus flashing light — two different problems on the same dashboard symbol.",
+            "why": "Every light-duty vehicle sold in the US since the 2008 model year has a tire pressure monitoring system. Most use a sensor inside each wheel that radios pressure to the car. Those sensors have batteries sealed inside them, and after roughly five to ten years they die — which is why a lot of TPMS lights have nothing to do with your tires. Knowing which light you are looking at matters: a steady light means low pressure, while a light that flashes at startup and then stays on usually means the system itself has a fault.",
+            "checklist": "Steady light: check and correct pressure on all four, then the spare\nFlashing then solid: the system has a fault — a sensor, a relearn or a receiver issue\nTell your installer the vehicle has TPMS before any tire work\nReplace the service kit — valve core, seal and cap — whenever a tire comes off\nExpect a relearn procedure after rotation on some vehicles\nDo not just ignore the light; you lose the warning that actually protects you",
+            "cadence": "Service the sensors whenever tires are replaced, and expect battery-related failures somewhere in the five-to-ten-year range.",
+            "extra": "none",
+            "link1_label": "TPMS Service",
+            "link1": "shopify://pages/auto-service",
+            "link2_label": "Tire Installation",
+            "link2": "shopify://pages/auto-service"
+          }
+        },
+        "topic_7": {
+          "type": "topic",
+          "settings": {
+            "anchor": "tire-replacement",
+            "nav": "Tire Replacement",
+            "category": "Buying",
+            "icon": "shopping-cart",
+            "title": "Tire Replacement",
+            "summary": "Worn out, too old, or damaged beyond repair. How to tell which one you have, and what to replace it with.",
+            "why": "Tires get replaced for two reasons: they are worn out, or they are too old. Tread depth covers the first. The second catches people off guard — rubber ages even parked, and South Florida sun and heat speed that up. A six-year-old tire with plenty of tread can still be hard, cracked and unreliable. Damage is the third path: a sidewall puncture, a bulge, or a tear cannot be repaired safely, no matter what anyone tells you. Only punctures in the tread area, within a limited size, belong on the repair table.",
+            "checklist": "Replace in sets of four when you can; in pairs at minimum, always on the same axle\nMatch size, load index and speed rating to the door placard, not to guesswork\nCheck the DOT date code on the sidewall — the last four digits are week and year\nNever repair a sidewall, a bulge, or a puncture bigger than a quarter inch\nBudget for an alignment with the new set so they wear evenly\nHave the old tires disposed of properly — we haul them away with us",
+            "cadence": "When tread hits the wear bars, when damage cannot be repaired safely, or once the tires are past roughly six years old — whichever comes first.",
+            "extra": "none",
+            "link1_label": "Tire Installation",
+            "link1": "shopify://pages/auto-service",
+            "link2_label": "Tire Repair",
+            "link2": "shopify://pages/auto-service"
+          }
+        }
+      },
+      "block_order": [
+        "topic_1",
+        "topic_2",
+        "topic_3",
+        "topic_4",
+        "topic_5",
+        "topic_6",
+        "topic_7"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-page-commercial-tires",
+      "settings": {
+        "phone": "(954) 773-1896",
+        "email": "info@tiredroponline.com",
+        "crumb": "Commercial Tires",
+        "hero_eyebrow": "Commercial",
+        "hero_heading": "Fleet & Commercial Tires",
+        "hero_lede": "Vans, box trucks, shuttles and contractor pickups. We source the load-rated sizes your fleet runs and ship them wherever the trucks are — or fit them ourselves if you are in South Florida.",
+        "hero_cta_label": "Request a quote",
+        "why_eyebrow": "Why fleets call us",
+        "why_heading": "Downtime is the expensive part",
+        "why_lede": "A tire is a small line item. A truck sitting in a waiting room for three hours is not. Everything below is built around keeping units on the road, wherever they run.",
+        "cat_eyebrow": "In the catalog",
+        "cat_heading": "Commercial tires we ship",
+        "cat_lede": "Load Range E casings approved for dual fitment, priced per tire. Volume pricing applies to sets of eight or more.",
+        "cat_link_label": "View in the tire catalog",
+        "cat_link": "shopify://collections/tires",
+        "empty_heading": "Commercial sizes are priced per quote",
+        "empty_text": "Commercial tires are not listed in the online catalog yet. Send us the sizes your fleet runs with the quote form below, or call [phone], and we will price them per tire and quote delivery to your yard.",
+        "quote_eyebrow": "Fleet quote",
+        "quote_heading": "Request a quote",
+        "quote_lede": "Tell us what you run and we will come back with per-tire pricing, delivery to your yard, and — if you are local — what it costs to have us fit them.",
+        "fleet_sizes": "1–5 vehicles\n6–15 vehicles\n16–40 vehicles\n40+ vehicles",
+        "submit_label": "Request fleet quote",
+        "privacy_note": "We use these details to price your quote and schedule service — nothing else.",
+        "ok_heading": "Quote request received",
+        "ok_text": "Thanks — we have your details. A fleet specialist will follow up by phone or email during shop hours.",
+        "aside_heading": "Talk to a fleet specialist",
+        "aside_text": "Prefer to handle it on the phone? Call during shop hours and we will price your list while you are on the line.",
+        "hours": "Mon – Fri | 8:00 AM – 6:30 PM\nSaturday | 8:00 AM – 4:00 PM\nSunday | Closed",
+        "address": "7712 West Oakland Park Blvd, Sunrise, FL 33351",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=7712+West+Oakland+Park+Blvd+Sunrise+FL+33351",
+        "aside_shipping": "Fleet orders ship anywhere in the continental United States.",
+        "aside_install": "Sunrise, Plantation, Fort Lauderdale, Davie, Weston, Coral Springs, Tamarac, Lauderhill, Pembroke Pines, Miramar and the rest of Broward County."
+      },
+      "blocks": {
+        "v1": {
+          "type": "value",
+          "settings": {
+            "icon": "truck",
+            "title": "Shipped to your yard",
+            "body": "Orders drop-ship from the distributor straight to your address, anywhere in the continental US. No counter trips, no driver paid to wait."
+          }
+        },
+        "v2": {
+          "type": "value",
+          "settings": {
+            "icon": "clock",
+            "title": "Local? We fit them too",
+            "body": "South Florida fleets can send the order free to our Sunrise shop, or book the van for a block before the route starts or after it ends."
+          }
+        },
+        "v3": {
+          "type": "value",
+          "settings": {
+            "icon": "dollar-sign",
+            "title": "Fleet pricing on volume",
+            "body": "Sets of eight or more are quoted at fleet rates, with one consolidated invoice instead of a stack of counter receipts."
+          }
+        },
+        "v4": {
+          "type": "value",
+          "settings": {
+            "icon": "wrench",
+            "title": "Load-rated, not passenger-rated",
+            "body": "Load Range E casings, dual-fitment approved sizes and correct inflation for the axle weights your trucks actually carry."
+          }
+        },
+        "v5": {
+          "type": "value",
+          "settings": {
+            "icon": "calendar-clock",
+            "title": "Rotation on a schedule",
+            "body": "Tell us your sizes and cycle and we keep the order list ready, so replacements are planned around your calendar instead of a blowout on the interstate."
+          }
+        },
+        "v6": {
+          "type": "value",
+          "settings": {
+            "icon": "circle-check",
+            "title": "One number to call",
+            "body": "Tires, repairs and roadside swaps all come back to [phone] — no dispatch tree, no ticket queue."
+          }
+        }
+      },
+      "block_order": [
+        "v1",
+        "v2",
+        "v3",
+        "v4",
+        "v5",
+        "v6"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

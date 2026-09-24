@@ -1,0 +1,274 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-page-financing",
+      "settings": {
+        "hero_eyebrow": "Financing",
+        "hero_title": "Tires now. Pay over time.",
+        "hero_lede": "Nobody plans for a blown tire in the middle of the month. Here is every way you can pay for an order — including financing, where the terms are set by a third-party lender, not by us.",
+        "crumb": "Financing",
+        "hero_cta_label": "Start a Request",
+        "phone": "(954) 773-1896",
+        "pay_eyebrow": "Ways To Pay",
+        "pay_title": "Four ways an order gets paid for",
+        "pay_lede": "Most customers use the first one. The rest exist because not every order is a card swipe.",
+        "pay_note": "We would rather under-promise here than list a payment method that turns out not to work at checkout. If you want to know exactly what is accepted and which financing program is running today, call",
+        "plans_eyebrow": "Plan Options",
+        "plans_title": "Three shapes a plan usually takes",
+        "plans_lede": "These are the kinds of programs financing providers commonly offer for tire and wheel purchases. What you are actually offered depends on the lender and on your application.",
+        "plans_note": "We do not quote rates, approval odds or monthly payments on this page, because we do not set them. Ask us what programs are running the day you buy, and read the lender's offer before you accept it.",
+        "req_eyebrow": "Before You Apply",
+        "req_title": "What you will likely need",
+        "requirements": "A valid, government-issued photo ID\nA Social Security number or ITIN, if the lender asks for one\nProof of a steady income source\nAn active checking account or debit card for payments\nA working phone number and email for the lender's verification step\nTo be at least 18 years old, with a billing address in the United States",
+        "req_note": "Requirements come from the financing provider and can differ by program. This list is a general guide, not a checklist we control.",
+        "steps_eyebrow": "How It Works",
+        "steps_title": "Four steps, start to finish",
+        "terms_eyebrow": "Terms, In Plain Language",
+        "terms_title": "The part you should actually read",
+        "apply_eyebrow": "Get Started",
+        "apply_title": "Tell us what you need covered",
+        "apply_lede": "Send this over and we will call you with a real price for the order and whatever financing options are running that week.",
+        "apply_point1": "<strong>No credit check here.</strong> This form does not touch your credit and is not an application.",
+        "apply_point2": "<strong>We talk during business hours.</strong> Sent at night or on Sunday? You will hear from us the next day we are open. Eastern time.",
+        "apply_point3": "<strong>Cards work too.</strong> Financing is an option, never a requirement.",
+        "form_title": "Start a financing conversation",
+        "form_intro": "This goes to us, not to a lender. No credit check happens here. All fields are required.",
+        "label_name": "Full name",
+        "ph_name": "Alex Moreno",
+        "label_phone": "Phone",
+        "ph_phone": "(954) 555-0188",
+        "label_email": "Email",
+        "ph_email": "you@example.com",
+        "label_amount": "Amount needed (USD)",
+        "ph_amount": "850",
+        "amount_hint": "A rough estimate is fine — we will quote the real number.",
+        "submit_label": "Send Request",
+        "success_title": "Request received.",
+        "success_copy": "Thanks. Someone will call you during the hours the shop is open, to confirm what you are buying, price it properly, and point you to whichever financing program is running. If you would rather not wait for the call, the number below reaches the same people.",
+        "success_note": "This is not an application and it is not an approval — it only starts the conversation. Any credit decision is made by a third-party lender under their own terms.",
+        "success_call_label": "Call instead",
+        "success_again_label": "Start over",
+        "error_title": "We could not get that through just now.",
+        "error_copy": "Your request did not go through, so no call is queued. Fix what is marked below and send it again — or call, and whoever answers can price the order and tell you which financing program is running that day.",
+        "faq_eyebrow": "FAQ",
+        "faq_title": "Questions we get on the phone",
+        "faq_note": "Still unsure? <a href=\"/pages/contact\">Send us a message</a> or call"
+      },
+      "blocks": {
+        "method_1": {
+          "type": "method",
+          "settings": {
+            "icon": "credit-card",
+            "title": "Card",
+            "copy": "Major credit and debit cards. If you would rather not pay online, call and we can take the order and the card over the phone."
+          }
+        },
+        "method_2": {
+          "type": "method",
+          "settings": {
+            "icon": "wallet",
+            "title": "Financing through a lender",
+            "copy": "A third-party financing provider can spread the cost over time. They review the application, they approve or decline it, and they set the rate and the term. Call first — which programs are open changes, and we will not send you to an application that is not running."
+          }
+        },
+        "method_3": {
+          "type": "method",
+          "settings": {
+            "icon": "store",
+            "title": "In person at the shop",
+            "copy": "Paying for an install, an add-on service or a ship-to-store order at the counter in Sunrise? Cards work there too, and so does cash."
+          }
+        },
+        "method_4": {
+          "type": "method",
+          "settings": {
+            "icon": "truck",
+            "title": "Fleet and commercial",
+            "copy": "Running several vehicles? Call us about how billing can be arranged for a fleet account rather than paying order by order."
+          }
+        },
+        "plan_1": {
+          "type": "plan",
+          "settings": {
+            "name": "Short term",
+            "tag": "Small orders",
+            "highlight": false,
+            "summary": "Spread one or two tires, or a single install, over a few months of scheduled payments.",
+            "points": "Best for a single tire, a pair, or an install appointment\nShort payment schedule, decided at approval\nThe price of the tires does not change because you financed them",
+            "note": "Costs and any fees are set by the lender, not by us."
+          }
+        },
+        "plan_2": {
+          "type": "plan",
+          "settings": {
+            "name": "Promotional period",
+            "tag": "Most common",
+            "highlight": true,
+            "summary": "Some lender programs offer no interest if the balance is paid in full within a promotional window on purchases over a set amount.",
+            "points": "Typically aimed at a full set of four, or tires plus install\nPromotional terms apply only if you meet them exactly\nInterest can be charged back if the balance is not cleared in time",
+            "note": "Promotional offers change. Ask what is available the day you apply."
+          }
+        },
+        "plan_3": {
+          "type": "plan",
+          "settings": {
+            "name": "Longer term",
+            "tag": "Bigger orders",
+            "highlight": false,
+            "summary": "Fixed monthly payments over a longer term for larger tickets — a wheel and tire package, or a set plus alignment and brakes.",
+            "points": "Lower monthly payment, longer commitment\nInterest usually applies for the whole term\nYou can normally pay it off early — confirm with the lender",
+            "note": "Rate and term depend entirely on the lender's decision."
+          }
+        },
+        "step_1": {
+          "type": "step",
+          "settings": {
+            "title": "Build the order first",
+            "copy": "Put the tires or wheels in the cart, or call us and we will price it with you — including the install, if you are having it fitted. You need a real number before financing means anything."
+          }
+        },
+        "step_2": {
+          "type": "step",
+          "settings": {
+            "title": "Apply with the lender",
+            "copy": "Financing is handled by a third-party provider, and we will point you at whichever program is open when you buy. The application is theirs, the decision is theirs, and the information you enter goes to them — not to us."
+          }
+        },
+        "step_3": {
+          "type": "step",
+          "settings": {
+            "title": "Read what you were actually offered",
+            "copy": "If you are approved, check the amount, the term, the rate and any fees before you accept. Ask questions. Walking away at this point costs you nothing."
+          }
+        },
+        "step_4": {
+          "type": "step",
+          "settings": {
+            "title": "The order goes through",
+            "copy": "Once payment is settled, the order is placed: shipped to your address, or sent free to the Sunrise shop so we can fit it."
+          }
+        },
+        "term_1": {
+          "type": "term",
+          "settings": {
+            "lead": "We are not a bank and we are not a lender.",
+            "copy": "Financing is provided by a third-party company. They review the application, they decide, and they set the rate, the term and any fees. Nothing on this page is an offer of credit or a promise that you will be approved."
+          }
+        },
+        "term_2": {
+          "type": "term",
+          "settings": {
+            "lead": "Rates and APR vary.",
+            "copy": "The annual percentage rate you are offered depends on the provider's program and on their review of your application. Some promotional plans advertise no interest if the full balance is paid within the promotional period — if it is not, interest may be charged on the original amount from the date of purchase. That is the detail people miss most often."
+          }
+        },
+        "term_3": {
+          "type": "term",
+          "settings": {
+            "lead": "Read the agreement.",
+            "copy": "Your actual terms — payment amount, due dates, late fees, payoff rules — live in the agreement the lender gives you, not here. Those terms control if anything on this page reads differently."
+          }
+        },
+        "term_4": {
+          "type": "term",
+          "settings": {
+            "lead": "Prices are separate.",
+            "copy": "What you pay us for tires, wheels and labor does not change based on how you pay. Financing costs, if any, are between you and the lender."
+          }
+        },
+        "term_5": {
+          "type": "term",
+          "settings": {
+            "lead": "Availability is not guaranteed.",
+            "copy": "Which financing programs we can point you at depends on the providers we are set up with at the time. This page describes how financing works when it is available; it is not a statement that a particular program is open today. Ask on the phone before you count on it."
+          }
+        },
+        "term_6": {
+          "type": "term",
+          "settings": {
+            "lead": "Questions are free.",
+            "copy": "If any of this is unclear, call us at <a href=\"tel:+19547731896\">(954) 773-1896</a> before you sign anything. We would rather explain it twice than have you stuck in a plan you did not understand."
+          }
+        },
+        "faq_1": {
+          "type": "faq",
+          "settings": {
+            "q": "Do you decide who gets approved?",
+            "a": "No. We sell tires and wheels; we are not a lender. Applications go to a third-party financing company that makes its own decision using its own criteria. We find out the outcome at roughly the same time you do."
+          }
+        },
+        "faq_2": {
+          "type": "faq",
+          "settings": {
+            "q": "Will applying affect my credit?",
+            "a": "That depends on the provider and the program. Some run a soft inquiry to pre-qualify and a hard inquiry only if you accept an offer. The lender has to disclose this during the application — read that part carefully before you submit."
+          }
+        },
+        "faq_3": {
+          "type": "faq",
+          "settings": {
+            "q": "Can I finance an order that ships to my house?",
+            "a": "Yes. Financing covers the purchase, not the destination. A set shipped to an address three states away and a set fitted in Sunrise are paid for the same way."
+          }
+        },
+        "faq_4": {
+          "type": "faq",
+          "settings": {
+            "q": "What if I am declined?",
+            "a": "Nothing changes on our side and we do not treat you any differently. You can still pay by card, and we can often re-work the order — the safety-critical tires now, the rest later."
+          }
+        },
+        "faq_5": {
+          "type": "faq",
+          "settings": {
+            "q": "Can I pay it off early?",
+            "a": "Most plans allow it, and on a promotional no-interest offer paying early is usually the entire point. Confirm the details in your lender agreement, since early-payoff rules come from them."
+          }
+        },
+        "faq_6": {
+          "type": "faq",
+          "settings": {
+            "q": "What if I return part of a financed order?",
+            "a": "Refunds go back through the way you paid, so a refund on a financed order is credited against your balance with the lender. That can take a billing cycle or two to show up on their side, and any interest already charged is between you and them. Our return terms are on the terms page."
+          }
+        },
+        "faq_7": {
+          "type": "faq",
+          "settings": {
+            "q": "What payment methods do you take if I skip financing?",
+            "a": "Major credit and debit cards, and cards or cash in person at the shop. If you would rather pay over the phone, call and ask. If you are running a fleet, call and ask how billing can be arranged."
+          }
+        }
+      },
+      "block_order": [
+        "method_1",
+        "method_2",
+        "method_3",
+        "method_4",
+        "plan_1",
+        "plan_2",
+        "plan_3",
+        "step_1",
+        "step_2",
+        "step_3",
+        "step_4",
+        "term_1",
+        "term_2",
+        "term_3",
+        "term_4",
+        "term_5",
+        "term_6",
+        "faq_1",
+        "faq_2",
+        "faq_3",
+        "faq_4",
+        "faq_5",
+        "faq_6",
+        "faq_7"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}
