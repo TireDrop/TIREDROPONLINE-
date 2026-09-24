@@ -1,7 +1,8 @@
 {% comment %}
   About page. Ported from the React AboutPage (src/pages/support/AboutPage.jsx).
   Copy lives in settings and blocks. Year counts and "since <year>" claims are
-  left out on purpose: they go stale. The brand row is read from the tires
+  left out on purpose: they go stale. So are staff names and an origin story;
+  the copy sticks to what the store does. The brand row is read from the tires
   collection, so it can never name a brand nobody can buy; with an empty
   catalog it says so and asks the reader to call.
 {% endcomment %}
@@ -114,30 +115,6 @@
       </div>
     </section>
   {%- endif -%}
-
-  <section class="tdp-sec tdp-fog">
-    <div class="tdp-wrap">
-      <div class="tdp-head">
-      <div class="tdp-head__text">
-        {%- if section.settings.team_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.team_eyebrow }}</p>{%- endif -%}
-        <h2 class="tdp-h2">{{ section.settings.team_title }}</h2>
-        {%- if section.settings.team_lede != blank -%}<p class="tdp-lede">{{ section.settings.team_lede }}</p>{%- endif -%}
-      </div>
-    </div>
-      <ul class="tdp-grid tdp-sm2 tdp-lg3">
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'person' -%}
-            <li class="tdp-card tdp-card--hover tdp-p6" {{ block.shopify_attributes }}>
-              <div class="tdp-about__initial" aria-hidden="true">{{ block.settings.name | slice: 0 }}</div>
-              <h3 class="tdp-h3">{{ block.settings.name }}</h3>
-              <p class="tdp-eyebrow tdp-eyebrow--plain tdp-about__role">{{ block.settings.role }}</p>
-              <p class="tdp-small tdp-about__bio">{{ block.settings.bio }}</p>
-            </li>
-          {%- endif -%}
-        {%- endfor -%}
-      </ul>
-    </div>
-  </section>
 
   <section class="tdp-sec tdp-bone">
     <div class="tdp-wrap">
@@ -327,9 +304,6 @@
   .tdp-about__figure { display: block; font-family: var(--font-heading--family, inherit); font-size: 2.25rem; line-height: 1; color: #F5A623; }
   .tdp-about__statlabel { display: block; margin-top: .5rem; font-size: .875rem; line-height: 1.43; color: rgba(255,255,255,.72); }
   .tdp-about__statnote { margin-top: 2rem; font-size: .75rem; line-height: 1.5; color: rgba(255,255,255,.65); }
-  .tdp-about__initial { margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: center; height: 3.5rem; width: 3.5rem; border-radius: 6px; background: #070E1A; font-family: var(--font-heading--family, inherit); font-size: 1.5rem; color: #F5A623; }
-  .tdp-about__role { margin: .25rem 0 0; font-size: 11px; }
-  .tdp-about__bio { margin-top: .75rem; }
   .tdp-about__copy { margin-top: .5rem; }
   .tdp-about__brands { margin-top: 2.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
   .tdp-about__brand { font-family: var(--font-heading--family, inherit); font-size: 1.125rem; color: rgba(7,14,26,.72); }
@@ -361,7 +335,7 @@
     {"type": "header", "content": "Page header"},
     {"type": "text", "id": "hero_eyebrow", "label": "Eyebrow", "default": "About Us"},
     {"type": "text", "id": "hero_title", "label": "Heading", "default": "A real tire shop, with a national counter"},
-    {"type": "textarea", "id": "hero_lede", "label": "Supporting copy", "default": "TireDrop is the online store of Extreme Tires — a family-owned shop that fits tires in South Florida. We ship anywhere in the continental United States. Near Sunrise, we will also put them on for you."},
+    {"type": "textarea", "id": "hero_lede", "label": "Supporting copy", "default": "TireDrop is the online store of Extreme Tires in Sunrise, FL. Shipping is free anywhere in the continental United States. Near Sunrise, ship your tires free to the shop and have them installed there, or book mobile install in 10 South Florida towns."},
     {"type": "text", "id": "crumb", "label": "Breadcrumb label", "default": "About Us"},
     {"type": "text", "id": "hero_cta_label", "label": "Button label", "default": "Shop Tires"},
     {"type": "url", "id": "hero_cta_link", "label": "Button link"},
@@ -369,19 +343,15 @@
     {"type": "text", "id": "phone", "label": "Phone number", "default": "(954) 773-1896", "info": "Shown as written; the call link is built from its digits."},
     {"type": "header", "content": "Our story"},
     {"type": "text", "id": "story_eyebrow", "label": "Eyebrow", "default": "Our Story"},
-    {"type": "text", "id": "story_title", "label": "Heading", "default": "It started in a tire bay, not a warehouse"},
-    {"type": "textarea", "id": "story_lede", "label": "Supporting copy", "default": "Most online tire stores are a catalog with a checkout button attached. This one is attached to a shop that mounts tires for a living."},
+    {"type": "text", "id": "story_title", "label": "Heading", "default": "An online store with a tire shop behind it"},
+    {"type": "textarea", "id": "story_lede", "label": "Supporting copy", "default": "Here is what that means for your order."},
     {"type": "text", "id": "lockup_badge", "label": "Lockup badge", "default": "The lockup"},
     {"type": "text", "id": "lockup_before", "label": "Lockup text before the mark", "default": "You will see"},
     {"type": "text", "id": "lockup_mark", "label": "Lockup mark", "default": "Powered by Extreme Tires"},
-    {"type": "text", "id": "lockup_after", "label": "Lockup text after the mark", "default": "on this site. That is the parent business — the shop, the vans and the people."},
+    {"type": "text", "id": "lockup_after", "label": "Lockup text after the mark", "default": "on this site. Extreme Tires is the parent business: it runs the Sunrise shop and the mobile install vans."},
     {"type": "header", "content": "By the numbers"},
     {"type": "text", "id": "stats_heading", "label": "Heading (screen readers only)", "default": "TireDrop by the numbers"},
-    {"type": "textarea", "id": "stats_note", "label": "Footnote", "default": "The state count is the continental-US shipping area and the town list is the mobile install area. None of these are marketing round-ups."},
-    {"type": "header", "content": "Team"},
-    {"type": "text", "id": "team_eyebrow", "label": "Eyebrow", "default": "Our Team"},
-    {"type": "text", "id": "team_title", "label": "Heading", "default": "The people behind the order"},
-    {"type": "textarea", "id": "team_lede", "label": "Supporting copy", "default": "Small crew, clear roles. Whether your tires land on a porch in Ohio or on a lift in Sunrise, one of these people had a hand in it. First names only — call the shop and you will be talking to one of them."},
+    {"type": "textarea", "id": "stats_note", "label": "Footnote", "default": "48 is the continental-US shipping area, $0 is what that shipping costs, and 10 is the number of South Florida towns the mobile install vans cover."},
     {"type": "header", "content": "How we work"},
     {"type": "text", "id": "work_eyebrow", "label": "Eyebrow", "default": "How We Work"},
     {"type": "text", "id": "work_title", "label": "Heading", "default": "What you get that a warehouse cannot give you"},
@@ -412,11 +382,6 @@
     { "type": "stat", "name": "Stat", "settings": [
       {"type": "text", "id": "value", "label": "Figure"},
       {"type": "text", "id": "label", "label": "Label"}
-    ] },
-    { "type": "person", "name": "Team member", "settings": [
-      {"type": "text", "id": "name", "label": "First name"},
-      {"type": "text", "id": "role", "label": "Role"},
-      {"type": "textarea", "id": "bio", "label": "Bio"}
     ] },
     { "type": "promise", "name": "How we work card", "settings": [
       {"type": "select", "id": "icon", "label": "Icon", "options": [{"value": "package", "label": "Package"}, {"value": "store", "label": "Store"}, {"value": "truck", "label": "Truck"}, {"value": "shield-check", "label": "Shield"}, {"value": "tag", "label": "Price tag"}, {"value": "clock", "label": "Clock"}, {"value": "phone", "label": "Phone"}, {"value": "map-pin", "label": "Map pin"}, {"value": "wrench", "label": "Wrench"}], "default": "package"},

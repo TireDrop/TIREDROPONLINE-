@@ -5,22 +5,19 @@
       "settings": {
         "hero_eyebrow": "About Us",
         "hero_title": "A real tire shop, with a national counter",
-        "hero_lede": "TireDrop is the online store of Extreme Tires — a family-owned shop that fits tires in South Florida. We ship anywhere in the continental United States. Near Sunrise, we will also put them on for you.",
+        "hero_lede": "TireDrop is the online store of Extreme Tires in Sunrise, FL. Shipping is free anywhere in the continental United States. Near Sunrise, ship your tires free to the shop and have them installed there, or book mobile install in 10 South Florida towns.",
         "crumb": "About Us",
         "hero_cta_label": "Shop Tires",
         "phone": "(954) 773-1896",
         "story_eyebrow": "Our Story",
-        "story_title": "It started in a tire bay, not a warehouse",
-        "story_lede": "Most online tire stores are a catalog with a checkout button attached. This one is attached to a shop that mounts tires for a living.",
+        "story_title": "An online store with a tire shop behind it",
+        "story_lede": "Here is what that means for your order.",
         "lockup_badge": "The lockup",
         "lockup_before": "You will see",
         "lockup_mark": "Powered by Extreme Tires",
-        "lockup_after": "on this site. That is the parent business — the shop, the vans and the people.",
+        "lockup_after": "on this site. Extreme Tires is the parent business: it runs the Sunrise shop and the mobile install vans.",
         "stats_heading": "TireDrop by the numbers",
-        "stats_note": "The state count is the continental-US shipping area and the town list is the mobile install area. None of these are marketing round-ups.",
-        "team_eyebrow": "Our Team",
-        "team_title": "The people behind the order",
-        "team_lede": "Small crew, clear roles. Whether your tires land on a porch in Ohio or on a lift in Sunrise, one of these people had a hand in it. First names only — call the shop and you will be talking to one of them.",
+        "stats_note": "48 is the continental-US shipping area, $0 is what that shipping costs, and 10 is the number of South Florida towns the mobile install vans cover.",
         "work_eyebrow": "How We Work",
         "work_title": "What you get that a warehouse cannot give you",
         "work_lede": "Nothing here is a trade secret. It is the short list of things we refuse to cut corners on, online or in the bay.",
@@ -41,111 +38,72 @@
         "story_1": {
           "type": "story",
           "settings": {
-            "copy": "Extreme Tires started out as one truck, a compressor and a phone that rang at all hours. The idea was simple enough: most tire work does not need a waiting room, it needs the right machine and the right hands. So the work went to wherever the car already was."
+            "copy": "TireDrop is the online store of Extreme Tires, the tire shop at 7712 West Oakland Park Blvd in Sunrise, FL."
           }
         },
         "story_2": {
           "type": "story",
           "settings": {
-            "copy": "Word moved the way it does in South Florida. A neighbor told a neighbor, an office manager told the rest of the park, a contractor called us to a jobsite and then kept calling. One truck became a fleet of vans, and the shop on 7712 West Oakland Park Blvd in Sunrise came next for the jobs that genuinely belong on a lift."
+            "copy": "Orders ship free to any address in the continental United States."
           }
         },
         "story_3": {
           "type": "story",
           "settings": {
-            "copy": "What has not changed since is the part people actually call us for: knowing which tire is worth the money. We hear how a set wore out. We see which sidewalls crack in the heat, which ones go quiet at highway speed, and which bargain brand comes back angry at 20,000 miles."
-          }
-        },
-        "story_4": {
-          "type": "story",
-          "settings": {
-            "copy": "TireDrop is what happens when you point that at the whole country. You order online, the tires ship from the distributor straight to your door, and we never touch a warehouse — but the catalog was picked by a shop, not by a spreadsheet. If you live near Sunrise, ship them free to us instead and we will fit them."
+            "copy": "If you are near Sunrise, you can ship your order to the shop at no charge and have the tires installed there. The shop also runs mobile install vans that fit tires in 10 South Florida towns."
           }
         },
         "milestone_1": {
           "type": "milestone",
           "settings": {
-            "when": "The start",
-            "title": "One truck, one promise",
-            "copy": "Extreme Tires starts in Sunrise with a single truck, mostly driveway calls and after-hours flats."
+            "when": "Online",
+            "title": "Order on TireDrop",
+            "copy": "Pick your tires and check out online, from anywhere in the continental United States."
           }
         },
         "milestone_2": {
           "type": "milestone",
           "settings": {
-            "when": "The early years",
-            "title": "Word of mouth does the marketing",
-            "copy": "Office parks and small fleets start booking standing appointments because nobody has to leave their desk."
+            "when": "Shipping",
+            "title": "Free to the continental US",
+            "copy": "Tires ship free to your address in any of the 48 continental states."
           }
         },
         "milestone_3": {
           "type": "milestone",
           "settings": {
-            "when": "Growth",
-            "title": "A fleet of vans, and a real shop",
-            "copy": "More vans, each carrying a tire machine, a spin balancer and calibrated torque wrenches — plus a bay on 7712 West Oakland Park Blvd for alignments, brakes and suspension."
+            "when": "Ship-to-store",
+            "title": "Free to the Sunrise shop",
+            "copy": "Ship the order to the Extreme Tires shop in Sunrise, FL at no charge and have the tires installed there."
           }
         },
         "milestone_4": {
           "type": "milestone",
           "settings": {
-            "when": "Today",
-            "title": "The shop goes national",
-            "copy": "TireDrop opens the same catalog to the continental United States, drop-shipped from the distributor. Local customers still get free ship-to-store and install."
+            "when": "Mobile install",
+            "title": "Vans in 10 South Florida towns",
+            "copy": "In 10 South Florida towns, a mobile install van can fit your tires where the car is parked."
           }
         },
         "stat_1": {
           "type": "stat",
           "settings": {
             "value": "48",
-            "label": "States in the shipping area"
+            "label": "States in the free-shipping area"
           }
         },
         "stat_2": {
           "type": "stat",
           "settings": {
+            "value": "$0",
+            "label": "Shipping to the continental US"
+          }
+        },
+        "stat_3": {
+          "type": "stat",
+          "settings": {
             "value": "10",
-            "label": "Broward towns the vans cover"
-          }
-        },
-        "person_1": {
-          "type": "person",
-          "settings": {
-            "name": "Luis",
-            "role": "Founder & Owner",
-            "bio": "Opened the shop and still answers the phone on busy Saturdays. TireDrop was his idea: sell the same tires nationally that he would put on his own family's car."
-          }
-        },
-        "person_2": {
-          "type": "person",
-          "settings": {
-            "name": "Yani",
-            "role": "Orders & Customer Care",
-            "bio": "Handles the questions that come in from across the country — fitment, order status, returns, and the ones that start with “I have no idea what size I need.”"
-          }
-        },
-        "person_3": {
-          "type": "person",
-          "settings": {
-            "name": "Keisha",
-            "role": "Sourcing & Fitment",
-            "bio": "Works the distributor catalogs. Finds the size, the load index and the speed rating that actually match the vehicle, and flags it when a listing looks wrong."
-          }
-        },
-        "person_4": {
-          "type": "person",
-          "settings": {
-            "name": "Marco",
-            "role": "Lead Install Technician",
-            "bio": "Runs the first van out of the yard most mornings. Mounts, balances and torques on driveways from Weston to Fort Lauderdale."
-          }
-        },
-        "person_5": {
-          "type": "person",
-          "settings": {
-            "name": "Andre",
-            "role": "Shop Foreman, Sunrise",
-            "bio": "Owns the bay work the van cannot do — alignments, brakes, suspension, and every ship-to-store set that gets fitted at the shop."
+            "label": "South Florida towns for mobile install"
           }
         },
         "promise_1": {
@@ -201,18 +159,13 @@
         "story_1",
         "story_2",
         "story_3",
-        "story_4",
         "milestone_1",
         "milestone_2",
         "milestone_3",
         "milestone_4",
         "stat_1",
         "stat_2",
-        "person_1",
-        "person_2",
-        "person_3",
-        "person_4",
-        "person_5",
+        "stat_3",
         "promise_1",
         "promise_2",
         "promise_3",
