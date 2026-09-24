@@ -274,6 +274,15 @@
     // After Shopify redirects back with ?contact_posted=true, move focus to the confirmation.
     var done = document.querySelector('#tdp-contact-form [role="status"]');
     if (done && /contact_posted=true/.test(location.search)) done.focus();
+    // ?topic=install (and friends) preselects the matching subject.
+    var topic = (new URLSearchParams(location.search).get('topic') || '').toLowerCase();
+    if (!topic) return;
+    var alias = { install: 'install', installation: 'install', shipping: 'shipping', delivery: 'shipping', order: 'order', returns: 'return', warranty: 'return', fleet: 'fleet', commercial: 'fleet' };
+    var want = alias[topic] || topic;
+    var radios = document.querySelectorAll('#tdp-contact-form input[name="contact[Subject]"]');
+    for (var i = 0; i < radios.length; i++) {
+      if (radios[i].value.toLowerCase().indexOf(want) !== -1) { radios[i].checked = true; break; }
+    }
   })();
 </script>
 
