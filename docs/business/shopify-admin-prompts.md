@@ -124,6 +124,11 @@ REPORT BACK:
 
 ## 5. Remove the email address from Shopify's privacy policy
 
+> **Superseded (September 24, 2026).** The business email is now
+> info@tiredroponline.com. The four Shopify policies are switched from the
+> gmail address to it through the Admin API, not through this prompt. Skip
+> this prompt; use prompt 10 for the settings that still point at gmail.
+
 The store owner decided the gmail address is not to be published. Shopify's
 auto-generated privacy policy publishes it anyway, and checkout links to it.
 
@@ -265,3 +270,52 @@ I am logged into Shopify admin in this browser.
 REPORT BACK: everything above as a list. Do not edit any rate, zone or tax
 setting.
 ```
+
+---
+
+## 10. Point the store's email at info@tiredroponline.com
+
+info@tiredroponline.com is the single address for forms, business information
+and contact. The pages, footer and policies already publish it. Shopify's own
+settings still use the gmail address, and those can only be changed in the
+admin. The Horizon contact form delivers to the store contact email, so until
+step 2 is done, contact-form messages keep going to gmail.
+
+```
+TASK: Make info@tiredroponline.com the store's email, and prove it receives mail.
+I am logged into Shopify admin and GoDaddy in this browser.
+Domain: tiredroponline.com (DNS at GoDaddy). Store: TireDrop.
+
+1. CHECK THE MAILBOX EXISTS (read only). In GoDaddy, open DNS for
+   tiredroponline.com and list every MX record (priority + value). Also note
+   whether GoDaddy shows an email product (Microsoft 365 / Professional
+   Email) or forwarding for this domain.
+   If there are NO MX records, STOP HERE and report "info@ has no mailbox" —
+   do not change anything in Shopify.
+
+2. Shopify admin → Settings → General → Store details → edit the contact
+   info. Set Store email / contact email to info@tiredroponline.com. Save.
+   If Shopify asks to verify the address, say so in your report.
+
+3. Settings → Notifications → Sender email: set info@tiredroponline.com.
+   If Shopify offers "Authenticate domain", open it and copy every DNS record
+   it shows (type, host/name, value) exactly.
+   In GoDaddy DNS for tiredroponline.com, ADD those records exactly as shown.
+   Do NOT edit or delete any existing record (especially the A, CNAME and
+   MX records Shopify and email already use).
+   Back in Shopify, click Verify. Report the status (it may say pending; DNS
+   can take up to 48 hours).
+
+4. TEST. Open https://tiredroponline.com/pages/contact in a new tab and
+   submit the contact form with name "Website test", your own email, and
+   message "TEST from the website contact form — please ignore."
+   Report exactly what the page says after submitting.
+
+5. REPORT BACK:
+   - MX records found (or "none")
+   - Store contact email: saved yes/no, verification needed yes/no
+   - Sender email: status, and the DNS records you added (copy them)
+   - Contact form test: the on-page message
+   Justin will confirm the test message arrived in the info@ inbox.
+```
+
