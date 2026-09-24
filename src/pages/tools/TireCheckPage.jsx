@@ -980,7 +980,7 @@ export default function TireCheckPage() {
                   {tread.status === "fine" &&
                     `That is healthy tread. Nothing here says replace, and nothing here says buy. Check again in a few months, or sooner if you are about to drive a long way in the wet.`}
                   {tread.status === "soon" &&
-                    `Still legal, but this is the band where rain starts to matter: below ${TREAD.wetRisk}/32" the grooves cannot clear enough water and wet stopping distances climb sharply. Hydroplaning starts here too. Safe to drive on, worth planning to replace.`}
+                    `Still legal, but this is the band where rain starts to matter: below ${TREAD.wetRisk}/32" the grooves cannot clear enough water and wet stopping distances climb sharply. Hydroplaning starts here too. Worth planning the replacement rather than waiting.`}
                   {tread.status === "replace" &&
                     `At or below ${TREAD.legal}/32" the tire is legally worn out in most US states, and the wet performance went long before the legality did. This one is done.`}
                 </p>
@@ -1248,6 +1248,23 @@ export default function TireCheckPage() {
               <p className="mt-4 max-w-2xl text-sm leading-relaxed text-smoke">
                 That is the whole answer. There is no offer under this
                 paragraph.
+              </p>
+
+              {/* The page answers two questions and must not be read as
+                  answering a third. It never sees a sidewall bulge, a cut, a
+                  previous repair, a separated belt or uneven wear from an
+                  alignment — every one of which can finish a tire that has
+                  plenty of tread and no age on it. Saying so is the
+                  difference between a useful tool and a safety claim we are
+                  not in a position to make. */}
+              <p className="mt-6 max-w-2xl border-t border-ink/10 pt-4 text-[13px] leading-relaxed text-smoke">
+                One thing this cannot do: it reads tread depth and date code,
+                and nothing else. It has not seen a bulge or a cut in your
+                sidewall, an old repair, a belt starting to separate, or wear
+                running unevenly across the tread — any of which can finish a
+                tire that still measures fine here. If something looks wrong, or
+                the car pulls, shakes or sits oddly, have someone look at it
+                properly.
               </p>
             </div>
           )}

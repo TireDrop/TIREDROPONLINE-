@@ -701,9 +701,9 @@ function Proof() {
           <p className="lede mt-4">
             {BUSINESS.parent} opened in {BUSINESS.foundedYear} and has been
             mounting tires in {BUSINESS.shop.city} ever since. {BUSINESS.name}{" "}
-            is the same crew selling online: orders drop-ship from the ATD and
-            U.S. AutoForce networks, so you get distributor pricing and a
-            catalog nobody could hold in a warehouse.
+            is the same crew selling online: orders drop-ship straight from the
+            distributor to wherever you want them, so the catalog is bigger than
+            anything a shop could hold in a warehouse.
           </p>
 
           <dl className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-4 lg:grid-cols-2">
