@@ -1,52 +1,65 @@
 {% comment %}
-  The four promises that sit directly under the hero. Blocks rather than fixed
-  settings so the list can be reordered or trimmed without touching Liquid.
+  The four promises directly under the hero (React HomePage <TrustBar>).
+  Blocks rather than fixed settings so the list can be reordered or trimmed
+  without touching Liquid. Each block picks one of the homepage icons.
 {% endcomment %}
 
-<section class="td-trust">
-  <ul class="td-trust__list">
-    {% for block in section.blocks %}
+{{ 'td-home.css' | asset_url | stylesheet_tag }}
+
+<section class="tdh tdh--bone td-trust" aria-label="{{ section.settings.label | escape }}">
+  <ul class="tdh-wrap td-trust__list" role="list">
+    {%- for block in section.blocks -%}
       <li class="td-trust__item" {{ block.shopify_attributes }}>
+        {%- render 'td-home-icon', name: block.settings.icon, size: 22, class: 'tdh-icon' -%}
         <h3 class="td-trust__title">{{ block.settings.title }}</h3>
         <p class="td-trust__copy">{{ block.settings.copy }}</p>
       </li>
-    {% endfor %}
+    {%- endfor -%}
   </ul>
 </section>
 
 <style>
-  .td-trust { border-bottom: 1px solid rgba(7,14,26,.1); background: #FFFFFF; }
+  .td-trust { border-bottom: 1px solid rgba(7,14,26,.1); }
   .td-trust__list {
-    max-width: 1280px; margin: 0 auto; padding: 2rem 1rem;
     display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
-    gap: 1.75rem 1.25rem; list-style: none;
+    gap: 1.75rem 1.25rem; list-style: none; margin: 0 auto; padding-top: 2rem; padding-bottom: 2rem;
   }
-  .td-trust__item {
-    border-top: 3px solid #0068E8; padding-top: .75rem;
-    display: grid; grid-row: span 2; grid-template-rows: subgrid; row-gap: .375rem; align-content: start;
-  }
+  .td-trust__item { display: flex; flex-direction: column; gap: .5rem; }
   .td-trust__title {
-    font-family: var(--font-heading--family, inherit);
-    font-size: .9375rem; line-height: 1.3; font-weight: 700;
-    margin: 0; color: #070E1A; text-wrap: balance;
+    font-size: 15px; line-height: 1.35; margin: 0; color: #070E1A; text-wrap: balance;
   }
-  .td-trust__copy { margin: 0; font-size: .8125rem; line-height: 1.55; color: #586274; }
-  @media (min-width: 768px) { .td-trust__list { padding: 2.25rem 2rem; } }
+  .td-trust__copy { margin: 0; font-size: .75rem; line-height: 1.625; color: #586274; }
+  @media (min-width: 768px) { .td-trust__title { font-size: 1rem; } }
   @media (min-width: 1024px) {
-    .td-trust__list { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 2rem; }
+    .td-trust__list { grid-template-columns: repeat(4, minmax(0,1fr)); column-gap: 2rem; }
   }
 </style>
 
 {% schema %}
 {
   "name": "TireDrop trust bar",
-  "tag": "section",
+  "tag": "div",
   "max_blocks": 6,
+  "settings": [
+    { "type": "text", "id": "label", "label": "Accessible name", "default": "Why order from TireDrop" }
+  ],
   "blocks": [
     {
       "type": "promise",
       "name": "Promise",
       "settings": [
+        {
+          "type": "select", "id": "icon", "label": "Icon", "default": "truck",
+          "options": [
+            { "value": "truck", "label": "Truck" },
+            { "value": "map-pin", "label": "Map pin" },
+            { "value": "store", "label": "Store" },
+            { "value": "calendar-check", "label": "Calendar" },
+            { "value": "package", "label": "Package" },
+            { "value": "wrench", "label": "Wrench" },
+            { "value": "badge-check", "label": "Badge" }
+          ]
+        },
         { "type": "text", "id": "title", "label": "Title" },
         { "type": "textarea", "id": "copy", "label": "Copy" }
       ]
@@ -56,10 +69,10 @@
     {
       "name": "TireDrop trust bar",
       "blocks": [
-        { "type": "promise", "settings": { "title": "Free shipping on every tire", "copy": "No minimum and no freight surcharge. The price on the tire is the price that ships." } },
-        { "type": "promise", "settings": { "title": "Ships anywhere in the lower 48", "copy": "Any street address in the continental United States — home, work, or your own installer." } },
-        { "type": "promise", "settings": { "title": "Free ship-to-store & install", "copy": "Send the set to our Sunrise shop at no charge and book the fitting." } },
-        { "type": "promise", "settings": { "title": "Fresh, DOT-dated rubber", "copy": "Drop-shipped rather than pulled off a shelf, so nothing has been ageing in a warehouse." } }
+        { "type": "promise", "settings": { "icon": "truck", "title": "Free shipping on every tire", "copy": "No minimum and no freight surcharge. The price on the tire is the price that ships." } },
+        { "type": "promise", "settings": { "icon": "map-pin", "title": "Ships anywhere in the lower 48", "copy": "Any street address in the continental United States — home, work, or your own installer." } },
+        { "type": "promise", "settings": { "icon": "store", "title": "Free ship-to-store & install", "copy": "Send the set to our Sunrise shop at no charge and book the fitting." } },
+        { "type": "promise", "settings": { "icon": "calendar-check", "title": "Fresh, DOT-dated rubber", "copy": "Shipped direct rather than pulled off a shelf, so nothing has been ageing in a warehouse." } }
       ]
     }
   ]
