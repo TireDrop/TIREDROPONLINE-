@@ -23,6 +23,7 @@ import {
 } from "../../components/ui/index.jsx";
 import { useCart, money } from "../../context/CartContext.jsx";
 import { BUSINESS } from "../../data/business.js";
+import { submitForm } from "../../data/forms.js";
 import {
   evaluatePromo,
   readSavedPromo,
@@ -398,6 +399,7 @@ export default function CheckoutPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [placed, setPlaced] = useState(null);
+  const [sending, setSending] = useState(false);
   const headingRef = useRef(null);
   // Once the shopper picks a delivery option it is theirs; until then the
   // cart decides the default.
@@ -473,13 +475,52 @@ export default function CheckoutPage() {
     placeOrder();
   }
 
-  function placeOrder() {
+  async function placeOrder() {
+    if (sending) return; // a second click must not place a second order
+    const ref = makeOrderRef();
+
+    // The order has to reach the shop, or the reference on the next screen is
+    // a number nobody can look up. It rides the same transport as the forms,
+    // so one VITE_FORM_ENDPOINT turns orders on with everything else.
+    setSending(true);
+    const outcome = await submitForm("order", {
+      reference: ref,
+      placedFor: `${form.firstName} ${form.lastName}`.trim(),
+      phone: form.phone,
+      email: form.email,
+      fulfillment: form.fulfillment,
+      address:
+        form.fulfillment === "shop"
+          ? `${BUSINESS.parent} — ${BUSINESS.shop.full}`
+          : [form.street, form.city, form.zip].filter(Boolean).join(", "),
+      vehicle: [form.year, form.make, form.model, form.trim]
+        .filter(Boolean)
+        .join(" "),
+      installDate: form.date || "",
+      installWindow: form.timeWindow || "",
+      promoCode: promo?.code || "",
+      items: safeLines
+        .map(
+          (l) =>
+            `${l.qty}x ${l.brand} ${l.name} ${l.size}${l.install ? " (fit at shop)" : ""} — ${money(l.price * l.qty)}`,
+        )
+        .join("\n"),
+      subtotal: money(totals.subtotal),
+      installation: money(totals.installTotal),
+      shipping: totals.shipping ? money(totals.shipping) : "FREE",
+      tax: money(totals.tax),
+      total: money(totals.total),
+    });
+    setSending(false);
+
     setPlaced({
-      ref: makeOrderRef(),
+      ref,
       lines: safeLines,
       totals,
       promoCode: promo?.code || "",
       form,
+      delivered: outcome.delivered,
+      sendError: outcome.error,
     });
     savePromo("");
     clear();
@@ -546,13 +587,29 @@ export default function CheckoutPage() {
                 className="mt-1 shrink-0 text-drop"
               />
               <div className="min-w-0">
-                <p className="eyebrow mb-1">Order received</p>
+                <p className="eyebrow mb-1">
+                  {placed.delivered ? "Order received" : "Call to confirm it"}
+                </p>
                 <h1 className="h1" tabIndex={-1} ref={headingRef}>
-                  Your order is in
+                  {placed.delivered
+                    ? "Your order is in"
+                    : "Finish this by phone"}
                 </h1>
                 <p className="lede mt-3">
-                  Thanks, {f.firstName}. Nothing has been charged yet — we call
-                  to confirm fitment and take payment before anything ships.
+                  {placed.delivered ? (
+                    <>
+                      Thanks, {f.firstName}. Nothing has been charged yet — we
+                      call to confirm fitment and take payment before anything
+                      ships.
+                    </>
+                  ) : (
+                    <>
+                      Thanks, {f.firstName}. Nothing has been charged — but this
+                      order has not reached the shop yet, so call{" "}
+                      {BUSINESS.phone} and read out the reference below. Your
+                      order is written out underneath it.
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -564,7 +621,11 @@ export default function CheckoutPage() {
                   {placed.ref}
                 </p>
               </div>
-              <Badge tone="amber">Awaiting confirmation call</Badge>
+              <Badge tone="amber">
+                {placed.delivered
+                  ? "Awaiting confirmation call"
+                  : "Not placed until you call"}
+              </Badge>
             </div>
 
             <div className="mt-8 grid gap-6 md:grid-cols-2">
@@ -576,10 +637,15 @@ export default function CheckoutPage() {
                       title: "We confirm your fitment",
                       copy: `We check the sizes against your ${f.year} ${f.make} ${f.model} before the order is released to the distributor.`,
                     },
-                    {
-                      title: "We call you back",
-                      copy: `Expect a call at ${f.phone} within one business day to confirm delivery and take payment.`,
-                    },
+                    placed.delivered
+                      ? {
+                          title: "We call you back",
+                          copy: `Expect a call at ${f.phone} to confirm delivery and take payment.`,
+                        }
+                      : {
+                          title: "You call us",
+                          copy: `This order did not reach the shop, so nobody is working on it yet. Call ${BUSINESS.phone} with reference ${placed.ref} and we will place it while you are on the line.`,
+                        },
                     {
                       title: ship
                         ? "Your order ships out"
@@ -1226,8 +1292,12 @@ export default function CheckoutPage() {
                 </Link>
               )}
 
-              <button type="submit" className="btn-primary">
-                {stepIndex === STEPS.length - 1 ? "Place Order" : "Continue"}
+              <button type="submit" className="btn-primary" disabled={sending}>
+                {stepIndex === STEPS.length - 1
+                  ? sending
+                    ? "Placing…"
+                    : "Place Order"
+                  : "Continue"}
                 <ArrowRight size={16} aria-hidden />
               </button>
 
