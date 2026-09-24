@@ -250,7 +250,7 @@ function ContactForm() {
             type="text"
             autoComplete="name"
             className="field"
-            placeholder="First and last name"
+            placeholder="Alex Moreno"
             value={values.name}
             onChange={update("name")}
             aria-invalid={errors.name ? "true" : undefined}

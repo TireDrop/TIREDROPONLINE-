@@ -1124,7 +1124,7 @@ export default function SchedulePage() {
                     id="name"
                     label="Full name"
                     autoComplete="name"
-                    placeholder="First and last name"
+                    placeholder="Alex Rivera"
                     value={form.name}
                     onChange={update("name")}
                     error={errors.name}
