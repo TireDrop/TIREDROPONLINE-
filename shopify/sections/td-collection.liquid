@@ -1,0 +1,612 @@
+{% comment %}
+  Collection page: /collections/tires and /collections/wheels, laid out like
+  the React /tires and /wheels pages (PageHero, finder panel, filter sidebar
+  and phone drawer, sort, removable chips, product grid, shipping band).
+
+  Filters are Shopify's own storefront filters (collection.filters, filter.v.*
+  URL params); the options appear once products and the Search & Discovery
+  filter settings exist. With no products in the collection at all, the page
+  shows an honest "call us" state instead of a grid.
+
+  Which copy set is used follows the collection handle: one containing
+  "wheel" gets the wheel copy, anything else the tire copy.
+{% endcomment %}
+{%- liquid
+  assign ss = section.settings
+  assign handle = collection.handle | downcase
+  assign is_wheel = false
+  if handle contains 'wheel'
+    assign is_wheel = true
+  endif
+  if is_wheel
+    assign noun = 'wheels'
+    assign noun_one = 'wheel'
+    assign eyebrow = ss.wheel_eyebrow
+    assign heading = ss.wheel_heading
+    assign lede = ss.wheel_lede
+  else
+    assign noun = 'tires'
+    assign noun_one = 'tire'
+    assign eyebrow = ss.tire_eyebrow
+    assign heading = ss.tire_heading
+    assign lede = ss.tire_lede
+  endif
+  if heading == blank
+    assign heading = collection.title
+  endif
+
+  assign finder_url = ss.finder_link | default: '/pages/find-my-tires'
+  assign phone = ss.phone | default: '(954) 773-1896'
+  assign phone_href = phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | prepend: 'tel:+1'
+
+  assign sort_by = collection.sort_by | default: collection.default_sort_by
+  assign catalog_empty = false
+  if collection.all_products_count == 0
+    assign catalog_empty = true
+  endif
+
+  assign active_count = 0
+  for filter in collection.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value
+        assign active_count = active_count | plus: 1
+      endif
+      if filter.max_value.value
+        assign active_count = active_count | plus: 1
+      endif
+    else
+      assign active_count = active_count | plus: filter.active_values.size
+    endif
+  endfor
+  assign show_filters = true
+  if catalog_empty or collection.filters.size == 0
+    assign show_filters = false
+  endif
+  assign sid = section.id
+-%}
+
+<div class="td-shop td-col" id="td-col-{{ sid }}">
+  {%- render 'td-collection-base' -%}
+
+  <header class="td-shop-hero">
+    <div class="td-shop-wrap td-shop-hero__inner">
+      {%- if eyebrow != blank -%}<p class="td-shop-eyebrow">{{ eyebrow }}</p>{%- endif -%}
+      <h1 class="td-shop-h1">{{ heading }}</h1>
+      {%- if lede != blank -%}<p class="td-shop-lede">{{ lede }}</p>{%- endif -%}
+    </div>
+  </header>
+
+  <nav class="td-shop-crumbs" aria-label="Breadcrumb">
+    <ol class="td-shop-wrap">
+      <li><a href="{{ routes.root_url }}">Home</a></li>
+      <li><span aria-current="page">{{ collection.title }}</span></li>
+    </ol>
+  </nav>
+
+  {%- if ss.show_finder -%}
+  <div class="td-shop-wrap td-col__finderwrap">
+    <div class="td-finder" data-td-finder>
+      <div class="td-finder__tabs" role="tablist" aria-label="Product finder">
+        <button type="button" role="tab" class="td-finder__tab" id="{{ sid }}-tab-vehicle" aria-selected="true" aria-controls="{{ sid }}-panel-vehicle" data-tab="vehicle">
+          <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+          Shop by Vehicle
+        </button>
+        <button type="button" role="tab" class="td-finder__tab" id="{{ sid }}-tab-size" aria-selected="false" aria-controls="{{ sid }}-panel-size" tabindex="-1" data-tab="size">
+          <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/></svg>
+          {% if is_wheel %}Shop by Wheel Size{% else %}Shop by Tire Size{% endif %}
+        </button>
+      </div>
+      <div class="td-finder__body">
+        <div role="tabpanel" id="{{ sid }}-panel-vehicle" aria-labelledby="{{ sid }}-tab-vehicle">
+          <p class="td-finder__intro">{{ ss.vehicle_copy }}</p>
+          <a href="{{ finder_url }}" class="td-shop-btn td-shop-btn--primary td-finder__submit">
+            <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            {{ ss.vehicle_button }}
+          </a>
+          <p class="td-finder__note">Not sure? Call us on <a href="{{ phone_href }}">{{ phone }}</a> and read the sidewall to us.</p>
+        </div>
+        <form role="tabpanel" id="{{ sid }}-panel-size" aria-labelledby="{{ sid }}-tab-size" action="{{ routes.search_url }}" method="get" hidden data-td-size-form data-kind="{% if is_wheel %}wheel{% else %}tire{% endif %}">
+          <input type="hidden" name="type" value="product">
+          <input type="hidden" name="q" value="" data-td-size-q>
+          <div class="td-finder__grid">
+            {%- if is_wheel -%}
+              <div>
+                <label class="td-shop-label" for="{{ sid }}-dia">Diameter</label>
+                <select class="td-shop-field" id="{{ sid }}-dia" data-part="d">
+                  <option value="">Any diameter</option>
+                  {%- for d in (15..24) -%}<option value="{{ d }}">{{ d }}"</option>{%- endfor -%}
+                </select>
+              </div>
+              <div>
+                <label class="td-shop-label" for="{{ sid }}-ww">Wheel Width</label>
+                <select class="td-shop-field" id="{{ sid }}-ww" data-part="w">
+                  <option value="">Any width</option>
+                  {%- assign wheel_widths = '6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12' | split: ',' -%}
+                  {%- for ww in wheel_widths -%}<option value="{{ ww }}">{{ ww }}"</option>{%- endfor -%}
+                </select>
+              </div>
+            {%- else -%}
+              <div>
+                <label class="td-shop-label" for="{{ sid }}-w">Width</label>
+                <select class="td-shop-field" id="{{ sid }}-w" data-part="w">
+                  <option value="">Any width</option>
+                  {%- for w in (13..35) -%}{%- assign mm = w | times: 10 | plus: 5 -%}<option value="{{ mm }}">{{ mm }}</option>{%- endfor -%}
+                </select>
+              </div>
+              <div>
+                <label class="td-shop-label" for="{{ sid }}-a">Aspect Ratio</label>
+                <select class="td-shop-field" id="{{ sid }}-a" data-part="a">
+                  <option value="">Any ratio</option>
+                  {%- for a in (5..17) -%}{%- assign ar = a | times: 5 -%}<option value="{{ ar }}">{{ ar }}</option>{%- endfor -%}
+                </select>
+              </div>
+              <div>
+                <label class="td-shop-label" for="{{ sid }}-d">Rim Diameter</label>
+                <select class="td-shop-field" id="{{ sid }}-d" data-part="d">
+                  <option value="">Any diameter</option>
+                  {%- for d in (13..24) -%}<option value="{{ d }}">{{ d }}</option>{%- endfor -%}
+                </select>
+              </div>
+            {%- endif -%}
+          </div>
+          <button type="submit" class="td-shop-btn td-shop-btn--primary td-finder__submit">
+            <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            Search Sizes
+          </button>
+          <p class="td-finder__note">
+            {%- if is_wheel -%}
+              Wheel sizes read diameter by width, e.g. 18x8.5. Bolt pattern is stamped on the back of your current wheel.
+            {%- else -%}
+              Your size is printed on the sidewall, e.g. 225/50R17 — that is a 225 width, 50 aspect ratio and a 17 inch rim.
+            {%- endif -%}
+          </p>
+          <p class="td-finder__error" role="alert" data-td-size-error hidden>
+            {%- if is_wheel -%}Pick at least a diameter to search wheel sizes.{%- else -%}Pick at least one number from your sidewall to search.{%- endif -%}
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+  {%- endif -%}
+
+  <section class="td-shop-section td-col__main">
+    <div class="td-shop-wrap">
+      {%- paginate collection.products by ss.per_page -%}
+      <div class="td-col__layout{% if show_filters %} has-filters{% endif %}">
+        {%- if show_filters -%}
+          <aside class="td-col__aside" aria-label="Filter {{ noun }}">
+            <div class="td-shop-card td-col__sidebar">
+              <div class="td-col__sidehead">
+                <h2 class="td-col__filtertitle">Filter
+                  {%- if active_count > 0 -%}<span class="td-col__countpill tnum">{{ active_count }}</span>{%- endif -%}
+                </h2>
+                {%- if active_count > 0 -%}
+                  <a class="td-col__clear" href="{{ collection.url }}?sort_by={{ sort_by }}">Clear all</a>
+                {%- endif -%}
+              </div>
+              <form action="{{ collection.url }}" method="get" data-td-autosubmit>
+                <input type="hidden" name="sort_by" value="{{ sort_by }}">
+                {%- render 'td-collection-facets', filters: collection.filters, prefix: 'filters' -%}
+                <noscript><button type="submit" class="td-shop-btn td-shop-btn--primary td-shop-btn--sm td-shop-btn--block">Apply filters</button></noscript>
+              </form>
+            </div>
+          </aside>
+
+          <div class="td-drawer" data-td-drawer hidden>
+            <button type="button" class="td-drawer__scrim" data-td-drawer-close aria-label="Close filters" tabindex="-1"></button>
+            <div class="td-drawer__panel" role="dialog" aria-modal="true" aria-label="Filter results">
+              <div class="td-drawer__head">
+                <h2 class="td-col__filtertitle">Filter</h2>
+                <button type="button" class="td-drawer__x" data-td-drawer-close aria-label="Close filters">
+                  <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+              <form action="{{ collection.url }}" method="get" class="td-drawer__form" id="{{ sid }}-drawer-form">
+                <input type="hidden" name="sort_by" value="{{ sort_by }}">
+                <div class="td-drawer__scroll">
+                  {%- render 'td-collection-facets', filters: collection.filters, prefix: 'filters-drawer' -%}
+                </div>
+                <div class="td-drawer__foot">
+                  <a class="td-shop-btn td-shop-btn--outline td-shop-btn--sm" href="{{ collection.url }}?sort_by={{ sort_by }}">Clear all</a>
+                  <button type="submit" class="td-shop-btn td-shop-btn--primary td-shop-btn--sm">Show results</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        {%- endif -%}
+
+        <div class="td-col__results">
+          {%- if catalog_empty -%}
+            <div class="td-shop-card td-shop-empty">
+              <span class="td-shop-empty__icon" aria-hidden="true">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.27 16.5 9.42"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+              </span>
+              <h2 class="td-shop-empty__title">{% if is_wheel %}{{ ss.wheel_empty_title }}{% else %}{{ ss.tire_empty_title }}{% endif %}</h2>
+              <p class="td-shop-empty__lede">{% if is_wheel %}{{ ss.wheel_empty_lede }}{% else %}{{ ss.tire_empty_lede }}{% endif %}</p>
+              <div class="td-shop-empty__actions">
+                <a href="{{ phone_href }}" class="td-shop-btn td-shop-btn--primary td-shop-btn--sm">
+                  <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  Call {{ phone }}
+                </a>
+                <a href="{{ finder_url }}" class="td-shop-btn td-shop-btn--outline td-shop-btn--sm">Find My Tires</a>
+              </div>
+            </div>
+          {%- else -%}
+            {%- if show_filters -%}
+              <div class="td-col__bar">
+                <button type="button" class="td-shop-btn td-shop-btn--outline td-shop-btn--sm td-col__barbtn" data-td-drawer-open aria-expanded="false">
+                  <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/></svg>
+                  <span>Filters{% if active_count > 0 %} ({{ active_count }}){% endif %}</span>
+                </button>
+                {%- render 'td-collection-sort', results: collection, sort_by: sort_by, id: 'sort-mobile', action: collection.url, extra_class: 'td-col__barsort' -%}
+              </div>
+            {%- endif -%}
+
+            <div class="td-col__meta">
+              <p class="td-shop-smoke td-col__count" aria-live="polite">
+                <span class="td-col__countnum">{{ collection.products_count }} {% if collection.products_count == 1 %}{{ noun_one }}{% else %}{{ noun }}{% endif %}</span>
+                of {{ collection.all_products_count }}
+              </p>
+              <div class="td-col__sortdesk">
+                <span class="td-shop-label" aria-hidden="true">Sort by</span>
+                {%- render 'td-collection-sort', results: collection, sort_by: sort_by, id: 'sort-desktop', action: collection.url, extra_class: '' -%}
+              </div>
+            </div>
+
+            {%- if active_count > 0 -%}
+              <div class="td-col__chips">
+                {%- for filter in collection.filters -%}
+                  {%- if filter.type == 'price_range' -%}
+                    {%- if filter.min_value.value or filter.max_value.value -%}
+                      <a class="td-col__chip" href="{{ filter.url_to_remove }}" aria-label="Remove filter {{ filter.label | escape }}">
+                        {%- if filter.min_value.value -%}From {{ filter.min_value.value | money_without_trailing_zeros }}{%- endif -%}
+                        {%- if filter.min_value.value and filter.max_value.value %} {% endif -%}
+                        {%- if filter.max_value.value -%}up to {{ filter.max_value.value | money_without_trailing_zeros }}{%- endif -%}
+                        <svg aria-hidden="true" focusable="false" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                      </a>
+                    {%- endif -%}
+                  {%- else -%}
+                    {%- for value in filter.active_values -%}
+                      <a class="td-col__chip" href="{{ value.url_to_remove }}" aria-label="Remove filter {{ value.label | escape }}">
+                        {{ value.label | escape }}
+                        <svg aria-hidden="true" focusable="false" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                      </a>
+                    {%- endfor -%}
+                  {%- endif -%}
+                {%- endfor -%}
+                <a class="td-col__clearchips" href="{{ collection.url }}?sort_by={{ sort_by }}">Clear all</a>
+              </div>
+            {%- endif -%}
+
+            {%- if collection.products_count == 0 -%}
+              <div class="td-shop-card td-shop-empty">
+                <span class="td-shop-empty__icon" aria-hidden="true">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13.5 8.5-5 5M8.5 8.5l5 5"/><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                </span>
+                <h2 class="td-shop-empty__title">No {{ noun }} match those filters</h2>
+                <p class="td-shop-empty__lede">
+                  {%- if is_wheel -%}{{ ss.wheel_nomatch_lede }}{%- else -%}{{ ss.tire_nomatch_lede }}{%- endif -%}
+                </p>
+                <div class="td-shop-empty__actions">
+                  <a href="{{ collection.url }}" class="td-shop-btn td-shop-btn--primary td-shop-btn--sm">Reset search</a>
+                  <a href="{{ phone_href }}" class="td-shop-btn td-shop-btn--outline td-shop-btn--sm">Call {{ phone }}</a>
+                </div>
+              </div>
+            {%- else -%}
+              <ul class="td-shop-grid td-shop-grid--3 td-col__grid" role="list">
+                {%- for product in collection.products -%}
+                  <li>{%- render 'td-product-card', product: product, heading_level: 3 -%}</li>
+                {%- endfor -%}
+              </ul>
+
+              {%- if paginate.pages > 1 -%}
+                <nav class="td-col__pages" aria-label="Pagination">
+                  {%- if paginate.previous -%}
+                    <a class="td-col__page" href="{{ paginate.previous.url }}" aria-label="Previous page">&larr;</a>
+                  {%- endif -%}
+                  {%- for part in paginate.parts -%}
+                    {%- if part.is_link -%}
+                      <a class="td-col__page tnum" href="{{ part.url }}">{{ part.title }}</a>
+                    {%- elsif part.title == paginate.current_page -%}
+                      <span class="td-col__page is-current tnum" aria-current="page">{{ part.title }}</span>
+                    {%- else -%}
+                      <span class="td-col__page is-gap">{{ part.title }}</span>
+                    {%- endif -%}
+                  {%- endfor -%}
+                  {%- if paginate.next -%}
+                    <a class="td-col__page" href="{{ paginate.next.url }}" aria-label="Next page">&rarr;</a>
+                  {%- endif -%}
+                </nav>
+              {%- endif -%}
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if is_wheel -%}
+            <div class="td-shop-card td-col__package">
+              <div class="td-col__bandtext">
+                <svg class="td-col__bandicon td-col__bandicon--drop" aria-hidden="true" focusable="false" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/></svg>
+                <div>
+                  <h2 class="td-shop-h3">{{ ss.wheel_band_title }}</h2>
+                  <p class="td-shop-smoke td-col__bandcopy">{{ ss.wheel_band_copy }}</p>
+                </div>
+              </div>
+              <a href="{{ ss.wheel_band_link | default: '/pages/install' }}" class="td-shop-btn td-shop-btn--dark">{{ ss.wheel_band_label }}</a>
+            </div>
+          {%- else -%}
+            <div class="td-col__hazard">
+              <div class="td-col__hazardin">
+                <div class="td-col__bandtext">
+                  <svg class="td-col__bandicon" aria-hidden="true" focusable="false" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+                  <div>
+                    <h2 class="td-shop-h3">{{ ss.tire_band_title }}</h2>
+                    <p class="td-col__bandcopy">{{ ss.tire_band_copy }}</p>
+                  </div>
+                </div>
+                <a href="{{ ss.tire_band_link | default: '/pages/shipping' }}" class="td-shop-btn td-shop-btn--primary">{{ ss.tire_band_label }}</a>
+              </div>
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+      {%- endpaginate -%}
+    </div>
+  </section>
+</div>
+
+<style>
+  .td-col__finderwrap { margin-top: 1.5rem; position: relative; z-index: 1; }
+  .td-finder { overflow: hidden; border-radius: 12px; border: 1px solid rgba(7,14,26,.1); background: #FFFFFF; box-shadow: var(--td-shadow-lift); }
+  .td-finder__tabs { display: flex; }
+  .td-finder__tab {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: .5rem; min-height: 48px;
+    padding: .875rem .75rem; border: 0; border-top: 3px solid transparent; cursor: pointer;
+    font-family: var(--td-display); font-size: 14px; font-weight: 700; line-height: 1.25; letter-spacing: -.008em;
+    background: var(--td-steel); color: rgba(255,255,255,.75);
+  }
+  .td-finder__tab:hover { background: var(--td-graphite); color: #FFFFFF; }
+  .td-finder__tab[aria-selected="true"] { background: #FFFFFF; color: var(--td-ink); border-top-color: var(--td-drop); }
+  .td-finder__body { padding: 1.25rem; }
+  .td-finder__intro { font-size: 15px; line-height: 1.6; color: var(--td-ink); max-width: 44rem; }
+  .td-finder__grid { display: grid; gap: 1rem; }
+  .td-finder__submit { margin-top: 1rem; min-height: 48px; width: 100%; white-space: nowrap; }
+  .td-finder__note { margin-top: .75rem !important; font-size: 12px; line-height: 1.625; color: var(--td-smoke); }
+  .td-finder__note a { color: var(--td-ink); }
+  .td-finder__error { margin-top: .75rem !important; border-radius: 6px; background: var(--td-sky); padding: .5rem .75rem; font-size: 14px; font-weight: 500; }
+  .td-finder select { appearance: auto; }
+  @media (min-width: 640px) {
+    .td-finder__grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .td-finder__submit { width: auto; }
+  }
+  @media (min-width: 768px) {
+    .td-col__finderwrap { margin-top: -2rem; }
+    .td-finder__tab { font-size: 15px; padding-left: 1rem; padding-right: 1rem; }
+    .td-finder__body { padding: 1.5rem; }
+  }
+  @media (min-width: 1024px) { .td-finder__grid { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+
+  .td-col__layout { display: block; }
+  .td-col__aside { display: none; }
+  @media (min-width: 1024px) {
+    .td-col__layout.has-filters { display: grid; grid-template-columns: 260px minmax(0,1fr); gap: 2rem; align-items: start; }
+    .td-col__aside { display: block; }
+  }
+  .td-col__sidebar { padding: 1.25rem; }
+  .td-col__sidehead { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: 1rem; }
+  .td-col__filtertitle { display: flex; align-items: center; gap: .5rem; font-size: 1.125rem; line-height: 1.15; }
+  .td-col__countpill { display: inline-flex; align-items: center; justify-content: center; height: 22px; min-width: 22px; padding: 0 .375rem; border-radius: 999px; background: var(--td-drop); color: #FFFFFF; font-size: 11px; font-weight: 700; line-height: 1; }
+  .td-col__clear { display: inline-flex; align-items: center; min-height: 24px; font-family: var(--td-display); font-size: 13px; font-weight: 700; color: var(--td-drop) !important; text-decoration: none; }
+  .td-col__clear:hover { color: var(--td-dive) !important; text-decoration: underline; text-underline-offset: 4px; }
+
+  .td-facet { border: 0; border-top: 1px solid rgba(7,14,26,.1); margin: 0; padding: 1.25rem 0; min-width: 0; }
+  .td-facet:first-of-type { border-top: 0; padding-top: 0; }
+  .td-facet__legend { padding: 0; margin-bottom: .625rem; color: rgba(7,14,26,.7); }
+  .td-facet__list { max-height: 14rem; overflow-y: auto; padding-right: .25rem; }
+  .td-facet__row { display: flex; align-items: center; gap: .625rem; min-height: 36px; padding: .375rem 0; font-size: 14px; cursor: pointer; }
+  .td-facet__row:hover { color: var(--td-drop); }
+  .td-facet__row.is-empty { color: var(--td-smoke); cursor: default; }
+  .td-facet__count { margin-left: auto; font-size: 12px; color: var(--td-smoke); }
+  .td-facet__pills { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .td-facet__pill { position: relative; cursor: pointer; }
+  .td-facet__pill span {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 36px; min-width: 44px;
+    padding: .375rem .75rem; border-radius: 6px; border: 1px solid rgba(7,14,26,.15);
+    font-family: var(--td-display); font-size: 14px; font-weight: 700;
+  }
+  .td-facet__pill:hover span { border-color: var(--td-ink); background: var(--td-fog); }
+  .td-facet__pill input:checked + span { border-color: var(--td-drop); background: var(--td-drop); color: #FFFFFF; box-shadow: var(--td-shadow-glow); }
+  .td-facet__pill input:focus-visible + span { outline: 2px solid var(--td-drop); outline-offset: 2px; }
+  .td-facet__pill input:disabled + span { opacity: .45; cursor: default; }
+  .td-facet__price { display: flex; align-items: center; gap: .5rem; }
+  .td-facet__price > div { flex: 1; }
+
+  .td-drawer { position: fixed; inset: 0; z-index: 60; }
+  .td-drawer[hidden] { display: none; }
+  .td-drawer__scrim { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: rgba(7,14,26,.5); cursor: pointer; }
+  .td-drawer__panel { position: absolute; top: 0; bottom: 0; right: 0; display: flex; flex-direction: column; width: 100%; max-width: 24rem; background: #FFFFFF; box-shadow: var(--td-shadow-lift); }
+  .td-drawer__head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .75rem 1.25rem; border-bottom: 1px solid rgba(7,14,26,.1); }
+  .td-drawer__x { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 0; border-radius: 6px; background: transparent; color: var(--td-ink); cursor: pointer; }
+  .td-drawer__x:hover { background: var(--td-fog); }
+  .td-drawer__form { display: flex; flex-direction: column; flex: 1; min-height: 0; margin: 0; }
+  .td-drawer__scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 1rem 1.25rem; }
+  .td-drawer__foot { display: flex; gap: .75rem; padding: .75rem 1.25rem; border-top: 1px solid rgba(7,14,26,.1); background: #FFFFFF; box-shadow: 0 -8px 20px -14px rgba(7,14,26,.4); }
+  .td-drawer__foot .td-shop-btn { flex: 1; white-space: nowrap; }
+  @media (min-width: 1024px) { .td-drawer { display: none !important; } }
+
+  .td-col__bar {
+    position: sticky; top: var(--header-height, 0px); z-index: 30; display: flex; align-items: center; gap: .5rem;
+    margin: 0 -1rem 1rem; padding: .5rem 1rem; border-bottom: 1px solid rgba(7,14,26,.1);
+    background: rgba(255,255,255,.95); backdrop-filter: blur(8px);
+  }
+  .td-col__barbtn, .td-col__barsort { flex: 1; min-width: 0; }
+  .td-col__barbtn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  @media (min-width: 768px) { .td-col__bar { margin-left: -2rem; margin-right: -2rem; padding-left: 2rem; padding-right: 2rem; } }
+  @media (min-width: 1024px) { .td-col__bar { display: none; } }
+
+  .td-col__meta { display: flex; flex-direction: column; gap: .75rem; margin-bottom: 1rem; }
+  .td-col__count { font-size: 14px; }
+  .td-col__countnum { font-weight: 600; color: var(--td-ink); }
+  .td-col__sortdesk { display: none; align-items: center; gap: .5rem; }
+  .td-col__sortdesk .td-shop-label { margin: 0; white-space: nowrap; }
+  .td-col__sortdesk .td-shop-field { width: auto; }
+  @media (min-width: 640px) { .td-col__meta { flex-direction: row; align-items: center; justify-content: space-between; } }
+  @media (min-width: 1024px) { .td-col__sortdesk { display: flex; } }
+
+  .td-sortform { margin: 0; display: flex; align-items: center; gap: .5rem; }
+  .td-col__chips { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: 1.25rem; }
+  .td-col__chip { display: inline-flex; align-items: center; gap: .375rem; min-height: 32px; padding: .25rem .625rem; border-radius: 6px; border: 1px solid rgba(7,14,26,.15); background: var(--td-fog); font-size: 12px; text-decoration: none; }
+  .td-col__chip svg { color: var(--td-smoke); }
+  .td-col__chip:hover { border-color: var(--td-ink); }
+  .td-col__clearchips { display: inline-flex; align-items: center; min-height: 32px; padding: 0 .25rem; font-family: var(--td-display); font-size: 12px; font-weight: 700; color: var(--td-drop) !important; text-decoration: none; }
+
+  .td-col__grid { list-style: none; margin: 0; padding: 0; }
+  .td-col__pages { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-top: 2rem; }
+  .td-col__page { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 0 .75rem; border-radius: 6px; border: 1px solid rgba(7,14,26,.15); background: #FFFFFF; font-family: var(--td-display); font-weight: 700; text-decoration: none; }
+  .td-col__page.is-current { background: var(--td-drop); border-color: var(--td-drop); color: #FFFFFF; }
+  .td-col__page.is-gap { border-color: transparent; background: transparent; }
+
+  .td-col__hazard { margin-top: 2.5rem; border-radius: 6px; padding: 4px; background-image: repeating-linear-gradient(-45deg, #F5A623 0 14px, #070E1A 14px 28px); }
+  .td-col__hazardin { display: flex; flex-direction: column; align-items: flex-start; gap: 1rem; border-radius: 6px; padding: 1.5rem; background: linear-gradient(180deg, #14233A 0%, #0B1524 100%); color: #FFFFFF; }
+  .td-col__hazardin h2 { color: #FFFFFF; }
+  .td-col__hazardin .td-col__bandcopy { color: rgba(255,255,255,.72); }
+  .td-col__bandtext { display: flex; align-items: flex-start; gap: .75rem; }
+  .td-col__bandicon { flex-shrink: 0; margin-top: 2px; color: var(--td-amber); }
+  .td-col__bandicon--drop { color: var(--td-drop); }
+  .td-col__bandcopy { margin-top: .25rem !important; font-size: 14px; line-height: 1.5; }
+  .td-col__package { margin-top: 2.5rem; display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem; }
+  .td-col__package .td-shop-btn, .td-col__hazardin .td-shop-btn { flex-shrink: 0; }
+  @media (min-width: 768px) {
+    .td-col__hazardin, .td-col__package { flex-direction: row; align-items: center; justify-content: space-between; }
+  }
+</style>
+
+<script>
+  (function () {
+    var root = document.getElementById("td-col-{{ sid }}");
+    if (!root) return;
+
+    // Finder tabs: only the chosen panel is shown, arrow keys move between tabs.
+    var tabs = root.querySelectorAll(".td-finder__tab");
+    function select(tab) {
+      tabs.forEach(function (t) {
+        var on = t === tab;
+        t.setAttribute("aria-selected", on ? "true" : "false");
+        t.tabIndex = on ? 0 : -1;
+        var panel = document.getElementById(t.getAttribute("aria-controls"));
+        if (panel) panel.hidden = !on;
+      });
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener("click", function () { select(t); });
+      t.addEventListener("keydown", function (e) {
+        if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+        var next = tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+        select(next); next.focus();
+      });
+    });
+    if (/[?&]search=size\b/.test(location.search) && tabs[1]) select(tabs[1]);
+
+    // Size search: the three numbers become one sidewall string for search.
+    var sizeForm = root.querySelector("[data-td-size-form]");
+    if (sizeForm) sizeForm.addEventListener("submit", function (e) {
+      var part = function (k) { var el = sizeForm.querySelector('[data-part="' + k + '"]'); return el ? el.value : ""; };
+      var w = part("w"), a = part("a"), d = part("d"), q = "";
+      var err = sizeForm.querySelector("[data-td-size-error]");
+      if (sizeForm.dataset.kind === "wheel") {
+        if (!d) { e.preventDefault(); err.hidden = false; return; }
+        q = w ? d + "x" + w : d + "x";
+      } else {
+        if (!w && !a && !d) { e.preventDefault(); err.hidden = false; return; }
+        q = (w || "") + (a ? "/" + a : "") + (d ? "R" + d : "");
+      }
+      err.hidden = true;
+      sizeForm.querySelector("[data-td-size-q]").value = q;
+    });
+
+    // The sidebar applies as soon as a box is ticked, like the React panel.
+    root.querySelectorAll("[data-td-autosubmit]").forEach(function (form) {
+      form.addEventListener("change", function () { form.submit(); });
+    });
+
+    // Sort: navigates with the current filters kept.
+    root.querySelectorAll("[data-td-sort]").forEach(function (sel) {
+      sel.addEventListener("change", function () {
+        var url = new URL(location.href);
+        url.searchParams.set("sort_by", sel.value);
+        url.searchParams.delete("page");
+        location.href = url.toString();
+      });
+    });
+
+    // Phone filter drawer.
+    var drawer = root.querySelector("[data-td-drawer]");
+    var opener = root.querySelector("[data-td-drawer-open]");
+    if (drawer && opener) {
+      var last = null;
+      var onKey = function (e) {
+        if (e.key === "Escape") close();
+        if (e.key !== "Tab") return;
+        var f = drawer.querySelectorAll('button:not([tabindex="-1"]), a[href], input:not([disabled]), select');
+        if (!f.length) return;
+        var first = f[0], end = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); end.focus(); }
+        else if (!e.shiftKey && document.activeElement === end) { e.preventDefault(); first.focus(); }
+      };
+      var open = function () {
+        last = document.activeElement;
+        drawer.hidden = false;
+        opener.setAttribute("aria-expanded", "true");
+        document.documentElement.style.overflow = "hidden";
+        drawer.querySelector(".td-drawer__x").focus();
+        document.addEventListener("keydown", onKey);
+      };
+      var close = function () {
+        drawer.hidden = true;
+        opener.setAttribute("aria-expanded", "false");
+        document.documentElement.style.overflow = "";
+        document.removeEventListener("keydown", onKey);
+        if (last) last.focus();
+      };
+      opener.addEventListener("click", open);
+      drawer.querySelectorAll("[data-td-drawer-close]").forEach(function (b) { b.addEventListener("click", close); });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "TireDrop collection",
+  "tag": "section",
+  "class": "td-section-collection",
+  "settings": [
+    { "type": "header", "content": "Tires (any collection without \"wheel\" in its handle)" },
+    { "type": "text", "id": "tire_eyebrow", "label": "Eyebrow", "default": "Tires" },
+    { "type": "text", "id": "tire_heading", "label": "Heading", "default": "Shop Tires" },
+    { "type": "textarea", "id": "tire_lede", "label": "Intro", "default": "Find your size, pick your set, then choose where it lands — your address anywhere in the continental US, or free to our South Florida shop where we fit them for you." },
+    { "type": "text", "id": "tire_empty_title", "label": "No products yet: heading", "default": "No tires listed online yet" },
+    { "type": "textarea", "id": "tire_empty_lede", "label": "No products yet: text", "default": "Our online catalog is still being loaded. Call us with your size and we will quote it, or use Find My Tires to look up the size your vehicle takes." },
+    { "type": "textarea", "id": "tire_nomatch_lede", "label": "No filter matches: text", "default": "Try widening the price range or clearing a size. If you know your size and cannot find it listed, call us — we can order sizes this page does not carry." },
+    { "type": "text", "id": "tire_band_title", "label": "Band heading", "default": "Shipped to you, or fitted by us" },
+    { "type": "textarea", "id": "tire_band_copy", "label": "Band text", "default": "Every order ships free anywhere in the continental US. In South Florida, send it free to the shop instead and we mount, balance and dispose of the old set." },
+    { "type": "text", "id": "tire_band_label", "label": "Band button", "default": "How shipping works" },
+    { "type": "url", "id": "tire_band_link", "label": "Band link" },
+    { "type": "header", "content": "Wheels (collections with \"wheel\" in the handle)" },
+    { "type": "text", "id": "wheel_eyebrow", "label": "Eyebrow", "default": "Wheels" },
+    { "type": "text", "id": "wheel_heading", "label": "Heading", "default": "Shop Wheels" },
+    { "type": "textarea", "id": "wheel_lede", "label": "Intro", "default": "Cast, flow-formed and forged wheels, fitment-checked before they ship. Send them to your address anywhere in the continental US, or free to our South Florida shop where we fit them for you." },
+    { "type": "text", "id": "wheel_empty_title", "label": "No products yet: heading", "default": "No wheels listed online yet" },
+    { "type": "textarea", "id": "wheel_empty_lede", "label": "No products yet: text", "default": "Our online catalog is still being loaded. Call us with your vehicle and the look you want and we will quote the right wheel, or use Find My Tires to look up your size." },
+    { "type": "textarea", "id": "wheel_nomatch_lede", "label": "No filter matches: text", "default": "Tell us the look you want and your vehicle, and we will source the right bolt pattern and offset." },
+    { "type": "text", "id": "wheel_band_title", "label": "Band heading", "default": "Wheel and tire packages" },
+    { "type": "textarea", "id": "wheel_band_copy", "label": "Band text", "default": "Buy the wheels and tires together and they ship as one order. In South Florida, send it free to the shop and we mount, balance and fit the whole package." },
+    { "type": "text", "id": "wheel_band_label", "label": "Band button", "default": "Ship to store & install" },
+    { "type": "url", "id": "wheel_band_link", "label": "Band link" },
+    { "type": "header", "content": "Finder and contact" },
+    { "type": "checkbox", "id": "show_finder", "label": "Show the vehicle / size finder", "default": true },
+    { "type": "textarea", "id": "vehicle_copy", "label": "Vehicle tab text", "default": "Look up the tire size your vehicle takes with Find My Tires, then come back and shop that size." },
+    { "type": "text", "id": "vehicle_button", "label": "Vehicle tab button", "default": "Open Find My Tires" },
+    { "type": "url", "id": "finder_link", "label": "Find My Tires page" },
+    { "type": "text", "id": "phone", "label": "Phone", "default": "(954) 773-1896" },
+    { "type": "range", "id": "per_page", "label": "Products per page", "min": 12, "max": 48, "step": 6, "default": 24 }
+  ]
+}
+{% endschema %}

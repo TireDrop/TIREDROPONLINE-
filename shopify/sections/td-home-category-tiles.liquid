@@ -1,0 +1,83 @@
+{% comment %}
+  The rest of the store (React HomePage <CategoryTiles>): tires, wheels,
+  commercial and the South Florida service side. No heading in React, so the
+  band is labelled for assistive tech from a setting instead.
+{% endcomment %}
+
+{{ 'td-home.css' | asset_url | stylesheet_tag }}
+
+<section class="tdh tdh--fog tdh-pad td-tiles" aria-label="{{ section.settings.label | escape }}">
+  <div class="tdh-wrap">
+    <ul class="td-tiles__grid" role="list">
+      {%- for block in section.blocks -%}
+        <li {{ block.shopify_attributes }}>
+          <a class="tdh-card td-tiles__tile" href="{{ block.settings.link | default: '/collections/all' }}">
+            {%- render 'td-home-icon', name: block.settings.icon, size: 26, class: 'tdh-icon td-tiles__icon' -%}
+            <h3 class="tdh-h3">{{ block.settings.title }}</h3>
+            <p class="td-tiles__copy">{{ block.settings.copy }}</p>
+            <span class="tdh-more">{{ section.settings.tile_cta }}{%- render 'td-home-icon', name: 'arrow-right', size: 15 -%}</span>
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .td-tiles .td-tiles__grid {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .75rem;
+  }
+  .td-tiles .td-tiles__tile { height: 100%; display: flex; flex-direction: column; padding: 1.5rem; }
+  .td-tiles .td-tiles__icon { margin-bottom: 1rem; }
+  .td-tiles .td-tiles__copy { flex: 1; margin: .5rem 0 0; font-size: .875rem; line-height: 1.625; color: #586274; }
+  /* Two columns of 170px on a phone: trim the padding so the copy keeps room. */
+  @media (max-width: 479px) { .td-tiles .td-tiles__tile { padding: 1.125rem; } }
+  @media (min-width: 640px) { .td-tiles .td-tiles__grid { gap: 1rem; } }
+  @media (min-width: 1024px) { .td-tiles .td-tiles__grid { grid-template-columns: repeat(4, minmax(0,1fr)); } }
+</style>
+
+{% schema %}
+{
+  "name": "TireDrop category tiles",
+  "tag": "div",
+  "max_blocks": 8,
+  "settings": [
+    { "type": "text", "id": "label", "label": "Accessible name", "default": "More from the store" },
+    { "type": "text", "id": "tile_cta", "label": "Tile link text", "default": "Explore" }
+  ],
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "Tile",
+      "settings": [
+        { "type": "select", "id": "icon", "label": "Icon", "default": "badge-check", "options": [
+            { "value": "cloud-sun", "label": "Sun and cloud" },
+            { "value": "gauge", "label": "Gauge" },
+            { "value": "truck", "label": "Truck" },
+            { "value": "snowflake", "label": "Snowflake" },
+            { "value": "building-2", "label": "Building" },
+            { "value": "badge-check", "label": "Badge" },
+            { "value": "wrench", "label": "Wrench" },
+            { "value": "store", "label": "Store" },
+            { "value": "package", "label": "Package" }
+          ] },
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "textarea", "id": "copy", "label": "Copy" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "TireDrop category tiles",
+      "blocks": [
+        { "type": "tile", "settings": { "icon": "badge-check", "title": "Tires", "copy": "All-season, performance, truck and SUV — shipped free to the lower 48." } },
+        { "type": "tile", "settings": { "icon": "badge-check", "title": "Wheels", "copy": "Alloy, forged and off-road wheels, fitment-checked before anything ships." } },
+        { "type": "tile", "settings": { "icon": "truck", "title": "Commercial & Fleet", "copy": "Load-rated sizes for vans and work trucks, shipped to the yard or to the shop." } },
+        { "type": "tile", "settings": { "icon": "wrench", "title": "Service — South Florida", "copy": "Brakes, alignment, suspension and diagnostics at the Sunrise shop." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

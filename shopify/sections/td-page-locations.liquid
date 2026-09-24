@@ -1,0 +1,978 @@
+{% comment %}
+  Locations page. Ported from the React LocationsPage (src/pages/support/LocationsPage.jsx).
+  The map is the same stylised panel React uses, with a link out to Google Maps
+  for directions; nothing third-party loads on the page. Hours are blocks,
+  seeded from the React business data (src/data/business.js).
+{% endcomment %}
+{%- liquid
+  assign tdp_digits = section.settings.phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
+  assign tdp_tel = 'tel:+1' | append: tdp_digits
+-%}
+<div class="tdp tdp-loc">
+  <div class="tdp-hero">
+    <div class="tdp-hero__line" aria-hidden="true"></div>
+    <div class="tdp-wrap tdp-hero__inner">
+      {%- if section.settings.hero_eyebrow != blank -%}
+        <p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.hero_eyebrow }}</p>
+      {%- endif -%}
+      <h1 class="tdp-h1">{{ section.settings.hero_title }}</h1>
+      {%- if section.settings.hero_lede != blank -%}
+        <p class="tdp-hero__lede">{{ section.settings.hero_lede }}</p>
+      {%- endif -%}
+      <div class="tdp-hero__actions">
+        <a href="{{ section.settings.maps_url }}" target="_blank" rel="noopener noreferrer" class="tdp-btn tdp-btn--primary"><svg class="tdp-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>{{ section.settings.directions_label }}<span class="tdp-sr"> (opens in a new tab)</span></a>
+        <a href="{{ tdp_tel }}" class="tdp-btn tdp-btn--ghost"><svg class="tdp-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.phone }}</a>
+  </div>
+    </div>
+  </div>
+
+  <nav class="tdp-crumbs" aria-label="Breadcrumb">
+    <ol class="tdp-wrap">
+      <li><a href="{{ routes.root_url }}">Home</a></li>
+      <li><svg class="tdp-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6"/></svg><span aria-current="page">{{ section.settings.crumb }}</span></li>
+    </ol>
+  </nav>
+
+  <section class="tdp-sec tdp-bone">
+    <div class="tdp-wrap">
+      <div class="tdp-head tdp-head--center">
+      <div class="tdp-head__text">
+        {%- if section.settings.ways_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.ways_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.ways_title }}</h2>
+        {%- if section.settings.ways_lede != blank -%}<p class="tdp-lede">{{ section.settings.ways_lede }}</p>{%- endif -%}
+      </div>
+    </div>
+      <ul class="tdp-grid tdp-md3">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'way' -%}
+            <li class="tdp-card tdp-p6 tdp-loc__col" {{ block.shopify_attributes }}>
+              {%- case block.settings.icon -%}{%- when 'package' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>{%- when 'building-2' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>{%- when 'truck' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>{%- when 'wrench' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>{%- when 'store' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/></svg>{%- when 'map-pin' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>{%- endcase -%}
+              <h3 class="tdp-h3">{{ block.settings.title }}</h3>
+              <p class="tdp-small tdp-loc__grow">{{ block.settings.copy }}</p>
+              {%- if block.settings.link_label != blank -%}
+                <a href="{{ block.settings.link }}" class="tdp-btn tdp-btn--outline tdp-btn--sm tdp-loc__btn">{{ block.settings.link_label }}</a>
+              {%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+  </section>
+
+  <section class="tdp-sec tdp-fog">
+    <div class="tdp-wrap">
+      <div class="tdp-head">
+      <div class="tdp-head__text">
+        {%- if section.settings.shop_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.shop_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.shop_title }}</h2>
+        {%- if section.settings.shop_lede != blank -%}<p class="tdp-lede">{{ section.settings.shop_lede }}</p>{%- endif -%}
+      </div>
+    </div>
+      <div class="tdp-loc__shop">
+        <div class="tdp-loc__stack">
+          <div class="tdp-card tdp-p6">
+            <h3 class="tdp-h3 tdp-loc__cardtitle">{{ section.settings.address_title }}</h3>
+            <address>
+              <div class="tdp-loc__line">
+                <svg class="tdp-ic tdp-drop tdp-loc__lineic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <div class="tdp-loc__addr">
+                  <p>{{ section.settings.street }}</p>
+                  <p>{{ section.settings.city_line }}</p>
+                </div>
+              </div>
+              <div class="tdp-loc__line">
+                <svg class="tdp-ic tdp-drop tdp-loc__lineic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <a href="{{ tdp_tel }}" class="tdp-loc__big">{{ section.settings.phone }}</a>
+              </div>
+              {%- if section.settings.email != blank -%}
+                <div class="tdp-loc__line">
+                  <svg class="tdp-ic tdp-drop tdp-loc__lineic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                  <a href="mailto:{{ section.settings.email }}" class="tdp-loc__big tdp-loc__email">{{ section.settings.email }}</a>
+                </div>
+              {%- endif -%}
+            </address>
+            {%- if section.settings.address_note != blank -%}<p class="tdp-xs tdp-loc__note">{{ section.settings.address_note }}</p>{%- endif -%}
+            <dl class="tdp-dl tdp-loc__facts">
+              {%- if section.settings.fact_trading != blank -%}<div><dt class="tdp-label">{{ section.settings.fact_trading_label }}</dt><dd>{{ section.settings.fact_trading }}</dd></div>{%- endif -%}
+              {%- if section.settings.fact_place != blank -%}<div><dt class="tdp-label">{{ section.settings.fact_place_label }}</dt><dd>{{ section.settings.fact_place }}</dd></div>{%- endif -%}
+              {%- if section.settings.fact_ships != blank -%}<div><dt class="tdp-label">{{ section.settings.fact_ships_label }}</dt><dd>{{ section.settings.fact_ships }}</dd></div>{%- endif -%}
+              {%- if section.settings.fact_installs != blank -%}<div><dt class="tdp-label">{{ section.settings.fact_installs_label }}</dt><dd>{{ section.settings.fact_installs }}</dd></div>{%- endif -%}
+            </dl>
+            <div class="tdp-actions tdp-loc__cardbtns">
+              <a href="{{ section.settings.maps_url }}" target="_blank" rel="noopener noreferrer" class="tdp-btn tdp-btn--primary tdp-btn--sm"><svg class="tdp-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>{{ section.settings.directions_label }}<span class="tdp-sr"> (opens in a new tab)</span></a>
+              {%- if section.settings.book_label != blank -%}
+                <a href="{{ section.settings.book_link | default: '/pages/contact' }}" class="tdp-btn tdp-btn--outline tdp-btn--sm">{{ section.settings.book_label }}</a>
+              {%- endif -%}
+            </div>
+          </div>
+
+          <div class="tdp-card tdp-p6">
+            <h3 class="tdp-h3 tdp-h3-ic tdp-loc__cardtitle"><svg class="tdp-ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>{{ section.settings.hours_title }}</h3>
+            <table class="tdp-hours">
+              <caption class="tdp-sr">Shop, pickup and mobile dispatch hours</caption>
+              <tbody>
+                {%- for block in section.blocks -%}
+                  {%- if block.type == 'hours' -%}
+                    <tr {{ block.shopify_attributes }}>
+                      <th scope="row">{{ block.settings.days }}</th>
+                      <td{% if block.settings.time == 'Closed' %} class="is-closed"{% endif %}>{{ block.settings.time }}</td>
+                    </tr>
+                  {%- endif -%}
+                {%- endfor -%}
+              </tbody>
+            </table>
+            {%- if section.settings.hours_note != blank -%}<p class="tdp-xs tdp-loc__note">{{ section.settings.hours_note }}</p>{%- endif -%}
+          </div>
+        </div>
+
+        <div class="tdp-card tdp-loc__map">
+          <div class="tdp-loc__mapart" aria-hidden="true">
+            <span class="tdp-loc__road-h"></span>
+            <span class="tdp-loc__road-v"></span>
+            <span class="tdp-loc__pin">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="#0068E8" stroke="#0068E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3" fill="#0068E8"/></svg>
+              <span>{{ section.settings.map_label }}</span>
+            </span>
+          </div>
+          <div class="tdp-loc__mapfoot">
+            <div>
+              <p class="tdp-display tdp-loc__mapname">{{ section.settings.shop_name }}</p>
+              <p class="tdp-small">{{ section.settings.street }}, {{ section.settings.city_line }}</p>
+            </div>
+            <a href="{{ section.settings.maps_url }}" target="_blank" rel="noopener noreferrer" class="tdp-btn tdp-btn--dark tdp-btn--sm"><svg class="tdp-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>{{ section.settings.directions_label }}<svg class="tdp-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg><span class="tdp-sr"> (opens in a new tab)</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tdp-sec tdp-bone">
+    <div class="tdp-wrap">
+      <div class="tdp-head">
+      <div class="tdp-head__text">
+        {%- if section.settings.visit_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.visit_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.visit_title }}</h2>
+        {%- if section.settings.visit_lede != blank -%}<p class="tdp-lede">{{ section.settings.visit_lede }}</p>{%- endif -%}
+      </div>
+    </div>
+      <div class="tdp-grid tdp-md3">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'visit' -%}
+            <div class="tdp-card tdp-p6" {{ block.shopify_attributes }}>
+              {%- case block.settings.icon -%}{%- when 'package' -%}<svg class="tdp-ic tdp-ic-lead" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>{%- when 'building-2' -%}<svg class="tdp-ic tdp-ic-lead" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>{%- when 'truck' -%}<svg class="tdp-ic tdp-ic-lead" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>{%- when 'wrench' -%}<svg class="tdp-ic tdp-ic-lead" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>{%- when 'store' -%}<svg class="tdp-ic tdp-ic-lead" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/></svg>{%- when 'map-pin' -%}<svg class="tdp-ic tdp-ic-lead" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>{%- endcase -%}
+              <h3 class="tdp-h3">{{ block.settings.title }}</h3>
+              <p class="tdp-small tdp-loc__copy">{{ block.settings.copy }}</p>
+              {%- if block.settings.list != blank -%}
+                {%- assign tdp_items = block.settings.list | newline_to_br | split: '<br />' -%}
+                <ul class="tdp-bullets tdp-loc__list">
+                  {%- for item in tdp_items -%}{%- assign t = item | strip -%}{%- if t != blank -%}<li><span class="tdp-dot" aria-hidden="true"></span>{{ t }}</li>{%- endif -%}{%- endfor -%}
+                </ul>
+              {%- endif -%}
+              {%- if block.settings.link_label != blank -%}
+                <a href="{{ block.settings.link }}" class="tdp-btn tdp-btn--outline tdp-btn--sm tdp-loc__btn">{{ block.settings.link_label }}</a>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+
+  <section class="tdp-sec tdp-fog">
+    <div class="tdp-wrap">
+      <div class="tdp-head tdp-head--action">
+        <div class="tdp-head__text">
+          {%- if section.settings.area_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.area_eyebrow }}</p>{%- endif -%}
+          <h2 class="tdp-h2">{{ section.settings.area_title }}</h2>
+          {%- if section.settings.area_lede != blank -%}<p class="tdp-lede">{{ section.settings.area_lede }}</p>{%- endif -%}
+        </div>
+        {%- if section.settings.area_cta_label != blank -%}
+          <div class="tdp-head__action"><a href="{{ section.settings.area_cta_link | default: '/pages/contact' }}" class="tdp-btn tdp-btn--primary">{{ section.settings.area_cta_label }}</a></div>
+        {%- endif -%}
+      </div>
+      {%- assign tdp_towns = section.settings.towns | newline_to_br | split: '<br />' -%}
+      <ul class="tdp-loc__towns">
+        {%- for town in tdp_towns -%}{%- assign t = town | strip -%}{%- if t != blank -%}
+          <li class="tdp-card"><svg class="tdp-ic tdp-drop" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>{{ t }}</li>
+        {%- endif -%}{%- endfor -%}
+      </ul>
+
+      <div class="tdp-card tdp-p6 tdp-loc__van">
+        <div class="tdp-loc__vanhead"><svg class="tdp-ic tdp-drop" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg><h3 class="tdp-h3">{{ section.settings.van_title }}</h3></div>
+        <p class="tdp-small">{{ section.settings.van_copy }}</p>
+        {%- assign tdp_van = section.settings.van_services | newline_to_br | split: '<br />' -%}
+        <ul class="tdp-bullets tdp-loc__list">
+          {%- for item in tdp_van -%}{%- assign t = item | strip -%}{%- if t != blank -%}<li><span class="tdp-dot" aria-hidden="true"></span>{{ t }}</li>{%- endif -%}{%- endfor -%}
+        </ul>
+        {%- if section.settings.van_link_label != blank -%}
+          <a href="{{ section.settings.van_link | default: '/pages/mobile-service' }}" class="tdp-btn tdp-btn--outline tdp-btn--sm tdp-loc__vanbtn">{{ section.settings.van_link_label }}</a>
+        {%- endif -%}
+      </div>
+
+      <div class="tdp-card tdp-p6 tdp-bl-amber tdp-loc__outside">
+        <div>
+          <span class="tdp-badge tdp-badge--amber">{{ section.settings.outside_badge }}</span>
+          <p class="tdp-small">{{ section.settings.outside_copy }}</p>
+        </div>
+        <a href="{{ tdp_tel }}" class="tdp-btn tdp-btn--dark tdp-btn--sm"><svg class="tdp-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.phone }}</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="tdp-ink tdp-loc__cta">
+    <div class="tdp-wrap tdp-loc__ctarow">
+      <div>
+        {%- if section.settings.cta_eyebrow != blank -%}<p class="tdp-eyebrow tdp-eyebrow--dark tdp-eyebrow--plain">{{ section.settings.cta_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.cta_title }}</h2>
+        {%- if section.settings.cta_lede != blank -%}<p class="tdp-lede tdp-loc__ctalede">{{ section.settings.cta_lede }}</p>{%- endif -%}
+      </div>
+      <a href="{{ section.settings.cta_link | default: '/collections/tires' }}" class="tdp-btn tdp-btn--primary tdp-loc__ctabtn">{{ section.settings.cta_label }}</a>
+    </div>
+  </section>
+</div>
+
+<style>
+  /* Page kit, shared by the td-page-* sections Agent E owns. Each section carries its own copy so it stays self-contained. */
+  .tdp { color: #070E1A; font-family: var(--font-body--family, inherit); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .tdp *, .tdp *::before, .tdp *::after { box-sizing: border-box; }
+  .tdp :where(h1, h2, h3, h4, p, ul, ol, dl, dd, dt, figure, blockquote, table, fieldset, legend, address) { margin: 0; padding: 0; }
+  .tdp :where(ul, ol) { list-style: none; }
+  .tdp :where(address) { font-style: normal; }
+  .tdp :where(fieldset) { border: 0; min-width: 0; }
+  .tdp :where(a) { color: inherit; }
+  .tdp :where(h1, h2, h3, h4) {
+    font-family: var(--font-heading--family, inherit); font-weight: 800; letter-spacing: -.018em;
+    font-variation-settings: "wdth" 108; color: inherit; text-wrap: balance; text-transform: none;
+  }
+  .tdp :where(a, button, input, select, textarea, summary):focus-visible { outline: 2px solid #0068E8; outline-offset: 2px; }
+  .tdp-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+  .tdp-wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding-left: 1rem; padding-right: 1rem; }
+  .tdp-sec { padding: 3.5rem 0; }
+  .tdp-bone { background: #FFFFFF; }
+  .tdp-fog { background: #F4F6FA; }
+  /* Dark bands pin their text colour rather than inheriting body ink. */
+  .tdp-ink { background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); color: #FFFFFF; }
+  .tdp-steel { background: #0B1524 linear-gradient(180deg, #14233A 0%, #0B1524 100%); color: #FFFFFF; }
+  .tdp-ink :where(h1, h2, h3), .tdp-steel :where(h1, h2, h3) { color: #FFFFFF; }
+
+  .tdp-h1 { font-size: 2.4rem; line-height: .98; }
+  .tdp-h2 { font-size: 1.9rem; line-height: 1.02; }
+  .tdp-h3 { font-size: 1.2rem; line-height: 1.15; }
+  .tdp-display { font-family: var(--font-heading--family, inherit); }
+  .tdp-eyebrow {
+    display: flex; align-items: center; gap: .625rem; margin-bottom: .625rem;
+    font-family: var(--font-heading--family, inherit); font-size: 12px; font-weight: 700; line-height: 1.4;
+    text-transform: uppercase; letter-spacing: .09em; color: #0068E8;
+  }
+  .tdp-eyebrow--plain { display: block; }
+  .tdp-rule { flex: none; height: 1px; width: 1.5rem; background: rgba(0,104,232,.45); }
+  .tdp-eyebrow--dark { color: #00B4FC; }
+  .tdp-eyebrow--dark .tdp-rule { background: rgba(0,180,252,.5); }
+  .tdp-label {
+    display: block; margin-bottom: .375rem; font-family: var(--font-heading--family, inherit);
+    font-size: 11px; font-weight: 700; line-height: 1.4; text-transform: uppercase; letter-spacing: .07em; color: #586274;
+  }
+  .tdp-lede { font-size: 1.0625rem; line-height: 1.6; color: #586274; }
+  .tdp-ink .tdp-lede, .tdp-steel .tdp-lede { color: rgba(255,255,255,.7); }
+  .tdp-small { font-size: .875rem; line-height: 1.625; color: #586274; }
+  .tdp-xs { font-size: .75rem; line-height: 1.625; color: #586274; }
+  .tdp-ink-text { color: #070E1A; }
+  .tdp-drop { color: #0068E8; }
+  .tdp-small a, .tdp-xs a, .tdp-lede a { text-underline-offset: 2px; }
+  .tdp-small a:hover, .tdp-xs a:hover { color: #0068E8; }
+
+  .tdp-head { margin-bottom: 2rem; }
+  .tdp-head__text { max-width: 42rem; }
+  .tdp-head .tdp-lede { margin-top: 1rem; max-width: 36rem; }
+  .tdp-head--center { text-align: center; }
+  .tdp-head--center .tdp-head__text { margin: 0 auto; }
+  .tdp-head--center .tdp-eyebrow { justify-content: center; }
+  .tdp-head--center .tdp-lede { margin-left: auto; margin-right: auto; }
+  .tdp-head__action { margin-top: 1.5rem; flex: none; }
+
+  /* Masthead */
+  .tdp-hero { position: relative; overflow: hidden; background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); color: #FFFFFF; }
+  .tdp-hero__line { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(0,180,252,.35), transparent); }
+  .tdp-hero__inner { position: relative; padding-top: 3.5rem; padding-bottom: 3.5rem; }
+  .tdp-hero .tdp-eyebrow { color: #00B4FC; margin-bottom: .75rem; }
+  .tdp-hero .tdp-rule { background: rgba(0,180,252,.55); }
+  .tdp-hero .tdp-h1 { max-width: 56rem; color: #FFFFFF; }
+  .tdp-hero__lede { margin-top: 1.25rem; max-width: 42rem; font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.7); }
+  .tdp-hero__actions { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: .75rem; }
+
+  /* Breadcrumbs */
+  .tdp-crumbs { background: #FFFFFF; border-bottom: 1px solid rgba(7,14,26,.1); }
+  .tdp-crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: .375rem; padding-top: 2px; padding-bottom: 2px; font-size: 12px; color: #586274; }
+  .tdp-crumbs li { display: flex; align-items: center; gap: .375rem; }
+  .tdp-crumbs a { display: flex; align-items: center; min-height: 44px; text-decoration: none; color: #586274; }
+  .tdp-crumbs a:hover { color: #0068E8; }
+  .tdp-crumbs [aria-current] { color: #070E1A; }
+  .tdp-crumbs svg { color: rgba(88,98,116,.5); }
+
+  /* Buttons. 44px minimum so every one clears the tap-target floor. */
+  .tdp-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px;
+    padding: .75rem 1.5rem; border-radius: 6px; border: 1px solid transparent; cursor: pointer;
+    font-family: var(--font-heading--family, inherit); font-size: 15px; font-weight: 700; line-height: 1;
+    letter-spacing: -.005em; text-decoration: none; text-align: center; transition: background-color .15s, border-color .15s, box-shadow .15s, color .15s;
+  }
+  .tdp-btn--sm { padding: .5rem 1rem; font-size: 13px; }
+  .tdp-btn--primary { background: #0068E8; color: #FFFFFF; box-shadow: 0 4px 14px -2px rgba(0,104,232,.35); }
+  .tdp-btn--primary:hover { background: #0053C4; box-shadow: none; }
+  .tdp-btn--dark { background: #070E1A; color: #FFFFFF; }
+  .tdp-btn--dark:hover { background: #101C2E; }
+  .tdp-btn--outline { border-color: rgba(7,14,26,.15); background: #FFFFFF; color: #070E1A; box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .tdp-btn--outline:hover { border-color: rgba(7,14,26,.3); background: #F4F6FA; }
+  .tdp-btn--ghost { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.05); color: #FFFFFF; }
+  .tdp-btn--ghost:hover { border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.1); }
+  .tdp-btn--quiet { border-color: transparent; color: rgba(255,255,255,.75); }
+  .tdp-btn--quiet:hover { border-color: #FFFFFF; }
+  .tdp-textlink { display: inline-flex; align-items: center; gap: .375rem; min-height: 44px; font-family: var(--font-heading--family, inherit); font-size: .875rem; font-weight: 700; color: #0068E8; text-decoration: none; }
+  .tdp-textlink:hover { color: #0053C4; }
+
+  /* Surfaces */
+  .tdp-card { background: #FFFFFF; border: 1px solid rgba(7,14,26,.07); border-radius: 12px; box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .tdp-card--hover { transition: transform .2s, box-shadow .2s; }
+  .tdp-card--hover:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(7,14,26,.05), 0 2px 4px rgba(7,14,26,.06), 0 18px 38px -10px rgba(7,14,26,.20); }
+  .tdp-p6 { padding: 1.5rem; }
+  .tdp-bl-drop { border-left: 4px solid #0068E8; }
+  .tdp-bl-amber { border-left: 4px solid #F5A623; }
+  .tdp-badge {
+    display: inline-flex; align-items: center; border-radius: 6px; padding: .25rem .5rem;
+    font-family: var(--font-heading--family, inherit); font-size: 11px; font-weight: 700; line-height: 1.1;
+    text-transform: uppercase; letter-spacing: .09em;
+  }
+  .tdp-badge--soft { background: rgba(7,14,26,.06); color: #070E1A; box-shadow: inset 0 0 0 1px rgba(7,14,26,.1); }
+  .tdp-badge--amber { background: #F5A623; color: #070E1A; }
+  .tdp-badge--drop { background: #0068E8; color: #FFFFFF; }
+  .tdp-ic { flex: none; display: inline-block; vertical-align: middle; }
+  .tdp-ic-lead { display: block; margin-bottom: 1rem; color: #0068E8; }
+  .tdp-h3-ic { display: flex; align-items: center; gap: .5rem; }
+  .tdp-h3-ic svg { color: #0068E8; }
+
+  .tdp-grid { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); }
+  .tdp-bullets > li { display: flex; align-items: flex-start; gap: .5rem; }
+  .tdp-bullets > li + li { margin-top: .5rem; }
+  .tdp-dot { flex: none; margin-top: .5rem; height: 6px; width: 6px; border-radius: 999px; background: #0068E8; }
+  .tdp-checks > li { display: flex; align-items: flex-start; gap: .5rem; font-size: .875rem; line-height: 1.43; color: #070E1A; }
+  .tdp-checks > li + li { margin-top: .625rem; }
+  .tdp-checks svg { margin-top: 2px; color: #0068E8; }
+  .tdp-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+
+  /* Hours */
+  .tdp-hours { width: 100%; border-collapse: collapse; font-size: .875rem; font-variant-numeric: tabular-nums; }
+  .tdp-hours tr + tr { border-top: 1px solid rgba(7,14,26,.1); }
+  .tdp-hours th { padding: .5rem 0; text-align: left; font-family: var(--font-heading--family, inherit); font-size: 1rem; font-weight: 400; color: #070E1A; }
+  .tdp-hours td { padding: .5rem 0; text-align: right; color: #070E1A; }
+  .tdp-hours td.is-closed { color: #586274; }
+
+  /* Definition list used for contact summaries */
+  .tdp-dl { border-top: 1px solid rgba(7,14,26,.1); padding-top: 1.25rem; font-size: .875rem; }
+  .tdp-dl > div + div { margin-top: .75rem; }
+  .tdp-dl dd { color: #070E1A; }
+
+  /* Forms */
+  .tdp-field {
+    display: block; width: 100%; min-height: 44px; margin: 0; border-radius: 6px; border: 1px solid rgba(7,14,26,.12);
+    background: #FFFFFF; padding: .625rem .875rem; font: inherit; font-size: 15px; line-height: 1.5; color: #070E1A;
+    box-shadow: inset 0 1px 2px rgba(7,14,26,.04); appearance: none;
+  }
+  .tdp-field::placeholder { color: rgba(88,98,116,.6); }
+  .tdp-field:focus { outline: none; border-color: #0068E8; box-shadow: 0 0 0 3px rgba(0,104,232,.15); }
+  .tdp-field[aria-invalid="true"] { border-color: #0068E8; }
+  textarea.tdp-field { resize: vertical; }
+  .tdp-err { margin-top: .375rem; display: flex; align-items: flex-start; gap: .375rem; font-size: .75rem; line-height: 1.5; color: #0068E8; }
+  .tdp-err svg { margin-top: 1px; }
+  .tdp-err[hidden] { display: none; }
+  .tdp-formerr { margin-bottom: 1.25rem; }
+  .tdp-formerr ul { margin-top: .5rem; padding-left: 1.1rem; list-style: disc; }
+  .tdp-formerr .errors ul { margin: .5rem 0 0; }
+
+  @media (min-width: 640px) {
+    .tdp-sm2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tdp-sm3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (min-width: 768px) {
+    .tdp-wrap { padding-left: 2rem; padding-right: 2rem; }
+    .tdp-sec { padding: 5rem 0; }
+    .tdp-h1 { font-size: 4.25rem; }
+    .tdp-h2 { font-size: 3rem; }
+    .tdp-h3 { font-size: 1.45rem; }
+    .tdp-lede { font-size: 1.1875rem; }
+    .tdp-head { margin-bottom: 3rem; }
+    .tdp-head--action { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; }
+    .tdp-head--action .tdp-head__action { margin-top: 0; }
+    .tdp-hero__inner { padding-top: 5rem; padding-bottom: 5rem; }
+    .tdp-hero__lede { font-size: 1.25rem; }
+    .tdp-md2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tdp-md3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tdp-md4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+  @media (min-width: 1024px) {
+    .tdp-lg2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tdp-lg3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tdp-lg4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .tdp-lg5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tdp *, .tdp *::before, .tdp *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+
+  .tdp-loc__col { display: flex; flex-direction: column; }
+  .tdp-loc__grow { margin-top: .5rem; flex: 1; }
+  .tdp-loc__btn { margin-top: 1.25rem; align-self: flex-start; }
+  .tdp-loc__shop { display: grid; gap: 1.5rem; }
+  .tdp-loc__stack > * + * { margin-top: 1.5rem; }
+  .tdp-loc__cardtitle { margin-bottom: 1rem; }
+  .tdp-loc__line { display: flex; gap: .75rem; align-items: flex-start; }
+  .tdp-loc__line + .tdp-loc__line { margin-top: 1rem; }
+  .tdp-loc__lineic { margin-top: 2px; }
+  .tdp-loc__addr p { font-size: 1rem; color: #070E1A; }
+  /* 44px hit area, pulled back with negative margins so the visual rhythm matches React. */
+  .tdp-loc__big { display: inline-flex; align-items: center; min-height: 44px; margin: -8px 0; font-family: var(--font-heading--family, inherit); font-size: 1.25rem; line-height: 1.4; color: #070E1A; text-decoration: none; }
+  .tdp-loc__big:hover { color: #0068E8; }
+  .tdp-loc__email { word-break: break-all; }
+  .tdp-loc__note { margin-top: 1rem; }
+  .tdp-loc__facts { margin-top: 1.5rem; }
+  .tdp-loc__cardbtns { margin-top: 1.5rem; }
+  .tdp-loc__map { overflow: hidden; display: flex; flex-direction: column; }
+  .tdp-loc__mapart {
+    position: relative; height: 14rem; background-color: #070E1A;
+    background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 44px), repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 44px), linear-gradient(135deg, #101C2E 0%, #070E1A 100%);
+  }
+  .tdp-loc__road-h { position: absolute; left: 0; right: 0; top: 50%; height: 3px; transform: translateY(-50%); background: rgba(245,166,35,.4); }
+  .tdp-loc__road-v { position: absolute; top: 0; bottom: 0; left: 33.333%; width: 3px; background: rgba(255,255,255,.15); }
+  .tdp-loc__pin { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; }
+  .tdp-loc__pin span { margin-top: .25rem; font-family: var(--font-heading--family, inherit); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: rgba(255,255,255,.7); }
+  .tdp-loc__mapfoot { display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem; }
+  .tdp-loc__mapname { font-size: 1.125rem; }
+  .tdp-loc__mapfoot .tdp-small { margin-top: .25rem; }
+  .tdp-loc__copy { margin-top: .5rem; }
+  .tdp-loc__list { margin-top: 1rem; font-size: .875rem; color: #070E1A; }
+  .tdp-loc__towns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+  .tdp-loc__towns li { display: flex; align-items: center; gap: .5rem; padding: .75rem 1rem; font-size: .875rem; color: #070E1A; }
+  .tdp-loc__van { margin-top: 2rem; }
+  .tdp-loc__vanhead { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+  .tdp-loc__van > .tdp-small { margin-bottom: 1rem; }
+  .tdp-loc__van .tdp-loc__list { margin-top: 0; }
+  .tdp-loc__vanbtn { margin-top: 1.5rem; }
+  .tdp-loc__outside { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+  .tdp-loc__outside .tdp-small { margin-top: .75rem; max-width: 36rem; }
+  .tdp-loc__outside .tdp-btn { flex: none; align-self: flex-start; }
+  .tdp-loc__cta { padding: 3rem 0; }
+  .tdp-loc__ctarow { display: flex; flex-direction: column; gap: 1.5rem; }
+  .tdp-loc__ctalede { margin-top: .75rem; max-width: 36rem; }
+  .tdp-loc__ctabtn { align-self: flex-start; flex: none; }
+  @media (min-width: 640px) {
+    .tdp-loc__mapart { height: 16rem; }
+    .tdp-loc__mapfoot { flex-direction: row; align-items: center; justify-content: space-between; }
+    .tdp-loc__mapfoot .tdp-btn { flex: none; }
+    .tdp-loc__towns { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tdp-loc__outside { flex-direction: row; align-items: center; justify-content: space-between; }
+    .tdp-loc__outside .tdp-btn { align-self: center; }
+  }
+  @media (min-width: 768px) {
+    .tdp-loc__cta { padding: 4rem 0; }
+    .tdp-loc__ctarow { flex-direction: row; align-items: center; justify-content: space-between; }
+    .tdp-loc__ctabtn { align-self: center; }
+  }
+  @media (min-width: 1024px) {
+    .tdp-loc__shop { grid-template-columns: 1fr 1.15fr; }
+    .tdp-loc__towns { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "TireDrop page: Locations",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Page header"
+    },
+    {
+      "type": "text",
+      "id": "hero_eyebrow",
+      "label": "Eyebrow",
+      "default": "The Shop"
+    },
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Heading",
+      "default": "Where your tires can be fitted"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_lede",
+      "label": "Supporting copy",
+      "default": "TireDrop is the online store of Extreme Tires — one business, one address, one phone number. We ship to the continental United States, so most customers never need an address from us. If you are near Sunrise, this is the shop behind the website."
+    },
+    {
+      "type": "text",
+      "id": "crumb",
+      "label": "Breadcrumb label",
+      "default": "The Shop"
+    },
+    {
+      "type": "text",
+      "id": "directions_label",
+      "label": "Directions button",
+      "default": "Get Directions"
+    },
+    {
+      "type": "text",
+      "id": "maps_url",
+      "label": "Directions link (Google Maps)",
+      "default": "https://www.google.com/maps/search/?api=1&query=7712+West+Oakland+Park+Blvd+Sunrise+FL+33351",
+      "info": "Opens in a new tab. A link rather than an embedded map, so no third-party map loads on the page."
+    },
+    {
+      "type": "header",
+      "content": "Contact details"
+    },
+    {
+      "type": "text",
+      "id": "phone",
+      "label": "Phone number",
+      "default": "(954) 773-1896",
+      "info": "Shown as written; the call link is built from its digits."
+    },
+    {
+      "type": "text",
+      "id": "email",
+      "label": "Email address",
+      "default": "info@tiredroponline.com"
+    },
+    {
+      "type": "text",
+      "id": "shop_name",
+      "label": "Shop name",
+      "default": "Extreme Tires — Sunrise"
+    },
+    {
+      "type": "text",
+      "id": "street",
+      "label": "Street",
+      "default": "7712 West Oakland Park Blvd"
+    },
+    {
+      "type": "text",
+      "id": "city_line",
+      "label": "City, state, ZIP",
+      "default": "Sunrise, FL 33351"
+    },
+    {
+      "type": "text",
+      "id": "map_label",
+      "label": "Map panel label",
+      "default": "Sunrise"
+    },
+    {
+      "type": "header",
+      "content": "Three ways to get fitted"
+    },
+    {
+      "type": "text",
+      "id": "ways_eyebrow",
+      "label": "Eyebrow",
+      "default": "Getting Them On"
+    },
+    {
+      "type": "text",
+      "id": "ways_title",
+      "label": "Heading",
+      "default": "Three ways this ends with tires on the car"
+    },
+    {
+      "type": "textarea",
+      "id": "ways_lede",
+      "label": "Supporting copy",
+      "default": "Only two of them involve driving to Sunrise, and one of those is us driving to you."
+    },
+    {
+      "type": "header",
+      "content": "The shop"
+    },
+    {
+      "type": "text",
+      "id": "shop_eyebrow",
+      "label": "Eyebrow",
+      "default": "Our Shop"
+    },
+    {
+      "type": "text",
+      "id": "shop_title",
+      "label": "Heading",
+      "default": "Sunrise, Florida"
+    },
+    {
+      "type": "textarea",
+      "id": "shop_lede",
+      "label": "Supporting copy",
+      "default": "Extreme Tires has run out of this building for years — it owns the vans, employs the technicians and fits every ship-to-store order. Pull in for an install, a pickup, or the bay work a van cannot do."
+    },
+    {
+      "type": "text",
+      "id": "address_title",
+      "label": "Address card heading",
+      "default": "Address & Contact"
+    },
+    {
+      "type": "textarea",
+      "id": "address_note",
+      "label": "Address card note",
+      "default": "One phone number and one email address cover both sides of the business — an order placed from out of state and an appointment in Sunrise reach the same people."
+    },
+    {
+      "type": "text",
+      "id": "fact_trading_label",
+      "label": "Trading as: label",
+      "default": "Trading as"
+    },
+    {
+      "type": "text",
+      "id": "fact_trading",
+      "label": "Trading as",
+      "default": "TireDrop — Powered by Extreme Tires"
+    },
+    {
+      "type": "text",
+      "id": "fact_place_label",
+      "label": "Place of business: label",
+      "default": "Place of business"
+    },
+    {
+      "type": "text",
+      "id": "fact_place",
+      "label": "Place of business",
+      "default": "7712 West Oakland Park Blvd, Sunrise, FL 33351"
+    },
+    {
+      "type": "text",
+      "id": "fact_ships_label",
+      "label": "Ships to: label",
+      "default": "Ships to"
+    },
+    {
+      "type": "textarea",
+      "id": "fact_ships",
+      "label": "Ships to",
+      "default": "Street addresses in the continental United States. Not Alaska, Hawaii, US territories or outside the country."
+    },
+    {
+      "type": "text",
+      "id": "fact_installs_label",
+      "label": "Installs in: label",
+      "default": "Installs in"
+    },
+    {
+      "type": "text",
+      "id": "fact_installs",
+      "label": "Installs in",
+      "default": "Broward County, Florida — at the shop or by mobile van."
+    },
+    {
+      "type": "text",
+      "id": "book_label",
+      "label": "Booking button",
+      "default": "Book an Install"
+    },
+    {
+      "type": "url",
+      "id": "book_link",
+      "label": "Booking link"
+    },
+    {
+      "type": "text",
+      "id": "hours_title",
+      "label": "Hours card heading",
+      "default": "Hours"
+    },
+    {
+      "type": "textarea",
+      "id": "hours_note",
+      "label": "Hours note",
+      "default": "These are the hours for installs, pickups and dispatching the vans. Orders can be placed on the website at any hour — they are reviewed the next time the shop is open."
+    },
+    {
+      "type": "header",
+      "content": "At the shop"
+    },
+    {
+      "type": "text",
+      "id": "visit_eyebrow",
+      "label": "Eyebrow",
+      "default": "At The Shop"
+    },
+    {
+      "type": "text",
+      "id": "visit_title",
+      "label": "Heading",
+      "default": "What actually happens in Sunrise"
+    },
+    {
+      "type": "textarea",
+      "id": "visit_lede",
+      "label": "Supporting copy",
+      "default": "Three different visits end up at the same counter. Here is what each one looks like."
+    },
+    {
+      "type": "header",
+      "content": "Mobile install area"
+    },
+    {
+      "type": "text",
+      "id": "area_eyebrow",
+      "label": "Eyebrow",
+      "default": "Mobile Install Area"
+    },
+    {
+      "type": "text",
+      "id": "area_title",
+      "label": "Heading",
+      "default": "Where the vans run"
+    },
+    {
+      "type": "textarea",
+      "id": "area_lede",
+      "label": "Supporting copy",
+      "default": "Mobile installation is Broward County only — a South Florida bonus on top of the national store. We keep the map tight on purpose, because that is how the van actually arrives when we said it would."
+    },
+    {
+      "type": "text",
+      "id": "area_cta_label",
+      "label": "Button",
+      "default": "Check My Address"
+    },
+    {
+      "type": "url",
+      "id": "area_cta_link",
+      "label": "Button link"
+    },
+    {
+      "type": "textarea",
+      "id": "towns",
+      "label": "Towns (one per line)",
+      "default": "Sunrise\nPlantation\nFort Lauderdale\nDavie\nWeston\nCoral Springs\nTamarac\nLauderhill\nPembroke Pines\nMiramar"
+    },
+    {
+      "type": "text",
+      "id": "van_title",
+      "label": "Van card heading",
+      "default": "What the van can do at your address"
+    },
+    {
+      "type": "textarea",
+      "id": "van_copy",
+      "label": "Van card copy",
+      "default": "Tire machine, spin balancer, calibrated torque wrenches and stock on board. We need a flat, safe spot beside the vehicle — a driveway, a parking space or a level patch of jobsite."
+    },
+    {
+      "type": "textarea",
+      "id": "van_services",
+      "label": "Van services (one per line)",
+      "default": "Tire Installation\nTire Balancing\nTire Repair\nTire Rotation\nWheel Installation\nOil Change\nTPMS Service"
+    },
+    {
+      "type": "text",
+      "id": "van_link_label",
+      "label": "Van card button",
+      "default": "How mobile service works"
+    },
+    {
+      "type": "url",
+      "id": "van_link",
+      "label": "Van card link"
+    },
+    {
+      "type": "text",
+      "id": "outside_badge",
+      "label": "Outside-area badge",
+      "default": "Outside Broward?"
+    },
+    {
+      "type": "textarea",
+      "id": "outside_copy",
+      "label": "Outside-area copy",
+      "default": "Then the van is not coming — but the tires still are. Order them shipped to your address and have your own installer fit them, or call us and we will talk through what to ask for when you get there."
+    },
+    {
+      "type": "header",
+      "content": "Closing band"
+    },
+    {
+      "type": "text",
+      "id": "cta_eyebrow",
+      "label": "Eyebrow",
+      "default": "Powered by Extreme Tires"
+    },
+    {
+      "type": "text",
+      "id": "cta_title",
+      "label": "Heading",
+      "default": "Buy the tires first. Decide the rest after."
+    },
+    {
+      "type": "textarea",
+      "id": "cta_lede",
+      "label": "Supporting copy",
+      "default": "You can change your mind about shipping to your door or to the shop while your order is still being placed — just call us."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button",
+      "default": "Shop Tires"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button link"
+    }
+  ],
+  "max_blocks": 50,
+  "blocks": [
+    {
+      "type": "way",
+      "name": "Way to get fitted",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            {
+              "value": "package",
+              "label": "Package"
+            },
+            {
+              "value": "building-2",
+              "label": "Building"
+            },
+            {
+              "value": "truck",
+              "label": "Truck"
+            },
+            {
+              "value": "wrench",
+              "label": "Wrench"
+            },
+            {
+              "value": "store",
+              "label": "Store"
+            },
+            {
+              "value": "map-pin",
+              "label": "Map pin"
+            }
+          ],
+          "default": "package"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "textarea",
+          "id": "copy",
+          "label": "Copy"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Button link"
+        }
+      ]
+    },
+    {
+      "type": "visit",
+      "name": "Shop visit card",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            {
+              "value": "package",
+              "label": "Package"
+            },
+            {
+              "value": "building-2",
+              "label": "Building"
+            },
+            {
+              "value": "truck",
+              "label": "Truck"
+            },
+            {
+              "value": "wrench",
+              "label": "Wrench"
+            },
+            {
+              "value": "store",
+              "label": "Store"
+            },
+            {
+              "value": "map-pin",
+              "label": "Map pin"
+            }
+          ],
+          "default": "package"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "textarea",
+          "id": "copy",
+          "label": "Copy"
+        },
+        {
+          "type": "textarea",
+          "id": "list",
+          "label": "List (one per line, optional)"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Button link"
+        }
+      ]
+    },
+    {
+      "type": "hours",
+      "name": "Hours row",
+      "settings": [
+        {
+          "type": "text",
+          "id": "days",
+          "label": "Days"
+        },
+        {
+          "type": "text",
+          "id": "time",
+          "label": "Hours",
+          "info": "Write Closed for a closed day."
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

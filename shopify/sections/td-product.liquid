@@ -1,0 +1,600 @@
+{% comment %}
+  Product page, laid out like the React /tires/:slug page: gallery beside a
+  buy box (set-of-four quantity helper, price breakdown, delivery explainer,
+  add to cart through Shopify's own /cart/add form), the South Florida
+  install band, specifications, and more from the same collection.
+
+  Fitment facts (size, load index and speed rating, bolt pattern) are read
+  from the title or a "Size" variant option by snippets/td-product-specs,
+  because the ATD feed's metafields are not known yet.
+
+  Left out on purpose, because there is nothing real behind them yet: star
+  ratings, the "How it rates" scores, stock counts beyond variant.available,
+  dated delivery estimates, the per-tire install price and the compare tool.
+{% endcomment %}
+{%- liquid
+  assign ss = section.settings
+  assign variant = product.selected_or_first_available_variant
+  capture td_specs
+    render 'td-product-specs', product: product, variant: variant
+  endcapture
+  assign td_spec = td_specs | split: '~~'
+  assign kind = td_spec[0] | strip
+  assign name = td_spec[1] | strip
+  assign size = td_spec[2] | strip
+  assign service = td_spec[3] | strip
+  assign bolt = td_spec[4] | strip
+
+  assign unit = 'item'
+  assign units = 'items'
+  assign set_qty = 1
+  assign list_url = routes.all_products_collection_url
+  assign list_label = 'Shop'
+  if kind == 'tire'
+    assign unit = 'tire'
+    assign units = 'tires'
+    assign set_qty = 4
+    assign list_url = '/collections/tires'
+    assign list_label = 'Tires'
+  elsif kind == 'wheel'
+    assign unit = 'wheel'
+    assign units = 'wheels'
+    assign set_qty = 4
+    assign list_url = '/collections/wheels'
+    assign list_label = 'Wheels'
+  endif
+
+  assign sub_line = size
+  if service != ''
+    if sub_line != ''
+      assign sub_line = sub_line | append: ' · '
+    endif
+    assign sub_line = sub_line | append: service
+  endif
+  if bolt != ''
+    if sub_line != ''
+      assign sub_line = sub_line | append: ' · '
+    endif
+    assign sub_line = sub_line | append: bolt
+  endif
+
+  assign price = variant.price
+  assign compare = variant.compare_at_price | default: 0
+  assign total = price | times: set_qty
+  assign each_saving = 0
+  if compare > price
+    assign each_saving = compare | minus: price
+  endif
+  assign list_total = compare | times: set_qty
+  assign total_saving = each_saving | times: set_qty
+
+  assign phone = ss.phone | default: '(954) 773-1896'
+  assign phone_href = phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | prepend: 'tel:+1'
+  assign sid = section.id
+  assign form_id = 'td-product-form-' | append: sid
+-%}
+
+<div class="td-shop td-pdp" id="td-pdp-{{ sid }}" data-set="{{ set_qty }}" data-unit="{{ unit }}" data-units="{{ units }}">
+  {%- render 'td-collection-base' -%}
+
+  <nav class="td-shop-crumbs" aria-label="Breadcrumb">
+    <ol class="td-shop-wrap">
+      <li><a href="{{ routes.root_url }}">Home</a></li>
+      <li><a href="{{ list_url }}">{{ list_label }}</a></li>
+      {%- if product.vendor != blank -%}
+        <li><a href="{{ product.vendor | url_for_vendor }}">{{ product.vendor }}</a></li>
+      {%- endif -%}
+      <li><span aria-current="page">{{ name }}</span></li>
+    </ol>
+  </nav>
+
+  <section class="td-shop-section">
+    <div class="td-shop-wrap td-pdp__grid">
+      <div class="td-pdp__gallery">
+        <div class="td-shop-card td-pdp__stage">
+          {%- assign first_image = product.featured_image -%}
+          {%- if first_image -%}
+            <img data-td-stage
+              src="{{ first_image | image_url: width: 900 }}"
+              srcset="{{ first_image | image_url: width: 450 }} 450w, {{ first_image | image_url: width: 900 }} 900w, {{ first_image | image_url: width: 1300 }} 1300w"
+              sizes="(min-width: 1024px) 560px, 100vw"
+              alt="{{ first_image.alt | default: product.title | escape }}"
+              width="{{ first_image.width }}" height="{{ first_image.height }}">
+          {%- else -%}
+            <div class="td-pdp__art">{%- render 'td-product-art', kind: kind, size: 420 -%}</div>
+          {%- endif -%}
+        </div>
+        {%- if product.images.size > 1 -%}
+          <ul class="td-pdp__thumbs" role="list">
+            {%- for image in product.images limit: 8 -%}
+              <li>
+                <button type="button" class="td-pdp__thumb" data-td-thumb
+                  data-src="{{ image | image_url: width: 900 }}"
+                  data-srcset="{{ image | image_url: width: 450 }} 450w, {{ image | image_url: width: 900 }} 900w, {{ image | image_url: width: 1300 }} 1300w"
+                  data-alt="{{ image.alt | default: product.title | escape }}"
+                  aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+                  aria-label="Show image {{ forloop.index }} of {{ product.images.size }}">
+                  <img src="{{ image | image_url: width: 160 }}" alt="" width="80" height="80" loading="lazy">
+                </button>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </div>
+
+      <div class="td-pdp__buy" data-td-buybox>
+        {%- if product.vendor != blank -%}<p class="td-shop-eyebrow">{{ product.vendor }}</p>{%- endif -%}
+        <h1 class="td-shop-h1 td-pdp__title">{{ name }}</h1>
+        {%- if sub_line != '' -%}<p class="td-pdp__sub tnum">{{ sub_line }}</p>{%- endif -%}
+
+        <div class="td-pdp__pricebox">
+          <div class="td-pdp__pricerow">
+            <span class="td-pdp__total tnum" data-td-total>{{ total | money }}</span>
+            <span class="td-shop-smoke td-pdp__for" data-td-for>for {{ set_qty }} {% if set_qty == 1 %}{{ unit }}{% else %}{{ units }}{% endif %}</span>
+          </div>
+          <p class="td-shop-smoke td-pdp__each tnum">
+            <span data-td-each>{{ price | money }}</span> per {{ unit }}
+            <span data-td-saveline{% if each_saving == 0 %} hidden{% endif %}> ·
+              <s data-td-compare>{{ compare | money }}</s>
+              <strong class="td-pdp__save">Save <span data-td-save-each>{{ each_saving | money }}</span> each</strong>
+            </span>
+          </p>
+          <p class="td-shop-smoke td-pdp__stock" data-td-stock>
+            {%- if variant.available -%}{{ ss.available_text }}{%- else -%}{{ ss.unavailable_text }}{%- endif -%}
+          </p>
+        </div>
+
+        <form method="post" action="{{ routes.cart_add_url }}" id="{{ form_id }}" accept-charset="UTF-8" class="td-pdp__form" data-td-form>
+          <input type="hidden" name="form_type" value="product">
+          <input type="hidden" name="utf8" value="✓">
+
+          {%- if product.has_only_default_variant -%}
+            <input type="hidden" name="id" value="{{ variant.id }}">
+          {%- else -%}
+            <div class="td-pdp__block">
+              <label class="td-shop-label" for="{{ sid }}-variant">{{ product.options | join: ' / ' }}</label>
+              <select class="td-shop-field" id="{{ sid }}-variant" name="id" data-td-variant>
+                {%- for v in product.variants -%}
+                  <option value="{{ v.id }}" data-price="{{ v.price }}" data-compare="{{ v.compare_at_price | default: 0 }}" data-available="{{ v.available }}"
+                    {% if v.id == variant.id %}selected{% endif %}>{{ v.title | escape }}{% unless v.available %} (not available){% endunless %}</option>
+                {%- endfor -%}
+              </select>
+            </div>
+          {%- endif -%}
+
+          <div class="td-pdp__block">
+            <span id="{{ sid }}-qty-label" class="td-shop-label">Quantity</span>
+            <div class="td-pdp__qty" role="group" aria-labelledby="{{ sid }}-qty-label">
+              {%- if set_qty > 1 -%}
+                {%- assign presets = '1,2,4,5' | split: ',' -%}
+                {%- for n in presets -%}
+                  {%- assign ni = n | plus: 0 -%}
+                  <button type="button" class="td-pdp__preset tnum" data-td-preset="{{ ni }}" aria-pressed="{% if ni == set_qty %}true{% else %}false{% endif %}">
+                    {{ ni }}{% if ni == set_qty %}<span class="td-pdp__presetset">set</span>{% endif %}
+                  </button>
+                {%- endfor -%}
+              {%- endif -%}
+              <div class="td-pdp__stepper">
+                <button type="button" class="td-pdp__step" data-td-step="-1" aria-label="Decrease quantity">
+                  <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
+                </button>
+                <label for="{{ sid }}-qty" class="td-sr">Quantity of {{ units }}</label>
+                <input id="{{ sid }}-qty" class="td-pdp__qtyinput tnum" type="number" name="quantity" min="1" max="{{ ss.max_qty }}" inputmode="numeric" value="{{ set_qty }}" data-td-qty>
+                <button type="button" class="td-pdp__step" data-td-step="1" aria-label="Increase quantity">
+                  <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg>
+                </button>
+              </div>
+            </div>
+            {%- if set_qty > 1 -%}
+              <p class="td-pdp__hint" data-td-qtyhint>Most customers buy a full set of four.</p>
+            {%- endif -%}
+          </div>
+
+          <div class="td-pdp__block">
+            <p class="td-shop-label">Delivery</p>
+            <div class="td-pdp__options">
+              <div class="td-pdp__option">
+                <p class="td-pdp__optitle">{{ ss.ship_title }}</p>
+                <p class="td-pdp__optline">
+                  <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+                  <span>{{ ss.ship_line }}</span>
+                </p>
+                <p class="td-pdp__optcopy">{{ ss.ship_copy }}</p>
+              </div>
+              <div class="td-pdp__option">
+                <p class="td-pdp__optitle">{{ ss.store_title }}</p>
+                <p class="td-pdp__optline">
+                  <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/></svg>
+                  <span>{{ ss.store_line }}</span>
+                </p>
+                <p class="td-pdp__optcopy">{{ ss.store_copy }}</p>
+              </div>
+            </div>
+            <p class="td-pdp__hint">{{ ss.delivery_note }}</p>
+          </div>
+
+          <dl class="td-pdp__bill tnum">
+            <div data-td-listrow{% if each_saving == 0 %} hidden{% endif %}>
+              <dt>List price, <span data-td-qtytext>{{ set_qty }} {% if set_qty == 1 %}{{ unit }}{% else %}{{ units }}{% endif %}</span></dt>
+              <dd class="td-pdp__strike" data-td-listtotal>{{ list_total | money }}</dd>
+            </div>
+            <div>
+              <dt>Your price</dt>
+              <dd data-td-yourprice>{{ total | money }}</dd>
+            </div>
+            <div data-td-saverow{% if each_saving == 0 %} hidden{% endif %}>
+              <dt>Instant saving</dt>
+              <dd class="td-pdp__save" data-td-saving>− {{ total_saving | money }}</dd>
+            </div>
+            <div>
+              <dt>Shipping</dt>
+              <dd>Free</dd>
+            </div>
+            <div class="td-pdp__billtotal">
+              <dt>Estimated total</dt>
+              <dd data-td-estimate>{{ total | money }}</dd>
+            </div>
+          </dl>
+          <p class="td-pdp__hint">Shipping is free. Taxes are calculated at checkout.</p>
+
+          <button type="submit" name="add" class="td-shop-btn td-shop-btn--primary td-shop-btn--block td-pdp__add" data-td-add
+            {% unless variant.available %}disabled{% endunless %}>
+            <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+            <span data-td-addlabel>{% if variant.available %}Add to Cart{% else %}Not available{% endif %}</span>
+          </button>
+          <p class="td-pdp__unavail" data-td-unavail{% if variant.available %} hidden{% endif %}>
+            Not available to ship right now — <a href="{{ phone_href }}">call {{ phone }}</a> and we will try to source it.
+          </p>
+        </form>
+
+        <div class="td-pdp__trust">
+          <span>
+            <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+            Ships free anywhere in the continental United States
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="td-pdp__band">
+    <div class="td-shop-wrap td-pdp__bandin">
+      <div class="td-pdp__bandtext">
+        <svg class="td-pdp__bandicon" aria-hidden="true" focusable="false" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/></svg>
+        <div>
+          <p class="td-shop-eyebrow td-pdp__bandeyebrow">{{ ss.band_eyebrow }}</p>
+          <h2 class="td-shop-h2 td-pdp__bandtitle">{{ ss.band_title }}</h2>
+          <p class="td-pdp__bandcopy">{{ ss.band_copy }}</p>
+        </div>
+      </div>
+      <div class="td-pdp__bandactions">
+        <a href="{{ ss.band_link | default: '/pages/install' }}" class="td-shop-btn td-shop-btn--primary">{{ ss.band_label }}</a>
+        <a href="{{ phone_href }}" class="td-shop-btn td-shop-btn--ghost">
+          <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          {{ phone }}
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <section class="td-shop-section td-pdp__details">
+    <div class="td-shop-wrap td-pdp__detailgrid">
+      <div>
+        <h2 class="td-shop-h2 td-pdp__h2">Specifications</h2>
+        <div class="td-pdp__tablewrap">
+          <table class="td-pdp__specs">
+            <caption class="td-sr">{{ product.title }} specifications</caption>
+            <tbody>
+              {%- if product.vendor != blank -%}<tr><th scope="row">Brand</th><td>{{ product.vendor }}</td></tr>{%- endif -%}
+              {%- if name != '' -%}<tr><th scope="row">Model</th><td>{{ name }}</td></tr>{%- endif -%}
+              {%- if size != '' -%}<tr><th scope="row">{% if kind == 'wheel' %}Wheel size{% else %}Tire size{% endif %}</th><td>{{ size }}</td></tr>{%- endif -%}
+              {%- if service != '' -%}<tr><th scope="row">Load index &amp; speed rating</th><td>{{ service }}</td></tr>{%- endif -%}
+              {%- if bolt != '' -%}<tr><th scope="row">Bolt pattern</th><td>{{ bolt }}</td></tr>{%- endif -%}
+              {%- unless product.has_only_default_variant -%}
+                {%- for option in product.options_with_values -%}
+                  {%- assign oname = option.name | downcase -%}
+                  {%- unless oname contains 'size' and size != '' -%}
+                    <tr><th scope="row">{{ option.name | escape }}</th><td>{{ option.selected_value | escape }}</td></tr>
+                  {%- endunless -%}
+                {%- endfor -%}
+              {%- endunless -%}
+              {%- if variant.sku != blank -%}<tr><th scope="row">Part number</th><td>{{ variant.sku | escape }}</td></tr>{%- endif -%}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        {%- if product.description != blank -%}
+          <h2 class="td-shop-h2 td-pdp__h2">{{ ss.about_title }}</h2>
+          <div class="td-pdp__desc">{{ product.description }}</div>
+        {%- endif -%}
+        <div class="td-shop-card td-pdp__questions">
+          <h3 class="td-shop-h3">Questions before you buy?</h3>
+          <p class="td-shop-smoke">{{ ss.questions_copy }}</p>
+          <a href="{{ ss.contact_link | default: '/pages/contact' }}" class="td-shop-btn td-shop-btn--outline td-shop-btn--sm">
+            Contact us
+            <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {%- liquid
+    assign related_source = product.collections.first
+    if kind == 'tire' and collections['tires']
+      assign related_source = collections['tires']
+    elsif kind == 'wheel' and collections['wheels']
+      assign related_source = collections['wheels']
+    endif
+    assign related_count = 0
+    if related_source
+      for p in related_source.products limit: 12
+        if p.id != product.id
+          assign related_count = related_count | plus: 1
+        endif
+      endfor
+    endif
+  -%}
+  {%- if related_count > 0 and ss.show_related -%}
+    <section class="td-shop-section td-pdp__related">
+      <div class="td-shop-wrap">
+        <div class="td-pdp__relhead">
+          <div>
+            <p class="td-shop-eyebrow td-pdp__releyebrow">You might also like</p>
+            <h2 class="td-shop-h2">More {{ units }}</h2>
+          </div>
+          <a href="{{ list_url }}" class="td-shop-btn td-shop-btn--outline td-shop-btn--sm">Shop all {{ units }}</a>
+        </div>
+        <ul class="td-shop-grid td-shop-grid--4 td-pdp__relgrid" role="list">
+          {%- assign shown = 0 -%}
+          {%- for p in related_source.products limit: 12 -%}
+            {%- if p.id != product.id and shown < 4 -%}
+              {%- assign shown = shown | plus: 1 -%}
+              <li>{%- render 'td-product-card', product: p, heading_level: 3 -%}</li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+    </section>
+  {%- endif -%}
+
+  <div class="td-pdp__sticky" data-td-sticky hidden>
+    <div class="td-pdp__stickyin">
+      <div class="td-pdp__stickyprice">
+        <p class="tnum td-pdp__stickytotal" data-td-sticky-total>{{ total | money }}</p>
+        <p class="td-pdp__stickymeta" data-td-sticky-meta>{{ set_qty }} {% if set_qty == 1 %}{{ unit }}{% else %}{{ units }}{% endif %} · {{ price | money }} each</p>
+      </div>
+      <button type="submit" form="{{ form_id }}" name="add" class="td-shop-btn td-shop-btn--primary td-shop-btn--sm td-pdp__stickybtn">
+        <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+        Add to cart
+      </button>
+    </div>
+  </div>
+
+  <script type="application/ld+json">{{ product | structured_data }}</script>
+</div>
+
+<style>
+  .td-pdp__grid { display: grid; gap: 2.5rem; align-items: start; }
+  @media (min-width: 1024px) { .td-pdp__grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  .td-pdp__stage { display: flex; align-items: center; justify-content: center; background: var(--td-fog); padding: 2rem; aspect-ratio: 1 / 1; max-height: 560px; width: 100%; overflow: hidden; }
+  .td-pdp__stage img { width: 100%; height: 100%; object-fit: contain; }
+  .td-pdp__art svg { width: 100%; max-width: 420px; height: auto; }
+  .td-pdp__art { display: flex; justify-content: center; width: 100%; }
+  .td-pdp__thumbs { list-style: none; margin: .75rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem; }
+  .td-pdp__thumb { width: 64px; height: 64px; padding: 4px; border-radius: 6px; border: 1px solid rgba(7,14,26,.15); background: #FFFFFF; cursor: pointer; }
+  .td-pdp__thumb[aria-pressed="true"] { border-color: var(--td-drop); box-shadow: 0 0 0 1px var(--td-drop); }
+  .td-pdp__thumb img { width: 100%; height: 100%; object-fit: contain; }
+  @media (min-width: 1024px) { .td-pdp__gallery { position: sticky; top: calc(var(--header-height, 0px) + 1.5rem); } }
+
+  .td-pdp__title { margin-top: .25rem !important; overflow-wrap: anywhere; }
+  .td-pdp__sub { margin-top: .5rem !important; font-family: var(--td-display); font-size: 1.125rem; color: var(--td-smoke); }
+  .td-pdp__pricebox { margin-top: 1.5rem; padding: 1.25rem 0; border-top: 1px solid rgba(7,14,26,.1); border-bottom: 1px solid rgba(7,14,26,.1); }
+  .td-pdp__pricerow { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: .75rem; row-gap: .25rem; }
+  .td-pdp__total { font-family: var(--td-display); font-size: 2.25rem; line-height: 1; letter-spacing: -.025em; }
+  .td-pdp__for, .td-pdp__each, .td-pdp__stock { font-size: 14px; }
+  .td-pdp__each, .td-pdp__stock { margin-top: .5rem !important; }
+  .td-pdp__save { font-family: var(--td-display); font-weight: 700; color: var(--td-drop); }
+  .td-pdp__form { margin: 0; }
+  .td-pdp__block { margin-top: 1.5rem; }
+  .td-pdp__qty { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+  .td-pdp__preset {
+    display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; justify-content: center; padding: 0 .75rem;
+    border-radius: 6px; border: 1px solid rgba(7,14,26,.15); background: #FFFFFF; color: var(--td-ink);
+    font-family: var(--td-display); font-size: 1rem; font-weight: 700; cursor: pointer;
+  }
+  .td-pdp__preset:hover { border-color: var(--td-ink); }
+  .td-pdp__preset[aria-pressed="true"] { border-color: var(--td-drop); background: var(--td-drop); color: #FFFFFF; }
+  .td-pdp__presetset { margin-left: .375rem; font-size: 11px; letter-spacing: normal; }
+  .td-pdp__stepper { display: inline-flex; align-items: center; border: 1px solid rgba(7,14,26,.15); border-radius: 6px; background: #FFFFFF; }
+  .td-pdp__step { display: flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border: 0; background: transparent; color: var(--td-ink); cursor: pointer; }
+  .td-pdp__step:hover { color: var(--td-drop); }
+  .td-pdp__step:disabled { opacity: .4; cursor: default; }
+  .td-pdp__qtyinput { width: 3.5rem; min-height: 44px; border: 0; border-left: 1px solid rgba(7,14,26,.15); border-right: 1px solid rgba(7,14,26,.15); text-align: center; font-family: var(--td-display); font-size: 1.125rem; color: var(--td-ink); background: #FFFFFF; -moz-appearance: textfield; }
+  .td-pdp__qtyinput::-webkit-inner-spin-button, .td-pdp__qtyinput::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .td-pdp__hint { margin-top: .5rem !important; font-size: 12px; color: var(--td-smoke); }
+  .td-pdp__options { display: grid; gap: .75rem; }
+  .td-pdp__option { border: 1px solid rgba(7,14,26,.15); border-radius: 6px; background: #FFFFFF; padding: 1rem; }
+  .td-pdp__option:first-child { border-color: var(--td-drop); background: rgba(0,104,232,.05); }
+  .td-pdp__optitle { font-family: var(--td-display); font-size: 1rem; font-weight: 700; }
+  .td-pdp__optline { margin-top: .25rem !important; display: flex; align-items: flex-start; gap: .5rem; font-size: 14px; font-weight: 500; }
+  .td-pdp__optline svg { flex-shrink: 0; margin-top: 2px; color: var(--td-drop); }
+  .td-pdp__optcopy { margin-top: .25rem !important; font-size: 14px; color: var(--td-smoke); }
+  .td-pdp__bill { margin: 1.5rem 0 0; font-size: 14px; }
+  .td-pdp__bill > div { display: flex; justify-content: space-between; gap: 1rem; margin-top: .375rem; }
+  .td-pdp__bill > div[hidden] { display: none; }
+  .td-pdp__bill dt { color: var(--td-smoke); }
+  .td-pdp__bill dd { margin: 0; font-weight: 500; }
+  .td-pdp__strike { color: var(--td-smoke); text-decoration: line-through; }
+  .td-pdp__billtotal { border-top: 1px solid rgba(7,14,26,.1); padding-top: .5rem; margin-top: .5rem !important; font-family: var(--td-display); font-size: 1.125rem; font-weight: 700; }
+  .td-pdp__billtotal dt { color: var(--td-ink); }
+  .td-pdp__billtotal dd { font-weight: 700; }
+  .td-pdp__add { margin-top: 1.25rem; min-height: 48px; }
+  .td-pdp__unavail { margin-top: .75rem !important; font-size: 14px; color: var(--td-smoke); }
+  .td-pdp__unavail a { color: var(--td-ink); }
+  .td-pdp__trust { margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; font-size: 12px; color: var(--td-smoke); }
+  .td-pdp__trust span { display: inline-flex; align-items: center; gap: .375rem; }
+  .td-pdp__trust svg { color: var(--td-drop); }
+
+  .td-pdp__band { background: radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); color: #FFFFFF; }
+  .td-pdp__bandin { display: flex; flex-direction: column; gap: 1.25rem; padding-top: 2.5rem; padding-bottom: 2.5rem; }
+  .td-pdp__bandtext { display: flex; align-items: flex-start; gap: 1rem; }
+  .td-pdp__bandicon { flex-shrink: 0; margin-top: .25rem; color: var(--td-amber); }
+  .td-pdp__bandeyebrow { color: var(--td-volt); margin-bottom: .25rem !important; }
+  .td-pdp__bandtitle { color: #FFFFFF; font-size: 1.875rem; }
+  .td-pdp__bandcopy { margin-top: .5rem !important; max-width: 36rem; font-size: 14px; color: rgba(255,255,255,.72); }
+  .td-pdp__bandactions { display: flex; flex-wrap: wrap; gap: .75rem; flex-shrink: 0; }
+  @media (min-width: 768px) {
+    .td-pdp__bandin { flex-direction: row; align-items: center; justify-content: space-between; }
+    .td-pdp__bandtitle { font-size: 2.25rem; }
+  }
+
+  .td-pdp__details { background: var(--td-fog); }
+  .td-pdp__detailgrid { display: grid; gap: 2.5rem; }
+  @media (min-width: 1024px) { .td-pdp__detailgrid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  .td-pdp__h2 { font-size: 1.875rem; }
+  @media (min-width: 768px) { .td-pdp__h2 { font-size: 2.25rem; } }
+  .td-pdp__tablewrap { margin-top: 1.25rem; overflow-x: auto; }
+  .td-pdp__specs { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .td-pdp__specs tr { border-top: 1px solid rgba(7,14,26,.1); border-bottom: 1px solid rgba(7,14,26,.1); }
+  .td-pdp__specs th { padding: .75rem 1rem .75rem 0; text-align: left; vertical-align: top; font-weight: 400; color: var(--td-smoke); }
+  .td-pdp__specs td { padding: .75rem 0; text-align: right; vertical-align: top; font-weight: 500; }
+  .td-pdp__desc { margin-top: 1.25rem; font-size: 14px; line-height: 1.625; }
+  .td-pdp__desc > * + * { margin-top: .75rem; }
+  .td-pdp__desc ul { padding-left: 1.25rem; }
+  .td-pdp__questions { margin-top: 1.5rem; padding: 1.25rem; }
+  .td-pdp__questions p { margin-top: .25rem !important; font-size: 14px; }
+  .td-pdp__questions .td-shop-btn { margin-top: 1rem; }
+
+  .td-pdp__related { background: #FFFFFF; }
+  .td-pdp__relhead { margin-bottom: 2rem; }
+  .td-pdp__relhead .td-shop-btn { margin-top: 1.5rem; }
+  .td-pdp__releyebrow { display: flex; align-items: center; gap: .625rem; margin-bottom: .625rem !important; }
+  .td-pdp__releyebrow::before { content: ""; width: 1.5rem; height: 1px; background: rgba(0,104,232,.45); }
+  .td-pdp__relgrid { list-style: none; margin: 0; padding: 0; }
+  @media (min-width: 768px) {
+    .td-pdp__relhead { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; margin-bottom: 3rem; }
+    .td-pdp__relhead .td-shop-btn { margin-top: 0; }
+  }
+
+  .td-pdp__sticky { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; border-top: 1px solid rgba(7,14,26,.1); background: rgba(255,255,255,.95); backdrop-filter: blur(8px); padding-bottom: env(safe-area-inset-bottom); }
+  .td-pdp__sticky[hidden] { display: none; }
+  .td-pdp__stickyin { display: flex; align-items: center; gap: .75rem; padding: .625rem 1rem; }
+  .td-pdp__stickyprice { min-width: 0; }
+  .td-pdp__stickytotal { font-family: var(--td-display); font-size: 1.25rem; line-height: 1; }
+  .td-pdp__stickymeta { margin-top: .25rem !important; font-size: 11px; color: var(--td-smoke); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .td-pdp__stickybtn { margin-left: auto; flex-shrink: 0; }
+  @media (min-width: 1024px) { .td-pdp__sticky { display: none !important; } }
+</style>
+
+<script>
+  (function () {
+    var root = document.getElementById("td-pdp-{{ sid }}");
+    if (!root) return;
+    var SET = Number(root.dataset.set) || 1, UNIT = root.dataset.unit, UNITS = root.dataset.units;
+    var MAX = {{ ss.max_qty | default: 12 }};
+    var fmt = function (c) { return "$" + (c / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+    var $ = function (s) { return root.querySelector(s); };
+    var qtyInput = $("[data-td-qty]");
+    var variantSel = $("[data-td-variant]");
+    var state = { price: {{ price | default: 0 }}, compare: {{ compare | default: 0 }}, available: {{ variant.available | default: false }} };
+
+    function plural(n) { return n === 1 ? UNIT : UNITS; }
+    function paint() {
+      var q = Math.min(MAX, Math.max(1, parseInt(qtyInput.value, 10) || 1));
+      var total = state.price * q, saving = state.compare > state.price ? state.compare - state.price : 0;
+      var set = function (sel, txt) { var el = $(sel); if (el) el.textContent = txt; };
+      set("[data-td-total]", fmt(total));
+      set("[data-td-for]", "for " + q + " " + plural(q));
+      set("[data-td-each]", fmt(state.price));
+      set("[data-td-compare]", fmt(state.compare));
+      set("[data-td-save-each]", fmt(saving));
+      set("[data-td-qtytext]", q + " " + plural(q));
+      set("[data-td-listtotal]", fmt(state.compare * q));
+      set("[data-td-yourprice]", fmt(total));
+      set("[data-td-saving]", "− " + fmt(saving * q));
+      set("[data-td-estimate]", fmt(total));
+      set("[data-td-sticky-total]", fmt(total));
+      set("[data-td-sticky-meta]", q + " " + plural(q) + " · " + fmt(state.price) + " each");
+      ["[data-td-saveline]", "[data-td-listrow]", "[data-td-saverow]"].forEach(function (s) { var el = $(s); if (el) el.hidden = saving === 0; });
+      root.querySelectorAll("[data-td-preset]").forEach(function (b) { b.setAttribute("aria-pressed", Number(b.dataset.tdPreset) === q ? "true" : "false"); });
+      var hint = $("[data-td-qtyhint]");
+      if (hint) hint.textContent = q === SET + 1 ? "A set of four plus a full-size spare." : "Most customers buy a full set of four.";
+      root.querySelectorAll("[data-td-step]").forEach(function (b) {
+        var d = Number(b.dataset.tdStep); b.disabled = d < 0 ? q <= 1 : q >= MAX;
+      });
+      var add = $("[data-td-add]");
+      add.disabled = !state.available;
+      set("[data-td-addlabel]", state.available ? "Add to Cart" : "Not available");
+      $("[data-td-unavail]").hidden = state.available;
+      set("[data-td-stock]", state.available ? {{ ss.available_text | json }} : {{ ss.unavailable_text | json }});
+    }
+    root.querySelectorAll("[data-td-preset]").forEach(function (b) {
+      b.addEventListener("click", function () { qtyInput.value = b.dataset.tdPreset; paint(); });
+    });
+    root.querySelectorAll("[data-td-step]").forEach(function (b) {
+      b.addEventListener("click", function () { qtyInput.value = Math.min(MAX, Math.max(1, (parseInt(qtyInput.value, 10) || 1) + Number(b.dataset.tdStep))); paint(); });
+    });
+    qtyInput.addEventListener("change", function () { qtyInput.value = Math.min(MAX, Math.max(1, parseInt(qtyInput.value, 10) || 1)); paint(); });
+    if (variantSel) variantSel.addEventListener("change", function () {
+      var o = variantSel.options[variantSel.selectedIndex];
+      state = { price: Number(o.dataset.price), compare: Number(o.dataset.compare) || 0, available: o.dataset.available === "true" };
+      var url = new URL(location.href); url.searchParams.set("variant", o.value); history.replaceState(null, "", url);
+      paint();
+    });
+    paint();
+
+    // Gallery thumbnails swap the main image.
+    var stage = $("[data-td-stage]");
+    root.querySelectorAll("[data-td-thumb]").forEach(function (t) {
+      t.addEventListener("click", function () {
+        if (!stage) return;
+        stage.src = t.dataset.src; stage.srcset = t.dataset.srcset; stage.alt = t.dataset.alt;
+        root.querySelectorAll("[data-td-thumb]").forEach(function (o) { o.setAttribute("aria-pressed", o === t ? "true" : "false"); });
+      });
+    });
+
+    // Phone buy bar, once the real buy box has scrolled away.
+    var sticky = $("[data-td-sticky]"), box = $("[data-td-buybox]");
+    if (sticky && box && "IntersectionObserver" in window) {
+      new IntersectionObserver(function (e) {
+        sticky.hidden = e[0].isIntersecting || !state.available;
+      }).observe(box);
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "TireDrop product",
+  "tag": "section",
+  "class": "td-section-product",
+  "settings": [
+    { "type": "text", "id": "available_text", "label": "Available line", "default": "Available to order." },
+    { "type": "text", "id": "unavailable_text", "label": "Not available line", "default": "Not available to ship right now — call us and we will try to source it." },
+    { "type": "range", "id": "max_qty", "label": "Maximum quantity per add", "min": 4, "max": 24, "step": 1, "default": 12 },
+    { "type": "header", "content": "Delivery explainer" },
+    { "type": "text", "id": "ship_title", "label": "Option 1 title", "default": "Ship it to me" },
+    { "type": "text", "id": "ship_line", "label": "Option 1 line", "default": "Ships free, no minimum" },
+    { "type": "textarea", "id": "ship_copy", "label": "Option 1 text", "default": "Delivered to your address anywhere in the continental United States." },
+    { "type": "text", "id": "store_title", "label": "Option 2 title", "default": "Ship to the shop and we'll fit them" },
+    { "type": "text", "id": "store_line", "label": "Option 2 line", "default": "Free to Extreme Tires — Sunrise, fitted there" },
+    { "type": "textarea", "id": "store_copy", "label": "Option 2 text", "default": "Mounting, balancing, new valve stems and disposal of your old tires. South Florida only — Sunrise, Plantation, Fort Lauderdale, Davie and nearby." },
+    { "type": "text", "id": "delivery_note", "label": "Delivery note", "default": "You choose between these in your cart." },
+    { "type": "header", "content": "South Florida band" },
+    { "type": "text", "id": "band_eyebrow", "label": "Eyebrow", "default": "South Florida" },
+    { "type": "text", "id": "band_title", "label": "Heading", "default": "Ship it free to the shop" },
+    { "type": "textarea", "id": "band_copy", "label": "Text", "default": "Local buyers can send the order to Extreme Tires — Sunrise at no charge and book an install. We fit them and dispose of the old ones — or send the van out to you instead." },
+    { "type": "text", "id": "band_label", "label": "Button", "default": "How install works" },
+    { "type": "url", "id": "band_link", "label": "Button link" },
+    { "type": "text", "id": "phone", "label": "Phone", "default": "(954) 773-1896" },
+    { "type": "header", "content": "Details" },
+    { "type": "text", "id": "about_title", "label": "Description heading", "default": "Why this one" },
+    { "type": "textarea", "id": "questions_copy", "label": "Questions card text", "default": "Call (954) 773-1896 during shop hours, send a note through the contact form, or stop by 7712 West Oakland Park Blvd, Sunrise, FL 33351." },
+    { "type": "url", "id": "contact_link", "label": "Contact page" },
+    { "type": "checkbox", "id": "show_related", "label": "Show more from the same collection", "default": true }
+  ]
+}
+{% endschema %}

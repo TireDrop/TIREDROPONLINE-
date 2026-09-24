@@ -1,0 +1,398 @@
+{% comment %}
+  Generic page layout: the React PageHero + Breadcrumbs + a prose body.
+  templates/page.json uses it, so it is the layout for terms, privacy,
+  accessibility and data-sharing-opt-out, and the fallback for any page that
+  has no template of its own.
+
+  The eyebrow and lede are not in the page body, so they come from "Page
+  intro" blocks matched on the page handle; a page with no matching block
+  gets the section-wide eyebrow and lede (blank by default).
+
+  The body is split on its h2 elements in Liquid, so the layout needs no
+  JavaScript and is server-rendered:
+    - an h2 with id="on-this-page" and a list becomes the sticky contents
+      sidebar, and whatever follows its list (the "Questions? Call" line)
+      becomes the help card under it;
+    - otherwise, with enough h2s, the contents list is built from them (an
+      h2 without an id gets one from its text so the link has a target);
+    - id="key-policies" becomes the boxed grid of jump-to cards;
+    - id="contact" becomes the contact block with its links as buttons;
+    - a first paragraph starting "Last updated" becomes the small label and
+      the rest of the text before the first h2 becomes the bordered note.
+  A page body with none of these renders as plain prose.
+{% endcomment %}
+
+{%- liquid
+  assign handle = page.handle | default: ''
+  assign eyebrow = section.settings.eyebrow
+  assign lede = section.settings.lede
+  for block in section.blocks
+    assign block_handles = block.settings.handles | split: ','
+    for h in block_handles
+      assign h_clean = h | strip
+      if handle != blank and h_clean == handle
+        if block.settings.eyebrow != blank
+          assign eyebrow = block.settings.eyebrow
+        endif
+        if block.settings.lede != blank
+          assign lede = block.settings.lede
+        endif
+      endif
+    endfor
+  endfor
+
+  assign body = page.content | default: ''
+  assign chunks = body | split: '<h2'
+  assign preamble = chunks.first | default: ''
+  if body.size > 0 and chunks.size == 0
+    assign preamble = body
+  endif
+
+  assign has_body_toc = false
+  assign toc_heading = section.settings.toc_heading
+  assign toc_list = ''
+  assign toc_lead = ''
+  assign help_html = ''
+  assign gen_toc = ''
+  assign gen_count = 0
+  assign article_sections = ''
+
+  for chunk in chunks offset: 1
+    assign open_tag = chunk | split: '>' | first
+    assign head_part = chunk | split: '</h2>' | first | append: '</h2>'
+    assign after_h = chunk | remove_first: head_part
+    assign h_text = head_part | remove: '</h2>' | remove_first: open_tag | remove_first: '>' | strip_html | strip
+
+    assign sid = ''
+    if open_tag contains 'id="'
+      assign sid = open_tag | split: 'id="' | last | split: '"' | first
+    endif
+    if sid == blank
+      assign sid = h_text | handleize
+      assign chunk_out = '<h2 id="' | append: sid | append: '"' | append: chunk
+    else
+      assign chunk_out = '<h2' | append: chunk
+    endif
+
+    if sid == 'on-this-page' and after_h contains '<ul'
+      assign has_body_toc = true
+      assign toc_heading = h_text
+      assign toc_lead = after_h | split: '<ul' | first
+      assign from_ul = after_h | remove_first: toc_lead
+      assign toc_list = from_ul | split: '</ul>' | first | append: '</ul>'
+      assign help_html = from_ul | remove_first: toc_list | strip
+      assign toc_lead = toc_lead | strip
+    elsif sid == 'key-policies'
+      assign keys_html = chunk_out | replace: '</a> — ', '</a>'
+      assign article_sections = article_sections | append: '<nav class="td-page__keys" aria-labelledby="' | append: sid | append: '">' | append: keys_html | append: '</nav>'
+    elsif sid == 'contact'
+      assign article_sections = article_sections | append: '<div class="td-page__contact">' | append: chunk_out | append: '</div>'
+    else
+      assign article_sections = article_sections | append: chunk_out
+      assign gen_toc = gen_toc | append: '<li><a href="#' | append: sid | append: '">' | append: h_text | append: '</a></li>'
+      assign gen_count = gen_count | plus: 1
+    endif
+  endfor
+
+  assign show_toc = false
+  if has_body_toc
+    assign show_toc = true
+  elsif section.settings.show_toc and gen_count >= section.settings.toc_min
+    assign show_toc = true
+    assign toc_list = '<ul>' | append: gen_toc | append: '</ul>'
+  endif
+
+  assign updated_text = ''
+  assign note_html = ''
+  if preamble contains 'Last updated'
+    assign first_p = preamble | split: '</p>' | first | append: '</p>'
+    if first_p contains 'Last updated'
+      assign updated_text = first_p | strip_html | strip
+      assign note_html = preamble | remove_first: first_p | strip
+      assign preamble = ''
+    endif
+  endif
+
+  assign help_phone_digits = section.settings.help_phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
+-%}
+
+{%- render 'td-prose' -%}
+
+<header class="td-pagehero">
+  <div aria-hidden="true" class="td-pagehero__rule"></div>
+  <div class="td-pagehero__inner">
+    {%- if eyebrow != blank -%}
+      <p class="td-pagehero__eyebrow"><span aria-hidden="true"></span>{{ eyebrow }}</p>
+    {%- endif -%}
+    <h1 class="td-pagehero__title">{{ page.title }}</h1>
+    {%- if lede != blank -%}
+      <p class="td-pagehero__lede">{{ lede }}</p>
+    {%- endif -%}
+  </div>
+</header>
+
+{%- if section.settings.show_breadcrumbs -%}
+  <nav aria-label="Breadcrumb" class="td-crumbs">
+    <ol class="td-crumbs__list">
+      <li><a href="{{ routes.root_url }}">Home</a></li>
+      <li>
+        <svg aria-hidden="true" focusable="false" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        <span aria-current="page">{{ page.title }}</span>
+      </li>
+    </ol>
+  </nav>
+{%- endif -%}
+
+<div class="td-page">
+  <div class="td-page__inner{% if show_toc %} td-page__inner--toc{% endif %}">
+    {%- if show_toc -%}
+      <nav class="td-page__side" aria-label="{{ page.title | escape }} contents">
+        <h2 class="td-page__toc-title">{{ toc_heading }}</h2>
+        {%- if toc_lead != blank -%}<div class="td-page__toc-lead">{{ toc_lead }}</div>{%- endif -%}
+        <div class="td-page__toc">{{ toc_list }}</div>
+
+        {%- if help_html != blank -%}
+          <div class="td-page__help">
+            <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+            {{ help_html }}
+          </div>
+        {%- elsif section.settings.show_help and section.settings.help_text != blank -%}
+          <div class="td-page__help">
+            <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+            <p>{{ section.settings.help_text }}
+              {%- if section.settings.help_phone != blank %} <a href="tel:+1{{ help_phone_digits }}">{{ section.settings.help_phone }}</a>{% endif -%}
+            </p>
+          </div>
+        {%- endif -%}
+      </nav>
+    {%- endif -%}
+
+    <article class="td-prose rte td-page__article">
+      {%- if updated_text != blank -%}
+        <p class="td-page__updated">{{ updated_text }}</p>
+      {%- endif -%}
+      {%- if note_html != blank -%}
+        <div class="td-page__note">{{ note_html }}</div>
+      {%- endif -%}
+      {{- preamble -}}
+      {{- article_sections -}}
+    </article>
+  </div>
+</div>
+
+<style>
+  /* ---------- Hero (React PageHero) ---------- */
+  .td-pagehero {
+    position: relative; overflow: hidden;
+    background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%);
+    color: #FFFFFF; /* pinned: a dark band must never inherit body ink */
+  }
+  .td-pagehero__rule {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 1px; pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(0,180,252,.35), transparent);
+  }
+  .td-pagehero__inner { position: relative; max-width: 1280px; margin: 0 auto; padding: 3.5rem 1rem; }
+  .td-pagehero__eyebrow {
+    display: flex; align-items: center; gap: .625rem; margin: 0 0 .75rem;
+    font-family: var(--font-heading--family, inherit);
+    font-size: 12px; font-weight: 700; line-height: 1.33; letter-spacing: .09em; text-transform: uppercase;
+    color: #00B4FC;
+  }
+  .td-pagehero__eyebrow span { display: block; width: 1.5rem; height: 1px; background: rgba(0,180,252,.55); }
+  .td-pagehero__title.td-pagehero__title {
+    max-width: 56rem; margin: 0;
+    font-family: var(--font-heading--family, inherit);
+    font-size: 2.4rem; font-weight: 800; line-height: .98; letter-spacing: -.018em; text-transform: none;
+    color: #FFFFFF; text-wrap: balance; overflow-wrap: break-word;
+  }
+  .td-pagehero__lede {
+    max-width: 42rem; margin: 1.25rem 0 0;
+    font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.7);
+  }
+
+  /* ---------- Breadcrumbs ---------- */
+  .td-crumbs { background: #FFFFFF; border-bottom: 1px solid rgba(7,14,26,.1); }
+  .td-crumbs__list {
+    display: flex; flex-wrap: wrap; align-items: center; gap: .375rem;
+    max-width: 1280px; margin: 0 auto; padding: 0 1rem; list-style: none;
+    font-size: 12px; line-height: 1.33; color: #586274;
+  }
+  .td-crumbs__list li { display: flex; align-items: center; gap: .375rem; margin: 0; }
+  .td-crumbs__list a {
+    display: flex; align-items: center; min-height: 44px;
+    color: #586274; text-decoration: none;
+  }
+  .td-crumbs__list a:hover { color: #0068E8; }
+  .td-crumbs__list svg { color: rgba(88,98,116,.5); flex: none; }
+  .td-crumbs__list [aria-current] { color: #070E1A; }
+
+  /* ---------- Body grid ---------- */
+  .td-page { background: #FFFFFF; color: #070E1A; }
+  .td-page__inner {
+    max-width: 1280px; margin: 0 auto; padding: 3.5rem 1rem;
+    display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem;
+  }
+
+  /* Contents sidebar */
+  .td-page__toc-title.td-page__toc-title {
+    margin: 0 0 .75rem;
+    font-family: var(--font-heading--family, inherit);
+    font-size: 14px; font-weight: 700; line-height: 1.43; letter-spacing: -.018em; text-transform: none;
+    color: #586274;
+  }
+  .td-page__toc-lead { font-size: 14px; color: #586274; margin-bottom: .75rem; }
+  .td-page__toc ul { list-style: none; margin: 0; padding: 0; }
+  .td-page__toc li { margin: 0; }
+  .td-page__toc a {
+    display: flex; align-items: center; min-height: 44px;
+    font-size: 14px; line-height: 1.43; color: #586274; text-decoration: none;
+    transition: color .15s ease;
+  }
+  .td-page__toc a:hover { color: #0068E8; }
+
+  /* Help card: "Questions about any of this? Call" + outline phone button */
+  .td-page__help {
+    margin-top: 1.5rem; padding: 1.25rem;
+    background: #FFFFFF; border: 1px solid rgba(7,14,26,.07); border-radius: 12px;
+    box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10);
+  }
+  .td-page__help > svg { display: block; margin-bottom: .75rem; color: #0068E8; }
+  .td-page__help p { margin: 0; font-size: 12px; line-height: 1.625; color: #586274; }
+  .td-page__help a { color: #0068E8; }
+  .td-page__help a[href^="tel:"],
+  .td-page__contact ul a {
+    display: flex; align-items: center; justify-content: center; gap: .5rem;
+    width: max-content; min-height: 44px; margin-top: 1rem; padding: .5rem 1rem;
+    border: 1px solid rgba(7,14,26,.15); border-radius: 6px; background: #FFFFFF;
+    box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10);
+    font-family: var(--font-heading--family, inherit);
+    font-size: 13px; font-weight: 700; line-height: 1; letter-spacing: -.005em;
+    color: #070E1A; text-decoration: none;
+    transition: background-color .15s ease, border-color .15s ease;
+  }
+  .td-page__help a[href^="tel:"]::before {
+    content: ""; width: 15px; height: 15px; flex: none; background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  .td-page__help a[href^="tel:"]:hover,
+  .td-page__contact ul a:hover { background: #F4F6FA; border-color: rgba(7,14,26,.3); color: #070E1A; }
+
+  /* ---------- Article furniture ---------- */
+  .td-prose.td-prose .td-page__updated {
+    margin: 0 0 1.5rem;
+    font-family: var(--font-heading--family, inherit);
+    font-size: 11px; font-weight: 700; line-height: 1.45; letter-spacing: .07em; text-transform: uppercase;
+    color: #586274;
+  }
+  .td-prose.td-prose .td-page__note {
+    margin: 0 0 2.5rem; padding: 1.5rem;
+    background: #FFFFFF; border: 1px solid rgba(7,14,26,.07); border-left: 4px solid #0068E8; border-radius: 12px;
+    box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10);
+  }
+  .td-prose.td-prose .td-page__note > :last-child { margin-bottom: 0; }
+
+  /* Key policies: boxed, 2-up grid of whole-card links */
+  .td-prose.td-prose .td-page__keys {
+    margin: 0 0 2.5rem; padding: 1.5rem;
+    background: #FFFFFF; border: 1px solid rgba(7,14,26,.1); border-radius: 6px;
+  }
+  .td-prose.td-prose .td-page__keys h2 { margin: 0 0 .25rem; }
+  .td-prose.td-prose .td-page__keys p { margin: 0 0 1.25rem; font-size: 14px; line-height: 1.43; }
+  .td-prose.td-prose .td-page__keys ul { display: grid; gap: .75rem; margin: 0; }
+  .td-prose.td-prose .td-page__keys li {
+    position: relative; display: flex; flex-direction: column; gap: .25rem;
+    margin: 0; padding: 1rem; border: 1px solid rgba(7,14,26,.1); border-radius: 6px;
+    font-size: 13px; line-height: 1.625; color: #586274;
+    transition: border-color .15s ease;
+  }
+  .td-prose.td-prose .td-page__keys li::before { content: none; }
+  .td-prose.td-prose .td-page__keys li:hover { border-color: #0068E8; }
+  .td-prose.td-prose .td-page__keys li > a {
+    font-family: var(--font-heading--family, inherit);
+    font-size: 16px; line-height: 1.5; color: #070E1A; text-decoration: none;
+  }
+  .td-prose.td-prose .td-page__keys li > a:hover { color: #070E1A; }
+  .td-prose.td-prose .td-page__keys li > a strong { font-weight: 400; color: inherit; }
+  .td-prose.td-prose .td-page__keys li > a::after { content: ""; position: absolute; inset: 0; border-radius: 6px; }
+  .td-prose.td-prose .td-page__keys li > a:focus-visible { outline: none; }
+  .td-prose.td-prose .td-page__keys li:has(> a:focus-visible) { outline: 2px solid #0068E8; outline-offset: 2px; }
+
+  /* Contact block */
+  .td-prose.td-prose .td-page__contact { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(7,14,26,.1); }
+  .td-prose.td-prose .td-page__contact h2 { margin: 0 0 .75rem; }
+  .td-prose.td-prose .td-page__contact p { font-size: 14px; line-height: 1.625; }
+  .td-prose.td-prose .td-page__contact p a {
+    display: inline-block; margin-top: .25rem;
+    font-family: var(--font-heading--family, inherit);
+    font-size: 18px; line-height: 1.55; color: #070E1A; text-decoration: none; word-break: break-all;
+  }
+  .td-prose.td-prose .td-page__contact p a[href^="tel:"] { margin-top: .5rem; }
+  .td-prose.td-prose .td-page__contact p a:hover { color: #0068E8; }
+  .td-prose.td-prose .td-page__contact ul { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1.5rem 0 0; }
+  .td-prose.td-prose .td-page__contact li { padding: 0; margin: 0; }
+  .td-prose.td-prose .td-page__contact li::before { content: none; }
+  .td-prose.td-prose .td-page__contact ul a { margin-top: 0; color: #070E1A; text-decoration: none; }
+  .td-prose.td-prose .td-page__contact ul a:hover { color: #070E1A; }
+
+  @media (min-width: 640px) {
+    .td-prose.td-prose .td-page__keys ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 768px) {
+    .td-pagehero__inner { padding: 5rem 2rem; }
+    .td-pagehero__title.td-pagehero__title { font-size: 4.25rem; }
+    .td-pagehero__lede { font-size: 1.25rem; }
+    .td-crumbs__list { padding: 0 2rem; }
+    .td-page__inner { padding: 5rem 2rem; }
+  }
+  @media (min-width: 1024px) {
+    .td-page__inner--toc { grid-template-columns: 240px minmax(0, 1fr); gap: 3.5rem; }
+    .td-page__side { position: sticky; top: calc(var(--header-height, 0px) + 1.5rem); align-self: start; }
+  }
+  /* React's compact desktop sizing, only where there is a mouse. Touch
+     screens of any width (a landscape tablet included) keep 44px targets. */
+  @media (min-width: 1024px) and (pointer: fine) {
+    .td-crumbs__list a { min-height: 32px; }
+    .td-crumbs__list { padding-top: .5rem; padding-bottom: .5rem; }
+    .td-page__toc li + li { margin-top: .5rem; }
+    .td-page__toc a { min-height: 32px; }
+    .td-page__help a[href^="tel:"], .td-page__contact ul a { min-height: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .td-page__toc a, .td-page__help a, .td-page__contact a, .td-prose.td-prose .td-page__keys li { transition: none; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "TireDrop page",
+  "tag": "section",
+  "class": "td-page-section",
+  "settings": [
+    { "type": "paragraph", "content": "Hero, breadcrumbs and the page content. The heading is the page title. Add a Page intro block to give a specific page its own eyebrow and lede." },
+    { "type": "text", "id": "eyebrow", "label": "Default eyebrow", "info": "Used on pages without a matching Page intro block. Leave blank for none." },
+    { "type": "textarea", "id": "lede", "label": "Default lede", "info": "Used on pages without a matching Page intro block. Leave blank for none." },
+    { "type": "checkbox", "id": "show_breadcrumbs", "label": "Show breadcrumbs", "default": true },
+    { "type": "header", "content": "Contents sidebar" },
+    { "type": "paragraph", "content": "A page body with an h2 id=\"on-this-page\" list uses that list. Otherwise the contents are built from the page's h2 headings." },
+    { "type": "checkbox", "id": "show_toc", "label": "Build contents from headings", "default": true },
+    { "type": "range", "id": "toc_min", "label": "Minimum headings for contents", "min": 2, "max": 8, "step": 1, "default": 3 },
+    { "type": "text", "id": "toc_heading", "label": "Contents heading", "default": "On this page" },
+    { "type": "checkbox", "id": "show_help", "label": "Show call card under built contents", "default": true },
+    { "type": "text", "id": "help_text", "label": "Call card text", "default": "Questions about any of this? Call — a person will answer and explain it." },
+    { "type": "text", "id": "help_phone", "label": "Call card phone", "default": "(954) 773-1896" }
+  ],
+  "blocks": [
+    {
+      "type": "intro",
+      "name": "Page intro",
+      "settings": [
+        { "type": "text", "id": "handles", "label": "Page handles", "info": "Comma-separated, e.g. terms, privacy" },
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+        { "type": "textarea", "id": "lede", "label": "Lede" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "TireDrop page" }]
+}
+{% endschema %}

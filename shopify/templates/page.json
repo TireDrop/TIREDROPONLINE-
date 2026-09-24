@@ -1,0 +1,54 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-page",
+      "blocks": {
+        "intro_terms": {
+          "type": "intro",
+          "settings": {
+            "handles": "terms",
+            "eyebrow": "Legal",
+            "lede": "The ground rules for buying from this site and for the work we do on your vehicle. Written to be read, not to be skimmed past."
+          }
+        },
+        "intro_privacy": {
+          "type": "intro",
+          "settings": {
+            "handles": "privacy",
+            "eyebrow": "Legal",
+            "lede": "What we collect, why we collect it, who else touches it, and how to tell us to stop. Plain language, no dark patterns."
+          }
+        },
+        "intro_accessibility": {
+          "type": "intro",
+          "settings": {
+            "handles": "accessibility",
+            "eyebrow": "Legal",
+            "lede": "We want this site to work for every customer, including those using a screen reader, a keyboard, magnification or voice control."
+          }
+        },
+        "intro_privacy_choices": {
+          "type": "intro",
+          "settings": {
+            "handles": "data-sharing-opt-out",
+            "eyebrow": "Legal",
+            "lede": ""
+          }
+        }
+      },
+      "block_order": ["intro_terms", "intro_privacy", "intro_accessibility", "intro_privacy_choices"],
+      "settings": {
+        "eyebrow": "",
+        "lede": "",
+        "show_breadcrumbs": true,
+        "show_toc": true,
+        "toc_min": 3,
+        "toc_heading": "On this page",
+        "show_help": true,
+        "help_text": "Questions about any of this? Call — a person will answer and explain it.",
+        "help_phone": "(954) 773-1896"
+      }
+    }
+  },
+  "order": ["main"]
+}

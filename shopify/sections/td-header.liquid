@@ -1,0 +1,858 @@
+{% comment %}
+  TireDrop header, replacing Horizon's `header` + `header-announcements` pair.
+  Modelled on the React header (src/components/layout/Header.jsx, Logo.jsx,
+  MobileCallBar.jsx):
+
+    1. an ink utility strip (phone, shipping line, the South Florida offer)
+       that scrolls away with the page;
+    2. the sticky masthead: logo with the "Powered by Extreme Tires" line,
+       search (desktop), cart, menu button (below 1024px), and from 1024px a
+       second row with the main navigation and the Shop Tires button;
+    3. on phones and tablets, a search row under the masthead that is not
+       sticky, because it is worth a row of the page but not a row of every
+       screen;
+    4. the mobile menu, a <dialog> drawer;
+    5. the fixed call bar at the bottom of the screen below 1024px.
+
+  Sticky: Horizon wraps the header group in <div id="header-group"> and each
+  section in its own wrapper, and a sticky element only sticks inside its
+  parent. Both wrappers are therefore `display: contents` so the masthead
+  sticks against .page-wrapper, the element Horizon scrolls. The theme
+  editor is left alone (html.shopify-design-mode): it draws its section
+  outline from the wrapper's box, and display: contents has none.
+
+  Navigation comes from the `menu` link list. A top-level link with children
+  is a link plus a separate disclosure button (aria-expanded), so the parent
+  page stays one click away and the submenu is reachable by keyboard. Without
+  JavaScript the submenus still open on hover and focus-within.
+
+  Search is a plain GET form to routes.search_url, so it works without
+  JavaScript.
+
+  The cart link goes to the cart page. Horizon's cart drawer and search modal
+  are still rendered by layout/theme.liquid; this section does not open them.
+{% endcomment %}
+
+{%- liquid
+  assign menu_handle = section.settings.menu.handle | default: section.settings.menu
+  assign menu = linklists[menu_handle]
+  assign logo = section.settings.logo | default: settings.logo
+  assign phone_digits = section.settings.phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.' | remove: '+'
+  if phone_digits.size == 10
+    assign phone_href = 'tel:+1' | append: phone_digits
+  else
+    assign phone_href = 'tel:+' | append: phone_digits
+  endif
+  assign shop_link = section.settings.shop_link | default: '/collections/tires'
+  assign count = cart.item_count | default: 0
+  if count == 1
+    assign cart_label = 'Cart, 1 item'
+  else
+    assign cart_label = 'Cart, ' | append: count | append: ' items'
+  endif
+  assign sid = section.id | handle
+-%}
+
+{%- capture icon_phone -%}<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{%- endcapture -%}
+{%- capture icon_cart -%}<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>{%- endcapture -%}
+{%- capture icon_search -%}<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>{%- endcapture -%}
+{%- capture icon_chevron -%}<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>{%- endcapture -%}
+
+{%- capture wordmark -%}
+  <span class="td-hd-wordmark">Tire<span class="td-hd-wordmark__drop">Drop<span class="td-hd-wordmark__dot" aria-hidden="true"></span></span></span>
+{%- endcapture -%}
+
+{%- capture search_fields -%}
+  <input type="hidden" name="type" value="product">
+  <input type="hidden" name="options[prefix]" value="last">
+{%- endcapture -%}
+
+{%- comment -%} 1. Utility strip {%- endcomment -%}
+<div class="td-hd-util">
+  <div class="td-hd-util__inner">
+    {%- if section.settings.phone != blank -%}
+      <a class="td-hd-util__phone" href="{{ phone_href }}">
+        {{ icon_phone }}
+        <span>{{ section.settings.phone }}</span>
+      </a>
+    {%- endif -%}
+    {%- if section.settings.shipping_line != blank -%}
+      <span class="td-hd-util__ship">
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>{{ section.settings.shipping_line }}</span>
+      </span>
+    {%- endif -%}
+    {%- if section.settings.offer_line != blank -%}
+      <span class="td-hd-util__offer">
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+        <span>{{ section.settings.offer_line }}</span>
+      </span>
+    {%- endif -%}
+  </div>
+</div>
+
+{%- comment -%} 2. Sticky masthead {%- endcomment -%}
+<div class="td-hd-bar" data-td-hd-bar>
+  <div class="td-hd-bar__row">
+    <a class="td-hd-brand" href="{{ routes.root_url }}">
+      {%- if logo != blank -%}
+        {{
+          logo
+          | image_url: width: 240
+          | image_tag:
+            widths: '80, 160, 240',
+            sizes: '80px',
+            loading: 'eager',
+            fetchpriority: 'high',
+            alt: shop.name,
+            class: 'td-hd-brand__logo'
+        }}
+      {%- else -%}
+        {{ wordmark }}
+      {%- endif -%}
+      {%- if section.settings.parent_name != blank -%}
+        <span class="td-hd-brand__parent">
+          {{- section.settings.parent_prefix }}
+          <span>{{ section.settings.parent_name }}</span>
+        </span>
+      {%- endif -%}
+    </a>
+
+    <form class="td-hd-search td-hd-search--bar" action="{{ routes.search_url }}" method="get" role="search">
+      <label class="td-hd-sr" for="td-hd-q-{{ sid }}">{{ section.settings.search_label }}</label>
+      <span class="td-hd-search__icon">{{ icon_search }}</span>
+      <input
+        class="td-hd-search__input"
+        id="td-hd-q-{{ sid }}"
+        type="search"
+        name="q"
+        value="{{ search.terms | escape }}"
+        placeholder="{{ section.settings.search_placeholder | escape }}"
+        autocomplete="off"
+      >
+      {{ search_fields }}
+      <button class="td-hd-search__submit" type="submit"><span>Search</span></button>
+    </form>
+
+    <div class="td-hd-actions">
+      <a class="td-hd-icon-btn td-hd-cart" href="{{ routes.cart_url }}" aria-label="{{ cart_label }}" data-td-hd-cart>
+        {{ icon_cart }}
+        <span class="td-hd-cart__count" aria-hidden="true" data-td-hd-count{% if count == 0 %} hidden{% endif %}>
+          {{- count -}}
+        </span>
+      </a>
+      <button
+        class="td-hd-icon-btn td-hd-menu-btn"
+        type="button"
+        aria-label="Open menu"
+        aria-haspopup="dialog"
+        aria-controls="td-hd-drawer-{{ sid }}"
+        aria-expanded="false"
+        data-td-hd-open
+      >
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="td-hd-navrow">
+    <div class="td-hd-navrow__inner">
+      <nav class="td-hd-nav" aria-label="Main" data-td-hd-nav>
+        {%- if menu.links.size > 0 -%}
+          <ul class="td-hd-nav__list">
+            {%- for link in menu.links -%}
+              {%- liquid
+                if link.type == 'frontpage_link' or link.url == routes.root_url
+                  assign is_active = false
+                  if template.name == 'index'
+                    assign is_active = true
+                  endif
+                else
+                  assign is_active = false
+                  if link.active or link.child_active or link.current
+                    assign is_active = true
+                  endif
+                endif
+              -%}
+              {%- if link.links.size > 0 -%}
+                <li class="td-hd-nav__item td-hd-nav__item--parent{% if is_active %} is-active{% endif %}" data-td-hd-item>
+                  <a class="td-hd-nav__link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
+                    {{- link.title -}}
+                  </a>
+                  <button
+                    class="td-hd-nav__toggle"
+                    type="button"
+                    aria-expanded="false"
+                    aria-controls="td-hd-sub-{{ sid }}-{{ forloop.index }}"
+                    aria-label="{{ link.title | escape }} menu"
+                    data-td-hd-toggle
+                  >
+                    {{ icon_chevron }}
+                  </button>
+                  <div class="td-hd-nav__panel" id="td-hd-sub-{{ sid }}-{{ forloop.index }}">
+                    <ul class="td-hd-nav__sublist">
+                      {%- for child in link.links -%}
+                        <li>
+                          <a class="td-hd-nav__sublink{% if child.current %} is-current{% endif %}" href="{{ child.url }}"{% if child.current %} aria-current="page"{% endif %}>
+                            {{- child.title -}}
+                          </a>
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  </div>
+                </li>
+              {%- else -%}
+                <li class="td-hd-nav__item{% if is_active %} is-active{% endif %}">
+                  <a class="td-hd-nav__link" href="{{ link.url }}"{% if link.current or is_active and link.type == 'frontpage_link' %} aria-current="page"{% endif %}>
+                    {{- link.title -}}
+                  </a>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </nav>
+      {%- if section.settings.shop_label != blank -%}
+        <a class="td-hd-btn td-hd-btn--primary td-hd-btn--sm" href="{{ shop_link }}">{{ section.settings.shop_label }}</a>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{%- comment -%} 3. Phone and tablet search row, below the sticky block {%- endcomment -%}
+<div class="td-hd-msearch">
+  <form class="td-hd-search" action="{{ routes.search_url }}" method="get" role="search">
+    <label class="td-hd-sr" for="td-hd-mq-{{ sid }}">{{ section.settings.search_label }}</label>
+    <span class="td-hd-search__icon">{{ icon_search }}</span>
+    <input
+      class="td-hd-search__input"
+      id="td-hd-mq-{{ sid }}"
+      type="search"
+      name="q"
+      value="{{ search.terms | escape }}"
+      placeholder="{{ section.settings.search_placeholder_short | default: section.settings.search_placeholder | escape }}"
+      autocomplete="off"
+    >
+    {{ search_fields }}
+    <button class="td-hd-search__submit" type="submit"><span>Search</span></button>
+  </form>
+</div>
+
+{%- comment -%} 4. Mobile menu {%- endcomment -%}
+<dialog class="td-hd-drawer" id="td-hd-drawer-{{ sid }}" aria-label="Site menu" data-td-hd-drawer>
+  <div class="td-hd-drawer__panel">
+    <div class="td-hd-drawer__head">
+      <a class="td-hd-drawer__home" href="{{ routes.root_url }}">
+        {%- if logo != blank -%}
+          {{
+            logo
+            | image_url: width: 192
+            | image_tag:
+              widths: '64, 128, 192',
+              sizes: '64px',
+              loading: 'lazy',
+              alt: shop.name,
+              class: 'td-hd-drawer__logo'
+          }}
+        {%- else -%}
+          {{ wordmark }}
+        {%- endif -%}
+      </a>
+      <button class="td-hd-icon-btn td-hd-drawer__close" type="button" aria-label="Close menu" data-td-hd-close>
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+
+    <nav class="td-hd-dnav" aria-label="Mobile">
+      {%- if menu.links.size > 0 -%}
+        <ul class="td-hd-dnav__list">
+          {%- for link in menu.links -%}
+            <li class="td-hd-dnav__item">
+              <div class="td-hd-dnav__row">
+                <a class="td-hd-dnav__link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
+                  {{- link.title -}}
+                </a>
+                {%- if link.links.size > 0 -%}
+                  <button
+                    class="td-hd-dnav__toggle"
+                    type="button"
+                    aria-expanded="{% if link.child_active %}true{% else %}false{% endif %}"
+                    aria-controls="td-hd-dsub-{{ sid }}-{{ forloop.index }}"
+                    aria-label="{{ link.title | escape }} submenu"
+                    data-td-hd-acc
+                  >
+                    {{ icon_chevron }}
+                  </button>
+                {%- endif -%}
+              </div>
+              {%- if link.links.size > 0 -%}
+                <ul class="td-hd-dnav__sub" id="td-hd-dsub-{{ sid }}-{{ forloop.index }}"{% unless link.child_active %} hidden{% endunless %}>
+                  {%- for child in link.links -%}
+                    <li>
+                      <a class="td-hd-dnav__sublink{% if child.current %} is-current{% endif %}" href="{{ child.url }}"{% if child.current %} aria-current="page"{% endif %}>
+                        {{- child.title -}}
+                      </a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </nav>
+
+    <div class="td-hd-drawer__foot">
+      {%- if section.settings.shop_label != blank -%}
+        <a class="td-hd-btn td-hd-btn--primary td-hd-btn--block" href="{{ shop_link }}">{{ section.settings.shop_label }}</a>
+      {%- endif -%}
+      {%- if section.settings.phone != blank -%}
+        <a class="td-hd-btn td-hd-btn--outline td-hd-btn--block" href="{{ phone_href }}">
+          {{ icon_phone }}
+          {{ section.settings.phone }}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+</dialog>
+
+{%- comment -%} 5. Phone call bar {%- endcomment -%}
+{%- if section.settings.show_call_bar -%}
+  <div class="td-hd-callbar">
+    <div class="td-hd-callbar__inner">
+      {%- if section.settings.shop_label != blank -%}
+        <a class="td-hd-btn td-hd-btn--primary td-hd-callbar__shop" href="{{ shop_link }}">
+          {{ icon_cart }}
+          {{ section.settings.shop_label }}
+        </a>
+      {%- endif -%}
+      {%- if section.settings.phone != blank -%}
+        <a
+          class="td-hd-btn td-hd-btn--ghost td-hd-callbar__call"
+          href="{{ phone_href }}"
+          aria-label="Call {{ shop.name | default: 'TireDrop' | escape }} at {{ section.settings.phone | escape }}"
+        >
+          {{ icon_phone }}
+          {{ section.settings.call_label }}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+<script>
+  (function () {
+    var root = document.currentScript && document.currentScript.parentElement;
+    if (!root || root.__tdHeader) return;
+    root.__tdHeader = true;
+
+    var desktop = window.matchMedia('(min-width: 1024px)');
+    var canHover = window.matchMedia('(hover: hover)');
+
+    /* ---------- Desktop dropdowns ---------- */
+    var nav = root.querySelector('[data-td-hd-nav]');
+    var items = nav ? Array.prototype.slice.call(nav.querySelectorAll('[data-td-hd-item]')) : [];
+    if (nav) nav.setAttribute('data-js', '');
+
+    function setOpen(item, open) {
+      var btn = item.querySelector('[data-td-hd-toggle]');
+      item.classList.toggle('is-open', open);
+      if (!open) item.__byHover = false;
+      if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    function closeAll(except) {
+      items.forEach(function (it) { if (it !== except) setOpen(it, false); });
+    }
+
+    items.forEach(function (item) {
+      var btn = item.querySelector('[data-td-hd-toggle]');
+      btn.addEventListener('click', function () {
+        /* Opened by the pointer a moment ago: a click pins it rather than
+           snapping it shut under the cursor. */
+        if (item.classList.contains('is-open') && item.__byHover) { item.__byHover = false; return; }
+        var open = !item.classList.contains('is-open');
+        closeAll(item);
+        setOpen(item, open);
+      });
+      item.addEventListener('mouseenter', function () {
+        if (!canHover.matches) return;
+        closeAll(item);
+        if (!item.classList.contains('is-open')) item.__byHover = true;
+        setOpen(item, true);
+      });
+      item.addEventListener('mouseleave', function () {
+        if (!canHover.matches) return;
+        if (item.contains(document.activeElement) && document.activeElement !== btn) return;
+        item.__byHover = false;
+        setOpen(item, false);
+      });
+      item.addEventListener('focusout', function (e) {
+        if (!item.contains(e.relatedTarget)) setOpen(item, false);
+      });
+      item.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && item.classList.contains('is-open')) {
+          e.stopPropagation();
+          setOpen(item, false);
+          btn.focus();
+        }
+      });
+    });
+
+    document.addEventListener('click', function (e) {
+      items.forEach(function (it) {
+        if (it.classList.contains('is-open') && !it.contains(e.target)) setOpen(it, false);
+      });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeAll();
+    });
+
+    /* ---------- Mobile drawer ---------- */
+    var drawer = root.querySelector('[data-td-hd-drawer]');
+    var opener = root.querySelector('[data-td-hd-open]');
+    var closer = root.querySelector('[data-td-hd-close]');
+    var lastFocus = null;
+
+    function focusables() {
+      return Array.prototype.slice.call(
+        drawer.querySelectorAll('a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])')
+      ).filter(function (el) { return el.offsetParent !== null || el === document.activeElement; });
+    }
+    function openDrawer() {
+      if (!drawer || drawer.open) return;
+      lastFocus = document.activeElement;
+      if (typeof drawer.showModal === 'function') drawer.showModal();
+      else drawer.setAttribute('open', '');
+      document.documentElement.classList.add('td-hd-locked');
+      opener.setAttribute('aria-expanded', 'true');
+      closer.focus();
+    }
+    function closeDrawer() {
+      if (!drawer || !drawer.open) return;
+      if (typeof drawer.close === 'function') drawer.close();
+      else { drawer.removeAttribute('open'); onClosed(); }
+    }
+    function onClosed() {
+      document.documentElement.classList.remove('td-hd-locked');
+      opener.setAttribute('aria-expanded', 'false');
+      if (lastFocus && typeof lastFocus.focus === 'function' && lastFocus.isConnected) lastFocus.focus();
+    }
+
+    if (drawer && opener && closer) {
+      opener.addEventListener('click', openDrawer);
+      closer.addEventListener('click', closeDrawer);
+      drawer.addEventListener('close', onClosed);
+      drawer.addEventListener('cancel', function (e) { e.preventDefault(); closeDrawer(); });
+      /* A click on the dialog element itself is a click on the backdrop:
+         the panel fills the dialog box. */
+      drawer.addEventListener('click', function (e) {
+        if (e.target === drawer) closeDrawer();
+        else if (e.target.closest && e.target.closest('a[href]')) closeDrawer();
+      });
+      drawer.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { e.preventDefault(); closeDrawer(); return; }
+        if (e.key !== 'Tab') return;
+        var list = focusables();
+        if (!list.length) return;
+        var first = list[0];
+        var last = list[list.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      });
+      Array.prototype.forEach.call(drawer.querySelectorAll('[data-td-hd-acc]'), function (btn) {
+        btn.addEventListener('click', function () {
+          var sub = document.getElementById(btn.getAttribute('aria-controls'));
+          var open = btn.getAttribute('aria-expanded') !== 'true';
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          if (sub) sub.hidden = !open;
+        });
+      });
+      var onBreakpoint = function (mq) { if (mq.matches) closeDrawer(); };
+      if (desktop.addEventListener) desktop.addEventListener('change', onBreakpoint);
+    }
+
+    /* ---------- Header heights for Horizon's sticky consumers ---------- */
+    var bar = root.querySelector('[data-td-hd-bar]');
+    var util = root.querySelector('.td-hd-util');
+    var msearch = root.querySelector('.td-hd-msearch');
+    function measure() {
+      if (!bar) return;
+      var h = bar.offsetHeight;
+      var group = h + (util ? util.offsetHeight : 0) + (msearch ? msearch.offsetHeight : 0);
+      document.body.style.setProperty('--header-height', h + 'px');
+      document.body.style.setProperty('--sticky-header-offset', h + 'px');
+      document.body.style.setProperty('--header-group-height', group + 'px');
+    }
+    measure();
+    if (window.ResizeObserver && bar) new ResizeObserver(measure).observe(bar);
+
+    /* ---------- Cart count ---------- */
+    var cartLink = root.querySelector('[data-td-hd-cart]');
+    var countEl = root.querySelector('[data-td-hd-count]');
+    function renderCount(n) {
+      if (!cartLink || !countEl || isNaN(n)) return;
+      countEl.textContent = String(n);
+      countEl.hidden = n === 0;
+      cartLink.setAttribute('aria-label', 'Cart, ' + n + (n === 1 ? ' item' : ' items'));
+    }
+    try {
+      import('@shopify/events').then(function (m) {
+        var name = m && m.StandardEvents && m.StandardEvents.cartLinesUpdate;
+        if (!name) return;
+        document.addEventListener(name, function (event) {
+          if (!event.promise) return;
+          event.promise.then(function (r) {
+            var n = (r && r.cart && r.cart.totalQuantity);
+            if (n == null && r && r.detail) n = r.detail.itemCount;
+            if (n != null) renderCount(parseInt(n, 10));
+          }).catch(function () {});
+        });
+      }).catch(function () {});
+    } catch (e) {}
+    window.addEventListener('pageshow', function (e) {
+      if (!e.persisted) return;
+      try {
+        var saved = JSON.parse(sessionStorage.getItem('cart-count') || 'null');
+        if (saved && Date.now() - saved.timestamp < 10000) renderCount(parseInt(saved.value, 10));
+      } catch (err) {}
+    });
+  })();
+</script>
+
+<style>
+  /* ---------- Wrappers: let the masthead stick against .page-wrapper ---------- */
+  html:not(.shopify-design-mode) #header-group,
+  html:not(.shopify-design-mode) .td-hd-section { display: contents; }
+  html.td-hd-locked, html.td-hd-locked .page-wrapper { overflow: hidden; }
+
+  .td-hd-util, .td-hd-bar, .td-hd-msearch, .td-hd-drawer, .td-hd-callbar {
+    --td-ink: #070E1A; --td-smoke: #586274; --td-fog: #F4F6FA; --td-drop: #0068E8; --td-dive: #0053C4;
+    --td-amber: #F5A623; --td-graphite: #22344C; --td-red: #D40C10;
+    --td-display: var(--font-heading--family, "Archivo", system-ui, sans-serif);
+    --td-body: var(--font-body--family, system-ui, sans-serif);
+    --td-gutter: 16px;
+    font-family: var(--td-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (min-width: 768px) {
+    .td-hd-util, .td-hd-bar, .td-hd-msearch { --td-gutter: 32px; }
+  }
+  :is(.td-hd-util, .td-hd-bar, .td-hd-msearch, .td-hd-drawer, .td-hd-callbar) svg { display: block; flex-shrink: 0; }
+  :is(.td-hd-util, .td-hd-bar, .td-hd-msearch, .td-hd-drawer, .td-hd-callbar) :is(ul) { list-style: none; margin: 0; padding: 0; }
+  :is(.td-hd-util, .td-hd-bar, .td-hd-msearch, .td-hd-drawer, .td-hd-callbar) a { text-decoration: none; }
+  :is(.td-hd-util, .td-hd-bar, .td-hd-msearch, .td-hd-drawer, .td-hd-callbar) :is(a, button, input):focus-visible {
+    outline: 2px solid var(--td-drop); outline-offset: 2px;
+  }
+  :is(.td-hd-util, .td-hd-callbar) :is(a, button):focus-visible { outline-color: #00B4FC; }
+  .td-hd-sr {
+    position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* ---------- 1. Utility strip ---------- */
+  .td-hd-util {
+    background-color: var(--td-ink);
+    background-image: linear-gradient(180deg, #14233A 0%, #0B1524 100%);
+    color: #FFFFFF;
+  }
+  .td-hd-util__inner {
+    max-width: 1280px; margin: 0 auto; padding: 8px var(--td-gutter);
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 4px 24px; font-size: 12px; line-height: 16px;
+  }
+  .td-hd-util__inner svg { width: 13px; height: 13px; }
+  .td-hd-util__phone {
+    display: inline-flex; align-items: center; gap: 6px;
+    /* A 44px target that only takes 28px of the strip. */
+    min-height: 44px; margin-block: -8px;
+    font-family: var(--td-display); font-size: 14px; line-height: 20px; font-weight: 700;
+    letter-spacing: -0.005em; color: #FFFFFF; transition: color .15s;
+  }
+  .td-hd-util__phone:hover { color: var(--td-amber); }
+  .td-hd-util__ship { display: none; align-items: center; gap: 6px; color: rgba(255,255,255,.7); }
+  .td-hd-util__offer { display: flex; align-items: center; gap: 6px; color: var(--td-amber); }
+  .td-hd-util__offer span { font-family: var(--td-display); font-weight: 700; letter-spacing: -0.005em; }
+  @media (min-width: 640px) { .td-hd-util__ship { display: flex; } }
+  /* A pointer does not need the phone-sized target; this keeps the strip at
+     React's 40px on desktop. */
+  @media (min-width: 1024px) { .td-hd-util__phone { min-height: 32px; margin-block: -4px; } }
+
+  /* ---------- 2. Sticky masthead ---------- */
+  .td-hd-bar {
+    position: sticky; top: 0; z-index: 40;
+    border-bottom: 1px solid rgba(7,14,26,.1);
+    background: rgba(255,255,255,.95);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    color: var(--td-ink);
+  }
+  .td-hd-bar__row {
+    max-width: 1280px; margin: 0 auto; padding: 8px var(--td-gutter);
+    display: flex; align-items: center; gap: 16px;
+  }
+  .td-hd-brand { display: flex; flex-shrink: 0; align-items: center; gap: 12px; color: var(--td-ink); }
+  .td-hd-brand .td-hd-brand__logo {
+    display: block; height: 72px; width: auto; max-width: none; object-fit: contain;
+  }
+  .td-hd-brand__parent {
+    display: none; white-space: nowrap;
+    font-family: var(--td-display); font-size: 11px; font-weight: 500; line-height: 1.25;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--td-smoke);
+  }
+  .td-hd-brand__parent span { display: block; color: var(--td-red); }
+  @media (min-width: 640px) { .td-hd-brand__parent { display: block; } }
+
+  .td-hd-wordmark {
+    font-family: var(--td-display); font-weight: 800; font-size: 24px; line-height: 1;
+    letter-spacing: -0.025em; text-transform: uppercase; color: var(--td-ink); white-space: nowrap;
+  }
+  .td-hd-wordmark__drop { color: var(--td-drop); }
+  .td-hd-wordmark__dot {
+    display: inline-block; width: 6px; height: 6px; margin-left: 2px; border-radius: 50%;
+    background: var(--td-drop); vertical-align: super;
+  }
+  @media (min-width: 768px) { .td-hd-wordmark { font-size: 28px; } }
+
+  /* Search */
+  .td-hd-search { position: relative; margin: 0; }
+  .td-hd-search--bar { display: none; }
+  .td-hd-search__icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--td-smoke); pointer-events: none;
+  }
+  .td-hd-search__icon svg { width: 17px; height: 17px; }
+  .td-hd-search .td-hd-search__input {
+    display: block; width: 100%; height: 44px; margin: 0;
+    padding: 0 96px 0 40px; border: 1px solid rgba(7,14,26,.12); border-radius: 9999px;
+    background: #FFFFFF; color: var(--td-ink); box-shadow: inset 0 1px 2px rgba(7,14,26,.04);
+    font-family: var(--td-body); font-size: 16px; line-height: 1.25;
+    -webkit-appearance: none; appearance: none; outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .td-hd-search .td-hd-search__input::placeholder { color: rgba(88,98,116,.9); opacity: 1; }
+  .td-hd-search .td-hd-search__input:focus { border-color: var(--td-drop); box-shadow: 0 0 0 2px rgba(0,104,232,.15); }
+  .td-hd-search .td-hd-search__input:focus-visible { outline: none; }
+  .td-hd-search__input::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
+  /* The button is the full 44px height of the field, so the tap target is
+     44px; the pill inside it is the 36px shape React draws. */
+  .td-hd-search__submit {
+    position: absolute; right: 0; top: 0; height: 44px; margin: 0; padding: 4px;
+    border: 0; border-radius: 9999px; background: transparent; cursor: pointer;
+  }
+  .td-hd-search__submit span {
+    display: flex; align-items: center; height: 36px; padding: 0 16px; border-radius: 9999px;
+    background: var(--td-drop); color: #FFFFFF; box-shadow: 0 4px 14px -2px rgba(0,104,232,.35);
+    font-family: var(--td-display); font-size: 13px; font-weight: 700; line-height: 1; letter-spacing: -0.005em;
+    transition: background-color .15s, box-shadow .15s;
+  }
+  .td-hd-search__submit:hover span { background: var(--td-dive); box-shadow: none; }
+  .td-hd-search__submit:focus-visible { outline-offset: -2px; }
+  @media (min-width: 1200px) { .td-hd-search .td-hd-search__input { font-size: 15px; } }
+
+  /* Actions */
+  .td-hd-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+  .td-hd-icon-btn {
+    position: relative; display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; margin: 0; padding: 0; border: 0; border-radius: 6px;
+    background: transparent; color: var(--td-ink); cursor: pointer;
+    transition: background-color .15s, color .15s;
+  }
+  .td-hd-icon-btn:hover { background: var(--td-fog); color: var(--td-drop); }
+  .td-hd-icon-btn svg { width: 22px; height: 22px; }
+  .td-hd-cart svg { width: 21px; height: 21px; }
+  .td-hd-cart__count {
+    position: absolute; right: 2px; top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    height: 19px; min-width: 19px; padding: 0 4px; border-radius: 9999px;
+    background: var(--td-drop); color: #FFFFFF; box-shadow: 0 0 0 2px #FFFFFF;
+    font-family: var(--td-body); font-size: 11px; font-weight: 700; line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .td-hd-cart__count[hidden] { display: none; }
+
+  /* Nav row */
+  .td-hd-navrow { display: none; border-top: 1px solid rgba(7,14,26,.07); }
+  .td-hd-navrow__inner {
+    max-width: 1280px; margin: 0 auto; padding: 0 var(--td-gutter);
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .td-hd-nav__list { display: flex; align-items: stretch; }
+  .td-hd-nav__item { position: relative; display: flex; align-items: stretch; }
+  .td-hd-nav__item::after {
+    content: ""; position: absolute; left: 12px; right: 12px; bottom: 0; height: 3px;
+    border-radius: 6px 6px 0 0; background: transparent; transition: background-color .15s;
+    pointer-events: none;
+  }
+  .td-hd-nav__link {
+    display: flex; align-items: center; white-space: nowrap; padding: 20px 12px;
+    font-family: var(--td-display); font-size: 14px; line-height: 21px; font-weight: 700;
+    letter-spacing: .015em; text-transform: uppercase; color: var(--td-ink); transition: color .15s;
+  }
+  .td-hd-nav__item--parent .td-hd-nav__link { padding-right: 0; }
+  .td-hd-nav__toggle {
+    display: flex; align-items: center; margin: 0; padding: 0 12px 0 4px;
+    border: 0; background: transparent; color: var(--td-ink); cursor: pointer; transition: color .15s;
+  }
+  .td-hd-nav__toggle svg { width: 14px; height: 14px; transition: transform .15s; }
+  .td-hd-nav__item.is-open .td-hd-nav__toggle svg { transform: rotate(180deg); }
+  .td-hd-nav__item:hover :is(.td-hd-nav__link, .td-hd-nav__toggle),
+  .td-hd-nav__item.is-open :is(.td-hd-nav__link, .td-hd-nav__toggle) { color: var(--td-drop); }
+  .td-hd-nav__item:hover::after, .td-hd-nav__item.is-open::after { background: rgba(0,104,232,.3); }
+  .td-hd-nav__item.is-active :is(.td-hd-nav__link, .td-hd-nav__toggle) { color: var(--td-drop); }
+  .td-hd-nav__item.is-active::after { background: var(--td-drop); }
+
+  .td-hd-nav__panel {
+    display: none; position: absolute; left: 0; top: 100%; z-index: 40; width: 16rem;
+    overflow: hidden; padding: 8px 0; background: #FFFFFF;
+    border: 1px solid rgba(7,14,26,.1); border-top: 0; border-radius: 0 0 12px 12px;
+    box-shadow: 0 0 0 1px rgba(7,14,26,.05), 0 2px 4px rgba(7,14,26,.06), 0 18px 38px -10px rgba(7,14,26,.20);
+  }
+  .td-hd-nav__item.is-open > .td-hd-nav__panel,
+  .td-hd-nav:not([data-js]) .td-hd-nav__item:is(:hover, :focus-within) > .td-hd-nav__panel { display: block; }
+  .td-hd-nav__sublink {
+    display: block; padding: 10px 16px; font-size: 14px; line-height: 20px;
+    color: var(--td-ink); transition: background-color .15s, color .15s;
+  }
+  .td-hd-nav__sublink:hover, .td-hd-nav__sublink.is-current { background: var(--td-fog); color: var(--td-drop); }
+  .td-hd-nav__sublink:focus-visible { outline-offset: -2px; }
+
+  /* Buttons */
+  .td-hd-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px 24px; border: 0; border-radius: 6px; white-space: nowrap;
+    font-family: var(--td-display); font-size: 15px; font-weight: 700; line-height: 1; letter-spacing: -0.005em;
+    transition: background-color .15s, box-shadow .15s, border-color .15s;
+  }
+  .td-hd-btn svg { width: 16px; height: 16px; }
+  .td-hd-btn--primary { background: var(--td-drop); color: #FFFFFF; box-shadow: 0 4px 14px -2px rgba(0,104,232,.35); }
+  .td-hd-btn--primary:hover { background: var(--td-dive); box-shadow: none; color: #FFFFFF; }
+  .td-hd-btn--sm { padding: 8px 16px; font-size: 13px; margin: 6px 0; flex-shrink: 0; }
+  .td-hd-btn--outline {
+    border: 1px solid rgba(7,14,26,.15); background: #FFFFFF; color: var(--td-ink);
+    box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10);
+  }
+  .td-hd-btn--outline:hover { border-color: rgba(7,14,26,.3); background: var(--td-fog); }
+  .td-hd-btn--ghost {
+    border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.05); color: #FFFFFF;
+  }
+  .td-hd-btn--ghost:hover { border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.1); color: #FFFFFF; }
+  .td-hd-btn--block { display: flex; width: 100%; min-height: 46px; }
+
+  @media (min-width: 1024px) {
+    .td-hd-bar__row { gap: 32px; }
+    .td-hd-brand .td-hd-brand__logo { height: 80px; }
+    .td-hd-search--bar { display: block; flex: 1 1 auto; min-width: 0; }
+    .td-hd-actions { margin-left: 0; }
+    .td-hd-menu-btn { display: none; }
+    .td-hd-navrow { display: block; }
+  }
+
+  /* ---------- 3. Phone and tablet search row ---------- */
+  .td-hd-msearch {
+    border-bottom: 1px solid rgba(7,14,26,.1); background: #FFFFFF;
+    padding: 10px var(--td-gutter);
+  }
+  @media (min-width: 1024px) { .td-hd-msearch { display: none; } }
+
+  /* ---------- 4. Drawer ---------- */
+  .td-hd-drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; left: auto;
+    width: 86%; max-width: 24rem; height: 100%; max-height: none; margin: 0; padding: 0;
+    border: 0; background: #FFFFFF; color: var(--td-ink); overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(7,14,26,.05), 0 2px 4px rgba(7,14,26,.06), 0 18px 38px -10px rgba(7,14,26,.20);
+  }
+  .td-hd-drawer:not([open]) { display: none; }
+  .td-hd-drawer::backdrop { background: rgba(7,14,26,.6); }
+  .td-hd-drawer[open] { animation: td-hd-slide .22s ease-out; }
+  @keyframes td-hd-slide { from { transform: translateX(100%); } to { transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .td-hd-drawer[open] { animation: none; } }
+  .td-hd-drawer__panel { display: flex; flex-direction: column; height: 100%; }
+  .td-hd-drawer__head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 16px 20px; border-bottom: 1px solid rgba(7,14,26,.1);
+  }
+  .td-hd-drawer__home { display: flex; align-items: center; }
+  .td-hd-drawer .td-hd-drawer__logo { display: block; height: 64px; width: auto; max-width: none; }
+  .td-hd-drawer__close { margin-right: -10px; }
+  .td-hd-dnav { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; padding: 16px 20px; }
+  .td-hd-dnav__item + .td-hd-dnav__item { margin-top: 4px; }
+  .td-hd-dnav__row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .td-hd-dnav__link {
+    flex: 1 1 auto; display: flex; align-items: center; min-height: 44px;
+    font-family: var(--td-display); font-size: 15px; line-height: 1.3; font-weight: 700;
+    letter-spacing: .015em; text-transform: uppercase; color: var(--td-ink);
+  }
+  .td-hd-dnav__link[aria-current="page"] { color: var(--td-drop); }
+  .td-hd-dnav__toggle {
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    width: 44px; height: 44px; margin: 0 -10px 0 0; padding: 0; border: 0; border-radius: 6px;
+    background: transparent; color: var(--td-ink); cursor: pointer;
+  }
+  .td-hd-dnav__toggle:hover { background: var(--td-fog); color: var(--td-drop); }
+  .td-hd-dnav__toggle svg { width: 18px; height: 18px; transition: transform .15s; }
+  .td-hd-dnav__toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+  .td-hd-dnav__sub {
+    margin: 0 0 8px 12px !important; padding-left: 16px !important;
+    border-left: 1px solid rgba(7,14,26,.1);
+  }
+  .td-hd-dnav__sub[hidden] { display: none; }
+  .td-hd-dnav__sublink {
+    display: flex; align-items: center; min-height: 44px;
+    font-size: 14px; line-height: 1.35; color: var(--td-smoke); transition: color .15s;
+  }
+  .td-hd-dnav__sublink:hover, .td-hd-dnav__sublink.is-current { color: var(--td-drop); }
+  .td-hd-drawer__foot {
+    display: grid; gap: 8px; padding: 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(7,14,26,.1);
+  }
+
+  /* ---------- 5. Call bar ---------- */
+  .td-hd-callbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    min-height: calc(68px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid var(--td-graphite);
+    background: rgba(7,14,26,.95);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    box-shadow: 0 -10px 28px -12px rgba(7,14,26,.55);
+  }
+  .td-hd-callbar__inner { display: flex; gap: 8px; padding: 10px 12px; }
+  .td-hd-callbar .td-hd-btn { min-height: 46px; font-size: 15px; }
+  .td-hd-callbar .td-hd-btn svg { width: 17px; height: 17px; }
+  .td-hd-callbar__shop { flex: 3 1 0; }
+  .td-hd-callbar__call { flex: 2 1 0; }
+  /* Keep the end of every page clear of the bar. */
+  @media (max-width: 1023.98px) {
+    .page-wrapper:has(.td-hd-callbar) { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+  }
+  @media (min-width: 1024px) { .td-hd-callbar { display: none; } }
+</style>
+
+{% schema %}
+{
+  "name": "TireDrop header",
+  "class": "td-hd-section",
+  "enabled_on": { "groups": ["header"] },
+  "settings": [
+    { "type": "header", "content": "Utility strip" },
+    { "type": "text", "id": "phone", "label": "Phone number", "default": "(954) 773-1896" },
+    { "type": "text", "id": "shipping_line", "label": "Shipping line", "info": "Hidden on phones.", "default": "Free shipping across the continental United States" },
+    { "type": "text", "id": "offer_line", "label": "Highlighted line", "default": "Free ship-to-store & install in South Florida" },
+    { "type": "header", "content": "Logo" },
+    { "type": "image_picker", "id": "logo", "label": "Logo", "info": "Leave empty to use the theme logo. Without either, the TireDrop wordmark is shown." },
+    { "type": "text", "id": "parent_prefix", "label": "Parent line prefix", "default": "Powered by" },
+    { "type": "text", "id": "parent_name", "label": "Parent name", "info": "Leave empty to hide the line.", "default": "Extreme Tires" },
+    { "type": "header", "content": "Navigation" },
+    { "type": "link_list", "id": "menu", "label": "Menu", "default": "main-menu" },
+    { "type": "text", "id": "shop_label", "label": "Shop button label", "default": "Shop Tires" },
+    { "type": "url", "id": "shop_link", "label": "Shop button link", "info": "Defaults to /collections/tires." },
+    { "type": "header", "content": "Search" },
+    { "type": "text", "id": "search_label", "label": "Search label (screen readers)", "default": "Search tires by size, brand or model" },
+    { "type": "text", "id": "search_placeholder", "label": "Placeholder", "default": "Search a size, brand or model — 225/45R17" },
+    { "type": "text", "id": "search_placeholder_short", "label": "Placeholder on phones", "default": "Search a size, brand or model" },
+    { "type": "header", "content": "Phone call bar" },
+    { "type": "checkbox", "id": "show_call_bar", "label": "Show call bar on phones and tablets", "default": true },
+    { "type": "text", "id": "call_label", "label": "Call button label", "default": "Call" }
+  ],
+  "presets": [{ "name": "TireDrop header" }]
+}
+{% endschema %}

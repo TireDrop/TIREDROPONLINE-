@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-product",
+      "settings": {
+        "band_link": "shopify://pages/install",
+        "contact_link": "shopify://pages/contact"
+      }
+    }
+  },
+  "order": ["main"]
+}

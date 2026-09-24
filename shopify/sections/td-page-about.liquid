@@ -1,0 +1,789 @@
+{% comment %}
+  About page. Ported from the React AboutPage (src/pages/support/AboutPage.jsx).
+  Copy lives in settings and blocks. Year counts and "since <year>" claims are
+  left out on purpose: they go stale. The brand row is read from the tires
+  collection, so it can never name a brand nobody can buy; with an empty
+  catalog it says so and asks the reader to call.
+{% endcomment %}
+{%- liquid
+  assign tdp_digits = section.settings.phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
+  assign tdp_tel = 'tel:+1' | append: tdp_digits
+-%}
+{%- liquid
+  assign tdp_stat_count = 0
+  for block in section.blocks
+    if block.type == 'stat'
+      assign tdp_stat_count = tdp_stat_count | plus: 1
+    endif
+  endfor
+  assign tdp_stat_cols = tdp_stat_count
+  if tdp_stat_cols > 4
+    assign tdp_stat_cols = 4
+  endif
+  assign tdp_vendors = collections['tires'].products | map: 'vendor' | uniq | sort
+-%}
+<div class="tdp tdp-about">
+  <div class="tdp-hero">
+    <div class="tdp-hero__line" aria-hidden="true"></div>
+    <div class="tdp-wrap tdp-hero__inner">
+      {%- if section.settings.hero_eyebrow != blank -%}
+        <p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.hero_eyebrow }}</p>
+      {%- endif -%}
+      <h1 class="tdp-h1">{{ section.settings.hero_title }}</h1>
+      {%- if section.settings.hero_lede != blank -%}
+        <p class="tdp-hero__lede">{{ section.settings.hero_lede }}</p>
+      {%- endif -%}
+      <div class="tdp-hero__actions">
+        {%- if section.settings.hero_cta_label != blank -%}
+          <a href="{{ section.settings.hero_cta_link | default: '/collections/tires' }}" class="tdp-btn tdp-btn--primary">{{ section.settings.hero_cta_label }}</a>
+        {%- endif -%}
+        <a href="{{ tdp_tel }}" class="tdp-btn tdp-btn--ghost"><svg class="tdp-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.phone }}</a>
+  </div>
+    </div>
+  </div>
+
+  <nav class="tdp-crumbs" aria-label="Breadcrumb">
+    <ol class="tdp-wrap">
+      <li><a href="{{ routes.root_url }}">Home</a></li>
+      <li><svg class="tdp-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6"/></svg><span aria-current="page">{{ section.settings.crumb }}</span></li>
+    </ol>
+  </nav>
+
+  <section class="tdp-sec tdp-bone">
+    <div class="tdp-wrap tdp-about__story">
+      <div>
+        <div class="tdp-head">
+      <div class="tdp-head__text">
+        {%- if section.settings.story_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.story_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.story_title }}</h2>
+        {%- if section.settings.story_lede != blank -%}<p class="tdp-lede">{{ section.settings.story_lede }}</p>{%- endif -%}
+      </div>
+    </div>
+        <div class="tdp-about__prose">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'story' -%}
+              <p {{ block.shopify_attributes }}>{{ block.settings.copy }}</p>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+        {%- if section.settings.lockup_mark != blank -%}
+          <p class="tdp-about__lockup tdp-small">
+            {%- if section.settings.lockup_badge != blank -%}<span class="tdp-badge tdp-badge--soft">{{ section.settings.lockup_badge }}</span>{%- endif -%}
+            <span>{{ section.settings.lockup_before }} <span class="tdp-about__mark">{{ section.settings.lockup_mark }}</span> {{ section.settings.lockup_after }}</span>
+          </p>
+        {%- endif -%}
+      </div>
+      <div>
+        <ol class="tdp-about__timeline">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'milestone' -%}
+              <li {{ block.shopify_attributes }}>
+                <span class="tdp-about__node" aria-hidden="true"></span>
+                <p class="tdp-eyebrow tdp-eyebrow--plain">{{ block.settings.when }}</p>
+                <h3 class="tdp-h3">{{ block.settings.title }}</h3>
+                <p class="tdp-small">{{ block.settings.copy }}</p>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  {%- if tdp_stat_count > 0 -%}
+    <section class="tdp-ink tdp-about__stats">
+      <div class="tdp-wrap">
+        <h2 class="tdp-sr">{{ section.settings.stats_heading }}</h2>
+        <dl class="tdp-about__statgrid" style="--tdp-cols: {{ tdp_stat_cols }};">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'stat' -%}
+              <div {{ block.shopify_attributes }}>
+                <dt class="tdp-sr">{{ block.settings.label }}</dt>
+                <dd>
+                  <span class="tdp-about__figure" aria-hidden="true">{{ block.settings.value }}</span>
+                  <span class="tdp-sr">{{ block.settings.value }}</span>
+                  <span class="tdp-about__statlabel">{{ block.settings.label }}</span>
+                </dd>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </dl>
+        {%- if section.settings.stats_note != blank -%}
+          <p class="tdp-about__statnote">{{ section.settings.stats_note }}</p>
+        {%- endif -%}
+      </div>
+    </section>
+  {%- endif -%}
+
+  <section class="tdp-sec tdp-fog">
+    <div class="tdp-wrap">
+      <div class="tdp-head">
+      <div class="tdp-head__text">
+        {%- if section.settings.team_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.team_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.team_title }}</h2>
+        {%- if section.settings.team_lede != blank -%}<p class="tdp-lede">{{ section.settings.team_lede }}</p>{%- endif -%}
+      </div>
+    </div>
+      <ul class="tdp-grid tdp-sm2 tdp-lg3">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'person' -%}
+            <li class="tdp-card tdp-card--hover tdp-p6" {{ block.shopify_attributes }}>
+              <div class="tdp-about__initial" aria-hidden="true">{{ block.settings.name | slice: 0 }}</div>
+              <h3 class="tdp-h3">{{ block.settings.name }}</h3>
+              <p class="tdp-eyebrow tdp-eyebrow--plain tdp-about__role">{{ block.settings.role }}</p>
+              <p class="tdp-small tdp-about__bio">{{ block.settings.bio }}</p>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+  </section>
+
+  <section class="tdp-sec tdp-bone">
+    <div class="tdp-wrap">
+      <div class="tdp-head">
+      <div class="tdp-head__text">
+        {%- if section.settings.work_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.work_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.work_title }}</h2>
+        {%- if section.settings.work_lede != blank -%}<p class="tdp-lede">{{ section.settings.work_lede }}</p>{%- endif -%}
+      </div>
+    </div>
+      <ul class="tdp-grid tdp-md2 tdp-lg3">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'promise' -%}
+            <li class="tdp-card tdp-p6" {{ block.shopify_attributes }}>
+              {%- case block.settings.icon -%}{%- when 'package' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>{%- when 'store' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/></svg>{%- when 'truck' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>{%- when 'shield-check' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>{%- when 'tag' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>{%- when 'clock' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>{%- when 'phone' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{%- when 'map-pin' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>{%- when 'wrench' -%}<svg class="tdp-ic tdp-ic-lead" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>{%- endcase -%}
+              <h3 class="tdp-h3">{{ block.settings.title }}</h3>
+              <p class="tdp-small tdp-about__copy">{{ block.settings.copy }}</p>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+
+      {%- if tdp_vendors.size > 0 -%}
+        <div class="tdp-about__brands">
+          <span class="tdp-badge tdp-badge--soft">{{ section.settings.brands_badge }}</span>
+          {%- for vendor in tdp_vendors -%}
+            {%- if vendor != blank -%}<span class="tdp-about__brand">{{ vendor }}</span>{%- endif -%}
+          {%- endfor -%}
+        </div>
+        <p class="tdp-small tdp-about__brandnote">{{ section.settings.brands_note }}</p>
+      {%- elsif section.settings.brands_empty != blank -%}
+        <p class="tdp-small tdp-about__brandnote tdp-about__brandnote--empty">{{ section.settings.brands_empty }} <a href="{{ tdp_tel }}">{{ section.settings.phone }}</a></p>
+      {%- endif -%}
+    </div>
+  </section>
+
+  <section class="tdp-steel tdp-about__cta">
+    <div class="tdp-wrap tdp-about__ctagrid">
+      <div>
+        {%- if section.settings.cta_eyebrow != blank -%}<p class="tdp-eyebrow tdp-eyebrow--dark tdp-eyebrow--plain">{{ section.settings.cta_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.cta_title }}</h2>
+        {%- if section.settings.cta_lede != blank -%}<p class="tdp-lede tdp-about__ctalede">{{ section.settings.cta_lede }}</p>{%- endif -%}
+      </div>
+      <div class="tdp-about__ctabtns">
+        <a href="{{ section.settings.cta_shop_link | default: '/collections/tires' }}" class="tdp-btn tdp-btn--primary">{{ section.settings.cta_shop_label }}</a>
+        <a href="{{ tdp_tel }}" class="tdp-btn tdp-btn--ghost"><svg class="tdp-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.cta_call_label }} {{ section.settings.phone }}</a>
+        {%- if section.settings.cta_visit_label != blank -%}
+          <a href="{{ section.settings.cta_visit_link | default: '/pages/locations' }}" class="tdp-btn tdp-btn--ghost tdp-btn--quiet"><svg class="tdp-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>{{ section.settings.cta_visit_label }}</a>
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+</div>
+
+<style>
+  /* Page kit, shared by the td-page-* sections Agent E owns. Each section carries its own copy so it stays self-contained. */
+  .tdp { color: #070E1A; font-family: var(--font-body--family, inherit); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .tdp *, .tdp *::before, .tdp *::after { box-sizing: border-box; }
+  .tdp :where(h1, h2, h3, h4, p, ul, ol, dl, dd, dt, figure, blockquote, table, fieldset, legend, address) { margin: 0; padding: 0; }
+  .tdp :where(ul, ol) { list-style: none; }
+  .tdp :where(address) { font-style: normal; }
+  .tdp :where(fieldset) { border: 0; min-width: 0; }
+  .tdp :where(a) { color: inherit; }
+  .tdp :where(h1, h2, h3, h4) {
+    font-family: var(--font-heading--family, inherit); font-weight: 800; letter-spacing: -.018em;
+    font-variation-settings: "wdth" 108; color: inherit; text-wrap: balance; text-transform: none;
+  }
+  .tdp :where(a, button, input, select, textarea, summary):focus-visible { outline: 2px solid #0068E8; outline-offset: 2px; }
+  .tdp-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+  .tdp-wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding-left: 1rem; padding-right: 1rem; }
+  .tdp-sec { padding: 3.5rem 0; }
+  .tdp-bone { background: #FFFFFF; }
+  .tdp-fog { background: #F4F6FA; }
+  /* Dark bands pin their text colour rather than inheriting body ink. */
+  .tdp-ink { background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); color: #FFFFFF; }
+  .tdp-steel { background: #0B1524 linear-gradient(180deg, #14233A 0%, #0B1524 100%); color: #FFFFFF; }
+  .tdp-ink :where(h1, h2, h3), .tdp-steel :where(h1, h2, h3) { color: #FFFFFF; }
+
+  .tdp-h1 { font-size: 2.4rem; line-height: .98; }
+  .tdp-h2 { font-size: 1.9rem; line-height: 1.02; }
+  .tdp-h3 { font-size: 1.2rem; line-height: 1.15; }
+  .tdp-display { font-family: var(--font-heading--family, inherit); }
+  .tdp-eyebrow {
+    display: flex; align-items: center; gap: .625rem; margin-bottom: .625rem;
+    font-family: var(--font-heading--family, inherit); font-size: 12px; font-weight: 700; line-height: 1.4;
+    text-transform: uppercase; letter-spacing: .09em; color: #0068E8;
+  }
+  .tdp-eyebrow--plain { display: block; }
+  .tdp-rule { flex: none; height: 1px; width: 1.5rem; background: rgba(0,104,232,.45); }
+  .tdp-eyebrow--dark { color: #00B4FC; }
+  .tdp-eyebrow--dark .tdp-rule { background: rgba(0,180,252,.5); }
+  .tdp-label {
+    display: block; margin-bottom: .375rem; font-family: var(--font-heading--family, inherit);
+    font-size: 11px; font-weight: 700; line-height: 1.4; text-transform: uppercase; letter-spacing: .07em; color: #586274;
+  }
+  .tdp-lede { font-size: 1.0625rem; line-height: 1.6; color: #586274; }
+  .tdp-ink .tdp-lede, .tdp-steel .tdp-lede { color: rgba(255,255,255,.7); }
+  .tdp-small { font-size: .875rem; line-height: 1.625; color: #586274; }
+  .tdp-xs { font-size: .75rem; line-height: 1.625; color: #586274; }
+  .tdp-ink-text { color: #070E1A; }
+  .tdp-drop { color: #0068E8; }
+  .tdp-small a, .tdp-xs a, .tdp-lede a { text-underline-offset: 2px; }
+  .tdp-small a:hover, .tdp-xs a:hover { color: #0068E8; }
+
+  .tdp-head { margin-bottom: 2rem; }
+  .tdp-head__text { max-width: 42rem; }
+  .tdp-head .tdp-lede { margin-top: 1rem; max-width: 36rem; }
+  .tdp-head--center { text-align: center; }
+  .tdp-head--center .tdp-head__text { margin: 0 auto; }
+  .tdp-head--center .tdp-eyebrow { justify-content: center; }
+  .tdp-head--center .tdp-lede { margin-left: auto; margin-right: auto; }
+  .tdp-head__action { margin-top: 1.5rem; flex: none; }
+
+  /* Masthead */
+  .tdp-hero { position: relative; overflow: hidden; background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); color: #FFFFFF; }
+  .tdp-hero__line { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(0,180,252,.35), transparent); }
+  .tdp-hero__inner { position: relative; padding-top: 3.5rem; padding-bottom: 3.5rem; }
+  .tdp-hero .tdp-eyebrow { color: #00B4FC; margin-bottom: .75rem; }
+  .tdp-hero .tdp-rule { background: rgba(0,180,252,.55); }
+  .tdp-hero .tdp-h1 { max-width: 56rem; color: #FFFFFF; }
+  .tdp-hero__lede { margin-top: 1.25rem; max-width: 42rem; font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.7); }
+  .tdp-hero__actions { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: .75rem; }
+
+  /* Breadcrumbs */
+  .tdp-crumbs { background: #FFFFFF; border-bottom: 1px solid rgba(7,14,26,.1); }
+  .tdp-crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: .375rem; padding-top: 2px; padding-bottom: 2px; font-size: 12px; color: #586274; }
+  .tdp-crumbs li { display: flex; align-items: center; gap: .375rem; }
+  .tdp-crumbs a { display: flex; align-items: center; min-height: 44px; text-decoration: none; color: #586274; }
+  .tdp-crumbs a:hover { color: #0068E8; }
+  .tdp-crumbs [aria-current] { color: #070E1A; }
+  .tdp-crumbs svg { color: rgba(88,98,116,.5); }
+
+  /* Buttons. 44px minimum so every one clears the tap-target floor. */
+  .tdp-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px;
+    padding: .75rem 1.5rem; border-radius: 6px; border: 1px solid transparent; cursor: pointer;
+    font-family: var(--font-heading--family, inherit); font-size: 15px; font-weight: 700; line-height: 1;
+    letter-spacing: -.005em; text-decoration: none; text-align: center; transition: background-color .15s, border-color .15s, box-shadow .15s, color .15s;
+  }
+  .tdp-btn--sm { padding: .5rem 1rem; font-size: 13px; }
+  .tdp-btn--primary { background: #0068E8; color: #FFFFFF; box-shadow: 0 4px 14px -2px rgba(0,104,232,.35); }
+  .tdp-btn--primary:hover { background: #0053C4; box-shadow: none; }
+  .tdp-btn--dark { background: #070E1A; color: #FFFFFF; }
+  .tdp-btn--dark:hover { background: #101C2E; }
+  .tdp-btn--outline { border-color: rgba(7,14,26,.15); background: #FFFFFF; color: #070E1A; box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .tdp-btn--outline:hover { border-color: rgba(7,14,26,.3); background: #F4F6FA; }
+  .tdp-btn--ghost { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.05); color: #FFFFFF; }
+  .tdp-btn--ghost:hover { border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.1); }
+  .tdp-btn--quiet { border-color: transparent; color: rgba(255,255,255,.75); }
+  .tdp-btn--quiet:hover { border-color: #FFFFFF; }
+  .tdp-textlink { display: inline-flex; align-items: center; gap: .375rem; min-height: 44px; font-family: var(--font-heading--family, inherit); font-size: .875rem; font-weight: 700; color: #0068E8; text-decoration: none; }
+  .tdp-textlink:hover { color: #0053C4; }
+
+  /* Surfaces */
+  .tdp-card { background: #FFFFFF; border: 1px solid rgba(7,14,26,.07); border-radius: 12px; box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .tdp-card--hover { transition: transform .2s, box-shadow .2s; }
+  .tdp-card--hover:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(7,14,26,.05), 0 2px 4px rgba(7,14,26,.06), 0 18px 38px -10px rgba(7,14,26,.20); }
+  .tdp-p6 { padding: 1.5rem; }
+  .tdp-bl-drop { border-left: 4px solid #0068E8; }
+  .tdp-bl-amber { border-left: 4px solid #F5A623; }
+  .tdp-badge {
+    display: inline-flex; align-items: center; border-radius: 6px; padding: .25rem .5rem;
+    font-family: var(--font-heading--family, inherit); font-size: 11px; font-weight: 700; line-height: 1.1;
+    text-transform: uppercase; letter-spacing: .09em;
+  }
+  .tdp-badge--soft { background: rgba(7,14,26,.06); color: #070E1A; box-shadow: inset 0 0 0 1px rgba(7,14,26,.1); }
+  .tdp-badge--amber { background: #F5A623; color: #070E1A; }
+  .tdp-badge--drop { background: #0068E8; color: #FFFFFF; }
+  .tdp-ic { flex: none; display: inline-block; vertical-align: middle; }
+  .tdp-ic-lead { display: block; margin-bottom: 1rem; color: #0068E8; }
+  .tdp-h3-ic { display: flex; align-items: center; gap: .5rem; }
+  .tdp-h3-ic svg { color: #0068E8; }
+
+  .tdp-grid { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); }
+  .tdp-bullets > li { display: flex; align-items: flex-start; gap: .5rem; }
+  .tdp-bullets > li + li { margin-top: .5rem; }
+  .tdp-dot { flex: none; margin-top: .5rem; height: 6px; width: 6px; border-radius: 999px; background: #0068E8; }
+  .tdp-checks > li { display: flex; align-items: flex-start; gap: .5rem; font-size: .875rem; line-height: 1.43; color: #070E1A; }
+  .tdp-checks > li + li { margin-top: .625rem; }
+  .tdp-checks svg { margin-top: 2px; color: #0068E8; }
+  .tdp-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+
+  /* Hours */
+  .tdp-hours { width: 100%; border-collapse: collapse; font-size: .875rem; font-variant-numeric: tabular-nums; }
+  .tdp-hours tr + tr { border-top: 1px solid rgba(7,14,26,.1); }
+  .tdp-hours th { padding: .5rem 0; text-align: left; font-family: var(--font-heading--family, inherit); font-size: 1rem; font-weight: 400; color: #070E1A; }
+  .tdp-hours td { padding: .5rem 0; text-align: right; color: #070E1A; }
+  .tdp-hours td.is-closed { color: #586274; }
+
+  /* Definition list used for contact summaries */
+  .tdp-dl { border-top: 1px solid rgba(7,14,26,.1); padding-top: 1.25rem; font-size: .875rem; }
+  .tdp-dl > div + div { margin-top: .75rem; }
+  .tdp-dl dd { color: #070E1A; }
+
+  /* Forms */
+  .tdp-field {
+    display: block; width: 100%; min-height: 44px; margin: 0; border-radius: 6px; border: 1px solid rgba(7,14,26,.12);
+    background: #FFFFFF; padding: .625rem .875rem; font: inherit; font-size: 15px; line-height: 1.5; color: #070E1A;
+    box-shadow: inset 0 1px 2px rgba(7,14,26,.04); appearance: none;
+  }
+  .tdp-field::placeholder { color: rgba(88,98,116,.6); }
+  .tdp-field:focus { outline: none; border-color: #0068E8; box-shadow: 0 0 0 3px rgba(0,104,232,.15); }
+  .tdp-field[aria-invalid="true"] { border-color: #0068E8; }
+  textarea.tdp-field { resize: vertical; }
+  .tdp-err { margin-top: .375rem; display: flex; align-items: flex-start; gap: .375rem; font-size: .75rem; line-height: 1.5; color: #0068E8; }
+  .tdp-err svg { margin-top: 1px; }
+  .tdp-err[hidden] { display: none; }
+  .tdp-formerr { margin-bottom: 1.25rem; }
+  .tdp-formerr ul { margin-top: .5rem; padding-left: 1.1rem; list-style: disc; }
+  .tdp-formerr .errors ul { margin: .5rem 0 0; }
+
+  @media (min-width: 640px) {
+    .tdp-sm2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tdp-sm3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (min-width: 768px) {
+    .tdp-wrap { padding-left: 2rem; padding-right: 2rem; }
+    .tdp-sec { padding: 5rem 0; }
+    .tdp-h1 { font-size: 4.25rem; }
+    .tdp-h2 { font-size: 3rem; }
+    .tdp-h3 { font-size: 1.45rem; }
+    .tdp-lede { font-size: 1.1875rem; }
+    .tdp-head { margin-bottom: 3rem; }
+    .tdp-head--action { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; }
+    .tdp-head--action .tdp-head__action { margin-top: 0; }
+    .tdp-hero__inner { padding-top: 5rem; padding-bottom: 5rem; }
+    .tdp-hero__lede { font-size: 1.25rem; }
+    .tdp-md2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tdp-md3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tdp-md4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+  @media (min-width: 1024px) {
+    .tdp-lg2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tdp-lg3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tdp-lg4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .tdp-lg5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tdp *, .tdp *::before, .tdp *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+
+  .tdp-about__story { display: grid; gap: 3rem; }
+  .tdp-about__prose { max-width: 68ch; font-size: 1.0625rem; line-height: 1.7; color: #586274; }
+  .tdp-about__prose p + p { margin-top: 1.25rem; }
+  .tdp-about__lockup { margin-top: 1.75rem; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+  .tdp-about__mark { font-family: var(--font-heading--family, inherit); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: #D40C10; }
+  .tdp-about__timeline { margin-top: .5rem; }
+  .tdp-about__timeline li { position: relative; border-left: 2px solid rgba(7,14,26,.1); padding: 0 0 2rem 1.5rem; }
+  .tdp-about__timeline li:last-child { padding-bottom: 0; }
+  .tdp-about__timeline .tdp-eyebrow { margin-bottom: .25rem; }
+  .tdp-about__timeline .tdp-h3 { margin-bottom: .5rem; }
+  .tdp-about__node { position: absolute; left: -7px; top: 6px; height: 12px; width: 12px; border-radius: 999px; background: #0068E8; }
+  .tdp-about__stats { padding: 3rem 0; }
+  .tdp-about__statgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }
+  .tdp-about__figure { display: block; font-family: var(--font-heading--family, inherit); font-size: 2.25rem; line-height: 1; color: #F5A623; }
+  .tdp-about__statlabel { display: block; margin-top: .5rem; font-size: .875rem; line-height: 1.43; color: rgba(255,255,255,.72); }
+  .tdp-about__statnote { margin-top: 2rem; font-size: .75rem; line-height: 1.5; color: rgba(255,255,255,.65); }
+  .tdp-about__initial { margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: center; height: 3.5rem; width: 3.5rem; border-radius: 6px; background: #070E1A; font-family: var(--font-heading--family, inherit); font-size: 1.5rem; color: #F5A623; }
+  .tdp-about__role { margin: .25rem 0 0; font-size: 11px; }
+  .tdp-about__bio { margin-top: .75rem; }
+  .tdp-about__copy { margin-top: .5rem; }
+  .tdp-about__brands { margin-top: 2.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+  .tdp-about__brand { font-family: var(--font-heading--family, inherit); font-size: 1.125rem; color: rgba(7,14,26,.72); }
+  .tdp-about__brandnote { margin-top: 1rem; }
+  .tdp-about__brandnote--empty { margin-top: 2.5rem; }
+  .tdp-about__cta { padding: 3.5rem 0; }
+  .tdp-about__ctagrid { display: grid; gap: 2rem; }
+  .tdp-about__ctalede { margin-top: 1rem; max-width: 36rem; }
+  .tdp-about__ctabtns { display: flex; flex-direction: column; gap: .75rem; }
+  @media (min-width: 640px) { .tdp-about__ctabtns { flex-direction: row; flex-wrap: wrap; } }
+  @media (min-width: 768px) {
+    .tdp-about__stats { padding: 4rem 0; }
+    .tdp-about__statgrid { grid-template-columns: repeat(var(--tdp-cols, 4), minmax(0, 1fr)); }
+    .tdp-about__figure { font-size: 3rem; }
+    .tdp-about__cta { padding: 5rem 0; }
+    .tdp-about__ctagrid { grid-template-columns: 1.2fr 1fr; align-items: center; }
+    .tdp-about__ctabtns { flex-direction: column; flex-wrap: nowrap; }
+  }
+  @media (min-width: 1024px) {
+    .tdp-about__story { grid-template-columns: 1.1fr 1fr; gap: 4rem; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "TireDrop page: About",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Page header"
+    },
+    {
+      "type": "text",
+      "id": "hero_eyebrow",
+      "label": "Eyebrow",
+      "default": "About Us"
+    },
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Heading",
+      "default": "A real tire shop, with a national counter"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_lede",
+      "label": "Supporting copy",
+      "default": "TireDrop is the online store of Extreme Tires — a family-owned shop that fits tires in South Florida. We ship anywhere in the continental United States. Near Sunrise, we will also put them on for you."
+    },
+    {
+      "type": "text",
+      "id": "crumb",
+      "label": "Breadcrumb label",
+      "default": "About Us"
+    },
+    {
+      "type": "text",
+      "id": "hero_cta_label",
+      "label": "Button label",
+      "default": "Shop Tires"
+    },
+    {
+      "type": "url",
+      "id": "hero_cta_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Contact details"
+    },
+    {
+      "type": "text",
+      "id": "phone",
+      "label": "Phone number",
+      "default": "(954) 773-1896",
+      "info": "Shown as written; the call link is built from its digits."
+    },
+    {
+      "type": "header",
+      "content": "Our story"
+    },
+    {
+      "type": "text",
+      "id": "story_eyebrow",
+      "label": "Eyebrow",
+      "default": "Our Story"
+    },
+    {
+      "type": "text",
+      "id": "story_title",
+      "label": "Heading",
+      "default": "It started in a tire bay, not a warehouse"
+    },
+    {
+      "type": "textarea",
+      "id": "story_lede",
+      "label": "Supporting copy",
+      "default": "Most online tire stores are a catalog with a checkout button attached. This one is attached to a shop that mounts tires for a living."
+    },
+    {
+      "type": "text",
+      "id": "lockup_badge",
+      "label": "Lockup badge",
+      "default": "The lockup"
+    },
+    {
+      "type": "text",
+      "id": "lockup_before",
+      "label": "Lockup text before the mark",
+      "default": "You will see"
+    },
+    {
+      "type": "text",
+      "id": "lockup_mark",
+      "label": "Lockup mark",
+      "default": "Powered by Extreme Tires"
+    },
+    {
+      "type": "text",
+      "id": "lockup_after",
+      "label": "Lockup text after the mark",
+      "default": "on this site. That is the parent business — the shop, the vans and the people."
+    },
+    {
+      "type": "header",
+      "content": "By the numbers"
+    },
+    {
+      "type": "text",
+      "id": "stats_heading",
+      "label": "Heading (screen readers only)",
+      "default": "TireDrop by the numbers"
+    },
+    {
+      "type": "textarea",
+      "id": "stats_note",
+      "label": "Footnote",
+      "default": "The state count is the continental-US shipping area and the town list is the mobile install area. None of these are marketing round-ups."
+    },
+    {
+      "type": "header",
+      "content": "Team"
+    },
+    {
+      "type": "text",
+      "id": "team_eyebrow",
+      "label": "Eyebrow",
+      "default": "Our Team"
+    },
+    {
+      "type": "text",
+      "id": "team_title",
+      "label": "Heading",
+      "default": "The people behind the order"
+    },
+    {
+      "type": "textarea",
+      "id": "team_lede",
+      "label": "Supporting copy",
+      "default": "Small crew, clear roles. Whether your tires land on a porch in Ohio or on a lift in Sunrise, one of these people had a hand in it. First names only — call the shop and you will be talking to one of them."
+    },
+    {
+      "type": "header",
+      "content": "How we work"
+    },
+    {
+      "type": "text",
+      "id": "work_eyebrow",
+      "label": "Eyebrow",
+      "default": "How We Work"
+    },
+    {
+      "type": "text",
+      "id": "work_title",
+      "label": "Heading",
+      "default": "What you get that a warehouse cannot give you"
+    },
+    {
+      "type": "textarea",
+      "id": "work_lede",
+      "label": "Supporting copy",
+      "default": "Nothing here is a trade secret. It is the short list of things we refuse to cut corners on, online or in the bay."
+    },
+    {
+      "type": "text",
+      "id": "brands_badge",
+      "label": "Brand row badge",
+      "default": "Brands in the catalog"
+    },
+    {
+      "type": "textarea",
+      "id": "brands_note",
+      "label": "Brand row note",
+      "default": "Every brand named here has tires you can filter to and buy on this site right now. The catalog widens as distributor access does — if you want something that is not listed, call and ask before you assume we cannot get it.",
+      "info": "Shown under the brand names, which are read from the tires collection."
+    },
+    {
+      "type": "textarea",
+      "id": "brands_empty",
+      "label": "Note while the catalog is empty",
+      "default": "The catalog is being loaded now. If you want a particular brand or size, call and ask before you assume we cannot get it."
+    },
+    {
+      "type": "header",
+      "content": "Closing band"
+    },
+    {
+      "type": "text",
+      "id": "cta_eyebrow",
+      "label": "Eyebrow",
+      "default": "Tires shipped. Or installed."
+    },
+    {
+      "type": "text",
+      "id": "cta_title",
+      "label": "Heading",
+      "default": "Tell us the vehicle. We will find the tire."
+    },
+    {
+      "type": "textarea",
+      "id": "cta_lede",
+      "label": "Supporting copy",
+      "default": "Shipping anywhere in the continental United States, free to the Sunrise shop if you would rather we fit them, and the van for driveways around Broward."
+    },
+    {
+      "type": "text",
+      "id": "cta_shop_label",
+      "label": "Shop button",
+      "default": "Shop Tires"
+    },
+    {
+      "type": "url",
+      "id": "cta_shop_link",
+      "label": "Shop link"
+    },
+    {
+      "type": "text",
+      "id": "cta_call_label",
+      "label": "Call button (the number is appended)",
+      "default": "Call"
+    },
+    {
+      "type": "text",
+      "id": "cta_visit_label",
+      "label": "Visit button",
+      "default": "Visit the Sunrise shop"
+    },
+    {
+      "type": "url",
+      "id": "cta_visit_link",
+      "label": "Visit link"
+    }
+  ],
+  "max_blocks": 50,
+  "blocks": [
+    {
+      "type": "story",
+      "name": "Story paragraph",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "copy",
+          "label": "Paragraph"
+        }
+      ]
+    },
+    {
+      "type": "milestone",
+      "name": "Timeline entry",
+      "settings": [
+        {
+          "type": "text",
+          "id": "when",
+          "label": "When"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "textarea",
+          "id": "copy",
+          "label": "Copy"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "name": "Stat",
+      "settings": [
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Figure"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label"
+        }
+      ]
+    },
+    {
+      "type": "person",
+      "name": "Team member",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "First name"
+        },
+        {
+          "type": "text",
+          "id": "role",
+          "label": "Role"
+        },
+        {
+          "type": "textarea",
+          "id": "bio",
+          "label": "Bio"
+        }
+      ]
+    },
+    {
+      "type": "promise",
+      "name": "How we work card",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            {
+              "value": "package",
+              "label": "Package"
+            },
+            {
+              "value": "store",
+              "label": "Store"
+            },
+            {
+              "value": "truck",
+              "label": "Truck"
+            },
+            {
+              "value": "shield-check",
+              "label": "Shield"
+            },
+            {
+              "value": "tag",
+              "label": "Price tag"
+            },
+            {
+              "value": "clock",
+              "label": "Clock"
+            },
+            {
+              "value": "phone",
+              "label": "Phone"
+            },
+            {
+              "value": "map-pin",
+              "label": "Map pin"
+            },
+            {
+              "value": "wrench",
+              "label": "Wrench"
+            }
+          ],
+          "default": "package"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "textarea",
+          "id": "copy",
+          "label": "Copy"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

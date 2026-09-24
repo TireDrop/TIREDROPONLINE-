@@ -1,0 +1,160 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-page-locations",
+      "settings": {
+        "hero_eyebrow": "The Shop",
+        "hero_title": "Where your tires can be fitted",
+        "hero_lede": "TireDrop is the online store of Extreme Tires — one business, one address, one phone number. We ship to the continental United States, so most customers never need an address from us. If you are near Sunrise, this is the shop behind the website.",
+        "crumb": "The Shop",
+        "directions_label": "Get Directions",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=7712+West+Oakland+Park+Blvd+Sunrise+FL+33351",
+        "phone": "(954) 773-1896",
+        "email": "info@tiredroponline.com",
+        "shop_name": "Extreme Tires — Sunrise",
+        "street": "7712 West Oakland Park Blvd",
+        "city_line": "Sunrise, FL 33351",
+        "map_label": "Sunrise",
+        "ways_eyebrow": "Getting Them On",
+        "ways_title": "Three ways this ends with tires on the car",
+        "ways_lede": "Only two of them involve driving to Sunrise, and one of those is us driving to you.",
+        "shop_eyebrow": "Our Shop",
+        "shop_title": "Sunrise, Florida",
+        "shop_lede": "Extreme Tires has run out of this building for years — it owns the vans, employs the technicians and fits every ship-to-store order. Pull in for an install, a pickup, or the bay work a van cannot do.",
+        "address_title": "Address & Contact",
+        "address_note": "One phone number and one email address cover both sides of the business — an order placed from out of state and an appointment in Sunrise reach the same people.",
+        "fact_trading_label": "Trading as",
+        "fact_trading": "TireDrop — Powered by Extreme Tires",
+        "fact_place_label": "Place of business",
+        "fact_place": "7712 West Oakland Park Blvd, Sunrise, FL 33351",
+        "fact_ships_label": "Ships to",
+        "fact_ships": "Street addresses in the continental United States. Not Alaska, Hawaii, US territories or outside the country.",
+        "fact_installs_label": "Installs in",
+        "fact_installs": "Broward County, Florida — at the shop or by mobile van.",
+        "book_label": "Book an Install",
+        "hours_title": "Hours",
+        "hours_note": "These are the hours for installs, pickups and dispatching the vans. Orders can be placed on the website at any hour — they are reviewed the next time the shop is open.",
+        "visit_eyebrow": "At The Shop",
+        "visit_title": "What actually happens in Sunrise",
+        "visit_lede": "Three different visits end up at the same counter. Here is what each one looks like.",
+        "area_eyebrow": "Mobile Install Area",
+        "area_title": "Where the vans run",
+        "area_lede": "Mobile installation is Broward County only — a South Florida bonus on top of the national store. We keep the map tight on purpose, because that is how the van actually arrives when we said it would.",
+        "area_cta_label": "Check My Address",
+        "towns": "Sunrise\nPlantation\nFort Lauderdale\nDavie\nWeston\nCoral Springs\nTamarac\nLauderhill\nPembroke Pines\nMiramar",
+        "van_title": "What the van can do at your address",
+        "van_copy": "Tire machine, spin balancer, calibrated torque wrenches and stock on board. We need a flat, safe spot beside the vehicle — a driveway, a parking space or a level patch of jobsite.",
+        "van_services": "Tire Installation\nTire Balancing\nTire Repair\nTire Rotation\nWheel Installation\nOil Change\nTPMS Service",
+        "van_link_label": "How mobile service works",
+        "outside_badge": "Outside Broward?",
+        "outside_copy": "Then the van is not coming — but the tires still are. Order them shipped to your address and have your own installer fit them, or call us and we will talk through what to ask for when you get there.",
+        "cta_eyebrow": "Powered by Extreme Tires",
+        "cta_title": "Buy the tires first. Decide the rest after.",
+        "cta_lede": "You can change your mind about shipping to your door or to the shop while your order is still being placed — just call us.",
+        "cta_label": "Shop Tires",
+        "book_link": "shopify://pages/contact",
+        "area_cta_link": "shopify://pages/contact",
+        "van_link": "shopify://pages/mobile-service",
+        "cta_link": "shopify://collections/tires"
+      },
+      "blocks": {
+        "way_1": {
+          "type": "way",
+          "settings": {
+            "icon": "package",
+            "title": "Have them shipped to you",
+            "copy": "Order online and the tires ship free to your address anywhere in the continental United States. Take them to any installer you like — plenty of customers already have a shop they trust.",
+            "link_label": "How shipping works",
+            "link": "shopify://pages/shipping"
+          }
+        },
+        "way_2": {
+          "type": "way",
+          "settings": {
+            "icon": "building-2",
+            "title": "Ship free to the shop",
+            "copy": "Send the order to Sunrise instead at no shipping cost. We sign for it, check it against your order, and book you in to have it fitted.",
+            "link_label": "Ship to store & install",
+            "link": "shopify://pages/install"
+          }
+        },
+        "way_3": {
+          "type": "way",
+          "settings": {
+            "icon": "truck",
+            "title": "Let the van come to you",
+            "copy": "In Broward County the van can fit them in your driveway, your office lot or a jobsite. Same equipment, no waiting room.",
+            "link_label": "Mobile installation",
+            "link": "shopify://pages/mobile-service"
+          }
+        },
+        "hours_1": {
+          "type": "hours",
+          "settings": {
+            "days": "Mon – Fri",
+            "time": "8:00 AM – 6:30 PM"
+          }
+        },
+        "hours_2": {
+          "type": "hours",
+          "settings": {
+            "days": "Saturday",
+            "time": "8:00 AM – 4:00 PM"
+          }
+        },
+        "hours_3": {
+          "type": "hours",
+          "settings": {
+            "days": "Sunday",
+            "time": "Closed"
+          }
+        },
+        "visit_1": {
+          "type": "visit",
+          "settings": {
+            "icon": "package",
+            "title": "Ship-to-store pickup",
+            "copy": "Your order ships here free. We check the size, load index and speed rating against what you bought before it goes anywhere near your car, then call you to book the fitting — or to hand the tires over if you would rather take them with you.",
+            "link_label": "How ship-to-store works",
+            "link": "shopify://pages/install"
+          }
+        },
+        "visit_2": {
+          "type": "visit",
+          "settings": {
+            "icon": "wrench",
+            "title": "Installation",
+            "copy": "Mounting, balancing, new valve service, TPMS relearn where the vehicle needs it, and a torque wrench on every lug. Ask for an alignment at the same time if the set is new — it is the cheapest way to protect it.",
+            "link_label": "Book an install",
+            "link": "shopify://pages/contact"
+          }
+        },
+        "visit_3": {
+          "type": "visit",
+          "settings": {
+            "icon": "building-2",
+            "title": "Full shop service",
+            "copy": "Some work needs the building — a lift, an alignment rack and tools that do not travel. That is what the bay is for, whether or not the tires came from us.",
+            "list": "Brake Repair\nWheel Alignment\nSuspension Repair\nLift Kits\nDiagnostics & Inspections",
+            "link_label": "All shop services",
+            "link": "shopify://pages/auto-service"
+          }
+        }
+      },
+      "block_order": [
+        "way_1",
+        "way_2",
+        "way_3",
+        "hours_1",
+        "hours_2",
+        "hours_3",
+        "visit_1",
+        "visit_2",
+        "visit_3"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

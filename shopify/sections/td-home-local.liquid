@@ -1,0 +1,177 @@
+{% comment %}
+  "Local? We'll put them on for you" (React HomePage <LocalAdvantage>).
+  Installation is South Florida only, and this band says so. Services are
+  blocks with the prices and durations the React site lists; each block can
+  take a link, and renders as a plain row without one (the store has no
+  per-service pages yet). The towns list is one comma-separated setting.
+{% endcomment %}
+
+{{ 'td-home.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign phone_digits = section.settings.phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
+  assign towns = section.settings.towns | split: ','
+-%}
+
+<section class="tdh tdh--bone tdh-pad td-local" aria-labelledby="td-local-{{ section.id }}">
+  <div class="tdh-wrap">
+    <div class="tdh-head">
+      <div class="tdh-head__text">
+        {%- if section.settings.eyebrow != blank -%}<p class="tdh-eyebrow">{{ section.settings.eyebrow }}</p>{%- endif -%}
+        <h2 class="tdh-h2" id="td-local-{{ section.id }}">{{ section.settings.heading }}</h2>
+        {%- if section.settings.lede != blank -%}<p class="tdh-lede">{{ section.settings.lede }}</p>{%- endif -%}
+      </div>
+    </div>
+
+    <div class="td-local__grid">
+      {%- for col in (1..2) -%}
+        {%- liquid
+          if col == 1
+            assign group = 'bay'
+            assign title = section.settings.bay_heading
+            assign icon = 'wrench'
+            assign cta = section.settings.bay_cta
+            assign cta_link = section.settings.bay_link | default: '/pages/install'
+            assign cta_class = 'tdh-btn--primary'
+          else
+            assign group = 'mobile'
+            assign title = section.settings.mobile_heading
+            assign icon = 'truck'
+            assign cta = section.settings.mobile_cta
+            assign cta_link = section.settings.mobile_link | default: '/pages/mobile-service'
+            assign cta_class = 'tdh-btn--outline'
+          endif
+        -%}
+        <div class="tdh-card td-local__card">
+          <div class="td-local__cardhead">
+            {%- render 'td-home-icon', name: icon, size: 20, class: 'tdh-icon' -%}
+            <h3 class="tdh-h3">{{ title }}</h3>
+          </div>
+          <ul class="td-local__list" role="list">
+            {%- for block in section.blocks -%}
+              {%- if block.settings.group == group -%}
+                <li {{ block.shopify_attributes }}>
+                  {%- if block.settings.link != blank -%}<a class="td-local__row" href="{{ block.settings.link }}">{%- else -%}<div class="td-local__row">{%- endif -%}
+                    <span class="td-local__name">{{ block.settings.name }}</span>
+                    <span class="td-local__meta">{{ block.settings.meta }}</span>
+                  {%- if block.settings.link != blank -%}</a>{%- else -%}</div>{%- endif -%}
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+          {%- if cta != blank -%}
+            <a class="tdh-btn {{ cta_class }} tdh-btn--sm td-local__cta" href="{{ cta_link }}">{{ cta }}</a>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- if towns.size > 0 -%}
+      <h3 class="td-local__towns-title" id="td-local-towns-{{ section.id }}">{{ section.settings.towns_heading }}</h3>
+      <ul class="td-local__towns" role="list" aria-labelledby="td-local-towns-{{ section.id }}">
+        {%- for town in towns -%}
+          {%- assign t = town | strip -%}
+          {%- if t != blank -%}<li>{{ t }}</li>{%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    <div class="td-local__actions">
+      {%- if section.settings.phone != blank -%}
+        <a class="tdh-btn tdh-btn--primary" href="tel:+1{{ phone_digits }}">
+          {%- render 'td-home-icon', name: 'phone', size: 17 -%}
+          {{ section.settings.phone }}
+        </a>
+      {%- endif -%}
+      {%- if section.settings.visit_label != blank -%}
+        <a class="tdh-btn tdh-btn--outline" href="{{ section.settings.visit_link | default: '/pages/locations' }}">
+          {%- render 'td-home-icon', name: 'map-pin', size: 17 -%}
+          {{ section.settings.visit_label }}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  .td-local .td-local__grid { display: grid; gap: 1rem; }
+  .td-local .td-local__card { padding: 1.5rem; display: flex; flex-direction: column; }
+  .td-local .td-local__cardhead { display: flex; align-items: center; gap: .5rem; margin-bottom: 1.25rem; }
+  .td-local .td-local__list { list-style: none; margin: 0; padding: 0; display: grid; gap: .625rem; }
+  .td-local .td-local__row {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+    padding: .5rem 0; border-bottom: 1px solid rgba(7,14,26,.05);
+    font-size: .875rem; color: #070E1A; text-decoration: none;
+  }
+  .td-local a.td-local__row:hover { color: #0068E8; }
+  .td-local .td-local__name { font-weight: 500; }
+  .td-local .td-local__meta { flex-shrink: 0; font-size: .75rem; color: #586274; font-variant-numeric: tabular-nums; }
+  .td-local .td-local__cta { align-self: flex-start; margin-top: 1.5rem; }
+  .td-local .td-local__towns-title {
+    margin: 2.5rem 0 0; text-align: center;
+    font-size: .75rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #586274;
+  }
+  .td-local .td-local__towns {
+    list-style: none; padding: 0; margin: 1rem auto 0; max-width: 48rem;
+    display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem;
+  }
+  .td-local .td-local__towns li {
+    border: 1px solid rgba(7,14,26,.1); background: #F4F6FA; border-radius: 6px;
+    padding: .375rem .875rem; font-family: var(--font-heading--family, "Archivo", system-ui, sans-serif);
+    font-size: .875rem; font-weight: 600; color: #070E1A;
+  }
+  .td-local .td-local__actions { margin-top: 2rem; display: flex; flex-direction: column; align-items: center; gap: .75rem; }
+  @media (min-width: 640px) { .td-local .td-local__actions { flex-direction: row; justify-content: center; } }
+  @media (min-width: 768px) { .td-local .td-local__card { padding: 1.75rem; } }
+  @media (min-width: 1024px) { .td-local .td-local__grid { grid-template-columns: repeat(2, minmax(0,1fr)); align-items: stretch; } }
+</style>
+
+{% schema %}
+{
+  "name": "TireDrop local install",
+  "tag": "div",
+  "max_blocks": 20,
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "South Florida only" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Local? We'll put them on for you" },
+    { "type": "textarea", "id": "lede", "label": "Supporting copy", "default": "Ship-to-store is free, and installation happens at Extreme Tires in Sunrise — or in your own driveway if the van is the easier answer." },
+    { "type": "text", "id": "bay_heading", "label": "Shop column heading", "default": "In the bay — Sunrise" },
+    { "type": "text", "id": "bay_cta", "label": "Shop column button", "default": "Ship to store & install" },
+    { "type": "url", "id": "bay_link", "label": "Shop column link" },
+    { "type": "text", "id": "mobile_heading", "label": "Mobile column heading", "default": "Mobile — Broward County" },
+    { "type": "text", "id": "mobile_cta", "label": "Mobile column button", "default": "How the van works" },
+    { "type": "url", "id": "mobile_link", "label": "Mobile column link" },
+    { "type": "text", "id": "towns_heading", "label": "Towns heading", "default": "Install towns we cover" },
+    { "type": "textarea", "id": "towns", "label": "Install towns (comma-separated)", "default": "Sunrise, Plantation, Fort Lauderdale, Davie, Weston, Coral Springs, Tamarac, Lauderhill, Pembroke Pines, Miramar" },
+    { "type": "text", "id": "phone", "label": "Phone number", "default": "(954) 773-1896" },
+    { "type": "text", "id": "visit_label", "label": "Visit button", "default": "Visit the Sunrise shop" },
+    { "type": "url", "id": "visit_link", "label": "Visit link" }
+  ],
+  "blocks": [
+    {
+      "type": "service",
+      "name": "Service",
+      "settings": [
+        { "type": "select", "id": "group", "label": "Column", "default": "bay", "options": [
+          { "value": "bay", "label": "In the bay" },
+          { "value": "mobile", "label": "Mobile van" }
+        ] },
+        { "type": "text", "id": "name", "label": "Service" },
+        { "type": "text", "id": "meta", "label": "Price and time", "info": "e.g. from $99 · 60–90 min" },
+        { "type": "url", "id": "link", "label": "Link (optional)" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "TireDrop local install",
+      "blocks": [
+        { "type": "service", "settings": { "group": "bay", "name": "Brake Repair", "meta": "from $189 · 2–3 hrs" } },
+        { "type": "service", "settings": { "group": "bay", "name": "Wheel Alignment", "meta": "from $99 · 60–90 min" } },
+        { "type": "service", "settings": { "group": "mobile", "name": "Tire Installation", "meta": "from $25 · 45–75 min" } },
+        { "type": "service", "settings": { "group": "mobile", "name": "Tire Balancing", "meta": "from $15 · 30–45 min" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

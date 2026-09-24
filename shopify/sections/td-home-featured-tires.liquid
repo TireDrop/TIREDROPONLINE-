@@ -1,0 +1,198 @@
+{% comment %}
+  Featured tires (React HomePage <FeaturedTires> + ProductCard), fed from a
+  real collection: the "tires" collection by default. With no collection or
+  no products the whole section renders nothing, so an empty catalog never
+  shows an empty grid.
+
+  Ported from ProductCard minus what the store cannot back up: no stars or
+  review counts, no dry/wet/tread-life scores, no struck-through list price
+  or "Save" line (there are no deals), no stock promises, and no compare
+  checkbox (the store has no compare tray). What is left comes from the
+  product itself: vendor, title, variant, price, availability.
+{% endcomment %}
+
+{%- liquid
+  assign c = section.settings.collection
+  if c == blank and section.settings.fallback_handle != blank
+    assign c = collections[section.settings.fallback_handle]
+  endif
+  assign show = false
+  if c != blank and c.products_count > 0
+    assign show = true
+  endif
+  assign set_size = section.settings.set_size | default: 4
+  assign phone_digits = section.settings.phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
+-%}
+
+{%- if show -%}
+{{ 'td-home.css' | asset_url | stylesheet_tag }}
+
+<section class="tdh tdh--fog tdh-pad td-feat" aria-labelledby="td-feat-{{ section.id }}">
+  <div class="tdh-wrap">
+    <div class="tdh-head tdh-head--action">
+      <div class="tdh-head__text">
+        {%- if section.settings.eyebrow != blank -%}<p class="tdh-eyebrow">{{ section.settings.eyebrow }}</p>{%- endif -%}
+        <h2 class="tdh-h2" id="td-feat-{{ section.id }}">{{ section.settings.heading }}</h2>
+      </div>
+      {%- if section.settings.action_label != blank -%}
+        <div class="tdh-head__action">
+          <a class="tdh-btn tdh-btn--outline tdh-btn--sm" href="{{ c.url }}">
+            {{ section.settings.action_label }}
+            {%- render 'td-home-icon', name: 'arrow-right', size: 15 -%}
+          </a>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <ul class="td-feat__grid" role="list">
+      {%- for product in c.products limit: section.settings.limit -%}
+        {%- assign v = product.selected_or_first_available_variant -%}
+        <li>
+          <article class="tdh-card td-pcard">
+            <a class="td-pcard__art" href="{{ product.url }}" tabindex="-1" aria-hidden="true">
+              {%- if product.featured_image -%}
+                {{ product.featured_image | image_url: width: 480 | image_tag: loading: 'lazy', class: 'td-pcard__img', alt: '', sizes: '(min-width: 1024px) 168px, 112px' }}
+              {%- else -%}
+                <img class="td-pcard__img" src="{{ 'td-home-tire.svg' | asset_url }}" alt="" width="168" height="140" loading="lazy">
+              {%- endif -%}
+            </a>
+
+            <div class="td-pcard__body">
+              <div class="td-pcard__head">
+              {%- if product.vendor != blank -%}<p class="tdh-eyebrow td-pcard__brand">{{ product.vendor }}</p>{%- endif -%}
+              <h3 class="td-pcard__title"><a href="{{ product.url }}">{{ product.title }}</a></h3>
+              {%- if v.title != 'Default Title' -%}
+                <p class="td-pcard__spec">{{ v.title }}</p>
+              {%- elsif product.type != blank -%}
+                <p class="td-pcard__spec">{{ product.type }}</p>
+              {%- endif -%}
+              </div>
+
+              <div class="td-pcard__price">
+                <div class="td-pcard__priceline">
+                  {%- if set_size > 1 -%}
+                    <span class="td-pcard__amount">{{ v.price | times: set_size | money }}</span>
+                    <span class="td-pcard__unit">set of {{ set_size }}</span>
+                  {%- else -%}
+                    <span class="td-pcard__amount">{{ v.price | money }}</span>
+                    <span class="td-pcard__unit">each</span>
+                  {%- endif -%}
+                </div>
+                {%- if set_size > 1 -%}<p class="td-pcard__each">{{ v.price | money }} each</p>{%- endif -%}
+                <p class="td-pcard__ship">
+                  {%- render 'td-home-icon', name: 'truck', size: 13 -%}
+                  <span>{{ section.settings.ship_note }}</span>
+                </p>
+                {%- unless product.available -%}
+                  <p class="td-pcard__stock">Sold out online — call us for a date</p>
+                {%- endunless -%}
+
+                <div class="td-pcard__actions">
+                  {%- if product.available -%}
+                    {%- form 'product', product, class: 'td-pcard__form' -%}
+                      <input type="hidden" name="id" value="{{ v.id }}">
+                      <input type="hidden" name="quantity" value="{{ set_size }}">
+                      <button type="submit" class="tdh-btn tdh-btn--primary tdh-btn--sm td-pcard__btn" aria-label="Add {% if set_size > 1 %}a set of {{ set_size }} {% endif %}{{ product.title | escape }} to the cart">
+                        {%- render 'td-home-icon', name: 'shopping-cart', size: 15 -%}
+                        {%- if set_size > 1 -%}
+                          <span class="td-pcard__short">Add {{ set_size }}</span><span class="td-pcard__long">Add set of {{ set_size }}</span>
+                        {%- else -%}
+                          Add to cart
+                        {%- endif -%}
+                      </button>
+                    {%- endform -%}
+                  {%- elsif section.settings.phone != blank -%}
+                    <a class="tdh-btn tdh-btn--primary tdh-btn--sm td-pcard__btn" href="tel:+1{{ phone_digits }}">
+                      {%- render 'td-home-icon', name: 'phone', size: 15 -%}
+                      Call {{ section.settings.phone }}
+                    </a>
+                  {%- endif -%}
+                  <a class="tdh-btn tdh-btn--outline tdh-btn--sm td-pcard__btn" href="{{ product.url }}" aria-label="View details for {{ product.title | escape }}">
+                    <span class="td-pcard__short">Details</span><span class="td-pcard__long">View Details</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </article>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .td-feat .td-feat__grid {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .75rem;
+  }
+  .td-feat .td-pcard { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+  .td-feat .td-pcard__art {
+    display: flex; align-items: center; justify-content: center; padding: .75rem;
+    border-bottom: 1px solid rgba(7,14,26,.05);
+    background: linear-gradient(to bottom, #FFFFFF, #F4F6FA);
+  }
+  .td-feat .td-pcard__img {
+    display: block; width: 112px; max-width: 100%; height: auto; aspect-ratio: 6 / 5; object-fit: contain;
+    transition: transform .3s ease;
+  }
+  .td-feat .td-pcard:hover .td-pcard__img { transform: scale(1.05); }
+  .td-feat .td-pcard__body { flex: 1; display: flex; flex-direction: column; padding: .75rem; }
+  .td-feat .td-pcard__brand { font-size: 11px; color: #586274; }
+  .td-feat .td-pcard__title { margin: .25rem 0 0; font-size: .9375rem; line-height: 1.2; }
+  .td-feat .td-pcard__title a { color: #070E1A; text-decoration: none; }
+  .td-feat .td-pcard__title a:hover { color: #0068E8; }
+  .td-feat .td-pcard__spec { margin: .25rem 0 0; font-size: 11px; line-height: 1.4; color: #586274; font-variant-numeric: tabular-nums; }
+  .td-feat .td-pcard__price { margin-top: auto; padding-top: .75rem; border-top: 1px solid rgba(7,14,26,.07); }
+  .td-feat .td-pcard__head { padding-bottom: .75rem; }
+  .td-feat .td-pcard__priceline { display: flex; flex-wrap: wrap; align-items: baseline; gap: .125rem .5rem; }
+  .td-feat .td-pcard__amount {
+    font-family: var(--font-heading--family, "Archivo", system-ui, sans-serif);
+    font-size: 1.375rem; font-weight: 700; line-height: 1; letter-spacing: -.02em; color: #070E1A;
+    font-variant-numeric: tabular-nums;
+  }
+  .td-feat .td-pcard__unit { font-size: 11px; text-transform: uppercase; letter-spacing: .09em; color: #586274; }
+  .td-feat .td-pcard__each { margin: .375rem 0 0; font-size: 11px; line-height: 1.4; color: #586274; font-variant-numeric: tabular-nums; }
+  .td-feat .td-pcard__ship { display: none; margin: .625rem 0 0; align-items: flex-start; gap: .375rem; font-size: 11px; line-height: 1.4; color: #586274; }
+  .td-feat .td-pcard__ship .td-home-icon { margin-top: 1px; flex-shrink: 0; }
+  .td-feat .td-pcard__stock { margin: .5rem 0 0; font-size: 11px; font-weight: 500; color: #586274; }
+  .td-feat .td-pcard__actions { margin-top: .625rem; display: flex; flex-direction: column; gap: .5rem; }
+  .td-feat .td-pcard__form { margin: 0; }
+  .td-feat .td-pcard__btn { width: 100%; padding-left: .5rem; padding-right: .5rem; }
+  .td-feat .td-pcard__long { display: none; }
+  @media (min-width: 640px) {
+    .td-feat .td-feat__grid { gap: 1rem; }
+    .td-feat .td-pcard__art { padding: 1.25rem; }
+    .td-feat .td-pcard__img { width: 168px; }
+    .td-feat .td-pcard__body { padding: 1rem; }
+    .td-feat .td-pcard__title { font-size: 1.0625rem; line-height: 1.15; }
+    .td-feat .td-pcard__spec { margin-top: .375rem; font-size: .75rem; }
+    .td-feat .td-pcard__amount { font-size: 1.75rem; }
+    .td-feat .td-pcard__ship { display: flex; }
+    .td-feat .td-pcard__actions { margin-top: .875rem; }
+    .td-feat .td-pcard__btn { padding-left: 1rem; padding-right: 1rem; }
+    .td-feat .td-pcard__short { display: none; }
+    .td-feat .td-pcard__long { display: inline; }
+  }
+  @media (min-width: 768px) { .td-feat .td-pcard__title { font-size: 1.15rem; } }
+  @media (min-width: 1024px) { .td-feat .td-feat__grid { grid-template-columns: repeat(4, minmax(0,1fr)); } }
+</style>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "TireDrop featured tires",
+  "tag": "div",
+  "settings": [
+    { "type": "collection", "id": "collection", "label": "Collection" },
+    { "type": "text", "id": "fallback_handle", "label": "Collection handle if none is picked", "default": "tires", "info": "The section hides itself when the collection has no products." },
+    { "type": "range", "id": "limit", "label": "Products to show", "min": 2, "max": 8, "step": 1, "default": 4 },
+    { "type": "range", "id": "set_size", "label": "Price as a set of", "min": 1, "max": 4, "step": 1, "default": 4, "info": "4 shows the set-of-four price and adds four to the cart. 1 shows the single-tire price." },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "In the catalog" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "A few sets to start with" },
+    { "type": "text", "id": "action_label", "label": "Button label", "default": "Shop all tires" },
+    { "type": "text", "id": "ship_note", "label": "Shipping line", "default": "Ships free to the lower 48" },
+    { "type": "text", "id": "phone", "label": "Phone number (sold-out items)", "default": "(954) 773-1896" }
+  ],
+  "presets": [{ "name": "TireDrop featured tires" }]
+}
+{% endschema %}

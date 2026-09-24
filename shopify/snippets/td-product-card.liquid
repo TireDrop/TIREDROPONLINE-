@@ -18,11 +18,11 @@
     render 'td-product-specs', product: product, variant: variant
   endcapture
   assign td_spec = td_specs | split: '~~'
-  assign kind = td_spec[0]
-  assign name = td_spec[1]
-  assign size = td_spec[2]
-  assign service = td_spec[3]
-  assign bolt = td_spec[4]
+  assign kind = td_spec[0] | strip
+  assign name = td_spec[1] | strip
+  assign size = td_spec[2] | strip
+  assign service = td_spec[3] | strip
+  assign bolt = td_spec[4] | strip
 
   assign set_qty = 1
   if kind == 'tire' or kind == 'wheel'
@@ -37,17 +37,19 @@
     assign saving = list_total | minus: headline
   endif
 
-  assign spec_line = ''
-  if size != ''
-    assign spec_line = size
-  endif
+  assign spec_line = size
   if service != ''
-    assign spec_line = spec_line | append: ' · ' | append: service
+    if spec_line != ''
+      assign spec_line = spec_line | append: ' · '
+    endif
+    assign spec_line = spec_line | append: service
   endif
   if bolt != ''
-    assign spec_line = spec_line | append: ' · ' | append: bolt
+    if spec_line != ''
+      assign spec_line = spec_line | append: ' · '
+    endif
+    assign spec_line = spec_line | append: bolt
   endif
-  assign spec_line = spec_line | remove_first: ' · '
   assign hl = heading_level | default: 3
   assign image = product.featured_image
 -%}

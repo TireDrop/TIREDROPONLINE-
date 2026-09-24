@@ -1,0 +1,579 @@
+{% comment %}
+  How shipping works — the Shopify port of src/pages/ShippingPage.jsx.
+
+  One section holds the whole page so the bands stay in React's order. Copy
+  lives in settings (headings, ledes) and blocks (cards, steps, FAQ), so it can
+  be edited in the theme editor. Dark bands pin their text to white.
+{% endcomment %}
+{%- liquid
+  assign ss = section.settings
+  assign phone = ss.phone | default: '(954) 773-1896'
+  assign phone_digits = phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
+  assign phone_href = 'tel:+1' | append: phone_digits
+-%}
+
+<div class="td-pg td-pg-ship" id="td-pg-{{ section.id }}">
+  <nav class="td-pg-crumbs" aria-label="Breadcrumb">
+    <ol class="td-pg-wrap">
+      <li><a href="{{ routes.root_url }}">Home</a></li>
+      <li>{% render 'td-pg-icon', name: 'chevron-right', size: 13 %}<span aria-current="page">{{ ss.crumb | default: 'How shipping works' }}</span></li>
+    </ol>
+  </nav>
+
+  <header class="td-pg-hero">
+    <div class="td-pg-wrap td-pg-hero__inner">
+      {%- if ss.hero_eyebrow != blank -%}<p class="td-pg-eyebrow">{{ ss.hero_eyebrow }}</p>{%- endif -%}
+      <h1>{{ ss.hero_heading }}</h1>
+      {%- if ss.hero_lede != blank -%}<p class="td-pg-hero__lede">{{ ss.hero_lede }}</p>{%- endif -%}
+      <div class="td-pg-hero__extra">
+        <div class="td-pg-btns">
+          {%- if ss.hero_cta1_label != blank -%}
+            <a class="td-pg-btn td-pg-btn--primary" href="{{ ss.hero_cta1_link | default: routes.all_products_collection_url }}">{{ ss.hero_cta1_label }}{% render 'td-pg-icon', name: 'arrow-right', size: 18 %}</a>
+          {%- endif -%}
+          {%- if ss.hero_cta2_label != blank -%}
+            <a class="td-pg-btn td-pg-btn--ghost" href="{{ ss.hero_cta2_link | default: '/pages/install' }}">{% render 'td-pg-icon', name: 'store', size: 18 %}{{ ss.hero_cta2_label }}</a>
+          {%- endif -%}
+        </div>
+        {%- assign checks = ss.hero_checks | newline_to_br | split: '<br />' -%}
+        <ul class="td-pg-checks">
+          {%- for c in checks -%}{%- assign c = c | strip -%}{%- if c != blank -%}
+            <li>{% render 'td-pg-icon', name: 'check', size: 14 %}{{ c }}</li>
+          {%- endif -%}{%- endfor -%}
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  {%- comment -%} ---------- Drop-ship model ---------- {%- endcomment -%}
+  <section class="td-pg-sec td-pg-sec--bone" aria-labelledby="td-pg-{{ section.id }}-model">
+    <div class="td-pg-wrap td-pg-ship__model">
+      <div class="td-pg-ship__model-text">
+        {%- if ss.model_eyebrow != blank -%}<p class="td-pg-eyebrow td-pg-eyebrow--plain">{{ ss.model_eyebrow }}</p>{%- endif -%}
+        <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-model">{{ ss.model_heading }}</h2>
+        {%- if ss.model_lede != blank -%}<p class="td-pg-lede td-pg-mt2">{{ ss.model_lede }}</p>{%- endif -%}
+        {%- if ss.model_body != blank -%}<p class="td-pg-body td-pg-mt2">{{ ss.model_body }}</p>{%- endif -%}
+      </div>
+      <ul class="td-pg-grid td-pg-ship__features">
+        {%- for block in section.blocks -%}{%- if block.type == 'feature' -%}
+          <li class="td-pg-card td-pg-card--pad" {{ block.shopify_attributes }}>
+            {% render 'td-pg-icon', name: block.settings.icon, size: 22, cls: 'td-pg-icon--lead' %}
+            <h3 class="td-pg-h3">{{ block.settings.title }}</h3>
+            <p class="td-pg-body td-pg-mt1">{{ block.settings.body | replace: '[phone]', phone | replace: phone, '<a href="PHONE_HREF">PHONE_TXT</a>' | replace: 'PHONE_HREF', phone_href | replace: 'PHONE_TXT', phone }}</p>
+          </li>
+        {%- endif -%}{%- endfor -%}
+      </ul>
+    </div>
+  </section>
+
+  {%- comment -%} ---------- Two delivery choices ---------- {%- endcomment -%}
+  <section class="td-pg-sec td-pg-sec--fog" aria-labelledby="td-pg-{{ section.id }}-choices">
+    <div class="td-pg-wrap">
+      <div class="td-pg-head td-pg-head--center"><div class="td-pg-head__text">
+        {%- if ss.choices_eyebrow != blank -%}<p class="td-pg-eyebrow">{{ ss.choices_eyebrow }}</p>{%- endif -%}
+        <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-choices">{{ ss.choices_heading }}</h2>
+        {%- if ss.choices_lede != blank -%}<p class="td-pg-lede">{{ ss.choices_lede }}</p>{%- endif -%}
+      </div></div>
+      <div class="td-pg-grid td-pg-grid--2">
+        {%- for block in section.blocks -%}{%- if block.type == 'choice' -%}
+          {%- assign bs = block.settings -%}
+          <div class="td-pg-card td-pg-card--pad td-pg-card--pad-lg td-pg-card--flex" {{ block.shopify_attributes }}>
+            <div class="td-pg-ship__choice-top">
+              {% render 'td-pg-icon', name: bs.icon, size: 26, cls: 'td-pg-icon--lead' %}
+              {%- if bs.badge != blank -%}<span class="td-pg-badge td-pg-badge--soft">{{ bs.badge }}</span>{%- endif -%}
+            </div>
+            <h3 class="td-pg-h3 td-pg-mt3">{{ bs.title }}</h3>
+            <p class="td-pg-body td-pg-mt1">{{ bs.body }}</p>
+            {%- assign pts = bs.points | newline_to_br | split: '<br />' -%}
+            <ul class="td-pg-ticks td-pg-mt3 td-pg-ship__points">
+              {%- for p in pts -%}{%- assign p = p | strip -%}{%- if p != blank -%}
+                <li>{% render 'td-pg-icon', name: 'check', size: 17 %}<span>{{ p }}</span></li>
+              {%- endif -%}{%- endfor -%}
+            </ul>
+            {%- if bs.cta_label != blank -%}
+              <a class="td-pg-btn td-pg-btn--outline td-pg-btn--sm td-pg-ship__choice-cta" href="{{ bs.cta_link | default: '#' }}">{{ bs.cta_label }}{% render 'td-pg-icon', name: 'arrow-right', size: 16 %}</a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}{%- endfor -%}
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ---------- Order flow ---------- {%- endcomment -%}
+  <section class="td-pg-sec td-pg-sec--bone" aria-labelledby="td-pg-{{ section.id }}-steps">
+    <div class="td-pg-wrap">
+      <div class="td-pg-head"><div class="td-pg-head__text">
+        {%- if ss.steps_eyebrow != blank -%}<p class="td-pg-eyebrow">{{ ss.steps_eyebrow }}</p>{%- endif -%}
+        <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-steps">{{ ss.steps_heading }}</h2>
+        {%- if ss.steps_lede != blank -%}<p class="td-pg-lede">{{ ss.steps_lede }}</p>{%- endif -%}
+      </div></div>
+      <ol class="td-pg-grid td-pg-grid--4">
+        {%- assign n = 0 -%}
+        {%- for block in section.blocks -%}{%- if block.type == 'step' -%}
+          {%- assign n = n | plus: 1 -%}
+          <li class="td-pg-card td-pg-card--pad td-pg-card--hover td-pg-card--flex td-pg-step" {{ block.shopify_attributes }}>
+            <div class="td-pg-step__top">
+              <span class="td-pg-step__icon">{% render 'td-pg-icon', name: block.settings.icon, size: 20 %}</span>
+              <span class="td-pg-step__num" aria-hidden="true">{% if n < 10 %}0{% endif %}{{ n }}</span>
+            </div>
+            <h3 class="td-pg-h3">{{ block.settings.title }}</h3>
+            <p class="td-pg-body td-pg-mt1">{{ block.settings.body }}</p>
+          </li>
+        {%- endif -%}{%- endfor -%}
+      </ol>
+    </div>
+  </section>
+
+  {%- comment -%} ---------- Coverage (dark) ---------- {%- endcomment -%}
+  <section class="td-pg-sec td-pg-sec--ink" aria-labelledby="td-pg-{{ section.id }}-cov">
+    <div class="td-pg-wrap td-pg-ship__cov">
+      <div>
+        {%- if ss.cov_eyebrow != blank -%}<p class="td-pg-eyebrow td-pg-eyebrow--plain">{{ ss.cov_eyebrow }}</p>{%- endif -%}
+        <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-cov">{{ ss.cov_heading }}</h2>
+        {%- if ss.cov_lede != blank -%}<p class="td-pg-lede td-pg-mt2">{{ ss.cov_lede }}</p>{%- endif -%}
+        {%- if ss.cov_body != blank -%}<p class="td-pg-body td-pg-mt2 td-pg-ship__cov-body">{{ ss.cov_body }}</p>{%- endif -%}
+        <div class="td-pg-btns td-pg-ship__cov-btns">
+          {%- if ss.cov_cta_label != blank -%}
+            <a class="td-pg-btn td-pg-btn--primary" href="{{ ss.cov_cta_link | default: '/pages/install' }}">{{ ss.cov_cta_label }}{% render 'td-pg-icon', name: 'arrow-right', size: 18 %}</a>
+          {%- endif -%}
+          <a class="td-pg-btn td-pg-btn--ghost" href="{{ phone_href }}">{% render 'td-pg-icon', name: 'phone', size: 18 %}{{ phone }}</a>
+        </div>
+      </div>
+      <div class="td-pg-panel td-pg-ship__costs">
+        <h3 class="td-pg-h3">{{ ss.costs_heading }}</h3>
+        {%- if ss.costs_body != blank -%}<p class="td-pg-body td-pg-mt2">{{ ss.costs_body }}</p>{%- endif -%}
+        {%- assign items = ss.costs_list | newline_to_br | split: '<br />' -%}
+        <ul class="td-pg-ship__costs-list">
+          {%- for it in items -%}{%- assign it = it | strip -%}{%- if it != blank -%}
+            <li>{% render 'td-pg-icon', name: 'check', size: 17 %}<span>{{ it }}</span></li>
+          {%- endif -%}{%- endfor -%}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ---------- When something goes wrong ---------- {%- endcomment -%}
+  <section class="td-pg-sec td-pg-sec--fog" aria-labelledby="td-pg-{{ section.id }}-wrong">
+    <div class="td-pg-wrap">
+      <div class="td-pg-head"><div class="td-pg-head__text">
+        {%- if ss.wrong_eyebrow != blank -%}<p class="td-pg-eyebrow">{{ ss.wrong_eyebrow }}</p>{%- endif -%}
+        <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-wrong">{{ ss.wrong_heading }}</h2>
+        {%- if ss.wrong_lede != blank -%}<p class="td-pg-lede">{{ ss.wrong_lede }}</p>{%- endif -%}
+      </div></div>
+      <div class="td-pg-grid td-pg-grid--3-lg">
+        {%- for block in section.blocks -%}{%- if block.type == 'problem' -%}
+          {%- assign bs = block.settings -%}
+          <div class="td-pg-card td-pg-card--pad td-pg-card--pad-lg" {{ block.shopify_attributes }}>
+            {% render 'td-pg-icon', name: bs.icon, size: 24, cls: 'td-pg-icon--lead' %}
+            <h3 class="td-pg-h3">{{ bs.title }}</h3>
+            {%- if bs.intro != blank -%}<p class="td-pg-body td-pg-mt2">{{ bs.intro }}</p>{%- endif -%}
+            {%- assign stp = bs.steps | newline_to_br | split: '<br />' -%}
+            {%- assign k = 0 -%}
+            {%- capture stp_html -%}
+              {%- for s in stp -%}{%- assign s = s | strip -%}{%- if s != blank -%}{%- assign k = k | plus: 1 -%}
+                <li><span class="td-pg-ship__n" aria-hidden="true">0{{ k }}</span><span>{{ s | replace: '[phone]', phone }}</span></li>
+              {%- endif -%}{%- endfor -%}
+            {%- endcapture -%}
+            {%- if k > 0 -%}<ol class="td-pg-ship__nums">{{ stp_html }}</ol>{%- endif -%}
+            {%- if bs.body != blank -%}<p class="td-pg-body td-pg-body--ink td-pg-mt2">{{ bs.body | replace: '[phone]', phone }}</p>{%- endif -%}
+          </div>
+        {%- endif -%}{%- endfor -%}
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ---------- FAQ ---------- {%- endcomment -%}
+  <section class="td-pg-sec td-pg-sec--bone" aria-labelledby="td-pg-{{ section.id }}-faq">
+    <div class="td-pg-wrap">
+      <div class="td-pg-head"><div class="td-pg-head__text">
+        {%- if ss.faq_eyebrow != blank -%}<p class="td-pg-eyebrow">{{ ss.faq_eyebrow }}</p>{%- endif -%}
+        <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-faq">{{ ss.faq_heading }}</h2>
+        {%- if ss.faq_lede != blank -%}<p class="td-pg-lede">{{ ss.faq_lede }}</p>{%- endif -%}
+      </div></div>
+      <div class="td-pg-faq">
+        {%- for block in section.blocks -%}{%- if block.type == 'faq' -%}
+          <details {{ block.shopify_attributes }}>
+            <summary>{{ block.settings.question }}{% render 'td-pg-icon', name: 'chevron-right', size: 18 %}</summary>
+            <p>{{ block.settings.answer | replace: '[phone]', phone }}</p>
+          </details>
+        {%- endif -%}{%- endfor -%}
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ---------- Closing CTA ---------- {%- endcomment -%}
+  <section class="td-pg-sec td-pg-sec--steel" aria-labelledby="td-pg-{{ section.id }}-cta">
+    <div class="td-pg-wrap td-pg-cta">
+      <div class="td-pg-cta__text">
+        {%- if ss.cta_eyebrow != blank -%}<p class="td-pg-eyebrow td-pg-eyebrow--plain">{{ ss.cta_eyebrow }}</p>{%- endif -%}
+        <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-cta">{{ ss.cta_heading }}</h2>
+        {%- if ss.cta_lede != blank -%}<p class="td-pg-lede">{{ ss.cta_lede }}</p>{%- endif -%}
+        {%- if ss.cta_meta != blank -%}<p class="td-pg-cta__meta">{% render 'td-pg-icon', name: 'map-pin', size: 14 %}{{ ss.cta_meta }}</p>{%- endif -%}
+      </div>
+      <div class="td-pg-btns">
+        {%- if ss.cta1_label != blank -%}
+          <a class="td-pg-btn td-pg-btn--primary" href="{{ ss.cta1_link | default: routes.all_products_collection_url }}">{{ ss.cta1_label }}{% render 'td-pg-icon', name: 'arrow-right', size: 18 %}</a>
+        {%- endif -%}
+        {%- if ss.cta2_label != blank -%}
+          <a class="td-pg-btn td-pg-btn--ghost" href="{{ ss.cta2_link | default: '/pages/install' }}">{% render 'td-pg-icon', name: 'store', size: 18 %}{{ ss.cta2_label }}</a>
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+</div>
+
+<style>
+  /* ---- TireDrop page kit (shared by the td-page-* sections; each carries its own copy) ---- */
+  .td-pg { color: #070E1A; font-family: var(--font-body--family, inherit); line-height: 1.5; }
+  /* Resets sit in :where() so they carry no specificity and never beat a component class. */
+  :where(.td-pg) *, :where(.td-pg) *::before, :where(.td-pg) *::after { box-sizing: border-box; }
+  :where(.td-pg) :where(h1, h2, h3, h4) {
+    font-family: var(--font-heading--family, inherit); font-weight: 800;
+    letter-spacing: -.018em; font-variation-settings: "wdth" 108; margin: 0; text-wrap: balance;
+  }
+  :where(.td-pg) :where(p, ul, ol, dl, dd, address, fieldset, legend) { margin: 0; }
+  :where(.td-pg) :where(ul, ol) { padding: 0; list-style: none; }
+  :where(.td-pg) a { color: inherit; }
+  .td-pg-icon { display: block; flex-shrink: 0; }
+  .td-pg-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .td-pg-wrap { max-width: 1280px; margin: 0 auto; padding: 0 1rem; }
+  .td-pg-sec { padding: 3.5rem 0; }
+  .td-pg-sec--bone { background: #FFFFFF; }
+  .td-pg-sec--fog { background: #F4F6FA; }
+  .td-pg-sec--ink { background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); color: #FFFFFF; }
+  .td-pg-sec--steel { background: #0B1524 linear-gradient(180deg, #14233A 0%, #0B1524 100%); color: #FFFFFF; }
+  .td-pg-sec--ink h2, .td-pg-sec--ink h3, .td-pg-sec--steel h2, .td-pg-sec--steel h3 { color: #FFFFFF; }
+
+  /* Breadcrumbs */
+  .td-pg-crumbs { background: #FFFFFF; border-bottom: 1px solid rgba(7,14,26,.1); }
+  .td-pg-crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: .375rem; padding: .5rem 0; font-size: .75rem; color: #586274; }
+  .td-pg-crumbs li { display: flex; align-items: center; gap: .375rem; }
+  .td-pg-crumbs a { display: flex; align-items: center; min-height: 32px; text-decoration: none; color: #586274; }
+  .td-pg-crumbs a:hover { color: #0068E8; }
+  .td-pg-crumbs .td-pg-icon { color: rgba(88,98,116,.5); }
+  .td-pg-crumbs [aria-current] { color: #070E1A; }
+
+  /* Hero */
+  .td-pg-hero { position: relative; overflow: hidden; color: #FFFFFF;
+    background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); }
+  .td-pg-hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(0,180,252,.35), transparent); }
+  .td-pg-hero__inner { position: relative; padding-top: 3.5rem; padding-bottom: 3.5rem; }
+  .td-pg-hero h1 { max-width: 56rem; font-size: 2.4rem; line-height: .98; color: #FFFFFF; }
+  .td-pg-hero__lede { margin-top: 1.25rem; max-width: 42rem; font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.7); }
+  .td-pg-hero__extra { margin-top: 2rem; }
+  .td-pg-checks { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 1.25rem; margin-top: 1.25rem; font-size: .75rem; color: rgba(255,255,255,.6); }
+  .td-pg-checks li { display: flex; align-items: center; gap: .375rem; }
+  .td-pg-checks .td-pg-icon { color: #F5A623; }
+
+  /* Eyebrows and headings */
+  .td-pg-eyebrow { display: flex; align-items: center; gap: .625rem; margin-bottom: .625rem;
+    font-family: var(--font-heading--family, inherit); font-size: .75rem; font-weight: 700;
+    letter-spacing: .09em; text-transform: uppercase; color: #0068E8; }
+  .td-pg-eyebrow::before { content: ""; display: block; width: 1.5rem; height: 1px; background: rgba(0,104,232,.45); flex-shrink: 0; }
+  .td-pg-eyebrow--plain::before { display: none; }
+  .td-pg-hero .td-pg-eyebrow, .td-pg-sec--ink .td-pg-eyebrow, .td-pg-sec--steel .td-pg-eyebrow { color: #00B4FC; }
+  .td-pg-hero .td-pg-eyebrow { margin-bottom: .75rem; }
+  .td-pg-hero .td-pg-eyebrow::before, .td-pg-sec--ink .td-pg-eyebrow::before, .td-pg-sec--steel .td-pg-eyebrow::before { background: rgba(0,180,252,.55); }
+  .td-pg-h2 { font-size: 1.9rem; line-height: 1.02; }
+  .td-pg-h3 { font-size: 1.2rem; line-height: 1.15; }
+  .td-pg-lede { font-size: 1.0625rem; line-height: 1.6; color: #586274; }
+  .td-pg-sec--ink .td-pg-lede, .td-pg-sec--steel .td-pg-lede { color: rgba(255,255,255,.72); }
+  .td-pg-body { font-size: .875rem; line-height: 1.625; color: #586274; }
+  .td-pg-body--ink { color: #070E1A; }
+  .td-pg-sec--ink .td-pg-body, .td-pg-sec--steel .td-pg-body { color: rgba(255,255,255,.7); }
+  .td-pg-body a, .td-pg-lede a { color: #0068E8; font-family: var(--font-heading--family, inherit); font-weight: 700; text-decoration: none; }
+  .td-pg-body a:hover, .td-pg-lede a:hover { color: #0053C4; }
+  .td-pg-sec--ink .td-pg-body a { color: #00B4FC; }
+  .td-pg-head { margin-bottom: 2rem; }
+  .td-pg-head__text { max-width: 42rem; }
+  .td-pg-head .td-pg-lede { margin-top: 1rem; max-width: 36rem; }
+  .td-pg-head--center { text-align: center; }
+  .td-pg-head--center .td-pg-head__text, .td-pg-head--center .td-pg-lede { margin-left: auto; margin-right: auto; }
+  .td-pg-head--center .td-pg-eyebrow { justify-content: center; }
+  .td-pg-head__action { margin-top: 1.5rem; }
+  .td-pg-mt1 { margin-top: .5rem; } .td-pg-mt2 { margin-top: 1rem; } .td-pg-mt3 { margin-top: 1.25rem; } .td-pg-mt4 { margin-top: 2rem; }
+
+  /* Buttons. 44px minimum height for touch, which is taller than React's 39px. */
+  .td-pg-btns { display: flex; flex-direction: column; gap: .75rem; }
+  .td-pg-btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    min-height: 44px; padding: .75rem 1.5rem; border-radius: 6px; border: 1px solid transparent;
+    font-family: var(--font-heading--family, inherit); font-size: .9375rem; font-weight: 700; line-height: 1;
+    letter-spacing: -.005em; text-decoration: none; cursor: pointer; text-align: center;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease; }
+  .td-pg-btn--primary { background: #0068E8; color: #FFFFFF !important; box-shadow: 0 4px 14px -2px rgba(0,104,232,.35); }
+  .td-pg-btn--primary:hover { background: #0053C4; box-shadow: none; }
+  .td-pg-btn--ghost { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.05); color: #FFFFFF !important; }
+  .td-pg-btn--ghost:hover { border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.1); }
+  .td-pg-btn--outline { border-color: rgba(7,14,26,.15); background: #FFFFFF; color: #070E1A !important;
+    box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .td-pg-btn--outline:hover { border-color: rgba(7,14,26,.3); background: #F4F6FA; }
+  .td-pg-btn--dark { background: #070E1A; color: #FFFFFF !important; }
+  .td-pg-btn--dark:hover { background: #101C2E; }
+  .td-pg-btn--sm { padding: .5rem 1rem; font-size: .8125rem; }
+  .td-pg a:focus-visible, .td-pg button:focus-visible, .td-pg summary:focus-visible,
+  .td-pg input:focus-visible, .td-pg select:focus-visible, .td-pg textarea:focus-visible {
+    outline: 2px solid #0068E8; outline-offset: 2px; }
+
+  /* Badges */
+  .td-pg-badge { display: inline-flex; align-items: center; flex-shrink: 0; padding: .25rem .5rem; border-radius: 6px;
+    font-family: var(--font-heading--family, inherit); font-size: .6875rem; font-weight: 700; line-height: 1;
+    letter-spacing: .09em; text-transform: uppercase; }
+  .td-pg-badge--drop { background: #0068E8; color: #FFFFFF; }
+  .td-pg-badge--soft { background: rgba(7,14,26,.06); color: #070E1A; box-shadow: inset 0 0 0 1px rgba(7,14,26,.1); }
+  .td-pg-badge--amber { background: #F5A623; color: #070E1A; }
+
+  /* Cards and grids */
+  .td-pg-card { position: relative; border-radius: 12px; border: 1px solid rgba(7,14,26,.07); background: #FFFFFF; color: #070E1A;
+    box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .td-pg-card--pad { padding: 1.5rem; }
+  .td-pg-card--hover { transition: transform .2s ease, box-shadow .2s ease; }
+  .td-pg-card--hover:hover { transform: translateY(-2px);
+    box-shadow: 0 0 0 1px rgba(7,14,26,.05), 0 2px 4px rgba(7,14,26,.06), 0 18px 38px -10px rgba(7,14,26,.20); }
+  .td-pg-card--flex { display: flex; flex-direction: column; }
+  .td-pg-card .td-pg-icon--lead { color: #0068E8; }
+  .td-pg-grid { display: grid; gap: 1.25rem; }
+  .td-pg-card h3 + .td-pg-body, .td-pg-card .td-pg-icon--lead + h3 { margin-top: .5rem; }
+  .td-pg-card .td-pg-icon--lead + h3 { margin-top: 1rem; }
+
+  /* Numbered step cards */
+  .td-pg-step__top { display: flex; align-items: center; justify-content: space-between; }
+  .td-pg-step__icon { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 6px; background: #070E1A; color: #FFFFFF; }
+  .td-pg-step__num { font-family: var(--font-heading--family, inherit); font-size: 2.25rem; font-weight: 400; line-height: 1; color: rgba(7,14,26,.1); }
+  .td-pg-step h3 { margin-top: 1.25rem; }
+
+  /* Tick lists */
+  .td-pg-ticks { display: grid; gap: .625rem; }
+  .td-pg-ticks li { display: flex; align-items: flex-start; gap: .625rem; font-size: .875rem; line-height: 1.625; }
+  .td-pg-ticks .td-pg-icon { margin-top: .1875rem; color: #0068E8; }
+
+  /* Inline callout: text left, button right from 640px */
+  .td-pg-callout { display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem; margin-top: 2rem; }
+  .td-pg-callout strong { font-family: var(--font-heading--family, inherit); font-size: .9375rem; color: #070E1A; }
+  .td-pg-callout .td-pg-btn { align-self: flex-start; flex-shrink: 0; }
+
+  /* Local notice strip */
+  .td-pg-notice { background: #EFF5FF; border-bottom: 1px solid rgba(7,14,26,.1); }
+  .td-pg-notice .td-pg-wrap { display: flex; align-items: flex-start; gap: .75rem; padding-top: 1rem; padding-bottom: 1rem; font-size: .875rem; line-height: 1.5; color: #586274; }
+  .td-pg-notice .td-pg-icon { color: #0068E8; margin-top: .0625rem; }
+  .td-pg-notice strong { font-family: var(--font-heading--family, inherit); color: #070E1A; }
+  .td-pg-notice a { color: #0068E8; text-decoration: underline; }
+  .td-pg-notice a:hover { color: #0053C4; }
+
+  /* Two-panel comparison. Each panel is a list, so it stacks naturally on a phone. */
+  .td-pg-vs__head { display: flex; align-items: center; gap: .5rem; padding: 1rem 1.5rem; border-radius: 12px 12px 0 0; }
+  .td-pg-vs__head h3 { font-size: 1.125rem; line-height: 1.3; }
+  .td-pg-vs__head--us { background: #0068E8; color: #FFFFFF; }
+  .td-pg-vs__head--us h3 { color: #FFFFFF; }
+  .td-pg-vs__head--them { background: rgba(7,14,26,.05); color: #586274; }
+  .td-pg-vs__head--them h3 { color: #586274; }
+  .td-pg-vs li { display: flex; align-items: flex-start; gap: .75rem; padding: 1rem 1.5rem; font-size: .875rem; line-height: 1.5; border-top: 1px solid rgba(7,14,26,.1); }
+  .td-pg-vs li:first-child { border-top: 0; }
+  .td-pg-vs--us .td-pg-icon { margin-top: .125rem; color: #0068E8; }
+  .td-pg-vs--them li { color: #586274; }
+  .td-pg-vs--them .td-pg-icon { margin-top: .125rem; color: rgba(88,98,116,.6); }
+
+  /* City chips */
+  .td-pg-chips { display: flex; flex-wrap: wrap; gap: .625rem; }
+  .td-pg-chips li { display: flex; align-items: center; gap: .375rem; padding: .5rem .875rem; border-radius: 6px;
+    border: 1px solid rgba(7,14,26,.1); background: #F4F6FA; font-family: var(--font-heading--family, inherit);
+    font-size: .875rem; font-weight: 700; color: #070E1A; }
+  .td-pg-chips .td-pg-icon { color: #0068E8; }
+
+  /* Hours */
+  .td-pg-hours { display: grid; gap: .5rem; margin-top: .75rem; font-size: .875rem; }
+  .td-pg-hours div { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-bottom: .5rem; border-bottom: 1px solid rgba(7,14,26,.1); }
+  .td-pg-hours div:last-child { border-bottom: 0; padding-bottom: 0; }
+  .td-pg-hours dt { font-family: var(--font-heading--family, inherit); font-weight: 700; color: #070E1A; }
+  .td-pg-hours dd { color: #586274; }
+
+  /* Dark panels inside ink/steel bands */
+  .td-pg-panel { border-radius: 12px; border: 1px solid #22344C; background: #0B1524 linear-gradient(180deg, #14233A 0%, #0B1524 100%); padding: 1.5rem; color: #FFFFFF; }
+  .td-pg-panel .td-pg-icon--lead { color: #00B4FC; }
+  .td-pg-panel h3 { margin-top: 1rem; }
+  .td-pg-panel .td-pg-hours div { border-bottom-color: #22344C; }
+  .td-pg-panel .td-pg-hours dt { color: #FFFFFF; font-weight: 600; }
+  .td-pg-panel .td-pg-hours dd { color: rgba(255,255,255,.65); }
+  .td-pg-panel address { margin-top: .5rem; font-style: normal; font-size: .875rem; line-height: 1.625; color: rgba(255,255,255,.7); }
+  .td-pg-link { display: inline-flex; align-items: center; gap: .375rem; min-height: 44px; margin-top: .5rem;
+    font-family: var(--font-heading--family, inherit); font-size: .875rem; font-weight: 700; text-decoration: none; color: #0068E8; }
+  .td-pg-link:hover { color: #0053C4; }
+  .td-pg-panel .td-pg-link { color: #00B4FC; }
+  .td-pg-panel .td-pg-link:hover { color: #FFFFFF; }
+
+  /* FAQ accordion */
+  .td-pg-faq { border-top: 1px solid rgba(7,14,26,.1); border-bottom: 1px solid rgba(7,14,26,.1); }
+  .td-pg-faq details { padding: .5rem 0; border-top: 1px solid rgba(7,14,26,.1); }
+  .td-pg-faq details:first-child { border-top: 0; }
+  .td-pg-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 44px;
+    cursor: pointer; list-style: none; font-family: var(--font-heading--family, inherit); font-size: 1.0625rem; font-weight: 700;
+    line-height: 1.375; letter-spacing: -.012em; color: #070E1A; transition: color .15s ease; }
+  .td-pg-faq summary::-webkit-details-marker { display: none; }
+  .td-pg-faq summary:hover { color: #0068E8; }
+  .td-pg-faq summary .td-pg-icon { color: #0068E8; transition: transform .2s ease; }
+  .td-pg-faq details[open] summary .td-pg-icon { transform: rotate(90deg); }
+  .td-pg-faq details p { margin-top: .5rem; padding-bottom: .5rem; font-size: .875rem; line-height: 1.625; color: #586274; }
+
+  /* Closing CTA band */
+  .td-pg-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 2rem; }
+  .td-pg-cta__text { max-width: 36rem; }
+  .td-pg-cta .td-pg-lede { margin-top: .75rem; }
+  .td-pg-cta__meta { display: flex; align-items: center; gap: .5rem; margin-top: 1rem; font-size: .75rem; color: rgba(255,255,255,.6); }
+  .td-pg-cta .td-pg-btns { width: 100%; }
+
+  @media (min-width: 640px) {
+    .td-pg-btns { flex-direction: row; flex-wrap: wrap; }
+    .td-pg-callout { flex-direction: row; align-items: center; justify-content: space-between; }
+    .td-pg-callout .td-pg-btn { align-self: center; }
+    .td-pg-grid--2-sm, .td-pg-grid--3, .td-pg-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 768px) {
+    .td-pg-wrap { padding: 0 2rem; }
+    .td-pg-sec { padding: 5rem 0; }
+    .td-pg-hero__inner { padding-top: 5rem; padding-bottom: 5rem; }
+    .td-pg-hero h1 { font-size: 4.25rem; }
+    .td-pg-hero__lede { font-size: 1.25rem; }
+    .td-pg-h2 { font-size: 3rem; }
+    .td-pg-h3 { font-size: 1.45rem; }
+    .td-pg-lede { font-size: 1.1875rem; }
+    .td-pg-head { margin-bottom: 3rem; }
+    .td-pg-head--action { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; }
+    .td-pg-head__action { margin-top: 0; flex-shrink: 0; }
+    .td-pg-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .td-pg-card--pad-lg { padding: 2rem; }
+    .td-pg-faq summary { font-size: 1.15rem; }
+  }
+  @media (min-width: 1024px) {
+    .td-pg-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .td-pg-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .td-pg-grid--3-lg { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .td-pg-cta { flex-direction: row; align-items: center; justify-content: space-between; }
+    .td-pg-cta .td-pg-btns { width: auto; flex-wrap: nowrap; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .td-pg-card--hover, .td-pg-faq summary .td-pg-icon, .td-pg-btn { transition: none; }
+    .td-pg-card--hover:hover { transform: none; }
+  }
+  /* ---- Shipping page only ---- */
+  .td-pg-ship__model { display: grid; gap: 2rem; }
+  .td-pg-ship__model-text { max-width: 42rem; }
+  .td-pg-ship__choice-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+  .td-pg-ship__points { flex: 1; align-content: start; }
+  .td-pg-ship__points li { color: #070E1A; }
+  .td-pg-ship__choice-cta { align-self: flex-start; margin-top: 1.75rem; }
+  .td-pg-ship__cov { display: grid; gap: 2rem; }
+  .td-pg-ship__cov-body { color: rgba(255,255,255,.62) !important; }
+  .td-pg-ship__cov-btns { margin-top: 1.75rem; }
+  .td-pg-ship__costs-list { display: grid; gap: .75rem; margin-top: 1.5rem; }
+  .td-pg-ship__costs-list li { display: flex; align-items: flex-start; gap: .75rem; padding-top: .75rem; border-top: 1px solid #22344C;
+    font-size: .875rem; line-height: 1.625; color: rgba(255,255,255,.82); }
+  .td-pg-ship__costs-list .td-pg-icon { margin-top: .1875rem; color: #00B4FC; }
+  .td-pg-ship__nums { display: grid; gap: .625rem; margin-top: 1.25rem; font-size: .875rem; line-height: 1.625; color: #070E1A; }
+  .td-pg-ship__nums li { display: flex; gap: .75rem; }
+  .td-pg-ship__n { font-family: var(--font-heading--family, inherit); font-weight: 500; color: #0068E8; }
+  .td-pg-ship .td-pg-grid--3-lg .td-pg-card:first-child .td-pg-icon--lead { color: #8A4F00; }
+  @media (min-width: 640px) {
+    .td-pg-ship__features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .td-pg-ship__features li:nth-child(3) { grid-column: span 2; }
+  }
+  @media (min-width: 768px) { .td-pg-ship__costs { padding: 2rem; } }
+  @media (min-width: 1024px) {
+    .td-pg-ship__model { grid-template-columns: 1.3fr 1fr; gap: 3rem; }
+    .td-pg-ship__features { grid-template-columns: 1fr; }
+    .td-pg-ship__features li:nth-child(3) { grid-column: auto; }
+    .td-pg-ship__cov { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3rem; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "TireDrop shipping page",
+  "tag": "div",
+  "class": "td-pg-section",
+  "settings": [
+    { "type": "text", "id": "phone", "label": "Phone number", "default": "(954) 773-1896", "info": "Written anywhere copy says [phone], and dialled by the call buttons." },
+    { "type": "text", "id": "crumb", "label": "Breadcrumb label", "default": "How shipping works" },
+    { "type": "header", "content": "Hero" },
+    { "type": "text", "id": "hero_eyebrow", "label": "Eyebrow", "default": "Shipping" },
+    { "type": "text", "id": "hero_heading", "label": "Heading", "default": "Ordered online. Shipped to your door." },
+    { "type": "textarea", "id": "hero_lede", "label": "Lede", "default": "TireDrop is an online tire and wheel store, so your order ships free, direct from the distributor warehouse, to anywhere in the continental United States. No storefront markup, no waiting on one shop's back room to restock." },
+    { "type": "text", "id": "hero_cta1_label", "label": "Primary button", "default": "Shop tires" },
+    { "type": "url", "id": "hero_cta1_link", "label": "Primary link" },
+    { "type": "text", "id": "hero_cta2_label", "label": "Secondary button", "default": "Ship to store instead" },
+    { "type": "url", "id": "hero_cta2_link", "label": "Secondary link" },
+    { "type": "textarea", "id": "hero_checks", "label": "Check marks (one per line)", "default": "Ships across the continental United States\nFree ship-to-store in South Florida\nPowered by Extreme Tires" },
+    { "type": "header", "content": "The short version" },
+    { "type": "text", "id": "model_eyebrow", "label": "Eyebrow", "default": "The short version" },
+    { "type": "text", "id": "model_heading", "label": "Heading", "default": "Your tires never sit in our building" },
+    { "type": "textarea", "id": "model_lede", "label": "Lede" },
+    { "type": "textarea", "id": "model_body", "label": "Body" },
+    { "type": "header", "content": "Delivery choices" },
+    { "type": "text", "id": "choices_eyebrow", "label": "Eyebrow", "default": "At checkout" },
+    { "type": "text", "id": "choices_heading", "label": "Heading", "default": "Two ways to take delivery" },
+    { "type": "textarea", "id": "choices_lede", "label": "Lede", "default": "You pick one at checkout. Everything else about the order stays the same." },
+    { "type": "header", "content": "Order flow" },
+    { "type": "text", "id": "steps_eyebrow", "label": "Eyebrow", "default": "After you order" },
+    { "type": "text", "id": "steps_heading", "label": "Heading", "default": "What happens next" },
+    { "type": "textarea", "id": "steps_lede", "label": "Lede", "default": "Four stages, and you hear from us at each one. No silent stretches where you are left wondering whether the order went through." },
+    { "type": "header", "content": "Coverage band" },
+    { "type": "text", "id": "cov_eyebrow", "label": "Eyebrow", "default": "Coverage" },
+    { "type": "text", "id": "cov_heading", "label": "Heading", "default": "Shipping is national. Installing is not." },
+    { "type": "textarea", "id": "cov_lede", "label": "Lede" },
+    { "type": "textarea", "id": "cov_body", "label": "Body" },
+    { "type": "text", "id": "cov_cta_label", "label": "Button", "default": "Local? Ship to the store" },
+    { "type": "url", "id": "cov_cta_link", "label": "Button link" },
+    { "type": "text", "id": "costs_heading", "label": "Panel heading", "default": "Shipping cost and dates, straight" },
+    { "type": "textarea", "id": "costs_body", "label": "Panel body" },
+    { "type": "textarea", "id": "costs_list", "label": "Panel list (one per line)" },
+    { "type": "header", "content": "If something goes wrong" },
+    { "type": "text", "id": "wrong_eyebrow", "label": "Eyebrow", "default": "If something goes wrong" },
+    { "type": "text", "id": "wrong_heading", "label": "Heading", "default": "Damaged, wrong, or out of stock" },
+    { "type": "textarea", "id": "wrong_lede", "label": "Lede" },
+    { "type": "header", "content": "FAQ" },
+    { "type": "text", "id": "faq_eyebrow", "label": "Eyebrow", "default": "Questions, answered" },
+    { "type": "text", "id": "faq_heading", "label": "Heading", "default": "Shipping FAQ" },
+    { "type": "textarea", "id": "faq_lede", "label": "Lede" },
+    { "type": "header", "content": "Closing band" },
+    { "type": "text", "id": "cta_eyebrow", "label": "Eyebrow", "default": "Tires shipped. Or installed." },
+    { "type": "text", "id": "cta_heading", "label": "Heading", "default": "Find your size, pick your delivery" },
+    { "type": "textarea", "id": "cta_lede", "label": "Lede" },
+    { "type": "text", "id": "cta_meta", "label": "Address line", "default": "7712 West Oakland Park Blvd, Sunrise, FL 33351 · Powered by Extreme Tires" },
+    { "type": "text", "id": "cta1_label", "label": "Primary button", "default": "Shop tires" },
+    { "type": "url", "id": "cta1_link", "label": "Primary link" },
+    { "type": "text", "id": "cta2_label", "label": "Secondary button", "default": "Ship to store" },
+    { "type": "url", "id": "cta2_link", "label": "Secondary link" }
+  ],
+  "blocks": [
+    { "type": "feature", "name": "Short-version card", "settings": [
+      {"type": "select", "id": "icon", "label": "Icon", "default": "check", "options": [{"value": "truck", "label": "Truck"}, {"value": "store", "label": "Store"}, {"value": "receipt", "label": "Receipt"}, {"value": "package-search", "label": "Package search"}, {"value": "package-check", "label": "Package check"}, {"value": "package-x", "label": "Package x"}, {"value": "boxes", "label": "Boxes"}, {"value": "shield-check", "label": "Shield check"}, {"value": "phone", "label": "Phone"}, {"value": "triangle-alert", "label": "Triangle alert"}, {"value": "map-pin", "label": "Map pin"}, {"value": "shopping-cart", "label": "Shopping cart"}, {"value": "calendar-check", "label": "Calendar check"}, {"value": "calendar-clock", "label": "Calendar clock"}, {"value": "wrench", "label": "Wrench"}, {"value": "home", "label": "Home"}, {"value": "check", "label": "Check"}, {"value": "circle-check", "label": "Circle check"}, {"value": "clock", "label": "Clock"}, {"value": "gauge", "label": "Gauge"}, {"value": "radio", "label": "Radio"}, {"value": "ruler", "label": "Ruler"}, {"value": "ban", "label": "Ban"}, {"value": "zap", "label": "Zap"}, {"value": "stethoscope", "label": "Stethoscope"}, {"value": "warehouse", "label": "Warehouse"}, {"value": "dollar-sign", "label": "Dollar sign"}, {"value": "tag", "label": "Tag"}, {"value": "info", "label": "Info"}]},
+      { "type": "text", "id": "title", "label": "Title" },
+      { "type": "textarea", "id": "body", "label": "Body", "info": "The phone number is linked automatically wherever it appears." }
+    ] },
+    { "type": "choice", "name": "Delivery choice", "settings": [
+      {"type": "select", "id": "icon", "label": "Icon", "default": "check", "options": [{"value": "truck", "label": "Truck"}, {"value": "store", "label": "Store"}, {"value": "receipt", "label": "Receipt"}, {"value": "package-search", "label": "Package search"}, {"value": "package-check", "label": "Package check"}, {"value": "package-x", "label": "Package x"}, {"value": "boxes", "label": "Boxes"}, {"value": "shield-check", "label": "Shield check"}, {"value": "phone", "label": "Phone"}, {"value": "triangle-alert", "label": "Triangle alert"}, {"value": "map-pin", "label": "Map pin"}, {"value": "shopping-cart", "label": "Shopping cart"}, {"value": "calendar-check", "label": "Calendar check"}, {"value": "calendar-clock", "label": "Calendar clock"}, {"value": "wrench", "label": "Wrench"}, {"value": "home", "label": "Home"}, {"value": "check", "label": "Check"}, {"value": "circle-check", "label": "Circle check"}, {"value": "clock", "label": "Clock"}, {"value": "gauge", "label": "Gauge"}, {"value": "radio", "label": "Radio"}, {"value": "ruler", "label": "Ruler"}, {"value": "ban", "label": "Ban"}, {"value": "zap", "label": "Zap"}, {"value": "stethoscope", "label": "Stethoscope"}, {"value": "warehouse", "label": "Warehouse"}, {"value": "dollar-sign", "label": "Dollar sign"}, {"value": "tag", "label": "Tag"}, {"value": "info", "label": "Info"}]},
+      { "type": "text", "id": "badge", "label": "Badge" },
+      { "type": "text", "id": "title", "label": "Title" },
+      { "type": "textarea", "id": "body", "label": "Body" },
+      { "type": "textarea", "id": "points", "label": "Points (one per line)" },
+      { "type": "text", "id": "cta_label", "label": "Button" },
+      { "type": "url", "id": "cta_link", "label": "Button link" }
+    ] },
+    { "type": "step", "name": "Order step", "settings": [
+      {"type": "select", "id": "icon", "label": "Icon", "default": "check", "options": [{"value": "truck", "label": "Truck"}, {"value": "store", "label": "Store"}, {"value": "receipt", "label": "Receipt"}, {"value": "package-search", "label": "Package search"}, {"value": "package-check", "label": "Package check"}, {"value": "package-x", "label": "Package x"}, {"value": "boxes", "label": "Boxes"}, {"value": "shield-check", "label": "Shield check"}, {"value": "phone", "label": "Phone"}, {"value": "triangle-alert", "label": "Triangle alert"}, {"value": "map-pin", "label": "Map pin"}, {"value": "shopping-cart", "label": "Shopping cart"}, {"value": "calendar-check", "label": "Calendar check"}, {"value": "calendar-clock", "label": "Calendar clock"}, {"value": "wrench", "label": "Wrench"}, {"value": "home", "label": "Home"}, {"value": "check", "label": "Check"}, {"value": "circle-check", "label": "Circle check"}, {"value": "clock", "label": "Clock"}, {"value": "gauge", "label": "Gauge"}, {"value": "radio", "label": "Radio"}, {"value": "ruler", "label": "Ruler"}, {"value": "ban", "label": "Ban"}, {"value": "zap", "label": "Zap"}, {"value": "stethoscope", "label": "Stethoscope"}, {"value": "warehouse", "label": "Warehouse"}, {"value": "dollar-sign", "label": "Dollar sign"}, {"value": "tag", "label": "Tag"}, {"value": "info", "label": "Info"}]},
+      { "type": "text", "id": "title", "label": "Title" },
+      { "type": "textarea", "id": "body", "label": "Body" }
+    ] },
+    { "type": "problem", "name": "Problem card", "settings": [
+      {"type": "select", "id": "icon", "label": "Icon", "default": "check", "options": [{"value": "truck", "label": "Truck"}, {"value": "store", "label": "Store"}, {"value": "receipt", "label": "Receipt"}, {"value": "package-search", "label": "Package search"}, {"value": "package-check", "label": "Package check"}, {"value": "package-x", "label": "Package x"}, {"value": "boxes", "label": "Boxes"}, {"value": "shield-check", "label": "Shield check"}, {"value": "phone", "label": "Phone"}, {"value": "triangle-alert", "label": "Triangle alert"}, {"value": "map-pin", "label": "Map pin"}, {"value": "shopping-cart", "label": "Shopping cart"}, {"value": "calendar-check", "label": "Calendar check"}, {"value": "calendar-clock", "label": "Calendar clock"}, {"value": "wrench", "label": "Wrench"}, {"value": "home", "label": "Home"}, {"value": "check", "label": "Check"}, {"value": "circle-check", "label": "Circle check"}, {"value": "clock", "label": "Clock"}, {"value": "gauge", "label": "Gauge"}, {"value": "radio", "label": "Radio"}, {"value": "ruler", "label": "Ruler"}, {"value": "ban", "label": "Ban"}, {"value": "zap", "label": "Zap"}, {"value": "stethoscope", "label": "Stethoscope"}, {"value": "warehouse", "label": "Warehouse"}, {"value": "dollar-sign", "label": "Dollar sign"}, {"value": "tag", "label": "Tag"}, {"value": "info", "label": "Info"}]},
+      { "type": "text", "id": "title", "label": "Title" },
+      { "type": "textarea", "id": "intro", "label": "Intro" },
+      { "type": "textarea", "id": "steps", "label": "Numbered steps (one per line, optional)" },
+      { "type": "textarea", "id": "body", "label": "Closing paragraph (optional)" }
+    ] },
+    { "type": "faq", "name": "FAQ", "settings": [
+      { "type": "text", "id": "question", "label": "Question" },
+      { "type": "textarea", "id": "answer", "label": "Answer" }
+    ] }
+  ],
+  "presets": [{ "name": "TireDrop shipping page" }]
+}
+{% endschema %}

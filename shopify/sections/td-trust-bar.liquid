@@ -20,18 +20,18 @@
 
 <style>
   .td-trust { border-bottom: 1px solid rgba(7,14,26,.1); }
-  .td-trust__list {
+  .td-trust .td-trust__list {
     display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
     gap: 1.75rem 1.25rem; list-style: none; margin: 0 auto; padding-top: 2rem; padding-bottom: 2rem;
   }
-  .td-trust__item { display: flex; flex-direction: column; gap: .5rem; }
-  .td-trust__title {
+  .td-trust .td-trust__item { display: flex; flex-direction: column; gap: .5rem; }
+  .td-trust .td-trust__title {
     font-size: 15px; line-height: 1.35; margin: 0; color: #070E1A; text-wrap: balance;
   }
-  .td-trust__copy { margin: 0; font-size: .75rem; line-height: 1.625; color: #586274; }
-  @media (min-width: 768px) { .td-trust__title { font-size: 1rem; } }
+  .td-trust .td-trust__copy { margin: 0; font-size: .75rem; line-height: 1.625; color: #586274; }
+  @media (min-width: 768px) { .td-trust .td-trust__title { font-size: 1rem; } }
   @media (min-width: 1024px) {
-    .td-trust__list { grid-template-columns: repeat(4, minmax(0,1fr)); column-gap: 2rem; }
+    .td-trust .td-trust__list { grid-template-columns: repeat(4, minmax(0,1fr)); column-gap: 2rem; }
   }
 </style>
 
@@ -72,7 +72,7 @@
         { "type": "promise", "settings": { "icon": "truck", "title": "Free shipping on every tire", "copy": "No minimum and no freight surcharge. The price on the tire is the price that ships." } },
         { "type": "promise", "settings": { "icon": "map-pin", "title": "Ships anywhere in the lower 48", "copy": "Any street address in the continental United States — home, work, or your own installer." } },
         { "type": "promise", "settings": { "icon": "store", "title": "Free ship-to-store & install", "copy": "Send the set to our Sunrise shop at no charge and book the fitting." } },
-        { "type": "promise", "settings": { "icon": "calendar-check", "title": "Fresh, DOT-dated rubber", "copy": "Shipped direct rather than pulled off a shelf, so nothing has been ageing in a warehouse." } }
+        { "type": "promise", "settings": { "icon": "calendar-check", "title": "Fresh, DOT-dated rubber", "copy": "Shipped direct rather than pulled off a back-room shelf, and the date code on the sidewall shows when it was made." } }
       ]
     }
   ]

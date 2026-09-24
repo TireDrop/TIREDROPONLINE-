@@ -1,0 +1,24 @@
+{%- comment -%}
+  The sort control for a collection or search results list. With script it
+  navigates on change and keeps the active filters; without script it is a
+  plain GET form that carries the active filters as hidden fields.
+  Params: results (collection or search), sort_by, id, action, extra_class
+{%- endcomment -%}
+<form class="td-sortform {{ extra_class }}" action="{{ action }}" method="get">
+  {%- for filter in results.filters -%}
+    {%- if filter.type == 'price_range' -%}
+      {%- if filter.min_value.value -%}<input type="hidden" name="{{ filter.min_value.param_name }}" value="{{ filter.min_value.value | divided_by: 100 }}">{%- endif -%}
+      {%- if filter.max_value.value -%}<input type="hidden" name="{{ filter.max_value.param_name }}" value="{{ filter.max_value.value | divided_by: 100 }}">{%- endif -%}
+    {%- else -%}
+      {%- for value in filter.active_values -%}<input type="hidden" name="{{ value.param_name }}" value="{{ value.value | escape }}">{%- endfor -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- if results.terms -%}<input type="hidden" name="q" value="{{ results.terms | escape }}"><input type="hidden" name="type" value="product">{%- endif -%}
+  <label class="td-sr" for="{{ id }}">Sort by</label>
+  <select class="td-shop-field" id="{{ id }}" name="sort_by" data-td-sort>
+    {%- for option in results.sort_options -%}
+      <option value="{{ option.value | escape }}"{% if option.value == sort_by %} selected{% endif %}>{{ option.name | escape }}</option>
+    {%- endfor -%}
+  </select>
+  <noscript><button type="submit" class="td-shop-btn td-shop-btn--outline td-shop-btn--sm">Sort</button></noscript>
+</form>

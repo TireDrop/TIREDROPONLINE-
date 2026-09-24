@@ -1,0 +1,13 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-collection",
+      "settings": {
+        "finder_link": "shopify://pages/find-my-tires",
+        "tire_band_link": "shopify://pages/shipping",
+        "wheel_band_link": "shopify://pages/install"
+      }
+    }
+  },
+  "order": ["main"]
+}
