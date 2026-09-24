@@ -20,6 +20,7 @@ import {
 import ProductCard from "../../components/shop/ProductCard.jsx";
 import { TIRES } from "../../data/products.js";
 import { BUSINESS } from "../../data/business.js";
+import { CONTACT_EMAIL, isWired, submitForm } from "../../data/forms.js";
 
 const FLEET_TIRES = TIRES.filter((t) => t.category === "Commercial");
 
@@ -94,6 +95,20 @@ function validate(form) {
   return errors;
 }
 
+// Read back verbatim when the quote could not be sent, so the list can go
+// down the phone instead of being typed a second time.
+function quoteDetails(form) {
+  return [
+    ["Company", form.company.trim()],
+    ["Contact", form.contact.trim()],
+    ["Phone", form.phone.trim()],
+    ["Email", form.email.trim()],
+    ["Fleet size", form.fleetSize],
+    ["Tire sizes", form.sizes.trim()],
+    ["Notes", form.message.trim()],
+  ].filter(([, value]) => value);
+}
+
 function FieldError({ id, message }) {
   if (!message) return null;
   return (
@@ -106,15 +121,24 @@ function FieldError({ id, message }) {
 export default function CommercialTiresPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
-  const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  // The submitForm outcome, kept whole rather than as a boolean: the
+  // confirmation may only promise a callback when `delivered` says the quote
+  // actually left the browser.
+  const [result, setResult] = useState(null);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (sending) return;
     const found = validate(form);
     setErrors(found);
-    if (Object.keys(found).length === 0) setSubmitted(true);
+    if (Object.keys(found).length > 0) return;
+
+    setSending(true);
+    setResult(await submitForm("fleet-quote", form));
+    setSending(false);
   };
 
   const describedBy = (key) => (errors[key] ? `${key}-error` : undefined);
@@ -184,45 +208,121 @@ export default function CommercialTiresPage() {
             <SectionHead
               eyebrow="Fleet quote"
               title="Request a quote"
-              lede="Tell us what you run and we will come back with per-tire pricing, delivery to your yard, and — if you are local — what it costs to have us fit them."
+              lede={
+                isWired()
+                  ? "Tell us what you run and we will come back with per-tire pricing, delivery to your yard, and — if you are local — what it costs to have us fit them."
+                  : "Tell us what you run, then call the list in — we will price it per tire, quote delivery to your yard, and, if you are local, what it costs to have us fit them."
+              }
             />
 
-            {submitted ? (
-              <div className="card border-l-4 border-l-drop p-8">
-                <CheckCircle2
-                  size={36}
-                  aria-hidden
-                  className="mb-4 text-drop"
-                />
-                <h3 className="h3">Quote request received</h3>
-                <p className="mt-2 text-sm leading-relaxed text-smoke">
-                  Thanks, {form.contact.trim() || "there"} — we have your
-                  details for {form.company.trim()}. A fleet specialist will
-                  follow up at {form.phone.trim()} or {form.email.trim()} during
-                  shop hours, usually the same business day.
-                </p>
-                <p className="mt-3 text-sm leading-relaxed text-smoke">
-                  Need it sooner? Call {BUSINESS.phone} and ask for fleet
-                  service.
-                </p>
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <a href={BUSINESS.phoneHref} className="btn-primary btn-sm">
-                    <Phone size={16} aria-hidden />
-                    {BUSINESS.phone}
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setForm(EMPTY_FORM);
-                      setErrors({});
-                      setSubmitted(false);
-                    }}
-                    className="btn-outline btn-sm"
-                  >
-                    Submit another vehicle list
-                  </button>
+            {result ? (
+              result.delivered ? (
+                <div
+                  className="card border-l-4 border-l-drop p-8"
+                  role="status"
+                >
+                  <CheckCircle2
+                    size={36}
+                    aria-hidden
+                    className="mb-4 text-drop"
+                  />
+                  <h3 className="h3">Quote request received</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-smoke">
+                    Thanks, {form.contact.trim() || "there"} — we have your
+                    details for {form.company.trim()}. A fleet specialist will
+                    follow up at {form.phone.trim()} or {form.email.trim()}{" "}
+                    during shop hours.
+                  </p>
+                  <p className="mt-3 text-sm leading-relaxed text-smoke">
+                    Need it sooner? Call {BUSINESS.phone} and ask for fleet
+                    service.
+                  </p>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <a href={BUSINESS.phoneHref} className="btn-primary btn-sm">
+                      <Phone size={16} aria-hidden />
+                      {BUSINESS.phone}
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setForm(EMPTY_FORM);
+                        setErrors({});
+                        setResult(null);
+                      }}
+                      className="btn-outline btn-sm"
+                    >
+                      Submit another vehicle list
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div
+                  className="card border-l-4 border-l-amber p-8"
+                  role="status"
+                >
+                  <Phone size={36} aria-hidden className="mb-4 text-drop" />
+                  <h3 className="h3">
+                    {result.error
+                      ? "That quote did not go through"
+                      : "Nothing was sent — call the list in"}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-smoke">
+                    {result.error
+                      ? `${result.error} Your list did not arrive, so nobody here is working on it.`
+                      : "This form does not reach an inbox yet, so nothing was sent and nobody at the shop has seen your list."}{" "}
+                    Call{" "}
+                    <a
+                      href={BUSINESS.phoneHref}
+                      className="font-display text-ink hover:text-drop"
+                    >
+                      {BUSINESS.phone}
+                    </a>{" "}
+                    during shop hours and ask for fleet service — that number
+                    reaches the counter, and we can price the list while you are
+                    on the line.
+                  </p>
+                  <p className="mt-3 text-sm leading-relaxed text-smoke">
+                    Everything you typed is here. Read it out or copy it across
+                    — you do not have to fill the form in again.
+                  </p>
+                  <dl className="mt-5 space-y-2 border-t border-ink/10 pt-5 text-sm">
+                    {quoteDetails(form).map(([label, value]) => (
+                      <div
+                        key={label}
+                        className="grid gap-0.5 sm:grid-cols-[112px_1fr] sm:gap-4"
+                      >
+                        <dt className="text-smoke">{label}</dt>
+                        <dd className="font-medium text-ink">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  {CONTACT_EMAIL && (
+                    <p className="mt-5 text-sm leading-relaxed text-smoke">
+                      Rather write it out? Send the same details to{" "}
+                      <a
+                        href={`mailto:${CONTACT_EMAIL}`}
+                        className="font-display text-ink hover:text-drop"
+                      >
+                        {CONTACT_EMAIL}
+                      </a>
+                      .
+                    </p>
+                  )}
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <a href={BUSINESS.phoneHref} className="btn-primary btn-sm">
+                      <Phone size={16} aria-hidden />
+                      {BUSINESS.phone}
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => setResult(null)}
+                      className="btn-outline btn-sm"
+                    >
+                      Edit these details
+                    </button>
+                  </div>
+                </div>
+              )
             ) : (
               <form
                 onSubmit={handleSubmit}
@@ -365,9 +465,10 @@ export default function CommercialTiresPage() {
 
                 <button
                   type="submit"
+                  disabled={sending}
                   className="btn-primary mt-6 w-full sm:w-auto"
                 >
-                  Request fleet quote
+                  {sending ? "Sending…" : "Request fleet quote"}
                 </button>
                 <p className="mt-3 text-xs text-smoke">
                   We use these details to price your quote and schedule service

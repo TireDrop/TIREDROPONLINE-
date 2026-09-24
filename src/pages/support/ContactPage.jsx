@@ -10,6 +10,7 @@ import {
   Phone,
 } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
+import { CONTACT_EMAIL, isWired, submitForm } from "../../data/forms.js";
 import {
   Breadcrumbs,
   PageHero,
@@ -81,7 +82,8 @@ function FieldError({ id, children }) {
 function ContactForm() {
   const [values, setValues] = useState(EMPTY);
   const [errors, setErrors] = useState({});
-  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState(null);
 
   const update = (field) => (event) => {
     const { value } = event.target;
@@ -90,49 +92,127 @@ function ContactForm() {
     setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const found = validate(values);
-    setErrors(found);
-    if (Object.keys(found).length === 0) setSent(true);
+  const startOver = () => {
+    setValues(EMPTY);
+    setResult(null);
   };
 
-  if (sent) {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (sending) return; // a second click must not fire a second send
+    const found = validate(values);
+    setErrors(found);
+    if (Object.keys(found).length > 0) return;
+
+    setSending(true);
+    const outcome = await submitForm("contact", values);
+    setSending(false);
+    setResult(outcome);
+  };
+
+  if (result) {
+    const firstName = values.name.split(" ")[0];
+
+    // Only a delivered message earns the confirmation that promises a reply.
+    if (result.delivered) {
+      return (
+        <div className="card border-l-4 border-l-drop p-8" role="status">
+          <CheckCircle2 size={34} aria-hidden className="mb-4 text-drop" />
+          <h3 className="h3">Message received, {firstName}.</h3>
+          <p className="mt-3 text-sm leading-relaxed text-smoke">
+            Thanks for reaching out about{" "}
+            <span className="text-ink">{values.subject.toLowerCase()}</span>. A
+            real person reads these during the hours listed on this page, and
+            will reply at {values.email} or {values.phone}. We do not put a
+            clock on that, because we would rather answer properly than answer
+            fast.
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-smoke">
+            If the car is down right now, or your order needs changing before it
+            ships, do not wait on the reply — the phone is the only channel we
+            treat as urgent. Call{" "}
+            <a href={BUSINESS.phoneHref} className="text-drop underline">
+              {BUSINESS.phone}
+            </a>{" "}
+            and we will pull it up on the spot.
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a href={BUSINESS.phoneHref} className="btn-primary btn-sm">
+              <Phone size={16} aria-hidden />
+              Call the shop
+            </a>
+            <button
+              type="button"
+              className="btn-outline btn-sm"
+              onClick={startOver}
+            >
+              Send another message
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div className="card border-l-4 border-l-drop p-8" role="status">
-        <CheckCircle2 size={34} aria-hidden className="mb-4 text-drop" />
-        <h3 className="h3">Message received, {values.name.split(" ")[0]}.</h3>
+      <div className="card border-l-4 border-l-amber p-8" role="status">
+        <Phone size={34} aria-hidden className="mb-4 text-drop" />
+        <h3 className="h3">
+          {result.error
+            ? `We could not get that through just now, ${firstName}.`
+            : `Nothing was sent, ${firstName} — call us instead.`}
+        </h3>
         <p className="mt-3 text-sm leading-relaxed text-smoke">
-          Thanks for reaching out about{" "}
-          <span className="text-ink">{values.subject.toLowerCase()}</span>. A
-          real person reads these during the hours listed on this page, and will
-          reply at {values.email} or {values.phone}. We do not put a clock on
-          that, because we would rather answer properly than answer fast.
+          {result.error
+            ? "Your message did not leave this page, so nobody here has read it. Rather than let you wait on an answer that is not coming, here is the channel that works."
+            : "Being straight with you: this form is not connected to an inbox yet, so your message was not sent anywhere. The phone reaches the same people it would have gone to."}
         </p>
         <p className="mt-3 text-sm leading-relaxed text-smoke">
-          If the car is down right now, or your order needs changing before it
-          ships, do not wait on the reply — the phone is the only channel we
-          treat as urgent. Call{" "}
+          Call{" "}
           <a href={BUSINESS.phoneHref} className="text-drop underline">
             {BUSINESS.phone}
           </a>{" "}
-          and we will pull it up on the spot.
+          during the hours listed on this page and ask about{" "}
+          <span className="text-ink">{values.subject.toLowerCase()}</span>. What
+          you wrote is below — read it out, or copy it across, rather than
+          typing it again.
+          {CONTACT_EMAIL ? ` You can also send it to ${CONTACT_EMAIL}.` : ""}
         </p>
+
+        <dl className="mt-6 space-y-3 border-t border-ink/10 pt-5 text-sm">
+          <div>
+            <dt className="label">Name</dt>
+            <dd className="text-ink">{values.name}</dd>
+          </div>
+          <div>
+            <dt className="label">Phone</dt>
+            <dd className="text-ink">{values.phone}</dd>
+          </div>
+          <div>
+            <dt className="label">Email</dt>
+            <dd className="text-ink">{values.email}</dd>
+          </div>
+          <div>
+            <dt className="label">About</dt>
+            <dd className="text-ink">{values.subject}</dd>
+          </div>
+          <div>
+            <dt className="label">Message</dt>
+            <dd className="whitespace-pre-wrap text-ink">{values.message}</dd>
+          </div>
+        </dl>
 
         <div className="mt-6 flex flex-wrap gap-3">
           <a href={BUSINESS.phoneHref} className="btn-primary btn-sm">
             <Phone size={16} aria-hidden />
-            Call the shop
+            Call {BUSINESS.phone}
           </a>
           <button
             type="button"
             className="btn-outline btn-sm"
-            onClick={() => {
-              setValues(EMPTY);
-              setSent(false);
-            }}
+            onClick={startOver}
           >
-            Send another message
+            Clear and start over
           </button>
         </div>
       </div>
@@ -268,8 +348,12 @@ function ContactForm() {
         </div>
       </div>
 
-      <button type="submit" className="btn-primary mt-7 w-full sm:w-auto">
-        Send Message
+      <button
+        type="submit"
+        className="btn-primary mt-7 w-full sm:w-auto"
+        disabled={sending}
+      >
+        {sending ? "Sending…" : "Send Message"}
       </button>
 
       <p className="mt-4 text-xs leading-relaxed text-smoke">
@@ -352,8 +436,10 @@ export default function ContactPage() {
                 <p className="mt-3 text-xs leading-relaxed text-smoke">
                   A dedicated {BUSINESS.name} email address is being set up and
                   will be published here once it is live. Until then the phone
-                  is the channel that reaches a person, and the form below
-                  reaches the same people.
+                  is the channel that reaches a person
+                  {isWired()
+                    ? ", and the form below reaches the same people."
+                    : " — the form below is not connected to an inbox yet."}
                 </p>
               </li>
 
@@ -428,7 +514,11 @@ export default function ContactPage() {
             <SectionHead
               eyebrow="Message Us"
               title="Not urgent? Write it down."
-              lede="Include an order number if you have one. Messages sent outside business hours get picked up the next morning we are open. If it is urgent, call instead — the form is not monitored around the clock."
+              lede={
+                isWired()
+                  ? "Include an order number if you have one. Messages sent outside business hours get picked up the next morning we are open. If it is urgent, call instead — the form is not monitored around the clock."
+                  : "Include an order number if you have one. This form is not connected to an inbox yet, so it will lay out what to tell us rather than send it — the phone is the channel that reaches a person."
+              }
             />
             <ContactForm />
           </div>

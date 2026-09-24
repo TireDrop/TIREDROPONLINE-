@@ -13,6 +13,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
+import { CONTACT_EMAIL, isWired, submitForm } from "../../data/forms.js";
 import {
   Accordion,
   Badge,
@@ -197,7 +198,8 @@ function FieldError({ id, children }) {
 function ApplicationForm() {
   const [values, setValues] = useState(EMPTY);
   const [errors, setErrors] = useState({});
-  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState(null);
 
   const update = (field) => (event) => {
     const { value } = event.target;
@@ -205,44 +207,123 @@ function ApplicationForm() {
     setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const found = validate(values);
-    setErrors(found);
-    if (Object.keys(found).length === 0) setSent(true);
+  const startOver = () => {
+    setValues(EMPTY);
+    setResult(null);
   };
 
-  if (sent) {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (sending) return; // a second click must not fire a second send
+    const found = validate(values);
+    setErrors(found);
+    if (Object.keys(found).length > 0) return;
+
+    setSending(true);
+    const outcome = await submitForm("financing", values);
+    setSending(false);
+    setResult(outcome);
+  };
+
+  if (result) {
+    const firstName = values.name.split(" ")[0];
+
+    // Only a delivered request earns the confirmation that promises a call.
+    if (result.delivered) {
+      return (
+        <div className="card border-l-4 border-l-drop p-6 md:p-8" role="status">
+          <CheckCircle2 size={34} aria-hidden className="mb-4 text-drop" />
+          <h3 className="h3">Request received.</h3>
+          <p className="mt-3 text-sm leading-relaxed text-smoke">
+            Thanks, {firstName}. Someone will call you at {values.phone} during
+            the hours the shop is open, to confirm what you are buying, price it
+            properly, and point you to whichever financing program is running.
+            If you would rather not wait for the call, the number below reaches
+            the same people.
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-smoke">
+            This is not an application and it is not an approval — it only
+            starts the conversation. Any credit decision is made by a
+            third-party lender under their own terms.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a href={BUSINESS.phoneHref} className="btn-primary btn-sm">
+              <Phone size={16} aria-hidden />
+              Call instead
+            </a>
+            <button
+              type="button"
+              className="btn-outline btn-sm"
+              onClick={startOver}
+            >
+              Start over
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div className="card border-l-4 border-l-drop p-6 md:p-8" role="status">
-        <CheckCircle2 size={34} aria-hidden className="mb-4 text-drop" />
-        <h3 className="h3">Request received.</h3>
+      <div className="card border-l-4 border-l-amber p-6 md:p-8" role="status">
+        <Phone size={34} aria-hidden className="mb-4 text-drop" />
+        <h3 className="h3">
+          {result.error
+            ? `We could not get that through just now, ${firstName}.`
+            : `Nothing was sent, ${firstName} — start it on the phone.`}
+        </h3>
         <p className="mt-3 text-sm leading-relaxed text-smoke">
-          Thanks, {values.name.split(" ")[0]}. Someone will call you at{" "}
-          {values.phone} during the hours the shop is open, to confirm what you
-          are buying, price it properly, and point you to whichever financing
-          program is running. If you would rather not wait for the call, the
-          number below reaches the same people.
+          {result.error
+            ? "Your request did not leave this page, so no call is queued. Do not sit waiting on one — one phone call gets you the same conversation."
+            : "Being straight with you: this form is not connected to an inbox yet, so your request was not sent anywhere and no call is queued. The phone reaches the same people it would have gone to."}
         </p>
         <p className="mt-3 text-sm leading-relaxed text-smoke">
-          This is not an application and it is not an approval — it only starts
-          the conversation. Any credit decision is made by a third-party lender
-          under their own terms.
+          Call{" "}
+          <a href={BUSINESS.phoneHref} className="text-drop underline">
+            {BUSINESS.phone}
+          </a>{" "}
+          during the hours the shop is open and whoever answers can price the
+          order properly and tell you which financing program is running that
+          day. What you filled in is below — read it out, or copy it across,
+          rather than typing it again.
+          {CONTACT_EMAIL ? ` You can also send it to ${CONTACT_EMAIL}.` : ""}
         </p>
+
+        <dl className="mt-6 space-y-3 border-t border-ink/10 pt-5 text-sm">
+          <div>
+            <dt className="label">Name</dt>
+            <dd className="text-ink">{values.name}</dd>
+          </div>
+          <div>
+            <dt className="label">Phone</dt>
+            <dd className="text-ink">{values.phone}</dd>
+          </div>
+          <div>
+            <dt className="label">Email</dt>
+            <dd className="text-ink">{values.email}</dd>
+          </div>
+          <div>
+            <dt className="label">Amount needed</dt>
+            <dd className="text-ink">${values.amount}</dd>
+          </div>
+        </dl>
+
+        <p className="mt-5 text-sm leading-relaxed text-smoke">
+          Either way, none of this was an application and none of it was an
+          approval. Any credit decision is made by a third-party lender under
+          their own terms.
+        </p>
+
         <div className="mt-6 flex flex-wrap gap-3">
           <a href={BUSINESS.phoneHref} className="btn-primary btn-sm">
             <Phone size={16} aria-hidden />
-            Call instead
+            Call {BUSINESS.phone}
           </a>
           <button
             type="button"
             className="btn-outline btn-sm"
-            onClick={() => {
-              setValues(EMPTY);
-              setSent(false);
-            }}
+            onClick={startOver}
           >
-            Start over
+            Clear and start over
           </button>
         </div>
       </div>
@@ -253,8 +334,10 @@ function ApplicationForm() {
     <form noValidate onSubmit={handleSubmit} className="card p-6 md:p-8">
       <h3 className="h3 mb-1">Start a financing conversation</h3>
       <p className="mb-6 text-sm text-smoke">
-        This goes to us, not to a lender. No credit check happens here. All
-        fields are required.
+        {isWired()
+          ? "This goes to us, not to a lender."
+          : "Nothing here goes to a lender, and this form is not connected to an inbox yet — it lays out what to tell us on the phone."}{" "}
+        No credit check happens here. All fields are required.
       </p>
 
       <div className="grid gap-5 sm:grid-cols-2">
@@ -346,8 +429,12 @@ function ApplicationForm() {
         </div>
       </div>
 
-      <button type="submit" className="btn-primary mt-7 w-full sm:w-auto">
-        Send Request
+      <button
+        type="submit"
+        className="btn-primary mt-7 w-full sm:w-auto"
+        disabled={sending}
+      >
+        {sending ? "Sending…" : "Send Request"}
       </button>
     </form>
   );
@@ -588,7 +675,11 @@ export default function FinancingPage() {
             <SectionHead
               eyebrow="Get Started"
               title="Tell us what you need covered"
-              lede="Send this over and we will call you with a real price for the order and whatever financing options are running that week."
+              lede={
+                isWired()
+                  ? "Send this over and we will call you with a real price for the order and whatever financing options are running that week."
+                  : "Fill this in, then call it through — whoever answers can give you a real price for the order and whatever financing options are running that week."
+              }
             />
 
             <ul className="space-y-4">
@@ -607,10 +698,12 @@ export default function FinancingPage() {
                 />
                 <p className="text-sm leading-relaxed text-smoke">
                   <span className="text-ink">
-                    We call during business hours.
+                    We talk during business hours.
                   </span>{" "}
-                  Sent at night or on Sunday? You will hear from us the next day
-                  we are open. Eastern time.
+                  {isWired()
+                    ? "Sent at night or on Sunday? You will hear from us the next day we are open."
+                    : "Reading this at night or on a Sunday? The line opens again the next day we are open."}{" "}
+                  Eastern time.
                 </p>
               </li>
               <li className="card flex gap-4 p-5">

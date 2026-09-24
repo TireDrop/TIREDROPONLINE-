@@ -17,6 +17,7 @@ import {
 
 import { Badge, PageHero, Section, Seo } from "../../components/ui/index.jsx";
 import { BUSINESS } from "../../data/business.js";
+import { CONTACT_EMAIL, isWired, submitForm } from "../../data/forms.js";
 import { SERVICES, getService } from "../../data/services.js";
 
 const STEP_LABELS = ["Service", "Vehicle", "Location", "Time", "Contact"];
@@ -261,23 +262,39 @@ function SummaryRow({ term, children }) {
   );
 }
 
-/** Read-only recap of every answer, shown before submit and again after. */
-function BookingSummary({ form }) {
+/**
+ * Read-only recap of every answer, shown before submit and again after.
+ *
+ * `callOrder` leads with the appointment rather than the service: when nothing
+ * was sent, this recap is a script the visitor reads down the phone, and the
+ * day and window are what the person on the other end needs first.
+ */
+function BookingSummary({ form, callOrder = false }) {
   const service = getService(form.service);
   const windowLabel = TIME_WINDOWS.find((w) => w.value === form.window)?.label;
 
-  return (
-    <dl>
-      <SummaryRow term="Service">
+  const rows = {
+    when: (
+      <SummaryRow key="when" term="When">
+        {formatLongDate(form.date)}
+        {windowLabel && ` · ${windowLabel}`}
+      </SummaryRow>
+    ),
+    service: (
+      <SummaryRow key="service" term="Service">
         {service
           ? `${service.name} — from $${service.priceFrom} ${service.priceUnit}`
           : "—"}
       </SummaryRow>
-      <SummaryRow term="Vehicle">
+    ),
+    vehicle: (
+      <SummaryRow key="vehicle" term="Vehicle">
         {[form.year, form.make, form.model].filter(Boolean).join(" ")}
         {form.tireSize && ` · ${form.tireSize}`}
       </SummaryRow>
-      <SummaryRow term="Where">
+    ),
+    where: (
+      <SummaryRow key="where" term="Where">
         {form.locationType === "mobile" ? (
           <>
             We come to you — {form.address}, {form.city}, {BUSINESS.shop.state}{" "}
@@ -292,19 +309,27 @@ function BookingSummary({ form }) {
           <>At the shop — {BUSINESS.shop.full}</>
         )}
       </SummaryRow>
-      <SummaryRow term="When">
-        {formatLongDate(form.date)}
-        {windowLabel && ` · ${windowLabel}`}
-      </SummaryRow>
-      <SummaryRow term="Contact">
+    ),
+    contact: (
+      <SummaryRow key="contact" term="Contact">
         {form.name}
         <span className="block text-smoke">
           {form.phone} · {form.email}
         </span>
       </SummaryRow>
-      {form.notes && <SummaryRow term="Notes">{form.notes}</SummaryRow>}
-    </dl>
-  );
+    ),
+    notes: form.notes ? (
+      <SummaryRow key="notes" term="Notes">
+        {form.notes}
+      </SummaryRow>
+    ) : null,
+  };
+
+  const order = callOrder
+    ? ["when", "service", "vehicle", "where", "contact", "notes"]
+    : ["service", "vehicle", "where", "when", "contact", "notes"];
+
+  return <dl>{order.map((key) => rows[key])}</dl>;
 }
 
 export default function SchedulePage() {
@@ -321,7 +346,11 @@ export default function SchedulePage() {
   });
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState({});
-  const [reference, setReference] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  // Null until the form is sent, then { delivered, error, reference }. The
+  // reference is only minted once the booking actually left the browser — a
+  // number for a request nobody received is worse than no number at all.
+  const [submission, setSubmission] = useState(null);
 
   const headingRef = useRef(null);
   const mounted = useRef(false);
@@ -334,7 +363,7 @@ export default function SchedulePage() {
       return;
     }
     headingRef.current?.focus();
-  }, [step, reference]);
+  }, [step, submission]);
 
   const service = getService(form.service);
   const lockedToShop = Boolean(service && !service.mobile);
@@ -382,8 +411,11 @@ export default function SchedulePage() {
     setStep((s) => Math.max(s - 1, 1));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
+    // Enter on any field of the last step submits, so without this guard a
+    // second press while the first is in flight books the job twice.
+    if (submitting) return;
     // Re-check every step so nothing slips through via keyboard navigation.
     const all = [1, 2, 3, 4, 5].reduce(
       (acc, n) => ({ ...acc, ...validateStep(n, form) }),
@@ -399,11 +431,17 @@ export default function SchedulePage() {
       return;
     }
     setErrors({});
-    setReference(makeReference());
+    setSubmitting(true);
+    const outcome = await submitForm("booking", form);
+    setSubmitting(false);
+    setSubmission({
+      ...outcome,
+      reference: outcome.delivered ? makeReference() : null,
+    });
   }
 
-  /* ---------------- Confirmation ---------------- */
-  if (reference) {
+  /* ---------------- Confirmation: the booking was sent ---------------- */
+  if (submission?.delivered) {
     return (
       <>
         <Seo
@@ -413,11 +451,11 @@ export default function SchedulePage() {
         <PageHero
           eyebrow="You're on the schedule"
           title="Appointment requested"
-          lede="We have your request. A dispatcher confirms your two-hour window by phone, usually the same business day."
+          lede="We have your request. A dispatcher confirms your two-hour window by phone."
         />
         <Section className="bg-fog">
           <div className="mx-auto max-w-2xl">
-            <div className="card p-6 md:p-8">
+            <div className="card p-6 md:p-8" role="status">
               <h2
                 ref={headingRef}
                 tabIndex={-1}
@@ -430,7 +468,7 @@ export default function SchedulePage() {
               <div className="mt-5 rounded-card bg-ink-wash px-5 py-5 text-bone">
                 <p className="label mb-1.5 text-volt">Reference number</p>
                 <p className="font-display text-3xl tracking-tight">
-                  {reference}
+                  {submission.reference}
                 </p>
                 <p className="mt-2 text-xs text-bone/60">
                   Keep this handy — it is the fastest way for us to pull up your
@@ -494,6 +532,102 @@ export default function SchedulePage() {
     );
   }
 
+  /* ---------------- Confirmation: nothing was sent ---------------- */
+  // No dispatcher knows this booking exists, so the page says so and turns
+  // itself into something the visitor can read down the phone instead.
+  if (submission) {
+    return (
+      <>
+        <Seo
+          title="Finish Your Booking by Phone"
+          description={`Your appointment details and the number to call at ${BUSINESS.parent} to get them on the schedule.`}
+        />
+        <PageHero
+          eyebrow="Not booked yet"
+          title="Finish this by phone"
+          lede={`Nobody at the shop has seen this yet. Call ${BUSINESS.phone}, read out the details below, and you are on the schedule. It takes about a minute.`}
+        />
+        <Section className="bg-fog">
+          <div className="mx-auto max-w-2xl">
+            <div className="card p-6 md:p-8" role="status">
+              <h2
+                ref={headingRef}
+                tabIndex={-1}
+                className="flex items-center gap-2.5 font-display text-2xl focus:outline-none"
+              >
+                <Phone size={24} aria-hidden className="text-drop" />
+                Call to book it
+              </h2>
+
+              <div className="mt-5 rounded-card bg-ink-wash px-5 py-5 text-bone">
+                <p className="label mb-1.5 text-volt">Call the shop</p>
+                <a
+                  href={BUSINESS.phoneHref}
+                  className="font-display text-3xl tracking-tight hover:text-volt"
+                >
+                  {BUSINESS.phone}
+                </a>
+                <p className="mt-2 text-xs text-bone/60">
+                  {BUSINESS.hours
+                    .map((row) => `${row.days} ${row.time}`)
+                    .join(" · ")}
+                </p>
+              </div>
+
+              <p className="mt-5 text-sm leading-relaxed text-smoke">
+                {submission.error
+                  ? `We tried to send this booking and it did not go through. ${submission.error}`
+                  : "This form cannot send yet, so your booking has not reached the shop."}{" "}
+                Nothing is being held — the day and window you picked are still
+                open to anyone until you call.
+              </p>
+
+              <div className="mt-7">
+                <h3 className="h3 mb-2">Read them this</h3>
+                <p className="mb-4 text-sm leading-relaxed text-smoke">
+                  Everything you chose, in the order it is easiest to say out
+                  loud. None of it is saved anywhere, so keep this screen open
+                  until the call is done.
+                </p>
+                <BookingSummary form={form} callOrder />
+              </div>
+
+              <div className="mt-7 border-t border-ink/10 pt-6">
+                <p className="text-sm leading-relaxed text-smoke">
+                  Ask for the day and window you picked. Whoever answers can
+                  tell you whether it is still open, give you the exact price
+                  for your vehicle, and book it while you are on the line.
+                </p>
+                {CONTACT_EMAIL && (
+                  <p className="mt-3 text-sm leading-relaxed text-smoke">
+                    Cannot call right now? Send the same details to{" "}
+                    <a
+                      href={`mailto:${CONTACT_EMAIL}`}
+                      className="font-display font-bold text-drop hover:text-dive"
+                    >
+                      {CONTACT_EMAIL}
+                    </a>
+                    . The phone is faster, and it is the only way to get a
+                    window confirmed today.
+                  </p>
+                )}
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  <a href={BUSINESS.phoneHref} className="btn-primary btn-sm">
+                    <Phone size={16} aria-hidden />
+                    {BUSINESS.phone}
+                  </a>
+                  <Link to="/auto-service" className="btn-outline btn-sm">
+                    Browse more services
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Section>
+      </>
+    );
+  }
+
   /* ---------------- Booking form ---------------- */
   return (
     <>
@@ -505,7 +639,11 @@ export default function SchedulePage() {
       <PageHero
         eyebrow="Schedule"
         title="Book your appointment"
-        lede={`Five quick steps. Pick the service, tell us about the vehicle, and choose where and when. Booking the fitting for tires you ordered on ${BUSINESS.name}? Choose Tire Installation — a dispatcher confirms your two-hour window by phone.`}
+        lede={`Five quick steps. Pick the service, tell us about the vehicle, and choose where and when. Booking the fitting for tires you ordered on ${BUSINESS.name}? Choose Tire Installation. ${
+          isWired()
+            ? "A dispatcher confirms your two-hour window by phone."
+            : "At the end this lays out what to read down the phone — the window is confirmed on that call."
+        }`}
       >
         <a href={BUSINESS.phoneHref} className="btn-ghost-light btn-sm">
           <Phone size={16} aria-hidden />
@@ -976,8 +1114,9 @@ export default function SchedulePage() {
                   How do we reach you?
                 </h2>
                 <p className="mt-2 text-sm text-smoke">
-                  A dispatcher calls to confirm your window and the exact price
-                  before anyone rolls out.
+                  {isWired()
+                    ? "A dispatcher calls to confirm your window and the exact price before anyone rolls out."
+                    : "Your window and the exact price for your vehicle are settled on the phone call at the end, before anyone rolls out."}
                 </p>
 
                 <div className="mt-6 grid gap-5 sm:grid-cols-2">
@@ -1036,7 +1175,9 @@ export default function SchedulePage() {
                   <h3 className="h3">Review before you send</h3>
                   <p className="mt-2 text-sm text-smoke">
                     Check it over. Anything wrong, step back and fix it —
-                    nothing is locked in until a dispatcher confirms by phone.
+                    {isWired()
+                      ? " nothing is locked in until a dispatcher confirms by phone."
+                      : " nothing is booked until you call it through."}
                   </p>
                   <div className="mt-4">
                     <BookingSummary form={form} />
@@ -1070,9 +1211,14 @@ export default function SchedulePage() {
                   <ArrowRight size={16} aria-hidden />
                 </button>
               ) : (
-                <button type="submit" className="btn-primary btn-sm">
-                  Request appointment
-                  <ArrowRight size={16} aria-hidden />
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  aria-busy={submitting || undefined}
+                  className="btn-primary btn-sm"
+                >
+                  {submitting ? "Booking…" : "Request appointment"}
+                  {!submitting && <ArrowRight size={16} aria-hidden />}
                 </button>
               )}
             </div>

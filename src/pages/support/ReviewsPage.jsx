@@ -11,6 +11,7 @@ import {
   YELP_PROFILE,
   googleReviewHref,
 } from "../../data/business.js";
+import { submitForm } from "../../data/forms.js";
 import {
   Badge,
   Breadcrumbs,
@@ -171,15 +172,18 @@ function ReviewCard({ review }) {
   );
 }
 
-/** Client-side review composer — nothing is submitted anywhere. */
+/** Review composer. What the confirmation may claim depends on whether the
+ *  shared transport actually delivered it, so the result is kept whole. */
 function LeaveReview() {
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
   const [error, setError] = useState("");
-  const [done, setDone] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState(null);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    if (sending) return;
     if (rating === 0) {
       setError("Pick a star rating first.");
       return;
@@ -189,10 +193,12 @@ function LeaveReview() {
       return;
     }
     setError("");
-    setDone(true);
+    setSending(true);
+    setResult(await submitForm("review", { rating, review: text.trim() }));
+    setSending(false);
   };
 
-  if (done) {
+  if (result?.delivered) {
     return (
       <div className="card border-l-4 border-l-drop p-6 md:p-8" role="status">
         <CheckCircle2 size={32} aria-hidden className="mb-4 text-drop" />
@@ -215,6 +221,75 @@ function LeaveReview() {
           Post it on Google too
           <ExternalLink size={14} aria-hidden />
         </a>
+      </div>
+    );
+  }
+
+  // Not delivered. A review nobody receives helps nobody, so this hands the
+  // words straight back and points at the two profiles where posting them
+  // actually counts for the shop.
+  if (result) {
+    return (
+      <div className="card border-l-4 border-l-amber p-6 md:p-8" role="status">
+        <Star size={32} aria-hidden className="mb-4 fill-amber text-amber" />
+        <h3 className="h3">
+          {result.error
+            ? "That did not send — your words are still here"
+            : "Nothing was sent — post it where it counts"}
+        </h3>
+        <p className="mt-3 text-sm leading-relaxed text-smoke">
+          {result.error
+            ? `${result.error} Your review was not saved anywhere, so it is still exactly as you wrote it.`
+            : "This box does not reach an inbox yet, so nothing was sent and nothing was published. Your review is below, exactly as you wrote it."}{" "}
+          Google and Yelp are where a review counts for the shop, and where the
+          next person shopping for tires will actually read it — copy it across
+          and it is a minute's work.
+        </p>
+
+        <blockquote className="mt-5 border-l-2 border-ink/10 pl-4">
+          <Stars rating={rating} />
+          <p className="mt-2 text-sm leading-relaxed text-smoke">
+            {text.trim()}
+          </p>
+        </blockquote>
+
+        <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+          <a
+            href={GOOGLE_REVIEWS_HREF}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-dark btn-sm min-h-[44px]"
+          >
+            Post it on Google
+            <ExternalLink size={14} aria-hidden />
+          </a>
+          <a
+            href={YELP_PROFILE.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-outline btn-sm min-h-[44px]"
+          >
+            Post it on Yelp
+            <ExternalLink size={14} aria-hidden />
+          </a>
+        </div>
+
+        <p className="mt-5 text-sm leading-relaxed text-smoke">
+          If something about your order or your install still needs fixing, call{" "}
+          <a href={BUSINESS.phoneHref} className="text-drop underline">
+            {BUSINESS.phone}
+          </a>{" "}
+          and ask for customer care — we would rather put it right than have you
+          write about it.
+        </p>
+
+        <button
+          type="button"
+          onClick={() => setResult(null)}
+          className="btn-outline btn-sm mt-6"
+        >
+          Back to what I wrote
+        </button>
       </div>
     );
   }
@@ -289,8 +364,12 @@ function LeaveReview() {
         </p>
       )}
 
-      <button type="submit" className="btn-primary mt-6 w-full sm:w-auto">
-        Submit Review
+      <button
+        type="submit"
+        disabled={sending}
+        className="btn-primary mt-6 w-full sm:w-auto"
+      >
+        {sending ? "Sending…" : "Submit Review"}
       </button>
     </form>
   );
