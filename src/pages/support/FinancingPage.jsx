@@ -23,16 +23,20 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
+// Checkout on this site collects an order; it does not take payment. Every
+// payment method below happens on the phone or at the counter, and this page
+// must not imply a card field exists on the website — /checkout says plainly
+// that no card is charged there, and the two have to agree.
 const PAY_METHODS = [
   {
     icon: CreditCard,
-    title: "Card at checkout",
-    copy: "Major credit and debit cards, processed by our payment provider. Your card details go to them, not to us — we never see or store a full card number.",
+    title: "Card, by phone",
+    copy: "Place the order on the site, then a person calls to confirm fitment and take the card. No card number is entered on this website, and we never store one.",
   },
   {
     icon: Wallet,
     title: "Financing through a lender",
-    copy: "A third-party financing provider can spread the cost over time. They review the application, they approve or decline it, and they set the rate and the term.",
+    copy: "A third-party financing provider can spread the cost over time. They review the application, they approve or decline it, and they set the rate and the term. Call first — which programs are open changes, and we will not send you to an application that is not running.",
   },
   {
     icon: Store,
@@ -104,7 +108,7 @@ const STEPS = [
   },
   {
     title: "Apply with the lender",
-    copy: "Financing is handled by a third-party provider. The application is theirs, the decision is theirs, and the information you enter goes to them — not to us.",
+    copy: "Financing is handled by a third-party provider, and we will point you at whichever program is open when you buy. The application is theirs, the decision is theirs, and the information you enter goes to them — not to us.",
   },
   {
     title: "Read what you were actually offered",
@@ -143,7 +147,7 @@ const FAQ = [
   },
   {
     q: "What payment methods do you take if I skip financing?",
-    a: "Major credit and debit cards at checkout, and cards or cash in person at the shop. If you are running a fleet, call and ask how billing can be arranged.",
+    a: "Major credit and debit cards, taken over the phone when we call to confirm your order, and cards or cash in person at the shop. Nothing is charged while you are on the website — placing an order here does not move any money. If you are running a fleet, call and ask how billing can be arranged.",
   },
 ];
 
@@ -215,9 +219,10 @@ function ApplicationForm() {
         <h3 className="h3">Request received.</h3>
         <p className="mt-3 text-sm leading-relaxed text-smoke">
           Thanks, {values.name.split(" ")[0]}. Someone will call you at{" "}
-          {values.phone} during business hours to confirm what you are buying,
-          price it properly, and point you to the financing provider's
-          application.
+          {values.phone} during the hours the shop is open, to confirm what you
+          are buying, price it properly, and point you to whichever financing
+          program is running. If you would rather not wait for the call, the
+          number below reaches the same people.
         </p>
         <p className="mt-3 text-sm leading-relaxed text-smoke">
           This is not an application and it is not an approval — it only starts
@@ -551,6 +556,16 @@ export default function FinancingPage() {
                 pay us for tires, wheels, shipping and labor does not change
                 based on how you pay. Financing costs, if any, are between you
                 and the lender.
+              </p>
+              <p>
+                <span className="text-bone">
+                  Availability is not guaranteed.
+                </span>{" "}
+                Which financing programs we can point you at depends on the
+                providers we are set up with at the time. This page describes
+                how financing works when it is available; it is not a statement
+                that a particular program is open today. Ask on the phone before
+                you count on it.
               </p>
               <p>
                 <span className="text-bone">Questions are free.</span> If any of

@@ -105,12 +105,14 @@ function ContactForm() {
         <p className="mt-3 text-sm leading-relaxed text-smoke">
           Thanks for reaching out about{" "}
           <span className="text-ink">{values.subject.toLowerCase()}</span>. A
-          real person reads these during business hours and will get back to you
-          at {values.email} or {values.phone}.
+          real person reads these during the hours listed on this page, and will
+          reply at {values.email} or {values.phone}. We do not put a clock on
+          that, because we would rather answer properly than answer fast.
         </p>
         <p className="mt-3 text-sm leading-relaxed text-smoke">
           If the car is down right now, or your order needs changing before it
-          ships, do not wait on the reply — call{" "}
+          ships, do not wait on the reply — the phone is the only channel we
+          treat as urgent. Call{" "}
           <a href={BUSINESS.phoneHref} className="text-drop underline">
             {BUSINESS.phone}
           </a>{" "}
@@ -271,8 +273,9 @@ function ContactForm() {
       </button>
 
       <p className="mt-4 text-xs leading-relaxed text-smoke">
-        We use what you send here to answer your question and nothing else. See
-        our{" "}
+        We use what you send here to answer your question and nothing else. It
+        is not added to a mailing list — there isn&apos;t one — and it is not
+        passed to anyone outside the shop. See our{" "}
         <Link to="/privacy" className="underline hover:text-drop">
           privacy policy
         </Link>
@@ -307,7 +310,11 @@ export default function ContactPage() {
         <div className="grid gap-10 lg:grid-cols-[1fr_1.25fr] lg:gap-14">
           {/* ---------- Contact methods ---------- */}
           <div>
-            <SectionHead eyebrow="Reach Us" title="Two ways to get an answer" />
+            <SectionHead
+              eyebrow="Reach Us"
+              title="Two ways to get an answer"
+              lede={`${BUSINESS.name} is the online store of ${BUSINESS.parent}, ${BUSINESS.shop.full}. One phone number, one shop, one set of people — whether you are ordering from Florida or from three states away.`}
+            />
 
             <div className="card border-l-4 border-l-drop p-6">
               <h3 className="h3 mb-2 flex items-center gap-2">
@@ -343,9 +350,10 @@ export default function ContactPage() {
                   install appointments and fleet accounts.
                 </p>
                 <p className="mt-3 text-xs leading-relaxed text-smoke">
-                  We do not publish an email address, because email is where
-                  questions go to sit for two days. The phone and the form both
-                  reach the same people.
+                  A dedicated {BUSINESS.name} email address is being set up and
+                  will be published here once it is live. Until then the phone
+                  is the channel that reaches a person, and the form below
+                  reaches the same people.
                 </p>
               </li>
 
@@ -420,7 +428,7 @@ export default function ContactPage() {
             <SectionHead
               eyebrow="Message Us"
               title="Not urgent? Write it down."
-              lede="Include an order number if you have one. Messages sent outside business hours get picked up the next morning we are open."
+              lede="Include an order number if you have one. Messages sent outside business hours get picked up the next morning we are open. If it is urgent, call instead — the form is not monitored around the clock."
             />
             <ContactForm />
           </div>

@@ -5,6 +5,7 @@
 // precisely because they must not be invented. Before launch, have counsel
 // review the whole document and pin down at least:
 //   - the legal entity name and state of formation behind TireDrop
+//     (`BUSINESS.legalName`; the entity line below renders once it is set)
 //   - the return window in days, who pays return shipping, and any restocking
 //     fee, then state the numbers here and on the checkout page
 //   - the deadline for reporting shipping damage, shortages or wrong items
@@ -12,9 +13,22 @@
 //   - warranty administration: which claims the manufacturer handles directly
 //   - whether an arbitration or class-action waiver clause is wanted
 //   - state-specific privacy rights language (CA, VA, CO and others)
+//
+// TWO RULES FOR EDITING THIS FILE:
+//   1. The privacy policy must describe what the code actually does, not what
+//      a tire site usually does. As built, this site sets no cookies, runs no
+//      analytics, loads no tracking pixels, captures no email addresses and
+//      has no backend: the only browser storage is localStorage for the cart,
+//      the promo code and the comparison tray. Section 3 says exactly that. If
+//      analytics, a payment processor or an email platform is ever added, that
+//      section has to change in the same commit.
+//   2. Nothing here may point at a document that does not exist. Section 9
+//      used to say the return window was "stated at checkout" — it was not
+//      stated anywhere. Do not reintroduce a forward reference until the
+//      number it points at is really published.
 
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Phone, ShieldCheck } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
 import {
@@ -25,6 +39,33 @@ import {
 } from "../../components/ui/index.jsx";
 
 const LAST_UPDATED = "September 22, 2026";
+
+// The four questions a customer — or anyone reviewing this site — comes to the
+// terms looking for. They are sections of this document rather than separate
+// pages, so surface them at the top instead of making people read the contents
+// list to find out that a returns policy exists at all.
+const KEY_POLICIES = [
+  {
+    id: "shipping",
+    title: "Shipping policy",
+    copy: "Where we ship, what the estimate means, and what happens when a set arrives in two deliveries.",
+  },
+  {
+    id: "returns",
+    title: "Returns & refunds",
+    copy: "What can go back, what cannot, who pays the freight, and how a refund reaches you.",
+  },
+  {
+    id: "damaged",
+    title: "Damaged or wrong items",
+    copy: "What to do the day it lands, and why the first phone call matters more than the second.",
+  },
+  {
+    id: "warranties",
+    title: "Warranties",
+    copy: "What we stand behind ourselves, and what belongs to the tire manufacturer.",
+  },
+];
 
 const DOCS = {
   terms: {
@@ -39,7 +80,7 @@ const DOCS = {
         paragraphs: [
           `${BUSINESS.name} is the online tire and wheel store of ${BUSINESS.parent}, the tire shop at ${BUSINESS.shop.full}. Orders placed on this site are fulfilled by shipping direct from our distributors — we do not hold stock of our own.`,
           `We sell to customers throughout ${BUSINESS.shipping.area}. Installation, whether at the shop or from one of our mobile vans, is available only in South Florida. Those are two different things, and this document treats them as such.`,
-          `Questions about anything here: call ${BUSINESS.phone} during business hours, or use the contact form. There is no email address to write to — the phone and the form are the channels.`,
+          `Questions about anything here: call ${BUSINESS.phone} during business hours, or use the contact form. A dedicated ${BUSINESS.name} email address is being set up; until it is live, the phone is the channel that reaches a person fastest.`,
         ],
       },
       {
@@ -116,7 +157,7 @@ const DOCS = {
           "To be returnable, tires and wheels must be unused and uninstalled, in original condition, with any labels, chalk marks and packaging intact. Once a tire has been mounted on a wheel it is not returnable, even if it was never driven on — that is the distributor's rule, not one we invented, and it is why the fitment conversation matters.",
         ],
         list: [
-          "The return window and any restocking fee are stated at checkout and on your order confirmation. Check them before you buy, and call us if anything is unclear.",
+          "Call us before you buy if the return window or any restocking fee matters to your decision, and we will tell you what applies to that specific item. Both are set by the distributor the item ships from, and we will confirm them on your order.",
           "Return shipping on a change-of-mind return is generally the customer's cost; if we sent the wrong thing, it is ours.",
           "Special orders and custom wheel or tire packages may not be returnable once placed. We will say so before we order.",
           "Refunds go back to the original payment method. If you financed the order, the refund is credited against your balance with the lender and may take a billing cycle to appear.",
@@ -128,7 +169,7 @@ const DOCS = {
         heading: "10. Damaged, incorrect or missing items",
         paragraphs: [
           "Inspect what arrives. If the packaging is badly damaged, note it with the driver if you can, and either way photograph it before you unwrap anything.",
-          "Call us promptly — within the reporting period stated on your order confirmation — if something arrives damaged, if the wrong item was sent, or if part of the order is missing. Carriers and distributors both impose deadlines on these claims, and a late report can cost you the claim entirely.",
+          "Call us the day it arrives, or as close to it as you can manage, if something is damaged, if the wrong item was sent, or if part of the order is missing. Carriers and distributors both impose short deadlines on these claims — we will tell you the exact deadline that applies to your shipment when you call — and a late report can cost you the claim entirely.",
           "When it is our error or a shipping problem, we sort it out: a replacement sent, or a refund, at no extra cost to you. Keep the packaging until it is resolved — the claim may require it.",
         ],
       },
@@ -189,31 +230,39 @@ const DOCS = {
         ],
         list: [
           "Contact details you give us: name, phone number and email address",
-          "Addresses: the billing address for your payment, and the shipping address the order goes to — or the shop, if you chose ship-to-store",
+          "Addresses: the shipping address the order goes to — or the shop, if you chose ship-to-store",
           "Vehicle information: year, make, model, tire and wheel sizes, and notes about any work performed",
           "Order history: what you bought, what it cost, what we quoted and what we did",
-          "Payment information, handled by our payment processor — we do not store full card numbers",
           "Messages you send through the contact form or leave on the phone",
-          "Basic technical information your browser sends automatically, such as device type, browser and general location, used to keep the site working",
         ],
         after: [
-          "We do not ask for information we have no use for, and you do not need an account to browse the site or call us.",
+          "There is one thing we deliberately do not collect here: card numbers. This website does not take payment. Checkout submits an order, and a person calls you to confirm fitment and take payment over the phone or at the counter. No card field exists on this site, so there is no card data for us to lose.",
+          "We do not ask for information we have no use for. You do not need an account to browse the site, and there is no newsletter sign-up anywhere on it.",
         ],
       },
       {
         id: "how-we-use-it",
         heading: "2. How we use it",
         paragraphs: [
-          "To answer your question, price an order, place it with the distributor, get it shipped to the right address, take payment, book an install, and handle any return, claim or warranty question afterward. We also use aggregate, non-identifying information to understand which pages people actually use, so we can improve the site.",
+          "To answer your question, price an order, place it with the distributor, get it shipped to the right address, take payment over the phone, book an install, and handle any return, claim or warranty question afterward. That is the whole list. We do not profile you, score you, or build an audience out of you.",
           "If you ask us to, we may send occasional service reminders — a rotation coming due, for example. You can tell us to stop at any time and we will.",
         ],
       },
       {
         id: "cookies",
-        heading: "3. Cookies and site analytics",
+        heading: "3. Cookies, tracking and browser storage",
         paragraphs: [
-          "This site uses a small number of cookies and similar browser storage. Some are strictly necessary — they remember what is in your cart and keep checkout working. Others, if enabled, help us measure traffic in aggregate so we know which pages are worth improving.",
-          "You can block or delete cookies in your browser settings. Strictly necessary cookies cannot be turned off without breaking parts of the site, such as the cart. We do not use cookies to build advertising profiles about you across unrelated websites.",
+          "This website sets no cookies at all. It runs no analytics, loads no advertising or social tracking pixels, and does not share your browsing with anyone. That is not a promise about the future — it is a description of the code running on this page today, and you are welcome to check it in your browser's developer tools.",
+          "What the site does use is local storage in your own browser, for three things and nothing else:",
+        ],
+        list: [
+          "Your cart — so the tires you picked are still there if you close the tab and come back",
+          "A promo code you have applied, so you do not have to type it twice",
+          "The comparison tray — which products you lined up side by side",
+        ],
+        after: [
+          "All three stay on your device. They are not sent to us, they contain no name, address or payment detail, and nobody else can read them. Clearing your browsing data deletes them; the only thing you lose is your cart.",
+          "If we ever add analytics or any other third-party script, this section gets rewritten before that ships, not after.",
         ],
       },
       {
@@ -223,14 +272,14 @@ const DOCS = {
         list: [
           "Distributors, who receive the shipping address and order details because they are the ones packing and dispatching your tires",
           "Shipping carriers, for delivery and tracking",
-          "Payment processors, to take card payments securely",
+          "The card processor used when we take payment over the phone or at the counter — that happens off this website, and they handle the card details, not us",
           "Financing providers, if you choose to apply; your application goes to them under their own privacy policy, not ours",
           "Manufacturers, when a warranty claim requires it",
-          "Service providers that host this website and keep it running",
+          "The company that hosts this website, which keeps ordinary server logs of requests made to it",
           "Law enforcement or regulators, where we are legally required to respond",
         ],
         after: [
-          "We do not sell your personal information, and we do not share it for cross-context behavioral advertising.",
+          "That is the complete list. No advertising network, no data broker, no analytics company. We do not sell your personal information, and we do not share it for cross-context behavioral advertising — and because the site carries no trackers, there is nothing running here that could.",
         ],
       },
       {
@@ -251,8 +300,8 @@ const DOCS = {
           "Ask us to correct it. If a phone number, address or vehicle detail is wrong, we will fix it.",
           "Ask us to delete it. Call and request deletion. We will remove what we are not required to keep for warranty, accounting or legal reasons, and we will tell you plainly what we had to retain and why.",
           "Opt out of reminders. Say the word on the phone, or reply to any message asking to stop, and we will take you off the reminder list.",
-          "Control cookies. Use your browser settings to block or clear them at any time.",
-          "We do not sell personal information or share it for cross-context behavioral advertising, so there is nothing for you to opt out of on that front.",
+          "Clear what the site stored on your device. Your cart, promo code and comparison tray live in your own browser. Clearing your browsing data removes them; nothing of yours is left behind on our side.",
+          "We set no cookies, run no analytics and do not sell personal information or share it for cross-context behavioral advertising, so there is nothing for you to opt out of on that front.",
         ],
         after: [
           `To use any of these, call ${BUSINESS.phone} during business hours or send a message through our contact form. We may need to confirm a couple of details — an order number, say — to be sure we are talking to the right person before we change or delete a record.`,
@@ -262,7 +311,7 @@ const DOCS = {
         id: "security",
         heading: "7. Security",
         paragraphs: [
-          "We take sensible steps to protect customer information, and we limit access to the people who need it to do the job. Payment details are handled by our processor rather than kept by us. No website or business can promise perfect security, and we are not going to pretend otherwise. If something goes wrong in a way that affects you, we will tell you.",
+          "We take sensible steps to protect customer information, and we limit access to the people who need it to do the job. Because this site takes no payment, card details are never entered here and never stored by us — they are handled by our card processor when we take payment over the phone or at the counter. No website or business can promise perfect security, and we are not going to pretend otherwise. If something goes wrong in a way that affects you, we will tell you.",
         ],
       },
       {
@@ -340,6 +389,22 @@ const DOCS = {
 
 export default function LegalPage({ doc = "terms" }) {
   const content = DOCS[doc] ?? DOCS.terms;
+  const { hash } = useLocation();
+
+  // The footer links straight at /terms#returns and /terms#shipping. The app's
+  // ScrollToTop fires on every navigation and would otherwise dump the reader
+  // at the top of a 15-section document, so move to the requested section once
+  // the page has painted.
+  useEffect(() => {
+    if (!hash) return;
+    const id = decodeURIComponent(hash.replace("#", ""));
+    const frame = window.requestAnimationFrame(() => {
+      document
+        .getElementById(id)
+        ?.scrollIntoView({ behavior: "instant", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [hash, doc]);
 
   return (
     <>
@@ -413,6 +478,36 @@ export default function LegalPage({ doc = "terms" }) {
               </p>
             </div>
 
+            {doc === "terms" && (
+              <nav
+                aria-label="Key policies"
+                className="mb-10 rounded-sm border border-ink/10 bg-white p-6"
+              >
+                <h2 className="h3 mb-1">The four people ask for most</h2>
+                <p className="mb-5 text-sm text-smoke">
+                  Shipping, returns, damaged deliveries and warranties are
+                  sections of these terms. Jump straight to one.
+                </p>
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {KEY_POLICIES.map((policy) => (
+                    <li key={policy.id}>
+                      <a
+                        href={`#${policy.id}`}
+                        className="flex h-full flex-col gap-1 rounded-sm border border-ink/10 p-4 transition-colors hover:border-drop"
+                      >
+                        <span className="font-display text-base text-ink">
+                          {policy.title}
+                        </span>
+                        <span className="text-[13px] leading-relaxed text-smoke">
+                          {policy.copy}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
+
             <div className="space-y-12">
               {content.sections.map((section) => (
                 <section
@@ -467,6 +562,17 @@ export default function LegalPage({ doc = "terms" }) {
                 <br />
                 {BUSINESS.poweredBy}
                 <br />
+                {/* Renders only once the registered entity is confirmed in
+                    data/business.js. Nothing is guessed here. */}
+                {BUSINESS.legalName && (
+                  <>
+                    A trade name of {BUSINESS.legalName}
+                    {BUSINESS.entityState
+                      ? `, a ${BUSINESS.entityState} company`
+                      : ""}
+                    <br />
+                  </>
+                )}
                 {BUSINESS.shop.street}
                 <br />
                 {BUSINESS.shop.city}, {BUSINESS.shop.state} {BUSINESS.shop.zip}

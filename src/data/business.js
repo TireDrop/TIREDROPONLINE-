@@ -12,8 +12,17 @@
 
 export const BUSINESS = {
   name: "TireDrop",
-  legalName: "TireDrop",
   parent: "Extreme Tires",
+
+  // The registered entity behind the storefront. Deliberately null: "TireDrop"
+  // is a trade name, and nobody has confirmed the registered company name, the
+  // state it was formed in, or its Florida document number. Pages render an
+  // entity line only once `legalName` is filled in, so leaving these null is
+  // safe — guessing is not. A distributor's dealer-approval reviewer will
+  // compare whatever is published here against the name on the application.
+  legalName: null,
+  entityState: null, // e.g. "Florida"
+  entityNumber: null, // Sunbiz document number, once confirmed
   poweredBy: "Powered by Extreme Tires",
   domain: "tiredroponline.com",
   tagline: "Tires shipped. Or installed.",
@@ -21,7 +30,11 @@ export const BUSINESS = {
 
   phone: "(954) 773-1896",
   phoneHref: "tel:+19547731896",
-  email: null, // TireDrop address pending — pages fall back to the phone
+  // Still null. Every page falls back to the phone, and the support pages say
+  // so plainly rather than dressing the gap up as a policy. A business with no
+  // published email address reads badly to a distributor reviewer, who will
+  // want somewhere to send dealer paperwork — this is the first gap to close.
+  email: null,
 
   // The Sunrise shop: ship-to-store pickup, local install, and mobile service.
   shop: {
@@ -64,12 +77,16 @@ export const BUSINESS = {
   ],
 };
 
-// Tire brands. The catalog spans two distributors, so the roster is wider
-// than any single one carries.
+// Tire brands shown in the footer strip, the homepage brand row and the
+// coupons page. Every name here links to `/tires?brands=<name>`, so a brand
+// listed with no matching product in `data/products.js` sends the visitor to
+// an empty result page. Keep this roster equal to `TIRE_BRAND_NAMES` from
+// products.js. Goodyear was removed for exactly that reason — it was advertised
+// in three places and returned "0 tires". If the shop does carry a brand, add
+// its products first, then add it back here.
 export const TIRE_BRANDS = [
   { name: "Continental", slug: "continental", logo: null },
   { name: "Michelin", slug: "michelin", logo: null },
-  { name: "Goodyear", slug: "goodyear", logo: null },
   { name: "Pirelli", slug: "pirelli", logo: null },
   { name: "Bridgestone", slug: "bridgestone", logo: null },
   { name: "Nexen", slug: "nexen", logo: null },
@@ -183,7 +200,8 @@ export const FOOTER_COLUMNS = [
       { label: "Mobile Installation", to: "/mobile-service" },
       { label: "Book an Install", to: "/schedule" },
       { label: "Track an Order", to: "/contact" },
-      { label: "Returns", to: "/terms" },
+      { label: "Returns & Refunds", to: "/terms#returns" },
+      { label: "Shipping Policy", to: "/terms#shipping" },
     ],
   },
   {

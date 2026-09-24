@@ -104,7 +104,7 @@ export default function LocationsPage() {
       <PageHero
         eyebrow="The Shop"
         title="Where your tires can be fitted"
-        lede={`${BUSINESS.name} ships to ${BUSINESS.shipping.area}, so most customers never need an address from us. If you are near ${BUSINESS.shop.city}, this is the shop behind the website — ${BUSINESS.parent}, on ${BUSINESS.shop.street}.`}
+        lede={`${BUSINESS.name} is the online store of ${BUSINESS.parent} — one business, one address, one phone number. We ship to ${BUSINESS.shipping.area}, so most customers never need an address from us. If you are near ${BUSINESS.shop.city}, this is the shop behind the website.`}
       >
         <div className="flex flex-wrap gap-3">
           <a
@@ -197,9 +197,53 @@ export default function LocationsPage() {
 
               <p className="mt-4 text-xs leading-relaxed text-smoke">
                 One phone number covers both sides of the business — an order
-                placed from out of state and an appointment in Sunrise reach the
-                same people.
+                placed from out of state and an appointment in{" "}
+                {BUSINESS.shop.city} reach the same people.
               </p>
+
+              {/* Who the customer — or anyone checking the business out — is
+                  actually dealing with, in one block. The registered-entity
+                  line appears only once BUSINESS.legalName is confirmed; it is
+                  never guessed. */}
+              <dl className="mt-6 space-y-3 border-t border-ink/10 pt-5 text-sm">
+                <div>
+                  <dt className="label">Trading as</dt>
+                  <dd className="text-ink">
+                    {BUSINESS.name} — {BUSINESS.poweredBy}
+                  </dd>
+                </div>
+                {BUSINESS.legalName && (
+                  <div>
+                    <dt className="label">Registered entity</dt>
+                    <dd className="text-ink">
+                      {BUSINESS.legalName}
+                      {BUSINESS.entityState
+                        ? `, a ${BUSINESS.entityState} company`
+                        : ""}
+                      {BUSINESS.entityNumber
+                        ? ` · ${BUSINESS.entityNumber}`
+                        : ""}
+                    </dd>
+                  </div>
+                )}
+                <div>
+                  <dt className="label">Place of business</dt>
+                  <dd className="text-ink">{BUSINESS.shop.full}</dd>
+                </div>
+                <div>
+                  <dt className="label">Ships to</dt>
+                  <dd className="text-ink">
+                    Street addresses in {BUSINESS.shipping.area}. Not Alaska,
+                    Hawaii, US territories or outside the country.
+                  </dd>
+                </div>
+                <div>
+                  <dt className="label">Installs in</dt>
+                  <dd className="text-ink">
+                    Broward County, Florida — at the shop or by mobile van.
+                  </dd>
+                </div>
+              </dl>
 
               <div className="mt-6 flex flex-wrap gap-3">
                 <a

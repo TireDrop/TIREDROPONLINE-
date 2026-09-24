@@ -10,7 +10,11 @@ import {
   Tag,
   Truck,
 } from "lucide-react";
-import { BUSINESS, TIRE_BRANDS } from "../../data/business.js";
+import { BUSINESS } from "../../data/business.js";
+// The catalog is the source of truth for which brands this page may name. The
+// display roster in business.js is for the footer strip; it is not evidence
+// that a brand is actually buyable.
+import { TIRE_BRAND_NAMES } from "../../data/products.js";
 import {
   Badge,
   Breadcrumbs,
@@ -69,7 +73,7 @@ const DIFFERENTIATORS = [
   {
     icon: ShieldCheck,
     title: "A real shop picked the catalog",
-    copy: "Every brand we list is one we have fitted, balanced and seen come back after 30,000 Florida miles. If a tire has a reputation we do not like, it is not on the site.",
+    copy: "The catalog was chosen by people who mount tires for a living, not assembled from whatever a feed happened to contain. These are brands the shop works with and would fit on a customer's car.",
   },
   {
     icon: Tag,
@@ -78,18 +82,24 @@ const DIFFERENTIATORS = [
   },
   {
     icon: Clock,
-    title: `Family-run since ${BUSINESS.foundedYear}`,
-    copy: `${BUSINESS.parent} has been the same family, the same phone number and the same building on ${BUSINESS.shop.street} for years. TireDrop is that shop with a wider counter.`,
+    title: `Independent since ${BUSINESS.foundedYear}`,
+    copy: `${BUSINESS.parent} still answers on ${BUSINESS.phone} from the shop on ${BUSINESS.shop.street}. ${BUSINESS.name} is that shop with a wider counter — same phone, same people.`,
   },
 ];
 
+// The brand count is taken from the products themselves, not from the display
+// roster in business.js — a number on this page should never be able to drift
+// above the number of brands a visitor can actually filter to.
 const STATS = [
   {
-    value: `${YEARS_IN_BUSINESS}+`,
-    label: "Years fitting tires in South Florida",
+    value: `${YEARS_IN_BUSINESS}`,
+    label: `Years ${BUSINESS.parent} has been fitting tires in South Florida`,
   },
-  { value: "48", label: "Continental US states we ship to" },
-  { value: `${TIRE_BRANDS.length}`, label: "Tire brands in the catalog" },
+  { value: "48", label: "States in the shipping area" },
+  {
+    value: `${TIRE_BRAND_NAMES.length}`,
+    label: "Tire brands you can buy today",
+  },
   {
     value: `${BUSINESS.installArea.length}`,
     label: "Broward towns the vans cover",
@@ -115,13 +125,13 @@ export default function AboutPage() {
     <>
       <Seo
         title="About TireDrop"
-        description={`${BUSINESS.name} is the national online store of ${BUSINESS.parent}, a family tire shop in ${BUSINESS.shop.city}, FL since ${BUSINESS.foundedYear}. Tires and wheels shipped across the continental US, or fitted at the shop.`}
+        description={`${BUSINESS.name} is the national online store of ${BUSINESS.parent}, an independent tire shop in ${BUSINESS.shop.city}, FL since ${BUSINESS.foundedYear}. Tires and wheels shipped across the continental US, or fitted at the shop.`}
       />
 
       <PageHero
         eyebrow="About Us"
         title="A real tire shop, with a national counter"
-        lede={`${BUSINESS.name} is the online store of ${BUSINESS.parent} — a family shop that has been fitting tires in South Florida since ${BUSINESS.foundedYear}. We ship anywhere in ${BUSINESS.shipping.area}. Near ${BUSINESS.shop.city}, we will also put them on for you.`}
+        lede={`${BUSINESS.name} is the online store of ${BUSINESS.parent} — an independent shop that has been fitting tires in South Florida since ${BUSINESS.foundedYear}. We ship anywhere in ${BUSINESS.shipping.area}. Near ${BUSINESS.shop.city}, we will also put them on for you.`}
       >
         <div className="flex flex-wrap gap-3">
           <Link to="/tires" className="btn-primary">
@@ -239,8 +249,9 @@ export default function AboutPage() {
             ))}
           </dl>
           <p className="mt-8 text-xs text-bone/60">
-            Figures are directional and illustrative — a plain sense of scale,
-            not an audited count.
+            Years are counted from {BUSINESS.foundedYear}, the brand count is
+            taken from the live catalog, and the town list is the mobile install
+            area. None of these are marketing round-ups.
           </p>
         </div>
       </section>
@@ -250,7 +261,7 @@ export default function AboutPage() {
         <SectionHead
           eyebrow="Our Team"
           title="The people behind the order"
-          lede="Small crew, clear roles. Whether your tires land on a porch in Ohio or on a lift in Sunrise, one of these five had a hand in it."
+          lede={`Small crew, clear roles. Whether your tires land on a porch in Ohio or on a lift in ${BUSINESS.shop.city}, one of these people had a hand in it. First names only — call the shop and you will be talking to one of them.`}
         />
 
         <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -292,12 +303,18 @@ export default function AboutPage() {
 
         <div className="mt-10 flex flex-wrap items-center gap-3">
           <Badge tone="soft">Brands in the catalog</Badge>
-          {TIRE_BRANDS.map((b) => (
-            <span key={b.slug} className="font-display text-lg text-ink/70">
-              {b.name}
+          {TIRE_BRAND_NAMES.map((name) => (
+            <span key={name} className="font-display text-lg text-ink/70">
+              {name}
             </span>
           ))}
         </div>
+        <p className="mt-4 text-sm leading-relaxed text-smoke">
+          Every brand named here has tires you can filter to and buy on this
+          site right now. The catalog widens as distributor access does — if you
+          want something that is not listed, call and ask before you assume we
+          cannot get it.
+        </p>
       </Section>
 
       {/* ---------- CTA ---------- */}
