@@ -1,15 +1,22 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   ChevronDown,
   MapPin,
   Menu,
   Phone,
+  Search,
   ShoppingCart,
   Truck,
   X,
 } from "lucide-react";
 import { BUSINESS, NAV } from "../../data/business.js";
+import {
+  TIRES,
+  TIRE_CATEGORIES,
+  TIRE_BRAND_NAMES,
+} from "../../data/products.js";
+import { parseSize } from "../../data/tireMath.js";
 import { useCart } from "../../context/CartContext.jsx";
 import Logo from "./Logo.jsx";
 
@@ -40,6 +47,111 @@ function UtilityBar() {
         </span>
       </div>
     </div>
+  );
+}
+
+/**
+ * Masthead search.
+ *
+ * The catalog has no free-text index — it filters on size, vehicle, brand and
+ * category — so rather than invent a `q` parameter that nothing reads, this
+ * works out which of those the shopper typed and hands off to the filter that
+ * exists. A size goes through the same parser the tools use, so `225/45ZR17`
+ * and `31x10.50R15` both resolve.
+ *
+ * When nothing matches it says so in place instead of navigating to an
+ * unfiltered catalog and letting the shopper conclude the search is broken.
+ */
+function HeaderSearch({ className = "", onDone }) {
+  const navigate = useNavigate();
+  const [term, setTerm] = useState("");
+  const [miss, setMiss] = useState("");
+
+  const resolve = (raw) => {
+    const text = raw.trim();
+    if (!text) return null;
+
+    const size = parseSize(text);
+    if (size) {
+      return size.format === "flotation"
+        ? `/tires?d=${size.rimDiameter}`
+        : `/tires?w=${size.width}&a=${size.aspect}&d=${size.rimDiameter}`;
+    }
+
+    const lower = text.toLowerCase();
+    const brand =
+      TIRE_BRAND_NAMES.find((b) => b.toLowerCase() === lower) ??
+      TIRE_BRAND_NAMES.find((b) => b.toLowerCase().startsWith(lower));
+    if (brand) return `/tires?brands=${encodeURIComponent(brand)}`;
+
+    const category =
+      TIRE_CATEGORIES.find((c) => c.toLowerCase() === lower) ??
+      TIRE_CATEGORIES.find((c) => c.toLowerCase().includes(lower));
+    if (category) return `/tires?category=${encodeURIComponent(category)}`;
+
+    // A model name is the other thing people type. Match it against the
+    // catalog and go straight to the product rather than to a filter.
+    const product = TIRES.find((t) =>
+      `${t.brand} ${t.model}`.toLowerCase().includes(lower),
+    );
+    if (product) return `/tires/${product.slug}`;
+
+    return null;
+  };
+
+  const submit = (e) => {
+    e.preventDefault();
+    const to = resolve(term);
+    if (!to) {
+      setMiss(
+        `Nothing matched "${term.trim()}". Try a size like 225/45R17, a brand, or a model.`,
+      );
+      return;
+    }
+    setMiss("");
+    setTerm("");
+    onDone?.();
+    navigate(to);
+  };
+
+  return (
+    <form role="search" onSubmit={submit} className={`relative ${className}`}>
+      <label htmlFor="masthead-search" className="sr-only">
+        Search tires by size, brand or model
+      </label>
+      <Search
+        size={17}
+        aria-hidden
+        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-smoke"
+      />
+      <input
+        id="masthead-search"
+        type="search"
+        value={term}
+        onChange={(e) => {
+          setTerm(e.target.value);
+          if (miss) setMiss("");
+        }}
+        placeholder="Search a size, brand or model — 225/45R17"
+        aria-describedby={miss ? "masthead-search-miss" : undefined}
+        className="field h-11 w-full rounded-full pl-10 pr-24 text-[15px]"
+      />
+      <button
+        type="submit"
+        className="btn-primary btn-sm absolute right-1 top-1 h-9 min-h-0 rounded-full px-4"
+      >
+        Search
+      </button>
+      {miss && (
+        <p
+          id="masthead-search-miss"
+          role="alert"
+          className="absolute left-0 top-full z-50 mt-1.5 w-full rounded-sm border border-ink/10 bg-bone px-3 py-2 text-[13px] leading-snug text-ink shadow-lift"
+        >
+          {miss}
+        </p>
+      )}
+    </form>
   );
 }
 
@@ -217,33 +329,31 @@ export default function Header() {
     <>
       <UtilityBar />
 
+      {/* Two rows, not one.
+          The logo and the navigation were competing for a single row: a
+          square badge beside eight nav items, which is what overflowed the
+          viewport at 1024px and made the masthead's height jump around by
+          breakpoint. Given a row each, the mark can be as large as it likes
+          and the nav gets the full width — which is the arrangement every
+          large retailer converged on for the same reason.
+
+          Only these rows stick. The utility strip scrolls away, because a
+          phone number does not need to follow you down a product page. */}
       <div className="sticky top-0 z-40 border-b border-ink/10 bg-bone/95 backdrop-blur">
-        <div className="wrap flex items-center justify-between gap-4">
-          {/* The full badge is square, so stacking the parent line under it
-              would make the masthead twice as tall as it needs to be. Set
-              beside it, the lockup stays one row and the mark keeps its
-              height. */}
-          <Link to="/" className="flex shrink-0 items-center gap-3 py-1.5">
-            <Logo
-              className="h-[76px] md:h-[92px] lg:h-[72px] xl:h-[92px]"
-              variant="full"
-            />
-            <span className="hidden whitespace-nowrap font-display text-[11px] uppercase leading-tight tracking-[0.12em] text-smoke sm:block lg:hidden xl:block">
+        <div className="wrap flex items-center gap-4 py-2 lg:gap-8">
+          <Link to="/" className="flex shrink-0 items-center gap-3">
+            <Logo className="h-[72px] lg:h-20" variant="full" />
+            <span className="hidden whitespace-nowrap font-display text-[11px] uppercase leading-tight tracking-[0.12em] text-smoke sm:block">
               Powered by
               <span className="block text-extremeRed">Extreme Tires</span>
             </span>
           </Link>
 
-          <DesktopNav />
+          {/* The middle of the masthead is where a shopper looks for search,
+              and it was the one thing this header did not have. */}
+          <HeaderSearch className="hidden min-w-0 flex-1 lg:block" />
 
-          <div className="flex items-center gap-1.5">
-            <Link
-              to="/tires"
-              className="btn-primary btn-sm ml-1.5 hidden whitespace-nowrap xl:inline-flex"
-            >
-              Shop Tires
-            </Link>
-
+          <div className="ml-auto flex items-center gap-1.5 lg:ml-0">
             <Link
               to="/cart"
               className="relative rounded-sm p-2.5 text-ink transition-colors hover:bg-fog hover:text-drop"
@@ -266,6 +376,27 @@ export default function Header() {
             </button>
           </div>
         </div>
+
+        {/* Navigation gets its own full-width row, so nothing has to shrink
+            to make the eight items fit. */}
+        <div className="hidden border-t border-ink/[0.07] lg:block">
+          <div className="wrap flex items-center justify-between gap-4">
+            <DesktopNav />
+            <Link
+              to="/tires"
+              className="btn-primary btn-sm my-1.5 shrink-0 whitespace-nowrap"
+            >
+              Shop Tires
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Search on a phone sits below the sticky block rather than inside it.
+          It is worth a row of the page; it is not worth 50px of every screen
+          for the whole session. */}
+      <div className="border-b border-ink/10 bg-bone px-5 py-2.5 md:px-8 lg:hidden">
+        <HeaderSearch />
       </div>
 
       <MobileDrawer open={menuOpen} onClose={closeMenu} />
