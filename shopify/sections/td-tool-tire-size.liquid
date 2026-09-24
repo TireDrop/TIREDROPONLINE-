@@ -1,0 +1,1195 @@
+{% comment %}
+  Tire Size Decoder — the Shopify port of src/pages/tools/TireSizePage.jsx.
+
+  Every number comes from window.TireDrop (assets/td-tiremath.js, generated
+  from src/data/tireMath.js). Nothing in here re-derives a dimension: this file
+  only formats, draws and explains what those functions return.
+
+  The URL is the state (?size= and ?vs=), so a result is a link someone can
+  paste into a text message. Without JavaScript the inputs are a plain GET
+  form, which lands back here with the same parameters.
+
+  All styling is scoped to .td-ts. The dark panels pin their text to white
+  rather than inheriting body ink.
+{% endcomment %}
+
+{%- assign uid = 'td-ts-' | append: section.id -%}
+
+<div class="td-ts" id="{{ uid }}">
+  {%- comment -%} ---------------- Step one: inputs ---------------- {%- endcomment -%}
+  <section class="td-ts-band" data-band="input" aria-labelledby="{{ uid }}-h1">
+    <div class="td-ts-inner">
+      <div class="td-ts-head">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="td-ts-eyebrow">{{ section.settings.eyebrow }}</p>
+        {%- endif -%}
+        <h1 class="td-ts-h1" id="{{ uid }}-h1">{{ section.settings.heading | default: 'Tire Size Decoder' }}</h1>
+        {%- if section.settings.lede != blank -%}
+          <p class="td-ts-lede">{{ section.settings.lede }}</p>
+        {%- endif -%}
+      </div>
+
+      <div class="td-ts-tool">
+        <div class="td-ts-tool__main">
+          <p class="td-ts-eyebrow">Step one</p>
+          <h2 class="td-ts-h3 td-ts-h3--lg">Read it off the sidewall</h2>
+          <p class="td-ts-body">It is the string that looks like 215/60R16 95H, moulded into the outer face of the tire. The door jamb placard on the driver's side has it too — that one is the size your car was built for.</p>
+
+          <form class="td-ts-form" method="get" action="" novalidate data-ts="form">
+            <div class="td-ts-fields">
+              <div class="td-ts-field">
+                <label class="td-ts-label" for="{{ uid }}-size">Your tire size</label>
+                <input class="td-ts-input" id="{{ uid }}-size" name="size" type="text" inputmode="text"
+                  autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="215/60R16 95H"
+                  aria-describedby="{{ uid }}-size-help" data-ts="size">
+                <p class="td-ts-help" id="{{ uid }}-size-help">Metric or flotation. Spaces and capitals do not matter.</p>
+                <div class="td-ts-error" id="{{ uid }}-size-err" role="alert" data-ts="size-err" hidden></div>
+              </div>
+              <div class="td-ts-field">
+                <label class="td-ts-label" for="{{ uid }}-vs">Compare against (optional)</label>
+                <input class="td-ts-input" id="{{ uid }}-vs" name="vs" type="text" inputmode="text"
+                  autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="225/50R17"
+                  aria-describedby="{{ uid }}-vs-help" data-ts="vs">
+                <p class="td-ts-help" id="{{ uid }}-vs-help">The size you are thinking of fitting instead.</p>
+                <div class="td-ts-error" id="{{ uid }}-vs-err" role="alert" data-ts="vs-err" hidden></div>
+              </div>
+            </div>
+
+            <div class="td-ts-examples">
+              <span class="td-ts-examples__label" id="{{ uid }}-try">Try one</span>
+              {%- assign examples = '215/60R16 95H|225/45ZR17|265/70R17 121S|31x10.50R15' | split: '|' -%}
+              {%- for ex in examples -%}
+                <button type="button" class="td-ts-chipbtn td-ts-tnum" data-ts-example="{{ ex }}" aria-describedby="{{ uid }}-try">{{ ex }}</button>
+              {%- endfor -%}
+            </div>
+
+            <div class="td-ts-actions">
+              <button type="button" class="td-ts-btn td-ts-btn--outline" data-ts="swap">
+                <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+                Swap the two
+              </button>
+              <button type="button" class="td-ts-btn td-ts-btn--outline" data-ts="copy">
+                <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                <span data-ts="copy-label">Copy link to this result</span>
+              </button>
+              <noscript><button type="submit" class="td-ts-btn td-ts-btn--primary">Decode</button></noscript>
+            </div>
+          </form>
+
+          {%- comment -%}
+            The one live region. Everything below updates too, but announcing a
+            page of cards on every keystroke would be unusable — this says the
+            result in one line instead.
+          {%- endcomment -%}
+          <p class="td-ts-status" role="status" aria-live="polite" data-ts="status">Type a size above and the decoded result appears here and in the sections below.</p>
+        </div>
+
+        <aside class="td-ts-aside" aria-labelledby="{{ uid }}-where">
+          <h2 class="td-ts-h3" id="{{ uid }}-where">Three places the size is written</h2>
+          <ol class="td-ts-steps">
+            <li><span class="td-ts-stepnum" aria-hidden="true">1</span><span><strong>The driver's door jamb.</strong> Open the door and look at the frame. This placard is what the car was engineered around — size, load index, speed rating and the right pressures.</span></li>
+            <li><span class="td-ts-stepnum" aria-hidden="true">2</span><span><strong>The tire sidewall.</strong> Tells you what is fitted right now, which is not always what the car asked for. If the two disagree, trust the placard.</span></li>
+            <li><span class="td-ts-stepnum" aria-hidden="true">3</span><span><strong>The owner's manual.</strong> Usually lists every size the car was offered with from the factory, including the optional wheel packages.</span></li>
+          </ol>
+          <p class="td-ts-aside__note">
+            <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <span>Every figure on this page comes from the marking itself. It cannot see your wheels, your fenders or your suspension, so it is a starting point, not a fitment approval.</span>
+          </p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ---------------- Results: filled by the script ---------------- {%- endcomment -%}
+  <section class="td-ts-band" data-band="decoded" hidden><div class="td-ts-inner" data-fill="decoded"></div></section>
+  <section class="td-ts-band" data-band="figures" hidden><div class="td-ts-inner" data-fill="figures"></div></section>
+  <section class="td-ts-band" data-band="compare" hidden><div class="td-ts-inner" data-fill="compare"></div></section>
+  <section class="td-ts-band" data-band="shop" hidden><div class="td-ts-inner" data-fill="shop"></div></section>
+
+  {%- comment -%} ---------------- Nothing typed yet ---------------- {%- endcomment -%}
+  <section class="td-ts-band td-ts-band--alt" data-band="how" aria-labelledby="{{ uid }}-how">
+    <div class="td-ts-inner">
+      <div class="td-ts-head">
+        <p class="td-ts-eyebrow">How this works</p>
+        <h2 class="td-ts-h2" id="{{ uid }}-how">Three things this tool will tell you</h2>
+      </div>
+      <div class="td-ts-grid3">
+        <div class="td-ts-card">
+          <span class="td-ts-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/></svg></span>
+          <h3 class="td-ts-h3">What the marking means</h3>
+          <p class="td-ts-body">Every number and letter on the sidewall, explained with the real figures for your size — not a generic example. Width, sidewall height, wheel diameter, load in pounds, speed in mph.</p>
+        </div>
+        <div class="td-ts-card">
+          <span class="td-ts-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+          <h3 class="td-ts-h3">Whether a different size works</h3>
+          <p class="td-ts-body">Put a second size in and we draw both to scale, one on top of the other, and show you the diameter, width, sidewall and clearance change between them.</p>
+        </div>
+        <div class="td-ts-card">
+          <span class="td-ts-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg></span>
+          <h3 class="td-ts-h3">What it does to your speedo</h3>
+          <p class="td-ts-body">A taller tire covers more ground per turn, so the needle reads low. We tell you what you are actually doing at an indicated 60, and when the change is big enough to matter.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ---------------- FAQ ---------------- {%- endcomment -%}
+  <section class="td-ts-band" data-band="faq" aria-labelledby="{{ uid }}-faq">
+    <div class="td-ts-inner">
+      <div class="td-ts-head">
+        <p class="td-ts-eyebrow">Questions</p>
+        <h2 class="td-ts-h2" id="{{ uid }}-faq">Tire sizes, answered properly</h2>
+        <p class="td-ts-lede">The questions we get asked on the phone, written out the way we would answer them.</p>
+      </div>
+      <div class="td-ts-faq">
+        <details><summary>What do the numbers on the side of a tire actually mean?<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></summary><p>Take 215/60R16 95H. 215 is the width across the tire in millimetres. 60 is the aspect ratio — the sidewall is 60% of that width, so 129 mm tall. R means radial construction. 16 is the wheel diameter in inches, measured at the bead seat. 95 is the load index, which is 1,521 lbs per tire. H is the speed rating, certified to 130 mph. The first four have to be right for the tire to physically fit; the last two have to meet or beat what your car was built for.</p></details>
+        <details><summary>Where do I find the right size for my car?<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></summary><p>Open the driver's door and look at the placard on the door jamb. That is the size, load index and speed rating the car was engineered around, along with the correct inflation pressures. The owner's manual repeats it. The sidewall of the tires currently on the car tells you what is fitted, which is not always the same thing — a previous owner may have changed it. When the placard and the sidewall disagree, the placard is the one to trust.</p></details>
+        <details><summary>Can I fit a different size than the placard says?<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></summary><p>Physically, often yes. Whether you should is a different question. Most fitment guides work to within 3% of the original overall diameter, because your speedometer, odometer, ABS and traction control all read wheel speed and assume the original rolling circumference. Past that they are all reading wrong by the same margin. A replacement also has to meet or beat the original load index, and it has to clear the suspension and bodywork at full steering lock and full suspension travel — which is something no calculator can see. Check the owner's manual before you buy.</p></details>
+        <details><summary>Can I mix tire sizes front and rear?<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></summary><p>Some cars leave the factory staggered, with a wider tire on the rear — that is fine, because it is the design. Mixing sizes that were not designed to be mixed is not. Never mix sizes across one axle. On an all-wheel-drive car, even small differences in rolling circumference between axles make the centre differential or coupling work continuously, and that gets expensive. Replace in pairs across an axle at minimum, and all four on an all-wheel-drive car.</p></details>
+        <details><summary>What does plus-sizing do?<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></summary><p>Plus-sizing means going up in wheel diameter and down in sidewall to keep the overall diameter roughly the same — 205/55R16 to 225/45R17, for example. Less sidewall flex sharpens steering response and usually looks better. You also get a harsher ride, more road noise, more exposure to pothole and rim damage, and a more expensive tire to replace. It needs the matching wheel: the tire cannot go on the wheel you have.</p></details>
+        <details><summary>Is a 60-series sidewall always the same height?<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></summary><p>No, and this is the single most common misreading of a tire size. The aspect ratio is a percentage of that tire's own width, not a fixed measurement. A 205/60R16 has a 123 mm sidewall; a 275/60R16 has a 165 mm one. Same 60, 42 mm difference.</p></details>
+        <details><summary>What about XL, reinforced, and the letters before the size?<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></summary><p>A letter in front — P, LT or ST — is the service type: passenger, light truck, or special trailer. XL or Reinforced after the size means the tire is built to carry more than a standard tire of the same size, and it will carry a higher load index to match. Both matter for load, neither changes the tire's dimensions.</p></details>
+      </div>
+      <p class="td-ts-faq__foot">Still not sure what you need? <a href="/pages/find-my-tires">Look it up by vehicle</a> or <a href="/pages/contact">ask us</a> — a size question takes about a minute to settle. Or call <a href="tel:+19547731896" class="td-ts-nowrap">(954) 773-1896</a>.</p>
+    </div>
+  </section>
+</div>
+
+<style>
+  .td-ts { color: #070E1A; font-family: var(--font-body--family, inherit); line-height: 1.5; }
+  .td-ts *, .td-ts *::before, .td-ts *::after { box-sizing: border-box; }
+  .td-ts [hidden] { display: none !important; }
+  .td-ts-band { background: #FFFFFF; }
+  .td-ts-band--alt { background: #F4F6FA; }
+  .td-ts-inner { max-width: 1280px; margin: 0 auto; padding: 3.5rem 1rem; }
+
+  /* ---- type ---- */
+  .td-ts-head { max-width: 42rem; margin: 0 auto 2rem; text-align: center; }
+  .td-ts-eyebrow {
+    font-family: var(--font-subheading--family, inherit);
+    font-size: .75rem; font-weight: 700; letter-spacing: .09em;
+    text-transform: uppercase; color: #0068E8; margin: 0 0 .625rem; text-wrap: balance;
+  }
+  .td-ts-h1, .td-ts-h2, .td-ts-h3 {
+    font-family: var(--font-heading--family, inherit);
+    color: #070E1A; margin: 0; text-wrap: balance;
+  }
+  .td-ts-h1 { font-weight: 800; letter-spacing: -.02em; line-height: 1.04; font-size: clamp(2.25rem, 6vw, 3.25rem); }
+  .td-ts-h2 { font-weight: 800; letter-spacing: -.02em; line-height: 1.08; font-size: clamp(1.75rem, 4vw, 2.5rem); overflow-wrap: anywhere; }
+  .td-ts-h3 { font-weight: 700; letter-spacing: -.01em; line-height: 1.2; font-size: 1.125rem; }
+  .td-ts-h3--lg { font-size: 1.5rem; }
+  .td-ts-lede { margin: .875rem auto 0; max-width: 36rem; text-wrap: pretty; font-size: 1.0625rem; line-height: 1.6; color: #586274; }
+  .td-ts-body { margin: .5rem 0 0; font-size: .9375rem; line-height: 1.6; color: #586274; }
+  .td-ts-tnum { font-variant-numeric: tabular-nums; }
+  .td-ts-nowrap { white-space: nowrap; }
+  .td-ts-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  .td-ts a { color: #0068E8; text-underline-offset: 2px; }
+  .td-ts a:hover { color: #0053C4; }
+  .td-ts :focus-visible { outline: 3px solid #0068E8; outline-offset: 2px; }
+
+  /* ---- step one ---- */
+  .td-ts-tool { display: grid; gap: 2rem; }
+  .td-ts-tool__main { min-width: 0; }
+  .td-ts-form { margin-top: 1.5rem; }
+  .td-ts-fields { display: grid; gap: 1.25rem; }
+  .td-ts-field { min-width: 0; }
+  .td-ts-label {
+    display: block; margin: 0 0 .375rem;
+    font-family: var(--font-heading--family, inherit);
+    font-size: .875rem; font-weight: 700; color: #070E1A;
+  }
+  .td-ts-input {
+    display: block; width: 100%; height: 48px; min-height: 48px; margin: 0;
+    padding: 0 .875rem; border: 1px solid #7A8494; border-radius: 10px;
+    background: #FFFFFF; color: #070E1A;
+    font-family: var(--font-heading--family, inherit); font-weight: 700;
+    font-size: 16px; letter-spacing: -.005em; font-variant-numeric: tabular-nums;
+    -webkit-appearance: none; appearance: none;
+  }
+  .td-ts-input::placeholder { color: #7A8494; font-weight: 600; opacity: 1; }
+  .td-ts-input:focus-visible { outline: 3px solid #0068E8; outline-offset: 1px; border-color: #0068E8; }
+  .td-ts-input[aria-invalid="true"] { border-color: #8A4F00; box-shadow: inset 0 0 0 1px #8A4F00; }
+  .td-ts-help { margin: .375rem 0 0; font-size: .8125rem; line-height: 1.45; color: #586274; }
+  .td-ts-error {
+    display: flex; gap: .5rem; align-items: flex-start;
+    margin-top: .5rem; padding: .625rem .75rem; border-radius: 8px;
+    background: rgba(245,166,35,.15); box-shadow: inset 0 0 0 1px rgba(138,79,0,.3);
+    font-size: .875rem; line-height: 1.45; color: #070E1A;
+  }
+  .td-ts-error svg { flex: none; margin-top: .125rem; color: #8A4F00; }
+  .td-ts-error b { font-variant-numeric: tabular-nums; }
+
+  .td-ts-examples { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: 1.25rem; }
+  .td-ts-examples__label { width: 100%; font-size: .75rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: #586274; }
+  .td-ts-chipbtn {
+    min-height: 44px; padding: 0 1rem; border-radius: 999px;
+    border: 1px solid #E3E8EF; background: #F4F6FA; color: #070E1A;
+    font-family: var(--font-body--family, inherit); font-size: .875rem; font-weight: 500;
+    cursor: pointer; transition: border-color .15s ease, color .15s ease;
+  }
+  .td-ts-chipbtn:hover { border-color: #0068E8; color: #0053C4; }
+
+  .td-ts-actions { display: flex; flex-wrap: wrap; gap: .625rem; margin-top: 1.25rem; }
+  .td-ts-btn {
+    flex: 1 1 13rem;
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    min-height: 48px; padding: 0 1.5rem; border-radius: 999px;
+    font-family: var(--font-heading--family, inherit);
+    font-weight: 700; font-size: .9375rem; line-height: 1.2; text-decoration: none; cursor: pointer;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .td-ts-btn--primary { background: #0068E8; color: #FFFFFF; border: 0; }
+  .td-ts-btn--primary:hover { background: #0053C4; color: #FFFFFF; }
+  .td-ts a.td-ts-btn--primary, .td-ts a.td-ts-btn--primary:hover { color: #FFFFFF; }
+  .td-ts-btn--outline { background: #FFFFFF; color: #0068E8; border: 1px solid #0068E8; }
+  .td-ts-btn--outline:hover { background: #EFF5FF; color: #0053C4; border-color: #0053C4; }
+  .td-ts-btn:disabled { cursor: not-allowed; color: #586274; border-color: #C3CAD5; background: #F4F6FA; }
+
+  .td-ts-status {
+    margin: 1.25rem 0 0; padding: .75rem .875rem; border-radius: 8px;
+    border: 1px solid #E3E8EF; background: #F4F6FA;
+    font-size: .9375rem; line-height: 1.5; color: #586274;
+  }
+  .td-ts-status strong { font-family: var(--font-heading--family, inherit); color: #070E1A; }
+
+  .td-ts-aside {
+    align-self: start; min-width: 0;
+    background: #F4F6FA; border: 1px solid #E3E8EF; border-radius: 12px; padding: 1.5rem;
+  }
+  .td-ts-steps { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .875rem; }
+  .td-ts-steps li { display: flex; gap: .75rem; font-size: .9375rem; line-height: 1.6; color: #586274; }
+  .td-ts-steps strong { color: #070E1A; font-weight: 600; }
+  .td-ts-stepnum {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; margin-top: .125rem; border-radius: 999px;
+    background: #070E1A; color: #FFFFFF; font-size: .6875rem; font-weight: 700;
+  }
+  .td-ts-aside__note {
+    display: flex; gap: .5rem; align-items: flex-start; margin: 1.25rem 0 0; padding-top: 1rem;
+    border-top: 1px solid #E3E8EF; font-size: .875rem; line-height: 1.6; color: #586274;
+  }
+  .td-ts-aside__note svg { flex: none; margin-top: .2rem; color: #0068E8; }
+
+  /* ---- cards ---- */
+  .td-ts-card { min-width: 0; background: #FFFFFF; border: 1px solid #E3E8EF; border-radius: 12px; padding: 1.25rem; }
+  .td-ts-grid2, .td-ts-grid3 { display: grid; gap: 1rem; }
+  .td-ts-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; margin-bottom: 1rem; border-radius: 10px;
+    background: #EFF5FF; color: #0068E8;
+  }
+  .td-ts-note {
+    display: flex; gap: .5rem; align-items: flex-start;
+    margin: 1rem 0 0; padding: 1.25rem; border-radius: 12px;
+    background: #FFFFFF; border: 1px solid #E3E8EF;
+    font-size: .9375rem; line-height: 1.6; color: #586274;
+  }
+  .td-ts-note svg { flex: none; margin-top: .2rem; color: #0068E8; }
+  .td-ts-note strong { color: #070E1A; font-family: var(--font-heading--family, inherit); }
+
+  /* ---- the dark drawing panels: text pinned to white ---- */
+  .td-ts-panel {
+    min-width: 0; overflow: hidden; border-radius: 16px; color: #FFFFFF;
+    background: radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%);
+  }
+  .td-ts-panel__top { padding: 1.25rem; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .td-ts-panel__eyebrow {
+    margin: 0 0 .75rem; font-family: var(--font-subheading--family, inherit);
+    font-size: .75rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #00B4FC;
+  }
+  .td-ts-chips { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0; padding: 0; list-style: none; }
+  .td-ts-chip {
+    display: flex; align-items: center; gap: .625rem; padding: .5rem .75rem; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.04);
+  }
+  .td-ts-chip__n {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 999px; border: 1px solid currentColor;
+    font-family: var(--font-heading--family, inherit); font-size: .6875rem; font-weight: 700;
+  }
+  .td-ts-chip__token { display: block; font-family: var(--font-heading--family, inherit); font-size: 1.25rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .td-ts-chip__title { display: none; margin-top: .25rem; font-size: .6875rem; letter-spacing: .09em; text-transform: uppercase; color: rgba(255,255,255,.75); }
+  .td-ts-panel__draw { padding: 1.5rem 1rem; }
+  .td-ts-svg { display: block; width: 100%; height: auto; margin: 0 auto; }
+  .td-ts-svg text { font-family: var(--font-heading--family, inherit); }
+  .td-ts-svg--compact { max-width: 380px; }
+  .td-ts-svg--wide { display: none; max-width: 760px; }
+  .td-ts-caption { margin: 1rem 0 0; text-align: center; font-size: .75rem; line-height: 1.45; color: rgba(255,255,255,.75); }
+
+  /* ---- plain-English cards ---- */
+  .td-ts-parts { display: grid; gap: 1rem; margin-top: 2rem; }
+  .td-ts-part__head { display: flex; align-items: center; gap: .75rem; margin-bottom: .625rem; }
+  .td-ts-part__n {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 999px; background: #070E1A; color: #FFFFFF;
+    font-family: var(--font-heading--family, inherit); font-size: .75rem; font-weight: 700;
+  }
+  .td-ts-part__dot { flex: none; width: 10px; height: 10px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(7,14,26,.25); }
+  .td-ts-part__title-muted { color: #586274; }
+  .td-ts-part p { margin: .5rem 0 0; font-size: .9375rem; line-height: 1.6; color: #586274; }
+  .td-ts-part p:first-of-type { margin-top: 0; }
+
+  /* ---- figures ---- */
+  .td-ts-stats { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .75rem; }
+  .td-ts-stat { min-width: 0; background: #FFFFFF; border: 1px solid #E3E8EF; border-radius: 12px; padding: 1rem; }
+  .td-ts-stat__label { margin: 0 0 .375rem; font-size: .6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #586274; }
+  .td-ts-stat__value {
+    margin: 0; font-family: var(--font-heading--family, inherit); font-weight: 700;
+    font-size: 1.375rem; line-height: 1.05; letter-spacing: -.02em; color: #070E1A; font-variant-numeric: tabular-nums;
+  }
+  .td-ts-stat__sub { margin: .5rem 0 0; font-size: .8125rem; line-height: 1.4; color: #586274; }
+
+  /* ---- comparison ---- */
+  .td-ts-cmp { display: grid; gap: 1.5rem; }
+  .td-ts-cmp .td-ts-panel { align-self: start; padding: 1.25rem; }
+  .td-ts-svg--overlap { max-width: 420px; }
+  .td-ts-legend { list-style: none; margin: 1.25rem 0 0; padding: 1rem 0 0; border-top: 1px solid rgba(255,255,255,.1); display: grid; gap: .625rem; }
+  .td-ts-legend li { display: flex; align-items: center; gap: .75rem; font-size: .875rem; color: rgba(255,255,255,.85); }
+  .td-ts-legend strong { font-family: var(--font-heading--family, inherit); color: #FFFFFF; font-variant-numeric: tabular-nums; }
+  .td-ts-legend__tall { margin-left: auto; color: rgba(255,255,255,.75); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .td-ts-legend__key { flex: none; width: 28px; height: 0; }
+  .td-ts-legend__key--from { border-top: 2px dashed #E9F2FF; }
+  .td-ts-legend__key--to { border-top: 3px solid #00B4FC; }
+  .td-ts-panel .td-ts-caption { text-align: left; }
+  .td-ts-cmp__side { min-width: 0; display: grid; gap: 1rem; align-content: start; }
+  .td-ts-card__eyebrow {
+    display: flex; align-items: center; gap: .5rem; margin: 0 0 .75rem;
+    font-family: var(--font-subheading--family, inherit); font-size: .75rem; font-weight: 700;
+    letter-spacing: .09em; text-transform: uppercase; color: #0068E8;
+  }
+  .td-ts-delta { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: .625rem 0; border-bottom: 1px solid #E3E8EF; }
+  .td-ts-delta:last-child { border-bottom: 0; }
+  .td-ts-delta__label { flex: none; font-size: .875rem; color: #586274; }
+  .td-ts-delta__val { min-width: 0; text-align: right; }
+  .td-ts-delta__num { font-family: var(--font-heading--family, inherit); font-weight: 700; font-size: 1.0625rem; color: #070E1A; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .td-ts-delta__sub { display: block; font-size: .75rem; line-height: 1.4; color: #586274; font-variant-numeric: tabular-nums; }
+  .td-ts-speedo__lead { margin: 0; font-size: 1.0625rem; line-height: 1.6; color: #070E1A; }
+  .td-ts-speedo__lead b { font-family: var(--font-heading--family, inherit); font-variant-numeric: tabular-nums; }
+  .td-ts-speedo__lead .td-ts-drop { color: #0068E8; }
+  .td-ts-speedo__grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: .5rem; margin-top: 1rem; }
+  .td-ts-speedo__cell { min-width: 0; background: #F4F6FA; border-radius: 8px; padding: .75rem; }
+  .td-ts-speedo__reads { margin: 0; font-size: .6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #586274; font-variant-numeric: tabular-nums; }
+  .td-ts-speedo__num { margin: .25rem 0 0; font-family: var(--font-heading--family, inherit); font-weight: 700; font-size: 1.25rem; line-height: 1; color: #070E1A; font-variant-numeric: tabular-nums; }
+  .td-ts-speedo__unit { margin: .125rem 0 0; font-size: .75rem; color: #586274; }
+  .td-ts-fine { margin: .75rem 0 0; font-size: .8125rem; line-height: 1.45; color: #586274; }
+
+  .td-ts-verdict { margin-top: 1.5rem; padding: 1.5rem; border-radius: 16px; background: #FFFFFF; border: 1px solid #E3E8EF; }
+  .td-ts-verdict--out {
+    border: 0; color: #FFFFFF;
+    background: radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%);
+  }
+  .td-ts-badges { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .td-ts-badge {
+    display: inline-flex; align-items: center; min-height: 28px; padding: 0 .75rem; border-radius: 999px;
+    font-family: var(--font-heading--family, inherit); font-size: .8125rem; font-weight: 700;
+  }
+  .td-ts-badge--drop { background: #EFF5FF; color: #0053C4; }
+  .td-ts-badge--amber { background: #F5A623; color: #070E1A; }
+  .td-ts-badge--soft { background: #F4F6FA; color: #070E1A; box-shadow: inset 0 0 0 1px #E3E8EF; }
+  .td-ts-badge--ink { color: #FFFFFF; box-shadow: inset 0 0 0 1px rgba(255,255,255,.45); }
+  .td-ts-verdict h3 { margin-top: .75rem; font-size: 1.25rem; }
+  .td-ts-verdict--out h3 { color: #FFFFFF; }
+  .td-ts-verdict__body { max-width: 48rem; }
+  .td-ts-verdict__body p { margin: .75rem 0 0; font-size: .9375rem; line-height: 1.6; color: #586274; }
+  .td-ts-verdict--out .td-ts-verdict__body p { color: rgba(255,255,255,.82); }
+  .td-ts-verdict__body b { font-variant-numeric: tabular-nums; }
+  .td-ts-verdict--out .td-ts-verdict__body b { color: #FFFFFF; }
+
+  /* ---- shop this size ---- */
+  .td-ts-shop { display: grid; gap: 1rem; max-width: 36rem; margin: 0 auto; }
+  .td-ts-shop--two { max-width: 56rem; }
+  .td-ts-shop .td-ts-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 1.5rem; }
+  .td-ts-shop__size { margin: 0; font-family: var(--font-heading--family, inherit); font-weight: 800; font-size: 1.75rem; letter-spacing: -.02em; color: #070E1A; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .td-ts-shop__role { margin: 0 0 .25rem; font-size: .75rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: #586274; }
+  .td-ts-shop .td-ts-btn { flex: none; width: 100%; max-width: 20rem; margin-top: 1rem; }
+  .td-ts-shop__call { margin: 1.25rem 0 0; text-align: center; font-size: .9375rem; color: #586274; }
+  .td-ts-shop__call a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
+
+  /* ---- FAQ ---- */
+  .td-ts-faq { max-width: 48rem; margin: 0 auto; border-top: 1px solid #E3E8EF; }
+  .td-ts-faq details { border-bottom: 1px solid #E3E8EF; }
+  .td-ts-faq summary {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    min-height: 56px; padding: .75rem 0; cursor: pointer; list-style: none;
+    font-family: var(--font-heading--family, inherit); font-weight: 700;
+    font-size: 1.0625rem; line-height: 1.35; letter-spacing: -.01em; color: #070E1A;
+  }
+  .td-ts-faq summary::-webkit-details-marker { display: none; }
+  .td-ts-faq summary:hover { color: #0053C4; }
+  .td-ts-faq summary svg { flex: none; color: #0068E8; transition: transform .15s ease; }
+  .td-ts-faq details[open] summary svg { transform: rotate(90deg); }
+  .td-ts-faq details p { margin: 0 0 1.25rem; font-size: .9375rem; line-height: 1.65; color: #586274; }
+  .td-ts-faq__foot { max-width: 48rem; margin: 1.5rem auto 0; font-size: .9375rem; line-height: 1.9; color: #586274; }
+  .td-ts-faq__foot a { font-weight: 600; display: inline-block; padding: .625rem 0; margin: -.625rem 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .td-ts *, .td-ts *::before, .td-ts *::after { transition: none !important; }
+  }
+  @media (min-width: 640px) {
+    .td-ts-fields { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .td-ts-examples__label { width: auto; margin-right: .25rem; }
+    .td-ts-chip__title { display: block; }
+    .td-ts-shop--two { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  }
+  @media (min-width: 768px) {
+    .td-ts-inner { padding: 4.5rem 2rem; }
+    .td-ts-h3 { font-size: 1.1875rem; }
+    .td-ts-h3--lg { font-size: 1.625rem; }
+    .td-ts-panel__top { padding: 1.25rem 2rem; }
+    .td-ts-panel__draw { padding: 2rem; }
+    .td-ts-svg--compact { display: none; }
+    .td-ts-svg--wide { display: block; }
+    .td-ts-parts { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .td-ts-grid3 { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1.25rem; }
+    .td-ts-card { padding: 1.5rem; }
+    .td-ts-stat__value { font-size: 1.5rem; }
+    .td-ts-cmp .td-ts-panel { padding: 1.5rem; }
+    .td-ts-verdict { padding: 2rem; }
+    .td-ts-verdict h3 { font-size: 1.45rem; }
+    .td-ts-speedo__grid { gap: .75rem; }
+    .td-ts-speedo__lead { font-size: 1.15rem; }
+  }
+  @media (min-width: 1024px) {
+    .td-ts-tool { grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap: 3rem; }
+    .td-ts-stats { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 1rem; }
+    .td-ts-cmp { grid-template-columns: minmax(0,420px) minmax(0,1fr); gap: 2.5rem; }
+  }
+</style>
+
+<script src="{{ 'td-tiremath.js' | asset_url }}"></script>
+<script>
+  (function () {
+    "use strict";
+    var root = document.getElementById({{ uid | json }});
+    if (!root || !window.TireDrop) return;
+    var TD = window.TireDrop;
+    var UID = root.id;
+    var PHONE = "(954) 773-1896";
+    var PHONE_HREF = "tel:+19547731896";
+
+    var q = function (sel) { return root.querySelector(sel); };
+    var sizeEl = q('[data-ts="size"]');
+    var vsEl = q('[data-ts="vs"]');
+    var statusEl = q('[data-ts="status"]');
+    var swapBtn = q('[data-ts="swap"]');
+    var copyBtn = q('[data-ts="copy"]');
+    var copyLabel = q('[data-ts="copy-label"]');
+    var errEls = { size: q('[data-ts="size-err"]'), vs: q('[data-ts="vs-err"]') };
+    var inputs = { size: sizeEl, vs: vsEl };
+
+    /* ------------------------------------------------------------------
+     * Lookup tables — these lived in TireSizePage.jsx, not in tireMath.js.
+     * ------------------------------------------------------------------ */
+
+    // Load index -> kg, the ETRTO table. Only 71-126; outside it the tool
+    // says so instead of guessing.
+    var LOAD_INDEX_KG = {
+      71: 345, 72: 355, 73: 365, 74: 375, 75: 387, 76: 400, 77: 412, 78: 425, 79: 437, 80: 450,
+      81: 462, 82: 475, 83: 487, 84: 500, 85: 515, 86: 530, 87: 545, 88: 560, 89: 580, 90: 600,
+      91: 615, 92: 630, 93: 650, 94: 670, 95: 690, 96: 710, 97: 730, 98: 750, 99: 775, 100: 800,
+      101: 825, 102: 850, 103: 875, 104: 900, 105: 925, 106: 950, 107: 975, 108: 1000, 109: 1030, 110: 1060,
+      111: 1090, 112: 1120, 113: 1150, 114: 1180, 115: 1215, 116: 1250, 117: 1285, 118: 1320, 119: 1360, 120: 1400,
+      121: 1450, 122: 1500, 123: 1550, 124: 1600, 125: 1650, 126: 1700
+    };
+    var LBS_PER_KG = 2.20462;
+    function loadPounds(index) {
+      var kg = LOAD_INDEX_KG[Number(index)];
+      return kg ? Math.round(kg * LBS_PER_KG) : null;
+    }
+
+    var SPEED_RATINGS = {
+      L: { mph: 75, note: "Off-road and light-truck fitments." },
+      M: { mph: 81, note: "Temporary spares." },
+      N: { mph: 87, note: "Temporary spares." },
+      P: { mph: 93, note: "Older light-truck fitments." },
+      Q: { mph: 99, note: "Studless and studdable winter tires." },
+      R: { mph: 106, note: "Heavy-duty light-truck tires." },
+      S: { mph: 112, note: "Family sedans and vans." },
+      T: { mph: 118, note: "Family sedans, vans and crossovers." },
+      U: { mph: 124, note: "Sedans and coupes." },
+      H: { mph: 130, note: "Sport sedans and most touring tires." },
+      V: { mph: 149, note: "Sports cars and performance sedans." },
+      W: { mph: 168, note: "Exotics and high-performance cars." },
+      Y: { mph: 186, note: "Exotics." },
+      Z: { mph: null, note: "An open-ended older marking — 149 mph and up." }
+    };
+
+    var CONSTRUCTION = {
+      R: "Radial. The body plies run straight across the tire from bead to bead under a steel belt. Effectively every road tire sold today is a radial.",
+      D: "Bias ply — sometimes marked with a dash instead of a letter. The plies run diagonally. You still see this on trailer tires, classics and some off-road tires, never on a modern passenger car.",
+      B: "Belted bias. Bias plies with a belt laid over them. Rare outside trailer and vintage fitments."
+    };
+
+    var SERVICE_TYPE = {
+      P: "P is P-metric: designed and load-rated for passenger cars, including most crossovers.",
+      LT: "LT is light truck: a heavier carcass built to run at higher pressures and carry more weight. An LT tire is not interchangeable with a P tire of the same size — it has a different load rating and usually a stiffer ride.",
+      ST: "ST is special trailer: for trailer axles only. Never fit an ST tire to a driven or steered axle."
+    };
+
+    // Colours per role, used on the dark panels only.
+    var ROLE_COLOR = {
+      width: "#00B4FC", sidewall: "#F5A623", overall: "#F5A623",
+      construction: "#9FB3CC", rim: "#E9F2FF", load: "#FFFFFF", speed: "#FFFFFF"
+    };
+
+    /* ------------------------------------------------------------------
+     * Formatting
+     * ------------------------------------------------------------------ */
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      });
+    }
+    function inches(n, d) { return n.toFixed(d == null ? 2 : d) + " in"; }
+    function mm(n) { return Math.round(n) + " mm"; }
+    function commas(n) { return Math.round(n).toLocaleString("en-US"); }
+    function signed(n, d) { return (n >= 0 ? "+" : "−") + Math.abs(n).toFixed(d == null ? 1 : d); }
+    function r2(n) { return Math.round(n * 100) / 100; }
+
+    /* ------------------------------------------------------------------
+     * Reading an input. The parser answers "is this shaped like a size";
+     * the range check answers "could a road tire be this" — 999/99R99 is
+     * shaped like a size and is not one, and the page should say so rather
+     * than draw it.
+     * ------------------------------------------------------------------ */
+    var UNREADABLE = 'That is not a size we can read yet. A tire size looks like <b>215/60R16</b>, <b>LT265/70R17 121S</b> or <b>31x10.50R15</b>. Keep typing — this updates as you go.';
+
+    function implausible(g) {
+      if (g.format === "flotation") {
+        if (g.flotationDiameter < 20 || g.flotationDiameter > 60 || g.widthIn < 5 || g.widthIn > 25 || g.flotationDiameter <= g.rimDiameter + 2) {
+          return "<b>" + esc(g.normalized) + "</b> reads like a flotation size, but the numbers do not add up to a tire. The first number is the overall height in inches and has to be well above the wheel size, which is the number after the R.";
+        }
+      } else {
+        if (g.width < 105 || g.width > 455) {
+          return "<b>" + esc(g.normalized) + "</b> reads like a size, but no road tire is made " + esc(g.width) + " mm wide. The first number is the width in millimetres — usually between 135 and 355.";
+        }
+        if (g.aspect < 20 || g.aspect > 95) {
+          return "<b>" + esc(g.normalized) + "</b> reads like a size, but " + esc(g.aspect) + " is not an aspect ratio any road tire is made in. The number after the slash is usually between 30 and 80.";
+        }
+      }
+      if (g.rimDiameter < 10 || g.rimDiameter > 30) {
+        return "<b>" + esc(g.normalized) + "</b> reads like a size, but no road tire fits a " + esc(g.rimDiameter) + "-inch wheel. The number after the R is the wheel size in inches — usually between 14 and 22.";
+      }
+      return null;
+    }
+
+    function readSize(raw) {
+      var t = String(raw || "").trim();
+      if (!t) return { empty: true, geo: null, error: null };
+      var g = TD.sizeGeometry(t);
+      if (!g) return { geo: null, error: UNREADABLE };
+      var bad = implausible(g);
+      if (bad) return { geo: null, error: bad };
+      return { geo: g, error: null };
+    }
+
+    /* ------------------------------------------------------------------
+     * Decoding the marking into labelled parts (reading order).
+     * ------------------------------------------------------------------ */
+    function decodeParts(geo) {
+      var parts = [];
+      if (geo.format === "flotation") {
+        parts.push({
+          role: "overall", token: String(geo.flotationDiameter), title: "Overall diameter",
+          short: geo.flotationDiameter + " in tall",
+          lines: [
+            geo.flotationDiameter + " means the tire stands " + geo.flotationDiameter + " inches tall, stated outright.",
+            "Flotation sizes skip the aspect ratio entirely — the first number is the diameter, not a width. That is why a 33-inch tire is called a 33."
+          ]
+        });
+        parts.push({
+          role: "width", token: String(geo.widthIn), title: "Section width",
+          short: geo.widthIn + " in · " + mm(geo.width),
+          lines: [
+            geo.widthIn + " is the width across the tire in inches — " + mm(geo.width) + " if you prefer metric.",
+            "Measured sidewall to sidewall on a mounted, inflated tire, not across the tread blocks."
+          ]
+        });
+      } else {
+        parts.push({
+          role: "width", token: String(geo.width), title: "Section width",
+          short: geo.width + " mm · " + geo.sectionWidthIn.toFixed(1) + " in",
+          lines: [
+            geo.width + " is the width in millimetres — " + inches(geo.sectionWidthIn, 1) + " across.",
+            "It is measured sidewall to sidewall on a mounted, inflated tire, so the tread itself is usually a little narrower than this number."
+          ]
+        });
+        parts.push({
+          role: "sidewall", token: String(geo.aspect), title: "Aspect ratio",
+          short: geo.aspect + "% → " + mm(geo.sidewallMm) + " of sidewall",
+          lines: [
+            geo.aspect + " means the sidewall is " + geo.aspect + "% of the tread width — so " + mm(geo.sidewallMm) + " tall, or " + inches(geo.sidewallIn) + ".",
+            "It is a ratio, not a measurement. The same 60 on a wider tire gives you a taller sidewall, which is why two 60-series tires can be completely different heights."
+          ]
+        });
+      }
+
+      parts.push({
+        role: "construction", token: geo.construction, title: "Construction",
+        short: geo.construction === "R" ? "R — radial" : geo.construction + " — bias",
+        lines: [CONSTRUCTION[geo.construction] || "An unusual construction letter. Check the tire's spec sheet."]
+      });
+
+      parts.push({
+        role: "rim", token: String(geo.rimDiameter), title: "Wheel diameter",
+        short: geo.rimDiameter + " in bead to bead",
+        lines: [
+          "This tire fits a " + geo.rimDiameter + "-inch wheel, measured bead seat to bead seat — not the outside edge of the rim.",
+          "This is the one number with no tolerance at all. A 16-inch tire does not go on a 17-inch wheel, at any price."
+        ]
+      });
+
+      if (geo.loadIndex) {
+        var lbs = loadPounds(geo.loadIndex);
+        parts.push({
+          role: "load", token: String(geo.loadIndex), title: "Load index",
+          short: lbs ? commas(lbs) + " lbs per tire" : "outside our table",
+          lines: lbs ? [
+            "Load index " + geo.loadIndex + " carries " + commas(lbs) + " lbs at its rated pressure — " + commas(lbs * 4) + " lbs across four tires.",
+            "Match or beat the index on your door placard. A lower one is not a saving, it is a smaller tire carrying your car."
+          ] : [
+            "Index " + geo.loadIndex + " sits outside the 71–126 table we publish here, so we are not going to put a pounds figure on it.",
+            "The exact rating is printed on the tire's spec sheet and stamped on the sidewall itself."
+          ]
+        });
+      }
+
+      if (geo.speedRating) {
+        var sr = SPEED_RATINGS[geo.speedRating];
+        parts.push({
+          role: "speed", token: geo.speedRating, title: "Speed rating",
+          short: sr && sr.mph ? "up to " + sr.mph + " mph" : "149 mph and up",
+          lines: sr ? [
+            sr.mph
+              ? geo.speedRating + " is certified to " + sr.mph + " mph. " + sr.note
+              : geo.speedRating + " is an open-ended marking from before the W and Y ratings existed: 149 mph and above. If there is a W or a Y next to it, that letter is the real ceiling.",
+            "The rating describes how the tire sheds heat at sustained speed. It is a limit, not an invitation."
+          ] : [
+            geo.speedRating + " is not in our table. The certified speed is on the tire's spec sheet."
+          ]
+        });
+      }
+
+      return parts.map(function (p, i) { p.n = i + 1; p.color = ROLE_COLOR[p.role]; return p; });
+    }
+
+    /* ------------------------------------------------------------------
+     * The sidewall diagram — a cut through tire and wheel, drawn from the
+     * geometry at one scale. Two versions: the phone keeps the drawing big
+     * and reads its labels from the numbered cards underneath.
+     * ------------------------------------------------------------------ */
+    function diagramGeometry(geo, labelled) {
+      var tireH = labelled ? 300 : 244;
+      var padY = labelled ? 38 : 20;
+      var width = labelled ? 660 : 260;
+      var cx = labelled ? 292 : 130;
+      var cy = padY + tireH / 2;
+      var k = tireH / geo.overallDiameter;
+      var R = tireH / 2;
+      var rr = (geo.rimDiameter * k) / 2;
+      var hw = (geo.sectionWidthIn * k) / 2;
+      return {
+        width: width, height: tireH + padY * 2, cx: cx, cy: cy, R: R, rr: rr, hw: hw,
+        rimHw: hw * 0.8, top: cy - R, bot: cy + R, bead: cy - rr, beadBot: cy + rr,
+        midUp: (cy - R + (cy - rr)) / 2, midLo: (cy + rr + (cy + R)) / 2, sectionH: R - rr
+      };
+    }
+
+    function tireBodyPath(d) {
+      var cx = d.cx, hw = d.hw, rimHw = d.rimHw, top = d.top, bead = d.bead, midUp = d.midUp;
+      var h = bead - top;
+      return [
+        "M", r2(cx - rimHw), r2(bead),
+        "C", r2(cx - hw * 0.99), r2(bead - h * 0.05), r2(cx - hw), r2(midUp + h * 0.24), r2(cx - hw), r2(midUp),
+        "C", r2(cx - hw), r2(midUp - h * 0.26), r2(cx - hw * 0.99), r2(top + h * 0.2), r2(cx - hw * 0.86), r2(top + h * 0.05),
+        "Q", r2(cx - hw * 0.8), r2(top), r2(cx - hw * 0.7), r2(top),
+        "L", r2(cx + hw * 0.7), r2(top),
+        "Q", r2(cx + hw * 0.8), r2(top), r2(cx + hw * 0.86), r2(top + h * 0.05),
+        "C", r2(cx + hw * 0.99), r2(top + h * 0.2), r2(cx + hw), r2(midUp - h * 0.26), r2(cx + hw), r2(midUp),
+        "C", r2(cx + hw), r2(midUp + h * 0.24), r2(cx + hw * 0.99), r2(bead - h * 0.05), r2(cx + rimHw), r2(bead),
+        "Z"
+      ].join(" ");
+    }
+
+    function dimLine(x1, y1, x2, y2, color) {
+      var vertical = Math.abs(x2 - x1) < 0.01;
+      var a = 5.5, t = 6;
+      var heads = vertical
+        ? ["M " + r2(x1) + " " + r2(y1) + " l " + (-a * 0.6) + " " + a + " l " + (a * 1.2) + " 0 Z",
+           "M " + r2(x2) + " " + r2(y2) + " l " + (-a * 0.6) + " " + (-a) + " l " + (a * 1.2) + " 0 Z"]
+        : ["M " + r2(x1) + " " + r2(y1) + " l " + a + " " + (-a * 0.6) + " l 0 " + (a * 1.2) + " Z",
+           "M " + r2(x2) + " " + r2(y2) + " l " + (-a) + " " + (-a * 0.6) + " l 0 " + (a * 1.2) + " Z"];
+      var ticks = vertical
+        ? line(x1 - t, y1, x1 + t, y1) + line(x2 - t, y2, x2 + t, y2)
+        : line(x1, y1 - t, x1, y1 + t) + line(x2, y2 - t, x2, y2 + t);
+      return '<g stroke="' + color + '" fill="' + color + '">' + line(x1, y1, x2, y2) +
+        heads.map(function (p) { return '<path d="' + p + '" stroke="none"/>'; }).join("") + ticks + "</g>";
+      function line(ax, ay, bx, by) {
+        return '<line x1="' + r2(ax) + '" y1="' + r2(ay) + '" x2="' + r2(bx) + '" y2="' + r2(by) + '" stroke-width="1.4"/>';
+      }
+    }
+
+    var LABEL_SLOT = {
+      width: { side: "left", y: 76 }, rim: { side: "left", y: 200 }, load: { side: "left", y: 318 },
+      sidewall: { side: "right", y: 76 }, overall: { side: "right", y: 76 },
+      construction: { side: "right", y: 196 }, speed: { side: "right", y: 318 }
+    };
+
+    function sidewallSvg(geo, parts, labelled) {
+      var d = diagramGeometry(geo, labelled);
+      var id = UID + (labelled ? "-wide" : "-compact");
+      var badgeR = labelled ? 11 : 12;
+      var grooveH = Math.max(2, (d.bead - d.top) * 0.16);
+      var flangeH = Math.max(3.5, d.rr * 0.09);
+      var s = [];
+
+      function anchorFor(role) {
+        switch (role) {
+          case "width": return [d.cx - d.hw, d.midUp];
+          case "sidewall": return [d.cx + d.hw + 14, d.midUp];
+          case "overall": return [d.cx + d.hw + 14, d.cy - d.R * 0.5];
+          case "rim": return [d.cx - d.rimHw * 0.8, d.cy];
+          case "construction": return [d.cx + d.hw * 0.9, d.bead - d.sectionH * 0.35];
+          case "load": return [d.cx - d.hw * 0.88, d.midLo];
+          case "speed": return [d.cx + d.hw * 0.88, d.midLo];
+          default: return [d.cx, d.cy];
+        }
+      }
+      function compactY(role) {
+        switch (role) {
+          case "width": case "sidewall": case "overall": return d.midUp;
+          case "rim": return d.cy;
+          case "construction": return d.cy - d.rr * 0.55;
+          default: return d.midLo;
+        }
+      }
+      var leftBadgeX = labelled ? 198 : d.cx - d.hw - 34;
+      var rightBadgeX = labelled ? 394 : d.cx + d.hw + 34;
+      var label = "Cross-section of a " + geo.normalized + " tire, " + inches(geo.overallDiameter) + " tall on a " +
+        geo.rimDiameter + "-inch wheel, " + inches(geo.sectionWidthIn, 1) + " wide with " + inches(geo.sidewallIn) +
+        " of sidewall, drawn to scale with its section width, sidewall height and wheel diameter marked. Each numbered callout is explained in the list below.";
+
+      s.push('<svg class="td-ts-svg td-ts-svg--' + (labelled ? "wide" : "compact") + '" viewBox="0 0 ' + d.width + " " + d.height +
+        '" role="img" aria-labelledby="' + id + '-t" focusable="false">');
+      s.push('<title id="' + id + '-t">' + esc(label) + "</title>");
+      s.push('<defs><linearGradient id="' + id + '-rubber" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22344C"/><stop offset="100%" stop-color="#0B1524"/></linearGradient>' +
+        '<linearGradient id="' + id + '-rim" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2C3F58"/><stop offset="45%" stop-color="#4C6081"/><stop offset="100%" stop-color="#24354C"/></linearGradient></defs>');
+
+      // the wheel: two rim bands joined by the disc
+      s.push('<g aria-hidden="true">');
+      [false, true].forEach(function (flip) {
+        s.push("<g" + (flip ? ' transform="translate(0 ' + r2(2 * d.cy) + ') scale(1 -1)"' : "") + ">");
+        s.push('<rect x="' + r2(d.cx - d.rimHw) + '" y="' + r2(d.bead) + '" width="' + r2(d.rimHw * 2) + '" height="' + r2(flangeH) + '" fill="url(#' + id + '-rim)"/>');
+        [d.cx - d.rimHw, d.cx + d.rimHw - flangeH * 0.85].forEach(function (fx) {
+          s.push('<rect x="' + r2(fx) + '" y="' + r2(d.bead - flangeH * 0.5) + '" width="' + r2(flangeH * 0.85) + '" height="' + r2(flangeH * 1.55) + '" rx="' + r2(flangeH * 0.3) + '" fill="#6B819F"/>');
+        });
+        s.push("</g>");
+      });
+      s.push('<rect x="' + r2(d.cx - Math.max(3, d.rimHw * 0.2)) + '" y="' + r2(d.bead) + '" width="' + r2(Math.max(6, d.rimHw * 0.4)) + '" height="' + r2(d.rr * 2) + '" fill="#2B3E58"/>');
+      s.push('<rect x="' + r2(d.cx - d.rimHw * 0.46) + '" y="' + r2(d.cy - d.rr * 0.34) + '" width="' + r2(d.rimHw * 0.92) + '" height="' + r2(d.rr * 0.68) + '" rx="' + r2(Math.max(2, d.rimHw * 0.12)) + '" fill="#374D69"/>');
+      [-1, 1].forEach(function (sgn) {
+        s.push('<circle cx="' + r2(d.cx) + '" cy="' + r2(d.cy + sgn * d.rr * 0.2) + '" r="' + r2(Math.max(1.6, d.rimHw * 0.075)) + '" fill="#0A1322"/>');
+      });
+      s.push('<circle cx="' + r2(d.cx) + '" cy="' + r2(d.cy) + '" r="' + r2(d.rimHw * 0.3) + '" fill="#22344C" stroke="#8296B0" stroke-width="1.2"/>');
+
+      // the rubber: upper section, then mirrored
+      var body = tireBodyPath(d);
+      [false, true].forEach(function (flip) {
+        s.push("<g" + (flip ? ' transform="translate(0 ' + r2(2 * d.cy) + ') scale(1 -1)"' : "") + ">");
+        s.push('<path d="' + body + '" fill="url(#' + id + '-rubber)" stroke="#5C6E88" stroke-width="1"/>');
+        var beltY = r2(d.top + (d.bead - d.top) * 0.26);
+        s.push('<line x1="' + r2(d.cx - d.hw * 0.84) + '" y1="' + beltY + '" x2="' + r2(d.cx + d.hw * 0.84) + '" y2="' + beltY + '" stroke="#7E93B0" stroke-width="1" stroke-opacity="0.5"/>');
+        [-0.44, -0.15, 0.15, 0.44].forEach(function (f) {
+          s.push('<rect x="' + r2(d.cx + f * d.hw - 1.8) + '" y="' + r2(d.top + 0.6) + '" width="3.6" height="' + r2(grooveH) + '" rx="1.6" fill="#060D18" opacity="0.85"/>');
+        });
+        s.push("</g>");
+      });
+
+      // dimension arrows
+      parts.forEach(function (p) {
+        if (p.role === "width") s.push(dimLine(d.cx - d.hw, d.midUp, d.cx + d.hw, d.midUp, p.color));
+        else if (p.role === "sidewall") s.push(dimLine(d.cx + d.hw + 14, d.top, d.cx + d.hw + 14, d.bead, p.color));
+        else if (p.role === "overall") s.push(dimLine(d.cx + d.hw + 14, d.top, d.cx + d.hw + 14, d.bot, p.color));
+        else if (p.role === "rim") s.push(dimLine(d.cx - d.rimHw * 0.8, d.bead, d.cx - d.rimHw * 0.8, d.beadBot, p.color));
+      });
+
+      // callouts
+      parts.forEach(function (p) {
+        var slot = LABEL_SLOT[p.role];
+        if (!slot) return;
+        var an = anchorFor(p.role), ax = an[0], ay = an[1];
+        var left = slot.side === "left";
+        var badgeX = left ? leftBadgeX : rightBadgeX;
+        var badgeY = labelled ? slot.y - 5 : compactY(p.role);
+        var elbowX = ax + (left ? -10 : 10);
+        var dotted = p.role === "construction" || p.role === "load" || p.role === "speed";
+        var pts = [[ax, ay], [elbowX, ay], [badgeX + (left ? badgeR + 3 : -(badgeR + 3)), badgeY]]
+          .map(function (pt) { return r2(pt[0]) + "," + r2(pt[1]); }).join(" ");
+        s.push('<polyline points="' + pts + '" fill="none" stroke="' + p.color + '" stroke-width="1.1" stroke-linejoin="round"' + (dotted ? ' stroke-dasharray="3 3"' : "") + ' opacity="0.8"/>');
+        s.push('<circle cx="' + r2(badgeX) + '" cy="' + r2(badgeY) + '" r="' + badgeR + '" fill="#070E1A" stroke="' + p.color + '" stroke-width="1.6"/>');
+        s.push('<text x="' + r2(badgeX) + '" y="' + r2(badgeY) + '" text-anchor="middle" dominant-baseline="central" fill="' + p.color + '" font-size="' + r2(badgeR * 1.18) + '" font-weight="800">' + p.n + "</text>");
+        if (labelled) {
+          var tx = left ? badgeX - badgeR - 8 : badgeX + badgeR + 8;
+          var anchor = left ? "end" : "start";
+          s.push('<text x="' + r2(tx) + '" y="' + slot.y + '" text-anchor="' + anchor + '" fill="' + p.color + '" font-size="15" font-weight="800">' + esc(p.title) + "</text>");
+          s.push('<text x="' + r2(tx) + '" y="' + (slot.y + 18) + '" text-anchor="' + anchor + '" fill="#FFFFFF" fill-opacity="0.78" font-size="12.5">' + esc(p.short) + "</text>");
+        }
+      });
+      s.push("</g></svg>");
+      return s.join("");
+    }
+
+    /* ------------------------------------------------------------------
+     * The overlap drawing: both tires at one scale on one ground line.
+     * ------------------------------------------------------------------ */
+    function overlapSvg(from, to) {
+      var W = 320;
+      var tallest = Math.max(from.overallDiameter, to.overallDiameter);
+      var k = 232 / tallest;
+      var ground = 18 + 232;
+      var H = ground + 66;
+      var cx = 158;
+      function circ(g) {
+        return { r: (g.overallDiameter * k) / 2, rimR: (g.rimDiameter * k) / 2, cy: ground - (g.overallDiameter * k) / 2, halfW: (g.sectionWidthIn * k) / 2 };
+      }
+      var a = circ(from), b = circ(to);
+      var label = from.normalized + " (" + inches(from.overallDiameter) + " tall) and " + to.normalized + " (" + inches(to.overallDiameter) +
+        " tall) drawn at the same scale, both sitting on the ground, with their tread widths shown as bars underneath.";
+      var s = [];
+      s.push('<svg class="td-ts-svg td-ts-svg--overlap" viewBox="0 0 ' + W + " " + H + '" role="img" aria-labelledby="' + UID + '-ov-t" focusable="false">');
+      s.push('<title id="' + UID + '-ov-t">' + esc(label) + "</title><g aria-hidden=\"true\">");
+      s.push('<line x1="8" y1="' + ground + '" x2="' + (W - 8) + '" y2="' + ground + '" stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="1.5"/>');
+      s.push('<g stroke="#FFFFFF" stroke-opacity="0.16" stroke-width="1">');
+      for (var i = 0; i < 22; i++) { var hx = 12 + i * 14; s.push('<line x1="' + hx + '" y1="' + ground + '" x2="' + (hx - 6) + '" y2="' + (ground + 6) + '"/>'); }
+      s.push("</g>");
+      s.push('<g fill="none" stroke="#E9F2FF"><circle cx="' + cx + '" cy="' + r2(a.cy) + '" r="' + r2(a.r) + '" stroke-width="2" stroke-dasharray="6 4"/>' +
+        '<circle cx="' + cx + '" cy="' + r2(a.cy) + '" r="' + r2(a.rimR) + '" stroke-width="1.2" stroke-opacity="0.55" stroke-dasharray="4 3"/></g>');
+      s.push('<circle cx="' + cx + '" cy="' + r2(a.cy) + '" r="' + r2(a.r) + '" fill="#E9F2FF" fill-opacity="0.05"/>');
+      s.push('<circle cx="' + cx + '" cy="' + r2(b.cy) + '" r="' + r2(b.r) + '" fill="#00B4FC" fill-opacity="0.1"/>');
+      s.push('<g fill="none" stroke="#00B4FC"><circle cx="' + cx + '" cy="' + r2(b.cy) + '" r="' + r2(b.r) + '" stroke-width="2.2"/>' +
+        '<circle cx="' + cx + '" cy="' + r2(b.cy) + '" r="' + r2(b.rimR) + '" stroke-width="1.4" stroke-opacity="0.6"/></g>');
+      s.push('<line x1="14" y1="' + r2(a.cy) + '" x2="' + (W - 40) + '" y2="' + r2(a.cy) + '" stroke="#E9F2FF" stroke-width="1" stroke-opacity="0.45" stroke-dasharray="5 4"/>');
+      s.push('<line x1="14" y1="' + r2(b.cy) + '" x2="' + (W - 40) + '" y2="' + r2(b.cy) + '" stroke="#00B4FC" stroke-width="1.2" stroke-opacity="0.8" stroke-dasharray="5 4"/>');
+      if (Math.abs(a.cy - b.cy) > 3) s.push(dimLine(W - 26, a.cy, W - 26, b.cy, "#F5A623"));
+      s.push('<rect x="' + r2(cx - a.halfW) + '" y="' + (ground + 20) + '" width="' + r2(a.halfW * 2) + '" height="9" rx="3" fill="#E9F2FF" fill-opacity="0.55"/>');
+      s.push('<rect x="' + r2(cx - b.halfW) + '" y="' + (ground + 36) + '" width="' + r2(b.halfW * 2) + '" height="9" rx="3" fill="#00B4FC"/>');
+      s.push("</g></svg>");
+      return s.join("");
+    }
+
+    /* ------------------------------------------------------------------
+     * Band renderers
+     * ------------------------------------------------------------------ */
+    var INFO_ICON = '<svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
+    var WARN_ICON = '<svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
+    var GAUGE_ICON = '<svg aria-hidden="true" focusable="false" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>';
+
+    function head(eyebrow, title, lede, hid) {
+      return '<div class="td-ts-head"><p class="td-ts-eyebrow">' + esc(eyebrow) + '</p><h2 class="td-ts-h2 td-ts-tnum" id="' + hid + '">' + esc(title) + "</h2>" +
+        (lede ? '<p class="td-ts-lede">' + esc(lede) + "</p>" : "") + "</div>";
+    }
+
+    function renderDecoded(geo, parts, serviceTyped) {
+      var h = [];
+      h.push(head("Decoded", geo.normalized + ", drawn to its own proportions",
+        "The drawing below is built from the size you typed — the sidewall really is that tall next to that wheel, and a wider tire really is drawn wider.", UID + "-dec"));
+      h.push('<div class="td-ts-panel"><div class="td-ts-panel__top"><p class="td-ts-panel__eyebrow">The marking, part by part</p><ul class="td-ts-chips">');
+      parts.forEach(function (p) {
+        h.push('<li class="td-ts-chip" style="color:' + p.color + '"><span class="td-ts-chip__n" aria-hidden="true">' + p.n + "</span><span>" +
+          '<span class="td-ts-chip__token">' + esc(p.token) + '<span class="td-ts-sr">, ' + esc(p.title) + "</span></span>" +
+          '<span class="td-ts-chip__title" aria-hidden="true">' + esc(p.title) + "</span></span></li>");
+      });
+      h.push('</ul></div><div class="td-ts-panel__draw">');
+      h.push(sidewallSvg(geo, parts, false));
+      h.push(sidewallSvg(geo, parts, true));
+      h.push('<p class="td-ts-caption">A cut through the tire and wheel. Drawn from your size at a single scale — proportions are real, the tread pattern is not.</p></div></div>');
+
+      h.push('<div class="td-ts-parts">');
+      parts.forEach(function (p) {
+        h.push('<div class="td-ts-card td-ts-part"><div class="td-ts-part__head"><span class="td-ts-part__n" aria-hidden="true">' + p.n + "</span>" +
+          '<span class="td-ts-part__dot" aria-hidden="true" style="background:' + p.color + '"></span>' +
+          '<h3 class="td-ts-h3"><span class="td-ts-tnum">' + esc(p.token) + '</span> <span class="td-ts-part__title-muted">— ' + esc(p.title) + "</span></h3></div>");
+        p.lines.forEach(function (line) { h.push("<p>" + esc(line) + "</p>"); });
+        h.push("</div>");
+      });
+      h.push("</div>");
+
+      if (serviceTyped && SERVICE_TYPE[serviceTyped]) {
+        h.push('<p class="td-ts-note"><span><strong>You also typed ' + esc(serviceTyped) + ".</strong> " + esc(SERVICE_TYPE[serviceTyped]) + "</span></p>");
+      }
+      if (geo.format === "metric" && (!geo.loadIndex || !geo.speedRating)) {
+        var missing = !geo.loadIndex && !geo.speedRating ? "load index or speed rating" : !geo.loadIndex ? "load index" : "speed rating";
+        h.push('<p class="td-ts-note">' + INFO_ICON + "<span>You did not type a " + missing +
+          ', so we have not guessed one. They are the two characters printed just after the wheel size — the <strong class="td-ts-tnum">95H</strong> in <strong class="td-ts-tnum">' +
+          esc(geo.normalized) + " 95H</strong>. Add them and this page will decode those too.</span></p>");
+      }
+      return h.join("");
+    }
+
+    function stat(label, value, sub, key) {
+      return '<div class="td-ts-stat" data-stat="' + key + '"><p class="td-ts-stat__label">' + esc(label) + '</p><p class="td-ts-stat__value">' + esc(value) +
+        '</p><p class="td-ts-stat__sub">' + esc(sub) + "</p></div>";
+    }
+
+    function renderFigures(geo, loadFrom) {
+      var sr = geo.speedRating ? SPEED_RATINGS[geo.speedRating] : null;
+      var h = [];
+      h.push(head("The figures behind it", "What that size works out to",
+        "Everything here is derived from the marking. These are nominal, free-standing dimensions — the numbers the size describes.", UID + "-fig"));
+      h.push('<div class="td-ts-stats">');
+      h.push(stat("Overall diameter", inches(geo.overallDiameter), mm(geo.overallDiameter * 25.4) + " — how tall the tire stands", "overall"));
+      h.push(stat("Sidewall height", inches(geo.sidewallIn), mm(geo.sidewallMm) + " from the rim flange to the tread", "sidewall"));
+      h.push(stat("Section width", inches(geo.sectionWidthIn), mm(geo.sectionWidthMm) + " across at the widest point", "width"));
+      h.push(stat("Circumference", inches(geo.circumference, 1), "The distance covered in one full turn of the wheel", "circumference"));
+      h.push(stat("Revolutions per mile", commas(geo.revsPerMile), "Unloaded. A tire squats under the weight of the car, so the real figure runs a little higher.", "revs"));
+      h.push(stat("Wheel it fits", geo.rimDiameter + " in", "Bead seat to bead seat. No tolerance on this one.", "rim"));
+      h.push(stat("Load index",
+        geo.loadIndex ? (loadFrom ? commas(loadFrom) + " lbs" : geo.loadIndex) : "—",
+        geo.loadIndex ? (loadFrom ? "Index " + geo.loadIndex + ", per tire — " + commas(loadFrom * 4) + " lbs on four" : "Outside the table we publish — see the tire's spec sheet") : "Not in what you typed",
+        "load"));
+      h.push(stat("Speed rating",
+        geo.speedRating ? (sr && sr.mph ? sr.mph + " mph" : geo.speedRating) : "—",
+        geo.speedRating ? "Rating " + geo.speedRating + " — a heat limit, not a target" : "Not in what you typed",
+        "speed"));
+      h.push("</div>");
+      return h.join("");
+    }
+
+    function delta(label, value, sub, key) {
+      return '<div class="td-ts-delta" data-delta="' + key + '"><span class="td-ts-delta__label">' + esc(label) + '</span><span class="td-ts-delta__val"><span class="td-ts-delta__num">' +
+        esc(value) + '</span><span class="td-ts-delta__sub">' + esc(sub) + "</span></span></div>";
+    }
+
+    function renderCompare(cmp, loadFrom, loadTo) {
+      var h = [];
+      h.push(head("Side by side", cmp.from.normalized + " against " + cmp.to.normalized,
+        "Both tires below are drawn at the same scale, sitting on the same ground. The difference you can see is the difference you would get.", UID + "-cmp"));
+      h.push('<div class="td-ts-cmp"><div class="td-ts-panel">' + overlapSvg(cmp.from, cmp.to));
+      h.push('<ul class="td-ts-legend">' +
+        '<li><span class="td-ts-legend__key td-ts-legend__key--from" aria-hidden="true"></span><strong>' + esc(cmp.from.normalized) + '</strong><span class="td-ts-legend__tall">' + inches(cmp.from.overallDiameter) + " tall</span></li>" +
+        '<li><span class="td-ts-legend__key td-ts-legend__key--to" aria-hidden="true"></span><strong>' + esc(cmp.to.normalized) + '</strong><span class="td-ts-legend__tall">' + inches(cmp.to.overallDiameter) + " tall</span></li></ul>");
+      h.push('<p class="td-ts-caption">Circles are the tires and their wheels. The bars underneath are the tread widths at the same scale.</p></div>');
+
+      h.push('<div class="td-ts-cmp__side"><div class="td-ts-card"><p class="td-ts-card__eyebrow">What changes</p>');
+      h.push(delta("Overall diameter", signed(cmp.diameterChange, 2) + "%", signed(cmp.diameterChangeIn, 2) + " in", "diameter"));
+      h.push(delta("Ground clearance", signed(cmp.clearanceChangeIn, 2) + " in", "Half the diameter change — the axle moves by the change in radius", "clearance"));
+      h.push(delta("Section width", signed(cmp.widthChangeMm, 0) + " mm", signed(cmp.widthChangeMm / 25.4, 2) + " in across", "width"));
+      h.push(delta("Sidewall height", signed(cmp.sidewallChangeIn, 2) + " in", signed(cmp.sidewallChangeIn * 25.4, 0) + " mm of sidewall", "sidewall"));
+      h.push(delta("Revolutions per mile", signed(cmp.revsChange, 2) + "%", commas(cmp.from.revsPerMile) + " → " + commas(cmp.to.revsPerMile) + ", unloaded", "revs"));
+      h.push("</div>");
+
+      h.push('<div class="td-ts-card" data-ts-speedo><p class="td-ts-card__eyebrow">' + GAUGE_ICON + "Your speedometer</p>");
+      h.push('<p class="td-ts-speedo__lead">At an indicated <b>60</b> you would really be doing <b class="td-ts-drop" data-speedo-lead>' + cmp.actualAt(60).toFixed(1) + "</b> mph.</p>");
+      h.push('<div class="td-ts-speedo__grid">');
+      [30, 60, 75].forEach(function (mph) {
+        h.push('<div class="td-ts-speedo__cell"><p class="td-ts-speedo__reads">Reads ' + mph + '</p><p class="td-ts-speedo__num" data-speedo="' + mph + '">' + cmp.actualAt(mph).toFixed(1) +
+          '</p><p class="td-ts-speedo__unit">actual mph</p></div>');
+      });
+      h.push('</div><p class="td-ts-fine">Calculated from nominal diameters. A loaded tire sits slightly shorter than its free diameter, so the real error is usually a shade smaller than this.</p></div></div></div>');
+
+      // Verdict
+      var ok = cmp.withinTolerance;
+      h.push('<div class="td-ts-verdict' + (ok ? "" : " td-ts-verdict--out") + '" data-verdict="' + (ok ? "inside" : "outside") + '"><div class="td-ts-badges">');
+      h.push(ok ? '<span class="td-ts-badge td-ts-badge--drop">Inside ±' + cmp.tolerance + "%</span>" : '<span class="td-ts-badge td-ts-badge--amber">Outside ±' + cmp.tolerance + "%</span>");
+      if (!cmp.sameRim) h.push('<span class="td-ts-badge ' + (ok ? "td-ts-badge--soft" : "td-ts-badge--ink") + '">Different wheel size</span>');
+      h.push("</div>");
+      h.push('<h3 class="td-ts-h3">' + (ok
+        ? "Diameter moves " + signed(cmp.diameterChange, 1) + "% — inside the window the industry works to."
+        : "Diameter moves " + signed(cmp.diameterChange, 1) + "% — past the " + cmp.tolerance + "% most fitment guides stop at.") + "</h3>");
+      h.push('<div class="td-ts-verdict__body">');
+      if (ok) {
+        h.push("<p>Your speedometer would read about <b>" + Math.abs(cmp.speedoErrorAt60).toFixed(1) + " mph</b> " + (cmp.speedoErrorAt60 >= 0 ? "low" : "high") +
+          " at an indicated 60, and your odometer by the same proportion. Ground clearance changes by " + signed(cmp.clearanceChangeIn, 2) + " in.</p>");
+      } else {
+        h.push("<p>Your speedometer, odometer, ABS and traction control all work off wheel rotation, so all of them would now be reading " + Math.abs(cmp.diameterChange).toFixed(1) +
+          "% out. At an indicated 60 you would be doing <b>" + cmp.actualAt(60).toFixed(1) + "</b>, and every mile logged would be off by the same margin.</p>");
+      }
+      if (!cmp.sameRim) {
+        h.push("<p>These are different wheel diameters — <b>" + esc(cmp.from.rimDiameter) + " in</b> against <b>" + esc(cmp.to.rimDiameter) +
+          " in</b>. This is a wheel change, not just a tire change: the new size will not mount on the wheels you have now.</p>");
+      }
+      if (loadFrom && loadTo && loadTo < loadFrom) {
+        h.push("<p>The replacement also carries less: <b>" + commas(loadTo) + " lbs</b> per tire against <b>" + commas(loadFrom) + " lbs</b>. Do not go below the load index on your door placard.</p>");
+      }
+      h.push("<p>We are not going to tell you this swap is safe, because a size calculator cannot see your car. It does not know your wheel width, your offset, how much room is in the arches, or how far the suspension travels. Check clearance at full steering lock and over full suspension travel, and check the placard in your driver's door jamb and your owner's manual for the sizes and load ratings your car was built for.</p>");
+      h.push("</div></div>");
+      return h.join("");
+    }
+
+    function shopCard(g, role) {
+      var href = "/search?q=" + encodeURIComponent(g.normalized) + "&type=product";
+      return '<div class="td-ts-card">' + (role ? '<p class="td-ts-shop__role">' + esc(role) + "</p>" : "") +
+        '<p class="td-ts-shop__size">' + esc(g.normalized) + "</p>" +
+        '<a class="td-ts-btn td-ts-btn--primary" data-shop="' + esc(g.normalized) + '" href="' + esc(href) + '" aria-label="See tires in this size: ' + esc(g.normalized) + '">See tires in this size</a></div>';
+    }
+
+    function renderShop(geo, vsGeo) {
+      var two = vsGeo && vsGeo.normalized !== geo.normalized;
+      var h = [];
+      h.push(head("Shop this size", two ? "Tires in these sizes" : "Tires in " + geo.normalized, null, UID + "-shop"));
+      h.push('<div class="td-ts-shop' + (two ? " td-ts-shop--two" : "") + '">');
+      h.push(shopCard(geo, two ? "On the car now" : null));
+      if (two) h.push(shopCard(vsGeo, "The one you are considering"));
+      h.push("</div>");
+      h.push('<p class="td-ts-shop__call">Or call <a href="' + PHONE_HREF + '">' + PHONE + "</a> and we will look the size up.</p>");
+      return h.join("");
+    }
+
+    /* ------------------------------------------------------------------
+     * State <-> URL, and the render loop
+     * ------------------------------------------------------------------ */
+    var bands = {};
+    Array.prototype.forEach.call(root.querySelectorAll("[data-band]"), function (el) { bands[el.getAttribute("data-band")] = el; });
+    function fill(name, html) {
+      var band = bands[name];
+      if (html == null) { band.hidden = true; band.querySelector("[data-fill]").innerHTML = ""; band.removeAttribute("aria-labelledby"); return; }
+      band.querySelector("[data-fill]").innerHTML = html;
+      band.hidden = false;
+      var h2 = band.querySelector("h2[id]");
+      if (h2) band.setAttribute("aria-labelledby", h2.id);
+    }
+    function stripe() {
+      // Alternate white and fog down whatever bands are showing.
+      var n = 0;
+      ["input", "decoded", "figures", "compare", "shop", "how", "faq"].forEach(function (k) {
+        var b = bands[k];
+        if (!b || b.hidden) return;
+        b.classList.toggle("td-ts-band--alt", n % 2 === 1);
+        n++;
+      });
+    }
+
+    function writeUrl() {
+      var sp = new URLSearchParams(location.search);
+      [["size", sizeEl.value], ["vs", vsEl.value]].forEach(function (kv) {
+        if (kv[1]) sp.set(kv[0], kv[1]); else sp.delete(kv[0]);
+      });
+      var qs = sp.toString();
+      try { history.replaceState(history.state, "", location.pathname + (qs ? "?" + qs : "") + location.hash); } catch (e) { /* sandboxed */ }
+    }
+
+    var errTimers = {};
+    var lastRead = {};
+    function setError(key, msg) {
+      var el = errEls[key], input = inputs[key];
+      var help = UID + "-" + key + "-help", errId = UID + "-" + key + "-err";
+      if (msg) {
+        var html = WARN_ICON + "<span>" + msg + "</span>";
+        if (el.innerHTML !== html) el.innerHTML = html;
+        el.hidden = false;
+        input.setAttribute("aria-invalid", "true");
+        input.setAttribute("aria-describedby", help + " " + errId);
+      } else {
+        el.hidden = true;
+        el.innerHTML = "";
+        input.removeAttribute("aria-invalid");
+        input.setAttribute("aria-describedby", help);
+      }
+    }
+    // Errors wait until typing pauses, so "225/" on its way to "225/45R17"
+    // is not shouted at. Valid or empty clears at once.
+    function scheduleErrors(immediate) {
+      ["size", "vs"].forEach(function (key) {
+        clearTimeout(errTimers[key]);
+        var r = lastRead[key];
+        if (!r || !r.error) { setError(key, null); return; }
+        if (immediate) setError(key, r.error);
+        else errTimers[key] = setTimeout(function () { setError(key, lastRead[key] && lastRead[key].error); }, 600);
+      });
+    }
+
+    function render() {
+      var sizeRaw = sizeEl.value, vsRaw = vsEl.value;
+      var a = readSize(sizeRaw), b = readSize(vsRaw);
+      lastRead = { size: a, vs: b };
+      var geo = a.geo, vsGeo = b.geo;
+      var cmp = geo && vsGeo ? TD.compareSizes(geo, vsGeo) : null;
+      var typedSomething = sizeRaw.trim().length > 0;
+      var loadFrom = geo && geo.loadIndex ? loadPounds(geo.loadIndex) : null;
+      var loadTo = vsGeo && vsGeo.loadIndex ? loadPounds(vsGeo.loadIndex) : null;
+      var serviceTyped = /^\s*(P|LT|ST)/i.test(sizeRaw) ? sizeRaw.trim().slice(0, 2).toUpperCase().replace(/[^A-Z]/g, "") : null;
+
+      // One-line summary for the live region.
+      var status;
+      if (geo) {
+        status = "<strong class=\"td-ts-tnum\">" + esc(geo.normalized) + "</strong> — <span class=\"td-ts-tnum\">" + inches(geo.overallDiameter) + "</span> overall diameter, <span class=\"td-ts-tnum\">" +
+          inches(geo.sidewallIn) + "</span> of sidewall, <span class=\"td-ts-tnum\">" + commas(geo.revsPerMile) + "</span> revolutions per mile unloaded.";
+        if (cmp) {
+          status += " Against " + esc(cmp.to.normalized) + ": <span class=\"td-ts-tnum\">" + signed(cmp.diameterChange, 1) + "%</span> diameter, and <span class=\"td-ts-tnum\">" +
+            cmp.actualAt(60).toFixed(1) + "</span> mph at an indicated 60.";
+        }
+      } else if (typedSomething) {
+        status = "That is not a size we can read yet.";
+      } else {
+        status = "Type a size above and the decoded result appears here and in the sections below.";
+      }
+      if (statusEl.innerHTML !== status) statusEl.innerHTML = status;
+
+      fill("decoded", geo ? renderDecoded(geo, decodeParts(geo), serviceTyped) : null);
+      fill("figures", geo ? renderFigures(geo, loadFrom) : null);
+      fill("compare", cmp ? renderCompare(cmp, loadFrom, loadTo) : null);
+      fill("shop", geo ? renderShop(geo, vsGeo) : null);
+      bands.how.hidden = typedSomething;
+      stripe();
+
+      swapBtn.disabled = !sizeRaw && !vsRaw;
+      copyBtn.disabled = !typedSomething;
+    }
+
+    function update(immediateErrors) {
+      writeUrl();
+      copyLabel.textContent = "Copy link to this result";
+      render();
+      scheduleErrors(immediateErrors);
+    }
+
+    [sizeEl, vsEl].forEach(function (el) {
+      el.addEventListener("input", function () { update(false); });
+      el.addEventListener("change", function () { scheduleErrors(true); });
+      el.addEventListener("blur", function () { scheduleErrors(true); });
+    });
+    q('[data-ts="form"]').addEventListener("submit", function (e) { e.preventDefault(); update(true); });
+    Array.prototype.forEach.call(root.querySelectorAll("[data-ts-example]"), function (btn) {
+      btn.addEventListener("click", function () { sizeEl.value = btn.getAttribute("data-ts-example"); update(true); });
+    });
+    swapBtn.addEventListener("click", function () {
+      var s = sizeEl.value; sizeEl.value = vsEl.value; vsEl.value = s; update(true);
+    });
+    copyBtn.addEventListener("click", function () {
+      var url = location.href;
+      function done(ok) { copyLabel.textContent = ok ? "Link copied" : "Copy the address bar to share this"; }
+      function fallback() {
+        try {
+          var ta = document.createElement("textarea");
+          ta.value = url; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+          document.body.appendChild(ta); ta.select();
+          var ok = document.execCommand("copy");
+          document.body.removeChild(ta); done(ok);
+        } catch (e) { done(false); }
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function () { done(true); }, fallback);
+      } else { fallback(); }
+    });
+
+    // Deep links: ?size= and ?vs= fill the inputs on load.
+    var params = new URLSearchParams(location.search);
+    sizeEl.value = params.get("size") || "";
+    vsEl.value = params.get("vs") || "";
+    render();
+    scheduleErrors(true);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "TireDrop tire size tool",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Free tool" },
+    { "type": "text", "id": "heading", "label": "Page heading (h1)", "default": "Tire Size Decoder" },
+    { "type": "textarea", "id": "lede", "label": "Supporting copy", "default": "Type what is written on your sidewall. We will draw it, explain every part of the marking in plain English, and show you exactly what changes if you fit something different." }
+  ],
+  "presets": [{ "name": "TireDrop tire size tool" }]
+}
+{% endschema %}

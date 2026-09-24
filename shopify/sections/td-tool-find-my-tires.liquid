@@ -1,0 +1,1237 @@
+{% comment %}
+  Find my tires — the five-question quiz, ported from the React site.
+
+  The React quiz ranked a hardcoded list of tires. This store has no tire
+  catalog yet (it arrives from a distributor feed), so this version does not
+  pretend to rank anything. It always produces a profile from the answers —
+  the type of tire that fits, the size to look for, and what to prioritise,
+  each with the React quiz's own reason — and then asks the shop for real
+  products in that size. If there are none, it says nothing about tires it
+  does not have and links to a search for the size instead.
+
+  Sizes and the vehicle table come from td-tiremath.js (generated from the
+  React site's tireMath.js + fitment.js). Nothing from that table is copied
+  here: makes and models are derived from its keys.
+
+  Answers live in the query string, as they did on the React site, so a
+  shared or refreshed link lands on the same question or result.
+{% endcomment %}
+
+<section class="td-fm" id="td-fm-{{ section.id }}">
+  <div class="td-fm__inner">
+    <header class="td-fm__head">
+      {% if section.settings.eyebrow != blank %}
+        <p class="td-fm__eyebrow">{{ section.settings.eyebrow }}</p>
+      {% endif %}
+      <h1 class="td-fm__h1">{{ section.settings.heading | default: 'Find my tires' }}</h1>
+      {% if section.settings.lede != blank %}
+        <p class="td-fm__lede">{{ section.settings.lede }}</p>
+      {% endif %}
+    </header>
+
+    <div class="td-fm__col">
+      <div class="td-fm__card td-fm__fallback" data-fm-fallback>
+        <p class="td-fm__p">This quiz needs JavaScript to run. Rather talk to someone? <a class="td-fm__link" href="tel:+19547731896">(954) 773-1896</a></p>
+      </div>
+
+      <form class="td-fm__quiz" data-fm-quiz novalidate hidden>
+        <div class="td-fm__progress">
+          <div class="td-fm__progress-row">
+            <p class="td-fm__progress-label" data-fm-progress-label>Question 1 of 5</p>
+            <p class="td-fm__progress-pct" data-fm-progress-pct aria-hidden="true">20% through</p>
+          </div>
+          <div class="td-fm__bar" role="progressbar" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1" aria-label="Question 1 of 5" data-fm-bar>
+            <span class="td-fm__bar-fill" data-fm-bar-fill></span>
+          </div>
+        </div>
+
+        <p class="td-fm__notice" data-fm-notice hidden></p>
+
+        <div class="td-fm__card">
+          <fieldset class="td-fm__step" data-fm-step="1">
+            <legend class="td-fm__legend"><h2 class="td-fm__q" tabindex="-1">What are you driving?</h2></legend>
+            <p class="td-fm__qlede">We need the size to rule out anything that physically will not fit, and the vehicle to rule out anything built for a different kind of one.</p>
+
+            <div class="td-fm__modes" role="group" aria-label="How to identify your tires">
+              <button type="button" class="td-fm__mode" data-fm-mode="vehicle" aria-pressed="true">By vehicle</button>
+              <button type="button" class="td-fm__mode" data-fm-mode="size" aria-pressed="false">I know my tire size</button>
+            </div>
+
+            <div class="td-fm__vehicle" data-fm-vehicle>
+              <div class="td-fm__selects">
+                <div class="td-fm__field">
+                  <label class="td-fm__label" for="td-fm-{{ section.id }}-year">Year</label>
+                  <select class="td-fm__select" id="td-fm-{{ section.id }}-year" data-fm-year>
+                    <option value="">Select year</option>
+                  </select>
+                </div>
+                <div class="td-fm__field">
+                  <label class="td-fm__label" for="td-fm-{{ section.id }}-make">Make</label>
+                  <select class="td-fm__select" id="td-fm-{{ section.id }}-make" data-fm-make>
+                    <option value="">Select make</option>
+                  </select>
+                </div>
+                <div class="td-fm__field">
+                  <label class="td-fm__label" for="td-fm-{{ section.id }}-model">Model</label>
+                  <select class="td-fm__select" id="td-fm-{{ section.id }}-model" data-fm-model disabled>
+                    <option value="">Pick a make first</option>
+                  </select>
+                </div>
+              </div>
+              <button type="button" class="td-fm__textbtn" data-fm-notlisted>My vehicle isn&rsquo;t listed &mdash; I&rsquo;ll type my size</button>
+            </div>
+
+            <div class="td-fm__field td-fm__sizefield">
+              <label class="td-fm__label" for="td-fm-{{ section.id }}-size">Tire size</label>
+              <input class="td-fm__input" id="td-fm-{{ section.id }}-size" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="225/50R17" aria-describedby="td-fm-{{ section.id }}-size-help td-fm-{{ section.id }}-size-read" data-fm-size>
+              <p class="td-fm__help" id="td-fm-{{ section.id }}-size-help" data-fm-size-help></p>
+              <p class="td-fm__tint" data-fm-stagger hidden></p>
+              <p class="td-fm__read" id="td-fm-{{ section.id }}-size-read" data-fm-size-read hidden></p>
+            </div>
+          </fieldset>
+
+          <fieldset class="td-fm__step" data-fm-step="2" hidden>
+            <legend class="td-fm__legend"><h2 class="td-fm__q" tabindex="-1">Where do you drive it?</h2></legend>
+            <p class="td-fm__qlede">This sets how much quietness, comfort and tread life count against outright grip.</p>
+            <div class="td-fm__opts td-fm__opts--pairs" data-fm-opts="roads"></div>
+          </fieldset>
+
+          <fieldset class="td-fm__step" data-fm-step="3" hidden>
+            <legend class="td-fm__legend"><h2 class="td-fm__q" tabindex="-1">What is the weather where you drive?</h2></legend>
+            <p class="td-fm__qlede">This is the answer that disqualifies tires rather than just ranking them.</p>
+            <div class="td-fm__opts" data-fm-opts="weather"></div>
+            <p class="td-fm__foot">This one does real work: a summer compound is ruled out entirely if you see snow, and a dedicated winter tire is ruled out if you never freeze &mdash; it wears out fast in heat.</p>
+          </fieldset>
+
+          <fieldset class="td-fm__step" data-fm-step="4" hidden>
+            <legend class="td-fm__legend"><h2 class="td-fm__q" tabindex="-1">What matters most to you?</h2></legend>
+            <p class="td-fm__qlede">Pick one or two. The first one you pick carries almost twice the weight of the second.</p>
+            <div class="td-fm__opts td-fm__opts--pairs" data-fm-opts="pri"></div>
+            <p class="td-fm__foot" aria-live="polite" data-fm-pri-note></p>
+          </fieldset>
+
+          <fieldset class="td-fm__step" data-fm-step="5" hidden>
+            <legend class="td-fm__legend"><h2 class="td-fm__q" tabindex="-1">What are you looking to spend?</h2></legend>
+            <p class="td-fm__qlede">A ceiling, not a target. Nothing here is padded to hit it.</p>
+            <div class="td-fm__opts td-fm__opts--pairs" data-fm-opts="budget"></div>
+            <p class="td-fm__foot">Tires are priced per tire and sold in sets of 4.</p>
+          </fieldset>
+
+          <div class="td-fm__error" role="alert" data-fm-error></div>
+
+          <div class="td-fm__nav">
+            <button type="button" class="td-fm__btn td-fm__btn--secondary td-fm__back" data-fm-back>
+              <span aria-hidden="true">&larr;</span> Back
+            </button>
+            <button type="submit" class="td-fm__btn td-fm__btn--primary td-fm__next" data-fm-next>Next</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="td-fm__results" aria-live="polite" data-fm-results></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .td-fm {
+    background: #F4F6FA;
+    color: #070E1A;
+    font-family: var(--font-body--family, inherit);
+  }
+  .td-fm *, .td-fm *::before, .td-fm *::after { box-sizing: border-box; }
+  .td-fm [hidden] { display: none !important; }
+  .td-fm__inner { max-width: 1280px; margin: 0 auto; padding: 3rem 1rem 3.5rem; }
+  .td-fm__head { max-width: 42rem; margin: 0 auto 2rem; text-align: center; }
+  .td-fm__eyebrow {
+    font-family: var(--font-subheading--family, var(--font-heading--family, inherit));
+    font-size: .75rem; font-weight: 700; letter-spacing: .09em;
+    text-transform: uppercase; color: #0068E8; margin: 0 0 .625rem; text-wrap: balance;
+  }
+  .td-fm__h1 {
+    font-family: var(--font-heading--family, inherit);
+    font-weight: 800; letter-spacing: -.02em; line-height: 1.04;
+    font-size: clamp(2rem, 5vw, 3rem); margin: 0; color: #070E1A; text-wrap: balance;
+  }
+  .td-fm__lede {
+    margin: .875rem auto 0; max-width: 36rem; text-wrap: pretty;
+    font-size: 1.0625rem; line-height: 1.6; color: #586274;
+  }
+  .td-fm__col { max-width: 44rem; margin: 0 auto; }
+
+  /* Progress */
+  .td-fm__progress { margin-bottom: 1rem; }
+  .td-fm__progress-row { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; margin-bottom: .5rem; }
+  .td-fm__progress-label {
+    margin: 0; font-family: var(--font-heading--family, inherit);
+    font-size: .8125rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #070E1A;
+  }
+  .td-fm__progress-pct { margin: 0; font-size: .8125rem; color: #586274; font-variant-numeric: tabular-nums; }
+  .td-fm__bar { height: 6px; border-radius: 999px; background: #E3E8EF; overflow: hidden; }
+  .td-fm__bar-fill { display: block; height: 100%; width: 20%; border-radius: 999px; background: #0068E8; transition: width .25s ease; }
+
+  /* Card */
+  .td-fm__card {
+    background: #FFFFFF; border: 1px solid #E3E8EF; border-radius: 12px;
+    padding: 1.25rem;
+  }
+  .td-fm__fallback { text-align: center; }
+  .td-fm__step { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .td-fm__legend { padding: 0; margin: 0; width: 100%; }
+  .td-fm__q {
+    font-family: var(--font-heading--family, inherit);
+    font-size: clamp(1.375rem, 3.2vw, 1.75rem); font-weight: 800; line-height: 1.15;
+    letter-spacing: -.015em; margin: 0; color: #070E1A; text-wrap: balance;
+  }
+  .td-fm__q:focus { outline: none; }
+  .td-fm__qlede { margin: .5rem 0 1.25rem; font-size: .9375rem; line-height: 1.55; color: #586274; text-wrap: pretty; }
+  .td-fm__foot { margin: 1rem 0 0; font-size: .875rem; line-height: 1.5; color: #586274; }
+  .td-fm__p { margin: 0; font-size: .9375rem; line-height: 1.6; color: #586274; }
+
+  /* Answer cards: real inputs, visually hidden, the label is the card. */
+  .td-fm__opts { display: grid; gap: .75rem; grid-template-columns: minmax(0, 1fr); }
+  .td-fm__opt { position: relative; display: block; cursor: pointer; }
+  .td-fm__opt input {
+    position: absolute; top: 0; left: 0; width: 1px; height: 1px; margin: 0;
+    opacity: 0; pointer-events: none;
+  }
+  .td-fm__optcard {
+    display: flex; align-items: flex-start; gap: .875rem; height: 100%;
+    min-height: 56px; padding: .9375rem 1rem;
+    background: #FFFFFF; border: 1px solid #C9D1DC; border-radius: 12px;
+    transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+  }
+  .td-fm__opt:hover .td-fm__optcard { border-color: #0068E8; }
+  .td-fm__opt input:checked + .td-fm__optcard {
+    border-color: #0068E8; background: #EFF5FF;
+    box-shadow: inset 0 0 0 1px #0068E8;
+  }
+  .td-fm__opt input:focus-visible + .td-fm__optcard { outline: 3px solid rgba(0,104,232,.55); outline-offset: 2px; }
+  .td-fm__tick {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; margin-top: 1px; border-radius: 999px;
+    border: 2px solid #7A8597; background: #FFFFFF; color: #FFFFFF;
+    font-family: var(--font-heading--family, inherit); font-size: .75rem; font-weight: 800; line-height: 1;
+  }
+  .td-fm__tick svg { display: none; width: 14px; height: 14px; }
+  .td-fm__opt input:checked + .td-fm__optcard .td-fm__tick { border-color: #0068E8; background: #0068E8; }
+  .td-fm__opt input:checked + .td-fm__optcard .td-fm__tick svg { display: block; }
+  .td-fm__opt input:checked + .td-fm__optcard .td-fm__tick[data-n] svg { display: none; }
+  .td-fm__opt input:checked + .td-fm__optcard .td-fm__tick[data-n]::after { content: attr(data-n); }
+  .td-fm__optbody { min-width: 0; }
+  .td-fm__optlabel {
+    display: block; font-family: var(--font-heading--family, inherit);
+    font-size: 1rem; font-weight: 700; line-height: 1.25; color: #070E1A;
+  }
+  .td-fm__optdetail { display: block; margin-top: .25rem; font-size: .875rem; line-height: 1.45; color: #586274; }
+
+  /* Step 1 */
+  .td-fm__modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; margin-bottom: 1.25rem; }
+  .td-fm__mode {
+    min-height: 48px; padding: .5rem .875rem; border-radius: 999px;
+    border: 1px solid #C9D1DC; background: #FFFFFF; color: #070E1A; cursor: pointer;
+    font-family: var(--font-heading--family, inherit); font-size: .9375rem; font-weight: 700; line-height: 1.2;
+  }
+  .td-fm__mode:hover { border-color: #0068E8; }
+  .td-fm__mode[aria-pressed="true"] { background: #0068E8; border-color: #0068E8; color: #FFFFFF; box-shadow: inset 0 0 0 1px #0068E8; }
+  .td-fm__mode:focus-visible, .td-fm__btn:focus-visible, .td-fm__textbtn:focus-visible, .td-fm__chip:focus-visible,
+  .td-fm__select:focus-visible, .td-fm__input:focus-visible, .td-fm__link:focus-visible {
+    outline: 3px solid rgba(0,104,232,.55); outline-offset: 2px;
+  }
+  .td-fm__selects { display: grid; gap: .875rem; }
+  .td-fm__field { min-width: 0; }
+  .td-fm__label {
+    display: block; margin-bottom: .375rem;
+    font-family: var(--font-heading--family, inherit); font-size: .875rem; font-weight: 700; color: #070E1A;
+  }
+  .td-fm__select, .td-fm__input {
+    display: block; width: 100%; min-height: 48px; margin: 0;
+    padding: .625rem .875rem; border: 1px solid #8A94A6; border-radius: 10px;
+    background-color: #FFFFFF; color: #070E1A;
+    font-family: var(--font-body--family, inherit); font-size: 1rem; line-height: 1.3;
+  }
+  .td-fm__select {
+    -webkit-appearance: none; appearance: none; padding-right: 2.25rem; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23586274' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right .875rem center;
+  }
+  .td-fm__select:disabled { background-color: #F4F6FA; color: #586274; cursor: not-allowed; }
+  .td-fm__input {
+    font-family: var(--font-heading--family, inherit); font-size: 1.125rem; font-weight: 600; letter-spacing: .01em;
+  }
+  .td-fm__input[aria-invalid="true"] { border-color: #B25E00; box-shadow: inset 0 0 0 1px #B25E00; }
+  .td-fm__textbtn {
+    display: inline-flex; align-items: center; min-height: 44px; margin-top: .5rem; padding: 0;
+    border: 0; background: none; cursor: pointer; text-align: left;
+    font-family: var(--font-body--family, inherit); font-size: .9375rem; font-weight: 600;
+    color: #0068E8; text-decoration: underline; text-underline-offset: 3px;
+  }
+  .td-fm__textbtn:hover { color: #0053C4; }
+  .td-fm__sizefield { margin-top: 1rem; }
+  .td-fm__vehicle[hidden] + .td-fm__sizefield { margin-top: 0; }
+  .td-fm__help { margin: .5rem 0 0; font-size: .875rem; line-height: 1.5; color: #586274; }
+  .td-fm__read { margin: .5rem 0 0; font-size: .875rem; line-height: 1.5; color: #070E1A; }
+  .td-fm__read::before { content: "\2713\00a0"; color: #0068E8; font-weight: 700; }
+  .td-fm__tint {
+    margin: .625rem 0 0; padding: .625rem .875rem; border-radius: 10px;
+    background: #EFF5FF; border: 1px solid rgba(0,104,232,.25);
+    font-size: .875rem; line-height: 1.5; color: #070E1A;
+  }
+
+  .td-fm__notice {
+    margin: 0 0 1rem; padding: .75rem 1rem; border-radius: 12px;
+    background: #EFF5FF; border: 1px solid rgba(0,104,232,.25);
+    font-size: .875rem; line-height: 1.5; color: #070E1A;
+  }
+  .td-fm__error:empty { display: none; }
+  .td-fm__error {
+    margin-top: 1.25rem; padding: .625rem .875rem; border-radius: 10px;
+    background: #FFF6E5; border: 1px solid #F5A623; border-left-width: 4px;
+    font-size: .875rem; line-height: 1.5; color: #070E1A;
+  }
+
+  /* Back left, Next right, one row, equal on phones. */
+  .td-fm__nav {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem;
+    margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid #E3E8EF;
+  }
+  .td-fm__back { grid-column: 1; }
+  .td-fm__next { grid-column: 2; }
+  .td-fm__btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .375rem;
+    min-height: 48px; padding: 0 1.5rem; border-radius: 999px; cursor: pointer;
+    font-family: var(--font-heading--family, inherit); font-weight: 700; font-size: .9375rem;
+    line-height: 1.2; text-decoration: none; text-align: center;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .td-fm__btn--primary { background: #0068E8; border: 1px solid #0068E8; color: #FFFFFF; }
+  .td-fm__btn--primary:hover { background: #0053C4; border-color: #0053C4; color: #FFFFFF; }
+  .td-fm__btn--secondary { background: #FFFFFF; border: 1px solid #8A94A6; color: #070E1A; }
+  .td-fm__btn--secondary:hover { border-color: #0068E8; color: #0053C4; }
+
+  /* Results */
+  .td-fm__results:empty { display: none; }
+  .td-fm__chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+  .td-fm__chip {
+    display: inline-flex; align-items: center; gap: .375rem; min-height: 44px; padding: .375rem .875rem;
+    border-radius: 999px; border: 1px solid #C9D1DC; background: #FFFFFF; color: #070E1A; cursor: pointer;
+    font-family: var(--font-body--family, inherit); font-size: .875rem; line-height: 1.3; text-align: left;
+  }
+  .td-fm__chip:hover { border-color: #0068E8; }
+  .td-fm__chip-edit { font-size: .75rem; color: #586274; }
+  .td-fm__chip--reset { border-color: transparent; background: none; color: #0068E8; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+  .td-fm__chip--reset:hover { color: #0053C4; }
+  .td-fm__h2 {
+    font-family: var(--font-heading--family, inherit);
+    font-size: clamp(1.375rem, 3.2vw, 1.75rem); font-weight: 800; line-height: 1.15;
+    letter-spacing: -.015em; margin: 0; color: #070E1A; text-wrap: balance;
+  }
+  .td-fm__h2:focus { outline: none; }
+  .td-fm__h3 {
+    font-family: var(--font-heading--family, inherit);
+    font-size: 1.125rem; font-weight: 800; line-height: 1.2; margin: 0; color: #070E1A; text-wrap: balance;
+  }
+  .td-fm__sub { margin: .5rem 0 0; font-size: .9375rem; line-height: 1.55; color: #586274; text-wrap: pretty; }
+  .td-fm__tiles { display: grid; gap: .75rem; margin-top: 1.25rem; }
+  .td-fm__tile { padding: 1rem; border-radius: 12px; background: #F4F6FA; border: 1px solid #E3E8EF; min-width: 0; }
+  .td-fm__kicker {
+    margin: 0 0 .25rem; font-family: var(--font-heading--family, inherit);
+    font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #586274;
+  }
+  .td-fm__value {
+    margin: 0; font-family: var(--font-heading--family, inherit);
+    font-size: 1.625rem; font-weight: 800; line-height: 1.1; letter-spacing: -.01em; color: #070E1A;
+    overflow-wrap: anywhere;
+  }
+  .td-fm__tile .td-fm__p { margin-top: .5rem; font-size: .875rem; line-height: 1.5; }
+  .td-fm__block { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid #E3E8EF; }
+  .td-fm__list { list-style: none; margin: .75rem 0 0; padding: 0; display: grid; gap: .75rem; }
+  .td-fm__item { display: flex; gap: .75rem; align-items: flex-start; }
+  .td-fm__num {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 999px; background: #070E1A; color: #FFFFFF;
+    font-family: var(--font-heading--family, inherit); font-size: .8125rem; font-weight: 800;
+  }
+  .td-fm__dot { flex: none; width: 8px; height: 8px; margin-top: .5rem; border-radius: 999px; background: #0068E8; }
+  .td-fm__itembody { min-width: 0; }
+  .td-fm__itemtitle { margin: 0; font-family: var(--font-heading--family, inherit); font-size: 1rem; font-weight: 700; line-height: 1.3; color: #070E1A; }
+  .td-fm__itemdetail { font-family: var(--font-body--family, inherit); font-weight: 400; color: #586274; }
+  .td-fm__textbtn--inline { margin-top: 0; }
+  .td-fm__itemtext { margin: .25rem 0 0; font-size: .875rem; line-height: 1.5; color: #586274; }
+  .td-fm__badge {
+    display: inline-block; margin-left: .375rem; padding: .125rem .5rem; border-radius: 999px;
+    background: #F5A623; color: #070E1A; vertical-align: 1px;
+    font-family: var(--font-heading--family, inherit); font-size: .6875rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+  }
+  .td-fm__products { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .75rem; }
+  .td-fm__product { padding: 1rem; border: 1px solid #E3E8EF; border-radius: 12px; background: #FFFFFF; }
+  .td-fm__ptitle { margin: 0; font-family: var(--font-heading--family, inherit); font-size: 1.0625rem; font-weight: 700; line-height: 1.3; }
+  .td-fm__ptitle a { color: #0068E8; text-decoration: none; }
+  .td-fm__ptitle a:hover { color: #0053C4; text-decoration: underline; }
+  .td-fm__price { margin: .375rem 0 0; font-size: .9375rem; color: #070E1A; font-variant-numeric: tabular-nums; }
+  .td-fm__price strong { font-family: var(--font-heading--family, inherit); font-weight: 800; }
+  .td-fm__why { margin: .5rem 0 0; padding: 0; list-style: none; display: grid; gap: .25rem; }
+  .td-fm__why li { font-size: .875rem; line-height: 1.45; color: #586274; padding-left: 1.125rem; position: relative; }
+  .td-fm__why li::before { content: "\2713"; position: absolute; left: 0; color: #0068E8; font-weight: 700; }
+  .td-fm__actions { display: flex; flex-direction: column; gap: .75rem; margin-top: 1rem; }
+  .td-fm__actions .td-fm__btn { width: 100%; }
+  .td-fm__call { margin: .875rem 0 0; font-size: .9375rem; line-height: 1.5; color: #586274; }
+  .td-fm__link { color: #0068E8; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; display: inline-block; padding: .625rem 0; }
+  .td-fm__link:hover { color: #0053C4; }
+  .td-fm__blame { list-style: none; margin: 1.25rem 0 0; padding: 0; display: grid; gap: .75rem; }
+  .td-fm__blame li { padding: 1rem; border-radius: 12px; background: #F4F6FA; border: 1px solid #E3E8EF; }
+  .td-fm__blame .td-fm__btn { margin-top: .75rem; }
+  .td-fm__loading { margin: .75rem 0 0; font-size: .9375rem; color: #586274; }
+
+  @media (min-width: 600px) {
+    .td-fm__card { padding: 2rem; }
+    .td-fm__opts--pairs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .td-fm__selects { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .td-fm__modes { display: flex; flex-wrap: wrap; }
+    .td-fm__mode { padding: .5rem 1.25rem; }
+    .td-fm__nav { grid-template-columns: auto auto; justify-content: space-between; }
+    .td-fm__btn { min-width: 10rem; }
+    .td-fm__tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .td-fm__actions { flex-direction: row; flex-wrap: wrap; align-items: center; }
+    .td-fm__actions .td-fm__btn { width: auto; }
+  }
+  @media (min-width: 768px) {
+    .td-fm__inner { padding: 4rem 2rem 4.5rem; }
+    .td-fm__head { margin-bottom: 2.5rem; }
+  }
+</style>
+
+<script src="{{ 'td-tiremath.js' | asset_url }}"></script>
+<script>
+(function () {
+  "use strict";
+  var root = document.getElementById("td-fm-{{ section.id }}");
+  if (!root) return;
+  var TD = window.TireDrop;
+  if (!TD || !TD.FITMENT || !TD.parseSize) return; // the fallback card stays up
+
+  var $ = function (sel) { return root.querySelector(sel); };
+  var $$ = function (sel) { return Array.prototype.slice.call(root.querySelectorAll(sel)); };
+
+  /* ------------------------------------------------------------------ *
+   * Copy and rules, ported from src/pages/tools/FindMyTiresPage.jsx.
+   * ------------------------------------------------------------------ */
+
+  var SET_SIZE = 4;
+  var PHONE = "(954) 773-1896";
+  var PHONE_HREF = "tel:+19547731896";
+  var ALL_CATEGORIES = ["All-Season", "Performance", "Truck & SUV", "Winter", "Commercial"];
+
+  // What each vehicle class can sensibly wear.
+  var CLASS_RULES = {
+    sedan: { label: "car", passenger: true, categories: ["All-Season", "Performance", "Winter"],
+      why: "Commercial and light-truck tires are built on stiff D/E-load casings for payload, not for a car." },
+    sports: { label: "sports car", passenger: true, categories: ["Performance", "All-Season", "Winter"],
+      why: "Commercial and light-truck casings are not made in performance-car fitments." },
+    crossover: { label: "crossover or SUV", passenger: true, categories: ["All-Season", "Performance", "Truck & SUV", "Winter"],
+      why: "A crossover rides on a passenger casing — a D/E-load commercial tire would be punishing and is not a listed fitment." },
+    truck: { label: "truck or body-on-frame SUV", passenger: false, categories: ["Truck & SUV", "Commercial", "Winter"],
+      why: "A truck needs a truck casing. Passenger touring tires are not load-rated for one." },
+    offroad: { label: "off-road truck", passenger: false, categories: ["Truck & SUV"],
+      why: "Off-pavement means an all-terrain or hybrid tread on a light-truck casing." },
+    van: { label: "cargo van", passenger: false, categories: ["Commercial", "Truck & SUV"],
+      why: "A loaded cargo van needs a commercial casing rated for the axle weight." }
+  };
+
+  /** When all we have is a size, the size itself is the only clue to the car. */
+  function classFromSize(p) {
+    if (!p) return "sedan";
+    if (p.format === "flotation" || p.service === "LT") return "truck";
+    if (p.width >= 245 && p.aspect >= 60) return "truck";
+    if (p.width >= 225 && p.aspect >= 58) return "crossover";
+    if (p.aspect <= 45) return "sports";
+    return "sedan";
+  }
+
+  var ROAD_OPTIONS = [
+    { value: "highway", label: "Mostly highway", detail: "Long runs at 65–80. Noise and even wear are what you live with." },
+    { value: "city", label: "Mostly city", detail: "Stop-and-go, short trips, potholes, kerbs and wet crosswalks." },
+    { value: "mixed", label: "A bit of both", detail: "A commute with some of each — nothing dominates." },
+    { value: "dirt", label: "Off pavement", detail: "Gravel, dirt, sand or a job site, at least some of the week." }
+  ];
+  var WEATHER_OPTIONS = [
+    { value: "warm", label: "It never freezes", detail: "Florida, Texas, southern California. Heat and hard rain, no snow." },
+    { value: "cold", label: "Cold and wet", detail: "Frost and cold rain, the odd slushy morning, no real winter." },
+    { value: "snow", label: "Real snow and ice", detail: "Plowed roads, packed snow, black ice. Winters that mean it." }
+  ];
+  var PRIORITY_OPTIONS = [
+    { value: "wear", axis: "wear", label: "Tread life", detail: "Miles before they are done." },
+    { value: "wet", axis: "wet", label: "Wet grip", detail: "Braking and cornering in the rain." },
+    { value: "quiet", axis: "quiet", label: "Quiet ride", detail: "No drone on the highway." },
+    { value: "comfort", axis: "comfort", label: "Comfort", detail: "Soaks up broken pavement." },
+    { value: "dry", axis: "dry", label: "Dry performance", detail: "Steering response and grip." },
+    { value: "price", axis: null, label: "Price", detail: "The cheapest set that still does the job." }
+  ];
+  var BUDGET_BANDS = [
+    { value: "120", max: 120, label: "Up to $120 a tire" },
+    { value: "180", max: 180, label: "Up to $180 a tire" },
+    { value: "250", max: 250, label: "Up to $250 a tire" },
+    { value: "any", max: Infinity, label: "No limit — show me the right tire" }
+  ];
+  var AXIS_KEYS = ["dry", "wet", "winter", "comfort", "quiet", "wear"];
+  var AXIS_LABEL = { dry: "Dry grip", wet: "Wet grip", winter: "Snow & ice", comfort: "Ride comfort", quiet: "Quietness", wear: "Tread life" };
+  var ROAD_PHRASE = {
+    highway: "the highway miles you described", city: "the city driving you described",
+    mixed: "the mix of city and highway you described", dirt: "the off-pavement driving you described"
+  };
+  var WEATHER_PHRASE = { warm: "somewhere it never freezes", cold: "cold, wet winters", snow: "real snow and ice" };
+  // Which axes each road/weather answer lifts, and the React quiz's sentence for it.
+  var ROAD_NOTE = {
+    highway: { axes: ["quiet", "comfort", "wear"], text: "Highway miles push quietness, comfort and tread life up." },
+    city: { axes: ["wet", "comfort", "wear"], text: "City driving pushes wet grip, comfort and tread life up." },
+    mixed: { axes: ["wet", "wear", "quiet", "comfort"], text: "A mixed commute spreads the weighting evenly." }
+  };
+  var WEATHER_NOTE = {
+    warm: { axes: ["wet"], text: "Snow and ice carry no weight at all, because you said it never freezes. Wet grip takes that weight instead." },
+    cold: { axes: ["winter", "wet"], text: "Cold and wet lifts wet grip and cold-weather traction." },
+    snow: { axes: ["winter"], text: "Real snow makes snow and ice traction the heaviest axis by far." }
+  };
+
+  var find = function (list, value) {
+    for (var i = 0; i < list.length; i++) if (list[i].value === value) return list[i];
+    return null;
+  };
+  var money = function (n) { return Number(n).toLocaleString("en-US", { style: "currency", currency: "USD" }); };
+
+  /* ---------------------- vehicle lists, from FITMENT ---------------------- */
+
+  var MAKES = [];
+  var MODELS = {};
+  Object.keys(TD.FITMENT).forEach(function (key) {
+    var parts = key.split("|");
+    if (!MODELS[parts[0]]) { MODELS[parts[0]] = []; MAKES.push(parts[0]); }
+    MODELS[parts[0]].push(parts[1]);
+  });
+  // The React selector offered the 22 model years back from 2026.
+  var YEARS = [];
+  for (var y = 2026; y > 2026 - 22; y--) YEARS.push(String(y));
+
+  /* ---------------------------- URL state ---------------------------- */
+
+  var params = new URLSearchParams(window.location.search);
+
+  function readAnswers() {
+    var pri = (params.get("pri") || "").split(",").filter(function (v) { return !!find(PRIORITY_OPTIONS, v); }).slice(0, 2);
+    return {
+      mode: params.get("mode") === "size" ? "size" : "vehicle",
+      year: params.get("vy") || "",
+      make: params.get("vmk") || "",
+      model: params.get("vmd") || "",
+      sizeText: params.get("size") || "",
+      roads: find(ROAD_OPTIONS, params.get("roads")) ? params.get("roads") : "",
+      weather: find(WEATHER_OPTIONS, params.get("weather")) ? params.get("weather") : "",
+      priorities: pri,
+      budget: find(BUDGET_BANDS, params.get("budget")) ? params.get("budget") : "",
+      relaxed: (params.get("relax") || "").split(",").filter(Boolean)
+    };
+  }
+
+  function patch(next) {
+    Object.keys(next).forEach(function (k) {
+      var v = next[k];
+      if (v === "" || v === null || v === undefined) params.delete(k);
+      else params.set(k, String(v));
+    });
+    var qs = params.toString();
+    try {
+      history.replaceState(history.state, "", window.location.pathname + (qs ? "?" + qs : "") + window.location.hash);
+    } catch (e) { /* sandboxed previews can refuse this; the quiz still works */ }
+  }
+
+  /* ---------------------------- step 1 state ---------------------------- */
+
+  var first = readAnswers();
+  var local = {
+    mode: first.mode,
+    year: YEARS.indexOf(first.year) >= 0 ? first.year : "",
+    make: MODELS[first.make] ? first.make : "",
+    model: "",
+    sizeText: first.sizeText
+  };
+  if (local.make && MODELS[local.make].indexOf(first.model) >= 0) local.model = first.model;
+  var stepError = "";
+
+  /* ---------------------------- elements ---------------------------- */
+
+  var form = $("[data-fm-quiz]");
+  var results = $("[data-fm-results]");
+  var yearSel = $("[data-fm-year]");
+  var makeSel = $("[data-fm-make]");
+  var modelSel = $("[data-fm-model]");
+  var sizeInput = $("[data-fm-size]");
+  var sizeHelp = $("[data-fm-size-help]");
+  var sizeRead = $("[data-fm-size-read]");
+  var stagger = $("[data-fm-stagger]");
+  var errorBox = $("[data-fm-error]");
+  var noticeBox = $("[data-fm-notice]");
+  var backBtn = $("[data-fm-back]");
+  var nextBtn = $("[data-fm-next]");
+
+  function el(tag, attrs, children) {
+    var node = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (k === "class") node.className = attrs[k];
+      else if (k === "text") node.textContent = attrs[k];
+      else if (k.indexOf("on") === 0) node.addEventListener(k.slice(2), attrs[k]);
+      else if (attrs[k] !== null && attrs[k] !== undefined && attrs[k] !== false) node.setAttribute(k, attrs[k]);
+    });
+    (children || []).forEach(function (c) {
+      if (c === null || c === undefined || c === false) return;
+      node.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+    });
+    return node;
+  }
+  function option(value, label) { var o = document.createElement("option"); o.value = value; o.textContent = label; return o; }
+
+  YEARS.forEach(function (yr) { yearSel.appendChild(option(yr, yr)); });
+  MAKES.forEach(function (m) { makeSel.appendChild(option(m, m)); });
+
+  function fillModels() {
+    while (modelSel.options.length) modelSel.remove(0);
+    modelSel.appendChild(option("", local.make ? "Select model" : "Pick a make first"));
+    (MODELS[local.make] || []).forEach(function (m) { modelSel.appendChild(option(m, m)); });
+    modelSel.disabled = !local.make;
+    modelSel.value = local.model;
+  }
+
+  /* ---------------------------- answer cards ---------------------------- */
+
+  var TICK = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var uid = "td-fm-{{ section.id }}";
+
+  function buildOptions(key, list, type) {
+    var box = $('[data-fm-opts="' + key + '"]');
+    list.forEach(function (o) {
+      var id = uid + "-" + key + "-" + o.value;
+      var input = el("input", { type: type, name: uid + "-" + key, value: o.value, id: id });
+      var tick = el("span", { class: "td-fm__tick", "aria-hidden": "true" });
+      tick.innerHTML = TICK;
+      var body = el("span", { class: "td-fm__optbody" }, [
+        el("span", { class: "td-fm__optlabel", text: o.label }),
+        o.detail ? el("span", { class: "td-fm__optdetail", text: o.detail }) : null
+      ]);
+      box.appendChild(el("label", { class: "td-fm__opt", for: id }, [input, el("span", { class: "td-fm__optcard" }, [tick, body])]));
+      input.addEventListener("change", function () { onPick(key, o.value, input.checked); });
+    });
+  }
+  buildOptions("roads", ROAD_OPTIONS, "radio");
+  buildOptions("weather", WEATHER_OPTIONS, "radio");
+  buildOptions("pri", PRIORITY_OPTIONS, "checkbox");
+  buildOptions("budget", BUDGET_BANDS.map(function (b) {
+    return {
+      value: b.value, label: b.label,
+      detail: isFinite(b.max) ? "About " + money(b.max * SET_SIZE) + " for a set of " + SET_SIZE + ", before install and rebates." : ""
+    };
+  }), "radio");
+
+  function onPick(key, value, checked) {
+    stepError = "";
+    if (key === "pri") {
+      var current = readAnswers().priorities;
+      var next = current.indexOf(value) >= 0
+        ? current.filter(function (v) { return v !== value; })
+        : current.concat([value]).slice(-2);
+      patch({ pri: next.join(",") });
+    } else {
+      var p = {}; p[key] = value; patch(p);
+    }
+    render(false);
+  }
+
+  function syncOptions(a) {
+    $$('[data-fm-opts="roads"] input').forEach(function (i) { i.checked = i.value === a.roads; });
+    $$('[data-fm-opts="weather"] input').forEach(function (i) { i.checked = i.value === a.weather; });
+    $$('[data-fm-opts="budget"] input').forEach(function (i) { i.checked = i.value === a.budget; });
+    $$('[data-fm-opts="pri"] input').forEach(function (i) {
+      var idx = a.priorities.indexOf(i.value);
+      i.checked = idx >= 0;
+      var tick = i.nextElementSibling.querySelector(".td-fm__tick");
+      if (idx >= 0) tick.setAttribute("data-n", String(idx + 1)); else tick.removeAttribute("data-n");
+    });
+    var note = $("[data-fm-pri-note]");
+    var lab = function (v) { var o = find(PRIORITY_OPTIONS, v); return o ? o.label : v; };
+    note.textContent = a.priorities.length === 0
+      ? "Nothing picked yet. The first pick counts for 2.6 of the weighting, the second for 1.4."
+      : a.priorities.length === 1
+        ? lab(a.priorities[0]) + " first. Pick a second, or carry on with one."
+        : lab(a.priorities[0]) + " first, " + lab(a.priorities[1]) + " second. Picking a third replaces the first.";
+  }
+
+  /* ---------------------------- step 1 UI ---------------------------- */
+
+  function guess() { return local.make && local.model ? TD.fitmentFor(local.make, local.model) : null; }
+
+  function syncStep1() {
+    $$("[data-fm-mode]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-fm-mode") === local.mode)); });
+    $("[data-fm-vehicle]").hidden = local.mode !== "vehicle";
+    yearSel.value = local.year;
+    makeSel.value = local.make;
+    if (sizeInput.value !== local.sizeText) sizeInput.value = local.sizeText;
+    var g = local.mode === "vehicle" ? guess() : null;
+    sizeHelp.textContent = g
+      ? g[0] + " is the most common original fitment for a " + local.model + ". Trims and model years move it around, so the size printed on your sidewall — or the sticker in your driver’s door jamb — is the one that counts. Change it here if it differs."
+      : "It is printed on the sidewall: three numbers and a letter, like 225/50R17. LT and flotation sizes such as LT265/70R17 or 31x10.50R15 work too.";
+    if (g && g[1] === "sports") {
+      stagger.hidden = false;
+      stagger.textContent = "";
+      stagger.appendChild(document.createTextNode("A " + local.model + " may be "));
+      stagger.appendChild(el("strong", { text: "staggered" }));
+      stagger.appendChild(document.createTextNode(" — a wider tire on the rear than the front. Check both ends before you buy four of anything. If the sizes differ, we will sort it out on the phone."));
+    } else {
+      stagger.hidden = true;
+    }
+    var typed = local.sizeText.trim() ? TD.parseSize(local.sizeText.trim()) : null;
+    sizeRead.hidden = !typed;
+    sizeRead.textContent = typed ? readAs(typed) : "";
+  }
+
+  function readAs(p) {
+    if (p.format === "flotation") return "Read as " + p.normalized + " — " + p.flotationDiameter + " inches tall, " + p.widthIn + " inches wide, on a " + p.rimDiameter + "-inch wheel.";
+    return "Read as " + p.normalized + " — " + p.width + "mm wide, " + p.aspect + " series, on a " + p.rimDiameter + "-inch wheel.";
+  }
+
+  $$("[data-fm-mode]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      local.mode = b.getAttribute("data-fm-mode");
+      stepError = "";
+      render(false);
+    });
+  });
+  $("[data-fm-notlisted]").addEventListener("click", function () {
+    local.mode = "size";
+    stepError = "";
+    render(false);
+    sizeInput.focus();
+  });
+  yearSel.addEventListener("change", function () { local.year = yearSel.value; stepError = ""; render(false); });
+  makeSel.addEventListener("change", function () {
+    local.make = makeSel.value; local.model = ""; local.sizeText = ""; stepError = "";
+    fillModels(); render(false);
+  });
+  modelSel.addEventListener("change", function () {
+    local.model = modelSel.value;
+    var f = TD.fitmentFor(local.make, local.model);
+    local.sizeText = f ? f[0] : "";
+    stepError = "";
+    render(false);
+  });
+  sizeInput.addEventListener("input", function () {
+    local.sizeText = sizeInput.value;
+    stepError = "";
+    sizeInput.removeAttribute("aria-invalid");
+    errorBox.textContent = "";
+    syncStep1();
+  });
+
+  /* ---------------------------- what the answers add up to ---------------------------- */
+
+  function weightsFor(a) {
+    var axes = { dry: 0.8, wet: 1.2, winter: 0.6, comfort: 1, quiet: 1, wear: 1.2 };
+    var price = 0.9;
+    if (a.roads === "highway") { axes.quiet += 1.4; axes.comfort += 1; axes.wear += 1.2; }
+    else if (a.roads === "city") { axes.wet += 0.8; axes.comfort += 0.9; axes.wear += 0.9; }
+    else if (a.roads === "mixed") { axes.wet += 0.5; axes.wear += 0.6; axes.quiet += 0.5; axes.comfort += 0.5; }
+    else if (a.roads === "dirt") { axes.wear += 0.8; axes.dry += 0.4; }
+    if (a.weather === "warm") { axes.winter = 0; axes.wet += 1.8; axes.dry += 0.5; }
+    else if (a.weather === "cold") { axes.winter += 1.4; axes.wet += 1.2; }
+    else if (a.weather === "snow") { axes.winter += 3.2; axes.wet += 1; }
+    a.priorities.forEach(function (key, i) {
+      var bump = i === 0 ? 2.6 : 1.4;
+      var o = find(PRIORITY_OPTIONS, key);
+      if (!o) return;
+      if (o.axis) axes[o.axis] += bump; else price += bump;
+    });
+    AXIS_KEYS.forEach(function (k) { axes[k] = Math.max(0, Math.round(axes[k] * 10) / 10); });
+    return { axes: axes, price: Math.round(price * 10) / 10 };
+  }
+
+  /** The 2-3 things to prioritise, each with only the reasons the React quiz gives. */
+  function prioritiesFor(a) {
+    var w = weightsFor(a);
+    var keys = AXIS_KEYS.concat(["price"]);
+    var weight = function (k) { return k === "price" ? w.price : w.axes[k]; };
+    var ordered = keys.filter(function (k) { return weight(k) > 0; })
+      .map(function (k, i) { return { k: k, i: i }; })
+      .sort(function (x, y) { return weight(y.k) - weight(x.k) || x.i - y.i; })
+      .map(function (x) { return x.k; });
+    var items = [];
+    ordered.forEach(function (k) {
+      if (items.length >= 3) return;
+      var opt = null;
+      PRIORITY_OPTIONS.forEach(function (o) { if ((o.axis || "price") === k) opt = o; });
+      var reasons = [];
+      var pi = opt ? a.priorities.indexOf(opt.value) : -1;
+      if (pi >= 0) reasons.push(opt.label + " was your " + (pi === 0 ? "first" : "second") + " priority.");
+      var rn = ROAD_NOTE[a.roads];
+      if (rn && rn.axes.indexOf(k) >= 0) reasons.push(rn.text);
+      var wn = WEATHER_NOTE[a.weather];
+      if (wn && wn.axes.indexOf(k) >= 0) reasons.push(wn.text);
+      if (!reasons.length) return; // nothing in the quiz says why, so it is not listed
+      items.push({
+        key: k,
+        label: opt ? opt.label : AXIS_LABEL[k],
+        detail: opt ? opt.detail : "",
+        reasons: reasons
+      });
+    });
+    return items;
+  }
+
+  function orderedCats(base, extra) {
+    var out = base.slice();
+    extra.forEach(function (c) { if (out.indexOf(c) < 0) out.push(c); });
+    return out;
+  }
+
+  /** Category options left once a set of constraints (by id) is applied. */
+  function categoriesUnder(ctx, activeIds) {
+    var on = function (id) { return activeIds.indexOf(id) >= 0; };
+    var rules = ctx.rules;
+    var cats;
+    if (on("vehicle") && ctx.known) cats = rules.categories.slice();
+    else if (on("vehicle") && rules.passenger) cats = orderedCats(rules.categories, ALL_CATEGORIES.filter(function (c) { return c !== "Commercial"; }));
+    else cats = orderedCats(rules.categories, ALL_CATEGORIES);
+    if (on("weather") && ctx.a.weather === "warm") cats = cats.filter(function (c) { return c !== "Winter"; });
+    // A highway tread has nothing to bite with off pavement: all-terrain treads
+    // are filed under Truck & SUV.
+    if (on("roads") && ctx.a.roads === "dirt") cats = cats.filter(function (c) { return c === "Truck & SUV"; });
+    return cats;
+  }
+
+  function profileFor(a) {
+    var size = a.sizeText ? TD.parseSize(a.sizeText) : null;
+    var known = !!(a.year && a.make && a.model);
+    var fit = known ? TD.fitmentFor(a.make, a.model) : null;
+    var vclass = known ? (fit ? fit[1] : "sedan") : classFromSize(size);
+    var rules = CLASS_RULES[vclass] || CLASS_RULES.sedan;
+    var vehicleLabel = known
+      ? a.year + " " + a.make + " " + a.model
+      : size ? size.normalized + " (read as a " + rules.label + " size)" : "Your vehicle";
+    var ctx = { a: a, known: known, rules: rules };
+
+    var constraints = [];
+    constraints.push({ id: "vehicle", chip: vehicleLabel, short: "built for a " + rules.label, why: rules.why,
+      relaxLabel: "Include tires built for other vehicles" });
+    if (a.weather === "snow") constraints.push({ id: "weather", chip: "Real snow and ice", short: "no summer compounds",
+      why: "A summer compound goes hard below about 45°F. On snow and ice it is not a slower tire, it is a different one.", relaxLabel: "Include summer tires anyway" });
+    else if (a.weather === "cold") constraints.push({ id: "weather", chip: "Cold and wet", short: "no summer compounds",
+      why: "A summer compound stiffens below about 45°F, which is most of a cold, wet winter.", relaxLabel: "Include summer tires anyway" });
+    else if (a.weather === "warm") constraints.push({ id: "weather", chip: "Never freezes", short: "no dedicated winter tires",
+      why: "A winter compound is soft by design. In heat it squirms and wears out fast, so it is the wrong tire where it never freezes.", relaxLabel: "Include dedicated winter tires anyway" });
+    if (a.roads === "dirt") constraints.push({ id: "roads", chip: "Off pavement", short: "all-terrain tread",
+      why: "A highway tread has nothing to bite with on gravel or dirt, and its shoulders cut up.", relaxLabel: "Include highway treads" });
+
+    var active = constraints.filter(function (c) { return a.relaxed.indexOf(c.id) < 0; });
+    var activeIds = active.map(function (c) { return c.id; });
+    var cats = categoriesUnder(ctx, activeIds);
+
+    var out = {
+      size: size, known: known, vclass: vclass, rules: rules, vehicleLabel: vehicleLabel,
+      constraints: constraints, active: active, cats: cats, band: find(BUDGET_BANDS, a.budget),
+      priorities: prioritiesFor(a), primary: null, primaryWhy: null, blame: []
+    };
+
+    if (!cats.length) {
+      // Which single answer is doing it: relaxing it alone leaves something that fits.
+      out.blame = active.filter(function (c) {
+        return categoriesUnder(ctx, activeIds.filter(function (id) { return id !== c.id; })).length > 0;
+      });
+      return out;
+    }
+
+    var primary = cats[0];
+    if (a.weather === "snow" && activeIds.indexOf("weather") >= 0 && cats.indexOf("Winter") >= 0) {
+      primary = "Winter";
+      out.primaryWhy = WEATHER_NOTE.snow.text;
+    } else if (a.priorities[0] === "dry" && a.weather === "warm" && cats.indexOf("Performance") >= 0) {
+      primary = "Performance";
+      out.primaryWhy = "Dry performance was your first priority.";
+    }
+    out.primary = primary;
+    out.also = cats.filter(function (c) { return c !== primary; });
+    return out;
+  }
+
+  /* ---------------------------- products (real ones only) ---------------------------- */
+
+  var productsPromise = null;
+  function loadProducts() {
+    if (!productsPromise) {
+      productsPromise = fetch("/collections/tires/products.json?limit=250", { headers: { Accept: "application/json" } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) { return d && Array.isArray(d.products) ? d.products : []; })
+        .catch(function () { return []; });
+    }
+    return productsPromise;
+  }
+
+  function tagsOf(p) {
+    if (Array.isArray(p.tags)) return p.tags.map(String);
+    if (typeof p.tags === "string") return p.tags.split(",").map(function (t) { return t.trim(); }).filter(Boolean);
+    return [];
+  }
+  function sizePattern(normalized) {
+    var s = normalized.toUpperCase().replace(/[.*+?^$()|[\]\\{}]/g, "\\$&").replace("R", "Z?R");
+    return new RegExp("(^|[^0-9.])" + s + "([^0-9]|$)");
+  }
+  function catTags(p) {
+    var tags = tagsOf(p).map(function (t) { return t.toLowerCase().replace(/&amp;/g, "&"); });
+    return ALL_CATEGORIES.filter(function (c) { return tags.indexOf(c.toLowerCase()) >= 0; });
+  }
+
+  function matchProducts(products, prof) {
+    var re = sizePattern(prof.size.normalized);
+    return products.filter(function (p) {
+      if (!p || !p.handle || !p.title || !p.variants || !p.variants.length) return false;
+      if (p.product_type && !/tire|tyre/i.test(p.product_type)) return false;
+      var hay = [p.title].concat(tagsOf(p)).map(function (t) { return String(t).toUpperCase().replace(/\s+/g, ""); }).join("|");
+      if (!re.test(hay)) return false;
+      var price = parseFloat(p.variants[0].price);
+      if (!isFinite(price)) return false;
+      // A tire explicitly tagged only with categories these answers rule out is left off.
+      var tagged = catTags(p);
+      if (tagged.length && !tagged.some(function (c) { return prof.cats.indexOf(c) >= 0; })) return false;
+      return true;
+    }).map(function (p) {
+      return { p: p, price: parseFloat(p.variants[0].price), inCat: catTags(p).indexOf(prof.primary) >= 0 };
+    });
+  }
+
+  /* ---------------------------- render ---------------------------- */
+
+  var STEP_COUNT = 5;
+  var renderToken = 0;
+
+  function currentStep(a) {
+    var size = a.sizeText ? TD.parseSize(a.sizeText) : null;
+    var raw = Number(params.get("q"));
+    var wantsResults = params.get("q") === "r";
+    var missing = !size ? 1 : !a.roads ? 2 : !a.weather ? 3 : a.priorities.length === 0 ? 4 : !a.budget ? 5 : null;
+    var show = wantsResults && missing === null;
+    var step = show ? 5 : wantsResults ? missing : Math.min(5, Math.max(1, raw || 1));
+    var notice = wantsResults && missing
+      ? (a.sizeText && !size
+        ? "We could not read “" + a.sizeText + "” as a tire size, so there is nothing to rank yet. Give us the size off your sidewall and we will pick up where the link left off."
+        : "That link is missing an answer, so there is nothing to rank yet. Fill this one in and we will pick up where it left off.")
+      : null;
+    return { step: step, show: show, notice: notice };
+  }
+
+  var resumeNotice = null;
+  (function () {
+    var s = currentStep(readAnswers());
+    resumeNotice = s.notice;
+  })();
+
+  function render(moveFocus) {
+    var a = readAnswers();
+    var s = currentStep(a);
+    form.hidden = s.show;
+    if (s.show) {
+      renderResults(a, moveFocus);
+      return;
+    }
+    results.textContent = "";
+    var step = s.step;
+    $$("[data-fm-step]").forEach(function (fs) { fs.hidden = Number(fs.getAttribute("data-fm-step")) !== step; });
+    $("[data-fm-progress-label]").textContent = "Question " + step + " of " + STEP_COUNT;
+    $("[data-fm-progress-pct]").textContent = Math.round((step / STEP_COUNT) * 100) + "% through";
+    var bar = $("[data-fm-bar]");
+    bar.setAttribute("aria-valuenow", String(step));
+    bar.setAttribute("aria-label", "Question " + step + " of " + STEP_COUNT);
+    $("[data-fm-bar-fill]").style.width = (step / STEP_COUNT) * 100 + "%";
+    noticeBox.hidden = !resumeNotice;
+    noticeBox.textContent = resumeNotice || "";
+    backBtn.hidden = step === 1;
+    nextBtn.textContent = step === STEP_COUNT ? "Show my results" : "Next";
+    errorBox.textContent = stepError;
+    if (step === 1) syncStep1();
+    if (stepError && step === 1 && local.sizeText.trim()) sizeInput.setAttribute("aria-invalid", "true");
+    else sizeInput.removeAttribute("aria-invalid");
+    syncOptions(a);
+    if (moveFocus) {
+      var h = $('[data-fm-step="' + step + '"] .td-fm__q');
+      if (h) h.focus();
+    }
+  }
+
+  function goTo(q) {
+    stepError = "";
+    resumeNotice = null;
+    patch({ q: q });
+    render(true);
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var a = readAnswers();
+    var step = currentStep(a).step;
+    if (step === 1) {
+      if (local.mode === "vehicle" && (!local.year || !local.make || !local.model)) {
+        stepError = "Pick a year, make and model — or switch to entering your tire size.";
+        return render(false);
+      }
+      var text = local.sizeText.trim();
+      if (!text) {
+        stepError = local.mode === "vehicle"
+          ? "We do not have a typical size for that model. Type the size off your sidewall instead."
+          : "Type the size off your sidewall — it looks like 225/50R17.";
+        return render(false);
+      }
+      var typed = TD.parseSize(text);
+      if (!typed) {
+        stepError = "“" + text + "” is not a tire size we can read. It looks like 225/50R17, LT265/70R17 or 31x10.50R15.";
+        render(false);
+        sizeInput.focus();
+        return;
+      }
+      var v = local.mode === "vehicle";
+      patch({ mode: local.mode, vy: v ? local.year : "", vmk: v ? local.make : "", vmd: v ? local.model : "", size: typed.normalized, relax: "" });
+      return goTo(2);
+    }
+    if (step === 2 && !a.roads) { stepError = "Pick the one that is closest to your week."; return render(false); }
+    if (step === 3 && !a.weather) { stepError = "Pick the winter you actually get."; return render(false); }
+    if (step === 4 && !a.priorities.length) { stepError = "Pick at least one. Two is better — the first one counts for more."; return render(false); }
+    if (step === 5 && !a.budget) { stepError = "Pick a ceiling, or tell us there isn’t one."; return render(false); }
+    goTo(step === 5 ? "r" : step + 1);
+  });
+  backBtn.addEventListener("click", function () {
+    var step = currentStep(readAnswers()).step;
+    if (step > 1) goTo(step - 1);
+  });
+
+  function startOver() {
+    local = { mode: "vehicle", year: "", make: "", model: "", sizeText: "" };
+    stepError = "";
+    resumeNotice = null;
+    params = new URLSearchParams();
+    patch({});
+    fillModels();
+    render(true);
+  }
+
+  function searchHref(size) { return "/search?q=" + encodeURIComponent(size.normalized) + "&type=product"; }
+
+  function callLine() {
+    return el("p", { class: "td-fm__call" }, ["Rather talk to someone? ", el("a", { class: "td-fm__link", href: PHONE_HREF, text: PHONE })]);
+  }
+
+  function renderResults(a, moveFocus) {
+    var prof = profileFor(a);
+    var token = ++renderToken;
+    results.textContent = "";
+
+    // Every answer, one tap from being changed.
+    var chips = el("div", { class: "td-fm__chips" });
+    var chipList = [
+      { step: 1, label: prof.vehicleLabel },
+      { step: 2, label: (find(ROAD_OPTIONS, a.roads) || {}).label },
+      { step: 3, label: (find(WEATHER_OPTIONS, a.weather) || {}).label }
+    ].concat(a.priorities.map(function (p, i) { return { step: 4, label: (i + 1) + ". " + find(PRIORITY_OPTIONS, p).label }; }))
+      .concat([{ step: 5, label: (find(BUDGET_BANDS, a.budget) || {}).label }]);
+    chipList.forEach(function (c) {
+      if (!c.label) return;
+      chips.appendChild(el("button", { type: "button", class: "td-fm__chip", onclick: function () {
+        if (c.step === 1) { local.mode = a.mode; local.year = a.year; local.make = a.make; local.model = a.model; local.sizeText = a.sizeText; fillModels(); }
+        goTo(c.step);
+      } }, [c.label, el("span", { class: "td-fm__chip-edit", text: "change" })]));
+    });
+    chips.appendChild(el("button", { type: "button", class: "td-fm__chip td-fm__chip--reset", onclick: startOver, text: "Start over" }));
+    results.appendChild(chips);
+
+    if (a.relaxed.length) {
+      var shorts = a.relaxed.map(function (id) {
+        var c = prof.constraints.filter(function (x) { return x.id === id; })[0];
+        return c ? c.short : id;
+      }).join(" and ");
+      results.appendChild(el("p", { class: "td-fm__notice" }, [
+        "Showing results with " + shorts + " relaxed. ",
+        el("button", { type: "button", class: "td-fm__textbtn td-fm__textbtn--inline", onclick: function () { patch({ relax: "" }); render(true); }, text: "Put it back" })
+      ]));
+    }
+
+    var card = el("div", { class: "td-fm__card" });
+    results.appendChild(card);
+    var h2 = el("h2", { class: "td-fm__h2", tabindex: "-1" });
+    card.appendChild(h2);
+
+    var sizeNote = sizeNoteFor(a, prof);
+
+    if (!prof.primary) {
+      // Answers that rule each other out. Name the answer; never invent a pick.
+      h2.textContent = "No tire type clears all of that";
+      card.appendChild(el("p", { class: "td-fm__sub", text:
+        "Your answers rule each other out, so there is no tire type to recommend — and we will not invent one." +
+        (prof.blame.length ? " Here is exactly which answer is doing it, and what happens if you relax it." : "") }));
+      var ul = el("ul", { class: "td-fm__blame" });
+      prof.blame.forEach(function (c) {
+        ul.appendChild(el("li", null, [
+          el("p", { class: "td-fm__itemtitle", text: c.chip + " — " + c.short }),
+          el("p", { class: "td-fm__itemtext", text: c.why }),
+          el("button", { type: "button", class: "td-fm__btn td-fm__btn--secondary", onclick: function () {
+            patch({ relax: a.relaxed.concat([c.id]).filter(function (v, i, arr) { return arr.indexOf(v) === i; }).join(",") });
+            render(true);
+          }, text: c.relaxLabel })
+        ]));
+      });
+      card.appendChild(ul);
+      var acts = el("div", { class: "td-fm__actions" }, [
+        el("button", { type: "button", class: "td-fm__btn td-fm__btn--primary", onclick: startOver, text: "Start over" }),
+        prof.size ? el("a", { class: "td-fm__btn td-fm__btn--secondary", href: searchHref(prof.size), text: "See tires in " + prof.size.normalized }) : null
+      ]);
+      card.appendChild(acts);
+      card.appendChild(callLine());
+      if (moveFocus) h2.focus();
+      return;
+    }
+
+    h2.textContent = "Your tire profile";
+    card.appendChild(el("p", { class: "td-fm__sub", text:
+      "For your " + prof.vehicleLabel + " and " + (ROAD_PHRASE[a.roads] || "the driving you described") + ", " + (WEATHER_PHRASE[a.weather] || "in your weather") + "." }));
+
+    // Type + size, side by side.
+    var typeTile = el("div", { class: "td-fm__tile" }, [
+      el("p", { class: "td-fm__kicker", text: "Tire type" }),
+      el("p", { class: "td-fm__value", text: prof.primary }),
+      prof.also.length ? el("p", { class: "td-fm__p", text: "Also fits your answers: " + prof.also.join(", ") + "." }) : null
+    ]);
+    var sizeTile = el("div", { class: "td-fm__tile" }, [
+      el("p", { class: "td-fm__kicker", text: "Size" }),
+      el("p", { class: "td-fm__value", text: prof.size.normalized }),
+      el("p", { class: "td-fm__p", text: sizeNote.main })
+    ]);
+    if (sizeNote.stagger) sizeTile.appendChild(el("p", { class: "td-fm__tint", text: sizeNote.stagger }));
+    card.appendChild(el("div", { class: "td-fm__tiles" }, [typeTile, sizeTile]));
+
+    // Why this type: the React quiz's own rules, as they apply to these answers.
+    var why = el("ul", { class: "td-fm__list" });
+    if (prof.primaryWhy) why.appendChild(reasonItem(prof.primary, prof.primaryWhy));
+    prof.active.forEach(function (c) { why.appendChild(reasonItem(c.chip + " — " + c.short, c.why)); });
+    why.appendChild(reasonItem(prof.size.rimDiameter + "-inch fitment", "A tire has to match your rim. Only " + prof.size.rimDiameter + "-inch tires can go on your wheels."));
+    card.appendChild(el("div", { class: "td-fm__block" }, [el("h3", { class: "td-fm__h3", text: "Why " + prof.primary }), why]));
+
+    // What to prioritise.
+    if (prof.priorities.length) {
+      var ol = el("ol", { class: "td-fm__list" });
+      prof.priorities.forEach(function (p, i) {
+        ol.appendChild(el("li", { class: "td-fm__item" }, [
+          el("span", { class: "td-fm__num", "aria-hidden": "true", text: String(i + 1) }),
+          el("div", { class: "td-fm__itembody" }, [
+            el("p", { class: "td-fm__itemtitle" }, [p.label, p.detail ? el("span", { class: "td-fm__itemdetail", text: " — " + p.detail }) : null]),
+            el("p", { class: "td-fm__itemtext", text: p.reasons.join(" ") })
+          ])
+        ]));
+      });
+      card.appendChild(el("div", { class: "td-fm__block" }, [el("h3", { class: "td-fm__h3", text: "What to prioritise" }), ol]));
+    }
+
+    if (prof.band && isFinite(prof.band.max)) {
+      card.appendChild(el("div", { class: "td-fm__block" }, [
+        el("h3", { class: "td-fm__h3", text: prof.band.label }),
+        el("p", { class: "td-fm__sub", text: "You set the ceiling at $" + prof.band.max + " a tire — " + money(prof.band.max * SET_SIZE) + " for a set of " + SET_SIZE + "." })
+      ]));
+    }
+
+    // Real products in the size, or a plain link to search for it.
+    var shop = el("div", { class: "td-fm__block" });
+    card.appendChild(shop);
+    shop.appendChild(el("h3", { class: "td-fm__h3", text: "Tires in " + prof.size.normalized }));
+    shop.appendChild(el("p", { class: "td-fm__loading", text: "Checking the shop for " + prof.size.normalized + "…" }));
+    if (moveFocus) h2.focus();
+
+    loadProducts().then(function (products) {
+      if (token !== renderToken) return;
+      shop.textContent = "";
+      shop.appendChild(el("h3", { class: "td-fm__h3", text: "Tires in " + prof.size.normalized }));
+      var matches = matchProducts(products, prof);
+      var band = prof.band;
+      var inBudget = band && isFinite(band.max) ? matches.filter(function (m) { return m.price <= band.max; }) : matches;
+
+      if (matches.length && !inBudget.length) {
+        var cheapest = Math.min.apply(null, matches.map(function (m) { return m.price; }));
+        shop.appendChild(el("p", { class: "td-fm__sub", text:
+          "The tires listed in " + prof.size.normalized + " are all over your $" + band.max + " ceiling. Raising it brings back " + matches.length + (matches.length === 1 ? " tire" : " tires") + ", the cheapest at " + money(cheapest) + " a tire (" + money(cheapest * SET_SIZE) + " a set)." }));
+        shop.appendChild(el("div", { class: "td-fm__actions" }, [
+          el("button", { type: "button", class: "td-fm__btn td-fm__btn--secondary", onclick: function () { patch({ budget: "any" }); render(true); }, text: "Raise the budget" }),
+          el("a", { class: "td-fm__btn td-fm__btn--primary", href: searchHref(prof.size), text: "See tires in " + prof.size.normalized })
+        ]));
+        shop.appendChild(callLine());
+        return;
+      }
+
+      if (inBudget.length) {
+        inBudget.sort(function (x, y) { return (y.inCat - x.inCat) || (x.price - y.price); });
+        var pick = inBudget.slice(0, 3);
+        var anyCat = pick.some(function (m) { return m.inCat; });
+        shop.appendChild(el("p", { class: "td-fm__sub", text: anyCat
+          ? "Listed in your size. Tires tagged " + prof.primary + " come first, then the lowest price."
+          : "Listed in your size, lowest price first." }));
+        var list = el("ul", { class: "td-fm__products" });
+        pick.forEach(function (m) {
+          var facts = el("ul", { class: "td-fm__why" });
+          facts.appendChild(el("li", { text: "Exactly your size — " + prof.size.normalized + "." }));
+          if (m.inCat) facts.appendChild(el("li", { text: "Tagged " + prof.primary + ", the tire type that fits your answers." }));
+          if (band && isFinite(band.max)) facts.appendChild(el("li", { text: money(m.price) + " a tire, inside your $" + band.max + " ceiling." }));
+          if (m.p.variants[0].available === false) facts.appendChild(el("li", { text: "Shown as sold out right now." }));
+          list.appendChild(el("li", { class: "td-fm__product" }, [
+            el("h4", { class: "td-fm__ptitle" }, [el("a", { href: "/products/" + encodeURIComponent(m.p.handle), text: m.p.title })]),
+            el("p", { class: "td-fm__price" }, [el("strong", { text: money(m.price) }), " a tire · " + money(m.price * SET_SIZE) + " a set of " + SET_SIZE]),
+            facts
+          ]));
+        });
+        shop.appendChild(list);
+      }
+
+      shop.appendChild(el("div", { class: "td-fm__actions" }, [
+        el("a", { class: "td-fm__btn td-fm__btn--primary", href: searchHref(prof.size), text: "See tires in " + prof.size.normalized }),
+        el("button", { type: "button", class: "td-fm__btn td-fm__btn--secondary", onclick: startOver, text: "Start over" })
+      ]));
+      shop.appendChild(callLine());
+    });
+  }
+
+  function reasonItem(title, text) {
+    return el("li", { class: "td-fm__item" }, [
+      el("span", { class: "td-fm__dot", "aria-hidden": "true" }),
+      el("div", { class: "td-fm__itembody" }, [el("p", { class: "td-fm__itemtitle", text: title }), el("p", { class: "td-fm__itemtext", text: text })])
+    ]);
+  }
+
+  function sizeNoteFor(a, prof) {
+    var fit = prof.known ? TD.fitmentFor(a.make, a.model) : null;
+    var isOe = fit && prof.size && fit[0] === prof.size.normalized;
+    return {
+      main: isOe
+        ? fit[0] + " is the most common original fitment for a " + a.model + ". Trims and model years move it around, so the size printed on your sidewall — or the sticker in your driver’s door jamb — is the one that counts."
+        : readAs(prof.size) + " Check it against the size printed on your sidewall.",
+      stagger: fit && fit[1] === "sports"
+        ? "A " + a.model + " may be staggered — a wider tire on the rear than the front. Check both ends before you buy four of anything. If the sizes differ, we will sort it out on the phone."
+        : null
+    };
+  }
+
+  /* ---------------------------- go ---------------------------- */
+
+  $("[data-fm-fallback]").hidden = true;
+  fillModels();
+  render(false);
+})();
+</script>
+
+{% schema %}
+{
+  "name": "TireDrop: Find my tires",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Free tool" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Find my tires" },
+    { "type": "textarea", "id": "lede", "label": "Supporting copy", "default": "Five questions about your car, your roads and your weather. At the end: the type of tire that fits, the size to look for, and what to prioritise — each with the reason." }
+  ],
+  "presets": [{ "name": "TireDrop: Find my tires" }]
+}
+{% endschema %}

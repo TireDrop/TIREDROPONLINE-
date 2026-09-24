@@ -1,0 +1,13 @@
+{
+  "sections": {
+    "td_tire_size": {
+      "type": "td-tool-tire-size",
+      "settings": {
+        "eyebrow": "Free tool",
+        "heading": "Tire Size Decoder",
+        "lede": "Type what is written on your sidewall. We will draw it, explain every part of the marking in plain English, and show you exactly what changes if you fit something different."
+      }
+    }
+  },
+  "order": ["td_tire_size"]
+}

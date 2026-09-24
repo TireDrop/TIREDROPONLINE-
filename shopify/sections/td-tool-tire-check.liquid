@@ -1,0 +1,1112 @@
+{% comment %}
+  "Do I need tires yet?" — the tire check tool, ported from
+  src/pages/tools/TireCheckPage.jsx.
+
+  All arithmetic comes from td-tiremath.js (window.TireDrop), which is
+  generated from src/data/tireMath.js. Nothing here recomputes tread status,
+  life left or tire age: it only chooses which words to show for what those
+  functions return.
+
+  Honesty rules this port keeps:
+  - It never calls a tire safe. It reports what the tread and date code say,
+    and the note on what it cannot see (sidewall, repairs, belts, uneven
+    wear) is always on the page, not only under a good result.
+  - Age is shown in whole years rounded down, the way decodeDot's caller in
+    the React page did it: 11.5 years reads "about 11", never 12.
+  - An unreadable gauge reading says so, with role="alert" and aria-invalid.
+    It never falls back to a default depth.
+
+  State lives in the URL (method, coin, bars, nd, tread, gauge, dot, size),
+  the same parameters the React page used, so old deep links keep working.
+{% endcomment %}
+
+{%- liquid
+  assign search_url = routes.search_url | default: '/search'
+  assign all_url = routes.all_products_collection_url | default: '/collections/all'
+-%}
+
+<section
+  id="td-tc-{{ section.id }}"
+  class="td-tc"
+  data-search-url="{{ search_url }}"
+  data-all-url="{{ all_url }}"
+>
+  {%- comment -%} ---------------- Head ---------------- {%- endcomment -%}
+  <div class="td-tc-band">
+    <div class="td-tc-inner">
+      <header class="td-tc-head td-tc-head--page">
+        {% if section.settings.eyebrow != blank %}
+          <p class="td-tc-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+        {% endif %}
+        <h1 class="td-tc-h1">{{ section.settings.heading | default: 'Do I need tires yet?' | escape }}</h1>
+        {% if section.settings.lede != blank %}
+          <p class="td-tc-lede">{{ section.settings.lede | escape }}</p>
+        {% endif %}
+        {% if section.settings.promise != blank %}
+          <p class="td-tc-promise">{{ section.settings.promise | escape }}</p>
+        {% endif %}
+      </header>
+    </div>
+  </div>
+
+  {%- comment -%} ---------------- Step one: tread ---------------- {%- endcomment -%}
+  <div class="td-tc-band td-tc-band--fog">
+    <div class="td-tc-inner">
+      <div class="td-tc-head">
+        <p class="td-tc-eyebrow">Step one</p>
+        <h2 class="td-tc-h2">How much tread is left?</h2>
+        <p class="td-tc-lede">Three ways in, depending on what you have to hand. Check three spots across each tire and use the shallowest reading — tires rarely wear evenly, and the worn edge is the one that decides.</p>
+      </div>
+
+      <div class="td-tc-grid td-tc-grid--tread">
+        <div class="td-tc-card td-tc-card--pad">
+          <fieldset class="td-tc-fieldset">
+            <legend class="td-tc-label">What are you using?</legend>
+            <div class="td-tc-seg td-tc-seg--3">
+              <label class="td-tc-seg__opt">
+                <input type="radio" name="td-tc-method" value="coin" data-tc="method">
+                <span>A coin</span>
+              </label>
+              <label class="td-tc-seg__opt">
+                <input type="radio" name="td-tc-method" value="gauge" data-tc="method">
+                <span>A depth gauge</span>
+              </label>
+              <label class="td-tc-seg__opt">
+                <input type="radio" name="td-tc-method" value="bars" data-tc="method">
+                <span>The wear bars</span>
+              </label>
+            </div>
+          </fieldset>
+
+          {%- comment -%} Coin {%- endcomment -%}
+          <div class="td-tc-method" data-tc-panel="coin">
+            <fieldset class="td-tc-fieldset">
+              <legend class="td-tc-label">Which coin?</legend>
+              <div class="td-tc-seg td-tc-seg--2">
+                <label class="td-tc-seg__opt">
+                  <input type="radio" name="td-tc-coin" value="penny" data-tc="coin">
+                  <span>Penny</span>
+                </label>
+                <label class="td-tc-seg__opt">
+                  <input type="radio" name="td-tc-coin" value="quarter" data-tc="coin">
+                  <span>Quarter</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="td-tc-figure-frame" data-tc-out="coin-diagram"></div>
+
+            <div class="td-tc-slider-head">
+              <label for="td-tc-slider-{{ section.id }}" class="td-tc-label td-tc-label--inline">Drag until the picture matches your tire</label>
+              <output class="td-tc-slider-value" for="td-tc-slider-{{ section.id }}" data-tc-out="slider-value">6/32"</output>
+            </div>
+            <input
+              id="td-tc-slider-{{ section.id }}"
+              class="td-tc-range"
+              type="range"
+              min="0"
+              max="12"
+              step="0.5"
+              value="6"
+              data-tc="tread"
+              aria-describedby="td-tc-slider-help-{{ section.id }}"
+            >
+            <div class="td-tc-range-ends" aria-hidden="true">
+              <span>Coin sits on top</span>
+              <span>Coin sinks in deep</span>
+            </div>
+            <p id="td-tc-slider-help-{{ section.id }}" class="td-tc-copy">
+              <span data-tc-out="coin-help"></span>
+              <span class="td-tc-ink" data-tc-out="coin-now"></span>
+            </p>
+          </div>
+
+          {%- comment -%} Gauge {%- endcomment -%}
+          <div class="td-tc-method" data-tc-panel="gauge" hidden>
+            <label for="td-tc-gauge-{{ section.id }}" class="td-tc-label">Depth reading, in 32nds of an inch</label>
+            <div class="td-tc-gauge-row">
+              <input
+                id="td-tc-gauge-{{ section.id }}"
+                class="td-tc-input td-tc-input--gauge"
+                type="text"
+                inputmode="decimal"
+                autocomplete="off"
+                placeholder="6"
+                data-tc="gauge"
+              >
+              <span class="td-tc-suffix" aria-hidden="true">/32"</span>
+            </div>
+            <p id="td-tc-gauge-error-{{ section.id }}" class="td-tc-error" role="alert" data-tc-out="gauge-error"></p>
+            <p class="td-tc-copy">A pin-style gauge reads in 32nds straight off the barrel. Sit the shoulders of the gauge flat on the tread blocks and push the pin to the bottom of a main groove — not into a sipe, and not on top of a wear bar, both of which will read shallow.</p>
+            <p class="td-tc-copy">Some gauges read in millimetres. Divide the millimetre reading by 0.79 to get 32nds — 4 mm is almost exactly 5/32".</p>
+          </div>
+
+          {%- comment -%} Wear bars {%- endcomment -%}
+          <div class="td-tc-method" data-tc-panel="bars" hidden>
+            <div class="td-tc-figure-frame" data-tc-out="bar-diagram"></div>
+            <fieldset class="td-tc-fieldset td-tc-fieldset--gap">
+              <legend class="td-tc-label">What do the bars look like?</legend>
+              <div class="td-tc-choices">
+                <label class="td-tc-choice">
+                  <input type="radio" name="td-tc-bars" value="above" data-tc="bars">
+                  <span>Tread sits clearly above the bars</span>
+                </label>
+                <label class="td-tc-choice">
+                  <input type="radio" name="td-tc-bars" value="close" data-tc="bars">
+                  <span>Tread is nearly down to the bars</span>
+                </label>
+                <label class="td-tc-choice">
+                  <input type="radio" name="td-tc-bars" value="flush" data-tc="bars">
+                  <span>Bars are flush with the tread</span>
+                </label>
+              </div>
+            </fieldset>
+            <p class="td-tc-copy">Tread wear indicators are short raised bars molded across the bottom of the main grooves, every few inches around the tire. Look for the small triangle, TWI mark or brand logo on the shoulder — it points at the nearest one.</p>
+          </div>
+        </div>
+
+        {%- comment -%} Tread result {%- endcomment -%}
+        <div class="td-tc-card td-tc-result" data-tc-out="tread-card" aria-live="polite">
+          <div data-tc-out="tread-empty">
+            <p class="td-tc-label">Your reading</p>
+            <p class="td-tc-copy td-tc-copy--flush" data-tc-out="tread-empty-copy"></p>
+            <button type="button" class="td-tc-btn td-tc-btn--outline td-tc-btn--sm" data-tc-action="use-coin" hidden>
+              Use a coin instead <span aria-hidden="true">&rarr;</span>
+            </button>
+          </div>
+
+          <div data-tc-out="tread-full" hidden>
+            <div class="td-tc-badge-row">
+              <span class="td-tc-icon" data-tc-out="tread-icon" aria-hidden="true"></span>
+              <span class="td-tc-badge" data-tc-out="tread-badge"></span>
+            </div>
+            <div class="td-tc-figs">
+              <div class="td-tc-fig">
+                <p class="td-tc-label td-tc-label--tight">Tread depth</p>
+                <p class="td-tc-fig__value" data-tc-out="tread-depth"></p>
+                <p class="td-tc-fig__sub" data-tc-out="tread-precision"></p>
+              </div>
+              <div class="td-tc-fig">
+                <p class="td-tc-label td-tc-label--tight">Usable life left</p>
+                <p class="td-tc-fig__value" data-tc-out="tread-life"></p>
+                <p class="td-tc-fig__sub">Measured against the 2/32" legal limit, not against zero. The last 2/32" is not yours to use.</p>
+              </div>
+            </div>
+            <div class="td-tc-lifebar" aria-hidden="true"><div class="td-tc-lifebar__fill" data-tc-out="tread-bar"></div></div>
+            <p class="td-tc-copy" data-tc-out="tread-copy"></p>
+            <p class="td-tc-small td-tc-rule" data-tc-out="tread-note"></p>
+
+            <fieldset class="td-tc-fieldset td-tc-fieldset--gap">
+              <legend class="td-tc-label">Compare the percentage against</legend>
+              <div class="td-tc-choices">
+                <label class="td-tc-choice"><input type="radio" name="td-tc-nd" value="10" data-tc="nd"><span>10/32" — typical passenger or touring tire</span></label>
+                <label class="td-tc-choice"><input type="radio" name="td-tc-nd" value="12" data-tc="nd"><span>12/32" — many all-terrain and light-truck tires</span></label>
+                <label class="td-tc-choice"><input type="radio" name="td-tc-nd" value="14" data-tc="nd"><span>14/32" — deep winter and heavy LT tires</span></label>
+              </div>
+            </fieldset>
+            <p class="td-tc-small">This only changes the percentage, never the verdict. Most passenger tires leave the factory at 10–11/32"; truck and winter tires start deeper, so pick the closest match or a new winter tire will read under 100%.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} ---------------- Step two: age ---------------- {%- endcomment -%}
+  <div class="td-tc-band">
+    <div class="td-tc-inner">
+      <div class="td-tc-head">
+        <p class="td-tc-eyebrow">Step two</p>
+        <h2 class="td-tc-h2">How old is the rubber?</h2>
+        <p class="td-tc-lede">Tread wears; rubber ages on its own schedule. The DOT code stamped on the sidewall is the only honest answer to how old a tire is — the day you bought it is not the day it was built.</p>
+      </div>
+
+      <div class="td-tc-grid td-tc-grid--age">
+        <div class="td-tc-card td-tc-card--pad">
+          <label for="td-tc-dot-{{ section.id }}" class="td-tc-label">The last four digits of the DOT code</label>
+          <input
+            id="td-tc-dot-{{ section.id }}"
+            class="td-tc-input td-tc-input--dot"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="3421"
+            aria-describedby="td-tc-dot-help-{{ section.id }}"
+            data-tc="dot"
+          >
+          <p id="td-tc-dot-help-{{ section.id }}" class="td-tc-copy">Paste the whole serial if it is easier — only the last four digits carry the date. The first two are the week, the last two are the year: <span class="td-tc-ink">3421</span> is the 34th week of 2021.</p>
+
+          <div class="td-tc-figure-frame td-tc-figure-frame--dark">
+            <svg viewBox="0 0 400 200" class="td-tc-svg" role="img" aria-label="A tire sidewall stamped DOT U2LL LMLR 3421, with the last four digits — 3421, week 34 of 2021 — highlighted as the date code.">
+              <rect x="0" y="0" width="400" height="200" rx="10" fill="#101C2E"/>
+              <path d="M 12 186 Q 200 86 388 186" fill="none" stroke="#22344C" stroke-width="52" stroke-linecap="round"/>
+              <path d="M 12 186 Q 200 86 388 186" fill="none" stroke="#334A69" stroke-width="2"/>
+              <text x="256" y="143" text-anchor="end" font-size="20" font-weight="700" letter-spacing="2" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#E9F2FF">DOT U2LL LMLR</text>
+              <rect x="264" y="118" width="80" height="38" rx="7" fill="#00B4FC"/>
+              <text x="304" y="144" text-anchor="middle" font-size="22" font-weight="800" letter-spacing="2" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#070E1A">3421</text>
+              <line x1="304" y1="116" x2="304" y2="96" stroke="#00B4FC" stroke-width="2"/>
+              <text x="304" y="82" text-anchor="middle" font-size="17" font-weight="700" fill="#00B4FC">The last four digits</text>
+              <text x="304" y="58" text-anchor="middle" font-size="16" font-weight="600" fill="#9FB4D0">week 34 of 2021</text>
+            </svg>
+          </div>
+
+          <h3 class="td-tc-h3">Where to find it</h3>
+          <ol class="td-tc-steps">
+            <li><span class="td-tc-steps__n" aria-hidden="true">1</span><span>Look on the sidewall for the letters DOT, followed by a run of letters and numbers. It is molded in, the same colour as the tire, so it is easier to feel than to see.</span></li>
+            <li><span class="td-tc-steps__n" aria-hidden="true">2</span><span><span class="td-tc-ink">This is where everyone gets stuck:</span> the full code with the date on the end is normally only stamped on one side of the tire. If the side facing you ends after the plant and size codes, the date is on the inboard face — look from under the car, or turn the wheel to full lock to see the inside of a front tire.</span></li>
+            <li><span class="td-tc-steps__n" aria-hidden="true">3</span><span>Four digits inside a small oval, right at the end. Three digits instead of four means the tire was built before 2000.</span></li>
+          </ol>
+        </div>
+
+        {%- comment -%} Age result {%- endcomment -%}
+        <div class="td-tc-card td-tc-result" data-tc-out="age-card" aria-live="polite">
+          <div data-tc-out="age-empty">
+            <p class="td-tc-label">Age check</p>
+            <p class="td-tc-copy td-tc-copy--flush">Type the four digits and this will tell you the week the tire was built, how old it is now, and what that means.</p>
+          </div>
+
+          <div data-tc-out="age-unreadable" hidden>
+            <div class="td-tc-badge-row">
+              <span class="td-tc-badge td-tc-badge--soft">Can't read that</span>
+            </div>
+            <p class="td-tc-copy td-tc-copy--flush">That is not a date code this page can decode. It needs four digits where the first two are a week from 01 to 53 — so <span class="td-tc-ink">0624</span> works and <span class="td-tc-ink">6024</span> cannot, because there is no 60th week. Check you have the last four digits of the DOT serial rather than the load index or the size.</p>
+          </div>
+
+          <div data-tc-out="age-legacy" hidden>
+            <div class="td-tc-badge-row">
+              <span class="td-tc-icon td-tc-icon--replace" aria-hidden="true"></span>
+              <span class="td-tc-badge td-tc-badge--replace">Pre-2000 tire</span>
+            </div>
+            <p class="td-tc-copy td-tc-copy--flush">Three digits means the tire was built before 2000, when the code did not carry a decade. Which year stopped mattering a long time ago: that tire is at least twenty-five years old and belongs off the car whatever the tread looks like — including if it is the spare that has never touched the road.</p>
+          </div>
+
+          <div data-tc-out="age-full" hidden>
+            <div class="td-tc-badge-row">
+              <span class="td-tc-icon" data-tc-out="age-icon" aria-hidden="true"></span>
+              <span class="td-tc-badge" data-tc-out="age-badge"></span>
+            </div>
+            <div class="td-tc-figs">
+              <div class="td-tc-fig">
+                <p class="td-tc-label td-tc-label--tight">Built</p>
+                <p class="td-tc-fig__value" data-tc-out="age-built"></p>
+                <p class="td-tc-fig__sub" data-tc-out="age-built-sub"></p>
+              </div>
+              <div class="td-tc-fig">
+                <p class="td-tc-label td-tc-label--tight">Age today</p>
+                <p class="td-tc-fig__value" data-tc-out="age-years"></p>
+                <p class="td-tc-fig__sub">In whole years, rounded down.</p>
+              </div>
+            </div>
+            <p class="td-tc-copy" data-tc-out="age-copy"></p>
+            <p class="td-tc-small td-tc-rule">Six and ten years are manufacturer guidance, not law — no US state puts an age limit on a passenger tire. Rubber ages whether the tire is driven or parked, which is why a spare with full tread can still be past it, and heat and sun move it along faster than a garage does.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} ---------------- The answer ---------------- {%- endcomment -%}
+  <div class="td-tc-band td-tc-band--fog">
+    <div class="td-tc-inner td-tc-inner--narrow">
+      <div class="td-tc-head">
+        <p class="td-tc-eyebrow">The answer</p>
+        <h2 class="td-tc-h2">So — do you need tires?</h2>
+      </div>
+
+      <div aria-live="polite" data-tc-out="verdict"></div>
+
+      {%- comment -%}
+        Always on the page, whatever the result — including before anything is
+        entered. The tool reads two numbers and must not be taken as answering
+        a third question it cannot see.
+      {%- endcomment -%}
+      <aside class="td-tc-cannot" aria-label="What this check cannot see" data-tc-out="cannot-see">
+        <p><strong>One thing this cannot do:</strong> it reads tread depth and date code, and nothing else. It has not seen a bulge or a cut in your sidewall, an old repair, a belt starting to separate, or wear running unevenly across the tread — any of which can finish a tire that still measures fine here. If something looks wrong, or the car pulls, shakes or sits oddly, have someone look at it properly.</p>
+      </aside>
+
+      <div class="td-tc-card td-tc-card--pad td-tc-size">
+        <h3 class="td-tc-h3 td-tc-h3--flush">Know your size? Carry it through.</h3>
+        <p class="td-tc-copy">It is on the sidewall in the form 215/60R16, and on the placard inside the driver's door. Enter it and every link on this page points at your size — including if you bookmark or share this result.</p>
+        <div class="td-tc-size-row">
+          <div class="td-tc-size-field">
+            <label for="td-tc-size-{{ section.id }}" class="td-tc-label">Your tire size</label>
+            <input
+              id="td-tc-size-{{ section.id }}"
+              class="td-tc-input"
+              type="text"
+              autocomplete="off"
+              placeholder="215/60R16"
+              aria-describedby="td-tc-size-msg-{{ section.id }}"
+              data-tc="size"
+            >
+          </div>
+          <a href="{{ search_url }}" class="td-tc-btn td-tc-btn--outline" data-tc-out="size-link" hidden></a>
+        </div>
+        <p id="td-tc-size-msg-{{ section.id }}" class="td-tc-small" aria-live="polite" data-tc-out="size-msg">Optional. Everything above works without it.</p>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} ---------------- FAQ ---------------- {%- endcomment -%}
+  <div class="td-tc-band">
+    <div class="td-tc-inner td-tc-inner--narrow">
+      <div class="td-tc-head">
+        <p class="td-tc-eyebrow">Questions</p>
+        <h2 class="td-tc-h2">The things people ask next</h2>
+        <p class="td-tc-lede">Short answers, including the ones that mean you do not need to buy anything.</p>
+      </div>
+      <div class="td-tc-faq">
+        <details>
+          <summary>How often should I actually check?</summary>
+          <p>Once a month, at the same time you check pressures, and again before any long drive. It takes under a minute per tire. Check three spots across each tire — outer shoulder, middle, inner shoulder — because a tire rarely wears evenly, and the shallowest reading is the one that counts.</p>
+        </details>
+        <details>
+          <summary>Does the spare count?</summary>
+          <p>Yes, and it is the one nobody checks. A full-size spare ages in the trunk at the same rate as the four doing the work, so a spare with beautiful tread can still be a ten-year-old tire. Check its date code and its pressure twice a year. A temporary compact spare is a different animal: it carries its own speed and distance limits printed on the sidewall, usually 50 mph and a short trip to a shop.</p>
+        </details>
+        <details>
+          <summary>What does uneven wear tell me?</summary>
+          <p>Worn down the centre with the shoulders still full means over-inflation — the tire is crowned and riding on its middle. Worn on both shoulders with the centre full means the opposite: chronic under-inflation. Worn on one shoulder only is alignment, usually camber or toe, and no new tire will survive it until the alignment is fixed. Patchy or scalloped wear that you can feel with your palm points at worn shocks, struts or a wheel that is out of balance.</p>
+        </details>
+        <details>
+          <summary>The tread is fine. Does age really matter?</summary>
+          <p>It does, and this is the part the tread check cannot see. Rubber cures and hardens over time whether the tire is driven or parked, which is why a barely-used spare or a low-mileage car on original tires can be past it with most of the tread still there. Six years is the usual point at which manufacturers ask for a yearly inspection, and ten years is the usual hard stop — but both are manufacturer guidance, not law. Heat and sunlight, which South Florida has in quantity, move it along faster.</p>
+        </details>
+        <details>
+          <summary>Is 2/32" really the legal line?</summary>
+          <p>In most US states, yes — it is the point at which a tire is legally worn out, and it is what the penny test finds. A handful of states word it differently or set the bar elsewhere, so treat 2/32" as the floor rather than the whole answer. Either way, well before that, wet braking has already fallen off sharply: below 4/32" the grooves can no longer move enough water out of the way.</p>
+        </details>
+        <details>
+          <summary>Do I have to replace all four?</summary>
+          <p>Not always. On a front- or rear-wheel-drive car, two is fine if the other two still have real tread — and the new pair goes on the rear axle regardless of which end drives, because a car that loses grip at the back first is much harder to catch. All-wheel drive is stricter: many manufacturers require all four within a small difference in circumference, so a single replacement on a worn set can cook a differential. Check the owner's manual before buying one tire.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .td-tc {
+    background: #FFFFFF; color: #070E1A;
+    font-family: var(--font-body--family, inherit);
+    font-size: 1rem; line-height: 1.5;
+  }
+  .td-tc *, .td-tc *::before, .td-tc *::after { box-sizing: border-box; }
+  .td-tc [hidden] { display: none !important; }
+  :where(.td-tc) p { margin: 0; }
+
+  .td-tc-band { padding: 3.5rem 0; }
+  .td-tc-band--fog { background: #F4F6FA; }
+  .td-tc-inner { max-width: 1280px; margin: 0 auto; padding: 0 1rem; }
+  .td-tc-inner--narrow > * { max-width: 56rem; margin-left: auto; margin-right: auto; }
+
+  /* Section heads: centred, as on the homepage bands. */
+  .td-tc-head { max-width: 42rem; margin: 0 auto 2rem; text-align: center; }
+  .td-tc-head--page { margin-bottom: 0; }
+  .td-tc-eyebrow {
+    font-family: var(--font-subheading--family, inherit);
+    font-size: .75rem; font-weight: 700; letter-spacing: .09em;
+    text-transform: uppercase; color: #0068E8; margin: 0 0 .625rem; text-wrap: balance;
+  }
+  .td-tc-h1 {
+    font-family: var(--font-heading--family, inherit);
+    font-weight: 800; letter-spacing: -.02em; line-height: 1.02;
+    font-size: clamp(2.25rem, 6vw, 3.5rem); margin: 0; color: #070E1A;
+    text-wrap: balance;
+  }
+  .td-tc-h2 {
+    font-family: var(--font-heading--family, inherit);
+    font-weight: 800; letter-spacing: -.02em; line-height: 1.05;
+    font-size: clamp(1.75rem, 4vw, 2.5rem); margin: 0; color: #070E1A;
+    text-wrap: balance;
+  }
+  .td-tc-h3 {
+    font-family: var(--font-heading--family, inherit);
+    font-weight: 700; line-height: 1.2; font-size: 1.125rem;
+    margin: 1.5rem 0 .75rem; color: #070E1A; text-wrap: balance;
+  }
+  .td-tc-h3--flush { margin-top: 0; margin-bottom: .5rem; }
+  .td-tc-lede {
+    margin: .875rem auto 0; max-width: 36rem; text-wrap: pretty;
+    font-size: 1.0625rem; line-height: 1.6; color: #586274;
+  }
+  .td-tc .td-tc-promise {
+    margin: 1rem auto 0; max-width: 36rem; text-wrap: pretty;
+    font-size: .9375rem; line-height: 1.6; color: #070E1A;
+  }
+
+  /* Cards and grids */
+  .td-tc-grid { display: grid; gap: 1.5rem; }
+  .td-tc-card {
+    background: #FFFFFF; border: 1px solid #E3E8EF; border-radius: 12px;
+    padding: 1.25rem; min-width: 0;
+  }
+  .td-tc-result { align-self: start; border-left-width: 4px; border-left-color: #C9D1DC; }
+  .td-tc-result.is-fine { border-left-color: #0068E8; }
+  .td-tc-result.is-soon { border-left-color: #F5A623; }
+  .td-tc-result.is-replace { border-left-color: #B42318; }
+
+  .td-tc-label {
+    display: block; margin: 0 0 .5rem;
+    font-family: var(--font-heading--family, inherit);
+    font-size: .75rem; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase; line-height: 1.35; color: #586274;
+  }
+  .td-tc-label--tight { margin-bottom: .25rem; }
+  .td-tc-label--gap { margin-top: 1.25rem; }
+  .td-tc-label--inline { margin: 0; }
+  .td-tc-copy { margin-top: .875rem; font-size: .9375rem; line-height: 1.6; color: #586274; }
+  .td-tc .td-tc-copy--flush { margin-top: 0; }
+  .td-tc-small { margin-top: .5rem; font-size: .8125rem; line-height: 1.6; color: #586274; }
+  .td-tc .td-tc-rule { margin-top: .875rem; padding-top: .75rem; border-top: 1px solid #E3E8EF; }
+  .td-tc-ink { color: #070E1A; font-weight: 600; }
+
+  /* Radio groups */
+  .td-tc-fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .td-tc-method { margin-top: 1.5rem; }
+  .td-tc-method > .td-tc-fieldset { margin-bottom: 1rem; }
+  .td-tc-fieldset--gap { margin-top: 1.25rem; }
+
+  .td-tc-seg { display: grid; gap: .5rem; grid-template-columns: repeat(var(--td-tc-n, 1), minmax(0, 1fr)); }
+  .td-tc-seg--2 { --td-tc-n: 2; }
+  .td-tc-seg--3 { --td-tc-n: 1; }
+  .td-tc-seg__opt { position: relative; display: block; }
+  .td-tc-seg__opt input {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    margin: 0; opacity: 0; cursor: pointer; z-index: 1;
+  }
+  .td-tc-seg__opt span {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 48px; padding: .5rem .75rem; border-radius: 999px;
+    border: 1px solid #C9D1DC; background: #FFFFFF; color: #070E1A;
+    font-family: var(--font-heading--family, inherit);
+    font-weight: 700; font-size: .9375rem; line-height: 1.2; text-align: center;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .td-tc-seg__opt input:hover + span { border-color: #070E1A; }
+  .td-tc-seg__opt input:checked + span { background: #070E1A; border-color: #070E1A; color: #FFFFFF; }
+  .td-tc-seg__opt input:focus-visible + span { outline: 3px solid #0068E8; outline-offset: 2px; }
+
+  .td-tc-choices { display: grid; gap: .5rem; }
+  .td-tc-choice {
+    display: flex; align-items: center; gap: .75rem; min-height: 48px;
+    padding: .625rem .875rem; border: 1px solid #C9D1DC; border-radius: 8px;
+    background: #FFFFFF; color: #586274; font-size: .9375rem; line-height: 1.4;
+    cursor: pointer; transition: border-color .15s ease, background-color .15s ease;
+  }
+  .td-tc-choice:hover { border-color: #070E1A; }
+  .td-tc-choice input { width: 20px; height: 20px; margin: 0; flex: 0 0 auto; accent-color: #0068E8; cursor: pointer; }
+  .td-tc-choice:has(input:checked) { border-color: #0068E8; background: #EFF5FF; color: #070E1A; }
+  .td-tc-choice input:focus-visible { outline: 3px solid #0068E8; outline-offset: 2px; }
+
+  /* Diagrams */
+  .td-tc-figure-frame { overflow: hidden; border-radius: 12px; border: 1px solid #E3E8EF; line-height: 0; }
+  .td-tc-figure-frame--dark { margin-top: 1.25rem; border-color: #101C2E; }
+  .td-tc-svg { display: block; width: 100%; height: auto; font-family: var(--font-heading--family, inherit); }
+
+  /* Slider */
+  .td-tc-slider-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-top: 1.25rem; }
+  .td-tc-slider-value {
+    font-family: var(--font-heading--family, inherit);
+    font-weight: 800; font-size: 1.25rem; color: #070E1A;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .td-tc-range { display: block; width: 100%; height: 44px; margin: .25rem 0 0; accent-color: #0068E8; cursor: pointer; background: transparent; }
+  .td-tc-range:focus-visible { outline: 3px solid #0068E8; outline-offset: 2px; border-radius: 6px; }
+  .td-tc-range-ends {
+    display: flex; justify-content: space-between; gap: 1rem;
+    font-size: .6875rem; font-weight: 600; letter-spacing: .07em;
+    text-transform: uppercase; color: #586274;
+  }
+
+  /* Fields */
+  .td-tc-input {
+    display: block; width: 100%; min-height: 48px; margin: 0;
+    padding: 0 .875rem; border: 1px solid #7A8596; border-radius: 8px;
+    background: #FFFFFF; color: #070E1A;
+    font-family: var(--font-body--family, inherit); font-size: 16px; line-height: 1.2;
+  }
+  .td-tc-input:focus-visible { outline: 3px solid #0068E8; outline-offset: 1px; border-color: #0068E8; }
+  .td-tc-input::placeholder { color: #6B7587; }
+  .td-tc-input[aria-invalid="true"] { border: 2px solid #B42318; }
+  .td-tc-gauge-row { display: flex; align-items: center; gap: .75rem; }
+  .td-tc-input--gauge { max-width: 7.5rem; font-variant-numeric: tabular-nums; font-size: 1.125rem; }
+  .td-tc-input--dot { max-width: 12rem; font-size: 1.125rem; letter-spacing: .12em; font-variant-numeric: tabular-nums; }
+  .td-tc-suffix { font-family: var(--font-heading--family, inherit); font-size: 1.125rem; font-weight: 700; color: #586274; }
+  .td-tc-error { margin-top: .5rem; font-size: .9375rem; line-height: 1.6; color: #B42318; font-weight: 600; }
+  .td-tc-error:empty { display: none; }
+
+  /* Buttons */
+  .td-tc-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    min-height: 48px; padding: 0 1.5rem; border-radius: 999px; border: 1px solid transparent;
+    font-family: var(--font-heading--family, inherit);
+    font-weight: 700; font-size: .9375rem; line-height: 1.2; text-align: center;
+    text-decoration: none; cursor: pointer; background: none;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .td-tc-btn:focus-visible { outline: 3px solid #0068E8; outline-offset: 2px; }
+  .td-tc-btn--primary { background: #0068E8; color: #FFFFFF; }
+  .td-tc-btn--primary:hover { background: #0053C4; }
+  .td-tc-btn--outline { border-color: #070E1A; color: #070E1A; background: #FFFFFF; }
+  .td-tc-btn--outline:hover { background: #F4F6FA; }
+  .td-tc-btn--sm { margin-top: 1rem; }
+
+  /* Results */
+  .td-tc-badge-row { display: flex; align-items: center; gap: .625rem; margin-bottom: 1rem; }
+  .td-tc-badge {
+    display: inline-flex; align-items: center; min-height: 28px; padding: .25rem .75rem;
+    border-radius: 999px; font-family: var(--font-heading--family, inherit);
+    font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    background: #EFF5FF; color: #070E1A;
+  }
+  .td-tc-badge--fine { background: #0068E8; color: #FFFFFF; }
+  .td-tc-badge--soon { background: #F5A623; color: #070E1A; }
+  .td-tc-badge--replace { background: #B42318; color: #FFFFFF; }
+  .td-tc-badge--soft { background: #EFF5FF; color: #070E1A; }
+  .td-tc-icon { display: inline-flex; width: 22px; height: 22px; flex: 0 0 auto; }
+  .td-tc-icon:empty { display: none; }
+  .td-tc-icon svg { width: 100%; height: 100%; }
+  .td-tc-icon--fine { color: #0068E8; }
+  .td-tc-icon--soon { color: #8A4F00; }
+  .td-tc-icon--replace { color: #B42318; }
+
+  .td-tc-figs { display: grid; gap: .75rem; }
+  .td-tc-fig { background: #F4F6FA; border-radius: 8px; padding: 1rem; }
+  .td-tc-fig__value {
+    font-family: var(--font-heading--family, inherit);
+    font-size: 1.6rem; font-weight: 800; line-height: 1.05; color: #070E1A;
+    font-variant-numeric: tabular-nums;
+  }
+  .td-tc-fig__sub { margin-top: .375rem; font-size: .8125rem; line-height: 1.5; color: #586274; }
+  .td-tc-lifebar { margin-top: 1rem; height: 10px; border-radius: 999px; background: #E3E8EF; overflow: hidden; }
+  .td-tc-lifebar__fill { height: 100%; border-radius: 999px; background: #0068E8; }
+  .is-soon .td-tc-lifebar__fill { background: #F5A623; }
+  .is-replace .td-tc-lifebar__fill { background: #B42318; }
+
+  /* Verdict */
+  .td-tc-verdict { background: #FFFFFF; border: 1px solid #E3E8EF; border-radius: 12px; padding: 1.5rem; }
+  .td-tc-verdict--fine { background: #EFF5FF; border-left: 4px solid #0068E8; }
+  .td-tc-verdict--soon { border-left: 4px solid #F5A623; }
+  .td-tc-verdict--replace { border-left: 4px solid #B42318; }
+  .td-tc-verdict__title {
+    font-family: var(--font-heading--family, inherit);
+    font-weight: 800; letter-spacing: -.015em; line-height: 1.1;
+    font-size: clamp(1.5rem, 3.4vw, 2.125rem); margin: 0; color: #070E1A; text-wrap: balance;
+  }
+  .td-tc-verdict__body { margin-top: 1rem; max-width: 42rem; font-size: 1.0625rem; line-height: 1.6; color: #586274; }
+  .td-tc-verdict__list { list-style: none; margin: 1.25rem 0 0; padding: 0; max-width: 42rem; display: grid; gap: .75rem; }
+  .td-tc-verdict__list li { display: flex; gap: .75rem; font-size: 1.0625rem; line-height: 1.6; color: #586274; }
+  .td-tc-verdict__list li::before {
+    content: ""; flex: 0 0 auto; width: 6px; height: 6px; margin-top: .7em;
+    border-radius: 999px; background: #8A4F00;
+  }
+  .td-tc-verdict--replace .td-tc-verdict__list li::before { background: #B42318; }
+  .td-tc-verdict__actions { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.75rem; }
+  .td-tc-verdict__small { margin-top: 1rem; max-width: 42rem; font-size: .9375rem; line-height: 1.6; color: #586274; }
+  .td-tc-verdict .td-tc-badge-row { margin-bottom: 1rem; }
+
+  .td-tc-cannot {
+    margin-top: 1.25rem; padding: 1rem 1.25rem; border-radius: 12px;
+    background: #FFFFFF; border: 1px solid #E3E8EF; border-left: 4px solid #0068E8;
+    font-size: .9375rem; line-height: 1.6; color: #586274;
+  }
+  .td-tc-cannot strong { color: #070E1A; }
+
+  .td-tc-size { margin-top: 1.25rem; }
+  .td-tc-size-row { display: flex; flex-direction: column; gap: .75rem; margin-top: 1rem; }
+  .td-tc-size-field { width: 100%; }
+
+  /* Steps list */
+  .td-tc-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: .75rem; font-size: .9375rem; line-height: 1.6; color: #586274; }
+  .td-tc-steps li { display: flex; gap: .75rem; }
+  .td-tc-steps__n {
+    display: inline-flex; align-items: center; justify-content: center;
+    flex: 0 0 auto; width: 24px; height: 24px; margin-top: .1rem; border-radius: 6px;
+    background: #070E1A; color: #F5A623;
+    font-family: var(--font-heading--family, inherit); font-size: .8125rem; font-weight: 700;
+  }
+
+  /* FAQ */
+  .td-tc-faq { border-top: 1px solid #E3E8EF; }
+  .td-tc-faq details { border-bottom: 1px solid #E3E8EF; }
+  .td-tc-faq summary {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    min-height: 56px; padding: .75rem 0; cursor: pointer; list-style: none;
+    font-family: var(--font-heading--family, inherit);
+    font-weight: 700; font-size: 1.0625rem; line-height: 1.35; color: #070E1A;
+  }
+  .td-tc-faq summary::-webkit-details-marker { display: none; }
+  .td-tc-faq summary::after {
+    content: "+"; flex: 0 0 auto; width: 28px; height: 28px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #F4F6FA; color: #070E1A; font-size: 1.25rem; font-weight: 700; line-height: 1;
+  }
+  .td-tc-faq details[open] summary::after { content: "\2212"; }
+  .td-tc-faq summary:focus-visible { outline: 3px solid #0068E8; outline-offset: 2px; border-radius: 4px; }
+  .td-tc-faq details p { padding: 0 0 1.25rem; max-width: 46rem; font-size: .9375rem; line-height: 1.7; color: #586274; }
+
+  @media (min-width: 520px) {
+    .td-tc-seg--3 { --td-tc-n: 3; }
+    .td-tc-size-row { flex-direction: row; align-items: flex-end; }
+    .td-tc-size-field { max-width: 16rem; }
+    .td-tc-verdict__actions { flex-direction: row; flex-wrap: wrap; }
+  }
+  @media (min-width: 640px) {
+    .td-tc-figs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 768px) {
+    .td-tc-band { padding: 4.5rem 0; }
+    .td-tc-inner { padding: 0 2rem; }
+    .td-tc-card--pad { padding: 1.75rem; }
+    .td-tc-result { padding: 1.5rem; }
+    .td-tc-verdict { padding: 2rem; }
+  }
+  @media (min-width: 1024px) {
+    .td-tc-grid--tread { grid-template-columns: minmax(0, 1fr) minmax(0, 360px); gap: 2rem; }
+    .td-tc-grid--age { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }
+    /* The result column is narrow beside the tool: stack its figures. */
+    .td-tc-result .td-tc-figs { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (min-width: 1200px) {
+    .td-tc-grid--tread { grid-template-columns: minmax(0, 1fr) minmax(0, 400px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .td-tc * { transition: none !important; }
+  }
+</style>
+
+<script src="{{ 'td-tiremath.js' | asset_url }}"></script>
+<script>
+  (function () {
+    "use strict";
+    var root = document.getElementById("td-tc-{{ section.id }}");
+    var TD = window.TireDrop;
+    if (!root || !TD) return;
+
+    var TREAD = TD.TREAD;
+    var SEARCH_URL = root.getAttribute("data-search-url") || "/search";
+    var ALL_URL = root.getAttribute("data-all-url") || "/collections/all";
+    var PHONE = "(954) 773-1896";
+    var PHONE_HREF = "tel:+19547731896";
+    var SHOP_NAME = "Extreme Tires — Sunrise";
+
+    /* ---------- Copy and constants carried over from the React page ---------- */
+
+    var PX = 7, SURFACE = 220, CENTER_X = 200, GROOVE_HALF = 40, MAX_DEPTH = 12;
+
+    var COINS = {
+      penny: { label: "Penny", possessive: "Lincoln's", diameter32: 24, headFrom32: 2, light: "#E2A276", mid: "#C1743C", dark: "#8A4A22" },
+      quarter: { label: "Quarter", possessive: "Washington's", diameter32: 30.56, headFrom32: 4, light: "#E4E8ED", mid: "#B9BEC7", dark: "#7E8794" }
+    };
+
+    var BUST =
+      "M -55 78 C -50 30, -48 6, -42 -10 C -36 -34, -22 -56, 0 -62 " +
+      "C 16 -58, 28 -44, 33 -28 C 35 -22, 30 -20, 28 -16 " +
+      "C 33 -10, 40 -6, 39 -1 C 38 3, 31 3, 29 6 " +
+      "C 28 12, 27 18, 22 22 C 14 28, 2 27, -4 30 " +
+      "C -6 40, -2 50, 4 60 C 12 70, 30 74, 44 78 Z";
+
+    var BAR_LEVELS = {
+      above: { label: "Tread sits clearly above the bars", shown: 6, depth: null, precision: "indicative",
+        note: 'The bars only tell you one thing precisely: when you have hit 2/32". Above that they cannot give you a number — use a coin or a gauge for that.' },
+      close: { label: "Tread is nearly down to the bars", shown: 3, depth: 3, precision: "estimated",
+        note: 'Called at roughly 3/32" — an estimate from the gap you can see, not a measurement.' },
+      flush: { label: "Bars are flush with the tread", shown: 2, depth: 2, precision: "measured",
+        note: 'The bars are molded at exactly 2/32", so flush is not an estimate. That tire is finished.' }
+    };
+
+    var NEW_DEPTHS = [10, 12, 14];
+
+    var ICON_OK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg>';
+    var ICON_WARN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
+    var ICON_CAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M12 14v3l2 1"/></svg>';
+    root.querySelectorAll(".td-tc-icon--replace").forEach(function (el) { el.innerHTML = ICON_WARN; });
+
+    function fmt32(n) { return Number.isInteger(n) ? String(n) : n.toFixed(1); }
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      });
+    }
+    function $(sel) { return root.querySelector(sel); }
+    function out(name) { return root.querySelector('[data-tc-out="' + name + '"]'); }
+    function ctl(name) { return root.querySelectorAll('[data-tc="' + name + '"]'); }
+    function show(el, on) { if (el) el.hidden = !on; }
+
+    /* ---------- URL state ---------- */
+
+    function params() { return new URLSearchParams(window.location.search); }
+    function patch(next) {
+      var p = params();
+      Object.keys(next).forEach(function (k) {
+        var v = next[k];
+        if (v === "" || v == null) p.delete(k);
+        else p.set(k, String(v));
+      });
+      var qs = p.toString();
+      try {
+        history.replaceState(history.state, "", window.location.pathname + (qs ? "?" + qs : "") + window.location.hash);
+      } catch (e) { /* URL could not be updated; the page still works. */ }
+      render();
+    }
+
+    /* ---------- Diagrams ---------- */
+
+    function coinSvg(depth, key) {
+      var c = COINS[key];
+      var radius = (c.diameter32 * PX) / 2;
+      var bustScale = (radius - c.headFrom32 * PX) / 62;
+      var grooveBottom = SURFACE + depth * PX;
+      var coinCy = grooveBottom - radius;
+      var headLine = grooveBottom - c.headFrom32 * PX;
+      var headShowing = depth < c.headFrom32;
+      var label = "Cross-section of a " + c.label.toLowerCase() + " standing head-down in a tread groove " +
+        fmt32(depth) + " thirty-seconds of an inch deep. The top of " + c.possessive + " head is " +
+        (headShowing ? "showing above the tread" : "buried below the tread") + ".";
+      var dim = "";
+      if (depth >= 3) {
+        dim =
+          '<g stroke="#9FB4D0" stroke-width="2" fill="none">' +
+          '<line x1="130" y1="' + SURFACE + '" x2="130" y2="' + grooveBottom + '"/>' +
+          '<line x1="120" y1="' + (SURFACE + 1) + '" x2="140" y2="' + (SURFACE + 1) + '"/>' +
+          '<line x1="120" y1="' + (grooveBottom - 1) + '" x2="140" y2="' + (grooveBottom - 1) + '"/></g>' +
+          '<text x="112" y="' + Math.max((SURFACE + grooveBottom) / 2 + 6, SURFACE + 24) +
+          '" text-anchor="end" font-size="18" font-weight="700" fill="#E9F2FF">' + fmt32(depth) + '/32&quot;</text>';
+      }
+      return (
+        '<svg viewBox="0 0 400 330" class="td-tc-svg" role="img" aria-label="' + esc(label) + '">' +
+        '<defs>' +
+        '<linearGradient id="td-tc-rubber" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2C4260"/><stop offset="100%" stop-color="#141F33"/></linearGradient>' +
+        '<linearGradient id="td-tc-metal" x1="0.15" y1="0" x2="0.85" y2="1"><stop offset="0%" stop-color="' + c.light + '"/><stop offset="55%" stop-color="' + c.mid + '"/><stop offset="100%" stop-color="' + c.dark + '"/></linearGradient>' +
+        '<clipPath id="td-tc-coinclip"><circle cx="0" cy="0" r="' + radius + '"/></clipPath>' +
+        '</defs>' +
+        '<rect x="0" y="0" width="400" height="' + SURFACE + '" rx="10" fill="#F4F6FA"/>' +
+        '<rect x="' + (CENTER_X - GROOVE_HALF) + '" y="' + SURFACE + '" width="' + GROOVE_HALF * 2 + '" height="' + (330 - SURFACE) + '" fill="#070E1A"/>' +
+        '<g transform="translate(' + CENTER_X + ' ' + coinCy + ')">' +
+        '<circle cx="0" cy="0" r="' + radius + '" fill="url(#td-tc-metal)"/>' +
+        '<g clip-path="url(#td-tc-coinclip)"><g transform="rotate(180)"><path d="' + BUST + '" transform="scale(' + bustScale + ')" fill="' + c.dark + '" opacity="0.55"/></g></g>' +
+        '<circle cx="0" cy="0" r="' + (radius - 9) + '" fill="none" stroke="' + c.dark + '" stroke-width="2" opacity="0.45"/>' +
+        '<circle cx="0" cy="0" r="' + radius + '" fill="none" stroke="' + c.dark + '" stroke-width="3"/>' +
+        '</g>' +
+        '<rect x="' + (CENTER_X - GROOVE_HALF) + '" y="' + grooveBottom + '" width="' + GROOVE_HALF * 2 + '" height="' + Math.max(0, 330 - grooveBottom) + '" fill="url(#td-tc-rubber)"/>' +
+        '<rect x="8" y="' + SURFACE + '" width="' + (CENTER_X - GROOVE_HALF - 8) + '" height="' + (330 - SURFACE) + '" rx="7" fill="url(#td-tc-rubber)"/>' +
+        '<rect x="' + (CENTER_X + GROOVE_HALF) + '" y="' + SURFACE + '" width="' + (392 - (CENTER_X + GROOVE_HALF)) + '" height="' + (330 - SURFACE) + '" rx="7" fill="url(#td-tc-rubber)"/>' +
+        '<g stroke="#0B1524" stroke-width="5" stroke-linecap="round" opacity="0.5">' +
+        '<line x1="45" y1="' + (SURFACE + 8) + '" x2="45" y2="330"/><line x1="95" y1="' + (SURFACE + 8) + '" x2="95" y2="330"/>' +
+        '<line x1="305" y1="' + (SURFACE + 8) + '" x2="305" y2="330"/><line x1="355" y1="' + (SURFACE + 8) + '" x2="355" y2="330"/></g>' +
+        '<g stroke="#7C93B5" stroke-width="2" opacity="0.55">' +
+        '<line x1="8" y1="' + (SURFACE + 1) + '" x2="' + (CENTER_X - GROOVE_HALF) + '" y2="' + (SURFACE + 1) + '"/>' +
+        '<line x1="' + (CENTER_X + GROOVE_HALF) + '" y1="' + (SURFACE + 1) + '" x2="392" y2="' + (SURFACE + 1) + '"/></g>' +
+        dim +
+        '<line x1="' + CENTER_X + '" y1="' + headLine + '" x2="392" y2="' + headLine + '" stroke="#0068E8" stroke-width="2" stroke-dasharray="6 5"/>' +
+        '<rect x="214" y="' + (headLine - 30) + '" width="178" height="26" rx="5" fill="#070E1A"/>' +
+        '<text x="386" y="' + (headLine - 11) + '" text-anchor="end" font-size="17" font-weight="700" fill="#FFFFFF">Top of the head</text>' +
+        '</svg>'
+      );
+    }
+
+    function barSvg(level) {
+      var step = 12, floor = 156;
+      var surface = floor - BAR_LEVELS[level].shown * step;
+      var barTop = floor - TREAD.legal * step;
+      var label = "A tread groove with a wear bar molded across the bottom of it, " + TREAD.legal +
+        " thirty-seconds of an inch tall. " + BAR_LEVELS[level].label + ".";
+      return (
+        '<svg viewBox="0 0 320 200" class="td-tc-svg" role="img" aria-label="' + esc(label) + '">' +
+        '<rect x="0" y="0" width="320" height="200" rx="10" fill="#F4F6FA"/>' +
+        '<rect x="118" y="' + surface + '" width="84" height="' + (floor - surface) + '" fill="#070E1A"/>' +
+        '<rect x="118" y="' + floor + '" width="84" height="' + (200 - floor) + '" fill="#22344C"/>' +
+        '<rect x="126" y="' + barTop + '" width="68" height="' + (floor - barTop) + '" rx="3" fill="#6B87AD"/>' +
+        '<rect x="8" y="' + surface + '" width="110" height="' + (200 - surface) + '" rx="6" fill="#22344C"/>' +
+        '<rect x="202" y="' + surface + '" width="110" height="' + (200 - surface) + '" rx="6" fill="#22344C"/>' +
+        '<line x1="8" y1="' + surface + '" x2="312" y2="' + surface + '" stroke="#0068E8" stroke-width="2" stroke-dasharray="6 5"/>' +
+        '<line x1="70" y1="32" x2="70" y2="' + surface + '" stroke="#0068E8" stroke-width="2"/>' +
+        '<text x="8" y="24" font-size="16" font-weight="700" fill="#070E1A">Tread surface</text>' +
+        '<polyline points="196,138 232,172 250,172" fill="none" stroke="#9FB4D0" stroke-width="2"/>' +
+        '<text x="312" y="178" text-anchor="end" font-size="16" font-weight="700" fill="#E9F2FF">Wear bar &#183; ' + TREAD.legal + '/32&quot;</text>' +
+        '</svg>'
+      );
+    }
+
+    /* ---------- Render ---------- */
+
+    function readState() {
+      var p = params();
+      var m = p.get("method");
+      var method = m === "coin" || m === "gauge" || m === "bars" ? m : "coin";
+      var coin = p.get("coin") === "quarter" ? "quarter" : "penny";
+      var b = p.get("bars");
+      var barLevel = Object.prototype.hasOwnProperty.call(BAR_LEVELS, b) ? b : "above";
+      var ndNum = Number(p.get("nd"));
+      var newDepth = NEW_DEPTHS.indexOf(ndNum) >= 0 ? ndNum : TREAD.new;
+
+      var sliderTouched = p.has("tread");
+      var sliderDepth = sliderTouched ? Math.min(MAX_DEPTH, Math.max(0, Number(p.get("tread")))) : 6;
+
+      var gaugeRaw = p.get("gauge") || "";
+      var gaugeNumber = Number(gaugeRaw);
+      var gaugeUnreadable = gaugeRaw.trim() !== "" &&
+        (!Number.isFinite(gaugeNumber) || gaugeNumber < 0 || gaugeNumber > 32);
+
+      return {
+        method: method, coin: coin, barLevel: barLevel, newDepth: newDepth,
+        sliderTouched: sliderTouched, sliderDepth: sliderDepth,
+        gaugeRaw: gaugeRaw, gaugeUnreadable: gaugeUnreadable,
+        dotRaw: p.get("dot") || "", sizeRaw: p.get("size") || ""
+      };
+    }
+
+    function readingFor(s) {
+      if (s.method === "coin") {
+        if (!s.sliderTouched || !Number.isFinite(s.sliderDepth)) return null;
+        return {
+          depth: s.sliderDepth, precision: "estimated",
+          note: "Read off the " + COINS[s.coin].label.toLowerCase() + " by eye. A gauge is worth a couple of dollars if you want the number exactly."
+        };
+      }
+      if (s.method === "gauge") {
+        var n = Number(s.gaugeRaw);
+        if (s.gaugeRaw.trim() === "" || !Number.isFinite(n) || n < 0 || n > 32) return null;
+        return {
+          depth: n, precision: "measured",
+          note: "Measured with a gauge — take the shallowest of three spots across the tire, not the deepest."
+        };
+      }
+      var level = BAR_LEVELS[s.barLevel];
+      return { depth: level.depth, precision: level.precision, note: level.note };
+    }
+
+    function setChecked(name, value) {
+      ctl(name).forEach(function (el) { el.checked = el.value === value; });
+    }
+
+    function render() {
+      var s = readState();
+
+      /* Controls follow the URL. */
+      setChecked("method", s.method);
+      setChecked("coin", s.coin);
+      setChecked("bars", s.barLevel);
+      root.querySelectorAll("[data-tc-panel]").forEach(function (el) {
+        show(el, el.getAttribute("data-tc-panel") === s.method);
+      });
+      setChecked("nd", String(s.newDepth));
+
+      /* Coin */
+      var diagramDepth = Number.isFinite(s.sliderDepth) ? s.sliderDepth : 6;
+      var slider = ctl("tread")[0];
+      if (slider && Number(slider.value) !== diagramDepth) slider.value = String(diagramDepth);
+      out("slider-value").textContent = fmt32(diagramDepth) + '/32"';
+      out("coin-diagram").innerHTML = coinSvg(diagramDepth, s.coin);
+      var c = COINS[s.coin];
+      out("coin-help").textContent =
+        "Push the coin into a groove head-first, with " + c.possessive + " head pointing down. The tread hides part of the portrait — drag the slider until the drawing shows the same amount of head you can see on the tire.";
+      out("coin-now").textContent = diagramDepth <= c.headFrom32
+        ? "Right now the top of the head is showing, or level with the tread — which means you are at or below " + c.headFrom32 + '/32".'
+        : "Right now the tread covers the top of the head, so you are above " + c.headFrom32 + '/32".';
+
+      /* Gauge validation: a specific message, never a silent fallback. */
+      var gauge = ctl("gauge")[0];
+      var gaugeErr = out("gauge-error");
+      if (s.gaugeUnreadable) {
+        gauge.setAttribute("aria-invalid", "true");
+        gauge.setAttribute("aria-describedby", gaugeErr.id);
+        var msg = 'That is not a depth this page can use. A tread gauge reads between 0 and 32 thirty-seconds of an inch — a new passenger tire is around 10/32".';
+        if (gaugeErr.textContent !== msg) gaugeErr.textContent = msg;
+      } else {
+        gauge.removeAttribute("aria-invalid");
+        gauge.removeAttribute("aria-describedby");
+        gaugeErr.textContent = "";
+      }
+
+      /* Bars */
+      out("bar-diagram").innerHTML = barSvg(s.barLevel);
+
+      /* Tread result */
+      var reading = readingFor(s);
+      var tread = reading && reading.depth != null ? TD.treadStatus(reading.depth, s.newDepth) : null;
+      var card = out("tread-card");
+      card.classList.remove("is-fine", "is-soon", "is-replace");
+      show(out("tread-empty"), !tread);
+      show(out("tread-full"), !!tread);
+      show($('[data-tc-action="use-coin"]'), !tread && s.method === "bars");
+      if (!tread) {
+        out("tread-empty-copy").textContent = s.method === "bars"
+          ? BAR_LEVELS[s.barLevel].note
+          : s.method === "gauge"
+            ? (s.gaugeUnreadable
+              ? "Correct the reading above and the verdict appears here."
+              : "Type what the gauge says and the verdict appears here.")
+            : "Drag the slider to match your tire and the verdict appears here.";
+      } else {
+        card.classList.add("is-" + tread.status);
+        var icon = out("tread-icon");
+        icon.className = "td-tc-icon td-tc-icon--" + tread.status;
+        icon.innerHTML = tread.status === "fine" ? ICON_OK : ICON_WARN;
+        var badge = out("tread-badge");
+        badge.className = "td-tc-badge td-tc-badge--" + tread.status;
+        badge.textContent = tread.status === "fine" ? "Plenty left" : tread.status === "soon" ? "Getting low" : "Replace now";
+        out("tread-depth").textContent = fmt32(tread.depth) + '/32"';
+        out("tread-precision").textContent = reading.precision === "measured" ? "Measured"
+          : reading.precision === "estimated" ? "Estimated" : "Indicative only";
+        out("tread-life").textContent = Math.round(tread.lifeLeftPct) + "%";
+        out("tread-bar").style.width = Math.max(2, Math.round(tread.lifeLeftPct)) + "%";
+        out("tread-copy").textContent =
+          tread.status === "fine"
+            ? "That is healthy tread. Nothing here says replace, and nothing here says buy. Check again in a few months, or sooner if you are about to drive a long way in the wet."
+            : tread.status === "soon"
+              ? "Still legal, but this is the band where rain starts to matter: below " + TREAD.wetRisk + '/32" the grooves cannot clear enough water and wet stopping distances climb sharply. Hydroplaning starts here too. Worth planning the replacement rather than waiting.'
+              : "At or below " + TREAD.legal + '/32" the tire is legally worn out in most US states, and the wet performance went long before the legality did. This one is done.';
+        out("tread-note").textContent = reading.note;
+      }
+
+      /* Age */
+      var dot = s.dotRaw.trim() ? TD.decodeDot(s.dotRaw) : null;
+      var dotUnreadable = s.dotRaw.trim().length > 0 && dot === null;
+      var dotLegacy = Boolean(dot && dot.legacy);
+      var ageStatus = dotLegacy ? "replace" : (dot ? dot.status : null);
+      var ageYearsWhole = dot && !dot.legacy ? Math.floor(dot.ageYears) : null;
+
+      var ageCard = out("age-card");
+      ageCard.classList.remove("is-fine", "is-soon", "is-replace");
+      show(out("age-empty"), !s.dotRaw.trim());
+      show(out("age-unreadable"), dotUnreadable);
+      show(out("age-legacy"), dotLegacy);
+      show(out("age-full"), !!(dot && !dot.legacy));
+      if (dotLegacy) ageCard.classList.add("is-replace");
+      if (dot && !dot.legacy) {
+        var tone = dot.status === "fine" ? "fine" : dot.status === "inspect" ? "soon" : "replace";
+        ageCard.classList.add("is-" + tone);
+        var aIcon = out("age-icon");
+        aIcon.className = "td-tc-icon td-tc-icon--" + tone;
+        aIcon.innerHTML = ICON_CAL;
+        var aBadge = out("age-badge");
+        aBadge.className = "td-tc-badge td-tc-badge--" + tone;
+        aBadge.textContent = dot.status === "fine" ? "Age is fine" : dot.status === "inspect" ? "Worth inspecting" : "Past the guidance";
+        out("age-built").textContent = "Week " + dot.week + ", " + dot.year;
+        out("age-built-sub").textContent = "Around " +
+          dot.built.toLocaleDateString("en-US", { month: "long", year: "numeric" }) +
+          ". Week 1 is taken as the first week of January, so this is accurate to a few days.";
+        out("age-years").textContent = "About " + ageYearsWhole + (ageYearsWhole === 1 ? " year" : " years");
+        out("age-copy").textContent =
+          dot.status === "fine"
+            ? "Comfortably inside the window every manufacturer works to. Age is not your problem on this tire."
+            : dot.status === "inspect"
+              ? "Past six years, most manufacturers ask for a professional inspection once a year — for cracking between the tread blocks, in the grooves and around the sidewall. That is an inspection, not a sentence."
+              : "Past ten years, most manufacturers say replace regardless of tread, and several vehicle makers say the same. The rubber has been curing the whole time.";
+      }
+
+      /* Size */
+      var size = s.sizeRaw.trim() ? TD.parseSize(s.sizeRaw) : null;
+      var sizeUnreadable = s.sizeRaw.trim().length > 0 && size === null;
+      var shopHref = size
+        ? SEARCH_URL + "?q=" + encodeURIComponent(size.normalized) + "&type=product"
+        : ALL_URL;
+      var sizeLink = out("size-link");
+      show(sizeLink, !!size);
+      if (size) {
+        sizeLink.href = shopHref;
+        sizeLink.innerHTML = "See " + esc(size.normalized) + ' in stock <span aria-hidden="true">&rarr;</span>';
+      }
+      out("size-msg").textContent = sizeUnreadable
+        ? "That does not read as a tire size yet. It looks like 215/60R16, P205/55R16 91V or 31x10.50R15."
+        : size
+          ? (size.format === "flotation"
+            ? "Read as " + size.normalized + " — a flotation size."
+            : "Read as " + size.normalized + (size.speedRating ? ", speed rating " + size.speedRating : "") +
+              ". Our catalog is a representative range rather than live distributor inventory, so if your size is not listed, call — the distributor list runs deeper than this page.")
+          : "Optional. Everything above works without it.";
+
+      /* Verdict: both halves have to be clean before this says "fine". */
+      var problems = [];
+      if (tread && tread.status === "replace")
+        problems.push("The tread is down to " + fmt32(tread.depth) + '/32". That is the legal minimum in most US states, and the tire is finished.');
+      else if (tread && tread.status === "soon")
+        problems.push("The tread is at " + fmt32(tread.depth) + '/32". It is still legal, but below 4/32" wet stopping distances climb sharply. Plan the replacement rather than waiting for the penny to tell you.');
+      if (dotLegacy)
+        problems.push("That is a pre-2000 date code, which makes the tire at least twenty-five years old. Replace it whatever the tread looks like.");
+      else if (ageStatus === "replace")
+        problems.push("The tire was built in " + dot.year + " and is about " + ageYearsWhole + " years old. Most manufacturers say ten years is the end of the road regardless of tread.");
+      else if (ageStatus === "inspect")
+        problems.push("The tire was built in " + dot.year + ", so it is about " + ageYearsWhole + " years old. Past six, the guidance is to have it looked at once a year — not to bin it.");
+
+      var checked = Boolean(tread) || Boolean(dot);
+      var html;
+      if (!checked) {
+        html = '<div class="td-tc-verdict"><p class="td-tc-verdict__body td-tc-copy--flush">' +
+          "Fill in either check above — the tread, the date code, or both — and the answer lands here. Both together is the complete picture: a tire can fail on tread with plenty of age left, or on age with plenty of tread left." +
+          "</p></div>";
+      } else if (problems.length === 0) {
+        var partial = !tread || !dot;
+        html = '<div class="td-tc-verdict td-tc-verdict--fine">' +
+          '<div class="td-tc-badge-row"><span class="td-tc-icon td-tc-icon--fine" aria-hidden="true">' + ICON_OK + '</span>' +
+          '<span class="td-tc-badge td-tc-badge--fine">No action needed</span></div>' +
+          '<h3 class="td-tc-verdict__title">Your readings are fine. Come back in six months.</h3>' +
+          '<p class="td-tc-verdict__body">' + (partial
+            ? "Everything you gave us checks out. The other half of the check takes a minute and is worth doing — a tire can be fine on tread and finished on age, or the other way round."
+            : "Tread is healthy and the rubber is well inside its window. Nothing to buy today. Keep an eye on pressures, rotate every 5,000 to 7,500 miles, and check again in six months or before a long trip.") +
+          '</p><p class="td-tc-verdict__small">That is the whole answer. There is no offer under this paragraph.</p></div>';
+      } else {
+        var urgent = (tread && tread.status === "replace") || ageStatus === "replace" || dotLegacy;
+        var state = urgent ? "replace" : "soon";
+        html = '<div class="td-tc-verdict td-tc-verdict--' + state + '">' +
+          '<div class="td-tc-badge-row"><span class="td-tc-icon td-tc-icon--' + state + '" aria-hidden="true">' + ICON_WARN + '</span>' +
+          '<span class="td-tc-badge td-tc-badge--' + state + '">' + (urgent ? "Replace these" : "Start planning") + '</span></div>' +
+          '<h3 class="td-tc-verdict__title">' + (urgent ? "Yes — these need replacing." : "Not yet, but it is on the horizon.") + '</h3>' +
+          '<ul class="td-tc-verdict__list">' + problems.map(function (p) { return "<li><span>" + esc(p) + "</span></li>"; }).join("") + '</ul>' +
+          '<div class="td-tc-verdict__actions">' +
+          '<a class="td-tc-btn td-tc-btn--primary" href="' + esc(shopHref) + '">' + (size ? "Shop " + esc(size.normalized) : "Shop tires") + ' <span aria-hidden="true">&rarr;</span></a>' +
+          '<a class="td-tc-btn td-tc-btn--outline" href="' + PHONE_HREF + '">Free inspection · ' + PHONE + '</a>' +
+          '</div>' +
+          '<p class="td-tc-verdict__small">Not near us? The numbers above are yours to take anywhere — we would rather you bought the right tire somewhere else than the wrong one here. If you are in South Florida, ' +
+          esc(SHOP_NAME) + ' will put it on a lift and look properly, at no charge.</p></div>';
+      }
+      var verdictEl = out("verdict");
+      if (verdictEl.getAttribute("data-html") !== html) {
+        verdictEl.innerHTML = html;
+        verdictEl.setAttribute("data-html", html);
+      }
+    }
+
+    /* ---------- Events ---------- */
+
+    function on(name, type, fn) { ctl(name).forEach(function (el) { el.addEventListener(type, fn); }); }
+    on("method", "change", function (e) { if (e.target.checked) patch({ method: e.target.value }); });
+    on("coin", "change", function (e) { if (e.target.checked) patch({ coin: e.target.value }); });
+    on("bars", "change", function (e) { if (e.target.checked) patch({ bars: e.target.value }); });
+    on("tread", "input", function (e) { patch({ tread: e.target.value }); });
+    on("nd", "change", function (e) { if (e.target.checked) patch({ nd: e.target.value }); });
+    on("gauge", "input", function (e) { patch({ gauge: e.target.value }); });
+    on("dot", "input", function (e) { patch({ dot: e.target.value }); });
+    on("size", "input", function (e) { patch({ size: e.target.value }); });
+    var useCoin = $('[data-tc-action="use-coin"]');
+    if (useCoin) useCoin.addEventListener("click", function () {
+      patch({ method: "coin" });
+      var first = root.querySelector('[data-tc="coin"]:checked');
+      if (first) first.focus();
+    });
+
+    /* Text fields start from the URL, then the URL follows them. */
+    var init = params();
+    ctl("gauge")[0].value = init.get("gauge") || "";
+    ctl("dot")[0].value = init.get("dot") || "";
+    ctl("size")[0].value = init.get("size") || "";
+
+    render();
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "TireDrop tire check",
+  "tag": "section",
+  "class": "td-tc-section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Free tool" },
+    { "type": "text", "id": "heading", "label": "Page heading", "default": "Do I need tires yet?" },
+    { "type": "textarea", "id": "lede", "label": "Supporting copy", "default": "Every tire shop on earth will tell you the answer is yes. This one checks the two things that decide it — how much tread is left and how old the rubber is — and tells you plainly if the answer is no." },
+    { "type": "textarea", "id": "promise", "label": "Promise line", "default": "Nothing here is stored, and if your tires are fine the page says so and stops. No countdown, no pitch." }
+  ],
+  "presets": [{ "name": "TireDrop tire check" }]
+}
+{% endschema %}

@@ -1,0 +1,14 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-tool-tire-check",
+      "settings": {
+        "eyebrow": "Free tool",
+        "heading": "Do I need tires yet?",
+        "lede": "Every tire shop on earth will tell you the answer is yes. This one checks the two things that decide it — how much tread is left and how old the rubber is — and tells you plainly if the answer is no.",
+        "promise": "Nothing here is stored, and if your tires are fine the page says so and stops. No countdown, no pitch."
+      }
+    }
+  },
+  "order": ["main"]
+}

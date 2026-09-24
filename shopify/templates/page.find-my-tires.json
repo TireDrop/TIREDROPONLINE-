@@ -1,0 +1,13 @@
+{
+  "sections": {
+    "find_my_tires": {
+      "type": "td-tool-find-my-tires",
+      "settings": {
+        "eyebrow": "Free tool",
+        "heading": "Find my tires",
+        "lede": "Five questions about your car, your roads and your weather. At the end: the type of tire that fits, the size to look for, and what to prioritise — each with the reason."
+      }
+    }
+  },
+  "order": ["find_my_tires"]
+}
