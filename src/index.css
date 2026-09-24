@@ -184,7 +184,7 @@
            focus:ring-drop/15;
   }
 
-  /* Diagonal hazard stripe used on promo bars and the mobile-service callout. */
+  /* Diagonal hazard stripe used on the shipping callout on the tires page. */
   .hazard {
     background-image: repeating-linear-gradient(
       -45deg,

@@ -183,13 +183,10 @@ Worth recording so nobody re-walks it.
   real route. Every in-page anchor target exists. The footer, the mobile
   drawer and the sitemap all resolve; `/compare` was missing from the sitemap
   and has been added.
-- **Promo arithmetic**, checked by hand against `summarize()` at each stage:
-  `MOBILE25`, `NEWCUSTOMER`, `FREEDELIVERY` and `FLEET15` all apply to the
-  right base, tax follows the discounted base, and the totals add up in the
-  cart, on the checkout rail and on the confirmation. Every rejection path
-  explains itself and names the remedy — including the amount you are short
-  for `FLEET15` and the reason `MOBILE25` will not apply without an install
-  line.
+- ~~**Promo arithmetic**~~ — superseded. The owner confirmed none of the
+  deals were real, so every promo code, the promo field and the Deals page
+  (`/coupons`, now a redirect to `/tires`) have been removed. The cart,
+  checkout rail and confirmation now total subtotal + installation + tax.
 - **Compare**: tick from the grid or the product page, the tray, the table,
   remove from any of the three, clear all, the four-item cap (the fifth
   checkbox is genuinely disabled, not just ignored), and a mid-way refresh.

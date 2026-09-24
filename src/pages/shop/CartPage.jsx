@@ -1,17 +1,14 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   CalendarClock,
-  Check,
   Minus,
   Plus,
   ShieldCheck,
   ShoppingCart,
-  Tag,
   Trash2,
   Truck,
   Wrench,
-  X,
 } from "lucide-react";
 
 import {
@@ -25,131 +22,23 @@ import ProductArt from "../../components/shop/ProductArt.jsx";
 import { BUSINESS } from "../../data/business.js";
 
 /* ------------------------------------------------------------------ */
-/*  Promo codes                                                        */
-/*  Shared with CheckoutPage (order review) and CouponsPage (offers).  */
+/*  Totals                                                             */
+/*  Shared with CheckoutPage (order review).                           */
 /* ------------------------------------------------------------------ */
-
-export const PROMOS = {
-  MOBILE25: {
-    label: "$25 off installation",
-    hint: "Applies to the installation line on any order fitted at our South Florida shop.",
-  },
-  NEWCUSTOMER: {
-    label: "10% off tires and wheels",
-    hint: "First-time customers. Discount applies to the parts subtotal.",
-  },
-  FLEET15: {
-    label: "15% off fleet orders",
-    hint: "Parts subtotal of $1,000 or more.",
-  },
-};
 
 const TAX_RATE = 0.07;
 const round2 = (n) => Math.round(n * 100) / 100;
 
-const PROMO_STORAGE_KEY = "tiredrop.promo.v1";
-
-/** Persists the applied code so checkout can show it on the review step. */
-export function savePromo(code) {
-  try {
-    if (code) window.localStorage.setItem(PROMO_STORAGE_KEY, code);
-    else window.localStorage.removeItem(PROMO_STORAGE_KEY);
-  } catch {
-    /* blocked storage — the code simply won't survive the page change */
-  }
-}
-
-export function readSavedPromo() {
-  try {
-    return window.localStorage.getItem(PROMO_STORAGE_KEY) || "";
-  } catch {
-    return "";
-  }
-}
-
 /**
- * Validates a code against the current cart and returns the discount split.
- * Returns `{ ok: false, error }` with customer-facing copy when it doesn't apply.
+ * The money rail: parts + installation + tax. Shipping is free to any
+ * continental-US address, so it adds nothing.
  */
-export function evaluatePromo(raw, { subtotal = 0, installTotal = 0 } = {}) {
-  const code = String(raw || "")
-    .trim()
-    .toUpperCase();
-  const miss = {
-    ok: false,
-    code,
-    subtotalOff: 0,
-    installOff: 0,
-  };
-
-  if (!code) return { ...miss, error: "Enter a promo code first." };
-  if (!PROMOS[code]) {
-    return {
-      ...miss,
-      error: `We don't recognize "${code}". Double-check the spelling, or see every live offer on our coupons page.`,
-    };
-  }
-
-  const hit = (extra) => ({
-    ok: true,
-    code,
-    label: PROMOS[code].label,
-    subtotalOff: 0,
-    installOff: 0,
-    ...extra,
-  });
-
-  switch (code) {
-    case "MOBILE25":
-      if (installTotal <= 0) {
-        return {
-          ...miss,
-          error:
-            "MOBILE25 discounts installation. Switch a set above to ship-to-store install, then apply it again.",
-        };
-      }
-      return hit({ installOff: Math.min(25, installTotal) });
-
-    case "NEWCUSTOMER":
-      if (subtotal <= 0) {
-        return {
-          ...miss,
-          error:
-            "Add tires or wheels to your cart before applying NEWCUSTOMER.",
-        };
-      }
-      return hit({ subtotalOff: round2(subtotal * 0.1) });
-
-    case "FLEET15":
-      if (subtotal < 1000) {
-        return {
-          ...miss,
-          error: `FLEET15 starts at ${money(1000)} in tires and wheels. You're ${money(
-            round2(1000 - subtotal),
-          )} short of it.`,
-        };
-      }
-      return hit({ subtotalOff: round2(subtotal * 0.15) });
-
-    default:
-      return { ...miss, error: "That code isn't valid on this order." };
-  }
-}
-
-/**
- * Recomputes the money rail with a promo folded in. Tax follows the discounted
- * base. Shipping is free to any continental-US address, so it adds nothing.
- */
-export function summarize({ subtotal, installTotal }, promo) {
-  const subtotalOff = promo?.ok ? promo.subtotalOff : 0;
-  const installOff = promo?.ok ? promo.installOff : 0;
-  const discount = round2(subtotalOff + installOff);
-  const taxable = Math.max(0, round2(subtotal + installTotal - discount));
+export function summarize({ subtotal, installTotal }) {
+  const taxable = Math.max(0, round2(subtotal + installTotal));
   const tax = round2(taxable * TAX_RATE);
   return {
     subtotal,
     installTotal,
-    discount,
     tax,
     total: round2(taxable + tax),
   };
@@ -304,98 +193,6 @@ function CartLine({ line, setQty, remove, addItem }) {
   );
 }
 
-function PromoBox({ promo, onApply, onClear }) {
-  const [value, setValue] = useState("");
-  const [error, setError] = useState("");
-
-  function submit(e) {
-    e.preventDefault();
-    const result = onApply(value);
-    if (result.ok) {
-      setError("");
-      setValue("");
-    } else {
-      setError(result.error);
-    }
-  }
-
-  if (promo?.ok) {
-    return (
-      <div className="border-t border-ink/10 pt-5">
-        <div className="flex items-start justify-between gap-3 rounded-sm border border-drop/30 bg-drop/5 p-3">
-          <div className="flex min-w-0 items-start gap-2.5">
-            <Check
-              size={16}
-              aria-hidden
-              className="mt-0.5 shrink-0 text-drop"
-            />
-            <div className="min-w-0">
-              <p className="font-display text-sm font-bold text-ink">
-                {promo.code} applied
-              </p>
-              <p className="text-xs text-smoke">{promo.label}</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClear}
-            aria-label={`Remove promo code ${promo.code}`}
-            className="shrink-0 text-smoke transition-colors hover:text-drop"
-          >
-            <X size={16} aria-hidden />
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <form onSubmit={submit} className="border-t border-ink/10 pt-5" noValidate>
-      <label htmlFor="promo" className="label">
-        Promo code
-      </label>
-      <div className="flex gap-2">
-        <input
-          id="promo"
-          name="promo"
-          type="text"
-          autoComplete="off"
-          spellCheck="false"
-          placeholder="MOBILE25"
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value);
-            if (error) setError("");
-          }}
-          aria-invalid={error ? "true" : undefined}
-          aria-describedby={error ? "promo-error" : "promo-hint"}
-          className="field uppercase"
-        />
-        <button type="submit" className="btn-dark btn-sm shrink-0">
-          Apply
-        </button>
-      </div>
-      {error ? (
-        <p
-          id="promo-error"
-          role="alert"
-          className="mt-2 text-xs leading-relaxed text-drop"
-        >
-          {error}
-        </p>
-      ) : (
-        <p id="promo-hint" className="mt-2 text-xs text-smoke">
-          Have one from a mailer or our{" "}
-          <Link to="/coupons" className="text-ink underline hover:text-drop">
-            current offers
-          </Link>
-          ? Drop it in here.
-        </p>
-      )}
-    </form>
-  );
-}
-
 const TRUST = [
   {
     icon: Truck,
@@ -419,61 +216,20 @@ const TRUST = [
 /* ------------------------------------------------------------------ */
 
 export default function CartPage() {
-  const {
-    lines,
-    count,
-    subtotal,
-    installTotal,
-    addItem,
-    setQty,
-    remove,
-  } = useCart();
+  const { lines, count, subtotal, installTotal, addItem, setQty, remove } =
+    useCart();
   const safeLines = Array.isArray(lines) ? lines : [];
 
-  const [promo, setPromo] = useState(() => {
-    const saved = readSavedPromo();
-    return saved
-      ? {
-          ok: true,
-          code: saved,
-          label: PROMOS[saved]?.label || "",
-          subtotalOff: 0,
-          installOff: 0,
-        }
-      : null;
-  });
-
-  // Re-run the saved code against the live cart so a changed cart can invalidate it.
-  const applied = useMemo(() => {
-    if (!promo?.code) return null;
-    const result = evaluatePromo(promo.code, { subtotal, installTotal });
-    return result.ok ? result : null;
-  }, [promo, subtotal, installTotal]);
-
   const totals = useMemo(
-    () => summarize({ subtotal, installTotal }, applied),
-    [subtotal, installTotal, applied],
+    () => summarize({ subtotal, installTotal }),
+    [subtotal, installTotal],
   );
-
-  function handleApply(raw) {
-    const result = evaluatePromo(raw, { subtotal, installTotal });
-    if (result.ok) {
-      setPromo(result);
-      savePromo(result.code);
-    }
-    return result;
-  }
-
-  function handleClear() {
-    setPromo(null);
-    savePromo("");
-  }
 
   return (
     <>
       <Seo
         title="Your Cart"
-        description="Review your TireDrop order, choose shipping to your address or free ship-to-store install in South Florida, apply a promo code and check out."
+        description="Review your TireDrop order, choose shipping to your address or free ship-to-store install in South Florida, and check out."
       />
       <Breadcrumbs trail={[{ label: "Cart" }]} />
 
@@ -569,18 +325,6 @@ export default function CartPage() {
                     </dd>
                   </div>
 
-                  {applied?.ok && totals.discount > 0 && (
-                    <div className="flex items-baseline justify-between gap-4">
-                      <dt className="flex items-center gap-1.5 text-drop">
-                        <Tag size={13} aria-hidden />
-                        Discount ({applied.code})
-                      </dt>
-                      <dd className="font-display text-base text-drop">
-                        −{money(totals.discount)}
-                      </dd>
-                    </div>
-                  )}
-
                   <div className="flex items-baseline justify-between gap-4">
                     <dt className="text-smoke">Shipping</dt>
                     <dd className="font-display text-base">
@@ -610,14 +354,6 @@ export default function CartPage() {
                   No card is charged online. We confirm fitment and take payment
                   by phone before anything ships.
                 </p>
-
-                <div className="mt-5">
-                  <PromoBox
-                    promo={applied}
-                    onApply={handleApply}
-                    onClear={handleClear}
-                  />
-                </div>
 
                 <div className="mt-6 flex items-start gap-2.5 border-t border-ink/10 pt-5">
                   <Wrench

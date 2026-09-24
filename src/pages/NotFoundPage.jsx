@@ -24,10 +24,10 @@ const HELPFUL_LINKS = [
     copy: "Free shipping to your address, or free to our shop if you are in South Florida.",
   },
   {
-    to: "/coupons",
+    to: "/schedule",
     icon: CalendarClock,
-    title: "Deals",
-    copy: "Promo codes, set-of-four offers and install specials in one place.",
+    title: "Book an Install",
+    copy: `Pick a time at the ${BUSINESS.shop.city} shop, or have the van come to you.`,
   },
 ];
 

@@ -86,10 +86,10 @@ export const SOCIAL = {
   youtube: null,
 };
 
-// Tire brands shown in the footer strip, the homepage brand row and the
-// coupons page. Every name here links to `/tires?brands=<name>`, so a brand
-// listed with no matching product in `data/products.js` sends the visitor to
-// an empty result page. Keep this roster equal to `TIRE_BRAND_NAMES` from
+// Tire brands shown in the footer strip and the homepage brand row. Every
+// name here links to `/tires?brands=<name>`, so a brand listed with no
+// matching product in `data/products.js` sends the visitor to an empty
+// result page. Keep this roster equal to `TIRE_BRAND_NAMES` from
 // products.js. Goodyear was removed for exactly that reason — it was advertised
 // in three places and returned "0 tires". If the shop does carry a brand, add
 // its products first, then add it back here.
@@ -186,7 +186,6 @@ export const NAV = [
       { label: "Do I Need Tires Yet?", to: "/tire-check" },
     ],
   },
-  { label: "Deals", to: "/coupons" },
   {
     label: "More",
     to: "/about",
@@ -211,7 +210,6 @@ export const FOOTER_COLUMNS = [
       { label: "Shop by Vehicle", to: "/tires?search=vehicle" },
       { label: "Shop by Size", to: "/tires?search=size" },
       { label: "Commercial & Fleet", to: "/commercial-tires" },
-      { label: "Deals", to: "/coupons" },
     ],
   },
   {

@@ -194,7 +194,8 @@ tracking pixels**, makes **no network requests** (`grep` finds no `fetch`, no
 `axios`, no third-party script), captures **no email addresses**, and takes
 **no payment** — `/checkout` says so itself: "No card is charged on this site."
 The only browser storage is `localStorage` for the cart, an applied promo code
-and the comparison tray.
+and the comparison tray. _(Superseded: promo codes have since been removed, so
+storage is now the cart and the comparison tray only.)_
 
 The policy nevertheless claimed: a payment processor holding card data; cookies
 including optional analytics cookies; aggregate traffic measurement; and
@@ -239,8 +240,8 @@ defect independent of what any distributor thinks.
 **Standard: general norm** (do not advertise what cannot be bought).
 
 **Verified state.** `TIRE_BRANDS` listed Goodyear, which appeared in the footer
-brand strip, the homepage brand row, the coupons page and the About page brand
-list — seven brands advertised. `src/data/products.js` contains **zero**
+brand strip, the homepage brand row, the coupons page (since removed) and the
+About page brand list — seven brands advertised. `src/data/products.js` contains **zero**
 Goodyear products. Clicking Goodyear in the footer landed on
 `/tires?brands=Goodyear` → _"0 tires of 20 — No tires match those filters."_
 The About page simultaneously claimed "7 Tire brands in the catalog" while the

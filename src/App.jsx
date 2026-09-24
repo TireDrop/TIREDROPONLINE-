@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from "react";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import Header from "./components/layout/Header.jsx";
 import Footer from "./components/layout/Footer.jsx";
@@ -31,7 +31,6 @@ const CommercialTiresPage = lazy(
 );
 const CartPage = lazy(() => import("./pages/shop/CartPage.jsx"));
 const CheckoutPage = lazy(() => import("./pages/shop/CheckoutPage.jsx"));
-const CouponsPage = lazy(() => import("./pages/shop/CouponsPage.jsx"));
 const ComparePage = lazy(() => import("./pages/shop/ComparePage.jsx"));
 
 // Free tools. They answer the questions that stop someone buying tires
@@ -100,7 +99,11 @@ export default function App() {
             <Route path="/commercial-tires" element={<CommercialTiresPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/coupons" element={<CouponsPage />} />
+
+            {/* There are no deals, coupons or promo codes. The old Deals page
+                is gone; anyone arriving on an old link lands on the catalog. */}
+            <Route path="/coupons" element={<Navigate to="/tires" replace />} />
+            <Route path="/deals" element={<Navigate to="/tires" replace />} />
 
             {/* Services */}
             <Route path="/mobile-service" element={<MobileServicePage />} />

@@ -714,11 +714,7 @@ export default function FinancingPage() {
                 />
                 <p className="text-sm leading-relaxed text-smoke">
                   <span className="text-ink">Cards work too.</span> Financing is
-                  an option, never a requirement. See current{" "}
-                  <Link to="/coupons" className="underline hover:text-drop">
-                    coupons
-                  </Link>{" "}
-                  before you decide.
+                  an option, never a requirement.
                 </p>
               </li>
             </ul>

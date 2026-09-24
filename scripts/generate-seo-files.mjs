@@ -58,13 +58,17 @@ const ALLOW_INDEXING = false;
 /**
  * Static routes, read from the router itself.
  * Skips the `*` catch-all and any `:param` route — those are expanded below
- * from the data that actually populates them.
+ * from the data that actually populates them — and any route whose element is
+ * a `<Navigate>` redirect (e.g. the retired /coupons and /deals), since a
+ * sitemap should list destinations, never URLs that bounce somewhere else.
  */
 function staticRoutesFromRouter() {
   const src = readFileSync(resolve(ROOT, "src/App.jsx"), "utf8");
-  const found = [...src.matchAll(/<Route\s+[^>]*?path="([^"]+)"/gs)].map(
-    (m) => m[1],
-  );
+  const found = [
+    ...src.matchAll(/<Route\s+[^>]*?path="([^"]+)"(?:\s+element=\{<(\w+))?/gs),
+  ]
+    .filter((m) => m[2] !== "Navigate")
+    .map((m) => m[1]);
   const routes = found.filter((p) => p !== "*" && !p.includes(":"));
   if (routes.length < 20) {
     throw new Error(

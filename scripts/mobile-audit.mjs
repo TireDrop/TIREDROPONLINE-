@@ -74,7 +74,6 @@ const ROUTES = [
   "/commercial-tires",
   "/cart",
   "/checkout",
-  "/coupons",
   "/shipping",
   "/install",
   "/mobile-service",

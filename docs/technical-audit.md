@@ -436,7 +436,8 @@ Ordered by how much it matters.
    only route of the 74 missing one. The `EmptyState` title is not a heading.
    Minor, and the route is `noindex` now, but it is a real gap.
 7. **`src/pages/shop/TiresPage.jsx` advertises Goodyear in two meta descriptions
-   and one lede** (lines 257, 262, 317), and `CouponsPage.jsx` names it at line 46. Goodyear was deliberately removed from `TIRE_BRANDS` because the catalog
+   and one lede** (lines 257, 262, 317), and `CouponsPage.jsx` names it at line 46
+   (that page has since been removed along with every deal and promo code). Goodyear was deliberately removed from `TIRE_BRANDS` because the catalog
    has no Goodyear products, so those descriptions promise a brand that returns
    zero results. I fixed the same problem in `index.html`; these four are in
    pages I do not own.

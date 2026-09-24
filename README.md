@@ -110,7 +110,7 @@ tiredrop/
 │       ├── HomePage.jsx · ShippingPage.jsx · InstallPage.jsx
 │       ├── NotFoundPage.jsx
 │       ├── shop/            Tires, Wheels, Product, Commercial, Cart,
-│       │                    Checkout, Coupons
+│       │                    Checkout, Compare
 │       ├── services/        MobileService, AutoService, ServiceDetail, Schedule
 │       └── support/         About, Locations, Contact, Reviews, Financing,
 │                            TireCare, Gallery, Sitemap, Legal
@@ -175,7 +175,7 @@ Type: **Barlow Condensed** (`font-display`) for headings, uppercase.
 | `/commercial-tires`                             | Fleet tires + quote request         |
 | `/compare`                                      | Side-by-side tire comparison        |
 | `/cart`, `/checkout`                            | Cart and checkout                   |
-| `/coupons`                                      | Deals                               |
+| `/coupons`, `/deals`                            | Redirects to `/tires` (no deals)    |
 | `/shipping`                                     | How shipping works                  |
 | `/install`                                      | Ship to store & install             |
 | `/mobile-service`                               | Mobile installation (South Florida) |

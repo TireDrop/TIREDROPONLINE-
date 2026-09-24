@@ -24,12 +24,7 @@ import {
 import { useCart, money } from "../../context/CartContext.jsx";
 import { BUSINESS } from "../../data/business.js";
 import { submitForm } from "../../data/forms.js";
-import {
-  evaluatePromo,
-  readSavedPromo,
-  savePromo,
-  summarize,
-} from "./CartPage.jsx";
+import { summarize } from "./CartPage.jsx";
 
 /* ------------------------------------------------------------------ */
 /*  Scheduling helpers — the shop is closed Sundays per BUSINESS.hours */
@@ -291,19 +286,17 @@ function StepHeading({ step, title, lede, headingRef }) {
   );
 }
 
-function SummaryRow({ term, value, accent = false }) {
+function SummaryRow({ term, value }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <dt className={accent ? "text-drop" : "text-smoke"}>{term}</dt>
-      <dd className={`font-display text-base ${accent ? "text-drop" : ""}`}>
-        {value}
-      </dd>
+      <dt className="text-smoke">{term}</dt>
+      <dd className="font-display text-base">{value}</dd>
     </div>
   );
 }
 
 /** Money rail rendered on the review step and again on the confirmation. */
-function OrderSummary({ lines, totals, promoCode }) {
+function OrderSummary({ lines, totals }) {
   return (
     <div className="card p-6">
       <h3 className="h3">Order Summary</h3>
@@ -336,17 +329,7 @@ function OrderSummary({ lines, totals, promoCode }) {
           term="Installation at the shop"
           value={totals.installTotal > 0 ? money(totals.installTotal) : "—"}
         />
-        {totals.discount > 0 && (
-          <SummaryRow
-            term={`Discount (${promoCode})`}
-            value={`−${money(totals.discount)}`}
-            accent
-          />
-        )}
-        <SummaryRow
-          term="Shipping"
-          value="Free"
-        />
+        <SummaryRow term="Shipping" value="Free" />
         <SummaryRow term="Sales tax (7%)" value={money(totals.tax)} />
       </dl>
       <div className="mt-4 flex items-baseline justify-between gap-4 border-t border-ink/10 pt-4">
@@ -405,16 +388,9 @@ export default function CheckoutPage() {
   // cart decides the default.
   const fulfillmentTouched = useRef(false);
 
-  const promo = useMemo(() => {
-    const code = readSavedPromo();
-    if (!code) return null;
-    const result = evaluatePromo(code, { subtotal, installTotal });
-    return result.ok ? result : null;
-  }, [subtotal, installTotal]);
-
   const totals = useMemo(
-    () => summarize({ subtotal, installTotal }, promo),
-    [subtotal, installTotal, promo],
+    () => summarize({ subtotal, installTotal }),
+    [subtotal, installTotal],
   );
 
   // What the cart already committed to, so step two can refuse a delivery
@@ -498,7 +474,6 @@ export default function CheckoutPage() {
         .join(" "),
       installDate: form.date || "",
       installWindow: form.timeWindow || "",
-      promoCode: promo?.code || "",
       items: safeLines
         .map(
           (l) =>
@@ -517,12 +492,10 @@ export default function CheckoutPage() {
       ref,
       lines: safeLines,
       totals,
-      promoCode: promo?.code || "",
       form,
       delivered: outcome.delivered,
       sendError: outcome.error,
     });
-    savePromo("");
     clear();
   }
 
@@ -697,19 +670,15 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <OrderSummary
-                lines={placed.lines}
-                totals={placed.totals}
-                promoCode={placed.promoCode}
-              />
+              <OrderSummary lines={placed.lines} totals={placed.totals} />
             </div>
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/tires" className="btn-outline">
                 Back to Shopping
               </Link>
-              <Link to="/coupons" className="btn-outline">
-                See Current Offers
+              <Link to="/shipping" className="btn-outline">
+                How Shipping Works
               </Link>
             </div>
           </div>
@@ -1312,11 +1281,7 @@ export default function CheckoutPage() {
           {/* Summary rail */}
           <aside aria-label="Order summary" className="min-w-0">
             <div className="lg:sticky lg:top-24">
-              <OrderSummary
-                lines={safeLines}
-                totals={totals}
-                promoCode={promo?.code || ""}
-              />
+              <OrderSummary lines={safeLines} totals={totals} />
               <p className="mt-4 text-xs leading-relaxed text-smoke">
                 Mounting, balancing, new valve stems and disposal of your old
                 tires are included on any line set to install at the shop.{" "}
