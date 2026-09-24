@@ -4,12 +4,15 @@
   copy. From 1024px an explicit grid puts headline and copy together on the
   left with the finder spanning both rows on the right.
 
-  The finder has two tabs, like React's SearchPanel. "By size" is a real
-  search: it builds 225/50R17 from the three selects and hands it to
-  /search, the same query the tire size decoder sends. "By vehicle" cannot
-  match a year/make/model to a size, because the store holds no fitment data.
-  So it does not pretend to: it points at the Find My Tires tool and the phone
-  number. Without JS both panels show, and the size form still submits.
+  The finder has two tabs, like React's SearchPanel.
+  - By vehicle: year, make and model. Makes and models come from the fitment
+    table in td-tiremath.js (window.TireDrop.FITMENT), the one the Find My
+    Tires tool sizes against, and the form hands vy/vmk/vmd to that tool,
+    which works out the original size and says to check the sidewall.
+  - By size: builds 225/50R17 from the three selects and hands it to
+    /search, the same query the tire size decoder sends.
+  Without JS both panels show; the size form still submits, and the vehicle
+  form lands on the tool, which asks for the car itself.
 
   Dark band: every text colour is pinned, not inherited.
 {% endcomment %}
@@ -18,10 +21,9 @@
 
 {%- liquid
   assign sid = section.id | replace: '_', '-'
-  assign phone_digits = section.settings.phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
 -%}
 
-<section class="tdh td-hero" style="--td-ink:{{ section.settings.background }};" aria-labelledby="td-hero-title-{{ sid }}">
+<section class="tdh td-hero" id="td-hero-{{ sid }}" style="--td-ink:{{ section.settings.background }};" aria-labelledby="td-hero-title-{{ sid }}">
   <div aria-hidden="true" class="td-hero__tread"></div>
   <div aria-hidden="true" class="td-hero__ring"></div>
 
@@ -63,26 +65,41 @@
             </button>
           </div>
 
-          <div class="td-finder__panel" id="{{ sid }}-panel-vehicle" role="tabpanel" aria-labelledby="{{ sid }}-tab-vehicle" data-td-panel="vehicle">
-            <p class="td-finder__lead">{{ section.settings.vehicle_copy }}</p>
-            <div class="td-finder__actions">
-              {%- if section.settings.vehicle_link != blank -%}
-                <a class="tdh-btn tdh-btn--primary td-finder__submit" href="{{ section.settings.vehicle_link }}">
-                  {%- render 'td-home-icon', name: 'list-checks', size: 18 -%}
-                  {{ section.settings.vehicle_cta }}
-                </a>
-              {%- endif -%}
-              {%- if section.settings.phone != blank -%}
-                <a class="tdh-btn tdh-btn--outline td-finder__submit" href="tel:+1{{ phone_digits }}">
-                  {%- render 'td-home-icon', name: 'phone', size: 17 -%}
-                  Call {{ section.settings.phone }}
-                </a>
-              {%- endif -%}
+          <form class="td-finder__panel" id="{{ sid }}-panel-vehicle" role="tabpanel" aria-labelledby="{{ sid }}-tab-vehicle" action="{{ section.settings.vehicle_link | default: '/pages/find-my-tires' }}" method="get" data-td-panel="vehicle" data-td-vehicle-form novalidate>
+            <div class="td-finder__fields">
+              <div>
+                <label class="td-finder__label" for="{{ sid }}-vy">Year</label>
+                <select class="td-finder__select" id="{{ sid }}-vy" name="vy" data-td-vy>
+                  <option value="">Select year</option>
+                  {%- comment -%} The same 22 model years the Find My Tires tool accepts. {%- endcomment -%}
+                  {%- for i in (0..21) -%}
+                    {%- assign yr = 2026 | minus: i -%}
+                    <option value="{{ yr }}">{{ yr }}</option>
+                  {%- endfor -%}
+                </select>
+              </div>
+              <div>
+                <label class="td-finder__label" for="{{ sid }}-vmk">Make</label>
+                <select class="td-finder__select" id="{{ sid }}-vmk" name="vmk" data-td-vmk>
+                  <option value="">Select make</option>
+                </select>
+              </div>
+              <div>
+                <label class="td-finder__label" for="{{ sid }}-vmd">Model</label>
+                <select class="td-finder__select" id="{{ sid }}-vmd" name="vmd" data-td-vmd disabled>
+                  <option value="">Select a make first</option>
+                </select>
+              </div>
             </div>
+            <button type="submit" class="tdh-btn tdh-btn--primary td-finder__submit">
+              {%- render 'td-home-icon', name: 'search', size: 18 -%}
+              {{ section.settings.vehicle_cta }}
+            </button>
             {%- if section.settings.vehicle_note != blank -%}
               <p class="td-finder__note">{{ section.settings.vehicle_note }}</p>
             {%- endif -%}
-          </div>
+            <p class="td-finder__error" role="alert" data-td-error></p>
+          </form>
 
           <form class="td-finder__panel" id="{{ sid }}-panel-size" role="tabpanel" aria-labelledby="{{ sid }}-tab-size" action="{{ routes.search_url | default: '/search' }}" method="get" data-td-panel="size" data-td-size-form novalidate>
             <input type="hidden" name="type" value="product">
@@ -151,10 +168,12 @@
   </div>
 </section>
 
+{%- if section.settings.show_finder -%}
+<script src="{{ 'td-tiremath.js' | asset_url }}"></script>
 <script>
   (function () {
-    var root = document.currentScript && document.currentScript.previousElementSibling;
-    if (!root || !root.querySelector) return;
+    var root = document.getElementById('td-hero-{{ sid }}');
+    if (!root) return;
     var finder = root.querySelector('[data-td-finder]');
     if (!finder) return;
 
@@ -183,6 +202,35 @@
     });
     select('vehicle');
 
+    // Vehicle: makes and models come from the fitment table the Find My
+    // Tires tool uses (td-tiremath.js), so every choice here is one that tool
+    // can size. The form hands vy/vmk/vmd to the tool, which reads them.
+    var vform = finder.querySelector('[data-td-vehicle-form]');
+    var mk = vform.querySelector('[data-td-vmk]');
+    var md = vform.querySelector('[data-td-vmd]');
+    var models = {};
+    var fit = (window.TireDrop && window.TireDrop.FITMENT) || {};
+    Object.keys(fit).forEach(function (key) {
+      var p = key.split('|');
+      if (!models[p[0]]) { models[p[0]] = []; mk.add(new Option(p[0], p[0])); }
+      models[p[0]].push(p[1]);
+    });
+    mk.addEventListener('change', function () {
+      md.length = 1;
+      (models[mk.value] || []).forEach(function (m) { md.add(new Option(m, m)); });
+      md.options[0].text = mk.value ? 'Select model' : 'Select a make first';
+      md.disabled = !mk.value;
+    });
+    vform.addEventListener('submit', function (e) {
+      var err = vform.querySelector('[data-td-error]');
+      if (!vform.querySelector('[data-td-vy]').value || !mk.value || !md.value) {
+        e.preventDefault();
+        err.textContent = 'Choose a year, make and model to see what fits.';
+        return;
+      }
+      err.textContent = '';
+    });
+
     // Size search: 225 / 50 / 17 -> "225/50R17", the form the sidewall uses.
     var form = finder.querySelector('[data-td-size-form]');
     form.addEventListener('submit', function (e) {
@@ -201,6 +249,7 @@
     });
   })();
 </script>
+{%- endif -%}
 
 <style>
   .td-hero {
@@ -261,8 +310,6 @@
   .td-hero .td-finder__panel { padding: 1.25rem; }
   .td-hero .td-finder__panel[hidden] { display: none; }
   .td-hero .td-finder:not(.is-tabbed) .td-finder__panel + .td-finder__panel { border-top: 1px solid rgba(7,14,26,.1); }
-  .td-hero .td-finder__lead { margin: 0; font-size: .9375rem; line-height: 1.55; color: #070E1A; }
-  .td-hero .td-finder__actions { display: flex; flex-wrap: wrap; gap: .625rem; margin-top: 1rem; }
   .td-hero .td-finder__fields { display: grid; gap: 1rem; }
   .td-hero .td-finder__label {
     display: block; margin-bottom: .375rem;
@@ -279,7 +326,6 @@
   }
   .td-hero .td-finder__select:focus { outline: none; border-color: #0068E8; box-shadow: 0 0 0 3px rgba(0,104,232,.15); }
   .td-hero .td-finder__submit { min-height: 48px; width: 100%; margin-top: 1rem; white-space: nowrap; }
-  .td-hero .td-finder__actions .td-finder__submit { margin-top: 0; }
   .td-hero .td-finder__note { margin: .75rem 0 0; font-size: .75rem; line-height: 1.6; color: #586274; }
   .td-hero .td-finder__error:empty { display: none; }
   .td-hero .td-finder__error {
@@ -333,12 +379,10 @@
     { "type": "text", "id": "finder_eyebrow", "label": "Finder eyebrow", "default": "Start here" },
     { "type": "text", "id": "finder_heading", "label": "Finder heading", "default": "Find your fit" },
     { "type": "text", "id": "finder_copy", "label": "Finder copy", "default": "Shop by vehicle, or by the size stamped on your sidewall." },
-    { "type": "textarea", "id": "vehicle_copy", "label": "Vehicle tab copy", "default": "Your tire size is printed on the sticker inside the driver's door, and on the sidewall of the tire itself. No sticker to hand? Answer five questions about your car and get the size and tire type that fit." },
-    { "type": "text", "id": "vehicle_cta", "label": "Vehicle tab button", "default": "Find my tires" },
-    { "type": "url", "id": "vehicle_link", "label": "Vehicle tab link" },
-    { "type": "text", "id": "vehicle_note", "label": "Vehicle tab note", "default": "Not sure? Call us and read the sidewall to us." },
-    { "type": "text", "id": "size_note", "label": "Size tab note", "default": "Your size is printed on the sidewall, e.g. 225/50R17 — that is a 225 width, 50 aspect ratio and a 17 inch rim." },
-    { "type": "text", "id": "phone", "label": "Phone number", "default": "(954) 773-1896" }
+    { "type": "text", "id": "vehicle_cta", "label": "Vehicle tab button", "default": "Find Tires" },
+    { "type": "url", "id": "vehicle_link", "label": "Vehicle tab sends to", "info": "The Find My Tires page. It reads the year, make and model." },
+    { "type": "text", "id": "vehicle_note", "label": "Vehicle tab note", "default": "We match your vehicle to the sizes that fit. Not sure? Call us and read the sidewall to us." },
+    { "type": "text", "id": "size_note", "label": "Size tab note", "default": "Your size is printed on the sidewall, e.g. 225/50R17 — that is a 225 width, 50 aspect ratio and a 17 inch rim." }
   ],
   "presets": [{ "name": "TireDrop hero" }]
 }

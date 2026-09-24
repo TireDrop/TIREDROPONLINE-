@@ -17,12 +17,10 @@
         "finder_eyebrow": "Start here",
         "finder_heading": "Find your fit",
         "finder_copy": "Shop by vehicle, or by the size stamped on your sidewall.",
-        "vehicle_copy": "Your tire size is printed on the sticker inside the driver's door, and on the sidewall of the tire itself. No sticker to hand? Answer five questions about your car and get the size and tire type that fit.",
-        "vehicle_cta": "Find my tires",
+        "vehicle_cta": "Find Tires",
         "vehicle_link": "shopify://pages/find-my-tires",
-        "vehicle_note": "Not sure? Call us and read the sidewall to us.",
-        "size_note": "Your size is printed on the sidewall, e.g. 225/50R17 — that is a 225 width, 50 aspect ratio and a 17 inch rim.",
-        "phone": "(954) 773-1896"
+        "vehicle_note": "We match your vehicle to the sizes that fit. Not sure? Call us and read the sidewall to us.",
+        "size_note": "Your size is printed on the sidewall, e.g. 225/50R17 — that is a 225 width, 50 aspect ratio and a 17 inch rim."
       }
     },
     "td_trust": {
@@ -419,7 +417,7 @@
           "type": "step",
           "settings": {
             "title": "Find your size",
-            "copy": "Search by the numbers on your sidewall, or let the free tools work it out, and compare the whole catalog."
+            "copy": "Search by vehicle or by the numbers on your sidewall and compare the whole catalog."
           }
         },
         "s2": {
