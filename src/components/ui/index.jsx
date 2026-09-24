@@ -529,8 +529,21 @@ export function Section({ className = "", children, ...rest }) {
   );
 }
 
-export function SectionHead({ eyebrow, title, lede, align = "left", action }) {
+/**
+ * `tone="dark"` is required on a section with a dark background. The heading
+ * and lede otherwise inherit body ink, which on bg-ink-wash lands at 1.08:1 —
+ * black on navy, invisible rather than merely low contrast.
+ */
+export function SectionHead({
+  eyebrow,
+  title,
+  lede,
+  align = "left",
+  action,
+  tone = "light",
+}) {
   const centered = align === "center";
+  const dark = tone === "dark";
   return (
     <div
       className={`mb-8 md:mb-12 ${centered ? "text-center" : ""} ${
@@ -542,17 +555,26 @@ export function SectionHead({ eyebrow, title, lede, align = "left", action }) {
             headline → lede rather than three paragraphs of decreasing size. */}
         {eyebrow && (
           <p
-            className={`eyebrow mb-2.5 flex items-center gap-2.5 ${
+            className={`${dark ? "eyebrow-dark" : "eyebrow"} mb-2.5 flex items-center gap-2.5 ${
               centered ? "justify-center" : ""
             }`}
           >
-            <span aria-hidden className="h-px w-6 bg-drop/45" />
+            <span
+              aria-hidden
+              className={`h-px w-6 ${dark ? "bg-volt/50" : "bg-drop/45"}`}
+            />
             {eyebrow}
           </p>
         )}
-        <h2 className="h2 text-balance">{title}</h2>
+        <h2 className={`h2 text-balance ${dark ? "text-bone" : ""}`}>
+          {title}
+        </h2>
         {lede && (
-          <p className={`lede mt-4 max-w-xl ${centered ? "mx-auto" : ""}`}>
+          <p
+            className={`lede mt-4 max-w-xl ${dark ? "text-bone/75" : ""} ${
+              centered ? "mx-auto" : ""
+            }`}
+          >
             {lede}
           </p>
         )}

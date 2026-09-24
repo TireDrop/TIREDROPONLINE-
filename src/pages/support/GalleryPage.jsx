@@ -231,7 +231,10 @@ function PlaceholderArt({ tone, label }) {
           opacity="0.5"
         />
       </svg>
-      <span className="absolute bottom-3 left-4 font-display text-xs font-bold uppercase tracking-[0.09em] text-bone/70">
+      {/* The tones run from near-black to amber, and 70% white is unreadable
+          on the light end. The chip gives the label its own backdrop so it
+          holds up over any of them. */}
+      <span className="absolute bottom-3 left-4 rounded-sm bg-ink/70 px-2 py-1 font-display text-xs font-bold uppercase tracking-[0.09em] text-bone">
         {label}
       </span>
     </div>

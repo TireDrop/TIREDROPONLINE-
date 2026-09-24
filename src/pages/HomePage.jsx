@@ -468,7 +468,7 @@ function HowItWorks() {
       <SectionHead
         eyebrow="How it works"
         title="Four steps from search to installed"
-        lede="No stock sitting in a warehouse waiting to age. Orders ship direct from the distributor network."
+        lede="No stock sitting in a warehouse waiting to age — orders ship direct, so what turns up on your drive is fresh rubber."
         action={
           <Link to="/shipping" className="btn-outline btn-sm">
             Shipping details
@@ -479,7 +479,10 @@ function HowItWorks() {
       <ol className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {STEPS.map((s) => (
           <li key={s.n} className="card relative p-6">
-            <span className="font-display text-5xl leading-none text-drop/15">
+            <span
+              aria-hidden
+              className="font-display text-5xl leading-none text-drop/15"
+            >
               {s.n}
             </span>
             <h3 className="h3 mt-3">{s.title}</h3>
@@ -653,6 +656,7 @@ function ToolsBand() {
         eyebrow="Free, no email required"
         title="Not sure what you need? Start here"
         lede="Three tools that answer the questions that stop people buying tires online. They work whether or not you buy anything from us."
+        tone="dark"
       />
 
       <div className="mt-8 grid gap-3 sm:gap-4 lg:grid-cols-3">
@@ -686,7 +690,10 @@ function Proof() {
   const stats = [
     { v: "48", l: "States we ship to" },
     { v: `${TIRE_BRANDS.length}`, l: "Tire brands" },
-    { v: "2", l: "Distributor networks" },
+    {
+      v: `${MOBILE_SERVICES.length + SHOP_SERVICES.length}`,
+      l: "Services at the shop",
+    },
     { v: `${yearsInBusiness}+`, l: `Years of ${BUSINESS.parent}` },
   ];
 

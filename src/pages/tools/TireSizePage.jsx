@@ -928,7 +928,7 @@ function CatalogMatches({ geo, heading }) {
         <EmptyState
           icon={Search}
           title={`We do not stock ${geo.normalized} on the site`}
-          lede={`Our catalog is a representative range, not the whole distributor network. Browse everything we do list, or call ${BUSINESS.phone} and we will look the size up.`}
+          lede={`Our catalog is a representative range, not every size made. Browse everything we do list, or call ${BUSINESS.phone} and we will look the size up.`}
           action={
             <Link to="/tires" className="btn-primary min-h-[44px]">
               Browse all tires

@@ -20,7 +20,7 @@ export default {
         // button text at 5.07:1.
         drop: "#0068E8",
         dive: "#0053C4", // hover / pressed
-        sky: "#E9F2FF", // tinted wash
+        sky: "#EFF5FF", // tinted wash; kept light enough that text-drop clears 4.5:1 on it
 
         // The mark's bright cyan. It is 8.2:1 on ink but only 2.4:1 on white,
         // so it is a dark-surface accent — never body text on a light page.

@@ -285,7 +285,10 @@ export default function ShippingPage() {
                 <span className="flex h-11 w-11 items-center justify-center rounded-sm bg-ink text-bone">
                   <step.icon size={20} aria-hidden />
                 </span>
-                <span className="font-display text-4xl leading-none text-ink/10">
+                <span
+                  aria-hidden
+                  className="font-display text-4xl leading-none text-ink/10"
+                >
                   0{i + 1}
                 </span>
               </div>

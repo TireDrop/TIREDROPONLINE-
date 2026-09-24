@@ -326,7 +326,7 @@ export default function ProductPage({ kind = "tire" }) {
               </p>
               <p className="mt-2 text-sm text-smoke">
                 {product.stock > 0
-                  ? `${product.stock} available to ship from our distributor network.`
+                  ? `${product.stock} available to ship.`
                   : "Not available to ship right now — call us and we will source it."}
               </p>
             </div>
