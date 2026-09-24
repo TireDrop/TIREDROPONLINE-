@@ -2,163 +2,42 @@
   "type": "footer",
   "name": "t:names.footer",
   "sections": {
-    "footer_m9NzUG": {
-      "type": "footer",
+    "td_footer": {
+      "type": "td-footer",
       "blocks": {
-        "brand": {
-          "type": "group",
-          "settings": {
-            "content_direction": "column",
-            "vertical_on_mobile": true,
-            "horizontal_alignment": "flex-start",
-            "vertical_alignment": "flex-start",
-            "align_baseline": false,
-            "horizontal_alignment_flex_direction_column": "flex-start",
-            "vertical_alignment_flex_direction_column": "flex-start",
-            "gap": 8,
-            "width": "fill",
-            "custom_width": 100,
-            "width_mobile": "fill",
-            "custom_width_mobile": 100,
-            "height": "fit",
-            "custom_height": 100,
-            "background_media": "none",
-            "video_position": "cover",
-            "background_image_position": "cover",
-            "border": "none",
-            "border_width": 1,
-            "border_opacity": 100,
-            "border_radius": 0,
-            "toggle_overlay": false,
-            "overlay_color": "#00000026",
-            "overlay_style": "solid",
-            "gradient_direction": "to top",
-            "open_in_new_tab": false,
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {
-            "brand_name": {
-              "type": "text",
-              "settings": {
-                "text": "<h2>TireDrop</h2>",
-                "width": "100%",
-                "max_width": "normal",
-                "alignment": "left",
-                "type_preset": "h4",
-                "font": "var(--font-heading--family)",
-                "font_size": "1rem",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "wrap": "pretty",
-                "background": false,
-                "background_color": "#00000026",
-                "corner_radius": 0,
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
-            "brand_copy": {
-              "type": "text",
-              "settings": {
-                "text": "<p>Tires shipped free to any address in the continental US, or free to our Sunrise, FL shop where we fit them for you. Powered by Extreme Tires since 2006.</p><p><a href=\"tel:+19547731896\">(954) 773-1896</a><br><a href=\"mailto:info@tiredroponline.com\">info@tiredroponline.com</a><br>7712 West Oakland Park Blvd<br>Sunrise, FL 33351</p>",
-                "width": "100%",
-                "max_width": "narrow",
-                "alignment": "left",
-                "type_preset": "rte",
-                "font": "var(--font-body--family)",
-                "font_size": "1rem",
-                "line_height": "normal",
-                "letter_spacing": "normal",
-                "case": "none",
-                "wrap": "pretty",
-                "background": false,
-                "background_color": "#00000026",
-                "corner_radius": 0,
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
-            }
-          },
-          "block_order": ["brand_name", "brand_copy"]
-        },
         "menu_shop": {
           "type": "menu",
-          "settings": { "menu": "td-footer-shop", "heading": "Shop", "menu_spacing": 10, "show_as_accordion": true, "accordion_icon": "caret", "accordion_dividers": true, "heading_preset": "h5", "link_preset": "paragraph", "padding-block-start": 0, "padding-block-end": 0, "padding-inline-start": 0, "padding-inline-end": 0 }
+          "settings": { "heading": "Shop", "menu": "td-footer-shop" }
         },
         "menu_tools": {
           "type": "menu",
-          "settings": { "menu": "td-footer-tools", "heading": "Free Tools", "menu_spacing": 10, "show_as_accordion": true, "accordion_icon": "caret", "accordion_dividers": true, "heading_preset": "h5", "link_preset": "paragraph", "padding-block-start": 0, "padding-block-end": 0, "padding-inline-start": 0, "padding-inline-end": 0 }
+          "settings": { "heading": "Free Tools", "menu": "td-footer-tools" }
         },
         "menu_shipping": {
           "type": "menu",
-          "settings": { "menu": "td-footer-shipping", "heading": "Shipping & Install", "menu_spacing": 10, "show_as_accordion": true, "accordion_icon": "caret", "accordion_dividers": true, "heading_preset": "h5", "link_preset": "paragraph", "padding-block-start": 0, "padding-block-end": 0, "padding-inline-start": 0, "padding-inline-end": 0 }
+          "settings": { "heading": "Shipping & Install", "menu": "td-footer-shipping" }
         },
         "menu_learn": {
           "type": "menu",
-          "settings": { "menu": "td-footer-learn", "heading": "Learn", "menu_spacing": 10, "show_as_accordion": true, "accordion_icon": "caret", "accordion_dividers": true, "heading_preset": "h5", "link_preset": "paragraph", "padding-block-start": 0, "padding-block-end": 0, "padding-inline-start": 0, "padding-inline-end": 0 }
+          "settings": { "heading": "Learn", "menu": "td-footer-learn" }
         },
         "menu_legal": {
           "type": "menu",
-          "settings": { "menu": "td-footer-legal", "heading": "Legal", "menu_spacing": 10, "show_as_accordion": true, "accordion_icon": "caret", "accordion_dividers": true, "heading_preset": "h5", "link_preset": "paragraph", "padding-block-start": 0, "padding-block-end": 0, "padding-inline-start": 0, "padding-inline-end": 0 }
+          "settings": { "heading": "Legal", "menu": "td-footer-legal" }
         }
       },
-      "block_order": ["brand", "menu_shop", "menu_tools", "menu_shipping", "menu_learn", "menu_legal"],
-      "name": "t:names.footer",
+      "block_order": ["menu_shop", "menu_tools", "menu_shipping", "menu_learn", "menu_legal"],
       "settings": {
-        "section_width": "page-width",
-        "gap": 32,
-        "background_color": "{{ settings.color_palette.background }}",
-        "padding-block-start": 48,
-        "padding-block-end": 32
-      }
-    },
-    "footer_utilities_jLGE8U": {
-      "type": "footer-utilities",
-      "blocks": {
-        "footer_copyright_jweRK8": {
-          "type": "footer-copyright",
-          "settings": { "show_powered_by": false, "font_size": "0.75rem", "case": "none" },
-          "blocks": {}
-        },
-        "footer_policy_list_VCdnpa": {
-          "type": "footer-policy-list",
-          "settings": { "font_size": "0.75rem", "case": "none" },
-          "blocks": {}
-        },
-        "social_links_Ew63Kq": {
-          "type": "social-links",
-          "settings": {
-            "facebook_url": "https://www.facebook.com/Extremetires/",
-            "instagram_url": "",
-            "youtube_url": "",
-            "tiktok_url": "",
-            "twitter_url": ""
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": ["footer_copyright_jweRK8", "footer_policy_list_VCdnpa", "social_links_Ew63Kq"],
-      "name": "t:names.utilities",
-      "settings": {
-        "section_width": "page-width",
-        "gap": 24,
-        "divider_thickness": 1,
-        "divider_color": "{{ settings.color_palette.color2 }}",
-        "background_color": "{{ settings.color_palette.background }}",
-        "padding-block-start": 20,
-        "padding-block-end": 48
+        "brand_copy": "Tires shipped free to any address in the continental US, or free to our Sunrise, FL shop where we fit them for you.",
+        "phone": "(954) 773-1896",
+        "email": "info@tiredroponline.com",
+        "address_label": "Ship to store & install",
+        "address_line_1": "7712 West Oakland Park Blvd",
+        "address_line_2": "Sunrise, FL 33351",
+        "facebook_url": "https://www.facebook.com/Extremetires/",
+        "show_payment_icons": true
       }
     }
   },
-  "order": ["footer_m9NzUG", "footer_utilities_jLGE8U"]
+  "order": ["td_footer"]
 }
