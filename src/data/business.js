@@ -118,6 +118,19 @@ export const GOOGLE_PROFILE = {
 export const googleReviewHref = () =>
   GOOGLE_PROFILE.reviewUrl ?? GOOGLE_PROFILE.searchUrl;
 
+// Yelp. Unlike the Google entry this URL is confirmed — it is the listing the
+// parent shop already has, under both its names.
+//
+// Deliberately no rating or review count here. Those move, and a number
+// hardcoded into a page is wrong the week after it is written; worse, an
+// aggregate this site cannot verify at the source is exactly the kind of
+// claim that should never be published as markup. The link goes to the
+// profile and lets the reader read the real thing.
+export const YELP_PROFILE = {
+  url: "https://www.yelp.com/biz/extreme-tires-sunrise",
+  name: "Extreme Tires",
+};
+
 // Primary navigation. Shopping leads; installation is the differentiator
 // rather than the main event.
 export const NAV = [

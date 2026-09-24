@@ -6,7 +6,11 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle2, ExternalLink, Phone, Star, Truck } from "lucide-react";
-import { BUSINESS, googleReviewHref } from "../../data/business.js";
+import {
+  BUSINESS,
+  YELP_PROFILE,
+  googleReviewHref,
+} from "../../data/business.js";
 import {
   Badge,
   Breadcrumbs,
@@ -295,14 +299,12 @@ function LeaveReview() {
 export default function ReviewsPage() {
   const [filter, setFilter] = useState("all");
 
-  const { average, total, distribution } = useMemo(() => {
+  const { total, distribution } = useMemo(() => {
     const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     REVIEWS.forEach((r) => {
       counts[r.rating] += 1;
     });
-    const sum = REVIEWS.reduce((acc, r) => acc + r.rating, 0);
     return {
-      average: sum / REVIEWS.length,
       total: REVIEWS.length,
       distribution: counts,
     };
@@ -336,33 +338,51 @@ export default function ReviewsPage() {
       {/* ---------- Summary + distribution ---------- */}
       <Section className="bg-bone">
         <div className="grid gap-6 lg:grid-cols-[320px_1fr] lg:gap-10">
-          <div className="card flex flex-col items-center justify-center p-8 text-center">
-            <p className="tnum font-display text-6xl leading-none text-ink">
-              {average.toFixed(1)}
+          <div className="card flex flex-col p-6 md:p-8">
+            <h2 className="h3">Read the real ones</h2>
+            <p className="mt-3 text-sm leading-relaxed text-smoke">
+              {BUSINESS.name} is new, so its own reviews are still being
+              collected. The shop behind it is not: {BUSINESS.parent} has been
+              fitting tires in {BUSINESS.shop.city} since {BUSINESS.foundedYear}
+              , and its customers have been writing about it for years. Both
+              profiles below are the shop's.
             </p>
-            <div className="mt-3">
-              <Stars rating={average} size={20} />
+
+            <div className="mt-6 flex flex-col gap-2.5">
+              <a
+                href={GOOGLE_REVIEWS_HREF}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-dark btn-sm min-h-[44px] w-full"
+              >
+                {BUSINESS.parent} on Google
+                <ExternalLink size={14} aria-hidden />
+              </a>
+              <a
+                href={YELP_PROFILE.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-outline btn-sm min-h-[44px] w-full"
+              >
+                {BUSINESS.parent} on Yelp
+                <ExternalLink size={14} aria-hidden />
+              </a>
             </div>
-            <p className="mt-3 text-sm text-smoke">
-              Based on {total} customer reviews
-            </p>
-            <a
-              href={GOOGLE_REVIEWS_HREF}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-dark btn-sm mt-6"
-            >
-              Review us on Google
-              <ExternalLink size={14} aria-hidden />
-            </a>
-            <p className="mt-4 text-xs leading-relaxed text-smoke">
-              The Google listing belongs to {BUSINESS.parent}, the shop behind{" "}
-              {BUSINESS.name}.
+
+            <p className="mt-5 text-xs leading-relaxed text-smoke">
+              We do not reprint star counts here. They move, and a number typed
+              into a page is out of date the week after. Open either profile and
+              read what is actually there.
             </p>
           </div>
 
           <div className="card p-6 md:p-8">
-            <h2 className="h3 mb-5">Rating breakdown</h2>
+            <h2 className="h3 mb-1">What people mention</h2>
+            <p className="mb-5 text-sm leading-relaxed text-smoke">
+              How the sample notes below break down. These are written to show
+              the page, not collected from customers — the real reviews are on
+              the profiles to the left.
+            </p>
 
             <ul className="space-y-3">
               {[5, 4, 3, 2, 1].map((star) => {
@@ -408,10 +428,41 @@ export default function ReviewsPage() {
       {/* ---------- Filter + list ---------- */}
       <Section className="bg-fog">
         <SectionHead
-          eyebrow="Read Them"
-          title="Filter by rating"
+          eyebrow="Samples"
+          title="What this page will look like"
           lede="We are not hiding the three-star ones. If we dropped the ball, you should be able to read about it."
         />
+
+        <p className="mb-8 flex items-start gap-2 rounded-sm bg-sky px-4 py-3 text-sm leading-relaxed text-ink">
+          <CheckCircle2
+            size={16}
+            aria-hidden
+            className="mt-0.5 shrink-0 text-drop"
+          />
+          <span>
+            The notes below are written examples, not customer submissions —
+            they are here to show the layout while {BUSINESS.name}'s own reviews
+            are collected. The real ones are on{" "}
+            <a
+              href={GOOGLE_REVIEWS_HREF}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-drop underline underline-offset-2"
+            >
+              Google
+            </a>{" "}
+            and{" "}
+            <a
+              href={YELP_PROFILE.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-drop underline underline-offset-2"
+            >
+              Yelp
+            </a>
+            .
+          </span>
+        </p>
 
         <div
           role="group"
