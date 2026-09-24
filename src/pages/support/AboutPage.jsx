@@ -23,34 +23,6 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
-const TEAM = [
-  {
-    name: "Luis",
-    role: "Founder & Owner",
-    bio: `Opened the shop and still answers the phone on busy Saturdays. TireDrop was his idea: sell the same tires nationally that he would put on his own family's car.`,
-  },
-  {
-    name: "Yani",
-    role: "Orders & Customer Care",
-    bio: 'Handles the questions that come in from across the country — fitment, order status, returns, and the ones that start with "I have no idea what size I need."',
-  },
-  {
-    name: "Keisha",
-    role: "Sourcing & Fitment",
-    bio: "Works the distributor catalogs. Finds the size, the load index and the speed rating that actually match the vehicle, and flags it when a listing looks wrong.",
-  },
-  {
-    name: "Marco",
-    role: "Lead Install Technician",
-    bio: "Runs the first van out of the yard most mornings. Mounts, balances and torques on driveways from Weston to Fort Lauderdale.",
-  },
-  {
-    name: "Andre",
-    role: "Shop Foreman, Sunrise",
-    bio: "Owns the bay work the van cannot do — alignments, brakes, suspension, and every ship-to-store set that gets fitted at the shop.",
-  },
-];
-
 const DIFFERENTIATORS = [
   {
     icon: Package,
@@ -95,14 +67,39 @@ const STATS = [
   },
 ];
 
-function TimelineItem({ year, title, copy }) {
+// What the business does today. Deliberately not a history: no founding
+// story, dates or headcounts that nobody can check.
+const FACTS = [
+  {
+    label: "Online",
+    title: `${BUSINESS.name} ships nationwide`,
+    copy: `Free shipping to any address in ${BUSINESS.shipping.area}, direct from a distributor warehouse. The delivery estimate is shown at checkout.`,
+  },
+  {
+    label: `In ${BUSINESS.shop.city}`,
+    title: "Free ship-to-store and install",
+    copy: `Send the order to ${BUSINESS.shop.name} at no shipping cost and the shop fits the tires there — mounted, balanced and the old set disposed of.`,
+  },
+  {
+    label: "Mobile install",
+    title: "The van comes to you",
+    copy: `In ${BUSINESS.installArea.join(", ")}, the install vans can fit your tires at the driveway, the office lot or the jobsite.`,
+  },
+  {
+    label: "At the shop",
+    title: "Bay work on the lift",
+    copy: `Alignments, brakes and suspension happen in the bay at ${BUSINESS.shop.street}.`,
+  },
+];
+
+function FactItem({ label, title, copy }) {
   return (
     <li className="relative border-l-2 border-ink/10 pl-6 pb-8 last:pb-0">
       <span
         aria-hidden
         className="absolute -left-[7px] top-1.5 h-3 w-3 rounded-full bg-drop"
       />
-      <p className="eyebrow mb-1">{year}</p>
+      <p className="eyebrow mb-1">{label}</p>
       <h3 className="h3 mb-2">{title}</h3>
       <p className="text-sm leading-relaxed text-smoke">{copy}</p>
     </li>
@@ -114,13 +111,13 @@ export default function AboutPage() {
     <>
       <Seo
         title="About TireDrop"
-        description={`${BUSINESS.name} is the online store of ${BUSINESS.parent}, a family-owned tire shop in ${BUSINESS.shop.city}, FL. Tires and wheels shipped across the continental US, or fitted at the shop.`}
+        description={`${BUSINESS.name} is the online store of ${BUSINESS.parent}, a tire shop in ${BUSINESS.shop.city}, FL. Tires and wheels shipped across the continental US, or fitted at the shop.`}
       />
 
       <PageHero
         eyebrow="About Us"
         title="A real tire shop, with a national counter"
-        lede={`${BUSINESS.name} is the online store of ${BUSINESS.parent} — a family-owned shop that fits tires in South Florida. We ship anywhere in ${BUSINESS.shipping.area}. Near ${BUSINESS.shop.city}, we will also put them on for you.`}
+        lede={`${BUSINESS.name} is the online store of ${BUSINESS.parent}, a tire shop in ${BUSINESS.shop.city}, FL. We ship anywhere in ${BUSINESS.shipping.area}. Near ${BUSINESS.shop.city}, we will also put them on for you.`}
       >
         <div className="flex flex-wrap gap-3">
           <Link to="/tires" className="btn-primary">
@@ -141,40 +138,30 @@ export default function AboutPage() {
           <div>
             <SectionHead
               eyebrow="Our Story"
-              title="It started in a tire bay, not a warehouse"
+              title="Attached to a tire bay, not a warehouse"
               lede="Most online tire stores are a catalog with a checkout button attached. This one is attached to a shop that mounts tires for a living."
             />
 
             <div className="max-w-[68ch] space-y-5 text-[1.0625rem] leading-[1.7] text-smoke">
               <p>
-                {BUSINESS.parent} started out as one truck, a compressor and a
-                phone that rang at all hours. The idea was
-                simple enough: most tire work does not need a waiting room, it
-                needs the right machine and the right hands. So the work went to
-                wherever the car already was.
+                {BUSINESS.parent} is a tire shop at {BUSINESS.shop.full}. It
+                mounts, balances and installs tires in the bay, and runs mobile
+                install vans that do the same work on driveways, office lots and
+                jobsites around South Florida.
               </p>
               <p>
-                Word moved the way it does in South Florida. A neighbor told a
-                neighbor, an office manager told the rest of the park, a
-                contractor called us to a jobsite and then kept calling. One
-                truck became a fleet of vans, and the shop on{" "}
-                {BUSINESS.shop.street} in {BUSINESS.shop.city} came next for the
-                jobs that genuinely belong on a lift.
+                What people call a tire shop for is knowing which tire is worth
+                the money. We hear how a set wore out. We see which sidewalls
+                crack in the heat, which ones go quiet at highway speed, and
+                which bargain brand comes back angry at 20,000 miles.
               </p>
               <p>
-                What has not changed since is the part people actually call us
-                for: knowing which tire is worth the
-                money. We hear how a set wore out. We see which sidewalls crack
-                in the heat, which ones go quiet at highway speed, and which
-                bargain brand comes back angry at 20,000 miles.
-              </p>
-              <p>
-                {BUSINESS.name} is what happens when you point that at the whole
-                country. You order online and the tires ship direct from a
-                distributor warehouse to your door — but the catalog was picked
-                by a shop, not by a spreadsheet. If you live
-                near {BUSINESS.shop.city}, ship them free to us instead and we
-                will fit them.
+                {BUSINESS.name} is the shop&apos;s online store. You order online
+                and the tires ship free, direct from a distributor warehouse, to
+                any address in {BUSINESS.shipping.area} — but the catalog was
+                picked by a shop, not by a spreadsheet. If you live near{" "}
+                {BUSINESS.shop.city}, ship them free to us instead and we will
+                fit them.
               </p>
             </div>
 
@@ -192,28 +179,11 @@ export default function AboutPage() {
           </div>
 
           <div>
-            <ol className="mt-2">
-              <TimelineItem
-                year="The start"
-                title="One truck, one promise"
-                copy={`${BUSINESS.parent} starts in ${BUSINESS.shop.city} with a single truck, mostly driveway calls and after-hours flats.`}
-              />
-              <TimelineItem
-                year="The early years"
-                title="Word of mouth does the marketing"
-                copy="Office parks and small fleets start booking standing appointments because nobody has to leave their desk."
-              />
-              <TimelineItem
-                year="Growth"
-                title="A fleet of vans, and a real shop"
-                copy={`More vans, each carrying a tire machine, a spin balancer and calibrated torque wrenches — plus a bay on ${BUSINESS.shop.street} for alignments, brakes and suspension.`}
-              />
-              <TimelineItem
-                year="Today"
-                title="The shop goes national"
-                copy={`${BUSINESS.name} opens the same catalog to ${BUSINESS.shipping.area}, shipped direct from a distributor warehouse. Local customers still get free ship-to-store and install.`}
-              />
-            </ol>
+            <ul className="mt-2">
+              {FACTS.map((fact) => (
+                <FactItem key={fact.label} {...fact} />
+              ))}
+            </ul>
           </div>
         </div>
       </Section>
@@ -244,33 +214,6 @@ export default function AboutPage() {
           </p>
         </div>
       </section>
-
-      {/* ---------- Team ---------- */}
-      <Section className="bg-fog">
-        <SectionHead
-          eyebrow="Our Team"
-          title="The people behind the order"
-          lede={`Small crew, clear roles. Whether your tires land on a porch in Ohio or on a lift in ${BUSINESS.shop.city}, one of these people had a hand in it. First names only — call the shop and you will be talking to one of them.`}
-        />
-
-        <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {TEAM.map((person) => (
-            <li key={person.name} className="card-hover p-6">
-              <div
-                aria-hidden
-                className="mb-5 flex h-14 w-14 items-center justify-center rounded-sm bg-ink font-display text-2xl text-amber"
-              >
-                {person.name.charAt(0)}
-              </div>
-              <h3 className="h3">{person.name}</h3>
-              <p className="eyebrow mt-1 text-[11px]">{person.role}</p>
-              <p className="mt-3 text-sm leading-relaxed text-smoke">
-                {person.bio}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </Section>
 
       {/* ---------- Commitment ---------- */}
       <Section className="bg-bone">

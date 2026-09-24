@@ -348,7 +348,7 @@ function ApplicationForm() {
             type="text"
             autoComplete="name"
             className="field"
-            placeholder="Alex Moreno"
+            placeholder="First and last name"
             value={values.name}
             onChange={update("name")}
             aria-invalid={errors.name ? "true" : undefined}

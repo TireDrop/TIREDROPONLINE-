@@ -35,8 +35,8 @@ import { BUSINESS } from "../../data/business.js";
 import { useCart, money } from "../../context/CartContext.jsx";
 import { useCompare } from "../../context/CompareContext.jsx";
 import {
+  DELIVERY_NOTE,
   SET_SIZE,
-  deliveryEstimate,
   priceBreakdown,
 } from "../../data/pricing.js";
 
@@ -95,10 +95,6 @@ export default function ProductPage({ kind = "tire" }) {
 
   const related = useMemo(() => (product ? relatedTo(product) : []), [product]);
 
-  // Recomputed once per mount: the estimate depends on the clock, not on the
-  // shopper's choices, and re-deriving it on every keystroke would be noise.
-  const delivery = useMemo(() => deliveryEstimate(), []);
-
   const clampQty = useCallback(
     (n) => (Number.isFinite(n) ? Math.min(MAX_QTY, Math.max(1, n)) : 1),
     [],
@@ -156,7 +152,6 @@ export default function ProductPage({ kind = "tire" }) {
   const sizeLabel = isTire
     ? product.size
     : `${product.diameter}x${product.wheelWidth} · ${product.boltPattern}`;
-  const savings = product.msrp - product.price;
   const bill = priceBreakdown(product, qty);
   const installTotal = install ? bill.install : 0;
   const orderTotal = bill.price + installTotal;
@@ -244,17 +239,6 @@ export default function ProductPage({ kind = "tire" }) {
               </div>
               <p className="mt-2 text-sm text-smoke">
                 {money(product.price)} per {unit}
-                {savings > 0 && (
-                  <>
-                    {" · "}
-                    <span className="line-through">
-                      {money(product.msrp)}
-                    </span>{" "}
-                    <span className="font-display font-bold text-drop">
-                      Save {money(savings)} each
-                    </span>
-                  </>
-                )}
               </p>
               <p className="mt-2 text-sm text-smoke">Available to order.</p>
             </div>
@@ -333,9 +317,9 @@ export default function ProductPage({ kind = "tire" }) {
             </div>
 
             {/* Fulfillment choice. Option two is the local upsell and sets the
-                same `install` flag the cart has always carried. Both options
-                carry a date, because "when does it get here" is the question
-                that decides the sale. */}
+                same `install` flag the cart has always carried. Neither names
+                a date: the delivery estimate depends on the address, so it is
+                shown at checkout. */}
             <fieldset className="mt-6">
               <legend className="label">Delivery</legend>
               <div className="grid gap-3">
@@ -363,14 +347,11 @@ export default function ProductPage({ kind = "tire" }) {
                         aria-hidden
                         className="mt-0.5 shrink-0 text-drop"
                       />
-                      <span className="min-w-0">
-                        Ships free, arrives{" "}
-                        {delivery.earliest}–{delivery.latest}
-                      </span>
+                      <span className="min-w-0">{DELIVERY_NOTE}</span>
                     </span>
                     <span className="mt-1 block text-sm text-smoke">
-                      Leaves the warehouse {delivery.shipsOn}, delivered to your
-                      address anywhere in {BUSINESS.shipping.area}.
+                      Delivered to your address anywhere in{" "}
+                      {BUSINESS.shipping.area}.
                     </span>
                   </span>
                 </label>
@@ -401,8 +382,8 @@ export default function ProductPage({ kind = "tire" }) {
                         className="mt-0.5 shrink-0 text-drop"
                       />
                       <span className="min-w-0">
-                        Free to {delivery.storeName} by {delivery.toStore},
-                        fitted there
+                        Free ship-to-store at {BUSINESS.shop.name}, fitted
+                        there
                       </span>
                     </span>
                     <span className="mt-1 block text-sm text-smoke">
@@ -417,30 +398,14 @@ export default function ProductPage({ kind = "tire" }) {
               </div>
             </fieldset>
 
-            {/* Price breakdown: list, what we charge, and install. */}
+            {/* Price breakdown: what we charge, and install. */}
             <dl className="tnum mt-6 space-y-1.5 text-sm">
-              {bill.instantSaving > 0 && (
-                <div className="flex justify-between gap-4">
-                  <dt className="text-smoke">
-                    List price, {qty} {plural(qty)}
-                  </dt>
-                  <dd className="text-smoke line-through">
-                    {money(bill.list)}
-                  </dd>
-                </div>
-              )}
               <div className="flex justify-between gap-4">
-                <dt className="text-smoke">Your price</dt>
+                <dt className="text-smoke">
+                  Price, {qty} {plural(qty)}
+                </dt>
                 <dd className="font-medium">{money(bill.price)}</dd>
               </div>
-              {bill.instantSaving > 0 && (
-                <div className="flex justify-between gap-4">
-                  <dt className="text-smoke">Instant saving</dt>
-                  <dd className="font-medium text-drop">
-                    − {money(bill.instantSaving)}
-                  </dd>
-                </div>
-              )}
               <div className="flex justify-between gap-4">
                 <dt className="text-smoke">Installation at the shop</dt>
                 <dd className="font-medium">

@@ -5,17 +5,11 @@ import { Check, ShoppingCart, Truck } from "lucide-react";
 import { money, useCart } from "../../context/CartContext.jsx";
 import { useCompare } from "../../context/CompareContext.jsx";
 import {
+  DELIVERY_NOTE_SHORT,
   SET_SIZE,
-  deliveryEstimate,
   priceBreakdown,
-  setMsrp,
-  setPrice,
 } from "../../data/pricing.js";
 import ProductArt from "./ProductArt.jsx";
-
-// A grid can hold forty cards and the estimate is the same for all of them, so
-// it is resolved once per page load rather than once per card.
-const DELIVERY = deliveryEstimate();
 
 /** Short spec line under the product name — size for tires, fitment for wheels. */
 function specLine(product) {
@@ -32,7 +26,6 @@ export default function ProductCard({ product }) {
   // Wheels are sold in fours too, so both get the set-of-four headline that a
   // shopper is really comparing between sites.
   const bd = priceBreakdown(product, SET_SIZE);
-  const setSaving = setMsrp(product) - setPrice(product);
 
   const compare = useCompare();
   const selected = compare.has(product.slug);
@@ -138,19 +131,6 @@ export default function ProductCard({ product }) {
             <span className="text-[11px] uppercase tracking-[0.09em] text-smoke">
               set of {SET_SIZE}
             </span>
-            {setSaving > 0 && (
-              <>
-                {/* The struck list price is the first thing to go when the
-                    card is half as wide: the saving says the same thing in
-                    fewer characters. */}
-                <span className="tnum hidden text-sm text-smoke line-through sm:inline">
-                  {money(bd.list)}
-                </span>
-                <span className="tnum font-display text-[12px] font-bold uppercase tracking-[0.06em] text-drop">
-                  Save {money(setSaving)}
-                </span>
-              </>
-            )}
           </div>
           <p className="tnum mt-1.5 text-[11px] leading-snug text-smoke">
             {money(product.price)} each
@@ -162,9 +142,7 @@ export default function ProductCard({ product }) {
 
           <p className="mt-2.5 hidden items-start gap-1.5 text-[11px] leading-snug text-smoke sm:flex">
             <Truck size={13} aria-hidden className="mt-px shrink-0" />
-            <span>
-              Ships free · arrives {DELIVERY.earliest}–{DELIVERY.latest}
-            </span>
+            <span>{DELIVERY_NOTE_SHORT}</span>
           </p>
 
           {/* On a phone the card is about 160px wide, and a floating control

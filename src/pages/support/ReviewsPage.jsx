@@ -123,7 +123,7 @@ export default function ReviewsPage() {
             <SectionHead
               eyebrow="Your Turn"
               title="Leave a review"
-              lede="Feedback is how a family shop gets better, online or in the bay. Tell us what went right — and what did not, so we can fix it."
+              lede="Feedback is how a tire shop gets better, online or in the bay. Tell us what went right — and what did not, so we can fix it."
             />
             <div className="card p-6">
               <h3 className="h3 mb-3">Something go wrong?</h3>
