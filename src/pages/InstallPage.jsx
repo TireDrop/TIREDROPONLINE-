@@ -39,7 +39,7 @@ const STEPS = [
   {
     icon: PackageCheck,
     title: "Your tires land at the shop",
-    body: `The order ships from the distributor straight to ${BUSINESS.parent} at ${BUSINESS.shop.street}. They come off the truck and go on the rack with your name on them.`,
+    body: `The order ships direct from a distributor warehouse to ${BUSINESS.parent} at ${BUSINESS.shop.street}. They come off the truck and go on the rack with your name on them.`,
   },
   {
     icon: CalendarCheck,
@@ -67,7 +67,7 @@ const WHY = [
   {
     icon: Wrench,
     title: "Fitted by people who do it daily",
-    body: `${BUSINESS.parent} has been mounting tires in ${BUSINESS.shop.city} since ${BUSINESS.foundedYear}. Balancing, TPMS relearns and torque specs are routine here, not an occasional job.`,
+    body: `${BUSINESS.parent} mounts tires in ${BUSINESS.shop.city} every working day. Balancing, TPMS relearns and torque specs are routine here, not an occasional job.`,
   },
   {
     icon: Check,
@@ -189,7 +189,7 @@ export default function InstallPage() {
           </span>
           <span className="flex items-center gap-1.5">
             <Check size={14} aria-hidden className="text-amber" />
-            {BUSINESS.poweredBy}, est. {BUSINESS.foundedYear}
+            {BUSINESS.poweredBy}
           </span>
         </p>
       </PageHero>
@@ -373,9 +373,9 @@ export default function InstallPage() {
           <p className="eyebrow-dark mb-2">The shop</p>
           <h2 className="h2">{BUSINESS.shop.name}</h2>
           <p className="lede mt-3 text-bone/70">
-            {BUSINESS.parent} has run this shop since {BUSINESS.foundedYear}. It
-            is where your ship-to-store order lands, where the fitting happens
-            and where the vans roll out from.
+            {BUSINESS.parent} runs this shop. It is where your ship-to-store
+            order lands, where the fitting happens and where the vans roll out
+            from.
           </p>
         </div>
 

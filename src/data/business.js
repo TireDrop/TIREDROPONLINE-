@@ -1,7 +1,7 @@
 // Single source of truth for business facts.
 //
-// TireDrop is the national e-commerce brand. Tires ship free anywhere in the
-// continental US, drop-shipped from the distributor. Customers in South
+// TireDrop is the online store. Tires ship free anywhere in the continental
+// US, direct from a distributor warehouse. Customers in South
 // Florida can instead choose free ship-to-store and have them installed at
 // Extreme Tires in Sunrise — the parent business, which also runs the mobile
 // install vans.
@@ -25,7 +25,6 @@ export const BUSINESS = {
   poweredBy: "Powered by Extreme Tires",
   domain: "tiredroponline.com",
   tagline: "Tires shipped. Or installed.",
-  foundedYear: 2006, // Extreme Tires — per the parent site and its listings
 
   phone: "(954) 773-1896",
   phoneHref: "tel:+19547731896",
@@ -86,27 +85,10 @@ export const SOCIAL = {
   youtube: null,
 };
 
-// Tire brands shown in the footer strip and the homepage brand row. Every
-// name here links to `/tires?brands=<name>`, so a brand listed with no
-// matching product in `data/products.js` sends the visitor to an empty
-// result page. Keep this roster equal to `TIRE_BRAND_NAMES` from
-// products.js. Goodyear was removed for exactly that reason — it was advertised
-// in three places and returned "0 tires". If the shop does carry a brand, add
-// its products first, then add it back here.
-export const TIRE_BRANDS = [
-  { name: "Continental", slug: "continental", logo: null },
-  { name: "Michelin", slug: "michelin", logo: null },
-  { name: "Pirelli", slug: "pirelli", logo: null },
-  { name: "Bridgestone", slug: "bridgestone", logo: null },
-  { name: "Nexen", slug: "nexen", logo: null },
-  { name: "Nitto", slug: "nitto", logo: null },
-];
-
 // Google Business Profile belongs to the Sunrise shop, not to TireDrop.
 // Fill these in once the listing is confirmed; every Google link then updates
-// at once. `reviewsAreReal` gates structured-data markup — leave it false
-// while the page shows placeholder content, since publishing review markup
-// for reviews that are not genuine breaches Google's policy.
+// at once. The site publishes no reviews of its own, so `reviewsAreReal`
+// stays false and no review markup is emitted.
 export const GOOGLE_PROFILE = {
   placeId: null,
   reviewUrl: null,

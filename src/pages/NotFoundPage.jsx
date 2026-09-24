@@ -9,7 +9,7 @@ const HELPFUL_LINKS = [
     to: "/tires",
     icon: Circle,
     title: "Shop Tires",
-    copy: "Search by vehicle or by size across every brand we carry.",
+    copy: "Search by vehicle or by size across every brand in the catalog.",
   },
   {
     to: "/wheels",

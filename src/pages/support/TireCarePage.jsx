@@ -401,7 +401,7 @@ export default function TireCarePage() {
     <>
       <Seo
         title="Tire Care Guides"
-        description="Plain-English tire guides from a shop that has been fitting tires since 2007 — pressure, rotation, balancing, tread depth, alignment, TPMS and replacement, including the penny test and why the door placard beats the sidewall number."
+        description="Plain-English tire guides from a real tire shop in Sunrise, FL — pressure, rotation, balancing, tread depth, alignment, TPMS and replacement, including the penny test and why the door placard beats the sidewall number."
       />
 
       <PageHero

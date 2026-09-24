@@ -19,9 +19,11 @@
 //      a tire site usually does. As built, this site sets no cookies, runs no
 //      analytics, loads no tracking pixels, captures no email addresses and
 //      has no backend: the only browser storage is localStorage for the cart
-//      and the comparison tray. Section 3 says exactly that. If
-//      analytics, a payment processor or an email platform is ever added, that
-//      section has to change in the same commit.
+//      and the comparison tray. Section 3 says exactly that. Card payments
+//      are taken by the live store's checkout (Shopify), so the policy names
+//      a payment processor without claiming the site takes no payment. If
+//      analytics or an email platform is ever added, that section has to
+//      change in the same commit.
 //   2. Nothing here may point at a document that does not exist. Section 9
 //      used to say the return window was "stated at checkout" — it was not
 //      stated anywhere. Do not reintroduce a forward reference until the
@@ -78,7 +80,7 @@ const DOCS = {
         id: "who-we-are",
         heading: "1. Who you are buying from",
         paragraphs: [
-          `${BUSINESS.name} is the online tire and wheel store of ${BUSINESS.parent}, the tire shop at ${BUSINESS.shop.full}. Orders placed on this site are fulfilled by shipping direct from our distributors — we do not hold stock of our own.`,
+          `${BUSINESS.name} is the online tire and wheel store of ${BUSINESS.parent}, the tire shop at ${BUSINESS.shop.full}. Orders placed on this site ship direct from a distributor warehouse — we do not hold stock of our own.`,
           `We sell to customers throughout ${BUSINESS.shipping.area}. Installation, whether at the shop or from one of our mobile vans, is available only in South Florida. Those are two different things, and this document treats them as such.`,
           `Questions about anything here: call ${BUSINESS.phone} during business hours, email ${BUSINESS.email}, or use the contact form. The phone is the channel that reaches a person fastest.`,
         ],
@@ -235,7 +237,7 @@ const DOCS = {
           `Messages you send through the contact form or to ${BUSINESS.email}, or leave on the phone`,
         ],
         after: [
-          "There is one thing we deliberately do not collect here: card numbers. This website does not take payment. Checkout submits an order, and a person calls you to confirm fitment and take payment over the phone or at the counter. No card field exists on this site, so there is no card data for us to lose.",
+          "We do not store card numbers. Card payments are handled by our payment processor, which receives the card details directly and handles them under its own security obligations; we see only that a payment went through.",
           "We do not ask for information we have no use for. You do not need an account to browse the site, and there is no newsletter sign-up anywhere on it.",
         ],
       },
@@ -243,7 +245,7 @@ const DOCS = {
         id: "how-we-use-it",
         heading: "2. How we use it",
         paragraphs: [
-          "To answer your question, price an order, place it with the distributor, get it shipped to the right address, take payment over the phone, book an install, and handle any return, claim or warranty question afterward. That is the whole list. We do not profile you, score you, or build an audience out of you.",
+          "To answer your question, price an order, place it with the distributor, get it shipped to the right address, take payment, book an install, and handle any return, claim or warranty question afterward. That is the whole list. We do not profile you, score you, or build an audience out of you.",
           "If you ask us to, we may send occasional service reminders — a rotation coming due, for example. You can tell us to stop at any time and we will.",
         ],
       },
@@ -270,7 +272,7 @@ const DOCS = {
         list: [
           "Distributors, who receive the shipping address and order details because they are the ones packing and dispatching your tires",
           "Shipping carriers, for delivery and tracking",
-          "The card processor used when we take payment over the phone or at the counter — that happens off this website, and they handle the card details, not us",
+          "The payment processor that handles card payments — they receive the card details, not us",
           "Financing providers, if you choose to apply; your application goes to them under their own privacy policy, not ours",
           "Manufacturers, when a warranty claim requires it",
           "The company that hosts this website, which keeps ordinary server logs of requests made to it",
@@ -309,7 +311,7 @@ const DOCS = {
         id: "security",
         heading: "7. Security",
         paragraphs: [
-          "We take sensible steps to protect customer information, and we limit access to the people who need it to do the job. Because this site takes no payment, card details are never entered here and never stored by us — they are handled by our card processor when we take payment over the phone or at the counter. No website or business can promise perfect security, and we are not going to pretend otherwise. If something goes wrong in a way that affects you, we will tell you.",
+          "We take sensible steps to protect customer information, and we limit access to the people who need it to do the job. Card details are never stored by us — they are handled by our payment processor. No website or business can promise perfect security, and we are not going to pretend otherwise. If something goes wrong in a way that affects you, we will tell you.",
         ],
       },
       {

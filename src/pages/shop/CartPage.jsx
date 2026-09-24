@@ -207,7 +207,7 @@ const TRUST = [
   {
     icon: CalendarClock,
     title: BUSINESS.poweredBy,
-    copy: `A real shop since ${BUSINESS.foundedYear} — call ${BUSINESS.phone}.`,
+    copy: `A real shop in ${BUSINESS.shop.city}, ${BUSINESS.shop.state} — call ${BUSINESS.phone}.`,
   },
 ];
 
@@ -351,8 +351,8 @@ export default function CartPage() {
                   Checkout
                 </Link>
                 <p className="mt-3 text-center text-xs leading-relaxed text-smoke">
-                  No card is charged online. We confirm fitment and take payment
-                  by phone before anything ships.
+                  We check the fitment against your vehicle before anything
+                  ships.
                 </p>
 
                 <div className="mt-6 flex items-start gap-2.5 border-t border-ink/10 pt-5">

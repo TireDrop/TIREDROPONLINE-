@@ -35,7 +35,6 @@ const SORTS = [
   { value: "best", label: "Featured" },
   { value: "price-asc", label: "Price: low to high" },
   { value: "price-desc", label: "Price: high to low" },
-  { value: "rating", label: "Top rated" },
 ];
 
 const PRICE_MIN = Math.min(...WHEELS.map((w) => w.price));
@@ -79,12 +78,10 @@ function sortProducts(list, sort) {
       return out.sort((a, b) => a.price - b.price);
     case "price-desc":
       return out.sort((a, b) => b.price - a.price);
-    case "rating":
-      return out.sort((a, b) => b.rating - a.rating);
     default:
-      return out.sort(
-        (a, b) => b.reviewCount * b.rating - a.reviewCount * a.rating,
-      );
+      // "Featured" is catalog order: there is no sales or review data behind
+      // any other ranking yet.
+      return out;
   }
 }
 
@@ -102,7 +99,6 @@ export default function WheelsPage() {
       finishes: listParam(params, "fin"),
       minPrice: params.get("minp") || "",
       maxPrice: params.get("maxp") || "",
-      minRating: Number(params.get("rating") || 0),
     }),
     [params],
   );
@@ -143,7 +139,6 @@ export default function WheelsPage() {
       fin: value.finishes,
       minp: value.minPrice,
       maxp: value.maxPrice,
-      rating: value.minRating || "",
     });
 
   const onSearch = (payload) => {
@@ -181,7 +176,6 @@ export default function WheelsPage() {
       if (filters.finishes.length && !filters.finishes.includes(w.finish))
         return false;
       if (w.price < min || w.price > max) return false;
-      if (filters.minRating && w.rating < filters.minRating) return false;
       if (sizeQuery.width && String(w.wheelWidth) !== sizeQuery.width)
         return false;
       if (sizeQuery.bolt && w.boltPattern !== sizeQuery.bolt) return false;
@@ -220,7 +214,6 @@ export default function WheelsPage() {
       fin: [],
       minp: "",
       maxp: "",
-      rating: "",
       w: "",
       a: "",
       d: "",
@@ -463,7 +456,7 @@ export default function WheelsPage() {
               <EmptyState
                 icon={SearchX}
                 title="No wheels match those filters"
-                lede="The distributor catalog runs far deeper than this page. Tell us the look you want and your vehicle, and we will source the right bolt pattern and offset."
+                lede="There are far more wheels than this page lists. Tell us the look you want and your vehicle, and we will source the right bolt pattern and offset."
                 action={
                   <div className="flex flex-wrap justify-center gap-3">
                     <Link to="/wheels" className="btn-primary btn-sm">

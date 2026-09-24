@@ -24,15 +24,13 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
-// Checkout on this site collects an order; it does not take payment. Every
-// payment method below happens on the phone or at the counter, and this page
-// must not imply a card field exists on the website — /checkout says plainly
-// that no card is charged there, and the two have to agree.
+// The live store takes cards at checkout. This page lists the ways to pay
+// without promising a program or a method that may not be running today.
 const PAY_METHODS = [
   {
     icon: CreditCard,
-    title: "Card, by phone",
-    copy: "Place the order on the site, then a person calls to confirm fitment and take the card. No card number is entered on this website, and we never store one.",
+    title: "Card",
+    copy: "Major credit and debit cards. If you would rather not pay online, call and we can take the order and the card over the phone.",
   },
   {
     icon: Wallet,
@@ -148,7 +146,7 @@ const FAQ = [
   },
   {
     q: "What payment methods do you take if I skip financing?",
-    a: "Major credit and debit cards, taken over the phone when we call to confirm your order, and cards or cash in person at the shop. Nothing is charged while you are on the website — placing an order here does not move any money. If you are running a fleet, call and ask how billing can be arranged.",
+    a: "Major credit and debit cards, and cards or cash in person at the shop. If you would rather pay over the phone, call and ask. If you are running a fleet, call and ask how billing can be arranged.",
   },
 ];
 

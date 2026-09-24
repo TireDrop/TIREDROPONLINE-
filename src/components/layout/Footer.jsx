@@ -9,34 +9,8 @@ import {
   Phone,
   Youtube,
 } from "lucide-react";
-import {
-  BUSINESS,
-  FOOTER_COLUMNS,
-  SOCIAL,
-  TIRE_BRANDS,
-} from "../../data/business.js";
-import BrandLogo from "../ui/BrandLogo.jsx";
+import { BUSINESS, FOOTER_COLUMNS, SOCIAL } from "../../data/business.js";
 import Logo from "./Logo.jsx";
-
-/** Brand strip that sits above the footer body, per the supplied artwork. */
-function BrandStrip() {
-  return (
-    <div className="border-b border-graphite py-7">
-      <ul className="wrap flex flex-wrap items-center justify-center gap-x-10 gap-y-5">
-        {TIRE_BRANDS.map((b) => (
-          <li key={b.slug}>
-            <Link
-              to={`/tires?brands=${encodeURIComponent(b.name)}`}
-              className="flex min-h-[44px] items-center opacity-80 transition-opacity hover:opacity-100"
-            >
-              <BrandLogo brand={b} className="h-8" />
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 // Whether any social account is confirmed. With none, the heading would sit
 // over an empty row.
@@ -47,8 +21,6 @@ export default function Footer() {
 
   return (
     <footer className="mt-auto bg-ink bg-ink-wash text-bone">
-      <BrandStrip />
-
       <div className="wrap grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-4">
         {FOOTER_COLUMNS.map((col) => (
           <div key={col.title}>
@@ -180,8 +152,7 @@ export default function Footer() {
           <div className="flex items-center gap-3">
             <Logo className="h-16 shrink-0" variant="full" onDark />
             <p>
-              © {year} {BUSINESS.name} · {BUSINESS.poweredBy}, serving drivers
-              since {BUSINESS.foundedYear}
+              © {year} {BUSINESS.name} · {BUSINESS.poweredBy}
             </p>
           </div>
           <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">

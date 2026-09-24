@@ -9,7 +9,7 @@ import React, {
 
 // Side-by-side comparison, the way every large tire retailer does it: tick a
 // few models in the catalog, a tray slides up, and one button opens a table
-// that puts their specs and ratings in the same columns.
+// that puts their prices and specs in the same columns.
 //
 // Four is the ceiling because that is how many columns fit a laptop screen
 // without the table turning into a spreadsheet.

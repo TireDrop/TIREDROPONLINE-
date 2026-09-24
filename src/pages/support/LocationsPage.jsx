@@ -156,7 +156,7 @@ export default function LocationsPage() {
         <SectionHead
           eyebrow="Our Shop"
           title={`${BUSINESS.shop.city}, Florida`}
-          lede={`${BUSINESS.parent} has run out of this building for years — it owns the vans, employs the technicians and fits every ship-to-store order. Pull in for an install, a pickup, or the bay work a van cannot do.`}
+          lede={`${BUSINESS.parent} runs out of this building — it owns the vans, employs the technicians and fits every ship-to-store order. Pull in for an install, a pickup, or the bay work a van cannot do.`}
         />
 
         <div className="grid gap-6 lg:grid-cols-[1fr_1.15fr]">

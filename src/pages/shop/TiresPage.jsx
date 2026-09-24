@@ -31,12 +31,12 @@ import { money } from "../../context/CartContext.jsx";
 
 // Tires sell as sets of four, so the price sorts are sorted on the set — the
 // number the shopper is actually comparing between two sites. The last two
-// sorts are what a tire buyer is really shopping for once price is settled.
+// sort on the tire's own published grades (UTQG treadwear and traction), which
+// is what a tire buyer is really shopping for once price is settled.
 const SORTS = [
   { value: "best", label: "Featured" },
   { value: "price-asc", label: "Price: set of 4, low to high" },
   { value: "price-desc", label: "Price: set of 4, high to low" },
-  { value: "rating", label: "Top rated" },
   { value: "wear", label: "Longest tread life" },
   { value: "wet", label: "Best wet grip" },
 ];
@@ -56,7 +56,7 @@ const listParam = (params, key) =>
   (params.get(key) || "").split(",").filter(Boolean);
 
 /**
- * Sorts on one rating axis, best first. An axis can be genuinely unrated —
+ * Sorts on one spec-derived axis, best first. An axis can be genuinely unrated —
  * a winter tire carries no UTQG treadwear grade — and an unrated tire belongs
  * at the bottom of the list rather than pretending to have scored a zero.
  */
@@ -76,17 +76,14 @@ function sortProducts(list, sort) {
       return out.sort((a, b) => setPrice(a) - setPrice(b));
     case "price-desc":
       return out.sort((a, b) => setPrice(b) - setPrice(a));
-    case "rating":
-      return out.sort((a, b) => b.rating - a.rating);
     case "wear":
       return out.sort(byAxis("wear"));
     case "wet":
       return out.sort(byAxis("wet"));
     default:
-      // "Featured" stands in for sales volume: reviews weighted by score.
-      return out.sort(
-        (a, b) => b.reviewCount * b.rating - a.reviewCount * a.rating,
-      );
+      // "Featured" is catalog order: there is no sales or review data behind
+      // any other ranking yet.
+      return out;
   }
 }
 
@@ -112,7 +109,6 @@ export default function TiresPage() {
       finishes: [],
       minPrice: params.get("minp") || "",
       maxPrice: params.get("maxp") || "",
-      minRating: Number(params.get("rating") || 0),
     }),
     [params],
   );
@@ -162,7 +158,6 @@ export default function TiresPage() {
       dia: value.diameters,
       minp: value.minPrice,
       maxp: value.maxPrice,
-      rating: value.minRating || "",
     });
 
   const onSearch = (payload) => {
@@ -201,7 +196,6 @@ export default function TiresPage() {
       )
         return false;
       if (t.price < min || t.price > max) return false;
-      if (filters.minRating && t.rating < filters.minRating) return false;
       if (sizeQuery.width && String(t.width) !== sizeQuery.width) return false;
       if (sizeQuery.aspect && String(t.aspect) !== sizeQuery.aspect)
         return false;
@@ -255,7 +249,6 @@ export default function TiresPage() {
       dia: [],
       minp: "",
       maxp: "",
-      rating: "",
       w: "",
       a: "",
       d: "",
@@ -280,15 +273,15 @@ export default function TiresPage() {
         />
         <PageHero
           eyebrow="Tires"
-          title="Tire Brands We Ship"
-          lede={`${brandSentence} in one catalog, drop-shipped from the distributor. Every set ships anywhere in the continental US.`}
+          title="Shop Tires by Brand"
+          lede={`${brandSentence} tires in one catalog, shipped direct from a distributor warehouse anywhere in the continental US.`}
         />
         <Breadcrumbs
           trail={[{ label: "Tires", to: "/tires" }, { label: "Brands" }]}
         />
         <Section>
           <SectionHead
-            eyebrow="Our lineup"
+            eyebrow="Brands"
             title="Pick a brand"
             lede="Tap any brand to see every size and model we can ship."
             action={

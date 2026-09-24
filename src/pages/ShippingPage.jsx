@@ -93,7 +93,7 @@ const FAQ = [
   },
   {
     q: "Where do my tires actually ship from?",
-    a: "From a distributor warehouse, not from us. TireDrop holds no stock of its own — we order through national distributors and your tires leave from whichever of their warehouses has your size. That is why the catalog is as deep as it is, and why we are not limited to what fits in one building.",
+    a: "From a distributor warehouse, not from us. TireDrop holds no stock of its own — your tires leave from whichever distributor warehouse has your size. That is why we are not limited to what fits in one building.",
   },
   {
     q: "Do you ship outside the continental US?",
@@ -130,7 +130,7 @@ export default function ShippingPage() {
     <>
       <Seo
         title="How Shipping Works"
-        description={`${BUSINESS.name} ships tires and wheels free, direct from the distributor, to anywhere in ${BUSINESS.shipping.area}. See how ordering, tracking, damaged shipments and out-of-stock sizes are handled.`}
+        description={`${BUSINESS.name} ships tires and wheels free, direct from a distributor warehouse, to anywhere in ${BUSINESS.shipping.area}. See how ordering, tracking, damaged shipments and out-of-stock sizes are handled.`}
       />
 
       <Breadcrumbs trail={[{ label: "How shipping works" }]} />
@@ -174,11 +174,10 @@ export default function ShippingPage() {
             <h2 className="h2">Your tires never sit in our building</h2>
             <p className="lede mt-4">
               {BUSINESS.name} does not hold stock. When you order, the order
-              goes to a national distributor — the same warehouses that supply
-              tire shops — and your tires leave from there. That is what lets a
-              small South Florida operation put a national catalog in front of
-              you and still get your size moving the same way a chain store
-              would.
+              goes to a distributor warehouse and your tires leave from there.
+              That is what lets a small South Florida operation put a wide
+              catalog in front of you and still get your size moving the same
+              way a chain store would.
             </p>
             <p className="mt-4 text-sm leading-relaxed text-smoke">
               It also means we are honest about what we control. We control the

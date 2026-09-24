@@ -1419,7 +1419,7 @@ export default function TireCheckPage() {
                     to={shopHref}
                     className="btn btn-outline btn-sm min-h-[44px]"
                   >
-                    See {size.normalized} in stock
+                    See {size.normalized} in the catalog
                     <ArrowRight size={15} aria-hidden />
                   </Link>
                 )}

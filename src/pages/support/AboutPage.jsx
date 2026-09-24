@@ -11,9 +11,8 @@ import {
   Truck,
 } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
-// The catalog is the source of truth for which brands this page may name. The
-// display roster in business.js is for the footer strip; it is not evidence
-// that a brand is actually buyable.
+// The catalog is the source of truth for which brands this page may name, so
+// it can never list a brand nobody can buy.
 import { TIRE_BRAND_NAMES } from "../../data/products.js";
 import {
   Badge,
@@ -24,13 +23,11 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
-const YEARS_IN_BUSINESS = new Date().getFullYear() - BUSINESS.foundedYear;
-
 const TEAM = [
   {
     name: "Luis",
     role: "Founder & Owner",
-    bio: `Opened the shop in ${BUSINESS.foundedYear} and still answers the phone on busy Saturdays. TireDrop was his idea: sell the same tires nationally that he would put on his own family's car.`,
+    bio: `Opened the shop and still answers the phone on busy Saturdays. TireDrop was his idea: sell the same tires nationally that he would put on his own family's car.`,
   },
   {
     name: "Yani",
@@ -58,7 +55,7 @@ const DIFFERENTIATORS = [
   {
     icon: Package,
     title: "Shipped straight to you",
-    copy: `Order online and your tires ship free to your address anywhere in ${BUSINESS.shipping.area}. They come direct from the distributor's warehouse, so you are not paying for a middle shelf they sat on.`,
+    copy: `Order online and your tires ship free to your address anywhere in ${BUSINESS.shipping.area}. They ship direct from a distributor warehouse, so you are not paying for a middle shelf they sat on.`,
   },
   {
     icon: Store,
@@ -73,7 +70,7 @@ const DIFFERENTIATORS = [
   {
     icon: ShieldCheck,
     title: "A real shop picked the catalog",
-    copy: "The catalog was chosen by people who mount tires for a living, not assembled from whatever a feed happened to contain. These are brands the shop works with and would fit on a customer's car.",
+    copy: "The catalog was chosen by people who mount tires for a living, not assembled from whatever a feed happened to contain.",
   },
   {
     icon: Tag,
@@ -82,24 +79,16 @@ const DIFFERENTIATORS = [
   },
   {
     icon: Clock,
-    title: `Independent since ${BUSINESS.foundedYear}`,
+    title: "Same phone, same people",
     copy: `${BUSINESS.parent} still answers on ${BUSINESS.phone} from the shop on ${BUSINESS.shop.street}. ${BUSINESS.name} is that shop with a wider counter — same phone, same people.`,
   },
 ];
 
-// The brand count is taken from the products themselves, not from the display
-// roster in business.js — a number on this page should never be able to drift
-// above the number of brands a visitor can actually filter to.
+// Figures that do not go stale: no year counts, and nothing that implies
+// stock levels or dealer status.
 const STATS = [
-  {
-    value: `${YEARS_IN_BUSINESS}`,
-    label: `Years ${BUSINESS.parent} has been fitting tires in South Florida`,
-  },
   { value: "48", label: "States in the shipping area" },
-  {
-    value: `${TIRE_BRAND_NAMES.length}`,
-    label: "Tire brands you can buy today",
-  },
+  { value: "$0", label: "Shipping, with no order minimum" },
   {
     value: `${BUSINESS.installArea.length}`,
     label: "Broward towns the vans cover",
@@ -125,13 +114,13 @@ export default function AboutPage() {
     <>
       <Seo
         title="About TireDrop"
-        description={`${BUSINESS.name} is the national online store of ${BUSINESS.parent}, a family-owned tire shop in ${BUSINESS.shop.city}, FL since ${BUSINESS.foundedYear}. Tires and wheels shipped across the continental US, or fitted at the shop.`}
+        description={`${BUSINESS.name} is the online store of ${BUSINESS.parent}, a family-owned tire shop in ${BUSINESS.shop.city}, FL. Tires and wheels shipped across the continental US, or fitted at the shop.`}
       />
 
       <PageHero
         eyebrow="About Us"
         title="A real tire shop, with a national counter"
-        lede={`${BUSINESS.name} is the online store of ${BUSINESS.parent} — a family-owned shop that has been fitting tires in South Florida since ${BUSINESS.foundedYear}. We ship anywhere in ${BUSINESS.shipping.area}. Near ${BUSINESS.shop.city}, we will also put them on for you.`}
+        lede={`${BUSINESS.name} is the online store of ${BUSINESS.parent} — a family-owned shop that fits tires in South Florida. We ship anywhere in ${BUSINESS.shipping.area}. Near ${BUSINESS.shop.city}, we will also put them on for you.`}
       >
         <div className="flex flex-wrap gap-3">
           <Link to="/tires" className="btn-primary">
@@ -153,13 +142,13 @@ export default function AboutPage() {
             <SectionHead
               eyebrow="Our Story"
               title="It started in a tire bay, not a warehouse"
-              lede="Most online tire stores are a catalog with a checkout button attached. This one is attached to a shop that has been mounting tires for nearly two decades."
+              lede="Most online tire stores are a catalog with a checkout button attached. This one is attached to a shop that mounts tires for a living."
             />
 
             <div className="max-w-[68ch] space-y-5 text-[1.0625rem] leading-[1.7] text-smoke">
               <p>
-                {BUSINESS.parent} opened in {BUSINESS.foundedYear} as one truck,
-                a compressor and a phone that rang at all hours. The idea was
+                {BUSINESS.parent} started out as one truck, a compressor and a
+                phone that rang at all hours. The idea was
                 simple enough: most tire work does not need a waiting room, it
                 needs the right machine and the right hands. So the work went to
                 wherever the car already was.
@@ -173,17 +162,17 @@ export default function AboutPage() {
                 jobs that genuinely belong on a lift.
               </p>
               <p>
-                What did not change in {YEARS_IN_BUSINESS} years is the part
-                people actually call us for: knowing which tire is worth the
+                What has not changed since is the part people actually call us
+                for: knowing which tire is worth the
                 money. We hear how a set wore out. We see which sidewalls crack
                 in the heat, which ones go quiet at highway speed, and which
                 bargain brand comes back angry at 20,000 miles.
               </p>
               <p>
                 {BUSINESS.name} is what happens when you point that at the whole
-                country. You order online, the tires ship from the distributor
-                straight to your door, and we never touch a warehouse — but the
-                catalog was picked by a shop, not by a spreadsheet. If you live
+                country. You order online and the tires ship direct from a
+                distributor warehouse to your door — but the catalog was picked
+                by a shop, not by a spreadsheet. If you live
                 near {BUSINESS.shop.city}, ship them free to us instead and we
                 will fit them.
               </p>
@@ -205,7 +194,7 @@ export default function AboutPage() {
           <div>
             <ol className="mt-2">
               <TimelineItem
-                year={BUSINESS.foundedYear}
+                year="The start"
                 title="One truck, one promise"
                 copy={`${BUSINESS.parent} starts in ${BUSINESS.shop.city} with a single truck, mostly driveway calls and after-hours flats.`}
               />
@@ -222,7 +211,7 @@ export default function AboutPage() {
               <TimelineItem
                 year="Today"
                 title="The shop goes national"
-                copy={`${BUSINESS.name} opens the same catalog to ${BUSINESS.shipping.area}, drop-shipped from the distributor. Local customers still get free ship-to-store and install.`}
+                copy={`${BUSINESS.name} opens the same catalog to ${BUSINESS.shipping.area}, shipped direct from a distributor warehouse. Local customers still get free ship-to-store and install.`}
               />
             </ol>
           </div>
@@ -233,7 +222,7 @@ export default function AboutPage() {
       <section className="bg-ink-wash py-12 text-bone md:py-16">
         <div className="wrap">
           <h2 className="sr-only">{BUSINESS.name} by the numbers</h2>
-          <dl className="grid grid-cols-2 gap-8 md:grid-cols-4">
+          <dl className="grid grid-cols-2 gap-8 md:grid-cols-3">
             {STATS.map((s) => (
               <div key={s.label}>
                 <dt className="sr-only">{s.label}</dt>
@@ -249,9 +238,9 @@ export default function AboutPage() {
             ))}
           </dl>
           <p className="mt-8 text-xs text-bone/60">
-            Years are counted from {BUSINESS.foundedYear}, the brand count is
-            taken from the live catalog, and the town list is the mobile install
-            area. None of these are marketing round-ups.
+            The state count is the continental-US shipping area and the town
+            list is the mobile install area. None of these are marketing
+            round-ups.
           </p>
         </div>
       </section>

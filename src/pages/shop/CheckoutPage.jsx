@@ -189,7 +189,7 @@ function validateVehicle(f) {
 function validateReview(f) {
   const e = {};
   if (!f.agree)
-    e.agree = "Please confirm you understand payment is taken by phone.";
+    e.agree = "Please confirm you understand this order is a request.";
   return e;
 }
 
@@ -545,7 +545,7 @@ export default function CheckoutPage() {
       <>
         <Seo
           title="Order Received"
-          description="Your TireDrop order is in. We call to confirm fitment, lock in delivery or your install window, and take payment."
+          description="Your TireDrop order is in. We call to confirm fitment, lock in delivery or your install window, and confirm payment."
         />
         <Breadcrumbs
           trail={[{ label: "Cart", to: "/cart" }, { label: "Order Received" }]}
@@ -571,14 +571,13 @@ export default function CheckoutPage() {
                 <p className="lede mt-3">
                   {placed.delivered ? (
                     <>
-                      Thanks, {f.firstName}. Nothing has been charged yet — we
-                      call to confirm fitment and take payment before anything
-                      ships.
+                      Thanks, {f.firstName}. We call to confirm fitment and
+                      payment before anything ships.
                     </>
                   ) : (
                     <>
-                      Thanks, {f.firstName}. Nothing has been charged — but this
-                      order has not reached the shop yet, so call{" "}
+                      Thanks, {f.firstName}. This order has not reached the shop
+                      yet, so call{" "}
                       {BUSINESS.phone} and read out the reference below. Your
                       order is written out underneath it.
                     </>
@@ -608,12 +607,12 @@ export default function CheckoutPage() {
                   {[
                     {
                       title: "We confirm your fitment",
-                      copy: `We check the sizes against your ${f.year} ${f.make} ${f.model} before the order is released to the distributor.`,
+                      copy: `We check the sizes against your ${f.year} ${f.make} ${f.model} before the order is released to ship.`,
                     },
                     placed.delivered
                       ? {
                           title: "We call you back",
-                          copy: `Expect a call at ${f.phone} to confirm delivery and take payment.`,
+                          copy: `Expect a call at ${f.phone} to confirm delivery and payment.`,
                         }
                       : {
                           title: "You call us",
@@ -706,8 +705,8 @@ export default function CheckoutPage() {
           <p className="eyebrow mb-2">{BUSINESS.tagline}</p>
           <h1 className="h1">Checkout</h1>
           <p className="lede mt-3 max-w-2xl">
-            Four quick steps. No card fields — we confirm fitment and take
-            payment over the phone before your order is released.
+            Four quick steps. We confirm fitment against your vehicle before
+            your order is released.
           </p>
         </header>
 
@@ -1188,17 +1187,15 @@ export default function CheckoutPage() {
                     />
                     <div className="min-w-0">
                       <p className="font-display text-base font-bold">
-                        No card is charged on this site
+                        We confirm before anything ships
                       </p>
                       <p className="mt-1 text-sm leading-relaxed text-smoke">
                         When you place this order, a team member calls you at{" "}
                         <span className="text-ink">
                           {form.phone || "the number you gave us"}
                         </span>{" "}
-                        within one business day to confirm fitment and delivery,
-                        then takes payment over the phone or in person at the
-                        appointment. We never ask for card details by email or
-                        text.
+                        within one business day to confirm fitment, delivery and
+                        payment. We never ask for card details by email or text.
                       </p>
                     </div>
                   </div>
@@ -1223,7 +1220,7 @@ export default function CheckoutPage() {
                       >
                         I understand this order is a request, and that{" "}
                         {BUSINESS.name} will call me to confirm fitment and
-                        collect payment before anything ships or is scheduled.
+                        payment before anything ships or is scheduled.
                       </label>
                       {errors.agree && (
                         <p

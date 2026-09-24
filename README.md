@@ -4,8 +4,8 @@ National tire and wheel store. Tires are drop-shipped from distributors to
 anywhere in the continental US, or delivered free to the Extreme Tires shop in
 Sunrise, FL and installed there.
 
-**Powered by Extreme Tires** — the parent business, fitting tires in South
-Florida since 2007. TireDrop is its national storefront.
+**Powered by Extreme Tires** — the parent business, a tire shop in Sunrise, FL.
+TireDrop is its online storefront.
 
 > This project is self-contained. It shares a repository with, but is
 > completely independent of, the unrelated `cannavibe` app at the repo root.
@@ -103,7 +103,7 @@ tiredrop/
 │   ├── components/
 │   │   ├── layout/          Header, Footer, Logo, MobileCallBar
 │   │   ├── ui/              Seo, Section, PageHero, Breadcrumbs, Badge,
-│   │   │                    Stars, Accordion, EmptyState, BrandLogo
+│   │   │                    Accordion, EmptyState
 │   │   └── shop/            ProductArt, ProductCard, Filters, SearchPanel
 │   │
 │   └── pages/
@@ -134,7 +134,9 @@ tiredrop/
   the mileage warranty. Where a spec genuinely does not exist — winter tires
   carry no UTQG treadwear grade, commercial LT tires are graded on another
   scale — the axis returns `null` and the UI prints "Not rated" instead of a
-  number. Nothing here claims we road-tested anything.
+  number. Nothing here claims we road-tested anything. Only the Find My Tires
+  tool uses them; product cards, product pages and the compare table show no
+  scores.
 
 ---
 
@@ -281,8 +283,9 @@ All of these need the client or a supplier:
    will call to confirm. Wire a real processor before taking money.
 6. **Forms have no backend.** Contact, quote, booking, financing and review
    forms validate and confirm, but nothing is sent.
-7. **Reviews are illustrative** and structured-data markup is deliberately off
-   until real ones exist.
+7. **No reviews are published on the site.** `/reviews` and the homepage link
+   to the shop's real Google and Yelp profiles instead, and review or rating
+   markup is deliberately off.
 8. **Legal pages are drafts** and need the client's counsel — the business is
    now a national retailer, which changes the terms materially.
 9. **Social links are placeholders** in the footer.

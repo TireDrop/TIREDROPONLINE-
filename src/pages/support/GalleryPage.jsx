@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Clock, Phone, Play, Truck } from "lucide-react";
+import { ArrowRight, Phone, Play, Truck } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
 import {
   Badge,
@@ -11,9 +11,10 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
-// Placeholder artwork only — no photography has been supplied yet. Each tile
-// is a CSS gradient plus an SVG tread motif, captioned with the job or order
-// it stands for. Swap these for real photos as they come in.
+// Illustrations only — no photography has been supplied yet. Each tile is a
+// CSS gradient plus an SVG tread motif, labelled "Illustration" so it is never
+// mistaken for a photo of a real job, and captioned with the kind of order or
+// job it stands for. Swap these for real photos as they come in.
 const GALLERY = [
   {
     id: "g1",
@@ -104,42 +105,36 @@ const VIDEOS = [
   {
     id: "v1",
     title: "What happens between checkout and your driveway",
-    duration: "3:40",
     description:
       "Where the tires come from, who picks them, and what to check the moment the boxes land at your door.",
   },
   {
     id: "v2",
     title: "Reading your door-jamb placard",
-    duration: "1:55",
     description:
       "Where to find your real PSI and tire size, why the sidewall number is not it, and how to order the right set without guessing.",
   },
   {
     id: "v3",
     title: "The penny test, done right",
-    duration: "2:10",
     description:
       "Measuring tread in more than one spot, finding the wear bars, and the quarter-test version for rainy season.",
   },
   {
     id: "v4",
     title: "Ship to your house, or ship to the shop?",
-    duration: "2:30",
     description:
       "Who each option suits, what ship-to-store costs, and how the install gets booked once the order lands.",
   },
   {
     id: "v5",
     title: "Which punctures we can repair, and which we refuse",
-    duration: "2:45",
     description:
       "Tread area versus sidewall, size limits, and why a proper patch-plug beats a plug-only roadside fix.",
   },
   {
     id: "v6",
     title: "Why your steering wheel shakes at 60",
-    duration: "4:05",
     description:
       "Balance versus alignment versus a bent wheel — how to tell them apart before you pay for the wrong fix.",
   },
@@ -196,7 +191,7 @@ const TIPS = [
   },
 ];
 
-/** Abstract tread-pattern tile standing in for photography. */
+/** Abstract tread-pattern illustration standing in for photography. */
 function PlaceholderArt({ tone, label }) {
   const [from, to] = tone;
   return (
@@ -338,13 +333,13 @@ export default function GalleryPage() {
           >
             <SectionHead
               title="Orders out, tires on"
-              lede="Captions describe the order or the job each tile stands for. Photography is being collected now — these are placeholders until it lands."
+              lede="Captions describe the order or the job each tile stands for. Photography is being collected now — these are illustrations until it lands."
             />
 
             <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {GALLERY.map((item) => (
                 <li key={item.id} className="card-hover overflow-hidden">
-                  <PlaceholderArt tone={item.tone} label={BUSINESS.name} />
+                  <PlaceholderArt tone={item.tone} label="Illustration" />
                   <div className="p-5">
                     <h3 className="font-display text-[1.0625rem] leading-snug text-ink">
                       {item.caption}
@@ -386,10 +381,6 @@ export default function GalleryPage() {
                         className="ml-0.5 fill-bone text-bone"
                       />
                     </span>
-                    <span className="absolute bottom-3 right-4 flex items-center gap-1.5 font-display text-xs font-bold uppercase tracking-[0.09em] text-bone/70">
-                      <Clock size={13} aria-hidden />
-                      {video.duration}
-                    </span>
                   </div>
 
                   <div className="p-5">
@@ -400,7 +391,7 @@ export default function GalleryPage() {
                       {video.description}
                     </p>
                     <p className="mt-4">
-                      <Badge tone="soft">Coming soon · {video.duration}</Badge>
+                      <Badge tone="soft">Coming soon</Badge>
                     </p>
                   </div>
                 </li>

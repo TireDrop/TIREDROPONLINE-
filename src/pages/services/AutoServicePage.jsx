@@ -196,7 +196,7 @@ export default function AutoServicePage() {
       <PageHero
         eyebrow={`Local service — ${BUSINESS.shop.city}, FL`}
         title="What the shop does besides fit your tires"
-        lede={`${BUSINESS.parent} has been working on cars in ${BUSINESS.shop.city} since ${BUSINESS.foundedYear}. ${mobileCount} of these services travel to you in a van; brakes, alignment, suspension and lift kits need a lift and a rack, so those happen in the bay.`}
+        lede={`${BUSINESS.parent} works on cars in ${BUSINESS.shop.city} every day. ${mobileCount} of these services travel to you in a van; brakes, alignment, suspension and lift kits need a lift and a rack, so those happen in the bay.`}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link to="/schedule" className="btn-primary">

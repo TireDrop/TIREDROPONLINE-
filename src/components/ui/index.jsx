@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ChevronRight, Star } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
 import { getProduct } from "../../data/products.js";
 import { getService } from "../../data/services.js";
@@ -106,14 +106,14 @@ function openingHours() {
   return out;
 }
 
-/** TireDrop the national storefront. */
+/** TireDrop the online storefront. */
 function organizationNode() {
   const node = {
     "@type": "Organization",
     "@id": `${ORIGIN}/#organization`,
     name: BUSINESS.name,
     url: ORIGIN,
-    description: `${BUSINESS.name} is the national online tire and wheel store of ${BUSINESS.parent}, shipping across ${BUSINESS.shipping.area}.`,
+    description: `${BUSINESS.name} is the online tire and wheel store of ${BUSINESS.parent}, shipping across ${BUSINESS.shipping.area}.`,
     telephone: BUSINESS.phone,
     logo: {
       "@type": "ImageObject",
@@ -147,7 +147,6 @@ function shopNode() {
     alternateName: BUSINESS.shop.name,
     url: `${ORIGIN}/locations`,
     telephone: BUSINESS.phone,
-    foundingDate: String(BUSINESS.foundedYear),
     image: OG_IMAGE,
     hasMap: BUSINESS.mapsHref,
     address: {
@@ -163,11 +162,11 @@ function shopNode() {
       "@type": "City",
       name: `${city}, FL`,
     })),
-    // No aggregateRating and no review. The reviews on this site are
-    // illustrative (GOOGLE_PROFILE.reviewsAreReal is false), and marking up
-    // reviews that are not genuine breaches Google's structured-data policy
-    // and risks a manual action against the domain. Nothing goes in here
-    // until the Google Business Profile is connected and the reviews are real.
+    // No aggregateRating, no review and no foundingDate. This site publishes
+    // no reviews of its own — it links to the shop's Google and Yelp profiles
+    // instead — and marking up reviews or ratings it does not hold breaches
+    // Google's structured-data policy. The founding year is left out until
+    // the owner confirms it.
   };
 }
 
@@ -196,11 +195,10 @@ const SHOP_ROUTES = [
  *
  * An Offer node is a machine-readable commitment — this price, this
  * availability, buyable now — and it is what feeds Google's free product
- * listings. None of those three hold yet: data/products.js is a representative
- * catalog rather than live distributor inventory, `stock` is illustrative, and
- * checkout takes an order for a human to call back on rather than a payment.
- * Publishing price and availability as fact would put a shopper one click from
- * a purchase the site cannot complete.
+ * listings. None of those hold yet: data/products.js is a representative
+ * catalog rather than live distributor inventory, with no stock counts at all.
+ * Publishing price and availability as fact would promise inventory nobody
+ * has confirmed.
  *
  * The consequence, stated plainly: with no offers and no aggregateRating, a
  * Product node produces no rich result at all — Google needs one of offers,
@@ -238,9 +236,8 @@ function productNode(product, url) {
       name: k,
       value: String(v),
     })),
-    // No aggregateRating. `rating` and `reviewCount` in the catalog are
-    // illustrative, and rating markup for ratings nobody left is a policy
-    // breach, not a shortcut.
+    // No aggregateRating. The catalog carries no ratings, and rating markup
+    // for ratings nobody left is a policy breach, not a shortcut.
   };
 
   if (isTire && product.warranty) {
@@ -257,10 +254,8 @@ function productNode(product, url) {
       url,
       priceCurrency: "USD",
       price: String(product.price),
-      availability:
-        product.stock > 0
-          ? "https://schema.org/InStock"
-          : "https://schema.org/OutOfStock",
+      // `availability` belongs here once the distributor feed supplies real
+      // inventory; the sample catalog has none to report.
       seller: { "@id": `${ORIGIN}/#organization` },
     };
   }
@@ -674,30 +669,6 @@ export function Badge({ tone = "drop", children }) {
     >
       {children}
     </span>
-  );
-}
-
-export function Stars({ rating, count, size = 14 }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <div className="flex" role="img" aria-label={`${rating} out of 5 stars`}>
-        {[1, 2, 3, 4, 5].map((n) => (
-          <Star
-            key={n}
-            size={size}
-            aria-hidden
-            className={
-              n <= Math.round(rating)
-                ? "fill-amber text-amber"
-                : "fill-ink/[0.06] text-ink/25"
-            }
-          />
-        ))}
-      </div>
-      {count != null && (
-        <span className="tnum text-xs text-smoke">({count})</span>
-      )}
-    </div>
   );
 }
 

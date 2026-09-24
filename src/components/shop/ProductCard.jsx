@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Check, ShoppingCart, Truck } from "lucide-react";
 
-import { Badge, Stars } from "../ui/index.jsx";
 import { money, useCart } from "../../context/CartContext.jsx";
 import { useCompare } from "../../context/CompareContext.jsx";
 import {
@@ -12,25 +11,11 @@ import {
   setMsrp,
   setPrice,
 } from "../../data/pricing.js";
-import { ratingsFor } from "../../data/tireRatings.js";
 import ProductArt from "./ProductArt.jsx";
-
-const BADGE_TONE = {
-  "Best Seller": "drop",
-  "Staff Pick": "ink",
-};
 
 // A grid can hold forty cards and the estimate is the same for all of them, so
 // it is resolved once per page load rather than once per card.
 const DELIVERY = deliveryEstimate();
-
-// The three axes a shopper actually scans on a grid. The rest live on the
-// product page and in the compare table, where there is room for them.
-const CARD_AXES = [
-  { key: "dry", label: "Dry" },
-  { key: "wet", label: "Wet" },
-  { key: "wear", label: "Tread life" },
-];
 
 /** Short spec line under the product name — size for tires, fitment for wheels. */
 function specLine(product) {
@@ -40,58 +25,14 @@ function specLine(product) {
   return `${product.size} · ${product.loadIndex}${product.speedRating} · ${product.category}`;
 }
 
-function stockHint(stock) {
-  if (stock <= 0) return { text: "Out of stock", tone: "text-smoke" };
-  if (stock <= 8) return { text: `Only ${stock} left`, tone: "text-drop" };
-  return { text: "In stock — ships today", tone: "text-smoke" };
-}
-
-/**
- * A single 0–10 axis. A null score is a real answer — winter tires carry no
- * UTQG treadwear grade — so it prints a dash instead of an empty bar, which
- * would read as a score of zero.
- */
-function RatingBar({ label, value }) {
-  return (
-    <div className="flex items-center gap-2.5">
-      <span className="w-[62px] shrink-0 text-[11px] leading-none text-smoke">
-        {label}
-      </span>
-      {value === null ? (
-        <span
-          className="flex-1 text-[11px] leading-none text-smoke"
-          title="Not rated"
-        >
-          — not rated
-        </span>
-      ) : (
-        <>
-          <span className="h-[4px] flex-1 overflow-hidden rounded-full bg-ink/[0.08]">
-            <span
-              className="block h-full rounded-full bg-drop"
-              style={{ width: `${value * 10}%` }}
-            />
-          </span>
-          <span className="tnum w-[22px] shrink-0 text-right font-display text-[11px] font-bold leading-none text-ink">
-            {value.toFixed(1)}
-          </span>
-        </>
-      )}
-    </div>
-  );
-}
-
 export default function ProductCard({ product }) {
   const href = `${product.kind === "wheel" ? "/wheels" : "/tires"}/${product.slug}`;
-  const hint = stockHint(product.stock);
   const isTire = product.kind === "tire";
 
   // Wheels are sold in fours too, so both get the set-of-four headline that a
   // shopper is really comparing between sites.
   const bd = priceBreakdown(product, SET_SIZE);
   const setSaving = setMsrp(product) - setPrice(product);
-
-  const ratings = isTire ? ratingsFor(product) : null;
 
   const compare = useCompare();
   const selected = compare.has(product.slug);
@@ -103,7 +44,6 @@ export default function ProductCard({ product }) {
   // in, because that is the quantity the headline price is quoting.
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
-  const inStock = product.stock > 0;
 
   const addSet = () => {
     addItem(
@@ -132,14 +72,6 @@ export default function ProductCard({ product }) {
   return (
     <article className="card-hover group flex h-full flex-col overflow-hidden">
       <div className="relative flex items-center justify-center border-b border-ink/[0.05] bg-gradient-to-b from-bone to-fog p-3 sm:p-5">
-        {product.badge && (
-          <div className="absolute left-2 top-2 z-10 sm:left-3 sm:top-3">
-            <Badge tone={BADGE_TONE[product.badge] || "soft"}>
-              {product.badge}
-            </Badge>
-          </div>
-        )}
-
         {isTire && (
           <label
             // `z-10` is load-bearing, not decoration. The art below scales on
@@ -196,26 +128,6 @@ export default function ProductCard({ product }) {
           {specLine(product)}
         </p>
 
-        <div className="mt-2 sm:mt-2.5">
-          <Stars
-            rating={product.rating}
-            count={product.reviewCount}
-            size={12}
-          />
-        </div>
-
-        {ratings && (
-          <div className="mt-3 hidden space-y-1.5 sm:block">
-            {CARD_AXES.map((axis) => (
-              <RatingBar
-                key={axis.key}
-                label={axis.label}
-                value={ratings[axis.key]}
-              />
-            ))}
-          </div>
-        )}
-
         {/* The price block is ruled off from the description above it, and
             every figure is tabular so the column of cards lines up. */}
         <div className="mt-auto border-t border-ink/[0.07] pt-3 sm:pt-3.5">
@@ -254,9 +166,6 @@ export default function ProductCard({ product }) {
               Ships free · arrives {DELIVERY.earliest}–{DELIVERY.latest}
             </span>
           </p>
-          <p className={`mt-2 text-[11px] font-medium sm:text-xs ${hint.tone}`}>
-            {hint.text}
-          </p>
 
           {/* On a phone the card is about 160px wide, and a floating control
               over the artwork costs a quarter of that while covering the
@@ -288,7 +197,6 @@ export default function ProductCard({ product }) {
             <button
               type="button"
               onClick={addSet}
-              disabled={!inStock}
               className="btn-primary btn-sm min-h-[44px] w-full px-2 sm:px-4"
               aria-label={`Add a set of ${SET_SIZE} ${product.brand} ${product.model} to the cart`}
             >

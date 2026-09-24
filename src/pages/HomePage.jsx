@@ -7,6 +7,7 @@ import {
   CalendarCheck,
   CircleDollarSign,
   CloudSun,
+  ExternalLink,
   Gauge,
   ListChecks,
   MapPin,
@@ -20,15 +21,16 @@ import {
   Wrench,
 } from "lucide-react";
 
-import { BUSINESS, TIRE_BRANDS } from "../data/business.js";
+import {
+  BUSINESS,
+  YELP_PROFILE,
+  googleReviewHref,
+} from "../data/business.js";
 import { MOBILE_SERVICES, SHOP_SERVICES } from "../data/services.js";
 import { TIRES, TIRE_CATEGORIES } from "../data/products.js";
 import ProductCard from "../components/shop/ProductCard.jsx";
 import SearchPanel from "../components/shop/SearchPanel.jsx";
-import { Seo, Section, SectionHead, Stars } from "../components/ui/index.jsx";
-import BrandLogo from "../components/ui/BrandLogo.jsx";
-
-const yearsInBusiness = new Date().getFullYear() - BUSINESS.foundedYear;
+import { Seo, Section, SectionHead } from "../components/ui/index.jsx";
 
 /* ---------------------------------- Hero --------------------------------- */
 
@@ -137,7 +139,7 @@ function Hero() {
           </div>
 
           <p className="mt-5 text-sm text-bone/55">
-            {BUSINESS.poweredBy} since {BUSINESS.foundedYear}.
+            {BUSINESS.poweredBy}.
           </p>
         </div>
       </div>
@@ -170,8 +172,8 @@ const TRUST = [
   },
   {
     Icon: CalendarCheck,
-    title: "Lab-fresh, DOT-dated",
-    copy: "Drop-shipped from the distributor, so nothing has been ageing on a shelf.",
+    title: "Fresh, DOT-dated rubber",
+    copy: "Shipped direct rather than pulled off a back-room shelf, and the date code on the sidewall shows when it was made.",
   },
 ];
 
@@ -264,7 +266,7 @@ const DELIVERY = [
     Icon: Package,
     eyebrow: "Anywhere in the continental US",
     title: "Ship it to me",
-    copy: "Your order is drop-shipped straight from the distributor to the address you give us — home, work, or your own installer. Shipping is free, and the delivery estimate is shown at checkout before you commit.",
+    copy: "Your order ships direct from a distributor warehouse to the address you give us — home, work, or your own installer. Shipping is free, and the delivery estimate is shown at checkout before you commit.",
     to: "/shipping",
     cta: "How shipping works",
   },
@@ -318,7 +320,7 @@ const CATEGORIES = [
   {
     to: "/tires",
     label: "Tires",
-    copy: `All-season, performance, truck and SUV — shipped from a roster of ${TIRE_BRANDS.length} brands.`,
+    copy: "All-season, performance, truck and SUV — shipped free to the lower 48.",
     Icon: BadgeCheck,
   },
   {
@@ -387,7 +389,7 @@ const STEPS = [
   {
     n: "03",
     title: "We confirm and release it",
-    copy: "We check the fitment against your vehicle, then release the order to the distributor.",
+    copy: "We check the fitment against your vehicle, then release the order to ship.",
   },
   {
     n: "04",
@@ -432,18 +434,17 @@ function HowItWorks() {
 
 function FeaturedTires() {
   // The catalog is the source of truth; fall back gracefully if it is empty.
-  const featured = (TIRES ?? [])
-    .slice()
-    .sort((a, b) => b.rating - a.rating)
-    .slice(0, 4);
+  // Catalog order, not a ranking: there are no sales or review figures to
+  // rank by, so the section does not claim any.
+  const featured = (TIRES ?? []).slice(0, 4);
 
   if (featured.length === 0) return null;
 
   return (
     <Section className="bg-fog">
       <SectionHead
-        eyebrow="Top rated"
-        title="Tires our customers keep coming back for"
+        eyebrow="In the catalog"
+        title="A few sets to start with"
         action={
           <Link to="/tires" className="btn-outline btn-sm">
             Shop all tires
@@ -457,34 +458,6 @@ function FeaturedTires() {
         ))}
       </div>
     </Section>
-  );
-}
-
-/* -------------------------------- Brand strip ----------------------------- */
-
-function BrandStrip() {
-  // Dark band so a single white-on-transparent logo file works here and in
-  // the footer without needing a second, dark-artwork variant.
-  return (
-    <section className="bg-ink-wash py-10">
-      <div className="wrap flex flex-col items-center gap-6">
-        <p className="font-display text-xs font-bold uppercase tracking-[0.09em] text-bone/60">
-          Brands we ship and stand behind
-        </p>
-        <ul className="flex flex-wrap items-center justify-center gap-x-12 gap-y-5">
-          {TIRE_BRANDS.map((b) => (
-            <li key={b.slug}>
-              <Link
-                to={`/tires?brands=${encodeURIComponent(b.name)}`}
-                className="flex min-h-[44px] items-center"
-              >
-                <BrandLogo brand={b} className="h-9" />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
   );
 }
 
@@ -619,14 +592,17 @@ function ToolsBand() {
 }
 
 function Proof() {
+  // Figures that stay true and imply nothing about stock or tenure. No star
+  // rating and no quote: TireDrop's own reviews are still being collected, so
+  // the card sends the reader to the shop's real Google and Yelp profiles.
   const stats = [
-    { v: "48", l: "States we ship to" },
-    { v: `${TIRE_BRANDS.length}`, l: "Tire brands" },
+    { v: "48", l: "States we ship to, plus DC" },
+    { v: "$0", l: "Shipping, with no minimum" },
     {
       v: `${MOBILE_SERVICES.length + SHOP_SERVICES.length}`,
       l: "Services at the shop",
     },
-    { v: `${yearsInBusiness}+`, l: `Years of ${BUSINESS.parent}` },
+    { v: `${BUSINESS.installArea.length}`, l: "Install towns we cover" },
   ];
 
   return (
@@ -638,11 +614,10 @@ function Proof() {
             An online tire store with a real shop behind it
           </h2>
           <p className="lede mt-4">
-            {BUSINESS.parent} opened in {BUSINESS.foundedYear} and has been
-            mounting tires in {BUSINESS.shop.city} ever since. {BUSINESS.name}{" "}
-            is the same crew selling online: orders drop-ship straight from the
-            distributor to wherever you want them, so the catalog is bigger than
-            anything a shop could hold in a warehouse.
+            {BUSINESS.parent} mounts tires in {BUSINESS.shop.city}, and{" "}
+            {BUSINESS.name} is the same crew selling online. Orders ship direct
+            to wherever you want them: your own door anywhere in the lower 48,
+            or our bay in {BUSINESS.shop.city}.
           </p>
 
           <dl className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-4 lg:grid-cols-2">
@@ -667,27 +642,48 @@ function Proof() {
         </div>
 
         <div className="card p-7">
-          <div className="flex items-center justify-between gap-4 border-b border-ink/10 pb-5">
-            <div>
-              <p className="font-display text-sm font-semibold text-smoke">
-                Customer rating
-              </p>
-              <p className="font-display text-4xl leading-none">4.8</p>
-            </div>
-            <Stars rating={4.8} size={20} />
+          <div className="border-b border-ink/10 pb-5">
+            <p className="font-display text-sm font-semibold text-smoke">
+              Customer reviews
+            </p>
+            <h3 className="h3 mt-1">Read the real ones</h3>
           </div>
 
-          <blockquote className="mt-5 text-sm leading-relaxed text-smoke">
-            “I ordered a set on a Tuesday night, had them sent to the shop, and
-            booked the install for the weekend. Cheaper than the quote I got
-            locally and I never had to guess at the size.”
-            <footer className="mt-3 font-display text-[13px] font-bold text-ink">
-              — Danielle R., Plantation
-            </footer>
-          </blockquote>
+          <p className="mt-5 text-sm leading-relaxed text-smoke">
+            {BUSINESS.name} is new, so its own reviews are still being
+            collected. The shop behind it is not: both profiles below are{" "}
+            {BUSINESS.parent}&apos;. We do not reprint star counts here — open
+            either one and read what is actually there.
+          </p>
 
-          <Link to="/reviews" className="btn-outline btn-sm mt-6 w-full">
-            Read customer reviews
+          <div className="mt-6 grid gap-2.5 sm:grid-cols-2">
+            <a
+              href={googleReviewHref()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary btn-sm w-full"
+            >
+              {BUSINESS.parent} on Google
+              <ExternalLink size={14} aria-hidden />
+              <span className="sr-only">(opens in a new tab)</span>
+            </a>
+            <a
+              href={YELP_PROFILE.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-outline btn-sm w-full"
+            >
+              {BUSINESS.parent} on Yelp
+              <ExternalLink size={14} aria-hidden />
+              <span className="sr-only">(opens in a new tab)</span>
+            </a>
+          </div>
+
+          <Link
+            to="/reviews"
+            className="mt-5 inline-block text-sm font-semibold text-drop underline underline-offset-2"
+          >
+            More on reviews
           </Link>
         </div>
       </div>
@@ -761,10 +757,9 @@ export default function HomePage() {
       <Proof />
       <LocalAdvantage />
 
-      {/* Still undecided: the process, the rest of the store, the brands. */}
+      {/* Still undecided: the process and the rest of the store. */}
       <HowItWorks />
       <CategoryTiles />
-      <BrandStrip />
       <FinalCta />
     </>
   );

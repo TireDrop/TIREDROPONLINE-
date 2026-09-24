@@ -55,7 +55,7 @@ export const SERVICES = [
     mobile: true,
     category: "Tires",
     blurb:
-      "Nail in your tread? We patch-plug it properly from the inside — the safe way.",
+      "Nail in your tread? We patch-plug it properly from the inside — the right way.",
     duration: "30 min",
     priceFrom: 35,
     priceUnit: "per tire",

@@ -10,12 +10,6 @@ import { X } from "lucide-react";
 // opens it lives in the sticky bar at the top of the results column, not
 // beside the panel, so the state has to sit above both.
 
-const RATING_OPTIONS = [
-  { label: "Any rating", value: 0 },
-  { label: "4.0 & up", value: 4 },
-  { label: "4.5 & up", value: 4.5 },
-];
-
 /** The cleared state. Exported so a page's "Clear all" agrees with ours. */
 export const EMPTY_FILTERS = {
   brands: [],
@@ -24,7 +18,6 @@ export const EMPTY_FILTERS = {
   finishes: [],
   minPrice: "",
   maxPrice: "",
-  minRating: 0,
 };
 
 export function countActiveFilters(value = {}) {
@@ -34,8 +27,7 @@ export function countActiveFilters(value = {}) {
     (value.diameters?.length || 0) +
     (value.finishes?.length || 0) +
     (value.minPrice ? 1 : 0) +
-    (value.maxPrice ? 1 : 0) +
-    (value.minRating ? 1 : 0)
+    (value.maxPrice ? 1 : 0)
   );
 }
 
@@ -74,12 +66,6 @@ export function activeFilterChips(value = {}) {
       id: "maxp",
       label: `Up to $${value.maxPrice}`,
       next: { ...value, maxPrice: "" },
-    });
-  if (value.minRating)
-    chips.push({
-      id: "rating",
-      label: `${value.minRating} & up`,
-      next: { ...value, minRating: 0 },
     });
 
   return chips;
@@ -228,24 +214,6 @@ function FilterFacets({ idPrefix, value, onChange, facets }) {
         </FilterGroup>
       )}
 
-      <FilterGroup title="Customer Rating">
-        {RATING_OPTIONS.map((opt) => (
-          <label
-            key={opt.value}
-            className="flex min-h-[36px] cursor-pointer items-center gap-2.5 py-1.5 text-sm text-ink"
-          >
-            <input
-              type="radio"
-              name={`${idPrefix}-min-rating`}
-              value={opt.value}
-              checked={Number(value.minRating || 0) === opt.value}
-              onChange={() => onChange({ ...value, minRating: opt.value })}
-              className="h-4 w-4 shrink-0 accent-drop"
-            />
-            <span>{opt.label}</span>
-          </label>
-        ))}
-      </FilterGroup>
     </>
   );
 }

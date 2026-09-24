@@ -28,7 +28,7 @@ const VALUE_PROPS = [
   {
     icon: Truck,
     title: "Shipped to your yard",
-    body: "Orders drop-ship from the distributor straight to your address, anywhere in the continental US. No counter trips, no driver paid to wait.",
+    body: "Orders ship direct from a distributor warehouse to your address, anywhere in the continental US. No counter trips, no driver paid to wait.",
   },
   {
     icon: Clock,

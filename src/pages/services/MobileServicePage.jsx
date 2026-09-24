@@ -195,7 +195,7 @@ export default function MobileServicePage() {
       <PageHero
         eyebrow="Mobile install — South Florida"
         title="You bought the tires. We'll come fit them."
-        lede={`A fully equipped van, a technician who does this every day, and your new set — parked where your car already is. It is the bonus that comes with buying from a store whose parent company has been fitting tires in ${BUSINESS.shop.city} since ${BUSINESS.foundedYear}.`}
+        lede={`A fully equipped van, a technician who does this every day, and your new set — parked where your car already is. It is the bonus that comes with buying from a store whose parent company fits tires in ${BUSINESS.shop.city} every day.`}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link to="/schedule" className="btn-primary">
@@ -210,7 +210,7 @@ export default function MobileServicePage() {
         <p className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-bone/60">
           <span className="flex items-center gap-1.5">
             <Check size={14} aria-hidden className="text-amber" />
-            {BUSINESS.poweredBy}, est. {BUSINESS.foundedYear}
+            {BUSINESS.poweredBy}
           </span>
           <span className="flex items-center gap-1.5">
             <Check size={14} aria-hidden className="text-amber" />

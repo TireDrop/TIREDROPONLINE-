@@ -1380,7 +1380,7 @@ export default function FindMyTiresPage() {
                   Nothing in the catalog clears all of that
                 </h2>
                 <p className="mt-2 max-w-xl text-sm leading-relaxed text-smoke">
-                  Your answers rule out every tire we carry. The catalog here is
+                  Your answers rule out every tire in the catalog. It is
                   representative, not live distributor inventory, so a real
                   match may still exist — but we will not invent one.
                   {blame.length > 0

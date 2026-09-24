@@ -9,7 +9,6 @@ import { Link, useParams } from "react-router-dom";
 import {
   Check,
   ChevronRight,
-  Gauge,
   Minus,
   PackageSearch,
   Phone,
@@ -27,8 +26,6 @@ import {
   Breadcrumbs,
   Section,
   SectionHead,
-  Stars,
-  Badge,
   EmptyState,
 } from "../../components/ui/index.jsx";
 import ProductArt from "../../components/shop/ProductArt.jsx";
@@ -37,17 +34,11 @@ import { getProduct, TIRES, WHEELS } from "../../data/products.js";
 import { BUSINESS } from "../../data/business.js";
 import { useCart, money } from "../../context/CartContext.jsx";
 import { useCompare } from "../../context/CompareContext.jsx";
-import { RATING_AXES, ratingsFor } from "../../data/tireRatings.js";
 import {
   SET_SIZE,
   deliveryEstimate,
   priceBreakdown,
 } from "../../data/pricing.js";
-
-const BADGE_TONE = {
-  "Best Seller": "drop",
-  "Staff Pick": "ink",
-};
 
 // One, a pair, a set, or a set plus a full-size spare. Four leads because that
 // is what the overwhelming majority of tire orders actually are.
@@ -65,45 +56,6 @@ function relatedTo(product) {
     (p) => p.id !== product.id && p.category !== product.category,
   );
   return [...sameCategory, ...rest].slice(0, 4);
-}
-
-/**
- * One axis of the ratings panel.
- *
- * A null score means the spec that would produce it does not exist — a winter
- * tire carries no UTQG treadwear grade — so it prints "Not rated" against an
- * empty track. Drawing it as a zero would read as a terrible tire, which is
- * the opposite of the truth.
- */
-function RatingBar({ label, value }) {
-  const rated = value != null;
-  return (
-    <li>
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="text-sm text-ink">{label}</span>
-        <span
-          className={
-            rated ? "font-display text-base leading-none" : "text-xs text-smoke"
-          }
-        >
-          {rated ? `${value.toFixed(1)} / 10` : "Not rated"}
-        </span>
-      </div>
-      <div
-        aria-hidden
-        className="mt-1.5 flex h-2 w-full items-center overflow-hidden rounded-sm bg-ink/10"
-      >
-        {rated ? (
-          <div
-            className="h-full rounded-sm bg-drop"
-            style={{ width: `${Math.max(2, value * 10)}%` }}
-          />
-        ) : (
-          <span className="mx-auto block h-px w-4 bg-smoke/70" />
-        )}
-      </div>
-    </li>
-  );
 }
 
 export default function ProductPage({ kind = "tire" }) {
@@ -146,11 +98,6 @@ export default function ProductPage({ kind = "tire" }) {
   // Recomputed once per mount: the estimate depends on the clock, not on the
   // shopper's choices, and re-deriving it on every keystroke would be noise.
   const delivery = useMemo(() => deliveryEstimate(), []);
-
-  const ratings = useMemo(
-    () => (product && isTire ? ratingsFor(product) : null),
-    [product, isTire],
-  );
 
   const clampQty = useCallback(
     (n) => (Number.isFinite(n) ? Math.min(MAX_QTY, Math.max(1, n)) : 1),
@@ -262,7 +209,7 @@ export default function ProductPage({ kind = "tire" }) {
       <Section>
         <div className="grid items-start gap-10 lg:grid-cols-2">
           {/* Product art. It sticks on a desktop so the tire stays in view
-              while the buy box, ratings and spec table scroll past it — the
+              while the buy box and spec table scroll past it — the
               column is far taller than the art, and stretching the panel to
               match just floats the product in an empty box. */}
           <div className="card flex items-center justify-center bg-fog p-8 lg:sticky lg:top-[calc(var(--header-h)+1.5rem)]">
@@ -277,23 +224,12 @@ export default function ProductPage({ kind = "tire" }) {
 
           {/* Buy box */}
           <div ref={buyBoxRef}>
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="eyebrow">{product.brand}</p>
-              {product.badge && (
-                <Badge tone={BADGE_TONE[product.badge] || "soft"}>
-                  {product.badge}
-                </Badge>
-              )}
-            </div>
+            <p className="eyebrow">{product.brand}</p>
             <h1 className="h1 mt-1">{product.model}</h1>
             <p className="tnum mt-2 font-display text-lg text-smoke">
               {sizeLabel}
               {isTire && ` · ${product.loadIndex}${product.speedRating}`}
             </p>
-
-            <div className="mt-3">
-              <Stars rating={product.rating} count={product.reviewCount} />
-            </div>
 
             {/* The headline is the set total, because that is the number a
                 shopper is comparing against the other tab they have open. */}
@@ -320,11 +256,7 @@ export default function ProductPage({ kind = "tire" }) {
                   </>
                 )}
               </p>
-              <p className="mt-2 text-sm text-smoke">
-                {product.stock > 0
-                  ? `${product.stock} available to ship.`
-                  : "Not available to ship right now — call us and we will source it."}
-              </p>
+              <p className="mt-2 text-sm text-smoke">Available to order.</p>
             </div>
 
             {/* Quantity. Presets first, because tapping "4" is faster than
@@ -528,11 +460,10 @@ export default function ProductPage({ kind = "tire" }) {
             <button
               type="button"
               onClick={handleAdd}
-              disabled={product.stock <= 0}
               className="btn-primary mt-5 w-full"
             >
               <ShoppingCart size={18} aria-hidden />
-              {product.stock > 0 ? "Add to Cart" : "Out of Stock"}
+              Add to Cart
             </button>
 
             <div aria-live="polite">
@@ -574,10 +505,12 @@ export default function ProductPage({ kind = "tire" }) {
             )}
 
             <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-xs text-smoke">
-              <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck size={14} aria-hidden className="text-drop" />
-                {product.warranty || "Manufacturer warranty included"}
-              </span>
+              {product.warranty && (
+                <span className="inline-flex items-center gap-1.5">
+                  <ShieldCheck size={14} aria-hidden className="text-drop" />
+                  {product.warranty}
+                </span>
+              )}
               <span className="inline-flex items-center gap-1.5">
                 <Truck size={14} aria-hidden className="text-drop" />
                 Ships anywhere in {BUSINESS.shipping.area}
@@ -617,48 +550,6 @@ export default function ProductPage({ kind = "tire" }) {
         </div>
       </div>
 
-      {/* Performance ratings. Derived from published specs, and labelled as
-          such — claiming a road test we never ran would be a lie a shopper
-          could catch. */}
-      {ratings && (
-        <Section className="bg-bone">
-          <div className="grid gap-10 lg:grid-cols-2">
-            <div>
-              <h2 className="h2 text-3xl md:text-4xl">How it rates</h2>
-              <p className="lede mt-3 text-sm md:text-base">
-                These scores are calculated from this tire&apos;s own published
-                specifications — UTQG treadwear, traction and temperature
-                grades, speed rating, tread depth, load range, 3PMSF winter
-                certification and the mileage warranty — not from road tests,
-                which TireDrop does not run.
-              </p>
-              <p className="mt-3 text-sm text-smoke">
-                Where a grade genuinely does not exist for this tire, the axis
-                reads &ldquo;Not rated&rdquo; rather than guessing a number.
-                Winter tires carry no UTQG treadwear grade and commercial
-                light-truck tires are graded on a different scale.
-              </p>
-              <Link to="/tire-care" className="btn-outline btn-sm mt-5">
-                <Gauge size={16} aria-hidden />
-                What these grades mean
-              </Link>
-            </div>
-
-            <div className="card p-5 md:p-6">
-              <ul className="space-y-4">
-                {RATING_AXES.map((axis) => (
-                  <RatingBar
-                    key={axis.key}
-                    label={axis.label}
-                    value={ratings[axis.key]}
-                  />
-                ))}
-              </ul>
-            </div>
-          </div>
-        </Section>
-      )}
-
       {/* Specs + features */}
       <Section>
         <div className="grid gap-10 lg:grid-cols-2">
@@ -686,17 +577,19 @@ export default function ProductPage({ kind = "tire" }) {
                       </td>
                     </tr>
                   ))}
-                  <tr>
-                    <th
-                      scope="row"
-                      className="py-3 pr-4 text-left align-top font-normal text-smoke"
-                    >
-                      Warranty
-                    </th>
-                    <td className="py-3 text-right align-top font-medium text-ink">
-                      {product.warranty || "Manufacturer limited warranty"}
-                    </td>
-                  </tr>
+                  {product.warranty && (
+                    <tr>
+                      <th
+                        scope="row"
+                        className="py-3 pr-4 text-left align-top font-normal text-smoke"
+                      >
+                        Warranty
+                      </th>
+                      <td className="py-3 text-right align-top font-medium text-ink">
+                        {product.warranty}
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -755,7 +648,7 @@ export default function ProductPage({ kind = "tire" }) {
 
       {/* Sticky phone buy bar. It sits on top of the global MobileCallBar
           (fixed, `--call-bar-h` tall) rather than over it, so both stay tappable. */}
-      {buyBoxGone && product.stock > 0 && (
+      {buyBoxGone && (
         <div className="fixed inset-x-0 bottom-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] z-30 border-t border-ink/10 bg-bone/95 backdrop-blur lg:hidden">
           <div className="flex items-center gap-3 px-4 py-2.5">
             <div className="min-w-0">

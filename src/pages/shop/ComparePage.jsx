@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Check, Scale, ShoppingCart, X } from "lucide-react";
 
 import { getProduct } from "../../data/products.js";
-import { RATING_AXES, ratingsFor } from "../../data/tireRatings.js";
 import { SET_SIZE, setPrice } from "../../data/pricing.js";
 import { useCompare } from "../../context/CompareContext.jsx";
 import { money, useCart } from "../../context/CartContext.jsx";
@@ -14,13 +13,12 @@ import {
   PageHero,
   Section,
   Seo,
-  Stars,
 } from "../../components/ui/index.jsx";
 
 // The compare table is the one screen where a shopper stops reading marketing
 // and starts reading numbers, so the whole page is built around making the
-// numbers answer the question: which of these is actually better, and at what
-// cost. That is why every numeric row carries a "Best" marker — a table that
+// numbers answer the question: what does each one cost, and how do the specs
+// differ. That is why the price rows carry a "Best" marker — a table that
 // only lines values up leaves the comparing to the customer, which is the work
 // they came here to avoid.
 
@@ -109,30 +107,6 @@ function Row({ label, cells, bestAt = -1, tint = false }) {
   );
 }
 
-/** A 0–10 axis score drawn as a bar, or an honest "Not rated" where none exists. */
-function AxisCell({ value, best }) {
-  if (value == null) {
-    return <span className="text-sm text-smoke">Not rated</span>;
-  }
-  return (
-    <div className="w-full">
-      <span className="block font-display text-base">
-        {value.toFixed(1)}
-        <span className="text-xs text-smoke"> / 10</span>
-      </span>
-      <span
-        aria-hidden
-        className="mt-1.5 block h-1.5 w-full rounded-sm bg-ink/10"
-      >
-        <span
-          className={`block h-full rounded-sm ${best ? "bg-drop" : "bg-steel/60"}`}
-          style={{ width: `${(value / 10) * 100}%` }}
-        />
-      </span>
-    </div>
-  );
-}
-
 /* ------------------------------ Column header ----------------------------- */
 
 function ColumnHead({ product, onRemove }) {
@@ -207,7 +181,7 @@ export default function ComparePage() {
     <>
       <Seo
         title="Compare Tires Side by Side"
-        description="Put up to four tires side by side — price for a set of four, ratings across six axes, warranty and the full spec sheet — and see which one wins each row."
+        description="Put up to four tires side by side — price for a set of four, fitment, warranty and the full spec sheet — in the same columns."
       />
       <Breadcrumbs
         trail={[{ label: "Tires", to: "/tires" }, { label: "Compare" }]}
@@ -215,7 +189,7 @@ export default function ComparePage() {
       <PageHero
         eyebrow="Side by side"
         title="Compare tires"
-        lede="Price for a set of four, performance ratings and the full spec sheet — in the same columns, with the best figure in every row called out."
+        lede="Price for a set of four, fitment and the full spec sheet — in the same columns, with the lowest price called out."
       />
     </>
   );
@@ -240,8 +214,6 @@ export default function ComparePage() {
     );
   }
 
-  const ratings = tires.map((t) => ratingsFor(t));
-
   // Every spec key any compared tire carries, in the order they first appear,
   // so a tire that is missing one shows a dash instead of shifting the rows.
   const specKeys = [];
@@ -253,7 +225,6 @@ export default function ComparePage() {
 
   const setPrices = tires.map((t) => setPrice(t));
   const eachPrices = tires.map((t) => t.price);
-  const stars = tires.map((t) => t.rating);
 
   const span = tires.length;
   const minWidth = LABEL_COL + span * TIRE_COL;
@@ -287,7 +258,7 @@ export default function ComparePage() {
             style={{ minWidth: `${minWidth}px` }}
           >
             <caption className="sr-only">
-              Price, ratings and specifications for the tires you selected.
+              Price and specifications for the tires you selected.
             </caption>
 
             <colgroup>
@@ -326,30 +297,6 @@ export default function ComparePage() {
                 bestAt={bestIndex(eachPrices, "low")}
                 cells={eachPrices.map((p) => money(p))}
               />
-
-              <GroupRow label="Ratings" span={span} />
-              <Row
-                label="Customer rating"
-                bestAt={bestIndex(stars, "high")}
-                cells={tires.map((t) => (
-                  <Stars key={t.slug} rating={t.rating} count={t.reviewCount} />
-                ))}
-              />
-              {RATING_AXES.map((axis, axisIndex) => {
-                const values = ratings.map((r) => r?.[axis.key] ?? null);
-                const best = bestIndex(values, "high");
-                return (
-                  <Row
-                    key={axis.key}
-                    label={axis.label}
-                    tint={axisIndex % 2 === 0}
-                    bestAt={best}
-                    cells={values.map((v, i) => (
-                      <AxisCell key={i} value={v} best={i === best} />
-                    ))}
-                  />
-                );
-              })}
 
               <GroupRow label="Fitment" span={span} />
               <Row label="Size" cells={tires.map((t) => t.size)} />
@@ -409,12 +356,6 @@ export default function ComparePage() {
             </tfoot>
           </table>
         </div>
-
-        <p className="mt-4 text-xs text-smoke">
-          Ratings are computed from each tire's published grades — UTQG, speed
-          rating, tread depth, load range and mileage warranty. Where a grade
-          does not exist the axis reads "Not rated" rather than zero.
-        </p>
       </Section>
     </>
   );
