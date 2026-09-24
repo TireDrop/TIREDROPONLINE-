@@ -94,8 +94,9 @@ but it is a decision nobody has recorded, not an oversight to leave standing.
 1. **Registered entity name** — "Extreme Tires", "Extreme Mobile Tires", or an
    LLC name behind both. Must match the dealer application exactly.
 2. **EIN**, Florida resale certificate, certificate of insurance.
-3. **A TireDrop email address.** `BUSINESS.email` is null and every page falls
-   back to the phone.
+3. ~~**A TireDrop email address.**~~ Answered: the owner confirmed
+   `info@tiredroponline.com` as the single address for forms, business
+   information and contact. It is now `BUSINESS.email`.
 4. **Google Place ID**, to replace the Maps search fallback with a direct
    review link.
 5. **Instagram and YouTube** — Facebook is confirmed and wired; the other two

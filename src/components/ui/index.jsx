@@ -124,9 +124,10 @@ function organizationNode() {
     image: OG_IMAGE,
     parentOrganization: { "@id": `${ORIGIN}/#shop` },
   };
-  // Both are null until the client confirms them (see src/data/business.js).
-  // An invented registered name or contact address in structured data is the
-  // kind of detail a distributor's reviewer checks against the application.
+  // Each is emitted only once the client has confirmed it (see
+  // src/data/business.js): the email is confirmed, the registered name is not
+  // yet. An invented registered name or contact address in structured data is
+  // the kind of detail a distributor's reviewer checks against the application.
   if (BUSINESS.legalName) node.legalName = BUSINESS.legalName;
   if (BUSINESS.email) node.email = BUSINESS.email;
   return node;

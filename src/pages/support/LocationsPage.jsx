@@ -4,6 +4,7 @@ import {
   Building2,
   Clock,
   ExternalLink,
+  Mail,
   MapPin,
   Navigation,
   Package,
@@ -193,12 +194,28 @@ export default function LocationsPage() {
                     {BUSINESS.phone}
                   </a>
                 </div>
+
+                {BUSINESS.email && (
+                  <div className="mt-4 flex gap-3">
+                    <Mail
+                      size={20}
+                      aria-hidden
+                      className="mt-0.5 shrink-0 text-drop"
+                    />
+                    <a
+                      href={`mailto:${BUSINESS.email}`}
+                      className="break-all font-display text-xl text-ink hover:text-drop"
+                    >
+                      {BUSINESS.email}
+                    </a>
+                  </div>
+                )}
               </address>
 
               <p className="mt-4 text-xs leading-relaxed text-smoke">
-                One phone number covers both sides of the business — an order
-                placed from out of state and an appointment in{" "}
-                {BUSINESS.shop.city} reach the same people.
+                One phone number and one email address cover both sides of the
+                business — an order placed from out of state and an appointment
+                in {BUSINESS.shop.city} reach the same people.
               </p>
 
               {/* Who the customer — or anyone checking the business out — is

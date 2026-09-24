@@ -7,17 +7,24 @@
  * to a real visitor which nothing keeps, so the transport lives here and every
  * form asks `isWired()` before it claims anything.
  *
- * To turn it on, set VITE_FORM_ENDPOINT (and VITE_CONTACT_EMAIL, which is what
- * the confirmations quote back) in the deploy environment. Any endpoint that
- * accepts a JSON POST works — Formspree, Basin, Netlify Forms, a Worker. No
- * code change is needed; the forms read it at build time.
+ * To turn it on, set VITE_FORM_ENDPOINT in the deploy environment, and set
+ * VITE_CONTACT_EMAIL to the address the confirmations quote back (it falls
+ * back to BUSINESS.email, info@tiredroponline.com, when left empty). Any
+ * endpoint that accepts a JSON POST works — Formspree, Basin, Netlify Forms, a
+ * Worker. No code change is needed; the forms read it at build time.
  */
+
+import { BUSINESS } from "./business.js";
 
 const ENDPOINT = (import.meta.env.VITE_FORM_ENDPOINT || "").trim();
 
-/** The address the confirmations name, or null while none is configured. */
+/**
+ * The address the confirmations name: VITE_CONTACT_EMAIL if set, otherwise the
+ * published business address. Quoting it is not a delivery claim — only
+ * `isWired()` decides whether a form may say its message arrived.
+ */
 export const CONTACT_EMAIL =
-  (import.meta.env.VITE_CONTACT_EMAIL || "").trim() || null;
+  (import.meta.env.VITE_CONTACT_EMAIL || "").trim() || BUSINESS.email || null;
 
 /** True once a real destination is configured, so copy may claim delivery. */
 export const isWired = () => ENDPOINT !== "";

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Phone, Truck, Wrench } from "lucide-react";
+import { Mail, MapPin, Phone, Truck, Wrench } from "lucide-react";
 import { BUSINESS, FOOTER_COLUMNS, NAV } from "../../data/business.js";
 import { SERVICES } from "../../data/services.js";
 import {
@@ -195,6 +195,15 @@ export default function SitemapPage() {
               <Phone size={16} aria-hidden />
               {BUSINESS.phone}
             </a>
+            {BUSINESS.email && (
+              <a
+                href={`mailto:${BUSINESS.email}`}
+                className="mt-1 flex min-h-[32px] items-center gap-2 break-all font-display text-lg text-ink hover:text-drop"
+              >
+                <Mail size={16} aria-hidden className="shrink-0" />
+                {BUSINESS.email}
+              </a>
+            )}
             <div className="mt-5">
               <Link to="/tires" className="btn-primary btn-sm">
                 Shop Tires

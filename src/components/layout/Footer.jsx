@@ -4,6 +4,7 @@ import {
   Clock,
   Facebook,
   Instagram,
+  Mail,
   MapPin,
   Phone,
   Youtube,
@@ -86,6 +87,19 @@ export default function Footer() {
                 {BUSINESS.phone}
               </a>
             </li>
+
+            {BUSINESS.email && (
+              <li>
+                <p className="label mb-1.5 text-bone/55">Email</p>
+                <a
+                  href={`mailto:${BUSINESS.email}`}
+                  className="-my-1 flex min-h-[36px] items-center gap-2 py-1 font-display text-base font-bold tracking-[-0.012em] text-bone transition-colors hover:text-amber"
+                >
+                  <Mail size={15} aria-hidden className="shrink-0" />
+                  <span className="break-all">{BUSINESS.email}</span>
+                </a>
+              </li>
+            )}
 
             <li>
               <p className="label mb-1.5 text-bone/55">

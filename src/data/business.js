@@ -7,8 +7,7 @@
 // install vans.
 //
 // Contact details are Extreme Tires' and come from the client-supplied
-// artwork. Do not invent new ones. A dedicated TireDrop email is being set up
-// and should replace `email` below once it exists.
+// artwork, plus the TireDrop email the owner confirmed. Do not invent new ones.
 
 export const BUSINESS = {
   name: "TireDrop",
@@ -30,11 +29,12 @@ export const BUSINESS = {
 
   phone: "(954) 773-1896",
   phoneHref: "tel:+19547731896",
-  // Still null. Every page falls back to the phone, and the support pages say
-  // so plainly rather than dressing the gap up as a policy. A business with no
-  // published email address reads badly to a distributor reviewer, who will
-  // want somewhere to send dealer paperwork — this is the first gap to close.
-  email: null,
+  // Confirmed by the owner as the single address for every form, business
+  // enquiry and contact — including dealer paperwork from a distributor
+  // reviewer. The footer, contact, locations and legal pages link to it, the
+  // structured data publishes it, and form confirmations quote it when
+  // VITE_CONTACT_EMAIL is not set. The phone is still the fastest channel.
+  email: "info@tiredroponline.com",
 
   // The Sunrise shop: ship-to-store pickup, local install, and mobile service.
   shop: {

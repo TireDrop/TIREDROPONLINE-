@@ -4,6 +4,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock,
+  Mail,
   MapPin,
   Navigation,
   Package,
@@ -176,7 +177,19 @@ function ContactForm() {
           <span className="text-ink">{values.subject.toLowerCase()}</span>. What
           you wrote is below — read it out, or copy it across, rather than
           typing it again.
-          {CONTACT_EMAIL ? ` You can also send it to ${CONTACT_EMAIL}.` : ""}
+          {CONTACT_EMAIL && (
+            <>
+              {" "}
+              You can also send it to{" "}
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="text-drop underline"
+              >
+                {CONTACT_EMAIL}
+              </a>
+              .
+            </>
+          )}
         </p>
 
         <dl className="mt-6 space-y-3 border-t border-ink/10 pt-5 text-sm">
@@ -434,12 +447,28 @@ export default function ContactPage() {
                   install appointments and fleet accounts.
                 </p>
                 <p className="mt-3 text-xs leading-relaxed text-smoke">
-                  A dedicated {BUSINESS.name} email address is being set up and
-                  will be published here once it is live. Until then the phone
-                  is the channel that reaches a person
+                  The phone is the channel that reaches a person fastest
                   {isWired()
                     ? ", and the form below reaches the same people."
                     : " — the form below is not connected to an inbox yet."}
+                </p>
+              </li>
+
+              <li className="card p-6">
+                <h3 className="h3 mb-3 flex items-center gap-2">
+                  <Mail size={20} aria-hidden className="text-drop" />
+                  By email
+                </h3>
+                <a
+                  href={`mailto:${BUSINESS.email}`}
+                  className="break-all font-display text-2xl text-ink hover:text-drop"
+                >
+                  {BUSINESS.email}
+                </a>
+                <p className="mt-2 text-sm text-smoke">
+                  One address for everything — orders, returns, fleet quotes and
+                  dealer paperwork. Include an order number if you have one. If
+                  it cannot wait, call instead.
                 </p>
               </li>
 

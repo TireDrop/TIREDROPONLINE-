@@ -153,6 +153,11 @@ address is being set up and that the phone reaches a person until it is.
 **Who fixes it properly: the client.** One mailbox on the `tiredroponline.com`
 domain, then set `BUSINESS.email` — every page picks it up.
 
+**Resolved.** The owner confirmed `info@tiredroponline.com` as the single
+business address. `BUSINESS.email` now holds it; the footer, contact, locations
+and legal pages link to it, the Organization structured data emits it, and the
+"being set up" sentences are gone.
+
 ---
 
 ### 6. No legal entity is named anywhere

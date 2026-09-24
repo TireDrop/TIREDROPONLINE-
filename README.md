@@ -286,8 +286,10 @@ All of these need the client or a supplier:
 8. **Legal pages are drafts** and need the client's counsel — the business is
    now a national retailer, which changes the terms materially.
 9. **Social links are placeholders** in the footer.
-10. **No TireDrop email address yet.** `BUSINESS.email` is `null` and every page
-    steers to the phone or the contact form until one exists.
+10. **Business email is published.** `BUSINESS.email` is
+    `info@tiredroponline.com`, confirmed by the owner as the single address for
+    forms, business enquiries and contact. Formspree should be signed up with it
+    — see `docs/business/turn-on-the-forms.md`.
 11. **Crawling is disabled.** `ALLOW_INDEXING` in
     `scripts/generate-seo-files.mjs` is `false` and `robots.txt` says
     `Disallow: /`. Flip it on launch day — see _Crawling, metadata and the

@@ -80,7 +80,7 @@ const DOCS = {
         paragraphs: [
           `${BUSINESS.name} is the online tire and wheel store of ${BUSINESS.parent}, the tire shop at ${BUSINESS.shop.full}. Orders placed on this site are fulfilled by shipping direct from our distributors — we do not hold stock of our own.`,
           `We sell to customers throughout ${BUSINESS.shipping.area}. Installation, whether at the shop or from one of our mobile vans, is available only in South Florida. Those are two different things, and this document treats them as such.`,
-          `Questions about anything here: call ${BUSINESS.phone} during business hours, or use the contact form. A dedicated ${BUSINESS.name} email address is being set up; until it is live, the phone is the channel that reaches a person fastest.`,
+          `Questions about anything here: call ${BUSINESS.phone} during business hours, email ${BUSINESS.email}, or use the contact form. The phone is the channel that reaches a person fastest.`,
         ],
       },
       {
@@ -233,7 +233,7 @@ const DOCS = {
           "Addresses: the shipping address the order goes to — or the shop, if you chose ship-to-store",
           "Vehicle information: year, make, model, tire and wheel sizes, and notes about any work performed",
           "Order history: what you bought, what it cost, what we quoted and what we did",
-          "Messages you send through the contact form or leave on the phone",
+          `Messages you send through the contact form or to ${BUSINESS.email}, or leave on the phone`,
         ],
         after: [
           "There is one thing we deliberately do not collect here: card numbers. This website does not take payment. Checkout submits an order, and a person calls you to confirm fitment and take payment over the phone or at the counter. No card field exists on this site, so there is no card data for us to lose.",
@@ -304,7 +304,7 @@ const DOCS = {
           "We set no cookies, run no analytics and do not sell personal information or share it for cross-context behavioral advertising, so there is nothing for you to opt out of on that front.",
         ],
         after: [
-          `To use any of these, call ${BUSINESS.phone} during business hours or send a message through our contact form. We may need to confirm a couple of details — an order number, say — to be sure we are talking to the right person before we change or delete a record.`,
+          `To use any of these, call ${BUSINESS.phone} during business hours, email ${BUSINESS.email}, or send a message through our contact form. We may need to confirm a couple of details — an order number, say — to be sure we are talking to the right person before we change or delete a record.`,
         ],
       },
       {
@@ -582,6 +582,13 @@ export default function LegalPage({ doc = "terms" }) {
                   className="mt-2 inline-block font-display text-lg text-ink hover:text-drop"
                 >
                   {BUSINESS.phone}
+                </a>
+                <br />
+                <a
+                  href={`mailto:${BUSINESS.email}`}
+                  className="inline-block break-all font-display text-lg text-ink hover:text-drop"
+                >
+                  {BUSINESS.email}
                 </a>
               </address>
 

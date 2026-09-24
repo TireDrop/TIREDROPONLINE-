@@ -24,8 +24,8 @@ Two values, both filled in at deploy time:
 Any service that accepts a JSON POST works. The quickest is Formspree, which
 needs no server of our own:
 
-1. Sign up at <https://formspree.io> with the address that should receive the
-   messages.
+1. Sign up at <https://formspree.io> with **info@tiredroponline.com** — the
+   business address, and the inbox that should receive the messages.
 2. Create a form. Name it something like "TireDrop site forms" — one form
    handles all five, because every submission carries a `_form` field naming
    which one it came from (`contact`, `financing`, `fleet-quote`, `review`,
@@ -62,10 +62,16 @@ removed.
 
 ## The other email
 
-`BUSINESS.email` in `src/data/business.js` is still `null`, and separate from
-this. It is the address the site would _publish_ — in the footer, on the
-contact page, in structured data. `VITE_CONTACT_EMAIL` is only where form
-submissions land and what a confirmation quotes back to the person who just
-typed it. They can be the same address, but publishing one is a decision about
-what the business wants in front of crawlers and scrapers, so it stays a
-separate call.
+`BUSINESS.email` in `src/data/business.js` is now `info@tiredroponline.com`.
+The owner confirmed it as the single address for every form, business enquiry
+and contact, and the site publishes it — in the footer, on the contact,
+locations and legal pages, and in structured data.
+
+`VITE_CONTACT_EMAIL` is what a confirmation quotes back to the person who just
+typed a message. When it is left empty it falls back to `BUSINESS.email`, so
+the confirmations already name info@tiredroponline.com; set it to that same
+address anyway so the deploy environment says so explicitly.
+
+Neither value turns the forms on. Only `VITE_FORM_ENDPOINT` does: until it is
+set, every confirmation still says the message was not sent, whatever address
+it quotes.
