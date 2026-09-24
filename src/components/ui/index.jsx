@@ -1,21 +1,411 @@
 import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ChevronRight, Star } from "lucide-react";
+import { BUSINESS } from "../../data/business.js";
+import { getProduct } from "../../data/products.js";
+import { getService } from "../../data/services.js";
 
-/** Sets document.title + meta description per page. */
-export function Seo({ title, description }) {
+const ORIGIN = `https://${BUSINESS.domain}`;
+const OG_IMAGE = `${ORIGIN}/brand/og-tiredrop.jpg`;
+
+/* ------------------------------------------------------------------ *
+ * Head-tag plumbing
+ *
+ * Every tag this component owns carries data-seo, so a route change can
+ * overwrite its own tags and leave index.html's untouched. Tags are updated in
+ * place rather than removed and re-added — replacing them makes a crawler that
+ * snapshots mid-update see a head with no title.
+ * ------------------------------------------------------------------ */
+
+function upsertMeta(selector, attrs) {
+  let tag = document.head.querySelector(selector);
+  if (!tag) {
+    tag = document.createElement("meta");
+    document.head.appendChild(tag);
+  }
+  for (const [k, v] of Object.entries(attrs)) tag.setAttribute(k, v);
+}
+
+function upsertLink(rel, href) {
+  let tag = document.head.querySelector(`link[rel="${rel}"]`);
+  if (!tag) {
+    tag = document.createElement("link");
+    tag.setAttribute("rel", rel);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute("href", href);
+}
+
+function setJsonLd(graph) {
+  let tag = document.head.querySelector('script[data-seo="ld"]');
+  if (!tag) {
+    tag = document.createElement("script");
+    tag.type = "application/ld+json";
+    tag.setAttribute("data-seo", "ld");
+    document.head.appendChild(tag);
+  }
+  tag.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": graph,
+  });
+}
+
+/* --------------------------- structured data --------------------------- */
+
+const DAY = {
+  mon: "Monday",
+  tue: "Tuesday",
+  wed: "Wednesday",
+  thu: "Thursday",
+  fri: "Friday",
+  sat: "Saturday",
+  sun: "Sunday",
+};
+const DAY_ORDER = Object.values(DAY);
+
+/** "8:00 AM" -> "08:00". Returns null for anything it does not recognise. */
+function to24h(text) {
+  const m = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(text.trim());
+  if (!m) return null;
+  let hour = Number(m[1]) % 12;
+  if (/pm/i.test(m[3])) hour += 12;
+  return `${String(hour).padStart(2, "0")}:${m[2]}`;
+}
+
+/**
+ * Turns BUSINESS.hours into openingHoursSpecification so the published hours
+ * and the marked-up hours cannot drift apart. Anything unparseable is dropped
+ * rather than guessed — a wrong opening time in structured data sends somebody
+ * to a closed shop.
+ */
+function openingHours() {
+  const out = [];
+  for (const row of BUSINESS.hours) {
+    const [open, close] = row.time
+      .split(/\s*[–-]\s*/)
+      .map((t) => to24h(t) ?? "");
+    if (!open || !close) continue; // "Closed", or a format we do not know
+    const parts = row.days
+      .split(/\s*[–-]\s*/)
+      .map((d) => DAY[d.slice(0, 3).toLowerCase()]);
+    if (parts.some((d) => !d)) continue;
+    const days =
+      parts.length === 2
+        ? DAY_ORDER.slice(
+            DAY_ORDER.indexOf(parts[0]),
+            DAY_ORDER.indexOf(parts[1]) + 1,
+          )
+        : parts;
+    out.push({
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: days,
+      opens: open,
+      closes: close,
+    });
+  }
+  return out;
+}
+
+/** TireDrop the national storefront. */
+function organizationNode() {
+  const node = {
+    "@type": "Organization",
+    "@id": `${ORIGIN}/#organization`,
+    name: BUSINESS.name,
+    url: ORIGIN,
+    description: `${BUSINESS.name} is the national online tire and wheel store of ${BUSINESS.parent}, shipping across ${BUSINESS.shipping.area}.`,
+    telephone: BUSINESS.phone,
+    logo: {
+      "@type": "ImageObject",
+      url: `${ORIGIN}/brand/tiredrop-full.png`,
+      width: 440,
+      height: 444,
+    },
+    image: OG_IMAGE,
+    parentOrganization: { "@id": `${ORIGIN}/#shop` },
+  };
+  // Both are null until the client confirms them (see src/data/business.js).
+  // An invented registered name or contact address in structured data is the
+  // kind of detail a distributor's reviewer checks against the application.
+  if (BUSINESS.legalName) node.legalName = BUSINESS.legalName;
+  if (BUSINESS.email) node.email = BUSINESS.email;
+  return node;
+}
+
+/**
+ * The Sunrise shop. This is the local business: it holds the address, the
+ * hours and the service area, and it is the parent of the TireDrop brand.
+ * AutoPartsStore covers the retail side, AutoRepair the bay work — both are
+ * LocalBusiness subtypes Google recognises, and the shop genuinely does both.
+ */
+function shopNode() {
+  return {
+    "@type": ["AutoPartsStore", "AutoRepair"],
+    "@id": `${ORIGIN}/#shop`,
+    name: BUSINESS.parent,
+    alternateName: BUSINESS.shop.name,
+    url: `${ORIGIN}/locations`,
+    telephone: BUSINESS.phone,
+    foundingDate: String(BUSINESS.foundedYear),
+    image: OG_IMAGE,
+    hasMap: BUSINESS.mapsHref,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: BUSINESS.shop.street,
+      addressLocality: BUSINESS.shop.city,
+      addressRegion: BUSINESS.shop.state,
+      postalCode: BUSINESS.shop.zip,
+      addressCountry: "US",
+    },
+    openingHoursSpecification: openingHours(),
+    areaServed: BUSINESS.installArea.map((city) => ({
+      "@type": "City",
+      name: `${city}, FL`,
+    })),
+    // No aggregateRating and no review. The reviews on this site are
+    // illustrative (GOOGLE_PROFILE.reviewsAreReal is false), and marking up
+    // reviews that are not genuine breaches Google's structured-data policy
+    // and risks a manual action against the domain. Nothing goes in here
+    // until the Google Business Profile is connected and the reviews are real.
+  };
+}
+
+/**
+ * Routes that render at 200 but must never be indexed. A cart and a checkout
+ * are empty for every crawler and have nothing to rank; listing them here
+ * rather than passing a prop from each page keeps the decision in one place.
+ * Product and service pages noindex themselves when the slug matches nothing
+ * (see graphFor), so they are not listed here.
+ */
+const NOINDEX_ROUTES = ["/cart", "/checkout"];
+
+/** Routes where the physical shop, not the web store, is the subject. */
+const SHOP_ROUTES = [
+  "/",
+  "/locations",
+  "/contact",
+  "/install",
+  "/auto-service",
+  "/mobile-service",
+  "/schedule",
+];
+
+/* ------------------------------------------------------------------ *
+ * Offers: deliberately off.
+ *
+ * An Offer node is a machine-readable commitment — this price, this
+ * availability, buyable now — and it is what feeds Google's free product
+ * listings. None of those three hold yet: data/products.js is a representative
+ * catalog rather than live distributor inventory, `stock` is illustrative, and
+ * checkout takes an order for a human to call back on rather than a payment.
+ * Publishing price and availability as fact would put a shopper one click from
+ * a purchase the site cannot complete.
+ *
+ * The consequence, stated plainly: with no offers and no aggregateRating, a
+ * Product node produces no rich result at all — Google needs one of offers,
+ * review or aggregateRating. The markup is still worth emitting, because it
+ * describes the product to crawlers that read entities rather than snippets.
+ * Rich results come back when the catalog is real.
+ *
+ * WHEN ATD OR U.S. AUTOFORCE PRICING AND INVENTORY ARE LIVE: set this true and
+ * the offer below starts shipping. Do not flip it before then.
+ * ------------------------------------------------------------------ */
+const EMIT_OFFERS = false;
+
+function productNode(product, url) {
+  const name = `${product.brand} ${product.model}`;
+  const isTire = product.kind === "tire";
+  const size = isTire
+    ? product.size
+    : `${product.diameter}x${product.wheelWidth} ${product.boltPattern}`;
+
+  const node = {
+    "@type": "Product",
+    "@id": `${url}#product`,
+    name: `${name} ${size}`,
+    url,
+    sku: product.id,
+    category: product.category,
+    brand: { "@type": "Brand", name: product.brand },
+    model: product.model,
+    description: (product.features ?? [])
+      .slice(0, 3)
+      .map((f) => f.replace(/\.?$/, "."))
+      .join(" "),
+    additionalProperty: Object.entries(product.specs ?? {}).map(([k, v]) => ({
+      "@type": "PropertyValue",
+      name: k,
+      value: String(v),
+    })),
+    // No aggregateRating. `rating` and `reviewCount` in the catalog are
+    // illustrative, and rating markup for ratings nobody left is a policy
+    // breach, not a shortcut.
+  };
+
+  if (isTire && product.warranty) {
+    node.additionalProperty.push({
+      "@type": "PropertyValue",
+      name: "Warranty",
+      value: product.warranty,
+    });
+  }
+
+  if (EMIT_OFFERS) {
+    node.offers = {
+      "@type": "Offer",
+      url,
+      priceCurrency: "USD",
+      price: String(product.price),
+      availability:
+        product.stock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      seller: { "@id": `${ORIGIN}/#organization` },
+    };
+  }
+
+  return node;
+}
+
+function serviceNode(service, url) {
+  return {
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name: service.name,
+    url,
+    description: service.blurb,
+    serviceType: service.name,
+    provider: { "@id": `${ORIGIN}/#shop` },
+    areaServed: BUSINESS.installArea.map((city) => ({
+      "@type": "City",
+      name: `${city}, FL`,
+    })),
+  };
+}
+
+/**
+ * Builds the JSON-LD graph for a route, plus whether the route should be
+ * noindexed. A product or service URL whose slug matches nothing is a 404
+ * rendered at 200 — it must not be indexed, and the component can tell on its
+ * own by looking the slug up, without the page passing anything.
+ */
+function graphFor(pathname, url, fullTitle, description) {
+  const graph = [
+    organizationNode(),
+    {
+      "@type": "WebSite",
+      "@id": `${ORIGIN}/#website`,
+      url: ORIGIN,
+      name: BUSINESS.name,
+      inLanguage: "en-US",
+      publisher: { "@id": `${ORIGIN}/#organization` },
+    },
+    {
+      "@type": "WebPage",
+      "@id": `${url}#webpage`,
+      url,
+      name: fullTitle,
+      ...(description ? { description } : {}),
+      inLanguage: "en-US",
+      isPartOf: { "@id": `${ORIGIN}/#website` },
+      about: { "@id": `${ORIGIN}/#organization` },
+    },
+  ];
+
+  let missing = false;
+
+  if (SHOP_ROUTES.includes(pathname)) graph.push(shopNode());
+
+  const product = /^\/(tires|wheels)\/(.+)$/.exec(pathname);
+  if (product) {
+    const found = getProduct(
+      product[1] === "tires" ? "tire" : "wheel",
+      product[2],
+    );
+    if (found) graph.push(productNode(found, url));
+    else missing = true;
+  }
+
+  const service = /^\/services\/(.+)$/.exec(pathname);
+  if (service) {
+    const found = getService(service[1]);
+    if (found) graph.push(serviceNode(found, url));
+    else missing = true;
+  }
+
+  return { graph, missing };
+}
+
+/* --------------------------------- Seo --------------------------------- */
+
+/**
+ * Per-page head: title, description, canonical, Open Graph, Twitter card and
+ * JSON-LD.
+ *
+ * Canonical drops the query string on purpose. /tires, /tires?search=size and
+ * /tires?view=brands are the same page in three UI states, so pointing them all
+ * at /tires consolidates the signals instead of splitting them across
+ * near-duplicates.
+ *
+ * `noindex` is for pages that render at 200 but should never be indexed —
+ * carts, checkouts and hand-rolled 404s. Product and service pages set it
+ * themselves when the slug matches nothing.
+ *
+ * One honest limit: this runs in the browser. Google renders JavaScript and
+ * will see all of it; the social-card scrapers (Facebook, X, LinkedIn, Slack,
+ * iMessage) do not, and they read the static tags in index.html instead. See
+ * docs/technical-audit.md.
+ */
+export function Seo({ title, description, noindex = false }) {
+  const { pathname } = useLocation();
+
   useEffect(() => {
-    document.title = `${title} | TireDrop`;
+    const fullTitle = `${title} | ${BUSINESS.name}`;
+    const url = `${ORIGIN}${pathname === "/" ? "/" : pathname.replace(/\/+$/, "")}`;
+
+    document.title = fullTitle;
+    if (description)
+      upsertMeta('meta[name="description"]', {
+        name: "description",
+        content: description,
+      });
+
+    upsertLink("canonical", url);
+
+    upsertMeta('meta[property="og:title"]', {
+      property: "og:title",
+      content: fullTitle,
+    });
+    upsertMeta('meta[property="og:url"]', { property: "og:url", content: url });
+    upsertMeta('meta[property="og:type"]', {
+      property: "og:type",
+      content: /^\/(tires|wheels)\/.+/.test(pathname) ? "product" : "website",
+    });
+    upsertMeta('meta[name="twitter:title"]', {
+      name: "twitter:title",
+      content: fullTitle,
+    });
     if (description) {
-      let tag = document.querySelector('meta[name="description"]');
-      if (!tag) {
-        tag = document.createElement("meta");
-        tag.setAttribute("name", "description");
-        document.head.appendChild(tag);
-      }
-      tag.setAttribute("content", description);
+      upsertMeta('meta[property="og:description"]', {
+        property: "og:description",
+        content: description,
+      });
+      upsertMeta('meta[name="twitter:description"]', {
+        name: "twitter:description",
+        content: description,
+      });
     }
-  }, [title, description]);
+
+    const { graph, missing } = graphFor(pathname, url, fullTitle, description);
+    setJsonLd(graph);
+
+    const hide = noindex || missing || NOINDEX_ROUTES.includes(pathname);
+    upsertMeta('meta[name="robots"]', {
+      name: "robots",
+      content: hide ? "noindex, follow" : "index, follow",
+    });
+  }, [title, description, noindex, pathname]);
+
   return null;
 }
 

@@ -6,7 +6,7 @@
     <title>TireDrop — Tires Shipped Free. Or Installed For You.</title>
     <meta
       name="description"
-      content="Shop tires and wheels from Continental, Michelin, Goodyear, Pirelli and more. Shipped anywhere in the continental US, or delivered free to our Sunrise, FL shop and installed for you."
+      content="Shop tires and wheels from Continental, Michelin, Bridgestone, Pirelli and more. Shipped anywhere in the continental US, or delivered free to our Sunrise, FL shop and installed for you."
     />
     <meta name="theme-color" content="#070E1A" />
     <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg" />
@@ -32,7 +32,26 @@
       name="twitter:image"
       content="https://tiredroponline.com/brand/og-tiredrop.jpg"
     />
-    <meta property="og:url" content="https://tiredroponline.com" />
+    <meta property="og:url" content="https://tiredroponline.com/" />
+    <meta property="og:site_name" content="TireDrop" />
+    <meta property="og:locale" content="en_US" />
+    <!-- Twitter falls back to og:title / og:description when these are absent,
+         but Slack and a few others do not, so both pairs are spelled out. -->
+    <meta
+      name="twitter:title"
+      content="TireDrop — Tires Shipped. Or Installed."
+    />
+    <meta
+      name="twitter:description"
+      content="A full tire and wheel catalog shipped to your door, or installed at our shop in Sunrise, FL. Powered by Extreme Tires."
+    />
+    <!-- No canonical here on purpose. Every route is served this same file,
+         so a static canonical would read "https://tiredroponline.com/" on all
+         73 URLs and tell any crawler that does not run JavaScript that the
+         whole site is a duplicate of the home page — worse than having none.
+         The Seo component sets the correct canonical per route once React
+         renders, which is what Google reads. Making it correct in the served
+         HTML needs prerendering; see docs/technical-audit.md. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

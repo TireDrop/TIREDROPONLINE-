@@ -78,8 +78,12 @@ empty the table.
 ```
 tiredrop/
 ├── public/brand/            Logo artwork (WebP + PNG fallback) and favicon
+├── public/robots.txt        Generated — do not hand-edit
+├── public/sitemap.xml       Generated — do not hand-edit
 ├── docs/                    Meeting brief and project documents
 ├── scripts/mobile-audit.mjs Phone-width audit across every route
+├── scripts/generate-seo-files.mjs
+│                            Writes robots.txt + sitemap.xml from the router
 ├── src/
 │   ├── main.jsx             Entry — router + cart provider
 │   ├── App.jsx              All routes in one place
@@ -213,6 +217,50 @@ that.
 
 ---
 
+## Crawling, metadata and the bundle
+
+**Crawling is switched off, deliberately.** `public/robots.txt` currently says
+`Disallow: /` because the site has not launched and tiredroponline.com still
+resolves to the previous NetDriven site. The only reachable deployment is a
+Vercel preview, and getting a half-finished storefront with draft legal pages
+indexed under this brand — on a `*.vercel.app` hostname nobody wants ranking —
+is a hole you climb out of slowly. `vercel.json` also sends
+`X-Robots-Tag: noindex` on `*.vercel.app` hosts only, so that half lifts by
+itself when a custom domain is attached.
+
+> **Launch step.** Set `ALLOW_INDEXING = true` at the top of
+> `scripts/generate-seo-files.mjs`, rebuild, commit the regenerated
+> `public/robots.txt`, and check `https://tiredroponline.com/robots.txt` before
+> submitting the sitemap in Search Console.
+
+**robots.txt and sitemap.xml are generated, never hand-written.** The route list
+comes out of `src/App.jsx` and is expanded from `products.js` and `services.js`,
+so adding a `<Route>` grows the sitemap and deleting one removes the URL. It
+runs on every `vite build` via a plugin in `vite.config.js`, or on its own:
+
+```bash
+node scripts/generate-seo-files.mjs   # 69 URLs at the last run
+```
+
+**Per-page head tags come from one component.** `Seo` in `components/ui/` owns
+the title, the meta description, the canonical, Open Graph, the Twitter card,
+`robots`, and the JSON-LD graph (`Organization`, `WebSite`, `WebPage`, plus
+`AutoPartsStore`/`AutoRepair` on shop pages, `Product` on product pages and
+`Service` on service pages). Two things it will never emit: review or rating
+markup while `GOOGLE_PROFILE.reviewsAreReal` is false, and `Offer` price and
+availability while the catalog is representative rather than live distributor
+inventory. Both gates are commented in the file.
+
+**Route-level code splitting.** Every page except the home page is a
+`React.lazy` import in `App.jsx`. Cold home-page load measured at 290 kB over
+the wire, 91 kB of it JavaScript — down from 412 kB and 209 kB when everything
+shipped in one bundle.
+
+Full findings, measurements and what is still open:
+[`docs/technical-audit.md`](docs/technical-audit.md).
+
+---
+
 ## Before go-live
 
 All of these need the client or a supplier:
@@ -240,3 +288,7 @@ All of these need the client or a supplier:
 9. **Social links are placeholders** in the footer.
 10. **No TireDrop email address yet.** `BUSINESS.email` is `null` and every page
     steers to the phone or the contact form until one exists.
+11. **Crawling is disabled.** `ALLOW_INDEXING` in
+    `scripts/generate-seo-files.mjs` is `false` and `robots.txt` says
+    `Disallow: /`. Flip it on launch day — see _Crawling, metadata and the
+    bundle_ above. Nothing will rank until you do.
