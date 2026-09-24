@@ -121,17 +121,18 @@ first size typed) is a guess at intent.
 `#decoder` and focus the **Compare against** field — which is honest but of
 limited value until a primary size is typed.
 
-## 5. Free shipping is measured on parts only, so an install-heavy order can miss it
+## 5. ~~Free shipping is measured on parts only~~ — resolved
 
-With the fix in this pass, the $29 fee is charged on the part of the order
-going to a street address, and ship-to-store lines are free. What is still
-true: a $392 parts order with $100 of installation totals $555 but still pays
-the $29, because the threshold looks at the $392. That is defensible — it is
-the parts that ship — but the storewide phrase is "orders over $500", which a
-shopper reads against the total. Worth one sentence of copy, or a decision to
-measure the threshold differently. `FREE_SHIP_AT` lives in
-`src/pages/shop/CartPage.jsx`, the fee itself in
-`src/context/CartContext.jsx`.
+Closed while committing this pass. The $29 fee is charged only on the part of
+the order going to a street address, but the $500 waiver is measured against
+the whole order, because that is what `/coupons` promises: _"Orders at or above
+$500 already ship free."_ Measuring the threshold against the shippable part
+alone would have started charging $29 on orders the site says ship free, which
+trades one contradiction for another.
+
+Checked in the browser across the combinations: $392 all-to-shop is free;
+$392 to an address is $29 with the meter reading "$108.00 to go"; $872 to an
+address is free; any mixed cart at or above $500 is free.
 
 ## 6. A rebate is capped at one per order, however many tires are bought
 

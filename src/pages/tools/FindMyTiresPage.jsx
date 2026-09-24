@@ -24,6 +24,7 @@ import {
 } from "../../components/ui/index.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
 import { TIRES, VEHICLE_DATA, VEHICLE_MAKES } from "../../data/products.js";
+import { FITMENT, fitmentFor } from "../../data/fitment.js";
 import { RATING_AXES, ratingsFor } from "../../data/tireRatings.js";
 import { compareSizes, parseSize } from "../../data/tireMath.js";
 import { SET_SIZE, priceBreakdown, setPrice } from "../../data/pricing.js";
@@ -93,55 +94,7 @@ const CLASS_RULES = {
 // The most common original fitment for each model in the vehicle selector.
 // It is a starting point, not a VIN lookup: trims and model years move these
 // around, so the size stays editable and the UI says where it came from.
-const FITMENT = {
-  "Toyota|Camry": ["215/60R16", "sedan"],
-  "Toyota|Corolla": ["205/55R16", "sedan"],
-  "Toyota|RAV4": ["225/65R17", "crossover"],
-  "Toyota|Tacoma": ["265/70R17", "truck"],
-  "Toyota|Highlander": ["245/60R18", "crossover"],
-  "Toyota|4Runner": ["265/70R17", "truck"],
-  "Honda|Accord": ["225/50R17", "sedan"],
-  "Honda|Civic": ["215/55R16", "sedan"],
-  "Honda|CR-V": ["235/65R17", "crossover"],
-  "Honda|Pilot": ["245/60R18", "crossover"],
-  "Honda|Odyssey": ["235/60R18", "crossover"],
-  "Ford|F-150": ["265/70R17", "truck"],
-  "Ford|Explorer": ["255/55R20", "crossover"],
-  "Ford|Escape": ["225/65R17", "crossover"],
-  "Ford|Mustang": ["235/50R18", "sports"],
-  "Ford|Transit-250": ["235/65R16", "van"],
-  "Chevrolet|Silverado": ["265/70R17", "truck"],
-  "Chevrolet|Equinox": ["225/65R17", "crossover"],
-  "Chevrolet|Tahoe": ["275/60R20", "truck"],
-  "Chevrolet|Malibu": ["225/55R17", "sedan"],
-  "Chevrolet|Colorado": ["265/65R17", "truck"],
-  "Nissan|Altima": ["215/60R16", "sedan"],
-  "Nissan|Rogue": ["225/65R17", "crossover"],
-  "Nissan|Sentra": ["205/55R16", "sedan"],
-  "Nissan|Frontier": ["265/70R17", "truck"],
-  "Nissan|Pathfinder": ["235/65R18", "crossover"],
-  "Jeep|Wrangler": ["245/75R17", "offroad"],
-  "Jeep|Grand Cherokee": ["265/60R18", "truck"],
-  "Jeep|Cherokee": ["225/60R17", "crossover"],
-  "Jeep|Gladiator": ["255/75R17", "offroad"],
-  "BMW|3 Series": ["225/45R18", "sports"],
-  "BMW|5 Series": ["245/45R18", "sports"],
-  "BMW|X3": ["245/50R19", "crossover"],
-  "BMW|X5": ["275/45R20", "crossover"],
-  "Mercedes-Benz|C-Class": ["225/45R18", "sports"],
-  "Mercedes-Benz|E-Class": ["245/45R18", "sports"],
-  "Mercedes-Benz|GLC": ["235/60R18", "crossover"],
-  "Mercedes-Benz|Sprinter 2500": ["245/75R16", "van"],
-  "Hyundai|Elantra": ["205/55R16", "sedan"],
-  "Hyundai|Sonata": ["215/55R17", "sedan"],
-  "Hyundai|Tucson": ["235/65R17", "crossover"],
-  "Hyundai|Santa Fe": ["235/65R17", "crossover"],
-  "Ram|1500": ["275/60R20", "truck"],
-  "Ram|2500": ["275/70R18", "truck"],
-  "Ram|ProMaster": ["225/75R16", "van"],
-};
 
-const fitmentFor = (make, model) => FITMENT[`${make}|${model}`] ?? null;
 
 /** When all we have is a size, the size itself is the only clue to the car. */
 function classFromSize(p) {

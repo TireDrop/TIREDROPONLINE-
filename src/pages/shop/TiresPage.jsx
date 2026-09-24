@@ -26,6 +26,7 @@ import {
 import { ratingsFor } from "../../data/tireRatings.js";
 import { setPrice } from "../../data/pricing.js";
 import { BUSINESS } from "../../data/business.js";
+import { oeSizeFor } from "../../data/fitment.js";
 import { money } from "../../context/CartContext.jsx";
 
 // Tires sell as sets of four, so the price sorts are sorted on the set — the
@@ -128,6 +129,11 @@ export default function TiresPage() {
     model: params.get("vmd") || "",
   };
   const hasVehicle = Boolean(vehicle.year && vehicle.make && vehicle.model);
+  // The typical original size for that vehicle, so the page can keep the
+  // promise the home-page finder makes: "We match your vehicle to the sizes
+  // we stock." Null when the table has no record for the make and model, in
+  // which case nothing below claims a match.
+  const oe = hasVehicle ? oeSizeFor(vehicle.make, vehicle.model) : null;
   const hasSize = Boolean(
     sizeQuery.width || sizeQuery.aspect || sizeQuery.diameter,
   );
@@ -208,6 +214,18 @@ export default function TiresPage() {
     });
     return sortProducts(filtered, sort);
   }, [filters, sizeQuery.width, sizeQuery.aspect, sizeQuery.diameter, sort]);
+
+  // A vehicle narrows the page rather than replacing it. Filtering the catalog
+  // down to one size outright can leave a single card on screen, and someone
+  // who arrived by vehicle still wants to see what else is stocked — so the
+  // sizes that fit come first and the rest keep their own heading below.
+  const fitsVehicle = (t) =>
+    oe != null &&
+    t.width === oe.width &&
+    t.aspect === oe.aspect &&
+    t.rimDiameter === oe.rimDiameter;
+  const fitting = oe ? results.filter(fitsVehicle) : [];
+  const others = oe ? results.filter((t) => !fitsVehicle(t)) : results;
 
   const activeFilterCount = countActiveFilters(filters);
   const sizeLabel = `${sizeQuery.width || "any"}/${sizeQuery.aspect || "any"}R${
@@ -344,8 +362,21 @@ export default function TiresPage() {
                 {vehicle.year} {vehicle.make} {vehicle.model}
               </p>
               <p className="mt-1 text-sm text-smoke">
-                Read us the size off your sidewall, or call and we will confirm
-                the exact fitment before anything ships.
+                {oe ? (
+                  <>
+                    Typical original size{" "}
+                    <span className="font-semibold text-ink">{oe.size}</span>.
+                    Trims and factory options vary, so check your sidewall — or
+                    call and we will confirm the exact fitment before anything
+                    ships.
+                  </>
+                ) : (
+                  <>
+                    We do not have an original size on file for this one. Read
+                    us the size off your sidewall, or call and we will confirm
+                    the exact fitment before anything ships.
+                  </>
+                )}
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
@@ -427,9 +458,19 @@ export default function TiresPage() {
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-smoke" aria-live="polite">
                 <span className="font-semibold text-ink">
-                  {results.length} {results.length === 1 ? "tire" : "tires"}
+                  {oe ? fitting.length : results.length}{" "}
+                  {(oe ? fitting.length : results.length) === 1
+                    ? "tire"
+                    : "tires"}
                 </span>{" "}
-                of {TIRES.length}
+                {oe ? (
+                  <>
+                    in {oe.size}
+                    {others.length > 0 && <> · {others.length} other sizes</>}
+                  </>
+                ) : (
+                  <>of {TIRES.length}</>
+                )}
                 {hasSize && (
                   <>
                     {" "}
@@ -488,7 +529,7 @@ export default function TiresPage() {
               <EmptyState
                 icon={SearchX}
                 title="No tires match those filters"
-                lede="Try widening the price range or clearing a size. If you know your size and cannot find it listed, call us — the distributor catalog runs deeper than this page."
+                lede="Try widening the price range or clearing a size. If you know your size and cannot find it listed, call us — we can order sizes this page does not carry."
                 action={
                   <div className="flex flex-wrap justify-center gap-3">
                     <Link to="/tires" className="btn-primary btn-sm">
@@ -501,6 +542,61 @@ export default function TiresPage() {
                   </div>
                 }
               />
+            ) : oe ? (
+              <div className="space-y-10">
+                <section aria-labelledby="fits-heading">
+                  <h2
+                    id="fits-heading"
+                    className="h3 mb-1 text-[1.25rem] md:text-[1.375rem]"
+                  >
+                    Fits your {vehicle.year} {vehicle.make} {vehicle.model}
+                  </h2>
+                  <p className="mb-4 text-sm text-smoke">
+                    Tires on this page in {oe.size}, the typical original size.
+                  </p>
+                  {fitting.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
+                      {fitting.map((tire) => (
+                        <ProductCard key={tire.id} product={tire} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-sm leading-relaxed text-ink">
+                        Nothing on this page comes in {oe.size} right now. We
+                        can order it — call with the size and we will quote it.
+                      </p>
+                      <a
+                        href={BUSINESS.phoneHref}
+                        className="btn-primary btn-sm shrink-0"
+                      >
+                        <Phone size={16} aria-hidden />
+                        {BUSINESS.phone}
+                      </a>
+                    </div>
+                  )}
+                </section>
+
+                {others.length > 0 && (
+                  <section aria-labelledby="others-heading">
+                    <h2
+                      id="others-heading"
+                      className="h3 mb-1 text-[1.25rem] md:text-[1.375rem]"
+                    >
+                      Other sizes we stock
+                    </h2>
+                    <p className="mb-4 text-sm text-smoke">
+                      These are not {oe.size} and will not fit without a wheel
+                      change.
+                    </p>
+                    <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
+                      {others.map((tire) => (
+                        <ProductCard key={tire.id} product={tire} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </div>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
                 {results.map((tire) => (
