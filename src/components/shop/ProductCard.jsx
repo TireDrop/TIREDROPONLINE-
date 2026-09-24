@@ -11,7 +11,6 @@ import {
   priceBreakdown,
   setMsrp,
   setPrice,
-  shipsFree,
 } from "../../data/pricing.js";
 import { ratingsFor } from "../../data/tireRatings.js";
 import ProductArt from "./ProductArt.jsx";
@@ -19,7 +18,6 @@ import ProductArt from "./ProductArt.jsx";
 const BADGE_TONE = {
   "Best Seller": "drop",
   "Staff Pick": "ink",
-  Rebate: "amber",
 };
 
 // A grid can hold forty cards and the estimate is the same for all of them, so
@@ -181,12 +179,6 @@ export default function ProductCard({ product }) {
           label={`${product.brand} ${product.model}`}
           className="pointer-events-none h-auto w-[112px] max-w-full transition-transform duration-300 group-hover:scale-105 sm:w-[168px]"
         />
-
-        {product.rebate && (
-          <div className="absolute bottom-2 left-2 z-10 sm:bottom-3 sm:left-3">
-            <Badge tone="amber">${product.rebate.amount} rebate</Badge>
-          </div>
-        )}
       </div>
 
       <div className="flex flex-1 flex-col p-3 sm:p-4">
@@ -256,20 +248,10 @@ export default function ProductCard({ product }) {
             </span>
           </p>
 
-          {bd.rebate > 0 && (
-            <p className="tnum mt-2 rounded-sm bg-sky px-2 py-1.5 text-[11px] leading-snug text-ink">
-              − {money(bd.rebate)}
-              <span className="hidden sm:inline"> mfr.</span> rebate →{" "}
-              <span className="font-display font-bold">{money(bd.net)}</span>
-              <span className="hidden sm:inline"> after rebate</span>
-            </p>
-          )}
-
           <p className="mt-2.5 hidden items-start gap-1.5 text-[11px] leading-snug text-smoke sm:flex">
             <Truck size={13} aria-hidden className="mt-px shrink-0" />
             <span>
-              {shipsFree() ? "Ships free" : "Shipping calculated at checkout"} ·
-              arrives {DELIVERY.earliest}–{DELIVERY.latest}
+              Ships free · arrives {DELIVERY.earliest}–{DELIVERY.latest}
             </span>
           </p>
           <p className={`mt-2 text-[11px] font-medium sm:text-xs ${hint.tone}`}>

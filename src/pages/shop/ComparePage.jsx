@@ -207,7 +207,7 @@ export default function ComparePage() {
     <>
       <Seo
         title="Compare Tires Side by Side"
-        description="Put up to four tires side by side — price for a set of four, rebates, ratings across six axes, warranty and the full spec sheet — and see which one wins each row."
+        description="Put up to four tires side by side — price for a set of four, ratings across six axes, warranty and the full spec sheet — and see which one wins each row."
       />
       <Breadcrumbs
         trail={[{ label: "Tires", to: "/tires" }, { label: "Compare" }]}
@@ -215,7 +215,7 @@ export default function ComparePage() {
       <PageHero
         eyebrow="Side by side"
         title="Compare tires"
-        lede="Price for a set of four, manufacturer rebates, performance ratings and the full spec sheet — in the same columns, with the best figure in every row called out."
+        lede="Price for a set of four, performance ratings and the full spec sheet — in the same columns, with the best figure in every row called out."
       />
     </>
   );
@@ -253,7 +253,6 @@ export default function ComparePage() {
 
   const setPrices = tires.map((t) => setPrice(t));
   const eachPrices = tires.map((t) => t.price);
-  const rebates = tires.map((t) => t.rebate?.amount ?? null);
   const stars = tires.map((t) => t.rating);
 
   const span = tires.length;
@@ -326,11 +325,6 @@ export default function ComparePage() {
                 tint
                 bestAt={bestIndex(eachPrices, "low")}
                 cells={eachPrices.map((p) => money(p))}
-              />
-              <Row
-                label="Rebate"
-                bestAt={bestIndex(rebates, "high")}
-                cells={tires.map((t) => t.rebate?.label ?? "—")}
               />
 
               <GroupRow label="Ratings" span={span} />

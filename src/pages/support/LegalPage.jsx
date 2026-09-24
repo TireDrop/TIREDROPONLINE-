@@ -108,7 +108,7 @@ const DOCS = {
           "We try hard to keep prices, specifications, fitment details and availability accurate. Even so, tire pricing moves, distributor stock turns over daily, and mistakes happen. Nothing on this site is a guaranteed offer to sell at a listed price.",
           "If a price or availability turns out to be wrong after you order, we will contact you, explain the difference, and give you the choice to proceed, pick an alternative or cancel for a full refund. We will not quietly substitute a different brand, size, load index or speed rating without telling you first.",
           "Prices are in US dollars and do not include taxes, which are calculated at checkout where they apply. Images are representative: tread patterns, sidewall markings and wheel finishes can vary between production runs.",
-          "Promotions, coupons and rebates each have their own terms, and cannot be combined unless we say so. Manufacturer rebates are administered by the manufacturer, not by us.",
+          "Promotions and coupons each have their own terms, and cannot be combined unless we say so.",
         ],
       },
       {
@@ -124,8 +124,8 @@ const DOCS = {
         id: "shipping",
         heading: "6. Shipping and delivery",
         paragraphs: [
-          `We ship to street addresses in ${BUSINESS.shipping.area}. We do not currently ship to Alaska, Hawaii, US territories or international destinations.`,
-          "Shipping method, cost and the estimated delivery window are shown at checkout and on your order confirmation. Estimates are estimates: they come from the distributor and the carrier, and weather, freight backlogs and delivery exceptions can move them. We do not promise a delivery date on this page, and neither should anyone else.",
+          `We ship free to street addresses in ${BUSINESS.shipping.area}, with no order minimum. We do not currently ship to Alaska, Hawaii, US territories or international destinations.`,
+          "The shipping method and the estimated delivery window are shown at checkout and on your order confirmation. Estimates are estimates: they come from the distributor and the carrier, and weather, freight backlogs and delivery exceptions can move them. We do not promise a delivery date on this page, and neither should anyone else.",
           "Orders can ship from more than one distributor location, so it is normal for a set of four to arrive in more than one delivery. If part of your order lands and the rest has not, call us before you worry.",
           "Someone should be available to receive the shipment. If a delivery is refused or goes unclaimed and comes back to the distributor, we will refund the order less any shipping and return costs actually charged to us.",
         ],

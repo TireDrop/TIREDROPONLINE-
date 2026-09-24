@@ -27,7 +27,7 @@ import { TIRES, VEHICLE_DATA, VEHICLE_MAKES } from "../../data/products.js";
 import { FITMENT, fitmentFor } from "../../data/fitment.js";
 import { RATING_AXES, ratingsFor } from "../../data/tireRatings.js";
 import { compareSizes, parseSize } from "../../data/tireMath.js";
-import { SET_SIZE, priceBreakdown, setPrice } from "../../data/pricing.js";
+import { SET_SIZE, setPrice } from "../../data/pricing.js";
 import { money } from "../../context/CartContext.jsx";
 
 /* ------------------------------------------------------------------ *
@@ -695,12 +695,7 @@ function buildReasons(entry, entries, answers, weights, group) {
     return `${AXIS_LABEL[k]} is not rated for this tire — no ${k === "wear" ? "UTQG treadwear grade is" : "grade is"} published for it — so it was left out of the score rather than counted as zero. It would have been about ${pct}% of your weighting.`;
   });
 
-  const rebate = entry.tire.rebate;
-  const bonus = rebate
-    ? `${money(rebate.amount)} of that comes back as a ${rebate.brand} rebate, taking a set to ${money(priceBreakdown(entry.tire).net)}.`
-    : null;
-
-  return { lead, support, tradeoff, caveats, bonus };
+  return { lead, support, tradeoff, caveats };
 }
 
 /**
@@ -968,11 +963,6 @@ function ResultCard({ entry, entries, answers, weights, rank, size, group }) {
         <p className="mt-2 text-[15px] leading-relaxed text-ink/85">
           {reasons.lead} {reasons.support}
         </p>
-        {reasons.bonus && (
-          <p className="mt-2 text-[13px] leading-relaxed text-smoke">
-            {reasons.bonus}
-          </p>
-        )}
 
         {reasons.tradeoff && (
           <p className="mt-3 rounded-sm bg-fog px-3 py-2 text-[13px] leading-snug text-ink/80">
@@ -1902,7 +1892,7 @@ export default function FindMyTiresPage() {
                         value: b.value,
                         label: b.label,
                         detail: Number.isFinite(b.max)
-                          ? `About ${money(b.max * SET_SIZE)} for a set of ${SET_SIZE}, before install and rebates.`
+                          ? `About ${money(b.max * SET_SIZE)} for a set of ${SET_SIZE}, before install.`
                           : "Ranked on fit and performance first, price second.",
                       }}
                       checked={answers.budget === b.value}
@@ -1915,8 +1905,7 @@ export default function FindMyTiresPage() {
                 </div>
                 <p className="mt-4 text-[13px] leading-snug text-smoke">
                   Tires are priced per tire and sold in sets of {SET_SIZE}. The
-                  set prices on the next screen are what you would actually pay,
-                  with any manufacturer rebate shown separately.
+                  set prices on the next screen are what you would actually pay.
                 </p>
               </fieldset>
             )}

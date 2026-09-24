@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   BadgeCheck,
-  BadgePercent,
   Building2,
   CalendarCheck,
   CircleDollarSign,
@@ -24,9 +23,6 @@ import {
 import { BUSINESS, TIRE_BRANDS } from "../data/business.js";
 import { MOBILE_SERVICES, SHOP_SERVICES } from "../data/services.js";
 import { TIRES, TIRE_CATEGORIES } from "../data/products.js";
-import { money } from "../context/CartContext.jsx";
-import { SET_SIZE, setPrice } from "../data/pricing.js";
-import ProductArt from "../components/shop/ProductArt.jsx";
 import ProductCard from "../components/shop/ProductCard.jsx";
 import SearchPanel from "../components/shop/SearchPanel.jsx";
 import { Seo, Section, SectionHead, Stars } from "../components/ui/index.jsx";
@@ -261,68 +257,6 @@ function ShopByCategory() {
   );
 }
 
-/* ----------------------------- Rebates & deals ---------------------------- */
-
-function RebateStrip() {
-  // Manufacturer rebates live on the product, so the strip is whatever the
-  // catalog is currently running rather than a hand-kept list that goes stale.
-  const rebated = (TIRES ?? []).filter((t) => t.rebate);
-  if (rebated.length === 0) return null;
-
-  return (
-    <Section className="bg-sky">
-      <SectionHead
-        eyebrow="Rebates & deals"
-        title="Money back from the manufacturer"
-        lede={`Prepaid-card rebates on a set of ${SET_SIZE}, claimed after your order ships. We send the form with your confirmation.`}
-        action={
-          <Link to="/coupons" className="btn-outline btn-sm">
-            All current offers
-            <ArrowRight size={15} aria-hidden />
-          </Link>
-        }
-      />
-
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        {rebated.map((tire) => (
-          <Link
-            key={tire.id}
-            to={`/tires/${tire.slug}`}
-            className="card-hover group flex flex-col items-start p-5"
-          >
-            <ProductArt
-              kind="tire"
-              accent={tire.accent}
-              size={56}
-              label={`${tire.brand} ${tire.model}`}
-              className="mb-3"
-            />
-            <span className="font-display text-xs font-bold uppercase tracking-[0.09em] text-smoke">
-              {tire.brand}
-            </span>
-            <h3 className="text-lg leading-tight">{tire.model}</h3>
-            <p className="mt-3 flex items-center gap-1.5 font-display text-sm font-bold text-drop">
-              <BadgePercent size={15} aria-hidden />
-              {tire.rebate.label}
-            </p>
-            <p className="mt-auto pt-3 text-xs text-smoke">
-              {money(setPrice(tire))} a set · {tire.size}
-            </p>
-            <span className="mt-3 flex items-center gap-1.5 font-display text-[13px] font-bold text-ink group-hover:text-drop">
-              See the deal
-              <ArrowRight
-                size={14}
-                aria-hidden
-                className="transition-transform group-hover:translate-x-1"
-              />
-            </span>
-          </Link>
-        ))}
-      </div>
-    </Section>
-  );
-}
-
 /* ----------------------------- Delivery choice ---------------------------- */
 
 const DELIVERY = [
@@ -330,7 +264,7 @@ const DELIVERY = [
     Icon: Package,
     eyebrow: "Anywhere in the continental US",
     title: "Ship it to me",
-    copy: "Your order is drop-shipped straight from the distributor to the address you give us — home, work, or your own installer. Shipping and delivery time are shown at checkout before you commit.",
+    copy: "Your order is drop-shipped straight from the distributor to the address you give us — home, work, or your own installer. Shipping is free, and the delivery estimate is shown at checkout before you commit.",
     to: "/shipping",
     cta: "How shipping works",
   },
@@ -815,7 +749,6 @@ export default function HomePage() {
           there is a shop here at all, and it used to sit seventh, behind
           five sections of explanation. */}
       <FeaturedTires />
-      <RebateStrip />
 
       {/* For the shopper the four featured tires did not suit. */}
       <ShopByCategory />

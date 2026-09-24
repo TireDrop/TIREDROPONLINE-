@@ -91,7 +91,7 @@ const FULFILLMENT = [
     value: "ship",
     icon: Package,
     title: "Ship to my address",
-    copy: `Delivered anywhere in ${BUSINESS.shipping.area}. Shipping and delivery time are confirmed before payment.`,
+    copy: `Delivered free anywhere in ${BUSINESS.shipping.area}. The delivery estimate is confirmed before payment.`,
   },
   {
     value: "shop",
@@ -345,7 +345,7 @@ function OrderSummary({ lines, totals, promoCode }) {
         )}
         <SummaryRow
           term="Shipping"
-          value={totals.shipping === 0 ? "FREE" : money(totals.shipping)}
+          value="Free"
         />
         <SummaryRow term="Sales tax (7%)" value={money(totals.tax)} />
       </dl>
@@ -392,7 +392,7 @@ function makeOrderRef() {
 /* ------------------------------------------------------------------ */
 
 export default function CheckoutPage() {
-  const { lines, subtotal, installTotal, shipping, clear } = useCart();
+  const { lines, subtotal, installTotal, clear } = useCart();
   const safeLines = Array.isArray(lines) ? lines : [];
 
   const [stepIndex, setStepIndex] = useState(0);
@@ -408,13 +408,13 @@ export default function CheckoutPage() {
   const promo = useMemo(() => {
     const code = readSavedPromo();
     if (!code) return null;
-    const result = evaluatePromo(code, { subtotal, installTotal, shipping });
+    const result = evaluatePromo(code, { subtotal, installTotal });
     return result.ok ? result : null;
-  }, [subtotal, installTotal, shipping]);
+  }, [subtotal, installTotal]);
 
   const totals = useMemo(
-    () => summarize({ subtotal, installTotal, shipping }, promo),
-    [subtotal, installTotal, shipping, promo],
+    () => summarize({ subtotal, installTotal }, promo),
+    [subtotal, installTotal, promo],
   );
 
   // What the cart already committed to, so step two can refuse a delivery
@@ -507,7 +507,7 @@ export default function CheckoutPage() {
         .join("\n"),
       subtotal: money(totals.subtotal),
       installation: money(totals.installTotal),
-      shipping: totals.shipping ? money(totals.shipping) : "FREE",
+      shipping: "Free",
       tax: money(totals.tax),
       total: money(totals.total),
     });

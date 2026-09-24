@@ -25,7 +25,6 @@ export const EMPTY_FILTERS = {
   minPrice: "",
   maxPrice: "",
   minRating: 0,
-  rebateOnly: false,
 };
 
 export function countActiveFilters(value = {}) {
@@ -36,8 +35,7 @@ export function countActiveFilters(value = {}) {
     (value.finishes?.length || 0) +
     (value.minPrice ? 1 : 0) +
     (value.maxPrice ? 1 : 0) +
-    (value.minRating ? 1 : 0) +
-    (value.rebateOnly ? 1 : 0)
+    (value.minRating ? 1 : 0)
   );
 }
 
@@ -83,12 +81,6 @@ export function activeFilterChips(value = {}) {
       label: `${value.minRating} & up`,
       next: { ...value, minRating: 0 },
     });
-  if (value.rebateOnly)
-    chips.push({
-      id: "rebate",
-      label: "Rebates available",
-      next: { ...value, rebateOnly: false },
-    });
 
   return chips;
 }
@@ -124,7 +116,6 @@ function CheckRow({ label, checked, onChange, name }) {
  */
 function FilterFacets({ idPrefix, value, onChange, facets }) {
   const isWheel = facets.kind === "wheel";
-  const isTire = facets.kind === "tire";
 
   const toggleIn = (key, item) => {
     const list = value[key] || [];
@@ -136,21 +127,6 @@ function FilterFacets({ idPrefix, value, onChange, facets }) {
 
   return (
     <>
-      {/* Rebates lead, the way they do on every competitor's facet list — a
-          $70 card back on a set is the offer that moves a shopper. */}
-      {isTire && (
-        <FilterGroup title="Deals">
-          <CheckRow
-            name={`${idPrefix}-rebate`}
-            label="Rebates available"
-            checked={Boolean(value.rebateOnly)}
-            onChange={() =>
-              onChange({ ...value, rebateOnly: !value.rebateOnly })
-            }
-          />
-        </FilterGroup>
-      )}
-
       <FilterGroup title="Brand">
         <div className="max-h-56 overflow-y-auto pr-1">
           {facets.brands.map((b) => (

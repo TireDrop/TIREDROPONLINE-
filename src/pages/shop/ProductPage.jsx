@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
-  BadgePercent,
   Check,
   ChevronRight,
   Gauge,
@@ -43,13 +42,11 @@ import {
   SET_SIZE,
   deliveryEstimate,
   priceBreakdown,
-  shipsFree,
 } from "../../data/pricing.js";
 
 const BADGE_TONE = {
   "Best Seller": "drop",
   "Staff Pick": "ink",
-  Rebate: "amber",
 };
 
 // One, a pair, a set, or a set plus a full-size spare. Four leads because that
@@ -218,7 +215,6 @@ export default function ProductPage({ kind = "tire" }) {
   const orderTotal = bill.price + installTotal;
   const inCompare = compare.has(product.slug);
   const compareLocked = !inCompare && compare.isFull;
-  const shortOfSet = product.rebate ? SET_SIZE - qty : 0;
   const plural = (n) => (n === 1 ? unit : `${unit}s`);
 
   const handleAdd = () => {
@@ -436,7 +432,7 @@ export default function ProductPage({ kind = "tire" }) {
                         className="mt-0.5 shrink-0 text-drop"
                       />
                       <span className="min-w-0">
-                        {shipsFree() ? "Ships free, arrives" : "Arrives"}{" "}
+                        Ships free, arrives{" "}
                         {delivery.earliest}–{delivery.latest}
                       </span>
                     </span>
@@ -489,9 +485,7 @@ export default function ProductPage({ kind = "tire" }) {
               </div>
             </fieldset>
 
-            {/* Price breakdown. List, what we charge, what the manufacturer
-                sends back — spelled out, because a rebate a shopper does not
-                notice is a rebate that never influenced the sale. */}
+            {/* Price breakdown: list, what we charge, and install. */}
             <dl className="tnum mt-6 space-y-1.5 text-sm">
               {bill.instantSaving > 0 && (
                 <div className="flex justify-between gap-4">
@@ -525,51 +519,10 @@ export default function ProductPage({ kind = "tire" }) {
                 <dt>Estimated total</dt>
                 <dd>{money(orderTotal)}</dd>
               </div>
-
-              {product.rebate && bill.rebate > 0 && (
-                <>
-                  <div className="flex justify-between gap-4 pt-1">
-                    <dt className="text-smoke">
-                      {product.rebate.brand} mail-in rebate
-                    </dt>
-                    <dd className="font-medium text-drop">
-                      − {money(bill.rebate)}
-                    </dd>
-                  </div>
-                  <div className="flex justify-between gap-4 font-display text-lg font-bold text-drop">
-                    <dt>After rebate</dt>
-                    <dd>{money(orderTotal - bill.rebate)}</dd>
-                  </div>
-                </>
-              )}
             </dl>
 
-            {product.rebate && shortOfSet > 0 && (
-              <button
-                type="button"
-                onClick={() => setQty(SET_SIZE)}
-                className="mt-3 flex w-full items-start gap-2.5 rounded-sm border border-amber bg-amber/10 p-3 text-left text-sm"
-              >
-                <BadgePercent
-                  size={16}
-                  aria-hidden
-                  className="mt-0.5 shrink-0 text-ink"
-                />
-                <span className="min-w-0">
-                  Add {shortOfSet} more to qualify for the{" "}
-                  {money(product.rebate.amount)} {product.rebate.brand} rebate.
-                </span>
-              </button>
-            )}
-
-            {product.rebate && (
-              <p className="mt-2 text-xs text-smoke">
-                {product.rebate.terms} Offer ends {product.rebate.expires}.
-              </p>
-            )}
-
             <p className="mt-2 text-xs text-smoke">
-              Taxes and shipping are calculated at checkout.
+              Shipping is free. Taxes are calculated at checkout.
             </p>
 
             <button

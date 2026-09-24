@@ -640,7 +640,7 @@ export default function FinancingPage() {
               </p>
               <p>
                 <span className="text-bone">Prices are separate.</span> What you
-                pay us for tires, wheels, shipping and labor does not change
+                pay us for tires, wheels and labor does not change
                 based on how you pay. Financing costs, if any, are between you
                 and the lender.
               </p>

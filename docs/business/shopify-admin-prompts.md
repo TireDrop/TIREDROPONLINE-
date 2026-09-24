@@ -252,9 +252,8 @@ REPORT BACK:
 
 ## 9. Report shipping and tax settings (read only)
 
-The site's copy disagrees with itself on shipping — "free shipping on every
-tire" in one place, "$29 under $500" in another. What checkout actually charges
-decides which one is true.
+The site says shipping is free to every address in the continental US, with
+no order minimum. This checks that Shopify's checkout charges the same.
 
 ```
 TASK: Report the store's shipping and tax configuration. CHANGE NOTHING.

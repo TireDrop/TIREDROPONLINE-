@@ -1,6 +1,6 @@
 // Single source of truth for business facts.
 //
-// TireDrop is the national e-commerce brand. Tires ship anywhere in the
+// TireDrop is the national e-commerce brand. Tires ship free anywhere in the
 // continental US, drop-shipped from the distributor. Customers in South
 // Florida can instead choose free ship-to-store and have them installed at
 // Extreme Tires in Sunrise — the parent business, which also runs the mobile
@@ -55,10 +55,10 @@ export const BUSINESS = {
     { days: "Sunday", time: "Closed" },
   ],
 
-  // Where tires can be shipped, versus where they can be installed.
+  // Where tires can be shipped, versus where they can be installed. Shipping
+  // is free to every address in the area, with no order minimum.
   shipping: {
     area: "the continental United States",
-    freeThreshold: 0, // free shipping is per-item, set by the distributor
     storePickup: true,
   },
 

@@ -5,7 +5,6 @@ import {
   CalendarClock,
   Check,
   Copy,
-  Mail,
   Phone,
   Tag,
   Truck,
@@ -19,7 +18,7 @@ import {
   Section,
   Badge,
 } from "../../components/ui/index.jsx";
-import { BUSINESS, TIRE_BRANDS } from "../../data/business.js";
+import { BUSINESS } from "../../data/business.js";
 
 /* ------------------------------------------------------------------ */
 /*  Offer catalog                                                      */
@@ -31,19 +30,13 @@ const GROUPS = [
     id: "tire",
     label: "Store Specials",
     icon: Truck,
-    lede: "Deals on the rubber itself — plus the shipping that gets it to your door.",
+    lede: "Deals on the rubber itself. Shipping to your door is already free anywhere in the continental US.",
   },
   {
     id: "service",
     label: "Install Specials — South Florida",
     icon: Wrench,
     lede: "For local customers: savings on the work we do once your order lands at the shop, or when the van comes out to you.",
-  },
-  {
-    id: "rebate",
-    label: "Manufacturer Rebates",
-    icon: Mail,
-    lede: "Money back straight from the tire makers, across the whole brand roster. We walk you through the claim form.",
   },
 ];
 
@@ -58,15 +51,6 @@ const OFFERS = [
     fine: "First-time customers only, one use per household. Applies to the parts subtotal; installation, taxes and disposal excluded. Cannot be combined with FLEET15.",
     expires: "December 31, 2026",
     featured: true,
-  },
-  {
-    id: "free-delivery",
-    group: "tire",
-    title: "Free Shipping On Any Order",
-    deal: "Waives the $29 shipping fee on orders under $500. Orders at or above $500 already ship free.",
-    code: "FREEDELIVERY",
-    fine: "Valid on orders shipping anywhere in the continental US. One use per order. Does not apply to freight-only commercial sizes.",
-    expires: "November 30, 2026",
   },
   {
     id: "fleet",
@@ -119,44 +103,6 @@ const OFFERS = [
     title: "$30 Off Brake Pads & Rotors",
     deal: "Per axle, on any pad-and-rotor replacement booked with a tire or wheel order. South Florida only.",
     fine: "Per axle, parts and labor. Must be booked at the same time as a tire or wheel purchase. Brake work is performed at the Sunrise shop.",
-    expires: "December 15, 2026",
-  },
-  /* ---------------- Manufacturer rebates ---------------- */
-  {
-    id: "continental",
-    group: "rebate",
-    brand: "Continental",
-    title: "Continental — Up To $80 Back",
-    deal: "Buy a set of four qualifying Continental tires and claim up to $80 on a prepaid Visa card.",
-    fine: "Purchase must fall inside the promotion window. Submit the rebate form and your itemized invoice online or by mail within 30 days of purchase. Allow 6–8 weeks for the card. Offer terms set by the manufacturer and subject to change.",
-    expires: "October 31, 2026",
-  },
-  {
-    id: "pirelli",
-    group: "rebate",
-    brand: "Pirelli",
-    title: "Pirelli — $100 Prepaid Card",
-    deal: "Claim $100 back on a set of four qualifying P Zero or Scorpion tires.",
-    fine: "Set of four required, purchased in a single transaction. Online submission with your itemized invoice within 30 days. Allow 6–8 weeks for delivery. Manufacturer terms apply.",
-    expires: "November 30, 2026",
-    featured: true,
-  },
-  {
-    id: "nexen",
-    group: "rebate",
-    brand: "Nexen",
-    title: "Nexen — $70 Back On Four",
-    deal: "Qualifying N'Fera and Roadian lines earn a $70 prepaid card on a set of four.",
-    fine: "Set of four from qualifying lines only. Rebate submitted within 30 days of the invoice date. One rebate per household per promotion. Manufacturer terms apply.",
-    expires: "October 15, 2026",
-  },
-  {
-    id: "nitto",
-    group: "rebate",
-    brand: "Nitto",
-    title: "Nitto — $60 Back On Four",
-    deal: "A $60 prepaid card on a set of four qualifying Nitto street or all-terrain tires.",
-    fine: "Set of four required. Qualifying lines are set by the manufacturer and can change mid-promotion — a tech confirms eligibility before you buy. Submit within 30 days of purchase.",
     expires: "December 15, 2026",
   },
 ];
@@ -231,13 +177,9 @@ function OfferCard({ offer, status, onCopy }) {
       {offer.featured && <div className="hazard h-1.5" aria-hidden />}
       <div className="flex flex-1 flex-col p-6">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          {offer.brand ? (
-            <Badge tone="ink">{offer.brand}</Badge>
-          ) : (
-            <Badge tone={offer.code ? "drop" : "soft"}>
-              {offer.code ? "Promo code" : "Mention at booking"}
-            </Badge>
-          )}
+          <Badge tone={offer.code ? "drop" : "soft"}>
+            {offer.code ? "Promo code" : "Mention at booking"}
+          </Badge>
           {offer.featured && <Badge tone="amber">Best value</Badge>}
         </div>
 
@@ -313,13 +255,13 @@ export default function CouponsPage() {
     <>
       <Seo
         title="Coupons & Current Offers"
-        description="Live tire specials, free-shipping codes, set-of-four deals and manufacturer rebates from TireDrop. Copy a promo code and use it at checkout."
+        description="Live tire specials, set-of-four deals and South Florida install offers from TireDrop. Copy a promo code and use it at checkout."
       />
       <Breadcrumbs trail={[{ label: "Coupons" }]} />
 
       <PageHero
         eyebrow="Current Offers"
-        title="Deals & Rebates"
+        title="Deals"
         lede="Real money off a real order. Copy a code straight into your cart, or mention the offer when a tech calls to confirm it."
       >
         <div className="flex flex-wrap gap-3">
@@ -401,22 +343,6 @@ export default function CouponsPage() {
                   </div>
                 </div>
 
-                {group.id === "rebate" && (
-                  <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-card bg-steel-wash px-5 py-4">
-                    <span className="font-display text-xs uppercase tracking-[0.09em] text-bone/70">
-                      Rebate brands
-                    </span>
-                    {TIRE_BRANDS.map((b) => (
-                      <span
-                        key={b.slug}
-                        className="font-display text-lg font-bold text-bone"
-                      >
-                        {b.name}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                   {offers.map((offer) => (
                     <OfferCard
@@ -438,7 +364,7 @@ export default function CouponsPage() {
         <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-12">
           <div>
             <p className="eyebrow mb-2">Using an offer</p>
-            <h2 className="h2">Three ways to cash one in</h2>
+            <h2 className="h2">Two ways to cash one in</h2>
             <ol className="mt-6 space-y-5">
               {[
                 {
@@ -448,10 +374,6 @@ export default function CouponsPage() {
                 {
                   title: "Mention it when we call",
                   copy: "Offers without a code get applied by hand. Say the offer name when a team member calls to confirm fitment and take payment.",
-                },
-                {
-                  title: "Claim your rebate after the sale",
-                  copy: "Manufacturer rebates are submitted to the tire maker, not to us. You get an itemized invoice with the order, and we walk you through the claim form.",
                 },
               ].map((s, i) => (
                 <li key={s.title} className="flex gap-4">
@@ -482,12 +404,6 @@ export default function CouponsPage() {
                 Offers apply to orders shipping within the continental US and
                 can't be applied to an order that has already been completed and
                 paid.
-              </li>
-              <li>
-                Manufacturer rebates are funded and fulfilled by the tire maker.
-                Qualifying lines, amounts and submission windows are set by them
-                and can change without notice. We confirm eligibility before you
-                buy.
               </li>
               <li>
                 Installation offers are South Florida only. Mobile installs also

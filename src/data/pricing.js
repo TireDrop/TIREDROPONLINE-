@@ -11,31 +11,21 @@ import { BUSINESS } from "./business.js";
 
 export const SET_SIZE = 4;
 
-/** What a set of four costs, before install, shipping or rebate. */
+/** What a set of four costs, before install. Shipping is free. */
 export const setPrice = (product, qty = SET_SIZE) => product.price * qty;
 
 /** What the same set lists at, so the saving can be shown honestly. */
 export const setMsrp = (product, qty = SET_SIZE) => product.msrp * qty;
 
-/** Manufacturer rebate on a set. Rebates are set-of-four deals, not per tire. */
-export const rebateFor = (product, qty = SET_SIZE) =>
-  product.rebate && qty >= SET_SIZE ? product.rebate.amount : 0;
-
-/**
- * The full picture for a quantity: list, price, instant saving, rebate, and
- * the net figure after the rebate lands.
- */
+/** The full picture for a quantity: list, price, instant saving and install. */
 export function priceBreakdown(product, qty = SET_SIZE) {
   const list = setMsrp(product, qty);
   const price = setPrice(product, qty);
-  const rebate = rebateFor(product, qty);
   return {
     qty,
     list,
     price,
     instantSaving: Math.max(0, list - price),
-    rebate,
-    net: price - rebate,
     install: (product.installPrice ?? 0) * qty,
   };
 }
@@ -84,6 +74,3 @@ export function deliveryEstimate(now = new Date()) {
     storeName: BUSINESS.shop.name,
   };
 }
-
-/** Free shipping is per item and set by the distributor; today that is all of them. */
-export const shipsFree = () => true;

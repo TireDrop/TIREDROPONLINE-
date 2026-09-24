@@ -58,7 +58,7 @@ const DIFFERENTIATORS = [
   {
     icon: Package,
     title: "Shipped straight to you",
-    copy: `Order online and your tires ship to your address anywhere in ${BUSINESS.shipping.area}. They come direct from the distributor's warehouse, so you are not paying for a middle shelf they sat on.`,
+    copy: `Order online and your tires ship free to your address anywhere in ${BUSINESS.shipping.area}. They come direct from the distributor's warehouse, so you are not paying for a middle shelf they sat on.`,
   },
   {
     icon: Store,
@@ -78,7 +78,7 @@ const DIFFERENTIATORS = [
   {
     icon: Tag,
     title: "The price is the price",
-    copy: "What you see at checkout covers the tires and the shipping method you chose. If anything about your order changes, we call you before we do anything about it.",
+    copy: "What you see at checkout covers the tires, and shipping is free to any continental-US address. If anything about your order changes, we call you before we do anything about it.",
   },
   {
     icon: Clock,

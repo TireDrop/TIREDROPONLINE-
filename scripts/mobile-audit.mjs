@@ -63,7 +63,7 @@ for (const sig of ["SIGINT", "SIGTERM"]) {
 const ROUTES = [
   "/",
   "/tires",
-  "/tires/continental-truecontact-tour-215-60r16", // carries a rebate
+  "/tires/continental-truecontact-tour-215-60r16", // standard tire product page
   "/tires/continental-vikingcontact-7-225-45r17", // unrated axes render "—"
   "/wheels",
   "/wheels/enkei-ts-v-18x8-matte-black",

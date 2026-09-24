@@ -92,31 +92,16 @@ export function CartProvider({ children }) {
       (n, l) => n + (l.install ? l.installPrice * l.qty : 0),
       0,
     );
-    // Ship-to-store is advertised as free in five places — the card, the
-    // product page, the cart toggle, the checkout option and the header
-    // banner — so a cart with every line set to install must not be billed
-    // $29 for delivery it was just promised for nothing.
-    const shippableSubtotal = lines.reduce(
-      (n, l) => n + (l.install ? 0 : l.price * l.qty),
-      0,
-    );
-    // The $500 threshold is measured against the whole order, because that is
-    // what /coupons promises: "Orders at or above $500 already ship free."
-    // Measuring it against the shippable part alone would start charging $29
-    // on orders the site says ship free. This is a placeholder rate: once the
-    // distributor APIs are wired, the carrier quote replaces it.
-    const shipping = shippableSubtotal === 0 || subtotal >= 500 ? 0 : 29;
     const tax = Math.round((subtotal + installTotal) * 0.07 * 100) / 100;
-    const total = subtotal + installTotal + shipping + tax;
+    // Shipping is free to every continental-US address and to the shop, so
+    // there is no shipping charge to add.
+    const total = subtotal + installTotal + tax;
 
     return {
       lines,
       count,
       subtotal,
-      // What the free-shipping threshold is actually measured against.
-      shippableSubtotal,
       installTotal,
-      shipping,
       tax,
       total,
       addItem: (item, qty = 1) =>

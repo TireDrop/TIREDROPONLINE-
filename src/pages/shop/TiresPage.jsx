@@ -113,7 +113,6 @@ export default function TiresPage() {
       minPrice: params.get("minp") || "",
       maxPrice: params.get("maxp") || "",
       minRating: Number(params.get("rating") || 0),
-      rebateOnly: params.get("rebate") === "1",
     }),
     [params],
   );
@@ -164,7 +163,6 @@ export default function TiresPage() {
       minp: value.minPrice,
       maxp: value.maxPrice,
       rating: value.minRating || "",
-      rebate: value.rebateOnly ? "1" : "",
     });
 
   const onSearch = (payload) => {
@@ -204,7 +202,6 @@ export default function TiresPage() {
         return false;
       if (t.price < min || t.price > max) return false;
       if (filters.minRating && t.rating < filters.minRating) return false;
-      if (filters.rebateOnly && t.rebate == null) return false;
       if (sizeQuery.width && String(t.width) !== sizeQuery.width) return false;
       if (sizeQuery.aspect && String(t.aspect) !== sizeQuery.aspect)
         return false;
@@ -259,7 +256,6 @@ export default function TiresPage() {
       minp: "",
       maxp: "",
       rating: "",
-      rebate: "",
       w: "",
       a: "",
       d: "",

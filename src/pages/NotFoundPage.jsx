@@ -21,13 +21,13 @@ const HELPFUL_LINKS = [
     to: "/shipping",
     icon: Truck,
     title: "Shipping & Install",
-    copy: "Ship to your address, or free to our shop if you are in South Florida.",
+    copy: "Free shipping to your address, or free to our shop if you are in South Florida.",
   },
   {
     to: "/coupons",
     icon: CalendarClock,
-    title: "Deals & Rebates",
-    copy: "Promo codes, set-of-four offers and manufacturer rebates in one place.",
+    title: "Deals",
+    copy: "Promo codes, set-of-four offers and install specials in one place.",
   },
 ];
 

@@ -121,27 +121,16 @@ first size typed) is a guess at intent.
 `#decoder` and focus the **Compare against** field — which is honest but of
 limited value until a primary size is typed.
 
-## 5. ~~Free shipping is measured on parts only~~ — resolved
+## 5. ~~Free shipping is measured on parts only~~ — superseded
 
-Closed while committing this pass. The $29 fee is charged only on the part of
-the order going to a street address, but the $500 waiver is measured against
-the whole order, because that is what `/coupons` promises: _"Orders at or above
-$500 already ship free."_ Measuring the threshold against the shippable part
-alone would have started charging $29 on orders the site says ship free, which
-trades one contradiction for another.
+The owner has since confirmed that shipping is free to every address in the
+continental US, with no minimum. The flat fee and the order threshold are gone
+from the cart and checkout, so this no longer applies.
 
-Checked in the browser across the combinations: $392 all-to-shop is free;
-$392 to an address is $29 with the meter reading "$108.00 to go"; $872 to an
-address is free; any mixed cart at or above $500 is free.
+## 6. ~~A rebate is capped at one per order~~ — superseded
 
-## 6. A rebate is capped at one per order, however many tires are bought
-
-`rebateFor` in `src/data/pricing.js` returns the flat rebate whenever
-`qty >= 4`. On `/tires/continental-truecontact-tour-215-60r16` set the quantity
-to 8: the page shows two sets' worth of tires and one $70 rebate. Under-
-promising rather than over-promising, and the rebates are illustrative, so this
-is only worth settling when the real rebate terms arrive — most manufacturer
-programmes are per set of four.
+The owner has confirmed the manufacturer rebates were not real. Rebate data,
+pricing and copy have been removed from the site, so this no longer applies.
 
 ## 7. Smaller things, in descending order of how likely a reviewer is to see them
 

@@ -54,10 +54,10 @@ const CHOICES = [
   {
     icon: Truck,
     badge: "Anywhere in the lower 48",
-    title: "Ship to my address",
+    title: "Ship to my address — free",
     body: "Home, work, or the shop you already trust with your car. Tires arrive where you told us to send them, and you arrange fitting on your own schedule.",
     points: [
-      "Available across " + BUSINESS.shipping.area,
+      "Free to any address across " + BUSINESS.shipping.area,
       "Ships direct from the distributor warehouse",
       "Tracking sent as soon as it exists",
     ],
@@ -85,7 +85,7 @@ const CHOICES = [
 const FAQ = [
   {
     q: "How much does shipping cost?",
-    a: "It depends on what you ordered and where it is going, so we do not quote a flat number here. Your exact shipping cost is calculated and shown at checkout, before you pay — not added afterwards. Choosing free ship-to-store at our Sunrise shop removes the shipping charge entirely.",
+    a: "Nothing. Shipping is free to any address in the continental US, with no order minimum. Ship-to-store at our Sunrise shop is free too.",
   },
   {
     q: "How long will my tires take to arrive?",
@@ -130,7 +130,7 @@ export default function ShippingPage() {
     <>
       <Seo
         title="How Shipping Works"
-        description={`${BUSINESS.name} ships tires and wheels direct from the distributor to anywhere in ${BUSINESS.shipping.area}. See how ordering, tracking, damaged shipments and out-of-stock sizes are handled.`}
+        description={`${BUSINESS.name} ships tires and wheels free, direct from the distributor, to anywhere in ${BUSINESS.shipping.area}. See how ordering, tracking, damaged shipments and out-of-stock sizes are handled.`}
       />
 
       <Breadcrumbs trail={[{ label: "How shipping works" }]} />
@@ -138,7 +138,7 @@ export default function ShippingPage() {
       <PageHero
         eyebrow="Shipping"
         title="Ordered online. Shipped to your door."
-        lede={`${BUSINESS.name} is an online tire and wheel store, so your order ships direct from the distributor warehouse to anywhere in ${BUSINESS.shipping.area}. No storefront markup, no waiting on one shop's back room to restock.`}
+        lede={`${BUSINESS.name} is an online tire and wheel store, so your order ships free, direct from the distributor warehouse, to anywhere in ${BUSINESS.shipping.area}. No storefront markup, no waiting on one shop's back room to restock.`}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link to="/tires" className="btn-primary">
@@ -333,16 +333,17 @@ export default function ShippingPage() {
           <div className="rounded-card border border-graphite bg-steel-wash p-6 md:p-8">
             <h3 className="h3">Shipping cost and dates, straight</h3>
             <p className="mt-3 text-sm leading-relaxed text-bone/70">
-              We do not publish a shipping price or a delivery window on this
-              page, and that is deliberate. Both depend on your address, your
+              Shipping is free to any address in the continental US, so there
+              is no price to publish. We do not print a delivery window on this
+              page, and that is deliberate. It depends on your address, your
               tire size and which warehouse fills the order — anything we
               printed here would be a guess.
             </p>
             <ul className="mt-6 space-y-3">
               {[
-                "Your shipping cost is calculated at checkout, before payment",
-                "Your delivery estimate appears alongside it, for your address",
-                "Free ship-to-store removes the shipping charge entirely",
+                "Shipping is free to any continental-US address, no minimum",
+                "Your delivery estimate is shown at checkout, for your address",
+                "Ship-to-store at our Sunrise shop is free too",
                 "No handling fee gets added after you have paid",
               ].map((item) => (
                 <li

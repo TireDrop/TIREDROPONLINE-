@@ -91,7 +91,7 @@ const COMPARISON = [
   },
   {
     store: "Free — ship-to-store costs nothing",
-    home: "Shipping is calculated at checkout",
+    home: "Also free to any continental-US address",
   },
   {
     store: "Old set taken away and recycled",
@@ -103,9 +103,9 @@ const FAQ = [
   {
     q: "Does ship to store really cost nothing?",
     a:
-      "Yes. Choosing the " +
+      "Yes. Shipping to the " +
       BUSINESS.shop.city +
-      " shop as the delivery address removes the shipping charge from your order. You still pay for the tires and, separately, for the installation when you come in.",
+      " shop is free, the same as shipping to any address in the continental US. You still pay for the tires and, separately, for the installation when you come in.",
   },
   {
     q: "What does the installation itself cost?",

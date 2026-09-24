@@ -71,7 +71,7 @@ const FITTING_OPTIONS = [
   {
     icon: Package,
     title: "Have them shipped to you",
-    copy: `Order online and the tires go to your address anywhere in ${BUSINESS.shipping.area}. Take them to any installer you like — plenty of customers already have a shop they trust.`,
+    copy: `Order online and the tires ship free to your address anywhere in ${BUSINESS.shipping.area}. Take them to any installer you like — plenty of customers already have a shop they trust.`,
     to: "/shipping",
     cta: "How shipping works",
   },

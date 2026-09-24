@@ -38,17 +38,12 @@ export const PROMOS = {
     label: "10% off tires and wheels",
     hint: "First-time customers. Discount applies to the parts subtotal.",
   },
-  FREEDELIVERY: {
-    label: "Free shipping",
-    hint: "Waives the $29 shipping fee on orders under $500.",
-  },
   FLEET15: {
     label: "15% off fleet orders",
     hint: "Parts subtotal of $1,000 or more.",
   },
 };
 
-const FREE_SHIP_AT = 500;
 const TAX_RATE = 0.07;
 const round2 = (n) => Math.round(n * 100) / 100;
 
@@ -76,10 +71,7 @@ export function readSavedPromo() {
  * Validates a code against the current cart and returns the discount split.
  * Returns `{ ok: false, error }` with customer-facing copy when it doesn't apply.
  */
-export function evaluatePromo(
-  raw,
-  { subtotal = 0, installTotal = 0, shipping = 0 } = {},
-) {
+export function evaluatePromo(raw, { subtotal = 0, installTotal = 0 } = {}) {
   const code = String(raw || "")
     .trim()
     .toUpperCase();
@@ -88,7 +80,6 @@ export function evaluatePromo(
     code,
     subtotalOff: 0,
     installOff: 0,
-    freeShipping: false,
   };
 
   if (!code) return { ...miss, error: "Enter a promo code first." };
@@ -105,7 +96,6 @@ export function evaluatePromo(
     label: PROMOS[code].label,
     subtotalOff: 0,
     installOff: 0,
-    freeShipping: false,
     ...extra,
   });
 
@@ -130,18 +120,6 @@ export function evaluatePromo(
       }
       return hit({ subtotalOff: round2(subtotal * 0.1) });
 
-    case "FREEDELIVERY":
-      if (shipping <= 0) {
-        return {
-          ...miss,
-          error:
-            subtotal >= FREE_SHIP_AT
-              ? `Good news — this order already clears ${money(FREE_SHIP_AT)}, so shipping is free without a code.`
-              : "Good news — shipping is already free on this order, so there is nothing for this code to take off.",
-        };
-      }
-      return hit({ freeShipping: true });
-
     case "FLEET15":
       if (subtotal < 1000) {
         return {
@@ -158,21 +136,22 @@ export function evaluatePromo(
   }
 }
 
-/** Recomputes the money rail with a promo folded in. Tax follows the discounted base. */
-export function summarize({ subtotal, installTotal, shipping }, promo) {
+/**
+ * Recomputes the money rail with a promo folded in. Tax follows the discounted
+ * base. Shipping is free to any continental-US address, so it adds nothing.
+ */
+export function summarize({ subtotal, installTotal }, promo) {
   const subtotalOff = promo?.ok ? promo.subtotalOff : 0;
   const installOff = promo?.ok ? promo.installOff : 0;
   const discount = round2(subtotalOff + installOff);
-  const shippingDue = promo?.ok && promo.freeShipping ? 0 : shipping;
   const taxable = Math.max(0, round2(subtotal + installTotal - discount));
   const tax = round2(taxable * TAX_RATE);
   return {
     subtotal,
     installTotal,
     discount,
-    shipping: shippingDue,
     tax,
-    total: round2(taxable + shippingDue + tax),
+    total: round2(taxable + tax),
   };
 }
 
@@ -421,7 +400,7 @@ const TRUST = [
   {
     icon: Truck,
     title: "Ships nationwide",
-    copy: `Drop-shipped to any address in ${BUSINESS.shipping.area}.`,
+    copy: `Drop-shipped free to any address in ${BUSINESS.shipping.area}.`,
   },
   {
     icon: ShieldCheck,
@@ -445,7 +424,6 @@ export default function CartPage() {
     count,
     subtotal,
     installTotal,
-    shipping,
     addItem,
     setQty,
     remove,
@@ -461,7 +439,6 @@ export default function CartPage() {
           label: PROMOS[saved]?.label || "",
           subtotalOff: 0,
           installOff: 0,
-          freeShipping: false,
         }
       : null;
   });
@@ -469,21 +446,17 @@ export default function CartPage() {
   // Re-run the saved code against the live cart so a changed cart can invalidate it.
   const applied = useMemo(() => {
     if (!promo?.code) return null;
-    const result = evaluatePromo(promo.code, {
-      subtotal,
-      installTotal,
-      shipping,
-    });
+    const result = evaluatePromo(promo.code, { subtotal, installTotal });
     return result.ok ? result : null;
-  }, [promo, subtotal, installTotal, shipping]);
+  }, [promo, subtotal, installTotal]);
 
   const totals = useMemo(
-    () => summarize({ subtotal, installTotal, shipping }, applied),
-    [subtotal, installTotal, shipping, applied],
+    () => summarize({ subtotal, installTotal }, applied),
+    [subtotal, installTotal, applied],
   );
 
   function handleApply(raw) {
-    const result = evaluatePromo(raw, { subtotal, installTotal, shipping });
+    const result = evaluatePromo(raw, { subtotal, installTotal });
     if (result.ok) {
       setPromo(result);
       savePromo(result.code);
@@ -495,8 +468,6 @@ export default function CartPage() {
     setPromo(null);
     savePromo("");
   }
-
-  const freeShipEarned = totals.shipping === 0;
 
   return (
     <>
@@ -581,47 +552,6 @@ export default function CartPage() {
               <div className="card p-6 lg:sticky lg:top-24">
                 <h2 className="h3">Order Summary</h2>
 
-                {/* Shipping is already waived over the threshold; the cart
-                    just never said so. Naming the gap in money is the whole
-                    lever — "$41 to go" is a decision, "orders over $500 ship
-                    free" is a policy nobody does arithmetic against. */}
-                {totals.subtotal > 0 &&
-                  (totals.shipping > 0 ? (
-                    <div className="mt-4 rounded-sm bg-sky p-3">
-                      <p className="text-[13px] leading-snug text-ink">
-                        <span className="font-display font-bold">
-                          {money(FREE_SHIP_AT - totals.subtotal)} to go
-                        </span>{" "}
-                        and the {money(totals.shipping)} shipping comes off.
-                      </p>
-                      <span
-                        className="mt-2 block h-1.5 overflow-hidden rounded-full bg-ink/[0.08]"
-                        role="progressbar"
-                        aria-label="Progress toward free shipping"
-                        aria-valuemin={0}
-                        aria-valuemax={FREE_SHIP_AT}
-                        aria-valuenow={Math.min(totals.subtotal, FREE_SHIP_AT)}
-                      >
-                        <span
-                          aria-hidden
-                          className="block h-full rounded-full bg-drop transition-[width] duration-300"
-                          style={{
-                            width: `${Math.min(100, (totals.subtotal / FREE_SHIP_AT) * 100)}%`,
-                          }}
-                        />
-                      </span>
-                    </div>
-                  ) : (
-                    <p className="mt-4 flex items-start gap-1.5 rounded-sm bg-sky p-3 text-[13px] leading-snug text-ink">
-                      <Check
-                        size={15}
-                        aria-hidden
-                        className="mt-px shrink-0 text-drop"
-                      />
-                      Shipping is free on this order.
-                    </p>
-                  ))}
-
                 <dl className="tnum mt-5 space-y-3 text-sm">
                   <div className="flex items-baseline justify-between gap-4">
                     <dt className="text-smoke">Tires &amp; wheels</dt>
@@ -654,11 +584,7 @@ export default function CartPage() {
                   <div className="flex items-baseline justify-between gap-4">
                     <dt className="text-smoke">Shipping</dt>
                     <dd className="font-display text-base">
-                      {freeShipEarned ? (
-                        <Badge tone="amber">Free</Badge>
-                      ) : (
-                        money(totals.shipping)
-                      )}
+                      <Badge tone="amber">Free</Badge>
                     </dd>
                   </div>
 
