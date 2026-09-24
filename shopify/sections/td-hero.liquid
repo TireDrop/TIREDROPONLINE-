@@ -1,0 +1,120 @@
+{% comment %}
+  TireDrop hero. Self-contained styling on purpose: it carries brand colours
+  that are not all expressible through Horizon's four-colour palette, and a
+  dark band whose text colour has to be pinned rather than inherited — a dark
+  section that inherits body ink renders black on navy.
+{% endcomment %}
+
+<section class="td-hero" style="--td-ink:{{ section.settings.background }};">
+  <div aria-hidden="true" class="td-hero__tread"></div>
+  <div aria-hidden="true" class="td-hero__ring"></div>
+
+  <div class="td-hero__inner">
+    {% if section.settings.eyebrow != blank %}
+      <p class="td-hero__eyebrow">{{ section.settings.eyebrow }}</p>
+    {% endif %}
+
+    <h1 class="td-hero__title">
+      {{ section.settings.heading }}
+      {% if section.settings.heading_accent != blank %}
+        <span class="td-hero__accent">{{ section.settings.heading_accent }}</span>
+      {% endif %}
+    </h1>
+
+    {% if section.settings.lede != blank %}
+      <p class="td-hero__lede">{{ section.settings.lede }}</p>
+    {% endif %}
+
+    <div class="td-hero__actions">
+      {% if section.settings.cta_label != blank %}
+        <a href="{{ section.settings.cta_link }}" class="td-btn td-btn--primary">
+          {{ section.settings.cta_label }}
+        </a>
+      {% endif %}
+      {% if section.settings.cta2_label != blank %}
+        <a href="{{ section.settings.cta2_link }}" class="td-btn td-btn--ghost">
+          {{ section.settings.cta2_label }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<style>
+  .td-hero {
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, var(--td-ink, #070E1A) 100%);
+    /* Pinned, not inherited. */
+    color: #FFFFFF;
+  }
+  .td-hero__tread {
+    position: absolute; inset: 0; opacity: .07; pointer-events: none;
+    background-image: repeating-linear-gradient(115deg, #fff 0 2px, transparent 2px 22px);
+  }
+  .td-hero__ring {
+    position: absolute; right: -10rem; top: 50%; transform: translateY(-50%);
+    height: 560px; width: 560px; border-radius: 9999px;
+    border: 72px solid #22344C; pointer-events: none; display: none;
+  }
+  .td-hero__inner {
+    position: relative;
+    max-width: 1280px; margin: 0 auto;
+    padding: 3.5rem 1rem 4rem;
+  }
+  .td-hero__eyebrow {
+    font-family: var(--font-subheading--family, inherit);
+    font-size: .75rem; font-weight: 700; letter-spacing: .09em;
+    text-transform: uppercase; color: #00B4FC; margin: 0 0 .75rem;
+  }
+  .td-hero__title {
+    font-family: var(--font-heading--family, inherit);
+    font-weight: 800; letter-spacing: -.02em; line-height: 1.02;
+    font-size: clamp(2.25rem, 6vw, 3.75rem);
+    margin: 0; color: #FFFFFF; text-wrap: balance;
+  }
+  .td-hero__accent { display: block; color: #00B4FC; }
+  .td-hero__lede {
+    margin: 1.25rem 0 0; max-width: 34rem;
+    font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.78);
+  }
+  .td-hero__actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2rem; }
+  .td-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 48px; padding: 0 1.5rem; border-radius: 999px;
+    font-family: var(--font-heading--family, inherit);
+    font-weight: 700; font-size: .9375rem; text-decoration: none;
+    transition: background-color .15s ease, color .15s ease;
+  }
+  .td-btn--primary { background: #0068E8; color: #FFFFFF; }
+  .td-btn--primary:hover { background: #0053C4; }
+  .td-btn--ghost { border: 1px solid rgba(255,255,255,.5); color: #FFFFFF; }
+  .td-btn--ghost:hover { background: rgba(255,255,255,.1); }
+
+  @media (min-width: 768px) {
+    .td-hero__inner { padding: 5rem 2rem 5.5rem; }
+  }
+  @media (min-width: 1024px) {
+    .td-hero__ring { display: block; }
+    .td-hero__inner { max-width: 68%; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "TireDrop hero",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Tires shipped. Or installed." },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Order tires online." },
+    { "type": "text", "id": "heading_accent", "label": "Heading second line", "default": "We ship them to you." },
+    { "type": "textarea", "id": "lede", "label": "Supporting copy", "default": "Free shipping to any address in the continental US — or free to our Sunrise shop, where we fit them for you." },
+    { "type": "color", "id": "background", "label": "Base colour", "default": "#070E1A" },
+    { "type": "text", "id": "cta_label", "label": "Primary button", "default": "Shop tires" },
+    { "type": "url", "id": "cta_link", "label": "Primary link" },
+    { "type": "text", "id": "cta2_label", "label": "Secondary button", "default": "Ship to store & install" },
+    { "type": "url", "id": "cta2_link", "label": "Secondary link" }
+  ],
+  "presets": [{ "name": "TireDrop hero" }]
+}
+{% endschema %}

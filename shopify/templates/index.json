@@ -1,0 +1,72 @@
+{
+  "sections": {
+    "td_hero": {
+      "type": "td-hero",
+      "settings": {
+        "eyebrow": "Tires shipped. Or installed.",
+        "heading": "Order tires online.",
+        "heading_accent": "We ship them to you.",
+        "lede": "Free shipping to any address in the continental US — or free to our Sunrise shop, where we fit them for you.",
+        "background": "#070E1A",
+        "cta_label": "Shop tires",
+        "cta_link": "shopify://collections/all",
+        "cta2_label": "Ship to store & install",
+        "cta2_link": "shopify://pages/install"
+      }
+    },
+    "td_trust": {
+      "type": "td-trust-bar",
+      "blocks": {
+        "t1": { "type": "promise", "settings": { "title": "Free shipping on every tire", "copy": "No minimum and no freight surcharge. The price on the tire is the price that ships." } },
+        "t2": { "type": "promise", "settings": { "title": "Ships anywhere in the lower 48", "copy": "Any street address in the continental United States — home, work, or your own installer." } },
+        "t3": { "type": "promise", "settings": { "title": "Free ship-to-store & install", "copy": "Send the set to our Sunrise shop at no charge and book the fitting." } },
+        "t4": { "type": "promise", "settings": { "title": "Fresh, DOT-dated rubber", "copy": "Drop-shipped rather than pulled off a shelf, so nothing has been ageing in a warehouse." } }
+      },
+      "block_order": ["t1", "t2", "t3", "t4"],
+      "settings": {}
+    },
+    "td_delivery": {
+      "type": "td-delivery-choice",
+      "blocks": {
+        "d1": { "type": "option", "settings": { "eyebrow": "Anywhere in the continental US", "title": "Ship it to me", "copy": "Your order ships straight to the address you give us — home, work, or your own installer. Shipping and delivery time are shown at checkout before you commit.", "cta_label": "How shipping works", "cta_link": "shopify://pages/shipping" } },
+        "d2": { "type": "option", "settings": { "eyebrow": "South Florida", "title": "Ship free to the shop — we'll fit them", "copy": "Send the order to Extreme Tires in Sunrise at no charge, then book an install. Mounting, balancing, valve stems and disposal of the old set, all handled in the bay.", "cta_label": "Ship to store & install", "cta_link": "shopify://pages/install" } }
+      },
+      "block_order": ["d1", "d2"],
+      "settings": {
+        "eyebrow": "Two ways to get them",
+        "heading": "Shipped to you, or fitted by us",
+        "lede": "Pick at checkout. Local to South Florida? Ship-to-store is free and we fit them in the bay."
+      }
+    },
+    "td_tools": {
+      "type": "td-tools-band",
+      "blocks": {
+        "k1": { "type": "tool", "settings": { "title": "Decode my tire size", "copy": "Type what is on your sidewall and see every number explained, drawn to the proportions of your own tire. Compare two sizes and see what actually changes.", "link": "shopify://pages/tire-size" } },
+        "k2": { "type": "tool", "settings": { "title": "Find my tires", "copy": "Five questions about your car, your roads and your weather, and a shortlist that says plainly why each tire made it.", "link": "shopify://pages/find-my-tires" } },
+        "k3": { "type": "tool", "settings": { "title": "Do I need tires yet?", "copy": "Check the tread with a coin you already have, and the age with the code on the sidewall. If they are fine, it says so.", "link": "shopify://pages/tire-check" } }
+      },
+      "block_order": ["k1", "k2", "k3"],
+      "settings": {
+        "eyebrow": "Free, no email required",
+        "heading": "Not sure what you need? Start here",
+        "lede": "Three tools that answer the questions that stop people buying tires online. They work whether or not you buy anything from us."
+      }
+    },
+    "td_steps": {
+      "type": "td-how-it-works",
+      "blocks": {
+        "s1": { "type": "step", "settings": { "title": "Find your size", "copy": "Read it off the sidewall, or use the size decoder if the numbers mean nothing to you yet." } },
+        "s2": { "type": "step", "settings": { "title": "Pick your set", "copy": "Price, tread life, wet grip and warranty are on every listing, so you are comparing the same things across brands." } },
+        "s3": { "type": "step", "settings": { "title": "Choose where it lands", "copy": "Your address anywhere in the continental US, or free to our Sunrise shop for fitting." } },
+        "s4": { "type": "step", "settings": { "title": "We confirm before it ships", "copy": "We check the sizes against your vehicle and call you to confirm fitment and take payment." } }
+      },
+      "block_order": ["s1", "s2", "s3", "s4"],
+      "settings": {
+        "eyebrow": "How it works",
+        "heading": "Four steps from search to installed",
+        "lede": "No stock sitting in a warehouse waiting to age — orders ship direct, so what turns up on your drive is fresh rubber."
+      }
+    }
+  },
+  "order": ["td_hero", "td_trust", "td_delivery", "td_tools", "td_steps"]
+}
