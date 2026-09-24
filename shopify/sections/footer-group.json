@@ -67,7 +67,7 @@
             "brand_copy": {
               "type": "text",
               "settings": {
-                "text": "<p>Tires shipped free to any address in the continental US, or free to our Sunrise, FL shop where we fit them for you. Powered by Extreme Tires since 2006.</p><p><a href=\"tel:+19547731896\">(954) 773-1896</a><br>7712 West Oakland Park Blvd<br>Sunrise, FL 33351</p>",
+                "text": "<p>Tires shipped free to any address in the continental US, or free to our Sunrise, FL shop where we fit them for you. Powered by Extreme Tires since 2006.</p><p><a href=\"tel:+19547731896\">(954) 773-1896</a><br><a href=\"mailto:info@tiredroponline.com\">info@tiredroponline.com</a><br>7712 West Oakland Park Blvd<br>Sunrise, FL 33351</p>",
                 "width": "100%",
                 "max_width": "narrow",
                 "alignment": "left",
