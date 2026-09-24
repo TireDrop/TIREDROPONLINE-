@@ -1,0 +1,122 @@
+{%- comment -%}
+  Stacks wide page tables into cards on phones.
+
+  Page bodies (auto-service, mobile-service, deals) carry 3–5 column tables
+  that need a sideways swipe at 375px. Below 750px, any table in rich text
+  with a <thead> of 3+ columns becomes one card per row: the row header is
+  the card title and every other cell is labelled with its column heading.
+  Two-column tables (hours, comparisons) already fit and are left alone.
+
+  The script copies each column heading onto its cells as data-label and
+  restores table roles, because display:block strips table semantics from
+  the accessibility tree in some browsers. Rendered once from layout/theme.liquid.
+{%- endcomment -%}
+<style>
+  @media screen and (max-width: 749px) {
+    .rte table.td-stack,
+    .rte table.td-stack tbody,
+    .rte table.td-stack tr,
+    .rte table.td-stack th,
+    .rte table.td-stack td {
+      display: block;
+    }
+
+    /* Column headings move onto each cell as labels, so hide the header row visually only. */
+    .rte table.td-stack thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .rte table.td-stack tbody tr {
+      margin: 0 0 0.75rem;
+      padding: 0.875rem 1rem;
+      border: 1px solid rgb(var(--color-foreground-rgb) / var(--opacity-10, 0.1));
+      border-radius: 0.75rem;
+      background: none;
+      font-weight: inherit;
+      text-transform: none;
+    }
+
+    .rte table.td-stack tbody tr:last-child {
+      margin-bottom: 0;
+    }
+
+    .rte table.td-stack tbody th {
+      padding: 0 0 0.5rem;
+      margin: 0 0 0.25rem;
+      border-bottom: 1px solid rgb(var(--color-foreground-rgb) / var(--opacity-10, 0.1));
+      font-size: 1.0625rem;
+      font-weight: 700;
+      line-height: 1.3;
+      text-transform: none;
+    }
+
+    .rte table.td-stack tbody td {
+      display: grid;
+      grid-template-columns: minmax(6.5rem, 34%) 1fr;
+      column-gap: 0.75rem;
+      padding: 0.375rem 0;
+      border: 0;
+      text-align: start;
+    }
+
+    .rte table.td-stack tbody td::before {
+      content: attr(data-label);
+      color: rgb(var(--color-foreground-rgb) / 0.7);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      line-height: 1.6;
+      text-transform: uppercase;
+    }
+  }
+</style>
+<script>
+  (function () {
+    function stack(root) {
+      var tables = (root || document).querySelectorAll('.rte table:not([data-td-stack])');
+      Array.prototype.forEach.call(tables, function (table) {
+        var head = table.tHead && table.tHead.rows[0];
+        if (!head || head.cells.length < 3) return;
+
+        var labels = Array.prototype.map.call(head.cells, function (cell) {
+          return cell.textContent.trim();
+        });
+
+        // Merged cells would put labels on the wrong column, so leave such tables alone.
+        var uneven = Array.prototype.some.call(table.rows, function (row) {
+          return row.cells.length !== labels.length;
+        });
+        if (uneven) return;
+
+        table.setAttribute('data-td-stack', '');
+        table.classList.add('td-stack');
+        table.setAttribute('role', 'table');
+        Array.prototype.forEach.call(table.querySelectorAll('thead, tbody, tfoot'), function (group) {
+          group.setAttribute('role', 'rowgroup');
+        });
+        Array.prototype.forEach.call(table.rows, function (row) {
+          var inHead = row.parentNode === table.tHead;
+          row.setAttribute('role', 'row');
+          Array.prototype.forEach.call(row.cells, function (cell, i) {
+            if (inHead) {
+              cell.setAttribute('role', 'columnheader');
+              return;
+            }
+            cell.setAttribute('role', cell.tagName === 'TH' ? 'rowheader' : 'cell');
+            if (cell.tagName === 'TD' && labels[i]) cell.setAttribute('data-label', labels[i]);
+          });
+        });
+      });
+    }
+
+    // The page body is already parsed above this script, so stack now to avoid a flash of the wide table.
+    stack();
+    document.addEventListener('DOMContentLoaded', function () { stack(); });
+    document.addEventListener('shopify:section:load', function (event) { stack(event.target); });
+  })();
+</script>
