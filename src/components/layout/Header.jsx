@@ -62,7 +62,8 @@ function UtilityBar() {
  * When nothing matches it says so in place instead of navigating to an
  * unfiltered catalog and letting the shopper conclude the search is broken.
  */
-function HeaderSearch({ className = "", onDone }) {
+function HeaderSearch({ id = "masthead-search", className = "", onDone }) {
+  const missId = `${id}-miss`;
   const navigate = useNavigate();
   const [term, setTerm] = useState("");
   const [miss, setMiss] = useState("");
@@ -116,7 +117,7 @@ function HeaderSearch({ className = "", onDone }) {
 
   return (
     <form role="search" onSubmit={submit} className={`relative ${className}`}>
-      <label htmlFor="masthead-search" className="sr-only">
+      <label htmlFor={id} className="sr-only">
         Search tires by size, brand or model
       </label>
       <Search
@@ -125,7 +126,7 @@ function HeaderSearch({ className = "", onDone }) {
         className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-smoke"
       />
       <input
-        id="masthead-search"
+        id={id}
         type="search"
         value={term}
         onChange={(e) => {
@@ -133,7 +134,7 @@ function HeaderSearch({ className = "", onDone }) {
           if (miss) setMiss("");
         }}
         placeholder="Search a size, brand or model — 225/45R17"
-        aria-describedby={miss ? "masthead-search-miss" : undefined}
+        aria-describedby={miss ? missId : undefined}
         className="field h-11 w-full rounded-full pl-10 pr-24 text-[15px]"
       />
       <button
@@ -144,7 +145,7 @@ function HeaderSearch({ className = "", onDone }) {
       </button>
       {miss && (
         <p
-          id="masthead-search-miss"
+          id={missId}
           role="alert"
           className="absolute left-0 top-full z-50 mt-1.5 w-full rounded-sm border border-ink/10 bg-bone px-3 py-2 text-[13px] leading-snug text-ink shadow-lift"
         >
@@ -396,7 +397,7 @@ export default function Header() {
           It is worth a row of the page; it is not worth 50px of every screen
           for the whole session. */}
       <div className="border-b border-ink/10 bg-bone px-5 py-2.5 md:px-8 lg:hidden">
-        <HeaderSearch />
+        <HeaderSearch id="mobile-search" />
       </div>
 
       <MobileDrawer open={menuOpen} onClose={closeMenu} />
