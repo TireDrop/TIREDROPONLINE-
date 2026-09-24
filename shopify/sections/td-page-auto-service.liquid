@@ -1,0 +1,607 @@
+{% comment %}
+  Auto services — the Shopify port of src/pages/services/AutoServicePage.jsx.
+
+  React gives every service its own page (/services/<slug>, ServiceDetailPage.jsx).
+  The theme has no such pages, so the detail content (what's included, signs
+  you need it) folds into each card here, and each card carries id="<slug>" so
+  /pages/auto-service#brake-repair lands on it and opens it.
+
+  Booking buttons go to the booking_url setting (the contact page with
+  ?topic=install) rather than React's /schedule flow, with the phone beside
+  them. The symptom picker needs JavaScript; without it the cards below still
+  list every symptom, so nothing is lost.
+{% endcomment %}
+{%- liquid
+  assign ss = section.settings
+  assign phone = ss.phone | default: '(954) 773-1896'
+  assign phone_digits = phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
+  assign phone_href = 'tel:+1' | append: phone_digits
+  assign booking_url = ss.booking_url | default: '/pages/contact?topic=install'
+  assign mobile_count = 0
+  for block in section.blocks
+    if block.type == 'service' and block.settings.mobile
+      assign mobile_count = mobile_count | plus: 1
+    endif
+  endfor
+  assign categories = 'Tires,Wheels,Maintenance,Repair,Custom' | split: ','
+-%}
+
+<div class="td-pg td-pg-auto" id="td-pg-{{ section.id }}">
+  <header class="td-pg-hero">
+    <div class="td-pg-wrap td-pg-hero__inner">
+      {%- if ss.hero_eyebrow != blank -%}<p class="td-pg-eyebrow">{{ ss.hero_eyebrow }}</p>{%- endif -%}
+      <h1>{{ ss.hero_heading }}</h1>
+      {%- if ss.hero_lede != blank -%}<p class="td-pg-hero__lede">{{ ss.hero_lede | replace: '[mobile_count]', mobile_count }}</p>{%- endif -%}
+      <div class="td-pg-hero__extra">
+        <div class="td-pg-btns">
+          {%- if ss.hero_cta_label != blank -%}
+            <a class="td-pg-btn td-pg-btn--primary" href="{{ booking_url }}">{{ ss.hero_cta_label }}{% render 'td-pg-icon', name: 'arrow-right', size: 18 %}</a>
+          {%- endif -%}
+          {%- if ss.hero_cta2_label != blank -%}
+            <a class="td-pg-btn td-pg-btn--ghost" href="{{ ss.hero_cta2_link | default: '/pages/install' }}">{% render 'td-pg-icon', name: 'store', size: 18 %}{{ ss.hero_cta2_label }}</a>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </header>
+
+  {%- if ss.notice_lead != blank or ss.notice_text != blank -%}
+    <div class="td-pg-notice">
+      <div class="td-pg-wrap">
+        {% render 'td-pg-icon', name: 'map-pin', size: 18 %}
+        <p><strong>{{ ss.notice_lead }}</strong> {{ ss.notice_text }}</p>
+      </div>
+    </div>
+  {%- endif -%}
+
+  <div class="td-pg-auto__legend">
+    <div class="td-pg-wrap">
+      <span><span class="td-pg-badge td-pg-badge--drop">Mobile</span>{{ ss.legend_mobile }}</span>
+      <span><span class="td-pg-badge td-pg-badge--soft">In-Shop</span>{{ ss.legend_shop }}</span>
+    </div>
+  </div>
+
+  {%- comment -%} ---------- Service groups ---------- {%- endcomment -%}
+  {%- assign band = 0 -%}
+  {%- for cat in categories -%}
+    {%- assign count = 0 -%}
+    {%- for block in section.blocks -%}{%- if block.type == 'service' and block.settings.category == cat -%}{%- assign count = count | plus: 1 -%}{%- endif -%}{%- endfor -%}
+    {%- if count > 0 -%}
+      {%- assign mod = band | modulo: 2 -%}
+      {%- assign band = band | plus: 1 -%}
+      {%- assign copy_key = 'copy_' | append: cat | downcase -%}
+      <section class="td-pg-sec {% if mod == 0 %}td-pg-sec--fog{% else %}td-pg-sec--bone{% endif %}" aria-labelledby="td-pg-{{ section.id }}-{{ cat | handleize }}">
+        <div class="td-pg-wrap">
+          <div class="td-pg-head"><div class="td-pg-head__text">
+            <p class="td-pg-eyebrow">{{ count }} {% if count == 1 %}service{% else %}services{% endif %}</p>
+            <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-{{ cat | handleize }}">{{ cat }}</h2>
+            {%- if ss[copy_key] != blank -%}<p class="td-pg-lede">{{ ss[copy_key] }}</p>{%- endif -%}
+          </div></div>
+          <ul class="td-pg-grid td-pg-grid--3">
+            {%- for block in section.blocks -%}{%- if block.type == 'service' and block.settings.category == cat -%}
+              {%- assign bs = block.settings -%}
+              <li class="td-pg-auto__item" id="{{ bs.slug | default: block.id }}" {{ block.shopify_attributes }}>
+                <div class="td-pg-card td-pg-card--pad td-pg-card--flex td-pg-svc">
+                  <div class="td-pg-svc__top">
+                    <h3 class="td-pg-h3">{{ bs.name }}</h3>
+                    {%- if bs.mobile -%}<span class="td-pg-badge td-pg-badge--drop">Mobile</span>{%- else -%}<span class="td-pg-badge td-pg-badge--soft">In-Shop</span>{%- endif -%}
+                  </div>
+                  <p class="td-pg-body td-pg-svc__blurb">{{ bs.blurb }}</p>
+                  {%- if bs.includes != blank or bs.symptoms != blank -%}
+                    <details class="td-pg-auto__more">
+                      <summary>{% render 'td-pg-icon', name: 'chevron-right', size: 16 %}What's included &amp; when to book</summary>
+                      {%- if bs.includes != blank -%}
+                        <h4>What's included</h4>
+                        {%- assign items = bs.includes | newline_to_br | split: '<br />' -%}
+                        <ul class="td-pg-ticks">
+                          {%- for it in items -%}{%- assign it = it | strip -%}{%- if it != blank -%}
+                            <li>{% render 'td-pg-icon', name: 'check', size: 16 %}<span>{{ it }}</span></li>
+                          {%- endif -%}{%- endfor -%}
+                        </ul>
+                      {%- endif -%}
+                      {%- if bs.symptoms != blank -%}
+                        <h4>Signs you need this</h4>
+                        {%- assign items = bs.symptoms | newline_to_br | split: '<br />' -%}
+                        <ul class="td-pg-ticks td-pg-auto__signs">
+                          {%- for it in items -%}{%- assign it = it | strip -%}{%- if it != blank -%}
+                            <li>{% render 'td-pg-icon', name: 'triangle-alert', size: 16 %}<span>{{ it }}</span></li>
+                          {%- endif -%}{%- endfor -%}
+                        </ul>
+                      {%- endif -%}
+                      <p class="td-pg-auto__where">{% if bs.mobile %}{{ ss.where_mobile }}{% else %}{{ ss.where_shop }}{% endif %}</p>
+                      <a class="td-pg-btn td-pg-btn--primary td-pg-btn--sm" href="{{ booking_url }}">Book {{ bs.name }}{% render 'td-pg-icon', name: 'arrow-right', size: 16 %}</a>
+                    </details>
+                  {%- endif -%}
+                  <div class="td-pg-svc__foot">
+                    <span class="td-pg-svc__time">{% render 'td-pg-icon', name: 'clock', size: 14 %}<span class="td-pg-sr">Typical time: </span>{{ bs.duration }}</span>
+                    <span class="td-pg-svc__price">From {{ bs.price_from }}<span class="td-pg-svc__unit">{{ bs.price_unit }}</span></span>
+                  </div>
+                </div>
+              </li>
+            {%- endif -%}{%- endfor -%}
+          </ul>
+        </div>
+      </section>
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- comment -%} ---------- Symptom matcher (dark) ---------- {%- endcomment -%}
+  <section class="td-pg-sec td-pg-sec--ink" aria-labelledby="td-pg-{{ section.id }}-sym">
+    <div class="td-pg-wrap">
+      <div class="td-pg-head"><div class="td-pg-head__text">
+        {%- if ss.sym_eyebrow != blank -%}<p class="td-pg-eyebrow td-pg-eyebrow--plain">{{ ss.sym_eyebrow }}</p>{%- endif -%}
+        <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-sym">{{ ss.sym_heading }}</h2>
+        {%- if ss.sym_lede != blank -%}<p class="td-pg-lede td-pg-auto__sym-lede">{{ ss.sym_lede }}</p>{%- endif -%}
+      </div></div>
+
+      <div class="td-pg-auto__matcher" data-td-matcher>
+        <div class="td-pg-auto__picker">
+          <p class="td-pg-auto__label" id="td-pg-{{ section.id }}-pick">Pick what your vehicle is doing</p>
+          <ul class="td-pg-auto__chips" role="group" aria-labelledby="td-pg-{{ section.id }}-pick">
+            {%- for block in section.blocks -%}{%- if block.type == 'service' -%}
+              {%- assign items = block.settings.symptoms | newline_to_br | split: '<br />' -%}
+              {%- for it in items -%}{%- assign it = it | strip -%}{%- if it != blank -%}
+                <li><button type="button" aria-pressed="false" data-svc="{{ block.settings.slug | default: block.id }}">{{ it }}</button></li>
+              {%- endif -%}{%- endfor -%}
+            {%- endif -%}{%- endfor -%}
+          </ul>
+          <noscript><p class="td-pg-body td-pg-mt2">Every service card above lists the signs it fixes under "What's included &amp; when to book".</p></noscript>
+        </div>
+
+        <div class="td-pg-auto__result" aria-live="polite">
+          <div class="td-pg-card td-pg-card--pad td-pg-auto__empty" data-result="">
+            {% render 'td-pg-icon', name: 'stethoscope', size: 28 %}
+            <h3 class="td-pg-h3">{{ ss.sym_empty_heading | default: 'Describe the problem' }}</h3>
+            <p class="td-pg-body td-pg-mt1">{{ ss.sym_empty_text | replace: '[phone]', phone }}</p>
+          </div>
+          {%- for block in section.blocks -%}{%- if block.type == 'service' -%}
+            {%- assign bs = block.settings -%}
+            <div class="td-pg-card td-pg-card--pad" data-result="{{ bs.slug | default: block.id }}" hidden>
+              <p class="td-pg-eyebrow td-pg-eyebrow--plain">What you need</p>
+              <div class="td-pg-auto__match-top">
+                <h3 class="td-pg-h3">{{ bs.name }}</h3>
+                {%- if bs.mobile -%}<span class="td-pg-badge td-pg-badge--drop">Mobile</span>{%- else -%}<span class="td-pg-badge td-pg-badge--soft">In-Shop</span>{%- endif -%}
+              </div>
+              <p class="td-pg-body td-pg-mt2">{{ bs.blurb }}</p>
+              <dl class="td-pg-auto__facts">
+                <div><dt>Typical time</dt><dd>{{ bs.duration }}</dd></div>
+                <div><dt>Starting at</dt><dd>From {{ bs.price_from }} <span>{{ bs.price_unit }}</span></dd></div>
+              </dl>
+              <div class="td-pg-btns td-pg-mt3">
+                <a class="td-pg-btn td-pg-btn--outline td-pg-btn--sm" href="#{{ bs.slug | default: block.id }}" data-open>Service details</a>
+                <a class="td-pg-btn td-pg-btn--primary td-pg-btn--sm" href="{{ booking_url }}">Book it{% render 'td-pg-icon', name: 'arrow-right', size: 16 %}</a>
+              </div>
+            </div>
+          {%- endif -%}{%- endfor -%}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ---------- Shop info + CTA ---------- {%- endcomment -%}
+  <section class="td-pg-sec td-pg-sec--bone" aria-label="{{ ss.shop_name | escape }}">
+    <div class="td-pg-wrap">
+      <div class="td-pg-grid td-pg-grid--3-lg td-pg-auto__info">
+        <div class="td-pg-card td-pg-card--pad">
+          {% render 'td-pg-icon', name: 'warehouse', size: 22, cls: 'td-pg-icon--lead' %}
+          <h3 class="td-pg-h3">{{ ss.shop_name }}</h3>
+          <address class="td-pg-body td-pg-mt1">{{ ss.address | newline_to_br }}</address>
+          {%- if ss.maps_url != blank -%}
+            <a class="td-pg-link" href="{{ ss.maps_url }}" target="_blank" rel="noopener">{% render 'td-pg-icon', name: 'map-pin', size: 15 %}Get directions<span class="td-pg-sr"> (opens in a new tab)</span></a>
+          {%- endif -%}
+        </div>
+        <div class="td-pg-card td-pg-card--pad">
+          {% render 'td-pg-icon', name: 'clock', size: 22, cls: 'td-pg-icon--lead' %}
+          <h3 class="td-pg-h3">Hours</h3>
+          {%- assign rows = ss.hours | newline_to_br | split: '<br />' -%}
+          <dl class="td-pg-hours">
+            {%- for row in rows -%}{%- assign parts = row | strip | split: '|' -%}{%- if parts.size > 1 -%}
+              <div><dt>{{ parts[0] | strip }}</dt><dd>{{ parts[1] | strip }}</dd></div>
+            {%- endif -%}{%- endfor -%}
+          </dl>
+        </div>
+        <div class="td-pg-card td-pg-card--pad td-pg-card--flex">
+          {% render 'td-pg-icon', name: 'phone', size: 22, cls: 'td-pg-icon--lead' %}
+          <h3 class="td-pg-h3">{{ ss.book_heading | default: 'Book it now' }}</h3>
+          <p class="td-pg-body td-pg-mt1 td-pg-auto__grow">{{ ss.book_text }}</p>
+          <div class="td-pg-auto__book-btns">
+            <a class="td-pg-btn td-pg-btn--primary td-pg-btn--sm" href="{{ booking_url }}">{{ ss.book_label | default: 'Schedule Service' }}{% render 'td-pg-icon', name: 'arrow-right', size: 16 %}</a>
+            <a class="td-pg-btn td-pg-btn--outline td-pg-btn--sm" href="{{ phone_href }}">{% render 'td-pg-icon', name: 'phone', size: 16 %}{{ phone }}</a>
+          </div>
+        </div>
+      </div>
+      {%- if ss.tires_lead != blank -%}
+        <div class="td-pg-card td-pg-callout td-pg-auto__callout">
+          <p class="td-pg-body"><strong>{{ ss.tires_lead }}</strong> {{ ss.tires_text }}</p>
+          <a class="td-pg-btn td-pg-btn--dark td-pg-btn--sm" href="{{ ss.tires_link | default: '/pages/mobile-service' }}">{% render 'td-pg-icon', name: 'truck', size: 16 %}{{ ss.tires_label | default: 'Mobile install' }}</a>
+        </div>
+      {%- endif -%}
+    </div>
+  </section>
+</div>
+
+<script>
+  (function () {
+    var root = document.getElementById('td-pg-{{ section.id }}');
+    if (!root) return;
+
+    // Symptom picker: one chip pressed at a time, its service shown beside it.
+    var matcher = root.querySelector('[data-td-matcher]');
+    if (matcher) {
+      var chips = matcher.querySelectorAll('button[data-svc]');
+      var results = matcher.querySelectorAll('[data-result]');
+      var show = function (slug) {
+        Array.prototype.forEach.call(results, function (r) { r.hidden = r.getAttribute('data-result') !== slug; });
+      };
+      Array.prototype.forEach.call(chips, function (chip) {
+        chip.addEventListener('click', function () {
+          var on = chip.getAttribute('aria-pressed') !== 'true';
+          Array.prototype.forEach.call(chips, function (c) { c.setAttribute('aria-pressed', 'false'); });
+          chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+          show(on ? chip.getAttribute('data-svc') : '');
+        });
+      });
+    }
+
+    // A link to #<slug> lands on that card with its details open.
+    var openTarget = function () {
+      var id = decodeURIComponent((location.hash || '').slice(1));
+      if (!id) return;
+      var item = document.getElementById(id);
+      if (!item || !root.contains(item)) return;
+      var more = item.querySelector('details');
+      if (more) more.open = true;
+    };
+    openTarget();
+    window.addEventListener('hashchange', openTarget);
+  })();
+</script>
+
+<style>
+  /* ---- TireDrop page kit (shared by the td-page-* sections; each carries its own copy) ---- */
+  .td-pg { color: #070E1A; font-family: var(--font-body--family, inherit); line-height: 1.5; }
+  /* Resets sit in :where() so they carry no specificity and never beat a component class. */
+  :where(.td-pg) *, :where(.td-pg) *::before, :where(.td-pg) *::after { box-sizing: border-box; }
+  :where(.td-pg) :where(h1, h2, h3, h4) {
+    font-family: var(--font-heading--family, inherit); font-weight: 800;
+    letter-spacing: -.018em; font-variation-settings: "wdth" 108; margin: 0; text-wrap: balance;
+  }
+  :where(.td-pg) :where(p, ul, ol, dl, dd, address, fieldset, legend) { margin: 0; }
+  :where(.td-pg) :where(ul, ol) { padding: 0; list-style: none; }
+  :where(.td-pg) a { color: inherit; }
+  .td-pg [hidden] { display: none !important; }
+  .td-pg-icon { display: block; flex-shrink: 0; }
+  .td-pg-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .td-pg-wrap { max-width: 1280px; margin: 0 auto; padding: 0 1rem; }
+  .td-pg-sec { padding: 3.5rem 0; }
+  .td-pg-sec--bone { background: #FFFFFF; }
+  .td-pg-sec--fog { background: #F4F6FA; }
+  .td-pg-sec--ink { background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); color: #FFFFFF; }
+  .td-pg-sec--steel { background: #0B1524 linear-gradient(180deg, #14233A 0%, #0B1524 100%); color: #FFFFFF; }
+  .td-pg-sec--ink h2, .td-pg-sec--ink h3, .td-pg-sec--steel h2, .td-pg-sec--steel h3 { color: #FFFFFF; }
+
+  /* Breadcrumbs */
+  .td-pg-crumbs { background: #FFFFFF; border-bottom: 1px solid rgba(7,14,26,.1); }
+  .td-pg-crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: .375rem; padding: .5rem 0; font-size: .75rem; color: #586274; }
+  .td-pg-crumbs li { display: flex; align-items: center; gap: .375rem; }
+  .td-pg-crumbs a { display: flex; align-items: center; min-height: 32px; text-decoration: none; color: #586274; }
+  .td-pg-crumbs a:hover { color: #0068E8; }
+  .td-pg-crumbs .td-pg-icon { color: rgba(88,98,116,.5); }
+  .td-pg-crumbs [aria-current] { color: #070E1A; }
+
+  /* Hero */
+  .td-pg-hero { position: relative; overflow: hidden; color: #FFFFFF;
+    background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); }
+  .td-pg-hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(0,180,252,.35), transparent); }
+  .td-pg-hero__inner { position: relative; padding-top: 3.5rem; padding-bottom: 3.5rem; }
+  .td-pg-hero h1 { max-width: 56rem; font-size: 2.4rem; line-height: .98; color: #FFFFFF; }
+  .td-pg-hero__lede { margin-top: 1.25rem; max-width: 42rem; font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.7); }
+  .td-pg-hero__extra { margin-top: 2rem; }
+  .td-pg-checks { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 1.25rem; margin-top: 1.25rem; font-size: .75rem; color: rgba(255,255,255,.6); }
+  .td-pg-checks li { display: flex; align-items: center; gap: .375rem; }
+  .td-pg-checks .td-pg-icon { color: #F5A623; }
+
+  /* Eyebrows and headings */
+  .td-pg-eyebrow { display: flex; align-items: center; gap: .625rem; margin-bottom: .625rem;
+    font-family: var(--font-heading--family, inherit); font-size: .75rem; font-weight: 700;
+    letter-spacing: .09em; text-transform: uppercase; color: #0068E8; }
+  .td-pg-eyebrow::before { content: ""; display: block; width: 1.5rem; height: 1px; background: rgba(0,104,232,.45); flex-shrink: 0; }
+  .td-pg-eyebrow--plain::before { display: none; }
+  .td-pg-hero .td-pg-eyebrow, .td-pg-sec--ink .td-pg-eyebrow, .td-pg-sec--steel .td-pg-eyebrow { color: #00B4FC; }
+  .td-pg-hero .td-pg-eyebrow { margin-bottom: .75rem; }
+  .td-pg-hero .td-pg-eyebrow::before, .td-pg-sec--ink .td-pg-eyebrow::before, .td-pg-sec--steel .td-pg-eyebrow::before { background: rgba(0,180,252,.55); }
+  .td-pg-h2 { font-size: 1.9rem; line-height: 1.02; }
+  .td-pg-h3 { font-size: 1.2rem; line-height: 1.15; }
+  .td-pg-lede { font-size: 1.0625rem; line-height: 1.6; color: #586274; }
+  .td-pg-sec--ink .td-pg-lede, .td-pg-sec--steel .td-pg-lede { color: rgba(255,255,255,.72); }
+  .td-pg-body { font-size: .875rem; line-height: 1.625; color: #586274; }
+  .td-pg-body--ink { color: #070E1A; }
+  .td-pg-sec--ink .td-pg-body, .td-pg-sec--steel .td-pg-body { color: rgba(255,255,255,.7); }
+  .td-pg-body a, .td-pg-lede a { color: #0068E8; font-family: var(--font-heading--family, inherit); font-weight: 700; text-decoration: none; }
+  .td-pg-body a:hover, .td-pg-lede a:hover { color: #0053C4; }
+  .td-pg-sec--ink .td-pg-body a { color: #00B4FC; }
+  .td-pg-head { margin-bottom: 2rem; }
+  .td-pg-head__text { max-width: 42rem; }
+  .td-pg-head .td-pg-lede { margin-top: 1rem; max-width: 36rem; }
+  .td-pg-head--center { text-align: center; }
+  .td-pg-head--center .td-pg-head__text, .td-pg-head--center .td-pg-lede { margin-left: auto; margin-right: auto; }
+  .td-pg-head--center .td-pg-eyebrow { justify-content: center; }
+  .td-pg-head__action { margin-top: 1.5rem; }
+  .td-pg-mt1 { margin-top: .5rem; } .td-pg-mt2 { margin-top: 1rem; } .td-pg-mt3 { margin-top: 1.25rem; } .td-pg-mt4 { margin-top: 2rem; }
+
+  /* Buttons. 44px minimum height for touch, which is taller than React's 39px. */
+  .td-pg-btns { display: flex; flex-direction: column; gap: .75rem; }
+  .td-pg-btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    min-height: 44px; padding: .75rem 1.5rem; border-radius: 6px; border: 1px solid transparent;
+    font-family: var(--font-heading--family, inherit); font-size: .9375rem; font-weight: 700; line-height: 1;
+    letter-spacing: -.005em; text-decoration: none; cursor: pointer; text-align: center;
+    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease; }
+  .td-pg-btn--primary { background: #0068E8; color: #FFFFFF !important; box-shadow: 0 4px 14px -2px rgba(0,104,232,.35); }
+  .td-pg-btn--primary:hover { background: #0053C4; box-shadow: none; }
+  .td-pg-btn--ghost { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.05); color: #FFFFFF !important; }
+  .td-pg-btn--ghost:hover { border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.1); }
+  .td-pg-btn--outline { border-color: rgba(7,14,26,.15); background: #FFFFFF; color: #070E1A !important;
+    box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .td-pg-btn--outline:hover { border-color: rgba(7,14,26,.3); background: #F4F6FA; }
+  .td-pg-btn--dark { background: #070E1A; color: #FFFFFF !important; }
+  .td-pg-btn--dark:hover { background: #101C2E; }
+  .td-pg-btn--sm { padding: .5rem 1rem; font-size: .8125rem; }
+  .td-pg a:focus-visible, .td-pg button:focus-visible, .td-pg summary:focus-visible,
+  .td-pg input:focus-visible, .td-pg select:focus-visible, .td-pg textarea:focus-visible {
+    outline: 2px solid #0068E8; outline-offset: 2px; }
+
+  /* Badges */
+  .td-pg-badge { display: inline-flex; align-items: center; flex-shrink: 0; padding: .25rem .5rem; border-radius: 6px;
+    font-family: var(--font-heading--family, inherit); font-size: .6875rem; font-weight: 700; line-height: 1;
+    letter-spacing: .09em; text-transform: uppercase; }
+  .td-pg-badge--drop { background: #0068E8; color: #FFFFFF; }
+  .td-pg-badge--soft { background: rgba(7,14,26,.06); color: #070E1A; box-shadow: inset 0 0 0 1px rgba(7,14,26,.1); }
+  .td-pg-badge--amber { background: #F5A623; color: #070E1A; }
+
+  /* Cards and grids */
+  .td-pg-card { position: relative; border-radius: 12px; border: 1px solid rgba(7,14,26,.07); background: #FFFFFF; color: #070E1A;
+    box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .td-pg-card--pad { padding: 1.5rem; }
+  .td-pg-card--hover { transition: transform .2s ease, box-shadow .2s ease; }
+  .td-pg-card--hover:hover { transform: translateY(-2px);
+    box-shadow: 0 0 0 1px rgba(7,14,26,.05), 0 2px 4px rgba(7,14,26,.06), 0 18px 38px -10px rgba(7,14,26,.20); }
+  .td-pg-card--flex { display: flex; flex-direction: column; }
+  .td-pg-card .td-pg-icon--lead { color: #0068E8; }
+  .td-pg-grid { display: grid; gap: 1.25rem; }
+  .td-pg-card h3 + .td-pg-body, .td-pg-card .td-pg-icon--lead + h3 { margin-top: .5rem; }
+  .td-pg-card .td-pg-icon--lead + h3 { margin-top: 1rem; }
+
+  /* Numbered step cards */
+  .td-pg-step__top { display: flex; align-items: center; justify-content: space-between; }
+  .td-pg-step__icon { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 6px; background: #070E1A; color: #FFFFFF; }
+  .td-pg-step__num { font-family: var(--font-heading--family, inherit); font-size: 2.25rem; font-weight: 400; line-height: 1; color: rgba(7,14,26,.1); }
+  .td-pg-step h3 { margin-top: 1.25rem; }
+
+  /* Tick lists */
+  .td-pg-ticks { display: grid; gap: .625rem; }
+  .td-pg-ticks li { display: flex; align-items: flex-start; gap: .625rem; font-size: .875rem; line-height: 1.625; }
+  .td-pg-ticks .td-pg-icon { margin-top: .1875rem; color: #0068E8; }
+
+  /* Inline callout: text left, button right from 640px */
+  .td-pg-callout { display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem; margin-top: 2rem; }
+  .td-pg-callout strong { font-family: var(--font-heading--family, inherit); font-size: .9375rem; color: #070E1A; }
+  .td-pg-callout .td-pg-btn { align-self: flex-start; flex-shrink: 0; }
+
+  /* Local notice strip */
+  .td-pg-notice { background: #EFF5FF; border-bottom: 1px solid rgba(7,14,26,.1); }
+  .td-pg-notice .td-pg-wrap { display: flex; align-items: flex-start; gap: .75rem; padding-top: 1rem; padding-bottom: 1rem; font-size: .875rem; line-height: 1.5; color: #586274; }
+  .td-pg-notice .td-pg-icon { color: #0068E8; margin-top: .0625rem; }
+  .td-pg-notice strong { font-family: var(--font-heading--family, inherit); color: #070E1A; }
+  .td-pg-notice a { color: #0068E8; text-decoration: underline; }
+  .td-pg-notice a:hover { color: #0053C4; }
+
+  /* Two-panel comparison. Each panel is a list, so it stacks naturally on a phone. */
+  .td-pg-vs__head { display: flex; align-items: center; gap: .5rem; padding: 1rem 1.5rem; border-radius: 12px 12px 0 0; }
+  .td-pg-vs__head h3 { font-size: 1.125rem; line-height: 1.3; }
+  .td-pg-vs__head--us { background: #0068E8; color: #FFFFFF; }
+  .td-pg-vs__head--us h3 { color: #FFFFFF; }
+  .td-pg-vs__head--them { background: rgba(7,14,26,.05); color: #586274; }
+  .td-pg-vs__head--them h3 { color: #586274; }
+  .td-pg-vs li { display: flex; align-items: flex-start; gap: .75rem; padding: 1rem 1.5rem; font-size: .875rem; line-height: 1.5; border-top: 1px solid rgba(7,14,26,.1); }
+  .td-pg-vs li:first-child { border-top: 0; }
+  .td-pg-vs--us .td-pg-icon { margin-top: .125rem; color: #0068E8; }
+  .td-pg-vs--them li { color: #586274; }
+  .td-pg-vs--them .td-pg-icon { margin-top: .125rem; color: rgba(88,98,116,.6); }
+
+  /* City chips */
+  .td-pg-chips { display: flex; flex-wrap: wrap; gap: .625rem; }
+  .td-pg-chips li { display: flex; align-items: center; gap: .375rem; padding: .5rem .875rem; border-radius: 6px;
+    border: 1px solid rgba(7,14,26,.1); background: #F4F6FA; font-family: var(--font-heading--family, inherit);
+    font-size: .875rem; font-weight: 700; color: #070E1A; }
+  .td-pg-chips .td-pg-icon { color: #0068E8; }
+
+  /* Hours */
+  .td-pg-hours { display: grid; gap: .5rem; margin-top: .75rem; font-size: .875rem; }
+  .td-pg-hours div { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-bottom: .5rem; border-bottom: 1px solid rgba(7,14,26,.1); }
+  .td-pg-hours div:last-child { border-bottom: 0; padding-bottom: 0; }
+  .td-pg-hours dt { font-family: var(--font-heading--family, inherit); font-weight: 700; color: #070E1A; }
+  .td-pg-hours dd { color: #586274; }
+
+  /* Dark panels inside ink/steel bands */
+  .td-pg-panel { border-radius: 12px; border: 1px solid #22344C; background: #0B1524 linear-gradient(180deg, #14233A 0%, #0B1524 100%); padding: 1.5rem; color: #FFFFFF; }
+  .td-pg-panel .td-pg-icon--lead { color: #00B4FC; }
+  .td-pg-panel h3 { margin-top: 1rem; }
+  .td-pg-panel .td-pg-hours div { border-bottom-color: #22344C; }
+  .td-pg-panel .td-pg-hours dt { color: #FFFFFF; font-weight: 600; }
+  .td-pg-panel .td-pg-hours dd { color: rgba(255,255,255,.65); }
+  .td-pg-panel address { margin-top: .5rem; font-style: normal; font-size: .875rem; line-height: 1.625; color: rgba(255,255,255,.7); }
+  .td-pg-link { display: inline-flex; align-items: center; gap: .375rem; min-height: 44px; margin-top: .5rem;
+    font-family: var(--font-heading--family, inherit); font-size: .875rem; font-weight: 700; text-decoration: none; color: #0068E8; }
+  .td-pg-link:hover { color: #0053C4; }
+  .td-pg-panel .td-pg-link { color: #00B4FC; }
+  .td-pg-panel .td-pg-link:hover { color: #FFFFFF; }
+
+  /* FAQ accordion */
+  .td-pg-faq { border-top: 1px solid rgba(7,14,26,.1); border-bottom: 1px solid rgba(7,14,26,.1); }
+  .td-pg-faq details { padding: .5rem 0; border-top: 1px solid rgba(7,14,26,.1); }
+  .td-pg-faq details:first-child { border-top: 0; }
+  .td-pg-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 44px;
+    cursor: pointer; list-style: none; font-family: var(--font-heading--family, inherit); font-size: 1.0625rem; font-weight: 700;
+    line-height: 1.375; letter-spacing: -.012em; color: #070E1A; transition: color .15s ease; }
+  .td-pg-faq summary::-webkit-details-marker { display: none; }
+  .td-pg-faq summary:hover { color: #0068E8; }
+  .td-pg-faq summary .td-pg-icon { color: #0068E8; transition: transform .2s ease; }
+  .td-pg-faq details[open] summary .td-pg-icon { transform: rotate(90deg); }
+  .td-pg-faq details p { margin-top: .5rem; padding-bottom: .5rem; font-size: .875rem; line-height: 1.625; color: #586274; }
+
+  /* Closing CTA band */
+  .td-pg-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 2rem; }
+  .td-pg-cta__text { max-width: 36rem; }
+  .td-pg-cta .td-pg-lede { margin-top: .75rem; }
+  .td-pg-cta__meta { display: flex; align-items: center; gap: .5rem; margin-top: 1rem; font-size: .75rem; color: rgba(255,255,255,.6); }
+  .td-pg-cta .td-pg-btns { width: 100%; }
+
+  @media (min-width: 640px) {
+    .td-pg-btns { flex-direction: row; flex-wrap: wrap; }
+    .td-pg-callout { flex-direction: row; align-items: center; justify-content: space-between; }
+    .td-pg-callout .td-pg-btn { align-self: center; }
+    .td-pg-grid--2-sm, .td-pg-grid--3, .td-pg-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 768px) {
+    .td-pg-wrap { padding: 0 2rem; }
+    .td-pg-sec { padding: 5rem 0; }
+    .td-pg-hero__inner { padding-top: 5rem; padding-bottom: 5rem; }
+    .td-pg-hero h1 { font-size: 4.25rem; }
+    .td-pg-hero__lede { font-size: 1.25rem; }
+    .td-pg-h2 { font-size: 3rem; }
+    .td-pg-h3 { font-size: 1.45rem; }
+    .td-pg-lede { font-size: 1.1875rem; }
+    .td-pg-head { margin-bottom: 3rem; }
+    .td-pg-head--action { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; }
+    .td-pg-head__action { margin-top: 0; flex-shrink: 0; }
+    .td-pg-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .td-pg-card--pad-lg { padding: 2rem; }
+    .td-pg-faq summary { font-size: 1.15rem; }
+  }
+  @media (min-width: 1024px) {
+    .td-pg-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .td-pg-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .td-pg-grid--3-lg { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .td-pg-cta { flex-direction: row; align-items: center; justify-content: space-between; }
+    .td-pg-cta .td-pg-btns { width: auto; flex-wrap: nowrap; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .td-pg-card--hover, .td-pg-faq summary .td-pg-icon, .td-pg-btn { transition: none; }
+    .td-pg-card--hover:hover { transform: none; }
+  }
+  /* ---- Service cards (mobile-service and auto-service) ---- */
+  .td-pg-svc { height: 100%; text-decoration: none; }
+  .td-pg-svc__top { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+  .td-pg-svc h3 { transition: color .15s ease; }
+  a.td-pg-svc:hover h3 { color: #0068E8; }
+  .td-pg-svc__blurb { flex: 1; margin-top: .75rem; }
+  .td-pg-svc__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem;
+    margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(7,14,26,.1); }
+  .td-pg-svc__time { display: flex; align-items: center; gap: .375rem; font-size: .75rem; color: #586274; }
+  .td-pg-svc__price { font-family: var(--font-heading--family, inherit); font-size: 1.125rem; font-weight: 500; color: #070E1A; }
+  .td-pg-svc__unit { margin-left: .25rem; font-family: var(--font-body--family, inherit); font-size: .75rem; font-weight: 400; color: #586274; }
+  /* ---- Auto-service page only ---- */
+  .td-pg-auto__legend { background: #FFFFFF; border-bottom: 1px solid rgba(7,14,26,.1); }
+  .td-pg-auto__legend .td-pg-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.5rem; padding-top: 1rem; padding-bottom: 1rem; font-size: .75rem; color: #586274; }
+  .td-pg-auto__legend .td-pg-wrap > span { display: flex; align-items: center; gap: .5rem; }
+  .td-pg-auto__item { scroll-margin-top: 7rem; }
+  .td-pg-auto__item:target .td-pg-card { box-shadow: 0 0 0 2px #0068E8, 0 8px 20px -6px rgba(7,14,26,.10); }
+  .td-pg-auto__more { margin-top: 1rem; }
+  .td-pg-auto__more summary { display: flex; align-items: center; gap: .375rem; min-height: 44px; cursor: pointer; list-style: none;
+    font-family: var(--font-heading--family, inherit); font-size: .875rem; font-weight: 700; color: #0068E8; }
+  .td-pg-auto__more summary::-webkit-details-marker { display: none; }
+  .td-pg-auto__more summary:hover { color: #0053C4; }
+  .td-pg-auto__more summary .td-pg-icon { transition: transform .2s ease; }
+  .td-pg-auto__more[open] summary .td-pg-icon { transform: rotate(90deg); }
+  .td-pg-auto__more h4 { margin: 1rem 0 .625rem; font-size: .6875rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #586274; }
+  .td-pg-auto__more h4:first-of-type { margin-top: .5rem; }
+  .td-pg-auto__more .td-pg-ticks li { font-size: .8125rem; color: #070E1A; }
+  .td-pg-auto__signs .td-pg-icon { color: #8A4F00 !important; }
+  .td-pg-auto__where { margin: 1rem 0; font-size: .8125rem; line-height: 1.5; color: #586274; }
+  .td-pg-auto__sym-lede { margin-top: .75rem !important; }
+  .td-pg-auto__matcher { display: grid; gap: 1.5rem; padding: 1.5rem; border-radius: 12px; background: #FFFFFF; color: #070E1A;
+    box-shadow: 0 0 0 1px rgba(7,14,26,.05), 0 2px 4px rgba(7,14,26,.06), 0 18px 38px -10px rgba(7,14,26,.20); }
+  .td-pg-auto__matcher h3 { color: #070E1A !important; }
+  /* The picker is a white card inside the dark band: take the light-surface colours back. */
+  .td-pg-auto__matcher .td-pg-body { color: #586274; }
+  .td-pg-auto__matcher .td-pg-eyebrow { color: #0068E8; }
+  .td-pg-auto__picker, .td-pg-auto__result { min-width: 0; }
+  .td-pg-auto__label { margin-bottom: .75rem !important; font-family: var(--font-heading--family, inherit); font-size: .6875rem; font-weight: 700;
+    letter-spacing: .07em; text-transform: uppercase; color: #586274; }
+  .td-pg-auto__chips { display: flex; flex-wrap: wrap; gap: .625rem; }
+  .td-pg-auto__chips button { min-height: 44px; padding: .375rem .875rem; border-radius: 6px; border: 1px solid rgba(7,14,26,.15);
+    background: #FFFFFF; color: #070E1A; font: inherit; font-size: .875rem; line-height: 1.3; text-align: left; cursor: pointer;
+    transition: border-color .15s ease, background-color .15s ease; }
+  .td-pg-auto__chips button:hover { border-color: rgba(7,14,26,.4); }
+  .td-pg-auto__chips button[aria-pressed="true"] { border-color: #0068E8; background: #0068E8; color: #FFFFFF; }
+  .td-pg-auto__empty { display: flex; flex-direction: column; justify-content: center; height: 100%; }
+  .td-pg-auto__empty > .td-pg-icon { color: rgba(7,14,26,.2); }
+  .td-pg-auto__empty h3 { margin-top: 1rem; }
+  .td-pg-auto__match-top { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+  .td-pg-auto__facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(7,14,26,.1); }
+  .td-pg-auto__facts dt { margin-bottom: .375rem; font-family: var(--font-heading--family, inherit); font-size: .6875rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #586274; }
+  .td-pg-auto__facts dd { font-family: var(--font-heading--family, inherit); font-size: 1rem; color: #070E1A; }
+  .td-pg-auto__facts dd span { font-family: var(--font-body--family, inherit); font-size: .75rem; color: #586274; }
+  .td-pg-auto__grow { flex: 1; }
+  .td-pg-auto__book-btns { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.5rem; }
+  .td-pg-auto__info { gap: 1.5rem; }
+  .td-pg-auto__callout { margin-top: 1.5rem; }
+  @media (min-width: 768px) { .td-pg-auto__matcher { padding: 2rem; } }
+  @media (min-width: 1024px) { .td-pg-auto__matcher { grid-template-columns: 1.4fr 1fr; gap: 2.5rem; } }
+  @media (prefers-reduced-motion: reduce) { .td-pg-auto__more summary .td-pg-icon { transition: none; } }
+</style>
+
+{% schema %}
+{
+  "name": "TireDrop auto services page",
+  "tag": "div",
+  "class": "td-pg-section",
+  "settings": [
+    { "type": "text", "id": "phone", "label": "Phone number", "default": "(954) 773-1896", "info": "Written anywhere copy says [phone], and dialled by the call buttons." },
+    { "type": "text", "id": "booking_url", "label": "Booking link", "default": "/pages/contact?topic=install", "info": "Where every booking button goes." },
+    { "type": "header", "content": "Hero" },
+    { "type": "text", "id": "hero_eyebrow", "label": "Eyebrow", "default": "Local service — Sunrise, FL" },
+    { "type": "text", "id": "hero_heading", "label": "Heading", "default": "What the shop does besides fit your tires" },
+    { "type": "textarea", "id": "hero_lede", "label": "Lede", "info": "[mobile_count] is replaced with the number of services marked mobile." },
+    { "type": "text", "id": "hero_cta_label", "label": "Booking button", "default": "Schedule Service" },
+    { "type": "text", "id": "hero_cta2_label", "label": "Secondary button", "default": "Ship to store & install" },
+    { "type": "url", "id": "hero_cta2_link", "label": "Secondary link" },
+    { "type": "header", "content": "Notice and legend" },
+    { "type": "text", "id": "notice_lead", "label": "Notice lead", "default": "For local customers." },
+    { "type": "textarea", "id": "notice_text", "label": "Notice text" },
+    { "type": "text", "id": "legend_mobile", "label": "Mobile legend", "default": "The van comes to your home, office or jobsite" },
+    { "type": "text", "id": "legend_shop", "label": "In-shop legend", "default": "Performed at 7712 West Oakland Park Blvd, Sunrise" },
+    { "type": "text", "id": "where_mobile", "label": "Card note: mobile services", "default": "Local service — the van performs this at your home, office or jobsite anywhere in the South Florida install area, or you bring the vehicle to Sunrise." },
+    { "type": "text", "id": "where_shop", "label": "Card note: in-shop services", "default": "In-shop only — this one needs a lift and bay equipment, so it happens at 7712 West Oakland Park Blvd, Sunrise." },
+    { "type": "header", "content": "Service groups" },
+    { "type": "textarea", "id": "copy_tires", "label": "Tires lede" },
+    { "type": "textarea", "id": "copy_wheels", "label": "Wheels lede" },
+    { "type": "textarea", "id": "copy_maintenance", "label": "Maintenance lede" },
+    { "type": "textarea", "id": "copy_repair", "label": "Repair lede" },
+    { "type": "textarea", "id": "copy_custom", "label": "Custom lede" },
+    { "type": "header", "content": "Symptom picker" },
+    { "type": "text", "id": "sym_eyebrow", "label": "Eyebrow", "default": "Not sure what you need?" },
+    { "type": "text", "id": "sym_heading", "label": "Heading", "default": "Tell us the symptom" },
+    { "type": "textarea", "id": "sym_lede", "label": "Lede" },
+    { "type": "text", "id": "sym_empty_heading", "label": "Empty panel heading", "default": "Describe the problem" },
+    { "type": "textarea", "id": "sym_empty_text", "label": "Empty panel text" },
+    { "type": "header", "content": "Shop and booking" },
+    { "type": "text", "id": "shop_name", "label": "Shop name", "default": "Extreme Tires — Sunrise" },
+    { "type": "textarea", "id": "address", "label": "Address", "default": "7712 West Oakland Park Blvd\nSunrise, FL 33351" },
+    { "type": "text", "id": "maps_url", "label": "Directions link", "default": "https://www.google.com/maps/search/?api=1&query=7712+West+Oakland+Park+Blvd+Sunrise+FL+33351" },
+    { "type": "textarea", "id": "hours", "label": "Hours (Days | Time, one per line)", "default": "Mon – Fri | 8:00 AM – 6:30 PM\nSaturday | 8:00 AM – 4:00 PM\nSunday | Closed" },
+    { "type": "text", "id": "book_heading", "label": "Booking card heading", "default": "Book it now" },
+    { "type": "textarea", "id": "book_text", "label": "Booking card text" },
+    { "type": "text", "id": "book_label", "label": "Booking card button", "default": "Schedule Service" },
+    { "type": "text", "id": "tires_lead", "label": "Callout lead", "default": "Buying tires on TireDrop?" },
+    { "type": "textarea", "id": "tires_text", "label": "Callout text" },
+    { "type": "text", "id": "tires_label", "label": "Callout button", "default": "Mobile install" },
+    { "type": "url", "id": "tires_link", "label": "Callout link" }
+  ],
+  "blocks": [
+    {"type": "service", "name": "Service", "settings": [{"type": "text", "id": "name", "label": "Name"}, {"type": "text", "id": "slug", "label": "Anchor", "info": "Lower-case, no spaces. Links such as /pages/auto-service#tire-installation land on this card."}, {"type": "select", "id": "category", "label": "Group", "default": "Tires", "options": [{"value": "Tires", "label": "Tires"}, {"value": "Wheels", "label": "Wheels"}, {"value": "Maintenance", "label": "Maintenance"}, {"value": "Repair", "label": "Repair"}, {"value": "Custom", "label": "Custom"}]}, {"type": "checkbox", "id": "mobile", "label": "The van can do this at the customer's location", "default": false}, {"type": "textarea", "id": "blurb", "label": "Summary"}, {"type": "text", "id": "duration", "label": "Typical time"}, {"type": "text", "id": "price_from", "label": "Starting price", "info": "Shown as From <price>. Include the $ sign."}, {"type": "text", "id": "price_unit", "label": "Price unit", "info": "For example: per tire"}, {"type": "textarea", "id": "includes", "label": "What's included (one per line)"}, {"type": "textarea", "id": "symptoms", "label": "Signs you need it (one per line)"}]}
+  ],
+  "presets": [{ "name": "TireDrop auto services page" }]
+}
+{% endschema %}

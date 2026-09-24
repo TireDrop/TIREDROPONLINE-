@@ -1,0 +1,16 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-404",
+      "blocks": {
+        "tires": { "type": "link", "settings": { "icon": "tire", "title": "Shop Tires", "copy": "Search by vehicle or by size across every brand we carry.", "link": "shopify://collections/tires" } },
+        "wheels": { "type": "link", "settings": { "icon": "wheel", "title": "Shop Wheels", "copy": "Alloy, forged and off-road wheels, fitment-checked before they ship.", "link": "shopify://collections/wheels" } },
+        "shipping": { "type": "link", "settings": { "icon": "truck", "title": "Shipping & Install", "copy": "Free shipping to your address, or free to our shop if you are in South Florida.", "link": "shopify://pages/shipping" } },
+        "install": { "type": "link", "settings": { "icon": "store", "title": "Ship to Store & Install", "copy": "Send it free to the Sunrise shop and we fit it for you, or have the van come to you.", "link": "shopify://pages/install" } }
+      },
+      "block_order": ["tires", "wheels", "shipping", "install"],
+      "settings": { "contact_link": "shopify://pages/contact" }
+    }
+  },
+  "order": ["main"]
+}

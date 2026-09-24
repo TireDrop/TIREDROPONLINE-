@@ -1,0 +1,98 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-page-contact",
+      "settings": {
+        "hero_eyebrow": "Contact",
+        "hero_title": "Talk to a person who actually works here",
+        "hero_lede": "Orders, shipping, returns, fitment, an install appointment or a fleet — wherever you are in the continental United States, it is the same phone and the same people.",
+        "crumb": "Contact Us",
+        "hero_call_label": "Call",
+        "phone": "(954) 773-1896",
+        "email": "info@tiredroponline.com",
+        "street": "7712 West Oakland Park Blvd",
+        "city_line": "Sunrise, FL 33351",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=7712+West+Oakland+Park+Blvd+Sunrise+FL+33351",
+        "reach_eyebrow": "Reach Us",
+        "reach_title": "Two ways to get an answer",
+        "reach_lede": "TireDrop is the online store of Extreme Tires, 7712 West Oakland Park Blvd, Sunrise, FL 33351. One phone number, one shop, one set of people — whether you are ordering from Florida or from three states away.",
+        "fast_title": "Fastest way to reach us",
+        "fast_copy": "Call. If an order has already been placed, if you are sitting on a flat, or you need something changed before it ships, the phone beats the form every time — the person who answers can pull the order up while you are talking.",
+        "phone_title": "By phone",
+        "phone_copy": "Order status, shipping questions, returns, fitment advice, install appointments and fleet accounts.",
+        "phone_note": "The phone is the channel that reaches a person fastest, and the form below reaches the same people.",
+        "email_title": "By email",
+        "email_copy": "One address for everything — orders, returns, fleet quotes and dealer paperwork. Include an order number if you have one. If it cannot wait, call instead.",
+        "shop_title": "At the shop",
+        "shop_copy": "Extreme Tires, the shop behind TireDrop — for pickups, installs and anything easier to explain in person.",
+        "directions_label": "Directions",
+        "shop_link_label": "The shop & install area",
+        "hours_title": "Hours",
+        "hours_note": "Eastern time. The store takes orders around the clock; people answer during the hours above.",
+        "message_eyebrow": "Message Us",
+        "message_title": "Not urgent? Write it down.",
+        "message_lede": "Include an order number if you have one. Messages sent outside business hours get picked up the next morning we are open. If it is urgent, call instead — the form is not monitored around the clock.",
+        "form_title": "Send us a message",
+        "form_intro": "Fields marked with an asterisk are required.",
+        "label_name": "Full name *",
+        "ph_name": "Alex Moreno",
+        "label_phone": "Phone *",
+        "ph_phone": "(954) 555-0188",
+        "label_email": "Email *",
+        "ph_email": "you@example.com",
+        "label_subject": "What is this about? *",
+        "subjects": "Order Question\nShipping & Delivery\nReturns & Warranty\nBook an Install\nCommercial & Fleet\nSomething Else",
+        "label_message": "Message *",
+        "ph_message": "Order number if you have one. Otherwise: year, make and model, tire size, and whether you want it shipped to you or to the shop.",
+        "submit_label": "Send Message",
+        "privacy_note": "We use what you send here to answer your question and nothing else. It is not added to a mailing list — there isn't one — and it is not passed to anyone outside the shop. See our <a href=\"/pages/privacy\">privacy policy</a>.",
+        "success_title": "Message received.",
+        "success_copy": "Thanks for reaching out. A real person reads these during the hours listed on this page, and will reply by email or phone. We do not put a clock on that, because we would rather answer properly than answer fast.",
+        "success_urgent": "If the car is down right now, or your order needs changing before it ships, do not wait on the reply — the phone is the only channel we treat as urgent. Call",
+        "success_call_label": "Call the shop",
+        "success_again_label": "Send another message",
+        "error_title": "We could not get that through just now.",
+        "error_copy": "Your message did not go through, so nobody here has read it yet. Fix what is marked below and send it again — or call, and the person who answers can help straight away.",
+        "cta_eyebrow": "Before you write",
+        "cta_title": "A lot of it is already answered",
+        "cta_lede": "How shipping works, what ship-to-store costs, and what happens if a tire shows up wrong — all written out, no hold music.",
+        "cta1_label": "Shipping & Returns",
+        "cta2_label": "Book an Install",
+        "shop_link": "shopify://pages/locations",
+        "cta1_link": "shopify://pages/shipping",
+        "cta2_link": "shopify://pages/install"
+      },
+      "blocks": {
+        "hours_1": {
+          "type": "hours",
+          "settings": {
+            "days": "Mon – Fri",
+            "time": "8:00 AM – 6:30 PM"
+          }
+        },
+        "hours_2": {
+          "type": "hours",
+          "settings": {
+            "days": "Saturday",
+            "time": "8:00 AM – 4:00 PM"
+          }
+        },
+        "hours_3": {
+          "type": "hours",
+          "settings": {
+            "days": "Sunday",
+            "time": "Closed"
+          }
+        }
+      },
+      "block_order": [
+        "hours_1",
+        "hours_2",
+        "hours_3"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

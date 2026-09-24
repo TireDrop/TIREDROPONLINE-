@@ -1,25 +1,23 @@
 {% comment %}
-  How shipping works — the Shopify port of src/pages/ShippingPage.jsx.
+  Mobile install — the Shopify port of src/pages/services/MobileServicePage.jsx.
 
-  One section holds the whole page so the bands stay in React's order. Copy
-  lives in settings (headings, ledes) and blocks (cards, steps, FAQ), so it can
-  be edited in the theme editor. Dark bands pin their text to white.
+  React's booking buttons go to its /schedule flow, which the theme does not
+  have; here they go to the booking_url setting (the contact page with
+  ?topic=install) with the phone beside them. React links each service card to
+  /services/<slug>; those detail pages do not exist in the theme, so the cards
+  link to the matching card on the auto-service page instead (#<slug>).
+  Dark bands pin their text to white.
 {% endcomment %}
 {%- liquid
   assign ss = section.settings
   assign phone = ss.phone | default: '(954) 773-1896'
   assign phone_digits = phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
   assign phone_href = 'tel:+1' | append: phone_digits
+  assign booking_url = ss.booking_url | default: '/pages/contact?topic=install'
+  assign services_url = ss.services_url | default: '/pages/auto-service'
 -%}
 
-<div class="td-pg td-pg-ship" id="td-pg-{{ section.id }}">
-  <nav class="td-pg-crumbs" aria-label="Breadcrumb">
-    <ol class="td-pg-wrap">
-      <li><a href="{{ routes.root_url }}">Home</a></li>
-      <li>{% render 'td-pg-icon', name: 'chevron-right', size: 13 %}<span aria-current="page">{{ ss.crumb | default: 'How shipping works' }}</span></li>
-    </ol>
-  </nav>
-
+<div class="td-pg td-pg-mob" id="td-pg-{{ section.id }}">
   <header class="td-pg-hero">
     <div class="td-pg-wrap td-pg-hero__inner">
       {%- if ss.hero_eyebrow != blank -%}<p class="td-pg-eyebrow">{{ ss.hero_eyebrow }}</p>{%- endif -%}
@@ -27,12 +25,10 @@
       {%- if ss.hero_lede != blank -%}<p class="td-pg-hero__lede">{{ ss.hero_lede }}</p>{%- endif -%}
       <div class="td-pg-hero__extra">
         <div class="td-pg-btns">
-          {%- if ss.hero_cta1_label != blank -%}
-            <a class="td-pg-btn td-pg-btn--primary" href="{{ ss.hero_cta1_link | default: routes.all_products_collection_url }}">{{ ss.hero_cta1_label }}{% render 'td-pg-icon', name: 'arrow-right', size: 18 %}</a>
+          {%- if ss.hero_cta_label != blank -%}
+            <a class="td-pg-btn td-pg-btn--primary" href="{{ booking_url }}">{{ ss.hero_cta_label }}{% render 'td-pg-icon', name: 'arrow-right', size: 18 %}</a>
           {%- endif -%}
-          {%- if ss.hero_cta2_label != blank -%}
-            <a class="td-pg-btn td-pg-btn--ghost" href="{{ ss.hero_cta2_link | default: '/pages/install' }}">{% render 'td-pg-icon', name: 'store', size: 18 %}{{ ss.hero_cta2_label }}</a>
-          {%- endif -%}
+          <a class="td-pg-btn td-pg-btn--ghost" href="{{ phone_href }}">{% render 'td-pg-icon', name: 'phone', size: 18 %}Call {{ phone }}</a>
         </div>
         {%- assign checks = ss.hero_checks | newline_to_br | split: '<br />' -%}
         <ul class="td-pg-checks">
@@ -44,61 +40,16 @@
     </div>
   </header>
 
-  {%- comment -%} ---------- Drop-ship model ---------- {%- endcomment -%}
-  <section class="td-pg-sec td-pg-sec--bone" aria-labelledby="td-pg-{{ section.id }}-model">
-    <div class="td-pg-wrap td-pg-ship__model">
-      <div class="td-pg-ship__model-text">
-        {%- if ss.model_eyebrow != blank -%}<p class="td-pg-eyebrow td-pg-eyebrow--plain">{{ ss.model_eyebrow }}</p>{%- endif -%}
-        <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-model">{{ ss.model_heading }}</h2>
-        {%- if ss.model_lede != blank -%}<p class="td-pg-lede td-pg-mt2">{{ ss.model_lede }}</p>{%- endif -%}
-        {%- if ss.model_body != blank -%}<p class="td-pg-body td-pg-mt2">{{ ss.model_body }}</p>{%- endif -%}
-      </div>
-      <ul class="td-pg-grid td-pg-ship__features">
-        {%- for block in section.blocks -%}{%- if block.type == 'feature' -%}
-          <li class="td-pg-card td-pg-card--pad" {{ block.shopify_attributes }}>
-            {% render 'td-pg-icon', name: block.settings.icon, size: 22, cls: 'td-pg-icon--lead' %}
-            <h3 class="td-pg-h3">{{ block.settings.title }}</h3>
-            <p class="td-pg-body td-pg-mt1">{{ block.settings.body | replace: '[phone]', phone | replace: phone, '<a href="PHONE_HREF">PHONE_TXT</a>' | replace: 'PHONE_HREF', phone_href | replace: 'PHONE_TXT', phone }}</p>
-          </li>
-        {%- endif -%}{%- endfor -%}
-      </ul>
-    </div>
-  </section>
-
-  {%- comment -%} ---------- Two delivery choices ---------- {%- endcomment -%}
-  <section class="td-pg-sec td-pg-sec--fog" aria-labelledby="td-pg-{{ section.id }}-choices">
-    <div class="td-pg-wrap">
-      <div class="td-pg-head td-pg-head--center"><div class="td-pg-head__text">
-        {%- if ss.choices_eyebrow != blank -%}<p class="td-pg-eyebrow">{{ ss.choices_eyebrow }}</p>{%- endif -%}
-        <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-choices">{{ ss.choices_heading }}</h2>
-        {%- if ss.choices_lede != blank -%}<p class="td-pg-lede">{{ ss.choices_lede }}</p>{%- endif -%}
-      </div></div>
-      <div class="td-pg-grid td-pg-grid--2">
-        {%- for block in section.blocks -%}{%- if block.type == 'choice' -%}
-          {%- assign bs = block.settings -%}
-          <div class="td-pg-card td-pg-card--pad td-pg-card--pad-lg td-pg-card--flex" {{ block.shopify_attributes }}>
-            <div class="td-pg-ship__choice-top">
-              {% render 'td-pg-icon', name: bs.icon, size: 26, cls: 'td-pg-icon--lead' %}
-              {%- if bs.badge != blank -%}<span class="td-pg-badge td-pg-badge--soft">{{ bs.badge }}</span>{%- endif -%}
-            </div>
-            <h3 class="td-pg-h3 td-pg-mt3">{{ bs.title }}</h3>
-            <p class="td-pg-body td-pg-mt1">{{ bs.body }}</p>
-            {%- assign pts = bs.points | newline_to_br | split: '<br />' -%}
-            <ul class="td-pg-ticks td-pg-mt3 td-pg-ship__points">
-              {%- for p in pts -%}{%- assign p = p | strip -%}{%- if p != blank -%}
-                <li>{% render 'td-pg-icon', name: 'check', size: 17 %}<span>{{ p }}</span></li>
-              {%- endif -%}{%- endfor -%}
-            </ul>
-            {%- if bs.cta_label != blank -%}
-              <a class="td-pg-btn td-pg-btn--outline td-pg-btn--sm td-pg-ship__choice-cta" href="{{ bs.cta_link | default: '#' }}">{{ bs.cta_label }}{% render 'td-pg-icon', name: 'arrow-right', size: 16 %}</a>
-            {%- endif -%}
-          </div>
-        {%- endif -%}{%- endfor -%}
+  {%- if ss.notice_lead != blank or ss.notice_text != blank -%}
+    <div class="td-pg-notice">
+      <div class="td-pg-wrap">
+        {% render 'td-pg-icon', name: 'map-pin', size: 18 %}
+        <p><strong>{{ ss.notice_lead }}</strong> {{ ss.notice_text }}{% if ss.notice_link_label != blank %} <a href="{{ ss.notice_link | default: '/pages/shipping' }}">{{ ss.notice_link_label }}</a>.{% endif %}</p>
       </div>
     </div>
-  </section>
+  {%- endif -%}
 
-  {%- comment -%} ---------- Order flow ---------- {%- endcomment -%}
+  {%- comment -%} ---------- How it works ---------- {%- endcomment -%}
   <section class="td-pg-sec td-pg-sec--bone" aria-labelledby="td-pg-{{ section.id }}-steps">
     <div class="td-pg-wrap">
       <div class="td-pg-head"><div class="td-pg-head__text">
@@ -120,63 +71,117 @@
           </li>
         {%- endif -%}{%- endfor -%}
       </ol>
+      {%- if ss.store_lead != blank -%}
+        <div class="td-pg-card td-pg-callout">
+          <p class="td-pg-body"><strong>{{ ss.store_lead }}</strong> {{ ss.store_text }}</p>
+          <a class="td-pg-btn td-pg-btn--dark td-pg-btn--sm" href="{{ ss.store_link | default: '/pages/install' }}">{% render 'td-pg-icon', name: 'store', size: 16 %}{{ ss.store_label | default: 'Ship to store' }}</a>
+        </div>
+      {%- endif -%}
     </div>
   </section>
 
-  {%- comment -%} ---------- Coverage (dark) ---------- {%- endcomment -%}
-  <section class="td-pg-sec td-pg-sec--ink" aria-labelledby="td-pg-{{ section.id }}-cov">
-    <div class="td-pg-wrap td-pg-ship__cov">
-      <div>
-        {%- if ss.cov_eyebrow != blank -%}<p class="td-pg-eyebrow td-pg-eyebrow--plain">{{ ss.cov_eyebrow }}</p>{%- endif -%}
-        <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-cov">{{ ss.cov_heading }}</h2>
-        {%- if ss.cov_lede != blank -%}<p class="td-pg-lede td-pg-mt2">{{ ss.cov_lede }}</p>{%- endif -%}
-        {%- if ss.cov_body != blank -%}<p class="td-pg-body td-pg-mt2 td-pg-ship__cov-body">{{ ss.cov_body }}</p>{%- endif -%}
-        <div class="td-pg-btns td-pg-ship__cov-btns">
-          {%- if ss.cov_cta_label != blank -%}
-            <a class="td-pg-btn td-pg-btn--primary" href="{{ ss.cov_cta_link | default: '/pages/install' }}">{{ ss.cov_cta_label }}{% render 'td-pg-icon', name: 'arrow-right', size: 18 %}</a>
-          {%- endif -%}
-          <a class="td-pg-btn td-pg-btn--ghost" href="{{ phone_href }}">{% render 'td-pg-icon', name: 'phone', size: 18 %}{{ phone }}</a>
+  {%- comment -%} ---------- What the van does ---------- {%- endcomment -%}
+  <section class="td-pg-sec td-pg-sec--fog" aria-labelledby="td-pg-{{ section.id }}-svc">
+    <div class="td-pg-wrap">
+      <div class="td-pg-head td-pg-head--action">
+        <div class="td-pg-head__text">
+          {%- if ss.svc_eyebrow != blank -%}<p class="td-pg-eyebrow">{{ ss.svc_eyebrow }}</p>{%- endif -%}
+          <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-svc">{{ ss.svc_heading }}</h2>
+          {%- if ss.svc_lede != blank -%}<p class="td-pg-lede">{{ ss.svc_lede }}</p>{%- endif -%}
+        </div>
+        <div class="td-pg-head__action">
+          <a class="td-pg-btn td-pg-btn--outline td-pg-btn--sm" href="{{ services_url }}">{{ ss.svc_all_label | default: 'See all services' }}{% render 'td-pg-icon', name: 'arrow-right', size: 16 %}</a>
         </div>
       </div>
-      <div class="td-pg-panel td-pg-ship__costs">
-        <h3 class="td-pg-h3">{{ ss.costs_heading }}</h3>
-        {%- if ss.costs_body != blank -%}<p class="td-pg-body td-pg-mt2">{{ ss.costs_body }}</p>{%- endif -%}
-        {%- assign items = ss.costs_list | newline_to_br | split: '<br />' -%}
-        <ul class="td-pg-ship__costs-list">
-          {%- for it in items -%}{%- assign it = it | strip -%}{%- if it != blank -%}
-            <li>{% render 'td-pg-icon', name: 'check', size: 17 %}<span>{{ it }}</span></li>
-          {%- endif -%}{%- endfor -%}
-        </ul>
-      </div>
+      <ul class="td-pg-grid td-pg-grid--3">
+        {%- for block in section.blocks -%}{%- if block.type == 'service' -%}
+          {%- assign bs = block.settings -%}
+          <li {{ block.shopify_attributes }}>
+            <a class="td-pg-card td-pg-card--pad td-pg-card--hover td-pg-card--flex td-pg-svc" href="{{ services_url }}#{{ bs.slug }}">
+              <div class="td-pg-svc__top">
+                <h3 class="td-pg-h3">{{ bs.name }}</h3>
+                <span class="td-pg-badge td-pg-badge--drop">Mobile</span>
+              </div>
+              <p class="td-pg-body td-pg-svc__blurb">{{ bs.blurb }}</p>
+              <div class="td-pg-svc__foot">
+                <span class="td-pg-svc__time">{% render 'td-pg-icon', name: 'clock', size: 14 %}<span class="td-pg-sr">Typical time: </span>{{ bs.duration }}</span>
+                <span class="td-pg-svc__price">From {{ bs.price_from }}<span class="td-pg-svc__unit">{{ bs.price_unit }}</span></span>
+              </div>
+            </a>
+          </li>
+        {%- endif -%}{%- endfor -%}
+      </ul>
     </div>
   </section>
 
-  {%- comment -%} ---------- When something goes wrong ---------- {%- endcomment -%}
-  <section class="td-pg-sec td-pg-sec--fog" aria-labelledby="td-pg-{{ section.id }}-wrong">
+  {%- comment -%} ---------- Install area ---------- {%- endcomment -%}
+  <section class="td-pg-sec td-pg-sec--bone" aria-labelledby="td-pg-{{ section.id }}-area">
     <div class="td-pg-wrap">
       <div class="td-pg-head"><div class="td-pg-head__text">
-        {%- if ss.wrong_eyebrow != blank -%}<p class="td-pg-eyebrow">{{ ss.wrong_eyebrow }}</p>{%- endif -%}
-        <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-wrong">{{ ss.wrong_heading }}</h2>
-        {%- if ss.wrong_lede != blank -%}<p class="td-pg-lede">{{ ss.wrong_lede }}</p>{%- endif -%}
+        {%- if ss.area_eyebrow != blank -%}<p class="td-pg-eyebrow">{{ ss.area_eyebrow }}</p>{%- endif -%}
+        <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-area">{{ ss.area_heading }}</h2>
+        {%- if ss.area_lede != blank -%}<p class="td-pg-lede">{{ ss.area_lede }}</p>{%- endif -%}
       </div></div>
-      <div class="td-pg-grid td-pg-grid--3-lg">
-        {%- for block in section.blocks -%}{%- if block.type == 'problem' -%}
-          {%- assign bs = block.settings -%}
-          <div class="td-pg-card td-pg-card--pad td-pg-card--pad-lg" {{ block.shopify_attributes }}>
-            {% render 'td-pg-icon', name: bs.icon, size: 24, cls: 'td-pg-icon--lead' %}
-            <h3 class="td-pg-h3">{{ bs.title }}</h3>
-            {%- if bs.intro != blank -%}<p class="td-pg-body td-pg-mt2">{{ bs.intro }}</p>{%- endif -%}
-            {%- assign stp = bs.steps | newline_to_br | split: '<br />' -%}
-            {%- assign k = 0 -%}
-            {%- capture stp_html -%}
-              {%- for s in stp -%}{%- assign s = s | strip -%}{%- if s != blank -%}{%- assign k = k | plus: 1 -%}
-                <li><span class="td-pg-ship__n" aria-hidden="true">0{{ k }}</span><span>{{ s | replace: '[phone]', phone }}</span></li>
-              {%- endif -%}{%- endfor -%}
-            {%- endcapture -%}
-            {%- if k > 0 -%}<ol class="td-pg-ship__nums">{{ stp_html }}</ol>{%- endif -%}
-            {%- if bs.body != blank -%}<p class="td-pg-body td-pg-body--ink td-pg-mt2">{{ bs.body | replace: '[phone]', phone }}</p>{%- endif -%}
-          </div>
+      {%- assign cities = ss.cities | newline_to_br | split: '<br />' -%}
+      <ul class="td-pg-chips">
+        {%- for city in cities -%}{%- assign city = city | strip -%}{%- if city != blank -%}
+          <li>{% render 'td-pg-icon', name: 'map-pin', size: 14 %}{{ city }}</li>
         {%- endif -%}{%- endfor -%}
+      </ul>
+      {%- if ss.outside_lead != blank -%}
+        <div class="td-pg-card td-pg-callout">
+          <p class="td-pg-body"><strong>{{ ss.outside_lead }}</strong> {{ ss.outside_text }}</p>
+          <a class="td-pg-btn td-pg-btn--dark td-pg-btn--sm" href="{{ phone_href }}">{% render 'td-pg-icon', name: 'phone', size: 16 %}{{ phone }}</a>
+        </div>
+      {%- endif -%}
+    </div>
+  </section>
+
+  {%- comment -%} ---------- What's in the van (dark) ---------- {%- endcomment -%}
+  <section class="td-pg-sec td-pg-sec--ink" aria-labelledby="td-pg-{{ section.id }}-kit">
+    <div class="td-pg-wrap">
+      <div class="td-pg-head"><div class="td-pg-head__text">
+        {%- if ss.kit_eyebrow != blank -%}<p class="td-pg-eyebrow td-pg-eyebrow--plain">{{ ss.kit_eyebrow }}</p>{%- endif -%}
+        <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-kit">{{ ss.kit_heading }}</h2>
+        {%- if ss.kit_lede != blank -%}<p class="td-pg-lede td-pg-mob__kit-lede">{{ ss.kit_lede }}</p>{%- endif -%}
+      </div></div>
+      <ul class="td-pg-mob__kit">
+        {%- for block in section.blocks -%}{%- if block.type == 'kit' -%}
+          <li {{ block.shopify_attributes }}>
+            {% render 'td-pg-icon', name: block.settings.icon, size: 22 %}
+            <h3>{{ block.settings.title }}</h3>
+            <p>{{ block.settings.body }}</p>
+          </li>
+        {%- endif -%}{%- endfor -%}
+      </ul>
+    </div>
+  </section>
+
+  {%- comment -%} ---------- Comparison ---------- {%- endcomment -%}
+  <section class="td-pg-sec td-pg-sec--fog" aria-labelledby="td-pg-{{ section.id }}-vs">
+    <div class="td-pg-wrap">
+      <div class="td-pg-head td-pg-head--center"><div class="td-pg-head__text">
+        {%- if ss.vs_eyebrow != blank -%}<p class="td-pg-eyebrow">{{ ss.vs_eyebrow }}</p>{%- endif -%}
+        <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-vs">{{ ss.vs_heading }}</h2>
+        {%- if ss.vs_lede != blank -%}<p class="td-pg-lede">{{ ss.vs_lede }}</p>{%- endif -%}
+      </div></div>
+      <div class="td-pg-grid td-pg-grid--2">
+        <div class="td-pg-card">
+          <div class="td-pg-vs__head td-pg-vs__head--us">{% render 'td-pg-icon', name: 'truck', size: 18 %}<h3>{{ ss.vs_us_heading | default: 'Mobile install' }}</h3></div>
+          <ul class="td-pg-vs td-pg-vs--us">
+            {%- for block in section.blocks -%}{%- if block.type == 'compare' and block.settings.us != blank -%}
+              <li {{ block.shopify_attributes }}>{% render 'td-pg-icon', name: 'check', size: 18 %}<span>{{ block.settings.us }}</span></li>
+            {%- endif -%}{%- endfor -%}
+          </ul>
+        </div>
+        <div class="td-pg-card">
+          <div class="td-pg-vs__head td-pg-vs__head--them">{% render 'td-pg-icon', name: 'clock', size: 18 %}<h3>{{ ss.vs_them_heading | default: 'The traditional tire stop' }}</h3></div>
+          <ul class="td-pg-vs td-pg-vs--them">
+            {%- for block in section.blocks -%}{%- if block.type == 'compare' and block.settings.them != blank -%}
+              <li>{% render 'td-pg-icon', name: 'x', size: 18 %}<span>{{ block.settings.them }}</span></li>
+            {%- endif -%}{%- endfor -%}
+          </ul>
+        </div>
       </div>
     </div>
   </section>
@@ -207,15 +212,12 @@
         {%- if ss.cta_eyebrow != blank -%}<p class="td-pg-eyebrow td-pg-eyebrow--plain">{{ ss.cta_eyebrow }}</p>{%- endif -%}
         <h2 class="td-pg-h2" id="td-pg-{{ section.id }}-cta">{{ ss.cta_heading }}</h2>
         {%- if ss.cta_lede != blank -%}<p class="td-pg-lede">{{ ss.cta_lede }}</p>{%- endif -%}
-        {%- if ss.cta_meta != blank -%}<p class="td-pg-cta__meta">{% render 'td-pg-icon', name: 'map-pin', size: 14 %}{{ ss.cta_meta }}</p>{%- endif -%}
       </div>
       <div class="td-pg-btns">
-        {%- if ss.cta1_label != blank -%}
-          <a class="td-pg-btn td-pg-btn--primary" href="{{ ss.cta1_link | default: routes.all_products_collection_url }}">{{ ss.cta1_label }}{% render 'td-pg-icon', name: 'arrow-right', size: 18 %}</a>
+        {%- if ss.cta_label != blank -%}
+          <a class="td-pg-btn td-pg-btn--primary" href="{{ booking_url }}">{{ ss.cta_label }}{% render 'td-pg-icon', name: 'arrow-right', size: 18 %}</a>
         {%- endif -%}
-        {%- if ss.cta2_label != blank -%}
-          <a class="td-pg-btn td-pg-btn--ghost" href="{{ ss.cta2_link | default: '/pages/install' }}">{% render 'td-pg-icon', name: 'store', size: 18 %}{{ ss.cta2_label }}</a>
-        {%- endif -%}
+        <a class="td-pg-btn td-pg-btn--ghost" href="{{ phone_href }}">{% render 'td-pg-icon', name: 'phone', size: 18 %}{{ phone }}</a>
       </div>
     </div>
   </section>
@@ -454,127 +456,109 @@
     .td-pg-card--hover, .td-pg-faq summary .td-pg-icon, .td-pg-btn { transition: none; }
     .td-pg-card--hover:hover { transform: none; }
   }
-  /* ---- Shipping page only ---- */
-  .td-pg-ship__model { display: grid; gap: 2rem; }
-  .td-pg-ship__model-text { max-width: 42rem; }
-  .td-pg-ship__choice-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
-  .td-pg-ship__points { flex: 1; align-content: start; }
-  .td-pg-ship__points li { color: #070E1A; }
-  .td-pg-ship__choice-cta { align-self: flex-start; margin-top: 1.75rem; }
-  .td-pg-ship__cov { display: grid; gap: 2rem; }
-  .td-pg-ship__cov-body { color: rgba(255,255,255,.62) !important; }
-  .td-pg-ship__cov-btns { margin-top: 1.75rem; }
-  .td-pg-ship__costs-list { display: grid; gap: .75rem; margin-top: 1.5rem; }
-  .td-pg-ship__costs-list li { display: flex; align-items: flex-start; gap: .75rem; padding-top: .75rem; border-top: 1px solid #22344C;
-    font-size: .875rem; line-height: 1.625; color: rgba(255,255,255,.82); }
-  .td-pg-ship__costs-list .td-pg-icon { margin-top: .1875rem; color: #00B4FC; }
-  .td-pg-ship__nums { display: grid; gap: .625rem; margin-top: 1.25rem; font-size: .875rem; line-height: 1.625; color: #070E1A; }
-  .td-pg-ship__nums li { display: flex; gap: .75rem; }
-  .td-pg-ship__n { font-family: var(--font-heading--family, inherit); font-weight: 500; color: #0068E8; }
-  .td-pg-ship .td-pg-grid--3-lg .td-pg-card:first-child .td-pg-icon--lead { color: #8A4F00; }
-  @media (min-width: 640px) {
-    .td-pg-ship__features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .td-pg-ship__features li:nth-child(3) { grid-column: span 2; }
-  }
-  @media (min-width: 768px) { .td-pg-ship__costs { padding: 2rem; } }
-  @media (min-width: 1024px) {
-    .td-pg-ship__model { grid-template-columns: 1.3fr 1fr; gap: 3rem; }
-    .td-pg-ship__features { grid-template-columns: 1fr; }
-    .td-pg-ship__features li:nth-child(3) { grid-column: auto; }
-    .td-pg-ship__cov { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3rem; }
-  }
+  /* ---- Service cards (mobile-service and auto-service) ---- */
+  .td-pg-svc { height: 100%; text-decoration: none; }
+  .td-pg-svc__top { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+  .td-pg-svc h3 { transition: color .15s ease; }
+  a.td-pg-svc:hover h3 { color: #0068E8; }
+  .td-pg-svc__blurb { flex: 1; margin-top: .75rem; }
+  .td-pg-svc__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem;
+    margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(7,14,26,.1); }
+  .td-pg-svc__time { display: flex; align-items: center; gap: .375rem; font-size: .75rem; color: #586274; }
+  .td-pg-svc__price { font-family: var(--font-heading--family, inherit); font-size: 1.125rem; font-weight: 500; color: #070E1A; }
+  .td-pg-svc__unit { margin-left: .25rem; font-family: var(--font-body--family, inherit); font-size: .75rem; font-weight: 400; color: #586274; }
+  /* ---- Mobile-service page only ---- */
+  .td-pg-mob__kit-lede { margin-top: .75rem !important; }
+  .td-pg-mob__kit { display: grid; gap: 1.5rem 2rem; }
+  .td-pg-mob__kit li { border-top: 1px solid #22344C; padding-top: 1.25rem; }
+  .td-pg-mob__kit .td-pg-icon { color: #00B4FC; }
+  .td-pg-mob__kit h3 { margin-top: .75rem; font-size: 1.0625rem; line-height: 1.3; color: #FFFFFF; }
+  .td-pg-mob__kit p { margin-top: .375rem; font-size: .875rem; line-height: 1.625; color: rgba(255,255,255,.65); }
+  @media (min-width: 640px) { .td-pg-mob__kit { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1024px) { .td-pg-mob__kit { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 </style>
 
 {% schema %}
 {
-  "name": "TireDrop shipping page",
+  "name": "TireDrop mobile install page",
   "tag": "div",
   "class": "td-pg-section",
   "settings": [
     { "type": "text", "id": "phone", "label": "Phone number", "default": "(954) 773-1896", "info": "Written anywhere copy says [phone], and dialled by the call buttons." },
-    { "type": "text", "id": "crumb", "label": "Breadcrumb label", "default": "How shipping works" },
+    { "type": "text", "id": "booking_url", "label": "Booking link", "default": "/pages/contact?topic=install", "info": "Where every booking button goes." },
+    { "type": "text", "id": "services_url", "label": "All-services page", "default": "/pages/auto-service", "info": "Service cards link here, to the card with the same slug." },
     { "type": "header", "content": "Hero" },
-    { "type": "text", "id": "hero_eyebrow", "label": "Eyebrow", "default": "Shipping" },
-    { "type": "text", "id": "hero_heading", "label": "Heading", "default": "Ordered online. Shipped to your door." },
-    { "type": "textarea", "id": "hero_lede", "label": "Lede", "default": "TireDrop is an online tire and wheel store, so your order ships free, direct from the distributor warehouse, to anywhere in the continental United States. No storefront markup, no waiting on one shop's back room to restock." },
-    { "type": "text", "id": "hero_cta1_label", "label": "Primary button", "default": "Shop tires" },
-    { "type": "url", "id": "hero_cta1_link", "label": "Primary link" },
-    { "type": "text", "id": "hero_cta2_label", "label": "Secondary button", "default": "Ship to store instead" },
-    { "type": "url", "id": "hero_cta2_link", "label": "Secondary link" },
-    { "type": "textarea", "id": "hero_checks", "label": "Check marks (one per line)", "default": "Ships across the continental United States\nFree ship-to-store in South Florida\nPowered by Extreme Tires" },
-    { "type": "header", "content": "The short version" },
-    { "type": "text", "id": "model_eyebrow", "label": "Eyebrow", "default": "The short version" },
-    { "type": "text", "id": "model_heading", "label": "Heading", "default": "Your tires never sit in our building" },
-    { "type": "textarea", "id": "model_lede", "label": "Lede" },
-    { "type": "textarea", "id": "model_body", "label": "Body" },
-    { "type": "header", "content": "Delivery choices" },
-    { "type": "text", "id": "choices_eyebrow", "label": "Eyebrow", "default": "At checkout" },
-    { "type": "text", "id": "choices_heading", "label": "Heading", "default": "Two ways to take delivery" },
-    { "type": "textarea", "id": "choices_lede", "label": "Lede", "default": "You pick one at checkout. Everything else about the order stays the same." },
-    { "type": "header", "content": "Order flow" },
-    { "type": "text", "id": "steps_eyebrow", "label": "Eyebrow", "default": "After you order" },
-    { "type": "text", "id": "steps_heading", "label": "Heading", "default": "What happens next" },
-    { "type": "textarea", "id": "steps_lede", "label": "Lede", "default": "Four stages, and you hear from us at each one. No silent stretches where you are left wondering whether the order went through." },
-    { "type": "header", "content": "Coverage band" },
-    { "type": "text", "id": "cov_eyebrow", "label": "Eyebrow", "default": "Coverage" },
-    { "type": "text", "id": "cov_heading", "label": "Heading", "default": "Shipping is national. Installing is not." },
-    { "type": "textarea", "id": "cov_lede", "label": "Lede" },
-    { "type": "textarea", "id": "cov_body", "label": "Body" },
-    { "type": "text", "id": "cov_cta_label", "label": "Button", "default": "Local? Ship to the store" },
-    { "type": "url", "id": "cov_cta_link", "label": "Button link" },
-    { "type": "text", "id": "costs_heading", "label": "Panel heading", "default": "Shipping cost and dates, straight" },
-    { "type": "textarea", "id": "costs_body", "label": "Panel body" },
-    { "type": "textarea", "id": "costs_list", "label": "Panel list (one per line)" },
-    { "type": "header", "content": "If something goes wrong" },
-    { "type": "text", "id": "wrong_eyebrow", "label": "Eyebrow", "default": "If something goes wrong" },
-    { "type": "text", "id": "wrong_heading", "label": "Heading", "default": "Damaged, wrong, or out of stock" },
-    { "type": "textarea", "id": "wrong_lede", "label": "Lede" },
+    { "type": "text", "id": "hero_eyebrow", "label": "Eyebrow", "default": "Mobile install — South Florida" },
+    { "type": "text", "id": "hero_heading", "label": "Heading", "default": "You bought the tires. We'll come fit them." },
+    { "type": "textarea", "id": "hero_lede", "label": "Lede" },
+    { "type": "text", "id": "hero_cta_label", "label": "Booking button", "default": "Book Mobile Install" },
+    { "type": "textarea", "id": "hero_checks", "label": "Check marks (one per line)", "default": "Powered by Extreme Tires\nTwo-hour arrival windows\nOld tires hauled away" },
+    { "type": "header", "content": "Local notice" },
+    { "type": "text", "id": "notice_lead", "label": "Bold lead", "default": "Broward County only." },
+    { "type": "textarea", "id": "notice_text", "label": "Text" },
+    { "type": "text", "id": "notice_link_label", "label": "Link text", "default": "See how shipping works" },
+    { "type": "url", "id": "notice_link", "label": "Link" },
+    { "type": "header", "content": "How it works" },
+    { "type": "text", "id": "steps_eyebrow", "label": "Eyebrow", "default": "How it works" },
+    { "type": "text", "id": "steps_heading", "label": "Heading", "default": "Order online. Fitted in your driveway." },
+    { "type": "textarea", "id": "steps_lede", "label": "Lede" },
+    { "type": "text", "id": "store_lead", "label": "Callout lead", "default": "Rather come to us?" },
+    { "type": "textarea", "id": "store_text", "label": "Callout text" },
+    { "type": "text", "id": "store_label", "label": "Callout button", "default": "Ship to store" },
+    { "type": "url", "id": "store_link", "label": "Callout link" },
+    { "type": "header", "content": "Mobile services" },
+    { "type": "text", "id": "svc_eyebrow", "label": "Eyebrow", "default": "Mobile services" },
+    { "type": "text", "id": "svc_heading", "label": "Heading", "default": "What the van can do at your curb" },
+    { "type": "textarea", "id": "svc_lede", "label": "Lede" },
+    { "type": "text", "id": "svc_all_label", "label": "All-services button", "default": "See all services" },
+    { "type": "header", "content": "Install area" },
+    { "type": "text", "id": "area_eyebrow", "label": "Eyebrow", "default": "Install area" },
+    { "type": "text", "id": "area_heading", "label": "Heading", "default": "Where the van rolls" },
+    { "type": "textarea", "id": "area_lede", "label": "Lede" },
+    { "type": "textarea", "id": "cities", "label": "Cities (one per line)", "default": "Sunrise\nPlantation\nFort Lauderdale\nDavie\nWeston\nCoral Springs\nTamarac\nLauderhill\nPembroke Pines\nMiramar" },
+    { "type": "text", "id": "outside_lead", "label": "Callout lead", "default": "Just outside the area?" },
+    { "type": "textarea", "id": "outside_text", "label": "Callout text" },
+    { "type": "header", "content": "What's in the van" },
+    { "type": "text", "id": "kit_eyebrow", "label": "Eyebrow", "default": "What's in the van" },
+    { "type": "text", "id": "kit_heading", "label": "Heading", "default": "A shop on four wheels" },
+    { "type": "textarea", "id": "kit_lede", "label": "Lede" },
+    { "type": "header", "content": "Comparison" },
+    { "type": "text", "id": "vs_eyebrow", "label": "Eyebrow", "default": "The difference" },
+    { "type": "text", "id": "vs_heading", "label": "Heading", "default": "Your driveway vs. their waiting room" },
+    { "type": "textarea", "id": "vs_lede", "label": "Lede", "default": "Same tires. Same torque spec. Completely different afternoon." },
+    { "type": "text", "id": "vs_us_heading", "label": "Left heading", "default": "Mobile install" },
+    { "type": "text", "id": "vs_them_heading", "label": "Right heading", "default": "The traditional tire stop" },
     { "type": "header", "content": "FAQ" },
     { "type": "text", "id": "faq_eyebrow", "label": "Eyebrow", "default": "Questions, answered" },
-    { "type": "text", "id": "faq_heading", "label": "Heading", "default": "Shipping FAQ" },
+    { "type": "text", "id": "faq_heading", "label": "Heading", "default": "Before you book" },
     { "type": "textarea", "id": "faq_lede", "label": "Lede" },
     { "type": "header", "content": "Closing band" },
     { "type": "text", "id": "cta_eyebrow", "label": "Eyebrow", "default": "Tires shipped. Or installed." },
-    { "type": "text", "id": "cta_heading", "label": "Heading", "default": "Find your size, pick your delivery" },
+    { "type": "text", "id": "cta_heading", "label": "Heading", "default": "Stop planning your day around a tire shop" },
     { "type": "textarea", "id": "cta_lede", "label": "Lede" },
-    { "type": "text", "id": "cta_meta", "label": "Address line", "default": "7712 West Oakland Park Blvd, Sunrise, FL 33351 · Powered by Extreme Tires" },
-    { "type": "text", "id": "cta1_label", "label": "Primary button", "default": "Shop tires" },
-    { "type": "url", "id": "cta1_link", "label": "Primary link" },
-    { "type": "text", "id": "cta2_label", "label": "Secondary button", "default": "Ship to store" },
-    { "type": "url", "id": "cta2_link", "label": "Secondary link" }
+    { "type": "text", "id": "cta_label", "label": "Booking button", "default": "Schedule Now" }
   ],
   "blocks": [
-    { "type": "feature", "name": "Short-version card", "settings": [
-      {"type": "select", "id": "icon", "label": "Icon", "default": "check", "options": [{"value": "truck", "label": "Truck"}, {"value": "store", "label": "Store"}, {"value": "receipt", "label": "Receipt"}, {"value": "package-search", "label": "Package search"}, {"value": "package-check", "label": "Package check"}, {"value": "package-x", "label": "Package x"}, {"value": "boxes", "label": "Boxes"}, {"value": "shield-check", "label": "Shield check"}, {"value": "phone", "label": "Phone"}, {"value": "triangle-alert", "label": "Triangle alert"}, {"value": "map-pin", "label": "Map pin"}, {"value": "shopping-cart", "label": "Shopping cart"}, {"value": "calendar-check", "label": "Calendar check"}, {"value": "calendar-clock", "label": "Calendar clock"}, {"value": "wrench", "label": "Wrench"}, {"value": "home", "label": "Home"}, {"value": "check", "label": "Check"}, {"value": "circle-check", "label": "Circle check"}, {"value": "clock", "label": "Clock"}, {"value": "gauge", "label": "Gauge"}, {"value": "radio", "label": "Radio"}, {"value": "ruler", "label": "Ruler"}, {"value": "ban", "label": "Ban"}, {"value": "zap", "label": "Zap"}, {"value": "stethoscope", "label": "Stethoscope"}, {"value": "warehouse", "label": "Warehouse"}, {"value": "dollar-sign", "label": "Dollar sign"}, {"value": "tag", "label": "Tag"}, {"value": "info", "label": "Info"}]},
-      { "type": "text", "id": "title", "label": "Title" },
-      { "type": "textarea", "id": "body", "label": "Body", "info": "The phone number is linked automatically wherever it appears." }
-    ] },
-    { "type": "choice", "name": "Delivery choice", "settings": [
-      {"type": "select", "id": "icon", "label": "Icon", "default": "check", "options": [{"value": "truck", "label": "Truck"}, {"value": "store", "label": "Store"}, {"value": "receipt", "label": "Receipt"}, {"value": "package-search", "label": "Package search"}, {"value": "package-check", "label": "Package check"}, {"value": "package-x", "label": "Package x"}, {"value": "boxes", "label": "Boxes"}, {"value": "shield-check", "label": "Shield check"}, {"value": "phone", "label": "Phone"}, {"value": "triangle-alert", "label": "Triangle alert"}, {"value": "map-pin", "label": "Map pin"}, {"value": "shopping-cart", "label": "Shopping cart"}, {"value": "calendar-check", "label": "Calendar check"}, {"value": "calendar-clock", "label": "Calendar clock"}, {"value": "wrench", "label": "Wrench"}, {"value": "home", "label": "Home"}, {"value": "check", "label": "Check"}, {"value": "circle-check", "label": "Circle check"}, {"value": "clock", "label": "Clock"}, {"value": "gauge", "label": "Gauge"}, {"value": "radio", "label": "Radio"}, {"value": "ruler", "label": "Ruler"}, {"value": "ban", "label": "Ban"}, {"value": "zap", "label": "Zap"}, {"value": "stethoscope", "label": "Stethoscope"}, {"value": "warehouse", "label": "Warehouse"}, {"value": "dollar-sign", "label": "Dollar sign"}, {"value": "tag", "label": "Tag"}, {"value": "info", "label": "Info"}]},
-      { "type": "text", "id": "badge", "label": "Badge" },
-      { "type": "text", "id": "title", "label": "Title" },
-      { "type": "textarea", "id": "body", "label": "Body" },
-      { "type": "textarea", "id": "points", "label": "Points (one per line)" },
-      { "type": "text", "id": "cta_label", "label": "Button" },
-      { "type": "url", "id": "cta_link", "label": "Button link" }
-    ] },
-    { "type": "step", "name": "Order step", "settings": [
+    { "type": "step", "name": "Step", "settings": [
       {"type": "select", "id": "icon", "label": "Icon", "default": "check", "options": [{"value": "truck", "label": "Truck"}, {"value": "store", "label": "Store"}, {"value": "receipt", "label": "Receipt"}, {"value": "package-search", "label": "Package search"}, {"value": "package-check", "label": "Package check"}, {"value": "package-x", "label": "Package x"}, {"value": "boxes", "label": "Boxes"}, {"value": "shield-check", "label": "Shield check"}, {"value": "phone", "label": "Phone"}, {"value": "triangle-alert", "label": "Triangle alert"}, {"value": "map-pin", "label": "Map pin"}, {"value": "shopping-cart", "label": "Shopping cart"}, {"value": "calendar-check", "label": "Calendar check"}, {"value": "calendar-clock", "label": "Calendar clock"}, {"value": "wrench", "label": "Wrench"}, {"value": "home", "label": "Home"}, {"value": "check", "label": "Check"}, {"value": "circle-check", "label": "Circle check"}, {"value": "clock", "label": "Clock"}, {"value": "gauge", "label": "Gauge"}, {"value": "radio", "label": "Radio"}, {"value": "ruler", "label": "Ruler"}, {"value": "ban", "label": "Ban"}, {"value": "zap", "label": "Zap"}, {"value": "stethoscope", "label": "Stethoscope"}, {"value": "warehouse", "label": "Warehouse"}, {"value": "dollar-sign", "label": "Dollar sign"}, {"value": "tag", "label": "Tag"}, {"value": "info", "label": "Info"}]},
       { "type": "text", "id": "title", "label": "Title" },
       { "type": "textarea", "id": "body", "label": "Body" }
     ] },
-    { "type": "problem", "name": "Problem card", "settings": [
+    {"type": "service", "name": "Service", "settings": [{"type": "text", "id": "name", "label": "Name"}, {"type": "text", "id": "slug", "label": "Anchor", "info": "Lower-case, no spaces. Links such as /pages/auto-service#tire-installation land on this card."}, {"type": "select", "id": "category", "label": "Group", "default": "Tires", "options": [{"value": "Tires", "label": "Tires"}, {"value": "Wheels", "label": "Wheels"}, {"value": "Maintenance", "label": "Maintenance"}, {"value": "Repair", "label": "Repair"}, {"value": "Custom", "label": "Custom"}]}, {"type": "checkbox", "id": "mobile", "label": "The van can do this at the customer's location", "default": false}, {"type": "textarea", "id": "blurb", "label": "Summary"}, {"type": "text", "id": "duration", "label": "Typical time"}, {"type": "text", "id": "price_from", "label": "Starting price", "info": "Shown as From <price>. Include the $ sign."}, {"type": "text", "id": "price_unit", "label": "Price unit", "info": "For example: per tire"}, {"type": "textarea", "id": "includes", "label": "What's included (one per line)"}, {"type": "textarea", "id": "symptoms", "label": "Signs you need it (one per line)"}]},
+    { "type": "kit", "name": "Van equipment", "settings": [
       {"type": "select", "id": "icon", "label": "Icon", "default": "check", "options": [{"value": "truck", "label": "Truck"}, {"value": "store", "label": "Store"}, {"value": "receipt", "label": "Receipt"}, {"value": "package-search", "label": "Package search"}, {"value": "package-check", "label": "Package check"}, {"value": "package-x", "label": "Package x"}, {"value": "boxes", "label": "Boxes"}, {"value": "shield-check", "label": "Shield check"}, {"value": "phone", "label": "Phone"}, {"value": "triangle-alert", "label": "Triangle alert"}, {"value": "map-pin", "label": "Map pin"}, {"value": "shopping-cart", "label": "Shopping cart"}, {"value": "calendar-check", "label": "Calendar check"}, {"value": "calendar-clock", "label": "Calendar clock"}, {"value": "wrench", "label": "Wrench"}, {"value": "home", "label": "Home"}, {"value": "check", "label": "Check"}, {"value": "circle-check", "label": "Circle check"}, {"value": "clock", "label": "Clock"}, {"value": "gauge", "label": "Gauge"}, {"value": "radio", "label": "Radio"}, {"value": "ruler", "label": "Ruler"}, {"value": "ban", "label": "Ban"}, {"value": "zap", "label": "Zap"}, {"value": "stethoscope", "label": "Stethoscope"}, {"value": "warehouse", "label": "Warehouse"}, {"value": "dollar-sign", "label": "Dollar sign"}, {"value": "tag", "label": "Tag"}, {"value": "info", "label": "Info"}]},
       { "type": "text", "id": "title", "label": "Title" },
-      { "type": "textarea", "id": "intro", "label": "Intro" },
-      { "type": "textarea", "id": "steps", "label": "Numbered steps (one per line, optional)" },
-      { "type": "textarea", "id": "body", "label": "Closing paragraph (optional)" }
+      { "type": "textarea", "id": "body", "label": "Body" }
+    ] },
+    { "type": "compare", "name": "Comparison row", "settings": [
+      { "type": "text", "id": "us", "label": "Mobile install" },
+      { "type": "text", "id": "them", "label": "Traditional tire stop" }
     ] },
     { "type": "faq", "name": "FAQ", "settings": [
       { "type": "text", "id": "question", "label": "Question" },
       { "type": "textarea", "id": "answer", "label": "Answer" }
     ] }
   ],
-  "presets": [{ "name": "TireDrop shipping page" }]
+  "presets": [{ "name": "TireDrop mobile install page" }]
 }
 {% endschema %}

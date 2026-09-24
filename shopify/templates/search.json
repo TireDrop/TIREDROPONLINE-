@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-search",
+      "settings": { "finder_link": "shopify://pages/find-my-tires" }
+    }
+  },
+  "order": ["main"]
+}

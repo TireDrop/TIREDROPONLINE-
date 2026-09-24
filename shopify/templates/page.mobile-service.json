@@ -1,0 +1,392 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-page-mobile-service",
+      "settings": {
+        "phone": "(954) 773-1896",
+        "booking_url": "/pages/contact?topic=install",
+        "services_url": "/pages/auto-service",
+        "hero_eyebrow": "Mobile install — South Florida",
+        "hero_heading": "You bought the tires. We'll come fit them.",
+        "hero_lede": "A fully equipped van, a technician who does this every day, and your new set — parked where your car already is. It is the bonus that comes with buying from a store whose parent company fits tires in Sunrise every day.",
+        "hero_cta_label": "Book Mobile Install",
+        "hero_checks": "Powered by Extreme Tires\nTwo-hour arrival windows\nOld tires hauled away",
+        "notice_lead": "Broward County only.",
+        "notice_text": "We ship tires to the continental United States, but the vans work South Florida. Outside the area?",
+        "notice_link_label": "See how shipping works",
+        "notice_link": "shopify://pages/shipping",
+        "steps_eyebrow": "How it works",
+        "steps_heading": "Order online. Fitted in your driveway.",
+        "steps_lede": "No drop-off, no shuttle, no waiting room. Here is exactly how it runs from the checkout page to the last lug nut.",
+        "store_lead": "Rather come to us?",
+        "store_text": "Free ship-to-store puts your order on the rack at the Sunrise shop and you book a fitting whenever suits. Same techs, same torque spec, full bay equipment.",
+        "store_label": "Ship to store",
+        "store_link": "shopify://pages/install",
+        "svc_eyebrow": "Mobile services",
+        "svc_heading": "What the van can do at your curb",
+        "svc_lede": "Every service below is performed at your location with shop-grade equipment. Prices start where shown and depend on your vehicle and the parts you choose.",
+        "svc_all_label": "See all services",
+        "area_eyebrow": "Install area",
+        "area_heading": "Where the van rolls",
+        "area_lede": "The fleet works out of Sunrise and covers these Broward cities daily. If yours is on this list, we come to you.",
+        "cities": "Sunrise\nPlantation\nFort Lauderdale\nDavie\nWeston\nCoral Springs\nTamarac\nLauderhill\nPembroke Pines\nMiramar",
+        "outside_lead": "Just outside the area?",
+        "outside_text": "Call before you assume the answer is no. We regularly stretch past the county line for fleet accounts, jobsites and full four-tire jobs — a dispatcher will tell you straight whether we can get a van to you and what it costs. Further afield, your tires still ship to your door.",
+        "kit_eyebrow": "What's in the van",
+        "kit_heading": "A shop on four wheels",
+        "kit_lede": "Mobile does not mean stripped down. Every van carries the same equipment the Sunrise bays use — which is why the work holds up the same way.",
+        "vs_eyebrow": "The difference",
+        "vs_heading": "Your driveway vs. their waiting room",
+        "vs_lede": "Same tires. Same torque spec. Completely different afternoon.",
+        "vs_us_heading": "Mobile install",
+        "vs_them_heading": "The traditional tire stop",
+        "faq_eyebrow": "Questions, answered",
+        "faq_heading": "Before you book",
+        "faq_lede": "The eight things local customers ask us most about mobile install. If yours is not here, call and ask.",
+        "cta_eyebrow": "Tires shipped. Or installed.",
+        "cta_heading": "Stop planning your day around a tire shop",
+        "cta_lede": "Tell us the vehicle and the address. We will bring the tires, the tools and the two-hour window — and leave with your old set.",
+        "cta_label": "Schedule Now"
+      },
+      "blocks": {
+        "s1": {
+          "type": "step",
+          "settings": {
+            "icon": "package-check",
+            "title": "Your order arrives",
+            "body": "Order your tires on TireDrop and send them to your address or free to the Sunrise shop. Already have tires sitting in the garage? That works too."
+          }
+        },
+        "s2": {
+          "type": "step",
+          "settings": {
+            "icon": "calendar-check",
+            "title": "Book the van",
+            "body": "Send us the service, the vehicle and the day that suits you with the booking request form. Prefer a human? Call and we will write it up for you."
+          }
+        },
+        "s3": {
+          "type": "step",
+          "settings": {
+            "icon": "phone",
+            "title": "We confirm a 2-hour window",
+            "body": "A dispatcher confirms the appointment and locks in a two-hour arrival window, so you are not burning a whole day waiting on a van."
+          }
+        },
+        "s4": {
+          "type": "step",
+          "settings": {
+            "icon": "zap",
+            "title": "Fitted where you parked",
+            "body": "Mounted, balanced, torqued to spec and pressures set — in your own driveway. Your old set leaves with us. You never went anywhere."
+          }
+        },
+        "svc_tire_installation": {
+          "type": "service",
+          "settings": {
+            "name": "Tire Installation",
+            "slug": "tire-installation",
+            "category": "Tires",
+            "mobile": true,
+            "blurb": "Mount and install new tires at your home, office or jobsite — no waiting room, no tow.",
+            "duration": "45–75 min",
+            "price_from": "$25",
+            "price_unit": "per tire",
+            "includes": "Dismount and disposal of old tires\nMount and seat new tires on your wheels\nRoad-force-style balance on every wheel\nValve stem replacement\nTorque to manufacturer spec\nTPMS reset where equipped",
+            "symptoms": "Tread worn to the wear bars\nTires older than six years\nSidewall cracking or bulging"
+          }
+        },
+        "svc_tire_balancing": {
+          "type": "service",
+          "settings": {
+            "name": "Tire Balancing",
+            "slug": "tire-balancing",
+            "category": "Tires",
+            "mobile": true,
+            "blurb": "Kill the steering-wheel shimmy. Precision balancing performed in your driveway.",
+            "duration": "30–45 min",
+            "price_from": "$15",
+            "price_unit": "per tire",
+            "includes": "Wheel weight removal and cleanup\nDynamic balance on a calibrated spin balancer\nRe-torque to spec\nRoad test on request",
+            "symptoms": "Steering wheel vibration above 45 mph\nSeat or floor buzz at highway speed\nUneven cupped tread wear"
+          }
+        },
+        "svc_tire_repair": {
+          "type": "service",
+          "settings": {
+            "name": "Tire Repair",
+            "slug": "tire-repair",
+            "category": "Tires",
+            "mobile": true,
+            "blurb": "Nail in your tread? We patch-plug it properly from the inside — the proper way.",
+            "duration": "30 min",
+            "price_from": "$35",
+            "price_unit": "per tire",
+            "includes": "Dismount and internal inspection\nCombination patch-plug repair\nRebalance after repair\nPressure set to door-placard spec",
+            "symptoms": "Slow leak or repeat low-pressure warnings\nVisible nail, screw or puncture\nTire that will not hold air overnight"
+          }
+        },
+        "svc_tire_rotation": {
+          "type": "service",
+          "settings": {
+            "name": "Tire Rotation",
+            "slug": "tire-rotation",
+            "category": "Tires",
+            "mobile": true,
+            "blurb": "Even out wear and add thousands of miles to your set. Recommended every 5,000–7,500 miles.",
+            "duration": "30 min",
+            "price_from": "$40",
+            "price_unit": "per service",
+            "includes": "Pattern rotation matched to your drivetrain\nTread depth measured at every corner\nPressure correction\nTorque to spec",
+            "symptoms": "Front tires wearing faster than rear\nIt has been over 7,500 miles\nNoise that changes with vehicle speed"
+          }
+        },
+        "svc_wheel_installation": {
+          "type": "service",
+          "settings": {
+            "name": "Wheel Installation",
+            "slug": "wheel-installation",
+            "category": "Wheels",
+            "mobile": true,
+            "blurb": "New wheels mounted, balanced and fitted with hub-centric rings for a true, vibration-free ride.",
+            "duration": "60–90 min",
+            "price_from": "$35",
+            "price_unit": "per wheel",
+            "includes": "Fitment and clearance verification\nMount and balance\nHub-centric ring fitment\nCorrect lug hardware check\nTPMS transfer or programming",
+            "symptoms": "Upgrading to aftermarket wheels\nBent or curbed wheel replacement\nSeasonal wheel and tire swap"
+          }
+        },
+        "svc_oil_change": {
+          "type": "service",
+          "settings": {
+            "name": "Oil Change",
+            "slug": "oil-change",
+            "category": "Maintenance",
+            "mobile": true,
+            "blurb": "Full-synthetic oil and a new filter while your car sits in its own parking spot.",
+            "duration": "30–45 min",
+            "price_from": "$79",
+            "price_unit": "per service",
+            "includes": "Up to 5 quarts full-synthetic oil\nNew oil filter\nFluid top-off\nMulti-point visual inspection\nUsed oil removed and recycled",
+            "symptoms": "Maintenance-required light on\nOver 5,000 miles since last change\nOil dark on the dipstick"
+          }
+        },
+        "svc_tpms_service": {
+          "type": "service",
+          "settings": {
+            "name": "TPMS Service",
+            "slug": "tpms-service",
+            "category": "Maintenance",
+            "mobile": true,
+            "blurb": "Diagnose, reset or replace the pressure sensors behind that stubborn dashboard light.",
+            "duration": "30–60 min",
+            "price_from": "$45",
+            "price_unit": "per sensor",
+            "includes": "Sensor scan and battery health check\nSensor replacement where needed\nRelearn and programming to your vehicle\nPressure set to placard spec",
+            "symptoms": "TPMS light stays on after inflating\nTPMS light flashing at startup\nSensor damaged during a prior install"
+          }
+        },
+        "k1": {
+          "type": "kit",
+          "settings": {
+            "icon": "gauge",
+            "title": "Calibrated spin balancer",
+            "body": "Dynamic balancing on board — the same machine standard the Sunrise bays run, not a bubble balancer."
+          }
+        },
+        "k2": {
+          "type": "kit",
+          "settings": {
+            "icon": "wrench",
+            "title": "Tire changer & bead breaker",
+            "body": "Mounts everything from a compact 15\" to a 22\" truck wheel without scratching the finish."
+          }
+        },
+        "k3": {
+          "type": "kit",
+          "settings": {
+            "icon": "shield-check",
+            "title": "Calibrated torque wrenches",
+            "body": "Every lug goes back to your manufacturer's spec in a star pattern. No rattle guns left to guess."
+          }
+        },
+        "k4": {
+          "type": "kit",
+          "settings": {
+            "icon": "radio",
+            "title": "TPMS programmer",
+            "body": "Scans, relearns and programs sensors so the dashboard light goes out before we leave."
+          }
+        },
+        "k5": {
+          "type": "kit",
+          "settings": {
+            "icon": "ruler",
+            "title": "Tread depth gauges & inflation",
+            "body": "Depth measured at every corner and pressures set to the door-placard number."
+          }
+        },
+        "k6": {
+          "type": "kit",
+          "settings": {
+            "icon": "truck",
+            "title": "Tire cart, floor jack & stands",
+            "body": "Rated jack, stands and a cart so heavy assemblies get handled properly on your driveway."
+          }
+        },
+        "k7": {
+          "type": "kit",
+          "settings": {
+            "icon": "zap",
+            "title": "Onboard power & lighting",
+            "body": "Generator and work lights mean we do not need your outlet, your garage or daylight."
+          }
+        },
+        "k8": {
+          "type": "kit",
+          "settings": {
+            "icon": "ban",
+            "title": "Old tire haul-off",
+            "body": "Your old set leaves with us and gets recycled. Nothing gets left at the curb."
+          }
+        },
+        "v1": {
+          "type": "compare",
+          "settings": {
+            "us": "Work happens where your car is parked",
+            "them": "Drive over and hope the bay is open"
+          }
+        },
+        "v2": {
+          "type": "compare",
+          "settings": {
+            "us": "A two-hour window you actually pick",
+            "them": "\"Should be a couple hours\" with no promise"
+          }
+        },
+        "v3": {
+          "type": "compare",
+          "settings": {
+            "us": "You keep working, cooking or sleeping",
+            "them": "You sit in a lobby with bad coffee"
+          }
+        },
+        "v4": {
+          "type": "compare",
+          "settings": {
+            "us": "No second vehicle or ride needed",
+            "them": "Someone has to drop you off and pick you up"
+          }
+        },
+        "v5": {
+          "type": "compare",
+          "settings": {
+            "us": "Flat tire? We come to the flat",
+            "them": "You put the donut on first, then drive on it"
+          }
+        },
+        "v6": {
+          "type": "compare",
+          "settings": {
+            "us": "Old tires hauled away and recycled",
+            "them": "Disposal fee tacked on at the register"
+          }
+        },
+        "q1": {
+          "type": "faq",
+          "settings": {
+            "question": "Is mobile install available everywhere you ship?",
+            "answer": "No, and we will not pretend otherwise. TireDrop ships tires to the continental United States, but the vans are a South Florida service run out of the Sunrise shop. If you are outside the Broward cities listed on this page, your order ships to you and you take it to a fitter you trust."
+          }
+        },
+        "q2": {
+          "type": "faq",
+          "settings": {
+            "question": "I bought my tires here. Can the van bring them to me?",
+            "answer": "That is exactly what it is for. Send the order free to the Sunrise shop at checkout, then book a mobile install — the van loads your set and brings it to your address. If you had them shipped to your house instead, leave them where they are and we will fit them there."
+          }
+        },
+        "q3": {
+          "type": "faq",
+          "settings": {
+            "question": "Does the van cost more than coming into the shop?",
+            "answer": "No. Mobile labor is billed at the same rate as the bay — tire installation starts at $25 per tire either way. Within the local install area there is no trip fee on standard appointments."
+          }
+        },
+        "q4": {
+          "type": "faq",
+          "settings": {
+            "question": "How much room does the van need?",
+            "answer": "One standard parking space next to your vehicle and about ten feet of clearance on the work side. A driveway, a flat stretch of street, an office lot or a jobsite staging area all work. We do not need your garage and we do not need a lift."
+          }
+        },
+        "q5": {
+          "type": "faq",
+          "settings": {
+            "question": "What happens if it rains?",
+            "answer": "South Florida rain is part of the job. Short afternoon showers rarely stop us — the van carries lighting and cover for the work area. If there is lightning or sustained heavy rain, we call you, pause the job and reschedule at the front of the next available window. You are never charged for weather."
+          }
+        },
+        "q6": {
+          "type": "faq",
+          "settings": {
+            "question": "Can you come to an apartment or condo complex?",
+            "answer": "Yes, and we do it every week. Some complexes want the van checked in at the gate or ask that work happen in a visitor space rather than a covered garage. Tell us the complex name and any gate code or call-up instructions when you book and we will handle it with management on arrival."
+          }
+        },
+        "q7": {
+          "type": "faq",
+          "settings": {
+            "question": "How long does a mobile appointment take?",
+            "answer": "A four-tire installation runs about 45 to 75 minutes. A single flat repair is roughly 30 minutes, a rotation about 30, and a full-synthetic oil change 30 to 45. Your confirmation lists the estimate for the exact service you booked."
+          }
+        },
+        "q8": {
+          "type": "faq",
+          "settings": {
+            "question": "What if my vehicle needs work the van cannot do?",
+            "answer": "Brakes, alignment, suspension, lift kits and diagnostics are bay work — they need a lift and an alignment rack, so they happen at the Sunrise shop. If the tech spots something like that in your driveway, you will hear it straight, with an estimate, and we will get you on the schedule there."
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "svc_tire_installation",
+        "svc_tire_balancing",
+        "svc_tire_repair",
+        "svc_tire_rotation",
+        "svc_wheel_installation",
+        "svc_oil_change",
+        "svc_tpms_service",
+        "k1",
+        "k2",
+        "k3",
+        "k4",
+        "k5",
+        "k6",
+        "k7",
+        "k8",
+        "v1",
+        "v2",
+        "v3",
+        "v4",
+        "v5",
+        "v6",
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5",
+        "q6",
+        "q7",
+        "q8"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

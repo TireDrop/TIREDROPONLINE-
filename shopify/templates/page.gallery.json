@@ -1,0 +1,257 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-page-gallery",
+      "settings": {
+        "hero_eyebrow": "News & Gallery",
+        "hero_title": "The work, up close",
+        "hero_lede": "Orders heading out across the continental United States, sets fitted in the Sunrise bay, and vans working driveways around Broward. Plus the videos and tips we end up repeating every week.",
+        "crumb": "News & Gallery",
+        "phone": "(954) 773-1896",
+        "tab_gallery": "Gallery",
+        "tab_videos": "Videos",
+        "tab_tips": "Tire Tips",
+        "gallery_title": "Orders out, tires on",
+        "gallery_lede": "Captions describe the order or the job each tile stands for. Photography is being collected now — these are illustrations until it lands.",
+        "art_label": "Illustration",
+        "videos_title": "How-tos we are filming",
+        "videos_lede": "Short, no-nonsense walkthroughs of the questions we answer most, for customers ordering online and for customers standing at the counter. These are in production — call us in the meantime and we will just explain it.",
+        "video_badge": "Coming soon",
+        "videos_note": "<strong>Want the short version now?</strong> Every topic above is written out in full in the tire care guides.",
+        "videos_note_label": "Read the guides",
+        "tips_title": "Short reads that save tires",
+        "tips_lede": "The advice we give on the phone, written down so you can check it in your own driveway — wherever that driveway is.",
+        "tip_link_label": "Read the tip",
+        "cta_eyebrow": "Tires shipped. Or installed.",
+        "cta_title": "Your order could be the next one out",
+        "cta_lede": "Tires shipped anywhere in the continental United States, free to the Sunrise shop if you want them fitted, and the van for driveways around Broward.",
+        "cta_label": "Shop Tires",
+        "videos_note_link": "shopify://pages/tire-care",
+        "cta_link": "shopify://collections/tires"
+      },
+      "blocks": {
+        "tile_1": {
+          "type": "tile",
+          "settings": {
+            "caption": "Order out the door — 4x Continental, shipped to Georgia",
+            "detail": "Picked from the distributor closest to the customer, boxed and on its way without passing through a warehouse of ours.",
+            "tone": "ink-graphite"
+          }
+        },
+        "tile_2": {
+          "type": "tile",
+          "settings": {
+            "caption": "Ship to store — set checked in at the Sunrise counter",
+            "detail": "Size, load index and speed rating read off every sidewall and matched to the order before anyone books the install.",
+            "tone": "graphite-ink"
+          }
+        },
+        "tile_3": {
+          "type": "tile",
+          "settings": {
+            "caption": "Install bay — full set fitted after a ship-to-store order",
+            "detail": "Mounted, balanced, new valve service and every lug torqued to spec.",
+            "tone": "drop-dive"
+          }
+        },
+        "tile_4": {
+          "type": "tile",
+          "settings": {
+            "caption": "Mobile install — driveway call, Plantation",
+            "detail": "Mat down, jack set, tire machine and balancer running off the van. The car never moved.",
+            "tone": "steel-ink"
+          }
+        },
+        "tile_5": {
+          "type": "tile",
+          "settings": {
+            "caption": "Wheel and tire package — staggered fitment, shipped",
+            "detail": "Offset and clearance confirmed with the customer first, then mounted and balanced as a package before it shipped.",
+            "tone": "graphite-steel"
+          }
+        },
+        "tile_6": {
+          "type": "tile",
+          "settings": {
+            "caption": "Alignment rack — Sunrise shop",
+            "detail": "Post-install alignment with a before-and-after printout for the customer.",
+            "tone": "amber-dive"
+          }
+        },
+        "tile_7": {
+          "type": "tile",
+          "settings": {
+            "caption": "Fleet order — six work vans, Tamarac yard",
+            "detail": "Ordered online, shipped to the shop, fitted on site. Tread depths recorded per vehicle, one invoice.",
+            "tone": "ink-steel"
+          }
+        },
+        "tile_8": {
+          "type": "tile",
+          "settings": {
+            "caption": "Packaging check — freight damage caught at the counter",
+            "detail": "A scuffed box gets opened and inspected before it is handed over. If the tire is wrong, it goes back, not on your car.",
+            "tone": "steel-drop"
+          }
+        },
+        "tile_9": {
+          "type": "tile",
+          "settings": {
+            "caption": "Office-park flat repair — sedan, Fort Lauderdale",
+            "detail": "Screw through the tread. Dismounted, patch-plugged from the inside and rebalanced.",
+            "tone": "ink-graphite"
+          }
+        },
+        "tile_10": {
+          "type": "tile",
+          "settings": {
+            "caption": "TPMS sensor replacement — SUV, Lauderhill",
+            "detail": "Dead sensor battery after eight years. Replaced in a work parking lot, light out.",
+            "tone": "graphite-ink"
+          }
+        },
+        "tile_11": {
+          "type": "tile",
+          "settings": {
+            "caption": "Fitment call — sizes read off a door placard over the phone",
+            "detail": "Half the job is making sure the right tire gets ordered in the first place. That part happens before anything ships.",
+            "tone": "steel-amber"
+          }
+        },
+        "tile_12": {
+          "type": "tile",
+          "settings": {
+            "caption": "Brake service — front rotors and pads, Sunrise shop",
+            "detail": "Bay work, priced before the parts came out of the box.",
+            "tone": "ink-steel"
+          }
+        },
+        "video_1": {
+          "type": "video",
+          "settings": {
+            "title": "What happens between checkout and your driveway",
+            "description": "Where the tires come from, who picks them, and what to check the moment the boxes land at your door."
+          }
+        },
+        "video_2": {
+          "type": "video",
+          "settings": {
+            "title": "Reading your door-jamb placard",
+            "description": "Where to find your real PSI and tire size, why the sidewall number is not it, and how to order the right set without guessing."
+          }
+        },
+        "video_3": {
+          "type": "video",
+          "settings": {
+            "title": "The penny test, done right",
+            "description": "Measuring tread in more than one spot, finding the wear bars, and the quarter-test version for rainy season."
+          }
+        },
+        "video_4": {
+          "type": "video",
+          "settings": {
+            "title": "Ship to your house, or ship to the shop?",
+            "description": "Who each option suits, what ship-to-store costs, and how the install gets booked once the order lands."
+          }
+        },
+        "video_5": {
+          "type": "video",
+          "settings": {
+            "title": "Which punctures we can repair, and which we refuse",
+            "description": "Tread area versus sidewall, size limits, and why a proper patch-plug beats a plug-only roadside fix."
+          }
+        },
+        "video_6": {
+          "type": "video",
+          "settings": {
+            "title": "Why your steering wheel shakes at 60",
+            "description": "Balance versus alignment versus a bent wheel — how to tell them apart before you pay for the wrong fix."
+          }
+        },
+        "tip_1": {
+          "type": "tip",
+          "settings": {
+            "kicker": "Pressure",
+            "title": "The monthly five-minute tire check",
+            "excerpt": "Cold tires, a real gauge, the door placard and a walk around the car. It catches most problems before they cost you a tire.",
+            "link": "/pages/tire-care#tire-pressure"
+          }
+        },
+        "tip_2": {
+          "type": "tip",
+          "settings": {
+            "kicker": "Tread",
+            "title": "Penny test, quarter test and wear bars",
+            "excerpt": "Three ways to answer the only question that matters in a downpour: is there still enough tread to move water?",
+            "link": "/pages/tire-care#tread-depth"
+          }
+        },
+        "tip_3": {
+          "type": "tip",
+          "settings": {
+            "kicker": "Rotation",
+            "title": "Why front tires die first",
+            "excerpt": "Steering, braking and engine weight all land on the same two tires. Rotation is how you stop buying them in pairs.",
+            "link": "/pages/tire-care#tire-rotation"
+          }
+        },
+        "tip_4": {
+          "type": "tip",
+          "settings": {
+            "kicker": "Alignment",
+            "title": "What one bad pothole really costs",
+            "excerpt": "A knocked-out alignment can shave a shoulder off a new set in a few thousand miles. Here is how to spot it early.",
+            "link": "/pages/tire-care#alignment"
+          }
+        },
+        "tip_5": {
+          "type": "tip",
+          "settings": {
+            "kicker": "TPMS",
+            "title": "Your TPMS light is not always about pressure",
+            "excerpt": "Sensors have batteries, and batteries die. Steady light and flashing light mean two different things.",
+            "link": "/pages/tire-care#tpms"
+          }
+        },
+        "tip_6": {
+          "type": "tip",
+          "settings": {
+            "kicker": "Buying",
+            "title": "Old tires with good tread are still old tires",
+            "excerpt": "How to read the DOT date code, and why heat and sun age rubber faster than mileage does.",
+            "link": "/pages/tire-care#tire-replacement"
+          }
+        }
+      },
+      "block_order": [
+        "tile_1",
+        "tile_2",
+        "tile_3",
+        "tile_4",
+        "tile_5",
+        "tile_6",
+        "tile_7",
+        "tile_8",
+        "tile_9",
+        "tile_10",
+        "tile_11",
+        "tile_12",
+        "video_1",
+        "video_2",
+        "video_3",
+        "video_4",
+        "video_5",
+        "video_6",
+        "tip_1",
+        "tip_2",
+        "tip_3",
+        "tip_4",
+        "tip_5",
+        "tip_6"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

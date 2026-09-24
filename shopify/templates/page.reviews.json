@@ -1,0 +1,42 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-page-reviews",
+      "settings": {
+        "hero_eyebrow": "Reviews",
+        "hero_title": "Shipped, fitted, and everything after",
+        "hero_lede": "Orders that went out to driveways in other states, sets fitted at the shop, van calls around Broward. The good ones, and the ones where we had to put something right.",
+        "crumb": "Reviews",
+        "phone": "(954) 773-1896",
+        "google_url": "https://www.google.com/maps/search/?api=1&query=Extreme+Tires+Sunrise+FL",
+        "yelp_url": "https://www.yelp.com/biz/extreme-tires-sunrise",
+        "real_title": "Read the real ones",
+        "real_copy": "TireDrop is new, so its own reviews are still being collected. The shop behind it is not: Extreme Tires has been fitting tires in Sunrise for years, and its customers have been writing about it. Both profiles below are the shop's.",
+        "google_label": "Extreme Tires on Google",
+        "yelp_label": "Extreme Tires on Yelp",
+        "real_note": "We do not reprint star counts here. They move, and a number typed into a page is out of date the week after. Open either profile and read what is actually there.",
+        "span_title": "We are not hiding the three-star ones",
+        "span_copy": "If we dropped the ball, you should be able to read about it.",
+        "span_note": "Reviews span both halves of the business: orders shipped out to customers across the continental United States, and tires fitted here in Sunrise or at an address around Broward.",
+        "list_eyebrow": "Customer Reviews",
+        "list_title": "In their own words",
+        "list_lede": "Posted with permission, word for word.",
+        "turn_eyebrow": "Your Turn",
+        "turn_title": "Leave a review",
+        "turn_lede": "Feedback is how a family shop gets better, online or in the bay. Tell us what went right — and what did not, so we can fix it.",
+        "wrong_title": "Something go wrong?",
+        "wrong_copy": "Call us before you post. Most complaints we hear are things we can still put right — a wrong size, a damaged box, a re-torque, a billing question. We would rather earn the stars back.",
+        "wrong_link_label": "Contact form",
+        "post_title": "Post it where it counts",
+        "post_copy": "Bought tires from us, or had them fitted? Tell us how it went. Google and Yelp are where a review counts for the shop, and where the next person shopping for tires will actually read it — it is a minute's work.",
+        "post_google_label": "Post it on Google",
+        "post_yelp_label": "Post it on Yelp",
+        "post_note": "If something about your order or your install still needs fixing, call and ask for customer care — we would rather put it right than have you write about it.",
+        "wrong_link": "shopify://pages/contact"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

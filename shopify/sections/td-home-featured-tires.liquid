@@ -104,7 +104,7 @@
                   {%- elsif section.settings.phone != blank -%}
                     <a class="tdh-btn tdh-btn--primary tdh-btn--sm td-pcard__btn" href="tel:+1{{ phone_digits }}">
                       {%- render 'td-home-icon', name: 'phone', size: 15 -%}
-                      Call {{ section.settings.phone }}
+                      <span class="td-pcard__short">Call us</span><span class="td-pcard__long">Call {{ section.settings.phone }}</span>
                     </a>
                   {%- endif -%}
                   <a class="tdh-btn tdh-btn--outline tdh-btn--sm td-pcard__btn" href="{{ product.url }}" aria-label="View details for {{ product.title | escape }}">
@@ -139,7 +139,8 @@
   .td-feat .td-pcard__body { flex: 1; display: flex; flex-direction: column; padding: .75rem; }
   .td-feat .td-pcard__brand { font-size: 11px; color: #586274; }
   .td-feat .td-pcard__title { margin: .25rem 0 0; font-size: .9375rem; line-height: 1.2; }
-  .td-feat .td-pcard__title a { color: #070E1A; text-decoration: none; }
+  /* Padding grows the tap target to 44px without moving the layout. */
+  .td-feat .td-pcard__title a { color: #070E1A; text-decoration: none; display: inline-block; padding: 14px 0; margin: -14px 0; }
   .td-feat .td-pcard__title a:hover { color: #0068E8; }
   .td-feat .td-pcard__spec { margin: .25rem 0 0; font-size: 11px; line-height: 1.4; color: #586274; font-variant-numeric: tabular-nums; }
   .td-feat .td-pcard__price { margin-top: auto; padding-top: .75rem; border-top: 1px solid rgba(7,14,26,.07); }

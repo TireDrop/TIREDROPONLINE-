@@ -52,8 +52,8 @@
         "cta_title": "Buy the tires first. Decide the rest after.",
         "cta_lede": "You can change your mind about shipping to your door or to the shop while your order is still being placed — just call us.",
         "cta_label": "Shop Tires",
-        "book_link": "shopify://pages/contact",
-        "area_cta_link": "shopify://pages/contact",
+        "book_link": "shopify://pages/install",
+        "area_cta_link": "shopify://pages/mobile-service",
         "van_link": "shopify://pages/mobile-service",
         "cta_link": "shopify://collections/tires"
       },
@@ -126,7 +126,7 @@
             "title": "Installation",
             "copy": "Mounting, balancing, new valve service, TPMS relearn where the vehicle needs it, and a torque wrench on every lug. Ask for an alignment at the same time if the set is new — it is the cheapest way to protect it.",
             "link_label": "Book an install",
-            "link": "shopify://pages/contact"
+            "link": "shopify://pages/install"
           }
         },
         "visit_3": {

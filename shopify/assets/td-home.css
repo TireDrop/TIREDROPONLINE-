@@ -2,9 +2,14 @@
   TireDrop homepage: the shared vocabulary every td-home section uses. The
   values are the React site's design tokens (tailwind.config.js, index.css):
   ink #070E1A, smoke #586274, fog #F4F6FA, drop #0068E8, dive #0053C4,
-  volt #00B4FC, graphite #22344C. Each homepage section links this file; the
-  browser fetches it once. Everything is prefixed tdh- so nothing here can
-  collide with Horizon's own class names.
+  volt #00B4FC, graphite #22344C. Each homepage section links this file, so
+  any one of them works alone; the browser downloads it once. Everything is
+  prefixed tdh- so nothing here can collide with Horizon's own class names.
+
+  Every repeated <link> re-enters the cascade at its own position, so a later
+  section's copy would override an earlier section's inline styles at equal
+  specificity. That is why each section scopes its own rules under its root
+  class (.td-proof .td-proof__lede): it always outranks the rules below.
 */
 
 .tdh { color: #070E1A; }

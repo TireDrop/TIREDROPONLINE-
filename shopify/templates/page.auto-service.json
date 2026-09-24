@@ -1,0 +1,243 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-page-auto-service",
+      "settings": {
+        "phone": "(954) 773-1896",
+        "booking_url": "/pages/contact?topic=install",
+        "hero_eyebrow": "Local service — Sunrise, FL",
+        "hero_heading": "What the shop does besides fit your tires",
+        "hero_lede": "Extreme Tires works on cars in Sunrise every day. [mobile_count] of these services travel to you in a van; brakes, alignment, suspension and lift kits need a lift and a rack, so those happen in the bay.",
+        "hero_cta_label": "Schedule Service",
+        "hero_cta2_label": "Ship to store & install",
+        "hero_cta2_link": "shopify://pages/install",
+        "notice_lead": "For local customers.",
+        "notice_text": "TireDrop ships tires to the continental United States. Everything on this page happens in South Florida — at the Sunrise shop or in your driveway.",
+        "legend_mobile": "The van comes to your home, office or jobsite",
+        "legend_shop": "Performed at 7712 West Oakland Park Blvd, Sunrise",
+        "where_mobile": "Local service — the van performs this at your home, office or jobsite anywhere in the South Florida install area, or you bring the vehicle to Sunrise.",
+        "where_shop": "In-shop only — this one needs a lift and bay equipment, so it happens at 7712 West Oakland Park Blvd, Sunrise.",
+        "copy_tires": "Fitting the set you ordered, and everything that happens between your wheel and the road afterwards.",
+        "copy_wheels": "Fitment, mounting and balancing for the wheel package you bought.",
+        "copy_maintenance": "Routine work that keeps the miles cheap — in the bay or in your own parking spot.",
+        "copy_repair": "Bay work at the Sunrise shop, where the lifts and the alignment rack live.",
+        "copy_custom": "Lift and leveling packages built around the tire and wheel setup you want.",
+        "sym_eyebrow": "Not sure what you need?",
+        "sym_heading": "Tell us the symptom",
+        "sym_lede": "You do not have to know the name of the repair. Pick the thing your vehicle is actually doing and we will match it to the fix.",
+        "sym_empty_heading": "Describe the problem",
+        "sym_empty_text": "Choose the symptom that sounds closest to what you are dealing with and we will point you at the right service. Nothing matching? Call us at [phone] and describe it — we have heard it before.",
+        "shop_name": "Extreme Tires — Sunrise",
+        "address": "7712 West Oakland Park Blvd\nSunrise, FL 33351",
+        "maps_url": "https://www.google.com/maps/search/?api=1&query=7712+West+Oakland+Park+Blvd+Sunrise+FL+33351",
+        "hours": "Mon – Fri | 8:00 AM – 6:30 PM\nSaturday | 8:00 AM – 4:00 PM\nSunday | Closed",
+        "book_heading": "Book it now",
+        "book_text": "Send us your service, your vehicle and your window through the booking request form — or call and talk it through with a dispatcher. Booking a fitting for tires on their way here? Say so in the notes.",
+        "book_label": "Schedule Service",
+        "tires_lead": "Buying tires on TireDrop?",
+        "tires_text": "Choose free ship-to-store at checkout and they land here on the rack with your name on them — then book the fitting around your week instead of around a delivery.",
+        "tires_label": "Mobile install",
+        "tires_link": "shopify://pages/mobile-service"
+      },
+      "blocks": {
+        "svc_tire_installation": {
+          "type": "service",
+          "settings": {
+            "name": "Tire Installation",
+            "slug": "tire-installation",
+            "category": "Tires",
+            "mobile": true,
+            "blurb": "Mount and install new tires at your home, office or jobsite — no waiting room, no tow.",
+            "duration": "45–75 min",
+            "price_from": "$25",
+            "price_unit": "per tire",
+            "includes": "Dismount and disposal of old tires\nMount and seat new tires on your wheels\nRoad-force-style balance on every wheel\nValve stem replacement\nTorque to manufacturer spec\nTPMS reset where equipped",
+            "symptoms": "Tread worn to the wear bars\nTires older than six years\nSidewall cracking or bulging"
+          }
+        },
+        "svc_tire_balancing": {
+          "type": "service",
+          "settings": {
+            "name": "Tire Balancing",
+            "slug": "tire-balancing",
+            "category": "Tires",
+            "mobile": true,
+            "blurb": "Kill the steering-wheel shimmy. Precision balancing performed in your driveway.",
+            "duration": "30–45 min",
+            "price_from": "$15",
+            "price_unit": "per tire",
+            "includes": "Wheel weight removal and cleanup\nDynamic balance on a calibrated spin balancer\nRe-torque to spec\nRoad test on request",
+            "symptoms": "Steering wheel vibration above 45 mph\nSeat or floor buzz at highway speed\nUneven cupped tread wear"
+          }
+        },
+        "svc_tire_repair": {
+          "type": "service",
+          "settings": {
+            "name": "Tire Repair",
+            "slug": "tire-repair",
+            "category": "Tires",
+            "mobile": true,
+            "blurb": "Nail in your tread? We patch-plug it properly from the inside — the proper way.",
+            "duration": "30 min",
+            "price_from": "$35",
+            "price_unit": "per tire",
+            "includes": "Dismount and internal inspection\nCombination patch-plug repair\nRebalance after repair\nPressure set to door-placard spec",
+            "symptoms": "Slow leak or repeat low-pressure warnings\nVisible nail, screw or puncture\nTire that will not hold air overnight"
+          }
+        },
+        "svc_tire_rotation": {
+          "type": "service",
+          "settings": {
+            "name": "Tire Rotation",
+            "slug": "tire-rotation",
+            "category": "Tires",
+            "mobile": true,
+            "blurb": "Even out wear and add thousands of miles to your set. Recommended every 5,000–7,500 miles.",
+            "duration": "30 min",
+            "price_from": "$40",
+            "price_unit": "per service",
+            "includes": "Pattern rotation matched to your drivetrain\nTread depth measured at every corner\nPressure correction\nTorque to spec",
+            "symptoms": "Front tires wearing faster than rear\nIt has been over 7,500 miles\nNoise that changes with vehicle speed"
+          }
+        },
+        "svc_wheel_installation": {
+          "type": "service",
+          "settings": {
+            "name": "Wheel Installation",
+            "slug": "wheel-installation",
+            "category": "Wheels",
+            "mobile": true,
+            "blurb": "New wheels mounted, balanced and fitted with hub-centric rings for a true, vibration-free ride.",
+            "duration": "60–90 min",
+            "price_from": "$35",
+            "price_unit": "per wheel",
+            "includes": "Fitment and clearance verification\nMount and balance\nHub-centric ring fitment\nCorrect lug hardware check\nTPMS transfer or programming",
+            "symptoms": "Upgrading to aftermarket wheels\nBent or curbed wheel replacement\nSeasonal wheel and tire swap"
+          }
+        },
+        "svc_oil_change": {
+          "type": "service",
+          "settings": {
+            "name": "Oil Change",
+            "slug": "oil-change",
+            "category": "Maintenance",
+            "mobile": true,
+            "blurb": "Full-synthetic oil and a new filter while your car sits in its own parking spot.",
+            "duration": "30–45 min",
+            "price_from": "$79",
+            "price_unit": "per service",
+            "includes": "Up to 5 quarts full-synthetic oil\nNew oil filter\nFluid top-off\nMulti-point visual inspection\nUsed oil removed and recycled",
+            "symptoms": "Maintenance-required light on\nOver 5,000 miles since last change\nOil dark on the dipstick"
+          }
+        },
+        "svc_tpms_service": {
+          "type": "service",
+          "settings": {
+            "name": "TPMS Service",
+            "slug": "tpms-service",
+            "category": "Maintenance",
+            "mobile": true,
+            "blurb": "Diagnose, reset or replace the pressure sensors behind that stubborn dashboard light.",
+            "duration": "30–60 min",
+            "price_from": "$45",
+            "price_unit": "per sensor",
+            "includes": "Sensor scan and battery health check\nSensor replacement where needed\nRelearn and programming to your vehicle\nPressure set to placard spec",
+            "symptoms": "TPMS light stays on after inflating\nTPMS light flashing at startup\nSensor damaged during a prior install"
+          }
+        },
+        "svc_brake_repair": {
+          "type": "service",
+          "settings": {
+            "name": "Brake Repair",
+            "slug": "brake-repair",
+            "category": "Repair",
+            "mobile": false,
+            "blurb": "Pads, rotors and full hydraulic diagnosis by technicians who do it every day.",
+            "duration": "2–3 hrs",
+            "price_from": "$189",
+            "price_unit": "per axle",
+            "includes": "Pad and rotor measurement\nCaliper and slide pin service\nHardware and shim replacement\nBrake fluid inspection\nRoad test and bed-in",
+            "symptoms": "Squealing or grinding when stopping\nPedal pulsation under braking\nLonger stopping distances"
+          }
+        },
+        "svc_wheel_alignment": {
+          "type": "service",
+          "settings": {
+            "name": "Wheel Alignment",
+            "slug": "wheel-alignment",
+            "category": "Repair",
+            "mobile": false,
+            "blurb": "Four-wheel computerized alignment that stops your new tires wearing out early.",
+            "duration": "60–90 min",
+            "price_from": "$99",
+            "price_unit": "four wheels",
+            "includes": "Camber, caster and toe measurement\nAdjustment to factory spec\nSteering wheel centering\nBefore-and-after printout",
+            "symptoms": "Car pulls to one side\nSteering wheel off-center on a straight road\nFeathered or one-sided tire wear"
+          }
+        },
+        "svc_suspension_repair": {
+          "type": "service",
+          "settings": {
+            "name": "Suspension Repair",
+            "slug": "suspension-repair",
+            "category": "Repair",
+            "mobile": false,
+            "blurb": "Struts, shocks, bushings and control arms — the parts that keep your tires on the road.",
+            "duration": "2–4 hrs",
+            "price_from": "$249",
+            "price_unit": "per axle",
+            "includes": "Full suspension inspection\nStrut and shock replacement\nBushing and control arm service\nAlignment check after repair",
+            "symptoms": "Bouncy or floaty ride\nClunking over bumps\nNose dive when braking"
+          }
+        },
+        "svc_lift_kits": {
+          "type": "service",
+          "settings": {
+            "name": "Lift Kits",
+            "slug": "lift-kits",
+            "category": "Custom",
+            "mobile": false,
+            "blurb": "Leveling kits through full suspension lifts, spec'd around the tire and wheel package you want.",
+            "duration": "4–8 hrs",
+            "price_from": "$599",
+            "price_unit": "installed",
+            "includes": "Fitment consultation\nKit installation\nDriveline angle check\nPost-install alignment\nTorque re-check appointment",
+            "symptoms": "Want more ground clearance\nFitting oversized tires\nCorrecting factory rake"
+          }
+        },
+        "svc_diagnostics": {
+          "type": "service",
+          "settings": {
+            "name": "Diagnostics & Inspections",
+            "slug": "diagnostics",
+            "category": "Repair",
+            "mobile": false,
+            "blurb": "Check engine light scan and a straight answer about what it will actually cost to fix.",
+            "duration": "60 min",
+            "price_from": "$89",
+            "price_unit": "per scan",
+            "includes": "Full OBD-II code scan\nLive data review\nVisual under-hood inspection\nWritten findings and estimate",
+            "symptoms": "Check engine light on\nRough idle or hesitation\nUnexplained drop in fuel economy"
+          }
+        }
+      },
+      "block_order": [
+        "svc_tire_installation",
+        "svc_tire_balancing",
+        "svc_tire_repair",
+        "svc_tire_rotation",
+        "svc_wheel_installation",
+        "svc_oil_change",
+        "svc_tpms_service",
+        "svc_brake_repair",
+        "svc_wheel_alignment",
+        "svc_suspension_repair",
+        "svc_lift_kits",
+        "svc_diagnostics"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

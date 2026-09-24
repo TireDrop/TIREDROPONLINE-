@@ -1,0 +1,915 @@
+{% comment %}
+  Contact page. Ported from the React ContactPage (src/pages/support/ContactPage.jsx).
+  The form is Shopify's native contact form, so a message lands in the store
+  inbox. Field names: contact[name], contact[email], contact[phone],
+  contact[Subject] and contact[body]. Hours are blocks seeded from the React
+  business data (src/data/business.js).
+{% endcomment %}
+{%- liquid
+  assign tdp_digits = section.settings.phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
+  assign tdp_tel = 'tel:+1' | append: tdp_digits
+-%}
+<div class="tdp tdp-contact">
+  <div class="tdp-hero">
+    <div class="tdp-hero__line" aria-hidden="true"></div>
+    <div class="tdp-wrap tdp-hero__inner">
+      {%- if section.settings.hero_eyebrow != blank -%}
+        <p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.hero_eyebrow }}</p>
+      {%- endif -%}
+      <h1 class="tdp-h1">{{ section.settings.hero_title }}</h1>
+      {%- if section.settings.hero_lede != blank -%}
+        <p class="tdp-hero__lede">{{ section.settings.hero_lede }}</p>
+      {%- endif -%}
+      <div class="tdp-hero__actions">
+        <a href="{{ tdp_tel }}" class="tdp-btn tdp-btn--primary"><svg class="tdp-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.hero_call_label }} {{ section.settings.phone }}</a>
+  </div>
+    </div>
+  </div>
+
+  <nav class="tdp-crumbs" aria-label="Breadcrumb">
+    <ol class="tdp-wrap">
+      <li><a href="{{ routes.root_url }}">Home</a></li>
+      <li><svg class="tdp-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6"/></svg><span aria-current="page">{{ section.settings.crumb }}</span></li>
+    </ol>
+  </nav>
+
+  <section class="tdp-sec tdp-bone">
+    <div class="tdp-wrap tdp-contact__grid">
+      <div>
+        <div class="tdp-head">
+      <div class="tdp-head__text">
+        {%- if section.settings.reach_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.reach_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.reach_title }}</h2>
+        {%- if section.settings.reach_lede != blank -%}<p class="tdp-lede">{{ section.settings.reach_lede }}</p>{%- endif -%}
+      </div>
+    </div>
+        <div class="tdp-card tdp-p6 tdp-bl-drop">
+          <h3 class="tdp-h3 tdp-h3-ic tdp-contact__cardtitle--tight"><svg class="tdp-ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>{{ section.settings.fast_title }}</h3>
+          <p class="tdp-small">{{ section.settings.fast_copy }}</p>
+          <a href="{{ tdp_tel }}" class="tdp-btn tdp-btn--primary tdp-btn--sm tdp-contact__fastbtn"><svg class="tdp-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.phone }}</a>
+        </div>
+
+        <ul class="tdp-contact__methods">
+          <li class="tdp-card tdp-p6">
+            <h3 class="tdp-h3 tdp-h3-ic tdp-contact__cardtitle"><svg class="tdp-ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.phone_title }}</h3>
+            <a href="{{ tdp_tel }}" class="tdp-contact__big">{{ section.settings.phone }}</a>
+            <p class="tdp-small tdp-contact__after">{{ section.settings.phone_copy }}</p>
+            {%- if section.settings.phone_note != blank -%}<p class="tdp-xs tdp-contact__note">{{ section.settings.phone_note }}</p>{%- endif -%}
+          </li>
+          <li class="tdp-card tdp-p6">
+            <h3 class="tdp-h3 tdp-h3-ic tdp-contact__cardtitle"><svg class="tdp-ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>{{ section.settings.email_title }}</h3>
+            <a href="mailto:{{ section.settings.email }}" class="tdp-contact__big tdp-contact__email">{{ section.settings.email }}</a>
+            <p class="tdp-small tdp-contact__after">{{ section.settings.email_copy }}</p>
+          </li>
+          <li class="tdp-card tdp-p6">
+            <h3 class="tdp-h3 tdp-h3-ic tdp-contact__cardtitle"><svg class="tdp-ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>{{ section.settings.shop_title }}</h3>
+            <p class="tdp-small tdp-contact__shopcopy">{{ section.settings.shop_copy }}</p>
+            <address class="tdp-contact__addr">{{ section.settings.street }}<br>{{ section.settings.city_line }}</address>
+            <div class="tdp-actions tdp-contact__shopbtns">
+              <a href="{{ section.settings.maps_url }}" target="_blank" rel="noopener noreferrer" class="tdp-btn tdp-btn--outline tdp-btn--sm"><svg class="tdp-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>{{ section.settings.directions_label }}<span class="tdp-sr"> (opens in a new tab)</span></a>
+              {%- if section.settings.shop_link_label != blank -%}
+                <a href="{{ section.settings.shop_link | default: '/pages/locations' }}" class="tdp-btn tdp-btn--outline tdp-btn--sm">{{ section.settings.shop_link_label }}</a>
+              {%- endif -%}
+            </div>
+          </li>
+          <li class="tdp-card tdp-p6">
+            <h3 class="tdp-h3 tdp-h3-ic tdp-contact__cardtitle"><svg class="tdp-ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>{{ section.settings.hours_title }}</h3>
+            <table class="tdp-hours">
+              <caption class="tdp-sr">Business hours</caption>
+              <tbody>
+                {%- for block in section.blocks -%}
+                  {%- if block.type == 'hours' -%}
+                    <tr {{ block.shopify_attributes }}>
+                      <th scope="row">{{ block.settings.days }}</th>
+                      <td{% if block.settings.time == 'Closed' %} class="is-closed"{% endif %}>{{ block.settings.time }}</td>
+                    </tr>
+                  {%- endif -%}
+                {%- endfor -%}
+              </tbody>
+            </table>
+            {%- if section.settings.hours_note != blank -%}<p class="tdp-xs tdp-contact__note">{{ section.settings.hours_note }}</p>{%- endif -%}
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="tdp-head">
+      <div class="tdp-head__text">
+        {%- if section.settings.message_eyebrow != blank -%}<p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.message_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.message_title }}</h2>
+        {%- if section.settings.message_lede != blank -%}<p class="tdp-lede">{{ section.settings.message_lede }}</p>{%- endif -%}
+      </div>
+    </div>
+        {%- form 'contact', id: 'tdp-contact-form', class: 'tdp-contact__form' -%}
+          {%- if form.posted_successfully? -%}
+            <div class="tdp-card tdp-bl-drop tdp-contact__result" role="status" tabindex="-1">
+              <svg class="tdp-ic tdp-drop tdp-contact__resultic" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <h3 class="tdp-h3">{{ section.settings.success_title }}</h3>
+              <p class="tdp-small tdp-contact__after">{{ section.settings.success_copy }}</p>
+              <p class="tdp-small tdp-contact__after">{{ section.settings.success_urgent }} <a href="{{ tdp_tel }}" class="tdp-drop">{{ section.settings.phone }}</a>.</p>
+              <div class="tdp-actions tdp-contact__resultbtns">
+                <a href="{{ tdp_tel }}" class="tdp-btn tdp-btn--primary tdp-btn--sm"><svg class="tdp-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.success_call_label }}</a>
+                <a href="{{ request.path | default: '/pages/contact' }}" class="tdp-btn tdp-btn--outline tdp-btn--sm">{{ section.settings.success_again_label }}</a>
+              </div>
+            </div>
+          {%- else -%}
+            <div class="tdp-card tdp-contact__card">
+              {%- if form.errors -%}
+                <div class="tdp-card tdp-bl-amber tdp-p6 tdp-formerr" role="alert">
+                  <h3 class="tdp-h3 tdp-h3-ic"><svg class="tdp-ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.error_title }}</h3>
+                  <p class="tdp-small tdp-contact__after">{{ section.settings.error_copy }} <a href="{{ tdp_tel }}" class="tdp-drop">{{ section.settings.phone }}</a></p>
+                  <div class="tdp-small tdp-ink-text">{{ form.errors | default_errors }}</div>
+                </div>
+              {%- endif -%}
+              <h3 class="tdp-h3 tdp-contact__formtitle">{{ section.settings.form_title }}</h3>
+              <p class="tdp-small tdp-contact__formintro">{{ section.settings.form_intro }}</p>
+              <div class="tdp-contact__fields">
+                <div>
+                  <label class="tdp-label" for="tdp-contact-name">{{ section.settings.label_name }}</label>
+                  <input id="tdp-contact-name" class="tdp-field" type="text" name="contact[name]" autocomplete="name" required
+                    placeholder="{{ section.settings.ph_name }}" value="{{ form.name }}"
+                    data-tdp-check="tdp-contact-name-error" data-err-required="Tell us who we are talking to.">
+                  <p class="tdp-err" id="tdp-contact-name-error" hidden><svg class="tdp-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg><span></span></p>
+                </div>
+                <div>
+                  <label class="tdp-label" for="tdp-contact-phone">{{ section.settings.label_phone }}</label>
+                  <input id="tdp-contact-phone" class="tdp-field" type="tel" inputmode="tel" name="contact[phone]" autocomplete="tel" required
+                    placeholder="{{ section.settings.ph_phone }}" value="{{ form.phone }}"
+                    data-tdp-check="tdp-contact-phone-error" data-err-required="A phone number gets you a faster answer." data-err-phone="Enter a 10-digit phone number, area code included.">
+                  <p class="tdp-err" id="tdp-contact-phone-error" hidden><svg class="tdp-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg><span></span></p>
+                </div>
+                <div class="tdp-contact__full">
+                  <label class="tdp-label" for="tdp-contact-email">{{ section.settings.label_email }}</label>
+                  <input id="tdp-contact-email" class="tdp-field" type="email" name="contact[email]" autocomplete="email" required spellcheck="false" autocapitalize="off"
+                    placeholder="{{ section.settings.ph_email }}" value="{{ form.email }}"
+                    {% if form.errors contains 'email' %}aria-invalid="true" {% endif %}data-tdp-check="tdp-contact-email-error" data-err-required="We need an email to write back to." data-err-email="That email address does not look complete.">
+                  <p class="tdp-err" id="tdp-contact-email-error" hidden><svg class="tdp-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg><span></span></p>
+                </div>
+                {%- assign tdp_subjects = section.settings.subjects | newline_to_br | split: '<br />' -%}
+                <fieldset class="tdp-contact__full" data-tdp-check="tdp-contact-subject-error" data-err-required="Pick the option that fits best.">
+                  <legend class="tdp-label">{{ section.settings.label_subject }}</legend>
+                  <div class="tdp-contact__radios">
+                    {%- for subject in tdp_subjects -%}
+                      {%- assign s = subject | strip -%}
+                      {%- if s != blank -%}
+                        <label class="tdp-contact__radio">
+                          <input type="radio" name="contact[Subject]" value="{{ s | escape }}" required>
+                          <span>{{ s }}</span>
+                        </label>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </div>
+                  <p class="tdp-err" id="tdp-contact-subject-error" hidden><svg class="tdp-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg><span></span></p>
+                </fieldset>
+                <div class="tdp-contact__full">
+                  <label class="tdp-label" for="tdp-contact-message">{{ section.settings.label_message }}</label>
+                  <textarea id="tdp-contact-message" class="tdp-field" name="contact[body]" rows="6" required
+                    placeholder="{{ section.settings.ph_message }}"
+                    data-tdp-check="tdp-contact-message-error" data-err-required="Add a few details so we can actually help." data-min="15" data-err-min="A little more detail, please — vehicle, tire size, or your order number.">{{ form.body }}</textarea>
+                  <p class="tdp-err" id="tdp-contact-message-error" hidden><svg class="tdp-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg><span></span></p>
+                </div>
+              </div>
+              <button type="submit" class="tdp-btn tdp-btn--primary tdp-contact__submit" data-sending="Sending…">{{ section.settings.submit_label }}</button>
+              {%- if section.settings.privacy_note != blank -%}<p class="tdp-xs tdp-contact__privacy">{{ section.settings.privacy_note }}</p>{%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endform -%}
+      </div>
+    </div>
+  </section>
+
+  <section class="tdp-ink tdp-contact__cta">
+    <div class="tdp-wrap tdp-contact__ctarow">
+      <div>
+        {%- if section.settings.cta_eyebrow != blank -%}<p class="tdp-eyebrow tdp-eyebrow--dark tdp-eyebrow--plain">{{ section.settings.cta_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.cta_title }}</h2>
+        {%- if section.settings.cta_lede != blank -%}<p class="tdp-lede tdp-contact__ctalede">{{ section.settings.cta_lede }}</p>{%- endif -%}
+      </div>
+      <div class="tdp-contact__ctabtns">
+        {%- if section.settings.cta1_label != blank -%}<a href="{{ section.settings.cta1_link | default: '/pages/shipping' }}" class="tdp-btn tdp-btn--primary">{{ section.settings.cta1_label }}</a>{%- endif -%}
+        {%- if section.settings.cta2_label != blank -%}<a href="{{ section.settings.cta2_link | default: '/pages/install' }}" class="tdp-btn tdp-btn--ghost">{{ section.settings.cta2_label }}</a>{%- endif -%}
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  (function () {
+    // Mirrors the React form's validation messages. Without JavaScript the
+    // browser's own required/type checks still apply and Shopify validates the email.
+    var form = document.getElementById('tdp-contact-form');
+    if (!form || form.getAttribute('data-tdp-ready')) return;
+    form.setAttribute('data-tdp-ready', '1');
+    form.noValidate = true;
+    var checks = form.querySelectorAll('[data-tdp-check]');
+    var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    function valueOf(el) {
+      if (el.tagName === 'FIELDSET') {
+        var picked = el.querySelector('input:checked');
+        return picked ? picked.value : '';
+      }
+      return el.value.trim();
+    }
+    function show(el, msg) {
+      var box = document.getElementById(el.getAttribute('data-tdp-check'));
+      var target = el.tagName === 'FIELDSET' ? el.querySelectorAll('input') : [el];
+      var hint = el.getAttribute('data-tdp-hint');
+      for (var i = 0; i < target.length; i++) {
+        if (msg) target[i].setAttribute('aria-invalid', 'true'); else target[i].removeAttribute('aria-invalid');
+      }
+      if (box) {
+        box.hidden = !msg;
+        box.querySelector('span').textContent = msg || '';
+      }
+      var hintEl = hint && document.getElementById(hint);
+      if (hintEl) hintEl.hidden = !!msg;
+      var ids = [msg ? box && box.id : hint].filter(Boolean).join(' ');
+      if (el.tagName === 'FIELDSET') { if (msg) el.setAttribute('aria-describedby', ids); else el.removeAttribute('aria-describedby'); }
+      else if (ids) el.setAttribute('aria-describedby', ids); else el.removeAttribute('aria-describedby');
+    }
+    function check(el) {
+      var v = valueOf(el), d = el.dataset, msg = '';
+      if (!v) msg = d.errRequired || '';
+      else if (d.errEmail && !EMAIL.test(v)) msg = d.errEmail;
+      else if (d.errPhone && v.replace(/\D/g, '').length < 10) msg = d.errPhone;
+      else if (d.errMin && v.length < Number(d.min || 0)) msg = d.errMin;
+      else if (d.errAmount) {
+        var n = Number(v.replace(/[$,\s]/g, ''));
+        if (isNaN(n) || n <= 0) msg = d.errAmount;
+        else if (d.errMax && n > Number(d.max || Infinity)) msg = d.errMax;
+      }
+      show(el, msg);
+      return !msg;
+    }
+    form.addEventListener('submit', function (event) {
+      var first = null;
+      for (var i = 0; i < checks.length; i++) {
+        if (!check(checks[i]) && !first) first = checks[i];
+      }
+      if (first) {
+        event.preventDefault();
+        (first.tagName === 'FIELDSET' ? first.querySelector('input') : first).focus();
+        return;
+      }
+      var btn = form.querySelector('[type="submit"]');
+      if (btn) {
+        if (btn.getAttribute('aria-disabled') === 'true') { event.preventDefault(); return; }
+        btn.setAttribute('aria-disabled', 'true');
+        btn.textContent = btn.getAttribute('data-sending') || btn.textContent;
+      }
+    });
+    for (var i = 0; i < checks.length; i++) {
+      (function (el) {
+        el.addEventListener(el.tagName === 'FIELDSET' ? 'change' : 'input', function () {
+          // Clear an error as soon as the customer starts fixing it.
+          var box = document.getElementById(el.getAttribute('data-tdp-check'));
+          if (box && !box.hidden) show(el, '');
+        });
+      })(checks[i]);
+    }
+  })();
+
+  (function () {
+    // After Shopify redirects back with ?contact_posted=true, move focus to the confirmation.
+    var done = document.querySelector('#tdp-contact-form [role="status"]');
+    if (done && /contact_posted=true/.test(location.search)) done.focus();
+  })();
+</script>
+
+<style>
+  /* Page kit, shared by the td-page-* sections Agent E owns. Each section carries its own copy so it stays self-contained. */
+  .tdp { color: #070E1A; font-family: var(--font-body--family, inherit); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .tdp *, .tdp *::before, .tdp *::after { box-sizing: border-box; }
+  .tdp :where(h1, h2, h3, h4, p, ul, ol, dl, dd, dt, figure, blockquote, table, fieldset, legend, address) { margin: 0; padding: 0; }
+  .tdp :where(ul, ol) { list-style: none; }
+  .tdp :where(address) { font-style: normal; }
+  .tdp :where(fieldset) { border: 0; min-width: 0; }
+  .tdp :where(a) { color: inherit; }
+  .tdp :where(h1, h2, h3, h4) {
+    font-family: var(--font-heading--family, inherit); font-weight: 800; letter-spacing: -.018em;
+    font-variation-settings: "wdth" 108; color: inherit; text-wrap: balance; text-transform: none;
+  }
+  .tdp :where(a, button, input, select, textarea, summary):focus-visible { outline: 2px solid #0068E8; outline-offset: 2px; }
+  .tdp-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+  .tdp-wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding-left: 1rem; padding-right: 1rem; }
+  .tdp-sec { padding: 3.5rem 0; }
+  .tdp-bone { background: #FFFFFF; }
+  .tdp-fog { background: #F4F6FA; }
+  /* Dark bands pin their text colour rather than inheriting body ink. */
+  .tdp-ink { background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); color: #FFFFFF; }
+  .tdp-steel { background: #0B1524 linear-gradient(180deg, #14233A 0%, #0B1524 100%); color: #FFFFFF; }
+  .tdp-ink :where(h1, h2, h3), .tdp-steel :where(h1, h2, h3) { color: #FFFFFF; }
+
+  .tdp-h1 { font-size: 2.4rem; line-height: .98; }
+  .tdp-h2 { font-size: 1.9rem; line-height: 1.02; }
+  .tdp-h3 { font-size: 1.2rem; line-height: 1.15; }
+  .tdp-display { font-family: var(--font-heading--family, inherit); }
+  .tdp-eyebrow {
+    display: flex; align-items: center; gap: .625rem; margin-bottom: .625rem;
+    font-family: var(--font-heading--family, inherit); font-size: 12px; font-weight: 700; line-height: 1.4;
+    text-transform: uppercase; letter-spacing: .09em; color: #0068E8;
+  }
+  .tdp-eyebrow--plain { display: block; }
+  .tdp-rule { flex: none; height: 1px; width: 1.5rem; background: rgba(0,104,232,.45); }
+  .tdp-eyebrow--dark { color: #00B4FC; }
+  .tdp-eyebrow--dark .tdp-rule { background: rgba(0,180,252,.5); }
+  .tdp-label {
+    display: block; margin-bottom: .375rem; font-family: var(--font-heading--family, inherit);
+    font-size: 11px; font-weight: 700; line-height: 1.4; text-transform: uppercase; letter-spacing: .07em; color: #586274;
+  }
+  .tdp-lede { font-size: 1.0625rem; line-height: 1.6; color: #586274; }
+  .tdp-ink .tdp-lede, .tdp-steel .tdp-lede { color: rgba(255,255,255,.7); }
+  .tdp-small { font-size: .875rem; line-height: 1.625; color: #586274; }
+  .tdp-xs { font-size: .75rem; line-height: 1.625; color: #586274; }
+  .tdp-ink-text { color: #070E1A; }
+  .tdp-drop { color: #0068E8; }
+  .tdp-small a, .tdp-xs a, .tdp-lede a { text-underline-offset: 2px; }
+  .tdp-small a:hover, .tdp-xs a:hover { color: #0068E8; }
+
+  .tdp-head { margin-bottom: 2rem; }
+  .tdp-head__text { max-width: 42rem; }
+  .tdp-head .tdp-lede { margin-top: 1rem; max-width: 36rem; }
+  .tdp-head--center { text-align: center; }
+  .tdp-head--center .tdp-head__text { margin: 0 auto; }
+  .tdp-head--center .tdp-eyebrow { justify-content: center; }
+  .tdp-head--center .tdp-lede { margin-left: auto; margin-right: auto; }
+  .tdp-head__action { margin-top: 1.5rem; flex: none; }
+
+  /* Masthead */
+  .tdp-hero { position: relative; overflow: hidden; background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); color: #FFFFFF; }
+  .tdp-hero__line { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(0,180,252,.35), transparent); }
+  .tdp-hero__inner { position: relative; padding-top: 3.5rem; padding-bottom: 3.5rem; }
+  .tdp-hero .tdp-eyebrow { color: #00B4FC; margin-bottom: .75rem; }
+  .tdp-hero .tdp-rule { background: rgba(0,180,252,.55); }
+  .tdp-hero .tdp-h1 { max-width: 56rem; color: #FFFFFF; }
+  .tdp-hero__lede { margin-top: 1.25rem; max-width: 42rem; font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.7); }
+  .tdp-hero__actions { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: .75rem; }
+
+  /* Breadcrumbs */
+  .tdp-crumbs { background: #FFFFFF; border-bottom: 1px solid rgba(7,14,26,.1); }
+  .tdp-crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: .375rem; padding-top: 2px; padding-bottom: 2px; font-size: 12px; color: #586274; }
+  .tdp-crumbs li { display: flex; align-items: center; gap: .375rem; }
+  .tdp-crumbs a { display: flex; align-items: center; min-height: 44px; text-decoration: none; color: #586274; }
+  .tdp-crumbs a:hover { color: #0068E8; }
+  .tdp-crumbs [aria-current] { color: #070E1A; }
+  .tdp-crumbs svg { color: rgba(88,98,116,.5); }
+
+  /* Buttons. 44px minimum so every one clears the tap-target floor. */
+  .tdp-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px;
+    padding: .75rem 1.5rem; border-radius: 6px; border: 1px solid transparent; cursor: pointer;
+    font-family: var(--font-heading--family, inherit); font-size: 15px; font-weight: 700; line-height: 1;
+    letter-spacing: -.005em; text-decoration: none; text-align: center; transition: background-color .15s, border-color .15s, box-shadow .15s, color .15s;
+  }
+  .tdp-btn--sm { padding: .5rem 1rem; font-size: 13px; }
+  .tdp-btn--primary { background: #0068E8; color: #FFFFFF; box-shadow: 0 4px 14px -2px rgba(0,104,232,.35); }
+  .tdp-btn--primary:hover { background: #0053C4; box-shadow: none; }
+  .tdp-btn--dark { background: #070E1A; color: #FFFFFF; }
+  .tdp-btn--dark:hover { background: #101C2E; }
+  .tdp-btn--outline { border-color: rgba(7,14,26,.15); background: #FFFFFF; color: #070E1A; box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .tdp-btn--outline:hover { border-color: rgba(7,14,26,.3); background: #F4F6FA; }
+  .tdp-btn--ghost { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.05); color: #FFFFFF; }
+  .tdp-btn--ghost:hover { border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.1); }
+  .tdp-btn--quiet { border-color: transparent; color: rgba(255,255,255,.75); }
+  .tdp-btn--quiet:hover { border-color: #FFFFFF; }
+  .tdp-textlink { display: inline-flex; align-items: center; gap: .375rem; min-height: 44px; font-family: var(--font-heading--family, inherit); font-size: .875rem; font-weight: 700; color: #0068E8; text-decoration: none; }
+  .tdp-textlink:hover { color: #0053C4; }
+
+  /* Surfaces */
+  .tdp-card { background: #FFFFFF; border: 1px solid rgba(7,14,26,.07); border-radius: 12px; box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .tdp-card--hover { transition: transform .2s, box-shadow .2s; }
+  .tdp-card--hover:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(7,14,26,.05), 0 2px 4px rgba(7,14,26,.06), 0 18px 38px -10px rgba(7,14,26,.20); }
+  .tdp-p6 { padding: 1.5rem; }
+  .tdp-bl-drop { border-left: 4px solid #0068E8; }
+  .tdp-bl-amber { border-left: 4px solid #F5A623; }
+  .tdp-badge {
+    display: inline-flex; align-items: center; border-radius: 6px; padding: .25rem .5rem;
+    font-family: var(--font-heading--family, inherit); font-size: 11px; font-weight: 700; line-height: 1.1;
+    text-transform: uppercase; letter-spacing: .09em;
+  }
+  .tdp-badge--soft { background: rgba(7,14,26,.06); color: #070E1A; box-shadow: inset 0 0 0 1px rgba(7,14,26,.1); }
+  .tdp-badge--amber { background: #F5A623; color: #070E1A; }
+  .tdp-badge--drop { background: #0068E8; color: #FFFFFF; }
+  .tdp-ic { flex: none; display: inline-block; vertical-align: middle; }
+  .tdp-ic-lead { display: block; margin-bottom: 1rem; color: #0068E8; }
+  .tdp-h3-ic { display: flex; align-items: center; gap: .5rem; }
+  .tdp-h3-ic svg { color: #0068E8; }
+
+  .tdp-grid { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); }
+  .tdp-bullets > li { display: flex; align-items: flex-start; gap: .5rem; }
+  .tdp-bullets > li + li { margin-top: .5rem; }
+  .tdp-dot { flex: none; margin-top: .5rem; height: 6px; width: 6px; border-radius: 999px; background: #0068E8; }
+  .tdp-checks > li { display: flex; align-items: flex-start; gap: .5rem; font-size: .875rem; line-height: 1.43; color: #070E1A; }
+  .tdp-checks > li + li { margin-top: .625rem; }
+  .tdp-checks svg { margin-top: 2px; color: #0068E8; }
+  .tdp-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+
+  /* Hours */
+  .tdp-hours { width: 100%; border-collapse: collapse; font-size: .875rem; font-variant-numeric: tabular-nums; }
+  .tdp-hours tr + tr { border-top: 1px solid rgba(7,14,26,.1); }
+  .tdp-hours th { padding: .5rem 0; text-align: left; font-family: var(--font-heading--family, inherit); font-size: 1rem; font-weight: 400; color: #070E1A; }
+  .tdp-hours td { padding: .5rem 0; text-align: right; color: #070E1A; }
+  .tdp-hours td.is-closed { color: #586274; }
+
+  /* Definition list used for contact summaries */
+  .tdp-dl { border-top: 1px solid rgba(7,14,26,.1); padding-top: 1.25rem; font-size: .875rem; }
+  .tdp-dl > div + div { margin-top: .75rem; }
+  .tdp-dl dd { color: #070E1A; }
+
+  /* Forms */
+  .tdp-field {
+    display: block; width: 100%; min-height: 44px; margin: 0; border-radius: 6px; border: 1px solid rgba(7,14,26,.12);
+    background: #FFFFFF; padding: .625rem .875rem; font: inherit; font-size: 15px; line-height: 1.5; color: #070E1A;
+    box-shadow: inset 0 1px 2px rgba(7,14,26,.04); appearance: none;
+  }
+  .tdp-field::placeholder { color: rgba(88,98,116,.6); }
+  .tdp-field:focus { outline: none; border-color: #0068E8; box-shadow: 0 0 0 3px rgba(0,104,232,.15); }
+  .tdp-field[aria-invalid="true"] { border-color: #0068E8; }
+  textarea.tdp-field { resize: vertical; }
+  .tdp-err { margin-top: .375rem; display: flex; align-items: flex-start; gap: .375rem; font-size: .75rem; line-height: 1.5; color: #0068E8; }
+  .tdp-err svg { margin-top: 1px; }
+  .tdp-err[hidden] { display: none; }
+  .tdp-formerr { margin-bottom: 1.25rem; }
+  .tdp-formerr ul { margin-top: .5rem; padding-left: 1.1rem; list-style: disc; }
+  .tdp-formerr .errors ul { margin: .5rem 0 0; }
+
+  @media (min-width: 640px) {
+    .tdp-sm2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tdp-sm3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (min-width: 768px) {
+    .tdp-wrap { padding-left: 2rem; padding-right: 2rem; }
+    .tdp-sec { padding: 5rem 0; }
+    .tdp-h1 { font-size: 4.25rem; }
+    .tdp-h2 { font-size: 3rem; }
+    .tdp-h3 { font-size: 1.45rem; }
+    .tdp-lede { font-size: 1.1875rem; }
+    .tdp-head { margin-bottom: 3rem; }
+    .tdp-head--action { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; }
+    .tdp-head--action .tdp-head__action { margin-top: 0; }
+    .tdp-hero__inner { padding-top: 5rem; padding-bottom: 5rem; }
+    .tdp-hero__lede { font-size: 1.25rem; }
+    .tdp-md2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tdp-md3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tdp-md4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+  @media (min-width: 1024px) {
+    .tdp-lg2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tdp-lg3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tdp-lg4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .tdp-lg5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tdp *, .tdp *::before, .tdp *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+
+  .tdp-contact__grid { display: grid; gap: 2.5rem; }
+  .tdp-contact__cardtitle { margin-bottom: .75rem; }
+  .tdp-contact__cardtitle--tight { margin-bottom: .5rem; }
+  .tdp-contact__fastbtn { margin-top: 1.25rem; }
+  .tdp-contact__methods { margin-top: 1.25rem; }
+  .tdp-contact__methods > li + li { margin-top: 1.25rem; }
+  /* 44px hit area, pulled back with negative margins so the rhythm matches React. */
+  .tdp-contact__big { display: inline-flex; align-items: center; min-height: 44px; margin: -6px 0; font-family: var(--font-heading--family, inherit); font-size: 1.5rem; line-height: 1.33; color: #070E1A; text-decoration: none; }
+  .tdp-contact__big:hover { color: #0068E8; }
+  .tdp-contact__email { word-break: break-all; }
+  .tdp-contact__after { margin-top: .75rem; }
+  .tdp-contact__methods .tdp-contact__after { margin-top: .5rem; }
+  .tdp-contact__note { margin-top: .75rem; }
+  .tdp-contact__methods li:last-child .tdp-contact__note { margin-top: 1rem; }
+  .tdp-contact__shopcopy { margin-bottom: .75rem; }
+  .tdp-contact__addr { font-size: .875rem; line-height: 1.43; color: #070E1A; }
+  .tdp-contact__shopbtns { margin-top: 1rem; }
+  .tdp-contact__card { padding: 1.5rem; }
+  .tdp-contact__formtitle { margin-bottom: .25rem; }
+  .tdp-contact__formintro { margin-bottom: 1.5rem; }
+  .tdp-contact__fields { display: grid; gap: 1.25rem; }
+  .tdp-contact__radios { display: grid; gap: .25rem .5rem; }
+  .tdp-contact__radio { display: flex; align-items: center; gap: .625rem; min-height: 44px; font-size: .875rem; color: #070E1A; cursor: pointer; }
+  .tdp-contact__radio input { margin: 0; width: 24px; height: 24px; flex: none; accent-color: #0068E8; }
+  .tdp-contact__submit { margin-top: 1.75rem; width: 100%; }
+  .tdp-contact__submit[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+  .tdp-contact__privacy { margin-top: 1rem; }
+  .tdp-contact__privacy a { text-decoration: underline; }
+  .tdp-contact__result { padding: 2rem; }
+  .tdp-contact__result:focus { outline: none; }
+  .tdp-contact__resultic { display: block; margin-bottom: 1rem; }
+  .tdp-contact__resultbtns { margin-top: 1.5rem; }
+  .tdp-contact__cta { padding: 3rem 0; }
+  .tdp-contact__ctarow { display: flex; flex-direction: column; gap: 1.5rem; }
+  .tdp-contact__ctalede { margin-top: .75rem; max-width: 36rem; }
+  .tdp-contact__ctabtns { display: flex; flex-direction: column; gap: .75rem; }
+  @media (min-width: 640px) {
+    .tdp-contact__fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tdp-contact__full { grid-column: 1 / -1; }
+    .tdp-contact__radios { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tdp-contact__submit { width: auto; }
+    .tdp-contact__ctabtns { flex-direction: row; }
+  }
+  @media (min-width: 768px) {
+    .tdp-contact__card { padding: 2rem; }
+    .tdp-contact__cta { padding: 4rem 0; }
+    .tdp-contact__ctarow { flex-direction: row; align-items: center; justify-content: space-between; }
+    .tdp-contact__ctabtns { flex: none; }
+  }
+  @media (min-width: 1024px) {
+    .tdp-contact__grid { grid-template-columns: 1fr 1.25fr; gap: 3.5rem; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "TireDrop page: Contact",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Page header"
+    },
+    {
+      "type": "text",
+      "id": "hero_eyebrow",
+      "label": "Eyebrow",
+      "default": "Contact"
+    },
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Heading",
+      "default": "Talk to a person who actually works here"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_lede",
+      "label": "Supporting copy",
+      "default": "Orders, shipping, returns, fitment, an install appointment or a fleet — wherever you are in the continental United States, it is the same phone and the same people."
+    },
+    {
+      "type": "text",
+      "id": "crumb",
+      "label": "Breadcrumb label",
+      "default": "Contact Us"
+    },
+    {
+      "type": "text",
+      "id": "hero_call_label",
+      "label": "Call button (the number is appended)",
+      "default": "Call"
+    },
+    {
+      "type": "header",
+      "content": "Contact details"
+    },
+    {
+      "type": "text",
+      "id": "phone",
+      "label": "Phone number",
+      "default": "(954) 773-1896",
+      "info": "Shown as written; the call link is built from its digits."
+    },
+    {
+      "type": "text",
+      "id": "email",
+      "label": "Email address",
+      "default": "info@tiredroponline.com"
+    },
+    {
+      "type": "text",
+      "id": "street",
+      "label": "Street",
+      "default": "7712 West Oakland Park Blvd"
+    },
+    {
+      "type": "text",
+      "id": "city_line",
+      "label": "City, state, ZIP",
+      "default": "Sunrise, FL 33351"
+    },
+    {
+      "type": "text",
+      "id": "maps_url",
+      "label": "Directions link (Google Maps)",
+      "default": "https://www.google.com/maps/search/?api=1&query=7712+West+Oakland+Park+Blvd+Sunrise+FL+33351"
+    },
+    {
+      "type": "header",
+      "content": "Reach us"
+    },
+    {
+      "type": "text",
+      "id": "reach_eyebrow",
+      "label": "Eyebrow",
+      "default": "Reach Us"
+    },
+    {
+      "type": "text",
+      "id": "reach_title",
+      "label": "Heading",
+      "default": "Two ways to get an answer"
+    },
+    {
+      "type": "textarea",
+      "id": "reach_lede",
+      "label": "Supporting copy",
+      "default": "TireDrop is the online store of Extreme Tires, 7712 West Oakland Park Blvd, Sunrise, FL 33351. One phone number, one shop, one set of people — whether you are ordering from Florida or from three states away."
+    },
+    {
+      "type": "text",
+      "id": "fast_title",
+      "label": "Fastest-way card: heading",
+      "default": "Fastest way to reach us"
+    },
+    {
+      "type": "textarea",
+      "id": "fast_copy",
+      "label": "Fastest-way card: copy",
+      "default": "Call. If an order has already been placed, if you are sitting on a flat, or you need something changed before it ships, the phone beats the form every time — the person who answers can pull the order up while you are talking."
+    },
+    {
+      "type": "text",
+      "id": "phone_title",
+      "label": "Phone card: heading",
+      "default": "By phone"
+    },
+    {
+      "type": "textarea",
+      "id": "phone_copy",
+      "label": "Phone card: copy",
+      "default": "Order status, shipping questions, returns, fitment advice, install appointments and fleet accounts."
+    },
+    {
+      "type": "textarea",
+      "id": "phone_note",
+      "label": "Phone card: note",
+      "default": "The phone is the channel that reaches a person fastest, and the form below reaches the same people."
+    },
+    {
+      "type": "text",
+      "id": "email_title",
+      "label": "Email card: heading",
+      "default": "By email"
+    },
+    {
+      "type": "textarea",
+      "id": "email_copy",
+      "label": "Email card: copy",
+      "default": "One address for everything — orders, returns, fleet quotes and dealer paperwork. Include an order number if you have one. If it cannot wait, call instead."
+    },
+    {
+      "type": "text",
+      "id": "shop_title",
+      "label": "Shop card: heading",
+      "default": "At the shop"
+    },
+    {
+      "type": "textarea",
+      "id": "shop_copy",
+      "label": "Shop card: copy",
+      "default": "Extreme Tires, the shop behind TireDrop — for pickups, installs and anything easier to explain in person."
+    },
+    {
+      "type": "text",
+      "id": "directions_label",
+      "label": "Shop card: directions button",
+      "default": "Directions"
+    },
+    {
+      "type": "text",
+      "id": "shop_link_label",
+      "label": "Shop card: second button",
+      "default": "The shop & install area"
+    },
+    {
+      "type": "url",
+      "id": "shop_link",
+      "label": "Shop card: second button link"
+    },
+    {
+      "type": "text",
+      "id": "hours_title",
+      "label": "Hours card: heading",
+      "default": "Hours"
+    },
+    {
+      "type": "textarea",
+      "id": "hours_note",
+      "label": "Hours card: note",
+      "default": "Eastern time. The store takes orders around the clock; people answer during the hours above."
+    },
+    {
+      "type": "header",
+      "content": "Message form"
+    },
+    {
+      "type": "text",
+      "id": "message_eyebrow",
+      "label": "Eyebrow",
+      "default": "Message Us"
+    },
+    {
+      "type": "text",
+      "id": "message_title",
+      "label": "Heading",
+      "default": "Not urgent? Write it down."
+    },
+    {
+      "type": "textarea",
+      "id": "message_lede",
+      "label": "Supporting copy",
+      "default": "Include an order number if you have one. Messages sent outside business hours get picked up the next morning we are open. If it is urgent, call instead — the form is not monitored around the clock."
+    },
+    {
+      "type": "text",
+      "id": "form_title",
+      "label": "Form heading",
+      "default": "Send us a message"
+    },
+    {
+      "type": "text",
+      "id": "form_intro",
+      "label": "Form intro",
+      "default": "Fields marked with an asterisk are required."
+    },
+    {
+      "type": "text",
+      "id": "label_name",
+      "label": "Name label",
+      "default": "Full name *"
+    },
+    {
+      "type": "text",
+      "id": "ph_name",
+      "label": "Name placeholder",
+      "default": "Alex Moreno"
+    },
+    {
+      "type": "text",
+      "id": "label_phone",
+      "label": "Phone label",
+      "default": "Phone *"
+    },
+    {
+      "type": "text",
+      "id": "ph_phone",
+      "label": "Phone placeholder",
+      "default": "(954) 555-0188"
+    },
+    {
+      "type": "text",
+      "id": "label_email",
+      "label": "Email label",
+      "default": "Email *"
+    },
+    {
+      "type": "text",
+      "id": "ph_email",
+      "label": "Email placeholder",
+      "default": "you@example.com"
+    },
+    {
+      "type": "text",
+      "id": "label_subject",
+      "label": "Topic label",
+      "default": "What is this about? *"
+    },
+    {
+      "type": "textarea",
+      "id": "subjects",
+      "label": "Topics (one per line)",
+      "default": "Order Question\nShipping & Delivery\nReturns & Warranty\nBook an Install\nCommercial & Fleet\nSomething Else"
+    },
+    {
+      "type": "text",
+      "id": "label_message",
+      "label": "Message label",
+      "default": "Message *"
+    },
+    {
+      "type": "textarea",
+      "id": "ph_message",
+      "label": "Message placeholder",
+      "default": "Order number if you have one. Otherwise: year, make and model, tire size, and whether you want it shipped to you or to the shop."
+    },
+    {
+      "type": "text",
+      "id": "submit_label",
+      "label": "Send button",
+      "default": "Send Message"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "privacy_note",
+      "label": "Privacy note",
+      "default": "We use what you send here to answer your question and nothing else. It is not added to a mailing list — there isn't one — and it is not passed to anyone outside the shop. See our <a href=\"/pages/privacy\">privacy policy</a>."
+    },
+    {
+      "type": "text",
+      "id": "success_title",
+      "label": "Sent: heading",
+      "default": "Message received."
+    },
+    {
+      "type": "textarea",
+      "id": "success_copy",
+      "label": "Sent: copy",
+      "default": "Thanks for reaching out. A real person reads these during the hours listed on this page, and will reply by email or phone. We do not put a clock on that, because we would rather answer properly than answer fast."
+    },
+    {
+      "type": "textarea",
+      "id": "success_urgent",
+      "label": "Sent: urgent note (the phone number is appended)",
+      "default": "If the car is down right now, or your order needs changing before it ships, do not wait on the reply — the phone is the only channel we treat as urgent. Call"
+    },
+    {
+      "type": "text",
+      "id": "success_call_label",
+      "label": "Sent: call button",
+      "default": "Call the shop"
+    },
+    {
+      "type": "text",
+      "id": "success_again_label",
+      "label": "Sent: second button",
+      "default": "Send another message"
+    },
+    {
+      "type": "text",
+      "id": "error_title",
+      "label": "Not sent: heading",
+      "default": "We could not get that through just now."
+    },
+    {
+      "type": "textarea",
+      "id": "error_copy",
+      "label": "Not sent: copy",
+      "default": "Your message did not go through, so nobody here has read it yet. Fix what is marked below and send it again — or call, and the person who answers can help straight away."
+    },
+    {
+      "type": "header",
+      "content": "Closing band"
+    },
+    {
+      "type": "text",
+      "id": "cta_eyebrow",
+      "label": "Eyebrow",
+      "default": "Before you write"
+    },
+    {
+      "type": "text",
+      "id": "cta_title",
+      "label": "Heading",
+      "default": "A lot of it is already answered"
+    },
+    {
+      "type": "textarea",
+      "id": "cta_lede",
+      "label": "Supporting copy",
+      "default": "How shipping works, what ship-to-store costs, and what happens if a tire shows up wrong — all written out, no hold music."
+    },
+    {
+      "type": "text",
+      "id": "cta1_label",
+      "label": "First button",
+      "default": "Shipping & Returns"
+    },
+    {
+      "type": "url",
+      "id": "cta1_link",
+      "label": "First button link"
+    },
+    {
+      "type": "text",
+      "id": "cta2_label",
+      "label": "Second button",
+      "default": "Book an Install"
+    },
+    {
+      "type": "url",
+      "id": "cta2_link",
+      "label": "Second button link"
+    }
+  ],
+  "max_blocks": 50,
+  "blocks": [
+    {
+      "type": "hours",
+      "name": "Hours row",
+      "settings": [
+        {
+          "type": "text",
+          "id": "days",
+          "label": "Days"
+        },
+        {
+          "type": "text",
+          "id": "time",
+          "label": "Hours",
+          "info": "Write Closed for a closed day."
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,742 @@
+{% comment %}
+  News & Gallery page. Ported from the React GalleryPage (src/pages/support/GalleryPage.jsx).
+  No photography has been supplied, so each tile is an inline-SVG illustration
+  labelled "Illustration" rather than passed off as a photo of the job. Pick a
+  photo on a tile and it replaces the illustration. Video durations from React
+  are left out: the videos are not filmed yet. Without JavaScript all three
+  panels show in order; with it they become tabs.
+{% endcomment %}
+{%- liquid
+  assign tdp_digits = section.settings.phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
+  assign tdp_tel = 'tel:+1' | append: tdp_digits
+-%}
+<div class="tdp tdp-gal" data-tdp-tabs>
+  <div class="tdp-hero">
+    <div class="tdp-hero__line" aria-hidden="true"></div>
+    <div class="tdp-wrap tdp-hero__inner">
+      {%- if section.settings.hero_eyebrow != blank -%}
+        <p class="tdp-eyebrow"><span class="tdp-rule" aria-hidden="true"></span>{{ section.settings.hero_eyebrow }}</p>
+      {%- endif -%}
+      <h1 class="tdp-h1">{{ section.settings.hero_title }}</h1>
+      {%- if section.settings.hero_lede != blank -%}
+        <p class="tdp-hero__lede">{{ section.settings.hero_lede }}</p>
+      {%- endif -%}
+      <div class="tdp-hero__actions">
+        <a href="{{ tdp_tel }}" class="tdp-btn tdp-btn--ghost"><svg class="tdp-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.phone }}</a>
+  </div>
+    </div>
+  </div>
+
+  <nav class="tdp-crumbs" aria-label="Breadcrumb">
+    <ol class="tdp-wrap">
+      <li><a href="{{ routes.root_url }}">Home</a></li>
+      <li><svg class="tdp-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6"/></svg><span aria-current="page">{{ section.settings.crumb }}</span></li>
+    </ol>
+  </nav>
+
+  <section class="tdp-sec tdp-bone">
+    <div class="tdp-wrap">
+      <div class="tdp-gal__tabs" role="tablist" aria-label="News and gallery sections" hidden>
+        <button type="button" role="tab" id="tdp-tab-gallery" aria-controls="tdp-panel-gallery" aria-selected="true" tabindex="0">{{ section.settings.tab_gallery }}</button>
+        <button type="button" role="tab" id="tdp-tab-videos" aria-controls="tdp-panel-videos" aria-selected="false" tabindex="-1">{{ section.settings.tab_videos }}</button>
+        <button type="button" role="tab" id="tdp-tab-tips" aria-controls="tdp-panel-tips" aria-selected="false" tabindex="-1">{{ section.settings.tab_tips }}</button>
+      </div>
+
+      <div id="tdp-panel-gallery" class="tdp-gal__panel" data-tdp-panel>
+        <div class="tdp-head"><div class="tdp-head__text">
+          <h2 class="tdp-h2">{{ section.settings.gallery_title }}</h2>
+          {%- if section.settings.gallery_lede != blank -%}<p class="tdp-lede">{{ section.settings.gallery_lede }}</p>{%- endif -%}
+        </div></div>
+        <ul class="tdp-grid tdp-sm2 tdp-lg3">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'tile' -%}
+              {%- liquid
+                case block.settings.tone
+                  when 'graphite-ink'
+                    assign g = '#22344C, #070E1A'
+                  when 'drop-dive'
+                    assign g = '#0068E8, #0053C4'
+                  when 'steel-ink'
+                    assign g = '#101C2E, #070E1A'
+                  when 'graphite-steel'
+                    assign g = '#22344C, #101C2E'
+                  when 'amber-dive'
+                    assign g = '#F5A623, #0053C4'
+                  when 'ink-steel'
+                    assign g = '#070E1A, #101C2E'
+                  when 'steel-drop'
+                    assign g = '#101C2E, #0068E8'
+                  when 'steel-amber'
+                    assign g = '#101C2E, #F5A623'
+                  else
+                    assign g = '#070E1A, #22344C'
+                endcase
+              -%}
+              <li class="tdp-card tdp-card--hover tdp-gal__tile" {{ block.shopify_attributes }}>
+                {%- if block.settings.image != blank -%}
+                  {{ block.settings.image | image_url: width: 900 | image_tag: loading: 'lazy', class: 'tdp-gal__photo', widths: '400, 600, 900', sizes: '(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw' }}
+                {%- else -%}
+                  <div class="tdp-gal__art" style="background: linear-gradient(135deg, {{ g }});" aria-hidden="true">
+                    <svg viewBox="0 0 200 120" preserveAspectRatio="none" focusable="false">
+                      <g fill="#FFFFFF" transform="skewX(-14)">
+                        <rect x="-6" y="-10" width="9" height="140"/><rect x="15" y="-10" width="9" height="140"/><rect x="36" y="-10" width="9" height="140"/><rect x="57" y="-10" width="9" height="140"/><rect x="78" y="-10" width="9" height="140"/><rect x="99" y="-10" width="9" height="140"/><rect x="120" y="-10" width="9" height="140"/><rect x="141" y="-10" width="9" height="140"/><rect x="162" y="-10" width="9" height="140"/><rect x="183" y="-10" width="9" height="140"/>
+                      </g>
+                      <rect x="0" y="54" width="200" height="3" fill="#FFFFFF" opacity=".5"/>
+                    </svg>
+                    {%- if section.settings.art_label != blank -%}<span class="tdp-gal__chip">{{ section.settings.art_label }}</span>{%- endif -%}
+                  </div>
+                {%- endif -%}
+                <div class="tdp-gal__body">
+                  <h3 class="tdp-gal__title">{{ block.settings.caption }}</h3>
+                  <p class="tdp-small tdp-gal__detail">{{ block.settings.detail }}</p>
+                </div>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+
+      <div id="tdp-panel-videos" class="tdp-gal__panel" data-tdp-panel>
+        <div class="tdp-head"><div class="tdp-head__text">
+          <h2 class="tdp-h2">{{ section.settings.videos_title }}</h2>
+          {%- if section.settings.videos_lede != blank -%}<p class="tdp-lede">{{ section.settings.videos_lede }}</p>{%- endif -%}
+        </div></div>
+        <ul class="tdp-grid tdp-sm2 tdp-lg3">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'video' -%}
+              <li class="tdp-card tdp-gal__tile" {{ block.shopify_attributes }}>
+                <div class="tdp-gal__thumb" aria-hidden="true">
+                  <span class="tdp-gal__play"><svg width="22" height="22" viewBox="0 0 24 24" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="2" stroke-linejoin="round" focusable="false"><polygon points="6 3 20 12 6 21 6 3"/></svg></span>
+                </div>
+                <div class="tdp-gal__body">
+                  <h3 class="tdp-gal__title">{{ block.settings.title }}</h3>
+                  <p class="tdp-small tdp-gal__detail">{{ block.settings.description }}</p>
+                  {%- if section.settings.video_badge != blank -%}<p class="tdp-gal__badge"><span class="tdp-badge tdp-badge--soft">{{ section.settings.video_badge }}</span></p>{%- endif -%}
+                </div>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+        {%- if section.settings.videos_note != blank -%}
+          <div class="tdp-card tdp-p6 tdp-bl-drop tdp-gal__note">
+            <p class="tdp-small">{{ section.settings.videos_note }}</p>
+            {%- if section.settings.videos_note_label != blank -%}
+              <a href="{{ section.settings.videos_note_link | default: '/pages/tire-care' }}" class="tdp-btn tdp-btn--outline tdp-btn--sm">{{ section.settings.videos_note_label }}<svg class="tdp-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div id="tdp-panel-tips" class="tdp-gal__panel" data-tdp-panel>
+        <div class="tdp-head"><div class="tdp-head__text">
+          <h2 class="tdp-h2">{{ section.settings.tips_title }}</h2>
+          {%- if section.settings.tips_lede != blank -%}<p class="tdp-lede">{{ section.settings.tips_lede }}</p>{%- endif -%}
+        </div></div>
+        <ul class="tdp-grid tdp-sm2 tdp-lg3">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'tip' -%}
+              <li class="tdp-card tdp-card--hover tdp-p6 tdp-gal__tip" {{ block.shopify_attributes }}>
+                <span class="tdp-badge tdp-badge--soft tdp-gal__kicker">{{ block.settings.kicker }}</span>
+                <h3 class="tdp-h3">{{ block.settings.title }}</h3>
+                <p class="tdp-small tdp-gal__grow">{{ block.settings.excerpt }}</p>
+                {%- if block.settings.link != blank -%}
+                  <a href="{{ block.settings.link }}" class="tdp-textlink">{{ section.settings.tip_link_label }}<span class="tdp-sr">: {{ block.settings.title }}</span><svg class="tdp-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="tdp-steel tdp-gal__cta">
+    <div class="tdp-wrap tdp-gal__ctagrid">
+      <div>
+        {%- if section.settings.cta_eyebrow != blank -%}<p class="tdp-eyebrow tdp-eyebrow--dark tdp-eyebrow--plain">{{ section.settings.cta_eyebrow }}</p>{%- endif -%}
+        <h2 class="tdp-h2">{{ section.settings.cta_title }}</h2>
+        {%- if section.settings.cta_lede != blank -%}<p class="tdp-lede tdp-gal__ctalede">{{ section.settings.cta_lede }}</p>{%- endif -%}
+      </div>
+      <div class="tdp-gal__ctabtns">
+        <a href="{{ section.settings.cta_link | default: '/collections/tires' }}" class="tdp-btn tdp-btn--primary"><svg class="tdp-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>{{ section.settings.cta_label }}</a>
+        <a href="{{ tdp_tel }}" class="tdp-btn tdp-btn--ghost"><svg class="tdp-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{{ section.settings.phone }}</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  (function () {
+    // WAI-ARIA tabs. The panels all render in the HTML, so without JavaScript
+    // the page simply shows the three of them one after another.
+    var root = document.querySelector('.tdp-gal[data-tdp-tabs]');
+    if (!root || root.getAttribute('data-tdp-ready')) return;
+    root.setAttribute('data-tdp-ready', '1');
+    var list = root.querySelector('[role="tablist"]');
+    var tabs = [].slice.call(list.querySelectorAll('[role="tab"]'));
+    var panels = tabs.map(function (t) { return document.getElementById(t.getAttribute('aria-controls')); });
+    panels.forEach(function (p, i) {
+      p.setAttribute('role', 'tabpanel');
+      p.setAttribute('aria-labelledby', tabs[i].id);
+      p.setAttribute('tabindex', '0');
+    });
+    function select(i, focus) {
+      tabs.forEach(function (t, j) {
+        var on = i === j;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        panels[j].hidden = !on;
+      });
+      if (focus) tabs[i].focus();
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { select(i, false); });
+    });
+    list.addEventListener('keydown', function (e) {
+      var i = tabs.indexOf(document.activeElement), n = null;
+      if (i < 0) return;
+      if (e.key === 'ArrowRight') n = (i + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft') n = (i - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'Home') n = 0;
+      else if (e.key === 'End') n = tabs.length - 1;
+      if (n !== null) { e.preventDefault(); select(n, true); }
+    });
+    list.hidden = false;
+    root.classList.add('is-tabbed');
+    select(0, false);
+  })();
+</script>
+
+<style>
+  /* Page kit, shared by the td-page-* sections Agent E owns. Each section carries its own copy so it stays self-contained. */
+  .tdp { color: #070E1A; font-family: var(--font-body--family, inherit); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .tdp *, .tdp *::before, .tdp *::after { box-sizing: border-box; }
+  .tdp :where(h1, h2, h3, h4, p, ul, ol, dl, dd, dt, figure, blockquote, table, fieldset, legend, address) { margin: 0; padding: 0; }
+  .tdp :where(ul, ol) { list-style: none; }
+  .tdp :where(address) { font-style: normal; }
+  .tdp :where(fieldset) { border: 0; min-width: 0; }
+  .tdp :where(a) { color: inherit; }
+  .tdp :where(h1, h2, h3, h4) {
+    font-family: var(--font-heading--family, inherit); font-weight: 800; letter-spacing: -.018em;
+    font-variation-settings: "wdth" 108; color: inherit; text-wrap: balance; text-transform: none;
+  }
+  .tdp :where(a, button, input, select, textarea, summary):focus-visible { outline: 2px solid #0068E8; outline-offset: 2px; }
+  .tdp-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+  .tdp-wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding-left: 1rem; padding-right: 1rem; }
+  .tdp-sec { padding: 3.5rem 0; }
+  .tdp-bone { background: #FFFFFF; }
+  .tdp-fog { background: #F4F6FA; }
+  /* Dark bands pin their text colour rather than inheriting body ink. */
+  .tdp-ink { background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); color: #FFFFFF; }
+  .tdp-steel { background: #0B1524 linear-gradient(180deg, #14233A 0%, #0B1524 100%); color: #FFFFFF; }
+  .tdp-ink :where(h1, h2, h3), .tdp-steel :where(h1, h2, h3) { color: #FFFFFF; }
+
+  .tdp-h1 { font-size: 2.4rem; line-height: .98; }
+  .tdp-h2 { font-size: 1.9rem; line-height: 1.02; }
+  .tdp-h3 { font-size: 1.2rem; line-height: 1.15; }
+  .tdp-display { font-family: var(--font-heading--family, inherit); }
+  .tdp-eyebrow {
+    display: flex; align-items: center; gap: .625rem; margin-bottom: .625rem;
+    font-family: var(--font-heading--family, inherit); font-size: 12px; font-weight: 700; line-height: 1.4;
+    text-transform: uppercase; letter-spacing: .09em; color: #0068E8;
+  }
+  .tdp-eyebrow--plain { display: block; }
+  .tdp-rule { flex: none; height: 1px; width: 1.5rem; background: rgba(0,104,232,.45); }
+  .tdp-eyebrow--dark { color: #00B4FC; }
+  .tdp-eyebrow--dark .tdp-rule { background: rgba(0,180,252,.5); }
+  .tdp-label {
+    display: block; margin-bottom: .375rem; font-family: var(--font-heading--family, inherit);
+    font-size: 11px; font-weight: 700; line-height: 1.4; text-transform: uppercase; letter-spacing: .07em; color: #586274;
+  }
+  .tdp-lede { font-size: 1.0625rem; line-height: 1.6; color: #586274; }
+  .tdp-ink .tdp-lede, .tdp-steel .tdp-lede { color: rgba(255,255,255,.7); }
+  .tdp-small { font-size: .875rem; line-height: 1.625; color: #586274; }
+  .tdp-xs { font-size: .75rem; line-height: 1.625; color: #586274; }
+  .tdp-ink-text { color: #070E1A; }
+  .tdp-drop { color: #0068E8; }
+  .tdp-small a, .tdp-xs a, .tdp-lede a { text-underline-offset: 2px; }
+  .tdp-small a:hover, .tdp-xs a:hover { color: #0068E8; }
+
+  .tdp-head { margin-bottom: 2rem; }
+  .tdp-head__text { max-width: 42rem; }
+  .tdp-head .tdp-lede { margin-top: 1rem; max-width: 36rem; }
+  .tdp-head--center { text-align: center; }
+  .tdp-head--center .tdp-head__text { margin: 0 auto; }
+  .tdp-head--center .tdp-eyebrow { justify-content: center; }
+  .tdp-head--center .tdp-lede { margin-left: auto; margin-right: auto; }
+  .tdp-head__action { margin-top: 1.5rem; flex: none; }
+
+  /* Masthead */
+  .tdp-hero { position: relative; overflow: hidden; background: #070E1A radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%); color: #FFFFFF; }
+  .tdp-hero__line { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(0,180,252,.35), transparent); }
+  .tdp-hero__inner { position: relative; padding-top: 3.5rem; padding-bottom: 3.5rem; }
+  .tdp-hero .tdp-eyebrow { color: #00B4FC; margin-bottom: .75rem; }
+  .tdp-hero .tdp-rule { background: rgba(0,180,252,.55); }
+  .tdp-hero .tdp-h1 { max-width: 56rem; color: #FFFFFF; }
+  .tdp-hero__lede { margin-top: 1.25rem; max-width: 42rem; font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.7); }
+  .tdp-hero__actions { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: .75rem; }
+
+  /* Breadcrumbs */
+  .tdp-crumbs { background: #FFFFFF; border-bottom: 1px solid rgba(7,14,26,.1); }
+  .tdp-crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: .375rem; padding-top: 2px; padding-bottom: 2px; font-size: 12px; color: #586274; }
+  .tdp-crumbs li { display: flex; align-items: center; gap: .375rem; }
+  .tdp-crumbs a { display: flex; align-items: center; min-height: 44px; text-decoration: none; color: #586274; }
+  .tdp-crumbs a:hover { color: #0068E8; }
+  .tdp-crumbs [aria-current] { color: #070E1A; }
+  .tdp-crumbs svg { color: rgba(88,98,116,.5); }
+
+  /* Buttons. 44px minimum so every one clears the tap-target floor. */
+  .tdp-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px;
+    padding: .75rem 1.5rem; border-radius: 6px; border: 1px solid transparent; cursor: pointer;
+    font-family: var(--font-heading--family, inherit); font-size: 15px; font-weight: 700; line-height: 1;
+    letter-spacing: -.005em; text-decoration: none; text-align: center; transition: background-color .15s, border-color .15s, box-shadow .15s, color .15s;
+  }
+  .tdp-btn--sm { padding: .5rem 1rem; font-size: 13px; }
+  .tdp-btn--primary { background: #0068E8; color: #FFFFFF; box-shadow: 0 4px 14px -2px rgba(0,104,232,.35); }
+  .tdp-btn--primary:hover { background: #0053C4; box-shadow: none; }
+  .tdp-btn--dark { background: #070E1A; color: #FFFFFF; }
+  .tdp-btn--dark:hover { background: #101C2E; }
+  .tdp-btn--outline { border-color: rgba(7,14,26,.15); background: #FFFFFF; color: #070E1A; box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .tdp-btn--outline:hover { border-color: rgba(7,14,26,.3); background: #F4F6FA; }
+  .tdp-btn--ghost { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.05); color: #FFFFFF; }
+  .tdp-btn--ghost:hover { border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.1); }
+  .tdp-btn--quiet { border-color: transparent; color: rgba(255,255,255,.75); }
+  .tdp-btn--quiet:hover { border-color: #FFFFFF; }
+  .tdp-textlink { display: inline-flex; align-items: center; gap: .375rem; min-height: 44px; font-family: var(--font-heading--family, inherit); font-size: .875rem; font-weight: 700; color: #0068E8; text-decoration: none; }
+  .tdp-textlink:hover { color: #0053C4; }
+
+  /* Surfaces */
+  .tdp-card { background: #FFFFFF; border: 1px solid rgba(7,14,26,.07); border-radius: 12px; box-shadow: 0 0 0 1px rgba(7,14,26,.04), 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
+  .tdp-card--hover { transition: transform .2s, box-shadow .2s; }
+  .tdp-card--hover:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(7,14,26,.05), 0 2px 4px rgba(7,14,26,.06), 0 18px 38px -10px rgba(7,14,26,.20); }
+  .tdp-p6 { padding: 1.5rem; }
+  .tdp-bl-drop { border-left: 4px solid #0068E8; }
+  .tdp-bl-amber { border-left: 4px solid #F5A623; }
+  .tdp-badge {
+    display: inline-flex; align-items: center; border-radius: 6px; padding: .25rem .5rem;
+    font-family: var(--font-heading--family, inherit); font-size: 11px; font-weight: 700; line-height: 1.1;
+    text-transform: uppercase; letter-spacing: .09em;
+  }
+  .tdp-badge--soft { background: rgba(7,14,26,.06); color: #070E1A; box-shadow: inset 0 0 0 1px rgba(7,14,26,.1); }
+  .tdp-badge--amber { background: #F5A623; color: #070E1A; }
+  .tdp-badge--drop { background: #0068E8; color: #FFFFFF; }
+  .tdp-ic { flex: none; display: inline-block; vertical-align: middle; }
+  .tdp-ic-lead { display: block; margin-bottom: 1rem; color: #0068E8; }
+  .tdp-h3-ic { display: flex; align-items: center; gap: .5rem; }
+  .tdp-h3-ic svg { color: #0068E8; }
+
+  .tdp-grid { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); }
+  .tdp-bullets > li { display: flex; align-items: flex-start; gap: .5rem; }
+  .tdp-bullets > li + li { margin-top: .5rem; }
+  .tdp-dot { flex: none; margin-top: .5rem; height: 6px; width: 6px; border-radius: 999px; background: #0068E8; }
+  .tdp-checks > li { display: flex; align-items: flex-start; gap: .5rem; font-size: .875rem; line-height: 1.43; color: #070E1A; }
+  .tdp-checks > li + li { margin-top: .625rem; }
+  .tdp-checks svg { margin-top: 2px; color: #0068E8; }
+  .tdp-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+
+  /* Hours */
+  .tdp-hours { width: 100%; border-collapse: collapse; font-size: .875rem; font-variant-numeric: tabular-nums; }
+  .tdp-hours tr + tr { border-top: 1px solid rgba(7,14,26,.1); }
+  .tdp-hours th { padding: .5rem 0; text-align: left; font-family: var(--font-heading--family, inherit); font-size: 1rem; font-weight: 400; color: #070E1A; }
+  .tdp-hours td { padding: .5rem 0; text-align: right; color: #070E1A; }
+  .tdp-hours td.is-closed { color: #586274; }
+
+  /* Definition list used for contact summaries */
+  .tdp-dl { border-top: 1px solid rgba(7,14,26,.1); padding-top: 1.25rem; font-size: .875rem; }
+  .tdp-dl > div + div { margin-top: .75rem; }
+  .tdp-dl dd { color: #070E1A; }
+
+  /* Forms */
+  .tdp-field {
+    display: block; width: 100%; min-height: 44px; margin: 0; border-radius: 6px; border: 1px solid rgba(7,14,26,.12);
+    background: #FFFFFF; padding: .625rem .875rem; font: inherit; font-size: 15px; line-height: 1.5; color: #070E1A;
+    box-shadow: inset 0 1px 2px rgba(7,14,26,.04); appearance: none;
+  }
+  .tdp-field::placeholder { color: rgba(88,98,116,.6); }
+  .tdp-field:focus { outline: none; border-color: #0068E8; box-shadow: 0 0 0 3px rgba(0,104,232,.15); }
+  .tdp-field[aria-invalid="true"] { border-color: #0068E8; }
+  textarea.tdp-field { resize: vertical; }
+  .tdp-err { margin-top: .375rem; display: flex; align-items: flex-start; gap: .375rem; font-size: .75rem; line-height: 1.5; color: #0068E8; }
+  .tdp-err svg { margin-top: 1px; }
+  .tdp-err[hidden] { display: none; }
+  .tdp-formerr { margin-bottom: 1.25rem; }
+  .tdp-formerr ul { margin-top: .5rem; padding-left: 1.1rem; list-style: disc; }
+  .tdp-formerr .errors ul { margin: .5rem 0 0; }
+
+  @media (min-width: 640px) {
+    .tdp-sm2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tdp-sm3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (min-width: 768px) {
+    .tdp-wrap { padding-left: 2rem; padding-right: 2rem; }
+    .tdp-sec { padding: 5rem 0; }
+    .tdp-h1 { font-size: 4.25rem; }
+    .tdp-h2 { font-size: 3rem; }
+    .tdp-h3 { font-size: 1.45rem; }
+    .tdp-lede { font-size: 1.1875rem; }
+    .tdp-head { margin-bottom: 3rem; }
+    .tdp-head--action { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; }
+    .tdp-head--action .tdp-head__action { margin-top: 0; }
+    .tdp-hero__inner { padding-top: 5rem; padding-bottom: 5rem; }
+    .tdp-hero__lede { font-size: 1.25rem; }
+    .tdp-md2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tdp-md3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tdp-md4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+  @media (min-width: 1024px) {
+    .tdp-lg2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tdp-lg3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tdp-lg4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .tdp-lg5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tdp *, .tdp *::before, .tdp *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+
+  .tdp-gal__tabs { margin-bottom: 2.5rem; display: flex; flex-wrap: wrap; gap: .5rem; border-bottom: 1px solid rgba(7,14,26,.1); padding-bottom: 1px; }
+  .tdp-gal__tabs[hidden] { display: none; }
+  .tdp-gal__tabs button {
+    margin: 0 0 -1px; min-height: 44px; padding: .75rem 1.25rem; border: 0; border-bottom: 2px solid transparent; border-radius: 0;
+    background: none; cursor: pointer; font-family: var(--font-heading--family, inherit); font-size: 1.125rem; line-height: 1.4; color: #586274;
+  }
+  .tdp-gal__tabs button:hover { color: #070E1A; }
+  .tdp-gal__tabs button[aria-selected="true"] { border-bottom-color: #0068E8; color: #0068E8; }
+  .tdp-gal__panel + .tdp-gal__panel { margin-top: 4rem; }
+  .is-tabbed .tdp-gal__panel + .tdp-gal__panel { margin-top: 0; }
+  .tdp-gal__panel[hidden] { display: none; }
+  .tdp-gal__panel:focus-visible { outline: 2px solid #0068E8; outline-offset: 4px; }
+  .tdp-gal__tile { overflow: hidden; }
+  .tdp-gal__art, .tdp-gal__photo { position: relative; display: block; width: 100%; height: 11rem; overflow: hidden; object-fit: cover; }
+  .tdp-gal__art svg { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .25; }
+  /* The tones run from near-black to amber; the chip gives the label its own backdrop. */
+  .tdp-gal__chip { position: absolute; left: 1rem; bottom: .75rem; border-radius: 6px; background: rgba(7,14,26,.7); padding: .25rem .5rem; font-family: var(--font-heading--family, inherit); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: #FFFFFF; }
+  .tdp-gal__body { padding: 1.25rem; }
+  .tdp-gal__title { font-size: 1.0625rem; line-height: 1.375; color: #070E1A; }
+  .tdp-gal__detail { margin-top: .5rem; }
+  .tdp-gal__thumb { position: relative; display: flex; height: 10rem; align-items: center; justify-content: center; background: #0B1524 linear-gradient(180deg, #14233A 0%, #0B1524 100%); }
+  .tdp-gal__play { display: flex; height: 3.5rem; width: 3.5rem; align-items: center; justify-content: center; border-radius: 999px; background: #0068E8; padding-left: 2px; }
+  .tdp-gal__badge { margin-top: 1rem; }
+  .tdp-gal__note { margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem; }
+  .tdp-gal__note .tdp-small { max-width: 36rem; }
+  .tdp-gal__note strong { font-weight: 400; color: #070E1A; }
+  .tdp-gal__note .tdp-btn { align-self: flex-start; flex: none; }
+  .tdp-gal__tip { display: flex; flex-direction: column; align-items: flex-start; }
+  .tdp-gal__kicker { margin-bottom: 1rem; }
+  .tdp-gal__grow { margin-top: .75rem; flex: 1; }
+  .tdp-gal__tip .tdp-textlink { margin-top: .75rem; }
+  .tdp-gal__cta { padding: 3.5rem 0; }
+  .tdp-gal__ctagrid { display: grid; gap: 2rem; }
+  .tdp-gal__ctalede { margin-top: 1rem; max-width: 36rem; }
+  .tdp-gal__ctabtns { display: flex; flex-direction: column; gap: .75rem; }
+  @media (min-width: 640px) {
+    .tdp-gal__art, .tdp-gal__photo { height: 12rem; }
+    .tdp-gal__note { flex-direction: row; align-items: center; justify-content: space-between; }
+    .tdp-gal__note .tdp-btn { align-self: center; }
+    .tdp-gal__ctabtns { flex-direction: row; }
+  }
+  @media (min-width: 768px) {
+    .tdp-gal__cta { padding: 5rem 0; }
+    .tdp-gal__ctagrid { grid-template-columns: 1.2fr 1fr; align-items: center; }
+    .tdp-gal__ctabtns { flex-direction: column; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "TireDrop page: Gallery",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Page header"
+    },
+    {
+      "type": "text",
+      "id": "hero_eyebrow",
+      "label": "Eyebrow",
+      "default": "News & Gallery"
+    },
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Heading",
+      "default": "The work, up close"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_lede",
+      "label": "Supporting copy",
+      "default": "Orders heading out across the continental United States, sets fitted in the Sunrise bay, and vans working driveways around Broward. Plus the videos and tips we end up repeating every week."
+    },
+    {
+      "type": "text",
+      "id": "crumb",
+      "label": "Breadcrumb label",
+      "default": "News & Gallery"
+    },
+    {
+      "type": "header",
+      "content": "Contact details"
+    },
+    {
+      "type": "text",
+      "id": "phone",
+      "label": "Phone number",
+      "default": "(954) 773-1896",
+      "info": "Shown as written; the call link is built from its digits."
+    },
+    {
+      "type": "header",
+      "content": "Tabs"
+    },
+    {
+      "type": "text",
+      "id": "tab_gallery",
+      "label": "Gallery tab",
+      "default": "Gallery"
+    },
+    {
+      "type": "text",
+      "id": "tab_videos",
+      "label": "Videos tab",
+      "default": "Videos"
+    },
+    {
+      "type": "text",
+      "id": "tab_tips",
+      "label": "Tips tab",
+      "default": "Tire Tips"
+    },
+    {
+      "type": "header",
+      "content": "Gallery"
+    },
+    {
+      "type": "text",
+      "id": "gallery_title",
+      "label": "Heading",
+      "default": "Orders out, tires on"
+    },
+    {
+      "type": "textarea",
+      "id": "gallery_lede",
+      "label": "Supporting copy",
+      "default": "Captions describe the order or the job each tile stands for. Photography is being collected now — these are illustrations until it lands."
+    },
+    {
+      "type": "text",
+      "id": "art_label",
+      "label": "Label on each illustration",
+      "default": "Illustration",
+      "info": "Keeps it plain that the tiles are artwork, not photos of real jobs."
+    },
+    {
+      "type": "header",
+      "content": "Videos"
+    },
+    {
+      "type": "text",
+      "id": "videos_title",
+      "label": "Heading",
+      "default": "How-tos we are filming"
+    },
+    {
+      "type": "textarea",
+      "id": "videos_lede",
+      "label": "Supporting copy",
+      "default": "Short, no-nonsense walkthroughs of the questions we answer most, for customers ordering online and for customers standing at the counter. These are in production — call us in the meantime and we will just explain it."
+    },
+    {
+      "type": "text",
+      "id": "video_badge",
+      "label": "Badge on each video",
+      "default": "Coming soon"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "videos_note",
+      "label": "Note under the videos",
+      "default": "<strong>Want the short version now?</strong> Every topic above is written out in full in the tire care guides."
+    },
+    {
+      "type": "text",
+      "id": "videos_note_label",
+      "label": "Note button",
+      "default": "Read the guides"
+    },
+    {
+      "type": "url",
+      "id": "videos_note_link",
+      "label": "Note button link"
+    },
+    {
+      "type": "header",
+      "content": "Tips"
+    },
+    {
+      "type": "text",
+      "id": "tips_title",
+      "label": "Heading",
+      "default": "Short reads that save tires"
+    },
+    {
+      "type": "textarea",
+      "id": "tips_lede",
+      "label": "Supporting copy",
+      "default": "The advice we give on the phone, written down so you can check it in your own driveway — wherever that driveway is."
+    },
+    {
+      "type": "text",
+      "id": "tip_link_label",
+      "label": "Link label on each tip",
+      "default": "Read the tip"
+    },
+    {
+      "type": "header",
+      "content": "Closing band"
+    },
+    {
+      "type": "text",
+      "id": "cta_eyebrow",
+      "label": "Eyebrow",
+      "default": "Tires shipped. Or installed."
+    },
+    {
+      "type": "text",
+      "id": "cta_title",
+      "label": "Heading",
+      "default": "Your order could be the next one out"
+    },
+    {
+      "type": "textarea",
+      "id": "cta_lede",
+      "label": "Supporting copy",
+      "default": "Tires shipped anywhere in the continental United States, free to the Sunrise shop if you want them fitted, and the van for driveways around Broward."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button",
+      "default": "Shop Tires"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button link"
+    }
+  ],
+  "max_blocks": 50,
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "Gallery tile",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Photo",
+          "info": "Use a real photo of this job. Until one is chosen, an illustration is shown and labelled as one."
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption"
+        },
+        {
+          "type": "textarea",
+          "id": "detail",
+          "label": "Detail"
+        },
+        {
+          "type": "select",
+          "id": "tone",
+          "label": "Illustration colours",
+          "options": [
+            {
+              "value": "ink-graphite",
+              "label": "Ink to graphite"
+            },
+            {
+              "value": "graphite-ink",
+              "label": "Graphite to ink"
+            },
+            {
+              "value": "drop-dive",
+              "label": "Blue"
+            },
+            {
+              "value": "steel-ink",
+              "label": "Steel to ink"
+            },
+            {
+              "value": "graphite-steel",
+              "label": "Graphite to steel"
+            },
+            {
+              "value": "amber-dive",
+              "label": "Amber to blue"
+            },
+            {
+              "value": "ink-steel",
+              "label": "Ink to steel"
+            },
+            {
+              "value": "steel-drop",
+              "label": "Steel to blue"
+            },
+            {
+              "value": "steel-amber",
+              "label": "Steel to amber"
+            }
+          ],
+          "default": "ink-graphite"
+        }
+      ]
+    },
+    {
+      "type": "video",
+      "name": "Video (coming soon)",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description"
+        }
+      ]
+    },
+    {
+      "type": "tip",
+      "name": "Tip",
+      "settings": [
+        {
+          "type": "text",
+          "id": "kicker",
+          "label": "Topic"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "textarea",
+          "id": "excerpt",
+          "label": "Excerpt"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

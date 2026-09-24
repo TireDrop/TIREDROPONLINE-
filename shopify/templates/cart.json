@@ -1,0 +1,26 @@
+{
+  "sections": {
+    "main": {
+      "type": "td-cart",
+      "blocks": {
+        "trust_ship": {
+          "type": "trust",
+          "settings": { "icon": "truck", "title": "Ships nationwide", "copy": "Drop-shipped free to any address in the continental United States." }
+        },
+        "trust_fit": {
+          "type": "trust",
+          "settings": { "icon": "shield", "title": "Fitment checked first", "copy": "We match sizes to your vehicle before the order is released." }
+        },
+        "trust_shop": {
+          "type": "trust",
+          "settings": { "icon": "phone", "title": "Powered by Extreme Tires", "copy": "A real shop in Sunrise, FL — call (954) 773-1896." }
+        }
+      },
+      "block_order": ["trust_ship", "trust_fit", "trust_shop"],
+      "settings": {
+        "install_link": "shopify://pages/install"
+      }
+    }
+  },
+  "order": ["main"]
+}
