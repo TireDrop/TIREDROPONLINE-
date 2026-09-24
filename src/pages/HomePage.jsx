@@ -384,7 +384,7 @@ const CATEGORIES = [
   {
     to: "/tires",
     label: "Tires",
-    copy: "All-season, performance, truck and SUV — shipped from a roster of seven brands.",
+    copy: `All-season, performance, truck and SUV — shipped from a roster of ${TIRE_BRANDS.length} brands.`,
     Icon: BadgeCheck,
   },
   {

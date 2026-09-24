@@ -43,6 +43,14 @@ const SORTS = [
 const PRICE_MIN = Math.min(...TIRES.map((t) => t.price));
 const PRICE_MAX = Math.max(...TIRES.map((t) => t.price));
 
+// Written from the catalog rather than typed, so a brand cannot be advertised
+// after its last product is gone.
+const brandSentence = TIRE_BRAND_NAMES.length
+  ? TIRE_BRAND_NAMES.slice(0, -1).join(", ") +
+    " and " +
+    TIRE_BRAND_NAMES[TIRE_BRAND_NAMES.length - 1]
+  : "Major-brand";
+
 const listParam = (params, key) =>
   (params.get(key) || "").split(",").filter(Boolean);
 
@@ -254,12 +262,12 @@ export default function TiresPage() {
       <>
         <Seo
           title="Tire Brands"
-          description="Michelin, Goodyear, Continental, Bridgestone, Pirelli, Nexen and Nitto tires from TireDrop, shipped anywhere in the continental US."
+          description={`${brandSentence} tires from TireDrop, shipped anywhere in the continental US.`}
         />
         <PageHero
           eyebrow="Tires"
           title="Tire Brands We Ship"
-          lede="Two distributor networks put Michelin, Goodyear, Continental, Bridgestone, Pirelli, Nexen and Nitto into one catalog. Every set ships anywhere in the continental US."
+          lede={`${brandSentence} in one catalog, drop-shipped from the distributor. Every set ships anywhere in the continental US.`}
         />
         <Breadcrumbs
           trail={[{ label: "Tires", to: "/tires" }, { label: "Brands" }]}
@@ -314,7 +322,7 @@ export default function TiresPage() {
     <>
       <Seo
         title="Shop Tires"
-        description="Shop Michelin, Goodyear, Continental, Bridgestone, Pirelli, Nexen and Nitto tires by vehicle or by size. Shipped anywhere in the continental US, or free to our South Florida shop."
+        description={`Shop ${brandSentence} tires by vehicle or by size. Shipped anywhere in the continental US, or free to our South Florida shop.`}
       />
       <PageHero
         eyebrow="Tires"

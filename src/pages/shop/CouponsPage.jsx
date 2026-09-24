@@ -43,7 +43,7 @@ const GROUPS = [
     id: "rebate",
     label: "Manufacturer Rebates",
     icon: Mail,
-    lede: "Money back straight from the tire makers, across the whole brand roster — Michelin and Goodyear included. We walk you through the claim form.",
+    lede: "Money back straight from the tire makers, across the whole brand roster. We walk you through the claim form.",
   },
 ];
 
