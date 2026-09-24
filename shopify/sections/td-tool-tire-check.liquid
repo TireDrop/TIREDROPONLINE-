@@ -992,7 +992,7 @@
         out("age-years").textContent = "About " + ageYearsWhole + (ageYearsWhole === 1 ? " year" : " years");
         out("age-copy").textContent =
           dot.status === "fine"
-            ? "Comfortably inside the window every manufacturer works to. Age is not your problem on this tire."
+            ? "Comfortably inside the window most manufacturers work to. By age alone, this tire is within the usual guidance."
             : dot.status === "inspect"
               ? "Past six years, most manufacturers ask for a professional inspection once a year — for cracking between the tread blocks, in the grooves and around the sidewall. That is an inspection, not a sentence."
               : "Past ten years, most manufacturers say replace regardless of tread, and several vehicle makers say the same. The rubber has been curing the whole time.";
@@ -1008,7 +1008,7 @@
       show(sizeLink, !!size);
       if (size) {
         sizeLink.href = shopHref;
-        sizeLink.innerHTML = "See " + esc(size.normalized) + ' in stock <span aria-hidden="true">&rarr;</span>';
+        sizeLink.innerHTML = "See tires in " + esc(size.normalized) + ' <span aria-hidden="true">&rarr;</span>';
       }
       out("size-msg").textContent = sizeUnreadable
         ? "That does not read as a tire size yet. It looks like 215/60R16, P205/55R16 91V or 31x10.50R15."
@@ -1016,7 +1016,7 @@
           ? (size.format === "flotation"
             ? "Read as " + size.normalized + " — a flotation size."
             : "Read as " + size.normalized + (size.speedRating ? ", speed rating " + size.speedRating : "") +
-              ". Our catalog is a representative range rather than live distributor inventory, so if your size is not listed, call — the distributor list runs deeper than this page.")
+              ". If nothing comes up in that size, call and we will check what can be ordered.")
           : "Optional. Everything above works without it.";
 
       /* Verdict: both halves have to be clean before this says "fine". */
@@ -1042,11 +1042,11 @@
         var partial = !tread || !dot;
         html = '<div class="td-tc-verdict td-tc-verdict--fine">' +
           '<div class="td-tc-badge-row"><span class="td-tc-icon td-tc-icon--fine" aria-hidden="true">' + ICON_OK + '</span>' +
-          '<span class="td-tc-badge td-tc-badge--fine">No action needed</span></div>' +
+          '<span class="td-tc-badge td-tc-badge--fine">Readings look good</span></div>' +
           '<h3 class="td-tc-verdict__title">Your readings are fine. Come back in six months.</h3>' +
           '<p class="td-tc-verdict__body">' + (partial
             ? "Everything you gave us checks out. The other half of the check takes a minute and is worth doing — a tire can be fine on tread and finished on age, or the other way round."
-            : "Tread is healthy and the rubber is well inside its window. Nothing to buy today. Keep an eye on pressures, rotate every 5,000 to 7,500 miles, and check again in six months or before a long trip.") +
+            : "Tread is healthy and the rubber is well inside its window. Keep an eye on pressures, rotate every 5,000 to 7,500 miles, and check again in six months or before a long trip.") +
           '</p><p class="td-tc-verdict__small">That is the whole answer. There is no offer under this paragraph.</p></div>';
       } else {
         var urgent = (tread && tread.status === "replace") || ageStatus === "replace" || dotLegacy;
@@ -1058,10 +1058,10 @@
           '<ul class="td-tc-verdict__list">' + problems.map(function (p) { return "<li><span>" + esc(p) + "</span></li>"; }).join("") + '</ul>' +
           '<div class="td-tc-verdict__actions">' +
           '<a class="td-tc-btn td-tc-btn--primary" href="' + esc(shopHref) + '">' + (size ? "Shop " + esc(size.normalized) : "Shop tires") + ' <span aria-hidden="true">&rarr;</span></a>' +
-          '<a class="td-tc-btn td-tc-btn--outline" href="' + PHONE_HREF + '">Free inspection · ' + PHONE + '</a>' +
+          '<a class="td-tc-btn td-tc-btn--outline" href="' + PHONE_HREF + '">Have it checked · ' + PHONE + '</a>' +
           '</div>' +
           '<p class="td-tc-verdict__small">Not near us? The numbers above are yours to take anywhere — we would rather you bought the right tire somewhere else than the wrong one here. If you are in South Florida, ' +
-          esc(SHOP_NAME) + ' will put it on a lift and look properly, at no charge.</p></div>';
+          esc(SHOP_NAME) + ' can put it on a lift and look properly.</p></div>';
       }
       var verdictEl = out("verdict");
       if (verdictEl.getAttribute("data-html") !== html) {
@@ -1107,7 +1107,7 @@
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Free tool" },
     { "type": "text", "id": "heading", "label": "Page heading", "default": "Do I need tires yet?" },
     { "type": "textarea", "id": "lede", "label": "Supporting copy", "default": "Every tire shop on earth will tell you the answer is yes. This one checks the two things that decide it — how much tread is left and how old the rubber is — and tells you plainly if the answer is no." },
-    { "type": "textarea", "id": "promise", "label": "Promise line", "default": "Nothing here is stored, and if your tires are fine the page says so and stops. No countdown, no pitch." }
+    { "type": "textarea", "id": "promise", "label": "Promise line", "default": "No sign-up and no contact details asked for. If your tires are fine the page says so and stops. No countdown, no pitch." }
   ],
   "presets": [{ "name": "TireDrop tire check" }]
 }

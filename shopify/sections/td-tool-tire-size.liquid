@@ -139,7 +139,7 @@
       <div class="td-ts-head">
         <p class="td-ts-eyebrow">Questions</p>
         <h2 class="td-ts-h2" id="{{ uid }}-faq">Tire sizes, answered properly</h2>
-        <p class="td-ts-lede">The questions we get asked on the phone, written out the way we would answer them.</p>
+        <p class="td-ts-lede">Common tire size questions, answered plainly.</p>
       </div>
       <div class="td-ts-faq">
         <details><summary>What do the numbers on the side of a tire actually mean?<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></summary><p>Take 215/60R16 95H. 215 is the width across the tire in millimetres. 60 is the aspect ratio — the sidewall is 60% of that width, so 129 mm tall. R means radial construction. 16 is the wheel diameter in inches, measured at the bead seat. 95 is the load index, which is 1,521 lbs per tire. H is the speed rating, certified to 130 mph. The first four have to be right for the tire to physically fit; the last two have to meet or beat what your car was built for.</p></details>
@@ -150,7 +150,7 @@
         <details><summary>Is a 60-series sidewall always the same height?<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></summary><p>No, and this is the single most common misreading of a tire size. The aspect ratio is a percentage of that tire's own width, not a fixed measurement. A 205/60R16 has a 123 mm sidewall; a 275/60R16 has a 165 mm one. Same 60, 42 mm difference.</p></details>
         <details><summary>What about XL, reinforced, and the letters before the size?<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></summary><p>A letter in front — P, LT or ST — is the service type: passenger, light truck, or special trailer. XL or Reinforced after the size means the tire is built to carry more than a standard tire of the same size, and it will carry a higher load index to match. Both matter for load, neither changes the tire's dimensions.</p></details>
       </div>
-      <p class="td-ts-faq__foot">Still not sure what you need? <a href="/pages/find-my-tires">Look it up by vehicle</a> or <a href="/pages/contact">ask us</a> — a size question takes about a minute to settle. Or call <a href="tel:+19547731896" class="td-ts-nowrap">(954) 773-1896</a>.</p>
+      <p class="td-ts-faq__foot">Still not sure what you need? <a href="/pages/find-my-tires">Look it up by vehicle</a> or <a href="/pages/contact">ask us</a> Or call <a href="tel:+19547731896" class="td-ts-nowrap">(954) 773-1896</a>.</p>
     </div>
   </section>
 </div>
@@ -994,7 +994,7 @@
       if (!cmp.sameRim) h.push('<span class="td-ts-badge ' + (ok ? "td-ts-badge--soft" : "td-ts-badge--ink") + '">Different wheel size</span>');
       h.push("</div>");
       h.push('<h3 class="td-ts-h3">' + (ok
-        ? "Diameter moves " + signed(cmp.diameterChange, 1) + "% — inside the window the industry works to."
+        ? "Diameter moves " + signed(cmp.diameterChange, 1) + "% — inside the ±3% most fitment guides work to."
         : "Diameter moves " + signed(cmp.diameterChange, 1) + "% — past the " + cmp.tolerance + "% most fitment guides stop at.") + "</h3>");
       h.push('<div class="td-ts-verdict__body">');
       if (ok) {
@@ -1031,7 +1031,7 @@
       h.push(shopCard(geo, two ? "On the car now" : null));
       if (two) h.push(shopCard(vsGeo, "The one you are considering"));
       h.push("</div>");
-      h.push('<p class="td-ts-shop__call">Or call <a href="' + PHONE_HREF + '">' + PHONE + "</a> and we will look the size up.</p>");
+      h.push('<p class="td-ts-shop__call">Or call <a href="' + PHONE_HREF + '">' + PHONE + "</a> and we will help you find the size.</p>");
       return h.join("");
     }
 

@@ -380,7 +380,7 @@
   .td-fm__link:hover { color: #0053C4; }
   .td-fm__blame { list-style: none; margin: 1.25rem 0 0; padding: 0; display: grid; gap: .75rem; }
   .td-fm__blame li { padding: 1rem; border-radius: 12px; background: #F4F6FA; border: 1px solid #E3E8EF; }
-  .td-fm__blame .td-fm__btn { margin-top: .75rem; }
+  .td-fm__blame .td-fm__btn { margin-top: .75rem; width: 100%; }
   .td-fm__loading { margin: .75rem 0 0; font-size: .9375rem; color: #586274; }
 
   @media (min-width: 600px) {
@@ -395,6 +395,7 @@
     .td-fm__tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .td-fm__actions { flex-direction: row; flex-wrap: wrap; align-items: center; }
     .td-fm__actions .td-fm__btn { width: auto; }
+    .td-fm__blame .td-fm__btn { width: auto; }
   }
   @media (min-width: 768px) {
     .td-fm__inner { padding: 4rem 2rem 4.5rem; }
@@ -627,7 +628,7 @@
   buildOptions("budget", BUDGET_BANDS.map(function (b) {
     return {
       value: b.value, label: b.label,
-      detail: isFinite(b.max) ? "About " + money(b.max * SET_SIZE) + " for a set of " + SET_SIZE + ", before install and rebates." : ""
+      detail: isFinite(b.max) ? "About " + money(b.max * SET_SIZE) + " for a set of " + SET_SIZE + ", before install." : ""
     };
   }), "radio");
 
@@ -658,7 +659,7 @@
     var note = $("[data-fm-pri-note]");
     var lab = function (v) { var o = find(PRIORITY_OPTIONS, v); return o ? o.label : v; };
     note.textContent = a.priorities.length === 0
-      ? "Nothing picked yet. The first pick counts for 2.6 of the weighting, the second for 1.4."
+      ? "Nothing picked yet. Pick up to two, most important first."
       : a.priorities.length === 1
         ? lab(a.priorities[0]) + " first. Pick a second, or carry on with one."
         : lab(a.priorities[0]) + " first, " + lab(a.priorities[1]) + " second. Picking a third replaces the first.";
@@ -683,7 +684,7 @@
       stagger.textContent = "";
       stagger.appendChild(document.createTextNode("A " + local.model + " may be "));
       stagger.appendChild(el("strong", { text: "staggered" }));
-      stagger.appendChild(document.createTextNode(" — a wider tire on the rear than the front. Check both ends before you buy four of anything. If the sizes differ, we will sort it out on the phone."));
+      stagger.appendChild(document.createTextNode(" — a wider tire on the rear than the front. Check both ends before you buy four of anything. If the sizes differ, call and we will go through both."));
     } else {
       stagger.hidden = true;
     }
@@ -1219,7 +1220,7 @@
         ? fit[0] + " is the most common original fitment for a " + a.model + ". Trims and model years move it around, so the size printed on your sidewall — or the sticker in your driver’s door jamb — is the one that counts."
         : readAs(prof.size) + " Check it against the size printed on your sidewall.",
       stagger: fit && fit[1] === "sports"
-        ? "A " + a.model + " may be staggered — a wider tire on the rear than the front. Check both ends before you buy four of anything. If the sizes differ, we will sort it out on the phone."
+        ? "A " + a.model + " may be staggered — a wider tire on the rear than the front. Check both ends before you buy four of anything. If the sizes differ, call and we will go through both."
         : null
     };
   }
