@@ -8,7 +8,12 @@ import {
   Phone,
   Youtube,
 } from "lucide-react";
-import { BUSINESS, FOOTER_COLUMNS, TIRE_BRANDS } from "../../data/business.js";
+import {
+  BUSINESS,
+  FOOTER_COLUMNS,
+  SOCIAL,
+  TIRE_BRANDS,
+} from "../../data/business.js";
 import BrandLogo from "../ui/BrandLogo.jsx";
 import Logo from "./Logo.jsx";
 
@@ -31,6 +36,10 @@ function BrandStrip() {
     </div>
   );
 }
+
+// Whether any social account is confirmed. With none, the heading would sit
+// over an empty row.
+const hasSocial = Object.values(SOCIAL).some(Boolean);
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -118,23 +127,34 @@ export default function Footer() {
               </ul>
             </li>
 
-            <li>
+            <li className={hasSocial ? "" : "hidden"}>
               <p className="label mb-2 text-bone/55">Socials</p>
               <div className="flex gap-2">
                 {[
-                  { Icon: Facebook, label: "Facebook" },
-                  { Icon: Instagram, label: "Instagram" },
-                  { Icon: Youtube, label: "YouTube" },
-                ].map(({ Icon, label }) => (
-                  <a
-                    key={label}
-                    href="#"
-                    aria-label={label}
-                    className="flex h-10 w-10 items-center justify-center rounded-sm border border-graphite text-bone/65 transition-colors hover:border-bone hover:bg-bone/5 hover:text-bone"
-                  >
-                    <Icon size={16} aria-hidden />
-                  </a>
-                ))}
+                  { Icon: Facebook, label: "Facebook", href: SOCIAL.facebook },
+                  {
+                    Icon: Instagram,
+                    label: "Instagram",
+                    href: SOCIAL.instagram,
+                  },
+                  { Icon: Youtube, label: "YouTube", href: SOCIAL.youtube },
+                ]
+                  // A link to "#" is not a placeholder, it is a broken link —
+                  // it jumps the page and tells a visitor the site is
+                  // unfinished. An account with no URL simply does not show.
+                  .filter(({ href }) => href)
+                  .map(({ Icon, label, href }) => (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      aria-label={`${BUSINESS.name} on ${label}`}
+                      className="flex h-10 w-10 items-center justify-center rounded-sm border border-graphite text-bone/65 transition-colors hover:border-bone hover:bg-bone/5 hover:text-bone"
+                    >
+                      <Icon size={16} aria-hidden />
+                    </a>
+                  ))}
               </div>
             </li>
           </ul>

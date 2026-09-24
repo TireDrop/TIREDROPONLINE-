@@ -77,6 +77,15 @@ export const BUSINESS = {
   ],
 };
 
+// Social profiles. Null means "no account confirmed yet" — the footer skips
+// those rather than rendering a link that goes nowhere, which is what three
+// href="#" icons were doing. Fill a URL in and the icon appears.
+export const SOCIAL = {
+  facebook: null,
+  instagram: null,
+  youtube: null,
+};
+
 // Tire brands shown in the footer strip, the homepage brand row and the
 // coupons page. Every name here links to `/tires?brands=<name>`, so a brand
 // listed with no matching product in `data/products.js` sends the visitor to
