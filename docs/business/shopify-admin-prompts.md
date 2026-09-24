@@ -316,6 +316,12 @@ Domain: tiredroponline.com (DNS at GoDaddy). Store: TireDrop.
       right after the phone number.
    c. Shipping policy, "Contact us about this document" block at the bottom:
       add a new line info@tiredroponline.com under (954) 773-1896.
+      Also in the Shipping policy, change the sentence
+      "Shipping method, cost and the estimated delivery window are shown at
+      checkout and on your order confirmation."
+      → "Shipping is free to any street address in the continental United
+      States. The estimated delivery window is shown at checkout and on your
+      order confirmation."
    d. Terms of service, SECTION 25: change "should be sent to us at
       (954) 773-1896." to "should be sent to us at info@tiredroponline.com or
       by phone at (954) 773-1896.", and add a line info@tiredroponline.com
