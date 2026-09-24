@@ -14,7 +14,7 @@
        sticky filter bar directly beneath it, and guessing this wrong leaves a
        strip of page scrolling through the gap. The logo grows at `md`, so the
        header does too. */
-    --header-h: 77px;
+    --header-h: 89px;
 
     /* How much of the bottom edge the compare tray is covering. CompareTray
        measures itself into this; zero whenever the tray is away. */
@@ -23,7 +23,19 @@
 
   @media (min-width: 768px) {
     :root {
+      --header-h: 105px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    :root {
       --header-h: 85px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    :root {
+      --header-h: 105px;
     }
   }
 

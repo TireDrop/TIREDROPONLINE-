@@ -62,7 +62,7 @@ function DesktopNav() {
                 to={item.to}
                 end={item.to === "/"}
                 className={({ isActive }) =>
-                  `relative flex h-full items-center gap-1 px-3.5 py-5 font-display text-[14px] font-bold uppercase tracking-[0.015em] transition-colors after:absolute after:inset-x-3.5 after:bottom-0 after:h-[3px] after:rounded-t-sm after:transition-colors ${
+                  `relative flex h-full items-center gap-1 whitespace-nowrap px-3 py-5 font-display text-[14px] font-bold uppercase tracking-[0.015em] transition-colors after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:rounded-t-sm after:transition-colors ${
                     isActive
                       ? "text-drop after:bg-drop"
                       : "text-ink after:bg-transparent hover:text-drop hover:after:bg-drop/30"
@@ -144,7 +144,7 @@ function MobileDrawer({ open, onClose }) {
         className="absolute right-0 top-0 flex h-full w-[86%] max-w-sm flex-col bg-bone shadow-lift"
       >
         <div className="flex items-center justify-between border-b border-ink/10 px-5 py-4">
-          <Logo className="h-12" variant="full" />
+          <Logo className="h-16" variant="full" />
           <button
             ref={closeButtonRef}
             onClick={onClose}
@@ -223,9 +223,12 @@ export default function Header() {
               would make the masthead twice as tall as it needs to be. Set
               beside it, the lockup stays one row and the mark keeps its
               height. */}
-          <Link to="/" className="flex shrink-0 items-center gap-2.5 py-2.5">
-            <Logo className="h-14 md:h-16" variant="full" />
-            <span className="hidden whitespace-nowrap font-display text-[11px] uppercase leading-tight tracking-[0.12em] text-smoke sm:block">
+          <Link to="/" className="flex shrink-0 items-center gap-3 py-1.5">
+            <Logo
+              className="h-[76px] md:h-[92px] lg:h-[72px] xl:h-[92px]"
+              variant="full"
+            />
+            <span className="hidden whitespace-nowrap font-display text-[11px] uppercase leading-tight tracking-[0.12em] text-smoke sm:block lg:hidden xl:block">
               Powered by
               <span className="block text-extremeRed">Extreme Tires</span>
             </span>
