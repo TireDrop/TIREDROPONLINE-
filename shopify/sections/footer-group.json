@@ -95,6 +95,10 @@
           "type": "menu",
           "settings": { "menu": "td-footer-shop", "heading": "Shop", "menu_spacing": 10, "show_as_accordion": true, "accordion_icon": "caret", "accordion_dividers": true, "heading_preset": "h5", "link_preset": "paragraph", "padding-block-start": 0, "padding-block-end": 0, "padding-inline-start": 0, "padding-inline-end": 0 }
         },
+        "menu_tools": {
+          "type": "menu",
+          "settings": { "menu": "td-footer-tools", "heading": "Free Tools", "menu_spacing": 10, "show_as_accordion": true, "accordion_icon": "caret", "accordion_dividers": true, "heading_preset": "h5", "link_preset": "paragraph", "padding-block-start": 0, "padding-block-end": 0, "padding-inline-start": 0, "padding-inline-end": 0 }
+        },
         "menu_shipping": {
           "type": "menu",
           "settings": { "menu": "td-footer-shipping", "heading": "Shipping & Install", "menu_spacing": 10, "show_as_accordion": true, "accordion_icon": "caret", "accordion_dividers": true, "heading_preset": "h5", "link_preset": "paragraph", "padding-block-start": 0, "padding-block-end": 0, "padding-inline-start": 0, "padding-inline-end": 0 }
@@ -108,7 +112,7 @@
           "settings": { "menu": "td-footer-legal", "heading": "Legal", "menu_spacing": 10, "show_as_accordion": true, "accordion_icon": "caret", "accordion_dividers": true, "heading_preset": "h5", "link_preset": "paragraph", "padding-block-start": 0, "padding-block-end": 0, "padding-inline-start": 0, "padding-inline-end": 0 }
         }
       },
-      "block_order": ["brand", "menu_shop", "menu_shipping", "menu_learn", "menu_legal"],
+      "block_order": ["brand", "menu_shop", "menu_tools", "menu_shipping", "menu_learn", "menu_legal"],
       "name": "t:names.footer",
       "settings": {
         "section_width": "page-width",
