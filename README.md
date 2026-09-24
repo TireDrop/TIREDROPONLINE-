@@ -93,7 +93,7 @@ tiredrop/
 │   │   ├── business.js      Brand, phone, shop, hours, nav, footer, areas
 │   │   ├── services.js      Service catalog (mobile vs in-shop)
 │   │   ├── products.js      Tire + wheel catalog, vehicle fitment data
-│   │   ├── pricing.js       Set-of-four maths, rebates, delivery estimates
+│   │   ├── pricing.js       Set-of-four maths, delivery estimates
 │   │   └── tireRatings.js   Performance scores derived from published specs
 │   │
 │   ├── context/
@@ -175,7 +175,7 @@ Type: **Barlow Condensed** (`font-display`) for headings, uppercase.
 | `/commercial-tires`                             | Fleet tires + quote request         |
 | `/compare`                                      | Side-by-side tire comparison        |
 | `/cart`, `/checkout`                            | Cart and checkout                   |
-| `/coupons`                                      | Deals and rebates                   |
+| `/coupons`                                      | Deals                               |
 | `/shipping`                                     | How shipping works                  |
 | `/install`                                      | Ship to store & install             |
 | `/mobile-service`                               | Mobile installation (South Florida) |
@@ -269,9 +269,9 @@ All of these need the client or a supplier:
    issuing API credentials. U.S. AutoForce is the second source and carries the
    brands ATD lost in 2025. Until both are wired, `data/products.js` is a
    representative catalog, not real inventory.
-2. **Rebates are illustrative.** The five in `data/products.js` show the UI
-   working. Real promotions come from the distributor feeds and expire — do not
-   publish these.
+2. **No manufacturer rebates.** The business runs none, so the rebate data and
+   UI were removed. Shipping is free to any continental-US address, with no
+   minimum.
 3. **Delivery dates are estimated,** not quoted. `data/pricing.js` models a 2pm
    distributor cutoff and 2–4 business days in transit. Replace it with the
    distributor's committed date once the API is live.
