@@ -134,7 +134,10 @@ export function evaluatePromo(
       if (shipping <= 0) {
         return {
           ...miss,
-          error: `Good news — this order already clears ${money(FREE_SHIP_AT)}, so shipping is free without a code.`,
+          error:
+            subtotal >= FREE_SHIP_AT
+              ? `Good news — this order already clears ${money(FREE_SHIP_AT)}, so shipping is free without a code.`
+              : "Good news — shipping is already free on this order, so there is nothing for this code to take off.",
         };
       }
       return hit({ freeShipping: true });
