@@ -37,6 +37,7 @@ export default function NotFoundPage() {
       <Seo
         title="Page Not Found"
         description={`That page is not here. Find tires, wheels, shipping and install options at ${BUSINESS.name}, or call ${BUSINESS.phone}.`}
+        noindex
       />
 
       <section className="bg-ink-wash text-bone">

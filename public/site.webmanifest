@@ -1,0 +1,20 @@
+{
+  "name": "TireDrop",
+  "short_name": "TireDrop",
+  "description": "Tires and wheels shipped free across the continental US, or delivered free to our Sunrise, FL shop and installed for you.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#070E1A",
+  "theme_color": "#070E1A",
+  "icons": [
+    { "src": "/brand/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/brand/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    {
+      "src": "/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

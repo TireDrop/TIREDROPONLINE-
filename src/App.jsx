@@ -5,7 +5,7 @@ import Header from "./components/layout/Header.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import MobileCallBar from "./components/layout/MobileCallBar.jsx";
 import CompareTray from "./components/shop/CompareTray.jsx";
-import { ScrollToTop } from "./components/ui/index.jsx";
+import { InPageAnchors, ScrollToTop } from "./components/ui/index.jsx";
 
 // Every route except the home page is loaded on demand.
 //
@@ -70,6 +70,7 @@ export default function App() {
   return (
     <div className="flex min-h-screen flex-col">
       <ScrollToTop pathname={pathname} />
+      <InPageAnchors />
       <Header />
 
       <main className="flex-1">

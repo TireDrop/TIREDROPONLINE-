@@ -10,6 +10,11 @@
     />
     <meta name="theme-color" content="#070E1A" />
     <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg" />
+    <!-- Safari on iOS ignores the SVG favicon, and an SVG cannot be used as a
+         home-screen icon at all, so this is a flat 180x180 PNG on brand ink. -->
+    <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="apple-mobile-web-app-title" content="TireDrop" />
     <meta
       property="og:title"
       content="TireDrop — Tires Shipped. Or Installed."

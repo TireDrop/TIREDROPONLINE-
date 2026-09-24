@@ -411,9 +411,113 @@ export function Seo({ title, description, noindex = false }) {
 
 /** Scrolls to top on route change. Rendered once inside the router. */
 export function ScrollToTop({ pathname }) {
+  // `/terms#returns` and friends are linked from the footer and the sitemap.
+  // Scrolling to the top unconditionally lands the reader at the top of a
+  // long legal page instead of the clause they asked for, so an in-page
+  // target wins when the route change carries one.
+  const { hash } = useLocation();
+
   useEffect(() => {
+    let id = "";
+    if (hash) {
+      try {
+        id = decodeURIComponent(hash.slice(1));
+      } catch {
+        id = hash.slice(1); // a malformed %-escape is not worth failing over
+      }
+    }
+
+    const target = id ? document.getElementById(id) : null;
+    if (target) {
+      target.scrollIntoView();
+      return undefined;
+    }
+
     window.scrollTo({ top: 0, behavior: "instant" });
-  }, [pathname]);
+    if (!id) return undefined;
+
+    // Routes are code-split, so the section a link points at is often still
+    // behind a Suspense fallback on the frame this runs. Watch a few frames
+    // for it rather than silently leaving the reader at the top of the page.
+    let frames = 45;
+    let raf = 0;
+    const stop = () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("wheel", stop);
+      window.removeEventListener("touchstart", stop);
+      window.removeEventListener("keydown", stop);
+    };
+    const look = () => {
+      const late = document.getElementById(id);
+      if (late) {
+        late.scrollIntoView();
+        stop();
+        return;
+      }
+      if (frames-- > 0) raf = requestAnimationFrame(look);
+      else stop();
+    };
+    // Any deliberate scroll of their own wins over ours.
+    window.addEventListener("wheel", stop, { passive: true });
+    window.addEventListener("touchstart", stop, { passive: true });
+    window.addEventListener("keydown", stop);
+    raf = requestAnimationFrame(look);
+    return stop;
+  }, [pathname, hash]);
+  return null;
+}
+
+/**
+ * Makes plain `<a href="#section">` jump links work under hash routing.
+ *
+ * The preview build runs on HashRouter (see src/main.jsx), where the whole
+ * route lives in `location.hash`. A bare `#section` link overwrites it, so the
+ * router sees the path "/section", finds no match and renders the 404 page —
+ * which is what the table of contents on /terms, /privacy, /accessibility and
+ * /tire-care did. Intercepting the click scrolls to the section and rewrites
+ * the hash as `#/route#section`, the form HashRouter parses back correctly.
+ *
+ * Under BrowserRouter the browser already does the right thing, so this stays
+ * out of the way entirely.
+ */
+export function InPageAnchors() {
+  const { pathname, search } = useLocation();
+
+  useEffect(() => {
+    if (import.meta.env.VITE_HASH_ROUTER !== "true") return undefined;
+
+    const onClick = (event) => {
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+        return;
+      const anchor =
+        event.target instanceof Element
+          ? event.target.closest('a[href^="#"]')
+          : null;
+      if (!anchor) return;
+
+      const href = anchor.getAttribute("href");
+      // "#/tires" is a route link the router owns; "#" alone goes nowhere.
+      if (!href || href === "#" || href.startsWith("#/")) return;
+
+      let id = href.slice(1);
+      try {
+        id = decodeURIComponent(id);
+      } catch {
+        /* leave it as written */
+      }
+      const target = document.getElementById(id);
+      if (!target) return;
+
+      event.preventDefault();
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.history.replaceState(null, "", `#${pathname}${search}#${id}`);
+    };
+
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, [pathname, search]);
+
   return null;
 }
 
@@ -595,7 +699,13 @@ export function Accordion({ items = [] }) {
   );
 }
 
-export function EmptyState({ icon: Icon, title, lede, action }) {
+export function EmptyState({
+  icon: Icon,
+  title,
+  lede,
+  action,
+  as: Heading = "h3",
+}) {
   return (
     <div className="card flex flex-col items-center px-6 py-16 text-center">
       {Icon && (
@@ -603,7 +713,9 @@ export function EmptyState({ icon: Icon, title, lede, action }) {
           <Icon size={26} aria-hidden />
         </span>
       )}
-      <h3 className="h3 text-[1.25rem] md:text-[1.375rem]">{title}</h3>
+      <Heading className="h3 text-[1.25rem] md:text-[1.375rem]">
+        {title}
+      </Heading>
       {lede && (
         <p className="mt-2 max-w-sm text-sm leading-relaxed text-smoke">
           {lede}

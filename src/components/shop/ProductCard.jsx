@@ -112,7 +112,9 @@ export default function ProductCard({ product }) {
       {
         id: product.id,
         kind: product.kind,
-        name: `${product.brand} ${product.model}`,
+        // The cart and the order summary both print the brand next to this,
+        // so the brand must not be in here as well.
+        name: product.model,
         brand: product.brand,
         size: isTire
           ? product.size

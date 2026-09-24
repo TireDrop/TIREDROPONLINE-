@@ -134,10 +134,17 @@ function validateContact(f) {
   return e;
 }
 
-function validateInstall(f) {
+function validateInstall(f, { hasShopInstall = false } = {}) {
   const e = {};
   if (!f.fulfillment)
     e.fulfillment = "Choose how you want your order delivered.";
+  // A line set to "ship free to the shop and we'll fit them" is already
+  // carrying an installation charge. Letting the order ship to a house
+  // instead bills for a fitting nobody is booked for, and the confirmation
+  // then promises both at once.
+  else if (f.fulfillment === "ship" && hasShopInstall)
+    e.fulfillment =
+      "Your cart has a set booked for installation at the shop, which is included in the total below. Choose \u201cShip free to the shop\u201d above, or turn installation off in your cart to have it shipped to you.";
 
   const needsAddress = f.fulfillment === "mobile" || f.fulfillment === "ship";
   if (needsAddress) {
@@ -392,6 +399,9 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState({});
   const [placed, setPlaced] = useState(null);
   const headingRef = useRef(null);
+  // Once the shopper picks a delivery option it is theirs; until then the
+  // cart decides the default.
+  const fulfillmentTouched = useRef(false);
 
   const promo = useMemo(() => {
     const code = readSavedPromo();
@@ -405,19 +415,29 @@ export default function CheckoutPage() {
     [subtotal, installTotal, shipping, promo],
   );
 
+  // What the cart already committed to, so step two can refuse a delivery
+  // choice that contradicts it.
+  const stepContext = useMemo(
+    () => ({
+      hasShopInstall: Array.isArray(lines) && lines.some((l) => l.install),
+    }),
+    [lines],
+  );
+
   // Move focus to the new step heading so screen readers and keyboards follow along.
   useEffect(() => {
     headingRef.current?.focus();
   }, [stepIndex, placed]);
 
   const set = (name, value) => {
+    if (name === "fulfillment") fulfillmentTouched.current = true;
     setForm((f) => ({ ...f, [name]: value }));
     setErrors((e) => (e[name] ? { ...e, [name]: undefined } : e));
   };
   const onInput = (e) => set(e.target.name, e.target.value);
 
   function goNext() {
-    const found = STEPS[stepIndex].validate(form);
+    const found = STEPS[stepIndex].validate(form, stepContext);
     const clean = Object.fromEntries(
       Object.entries(found).filter(([, v]) => v),
     );
@@ -425,16 +445,28 @@ export default function CheckoutPage() {
     if (Object.keys(clean).length > 0) return;
 
     if (stepIndex < STEPS.length - 1) {
+      // A cart with a set booked for fitting at the shop opens the delivery
+      // step on ship-to-store rather than on an option that contradicts it.
+      // Done here rather than as an initial value because the cart only comes
+      // back from storage after the first render.
+      if (
+        STEPS[stepIndex + 1].id === "install" &&
+        !fulfillmentTouched.current &&
+        stepContext.hasShopInstall &&
+        form.fulfillment === "ship"
+      ) {
+        setForm((f) => ({ ...f, fulfillment: "shop" }));
+      }
       setStepIndex((i) => i + 1);
       return;
     }
 
     // Placing the order re-checks every step, in case an edit round-trip broke one.
     const broken = STEPS.findIndex((s) =>
-      Object.values(s.validate(form)).some(Boolean),
+      Object.values(s.validate(form, stepContext)).some(Boolean),
     );
     if (broken !== -1) {
-      setErrors(STEPS[broken].validate(form));
+      setErrors(STEPS[broken].validate(form, stepContext));
       setStepIndex(broken);
       return;
     }

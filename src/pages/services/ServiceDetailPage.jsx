@@ -31,6 +31,7 @@ function NotFoundPanel() {
       <Seo
         title="Service Not Found"
         description={`That service page does not exist. Browse every tire, wheel, maintenance and repair service ${BUSINESS.parent} offers in ${BUSINESS.shop.city}, FL.`}
+        noindex
       />
       <Breadcrumbs
         trail={[
@@ -41,6 +42,7 @@ function NotFoundPanel() {
       <Section className="bg-fog">
         <EmptyState
           icon={SearchX}
+          as="h1"
           title="We could not find that service"
           lede="The link may be out of date. Every local service — van and bay alike — is listed on the auto service page."
           action={

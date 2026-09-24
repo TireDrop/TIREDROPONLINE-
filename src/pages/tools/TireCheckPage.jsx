@@ -608,6 +608,10 @@ export default function TireCheckPage() {
     ? Math.min(MAX_DEPTH, Math.max(0, Number(params.get("tread"))))
     : 6;
   const gaugeRaw = params.get("gauge") ?? "";
+  const gaugeNumber = Number(gaugeRaw);
+  const gaugeUnreadable =
+    gaugeRaw.trim() !== "" &&
+    (!Number.isFinite(gaugeNumber) || gaugeNumber < 0 || gaugeNumber > 32);
   const dotRaw = params.get("dot") ?? "";
   const sizeRaw = params.get("size") ?? "";
 
@@ -671,11 +675,11 @@ export default function TireCheckPage() {
       );
     else if (ageStatus === "replace")
       problems.push(
-        `The tire was built in ${dot.year} and is about ${dot.ageYears.toFixed(0)} years old. Most manufacturers say ten years is the end of the road regardless of tread.`,
+        `The tire was built in ${dot.year} and is about ${Math.floor(dot.ageYears)} years old. Most manufacturers say ten years is the end of the road regardless of tread.`,
       );
     else if (ageStatus === "inspect")
       problems.push(
-        `The tire was built in ${dot.year}, so it is about ${dot.ageYears.toFixed(0)} years old. Past six, the guidance is to have it looked at once a year — not to bin it.`,
+        `The tire was built in ${dot.year}, so it is about ${Math.floor(dot.ageYears)} years old. Past six, the guidance is to have it looked at once a year — not to bin it.`,
       );
 
     const checked = Boolean(tread) || Boolean(dot);
@@ -838,12 +842,29 @@ export default function TireCheckPage() {
                     value={gaugeRaw}
                     onChange={(e) => patch({ gauge: e.target.value })}
                     placeholder="6"
-                    className="field tnum max-w-[7rem]"
+                    aria-invalid={gaugeUnreadable ? "true" : undefined}
+                    aria-describedby={
+                      gaugeUnreadable ? "gauge-error" : undefined
+                    }
+                    className={`field tnum max-w-[7rem] ${
+                      gaugeUnreadable ? "border-drop" : ""
+                    }`}
                   />
                   <span className="font-display text-lg font-bold text-smoke">
                     /32&quot;
                   </span>
                 </div>
+                {gaugeUnreadable && (
+                  <p
+                    id="gauge-error"
+                    role="alert"
+                    className="mt-2 text-sm leading-relaxed text-drop"
+                  >
+                    That is not a depth this page can use. A tread gauge reads
+                    between 0 and 32 thirty-seconds of an inch — a new passenger
+                    tire is around 10/32&quot;.
+                  </p>
+                )}
                 <p className="mt-3 text-sm leading-relaxed text-smoke">
                   A pin-style gauge reads in 32nds straight off the barrel. Sit
                   the shoulders of the gauge flat on the tread blocks and push
@@ -913,7 +934,9 @@ export default function TireCheckPage() {
                   {method === "bars"
                     ? BAR_LEVELS[barLevel].note
                     : method === "gauge"
-                      ? "Type what the gauge says and the verdict appears here."
+                      ? gaugeUnreadable
+                        ? "Correct the reading above and the verdict appears here."
+                        : "Type what the gauge says and the verdict appears here."
                       : "Drag the slider to match your tire and the verdict appears here."}
                 </p>
                 {method === "bars" && (

@@ -14,6 +14,7 @@ import {
 // Pages that exist as routes but do not belong in the marketing navigation.
 const UTILITY_LINKS = [
   { label: "Book an Install", to: "/schedule" },
+  { label: "Compare Tires", to: "/compare" },
   { label: "Cart", to: "/cart" },
   { label: "Checkout", to: "/checkout" },
   { label: "Sitemap", to: "/sitemap" },

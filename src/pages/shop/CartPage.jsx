@@ -493,7 +493,6 @@ export default function CartPage() {
     savePromo("");
   }
 
-  const toFreeShip = round2(FREE_SHIP_AT - subtotal);
   const freeShipEarned = totals.shipping === 0;
 
   return (
@@ -593,10 +592,15 @@ export default function CartPage() {
                         and the {money(totals.shipping)} shipping comes off.
                       </p>
                       <span
-                        aria-hidden
                         className="mt-2 block h-1.5 overflow-hidden rounded-full bg-ink/[0.08]"
+                        role="progressbar"
+                        aria-label="Progress toward free shipping"
+                        aria-valuemin={0}
+                        aria-valuemax={FREE_SHIP_AT}
+                        aria-valuenow={Math.min(totals.subtotal, FREE_SHIP_AT)}
                       >
                         <span
+                          aria-hidden
                           className="block h-full rounded-full bg-drop transition-[width] duration-300"
                           style={{
                             width: `${Math.min(100, (totals.subtotal / FREE_SHIP_AT) * 100)}%`,
@@ -662,33 +666,6 @@ export default function CartPage() {
                     </dd>
                   </div>
                 </dl>
-
-                {!freeShipEarned && toFreeShip > 0 && (
-                  <div className="mt-4 rounded-sm bg-fog p-3">
-                    <p className="text-xs text-ink">
-                      Add{" "}
-                      <span className="font-display text-drop">
-                        {money(toFreeShip)}
-                      </span>{" "}
-                      for free shipping.
-                    </p>
-                    <div
-                      className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink/10"
-                      role="progressbar"
-                      aria-label="Progress toward free shipping"
-                      aria-valuemin={0}
-                      aria-valuemax={FREE_SHIP_AT}
-                      aria-valuenow={Math.min(subtotal, FREE_SHIP_AT)}
-                    >
-                      <div
-                        className="h-full bg-drop"
-                        style={{
-                          width: `${Math.min(100, (subtotal / FREE_SHIP_AT) * 100)}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
 
                 <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-ink/10 pt-5">
                   <span className="font-display text-lg font-bold">Total</span>

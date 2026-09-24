@@ -166,6 +166,7 @@ export default function ProductPage({ kind = "tire" }) {
         <Seo
           title="Product Not Found"
           description="That product is no longer listed. Browse the current TireDrop tire and wheel catalog, shipped anywhere in the continental US."
+          noindex
         />
         <PageHero
           eyebrow="404"
@@ -184,8 +185,9 @@ export default function ProductPage({ kind = "tire" }) {
         <Section>
           <EmptyState
             icon={PackageSearch}
+            as="h2"
             title="This listing is gone"
-            lede="Head back to the catalog, or call us with the size you need — the distributor catalog runs far deeper than this page."
+            lede="Head back to the catalog, or call us with the size you need — we can order sizes this page does not list."
             action={
               <div className="flex flex-wrap justify-center gap-3">
                 <Link
@@ -224,7 +226,10 @@ export default function ProductPage({ kind = "tire" }) {
       {
         id: product.id,
         kind: product.kind,
-        name,
+        // `name` here is "<brand> <model>" for the page headline and the SEO
+        // title. The cart prints the brand itself, so the line carries the
+        // model alone or it reads "Nexen Nexen N'Priz AH5".
+        name: product.model,
         brand: product.brand,
         size: sizeLabel,
         price: product.price,

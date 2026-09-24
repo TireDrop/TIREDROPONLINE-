@@ -1460,8 +1460,10 @@ export default function FindMyTiresPage() {
                           <span className="tnum font-display font-bold text-ink">
                             {b.rescued}
                           </span>{" "}
-                          {b.rescued === 1 ? "tire" : "tires"} that clear every
-                          other answer
+                          {b.rescued === 1
+                            ? "tire that clears"
+                            : "tires that clear"}{" "}
+                          every other answer
                           {b.constraint.id === "budget" && b.cheapest
                             ? `, the cheapest at ${money(b.cheapest)} a tire (${money(b.cheapest * SET_SIZE)} a set)`
                             : ""}
@@ -1506,8 +1508,11 @@ export default function FindMyTiresPage() {
               <>
                 <p className="mb-6 max-w-2xl text-sm leading-relaxed text-smoke">
                   <span className="font-display font-bold text-ink">
-                    {ranked.length} {ranked.length === 1 ? "tire" : "tires"} in
-                    the catalog clear every one of your answers.
+                    {ranked.length}{" "}
+                    {ranked.length === 1
+                      ? "tire in the catalog clears"
+                      : "tires in the catalog clear"}{" "}
+                    every one of your answers.
                   </span>{" "}
                   {onSize.length === 0
                     ? `None of them holds your ${size ? size.normalized : "size"} within the ±3% diameter guideline, so every one below is a compromise and says how much of one.`

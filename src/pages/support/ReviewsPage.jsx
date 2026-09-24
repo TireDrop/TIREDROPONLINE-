@@ -284,7 +284,7 @@ function LeaveReview() {
       />
 
       {error && (
-        <p id="review-error" className="mt-2 text-xs text-drop">
+        <p id="review-error" role="alert" className="mt-2 text-xs text-drop">
           {error}
         </p>
       )}
