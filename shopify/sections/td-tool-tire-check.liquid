@@ -462,6 +462,7 @@
 
   /* Radio groups */
   .td-tc-fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .td-tc-fieldset > legend { padding: 0; }
   .td-tc-method { margin-top: 1.5rem; }
   .td-tc-method > .td-tc-fieldset { margin-bottom: 1rem; }
   .td-tc-fieldset--gap { margin-top: 1.25rem; }
@@ -606,13 +607,13 @@
   .td-tc-verdict .td-tc-badge-row { margin-bottom: 1rem; }
 
   .td-tc-cannot {
-    margin-top: 1.25rem; padding: 1rem 1.25rem; border-radius: 12px;
+    margin-top: 1.25rem; padding: 1.25rem 1.5rem; border-radius: 12px;
     background: #FFFFFF; border: 1px solid #E3E8EF; border-left: 4px solid #0068E8;
     font-size: .9375rem; line-height: 1.6; color: #586274;
   }
   .td-tc-cannot strong { color: #070E1A; }
 
-  .td-tc-size { margin-top: 1.25rem; }
+  .td-tc .td-tc-size { margin-top: 1.25rem; padding: 1.5rem; }
   .td-tc-size-row { display: flex; flex-direction: column; gap: .75rem; margin-top: 1rem; }
   .td-tc-size-field { width: 100%; }
 
@@ -659,7 +660,8 @@
     .td-tc-inner { padding: 0 2rem; }
     .td-tc-card--pad { padding: 1.75rem; }
     .td-tc-result { padding: 1.5rem; }
-    .td-tc-verdict { padding: 2rem; }
+    .td-tc-verdict, .td-tc .td-tc-size { padding: 2rem; }
+    .td-tc-cannot { padding: 1.25rem 2rem; }
   }
   @media (min-width: 1024px) {
     .td-tc-grid--tread { grid-template-columns: minmax(0, 1fr) minmax(0, 360px); gap: 2rem; }
