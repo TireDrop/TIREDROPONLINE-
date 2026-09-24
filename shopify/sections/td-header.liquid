@@ -88,6 +88,9 @@
         <span>{{ section.settings.offer_line }}</span>
       </span>
     {%- endif -%}
+    {%- if section.settings.mobile_line != blank -%}
+      <span class="td-hd-util__mobile">{{ section.settings.mobile_line }}</span>
+    {%- endif -%}
   </div>
 </div>
 
@@ -572,7 +575,7 @@
   .td-hd-util__ship { display: none; align-items: center; gap: 6px; color: rgba(255,255,255,.7); }
   .td-hd-util__offer { display: flex; align-items: center; gap: 6px; color: var(--td-amber); }
   .td-hd-util__offer span { font-family: var(--td-display); font-weight: 700; letter-spacing: -0.005em; }
-  @media (min-width: 640px) { .td-hd-util__ship { display: flex; } }
+  @media (min-width: 1024px) { .td-hd-util__ship { display: flex; } }
   /* A pointer does not need the phone-sized target; this keeps the strip at
      React's 40px on desktop. */
   @media (min-width: 1024px) { .td-hd-util__phone { min-height: 32px; margin-block: -4px; } }
@@ -746,10 +749,37 @@
     .td-hd-navrow { display: block; }
   }
 
+  /* ---------- Phones and tablets: a balanced, shorter header ----------
+     Below 1024px the masthead is menu | logo | cart, the logo centred and
+     the two icons flush to the gutters, so the bar reads symmetric and only
+     60px stays pinned. On phones the utility strip drops to one short line;
+     the phone number already lives in the call bar and the drawer. */
+  .td-hd-util__mobile { display: none; }
+  @media (max-width: 639.98px) {
+    .td-hd-util__inner { justify-content: center; padding-block: 8px; }
+    .td-hd-util__phone, .td-hd-util__offer { display: none; }
+    .td-hd-util__mobile {
+      display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      text-align: center; color: var(--td-amber);
+      font-family: var(--td-display); font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: -0.005em;
+    }
+  }
+  @media (max-width: 1023.98px) {
+    .td-hd-bar__row {
+      display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px;
+      align-items: center; gap: 8px; padding-block: 6px;
+    }
+    .td-hd-actions { display: contents; }
+    .td-hd-menu-btn { grid-column: 1; grid-row: 1; margin-left: -10px; }
+    .td-hd-brand { grid-column: 2; grid-row: 1; justify-self: center; }
+    .td-hd-cart { grid-column: 3; grid-row: 1; justify-self: end; margin-right: -10px; }
+    .td-hd-brand .td-hd-brand__logo { height: 48px; }
+  }
+
   /* ---------- 3. Phone and tablet search row ---------- */
   .td-hd-msearch {
     border-bottom: 1px solid rgba(7,14,26,.1); background: #FFFFFF;
-    padding: 10px var(--td-gutter);
+    padding: 8px var(--td-gutter);
   }
   @media (min-width: 1024px) { .td-hd-msearch { display: none; } }
 
@@ -825,6 +855,14 @@
     .page-wrapper:has(.td-hd-callbar) { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
   }
   @media (min-width: 1024px) { .td-hd-callbar { display: none; } }
+
+  /* Below 1024px the menu button sits on the left, so the drawer opens from
+     the left. Kept after section 4 so it overrides the drawer's defaults. */
+  @media (max-width: 1023.98px) {
+    .td-hd-drawer { left: 0; right: auto; }
+    .td-hd-drawer[open] { animation-name: td-hd-slide-left; }
+  }
+  @keyframes td-hd-slide-left { from { transform: translateX(-100%); } to { transform: none; } }
 </style>
 
 {% schema %}
@@ -837,6 +875,7 @@
     { "type": "text", "id": "phone", "label": "Phone number", "default": "(954) 773-1896" },
     { "type": "text", "id": "shipping_line", "label": "Shipping line", "info": "Hidden on phones.", "default": "Free shipping across the continental United States" },
     { "type": "text", "id": "offer_line", "label": "Highlighted line", "default": "Free ship-to-store & install in South Florida" },
+    { "type": "text", "id": "mobile_line", "label": "Phone strip line (under 640px)", "default": "Free shipping · Free ship-to-store in Sunrise, FL" },
     { "type": "header", "content": "Logo" },
     { "type": "image_picker", "id": "logo", "label": "Logo", "info": "Leave empty to use the theme logo. Without either, the TireDrop wordmark is shown." },
     { "type": "text", "id": "parent_prefix", "label": "Parent line prefix", "default": "Powered by" },
@@ -848,7 +887,7 @@
     { "type": "header", "content": "Search" },
     { "type": "text", "id": "search_label", "label": "Search label (screen readers)", "default": "Search tires by size, brand or model" },
     { "type": "text", "id": "search_placeholder", "label": "Placeholder", "default": "Search a size, brand or model — 225/45R17" },
-    { "type": "text", "id": "search_placeholder_short", "label": "Placeholder on phones", "default": "Search a size, brand or model" },
+    { "type": "text", "id": "search_placeholder_short", "label": "Placeholder on phones", "default": "Search tire size or brand" },
     { "type": "header", "content": "Phone call bar" },
     { "type": "checkbox", "id": "show_call_bar", "label": "Show call bar on phones and tablets", "default": true },
     { "type": "text", "id": "call_label", "label": "Call button label", "default": "Call" }

@@ -8,6 +8,7 @@
         "phone": "(954) 773-1896",
         "shipping_line": "Free shipping across the continental United States",
         "offer_line": "Free ship-to-store & install in South Florida",
+        "mobile_line": "Free shipping · Free ship-to-store in Sunrise, FL",
         "parent_prefix": "Powered by",
         "parent_name": "Extreme Tires",
         "menu": "td-main-menu",
@@ -15,7 +16,7 @@
         "shop_link": "shopify://collections/tires",
         "search_label": "Search tires by size, brand or model",
         "search_placeholder": "Search a size, brand or model — 225/45R17",
-        "search_placeholder_short": "Search a size, brand or model",
+        "search_placeholder_short": "Search tire size or brand",
         "show_call_bar": true,
         "call_label": "Call"
       }
