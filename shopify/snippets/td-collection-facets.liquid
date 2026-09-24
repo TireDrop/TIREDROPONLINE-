@@ -1,0 +1,79 @@
+{%- comment -%}
+  The filter groups, styled like the React Filters sidebar. Every option comes
+  from Shopify's storefront filtering (collection.filters / search.filters),
+  so the groups appear on their own once the catalog and the Search &
+  Discovery filter settings exist; nothing here is typed by hand.
+
+  A list whose labels are all short ("16", "17", "18") is drawn as the pill
+  row React uses for rim diameter; longer lists are checkbox rows.
+
+  Rendered twice per page, sidebar and drawer, so every id is prefixed.
+  Params: filters (required), prefix (required)
+{%- endcomment -%}
+{%- for filter in filters -%}
+  {%- assign fid = prefix | append: '-' | append: forloop.index -%}
+  {%- case filter.type -%}
+    {%- when 'price_range' -%}
+      <fieldset class="td-facet">
+        <legend class="td-shop-label td-facet__legend">{{ filter.label | escape }}</legend>
+        <div class="td-facet__price">
+          <div>
+            <label class="td-sr" for="{{ fid }}-min">Minimum price</label>
+            <input class="td-shop-field" id="{{ fid }}-min" type="number" inputmode="numeric" min="0"
+              name="{{ filter.min_value.param_name }}"
+              {% if filter.min_value.value %}value="{{ filter.min_value.value | divided_by: 100 }}"{% endif %}
+              placeholder="$0">
+          </div>
+          <span aria-hidden="true" class="td-shop-smoke">–</span>
+          <div>
+            <label class="td-sr" for="{{ fid }}-max">Maximum price</label>
+            <input class="td-shop-field" id="{{ fid }}-max" type="number" inputmode="numeric" min="0"
+              name="{{ filter.max_value.param_name }}"
+              {% if filter.max_value.value %}value="{{ filter.max_value.value | divided_by: 100 }}"{% endif %}
+              placeholder="${{ filter.range_max | divided_by: 100 | ceil }}">
+          </div>
+        </div>
+      </fieldset>
+    {%- else -%}
+      {%- liquid
+        assign pills = true
+        for value in filter.values
+          if value.label.size > 5
+            assign pills = false
+          endif
+        endfor
+        if filter.values.size == 0
+          continue
+        endif
+      -%}
+      <fieldset class="td-facet">
+        <legend class="td-shop-label td-facet__legend">{{ filter.label | escape }}</legend>
+        {%- if pills -%}
+          <div class="td-facet__pills">
+            {%- for value in filter.values -%}
+              {%- assign vid = fid | append: '-' | append: forloop.index -%}
+              <label class="td-facet__pill" for="{{ vid }}">
+                <input class="td-sr" type="checkbox" id="{{ vid }}" name="{{ value.param_name }}" value="{{ value.value | escape }}"
+                  {% if value.active %}checked{% endif %}
+                  {% if value.count == 0 and value.active == false %}disabled{% endif %}>
+                <span class="tnum">{{ value.label | escape }}</span>
+              </label>
+            {%- endfor -%}
+          </div>
+        {%- else -%}
+          <div class="td-facet__list">
+            {%- for value in filter.values -%}
+              {%- assign vid = fid | append: '-' | append: forloop.index -%}
+              <label class="td-facet__row{% if value.count == 0 and value.active == false %} is-empty{% endif %}" for="{{ vid }}">
+                <input type="checkbox" id="{{ vid }}" name="{{ value.param_name }}" value="{{ value.value | escape }}"
+                  {% if value.active %}checked{% endif %}
+                  {% if value.count == 0 and value.active == false %}disabled{% endif %}>
+                <span>{{ value.label | escape }}</span>
+                <span class="td-facet__count tnum">{{ value.count }}</span>
+              </label>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </fieldset>
+  {%- endcase -%}
+{%- endfor -%}

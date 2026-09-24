@@ -1,0 +1,38 @@
+{%- comment -%}
+  Stand-in artwork for a product that has no photo yet, drawn the way the
+  React ProductArt draws it: a dark tire seen three-quarter on, or a
+  five-spoke wheel. Decorative only, so it is hidden from assistive tech; the
+  product name next to it carries the meaning.
+  Params: kind ("tire" | "wheel" | "other"), size (px, optional)
+{%- endcomment -%}
+{%- assign art_size = size | default: 168 -%}
+{%- if kind == 'wheel' -%}
+<svg aria-hidden="true" focusable="false" width="{{ art_size }}" height="{{ art_size }}" viewBox="0 0 200 200">
+  <ellipse cx="100" cy="186" rx="62" ry="7" fill="#070E1A" opacity=".12"/>
+  <circle cx="100" cy="98" r="84" fill="#1A2130"/>
+  <circle cx="100" cy="98" r="70" fill="#C9D1DC"/>
+  <circle cx="100" cy="98" r="64" fill="#E8EDF3"/>
+  <g fill="#9AA6B6">
+    <path d="M94 40 106 40 108 84 92 84Z"/>
+    <path d="M94 40 106 40 108 84 92 84Z" transform="rotate(72 100 98)"/>
+    <path d="M94 40 106 40 108 84 92 84Z" transform="rotate(144 100 98)"/>
+    <path d="M94 40 106 40 108 84 92 84Z" transform="rotate(216 100 98)"/>
+    <path d="M94 40 106 40 108 84 92 84Z" transform="rotate(288 100 98)"/>
+  </g>
+  <circle cx="100" cy="98" r="16" fill="#586274"/>
+  <circle cx="100" cy="98" r="6" fill="#22344C"/>
+</svg>
+{%- else -%}
+<svg aria-hidden="true" focusable="false" width="{{ art_size }}" height="{{ art_size }}" viewBox="0 0 200 200">
+  <ellipse cx="100" cy="186" rx="70" ry="7" fill="#070E1A" opacity=".14"/>
+  <ellipse cx="116" cy="98" rx="70" ry="80" fill="#10151E"/>
+  <g stroke="#2A3240" stroke-width="3">
+    <path d="M150 34v128M160 44v108M170 58v80M140 26v144"/>
+  </g>
+  <circle cx="92" cy="98" r="80" fill="#1B212C"/>
+  <circle cx="92" cy="98" r="72" fill="none" stroke="#2A3240" stroke-width="2" stroke-dasharray="3 9"/>
+  <circle cx="92" cy="98" r="50" fill="#0E131B"/>
+  <circle cx="92" cy="98" r="42" fill="#161C26"/>
+  <circle cx="92" cy="98" r="42" fill="none" stroke="#2A3240" stroke-width="2"/>
+</svg>
+{%- endif -%}

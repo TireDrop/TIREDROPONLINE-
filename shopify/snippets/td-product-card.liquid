@@ -1,0 +1,129 @@
+{%- comment -%}
+  One product in a grid, laid out like the React ProductCard.
+
+  What it deliberately does not carry over from React, because the store has
+  no data behind it: star ratings and review counts, the dry/wet/tread-life
+  bars, "Best Seller" badges, "Only N left" stock counts, dated delivery
+  estimates and per-tire install prices. Stock is only ever what
+  variant.available says.
+
+  Tires and wheels are headlined as a set of four, the number a shopper
+  compares between sites; anything else shows its unit price.
+
+  Params: product (required), heading_level (default 3)
+{%- endcomment -%}
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+  capture td_specs
+    render 'td-product-specs', product: product, variant: variant
+  endcapture
+  assign td_spec = td_specs | split: '~~'
+  assign kind = td_spec[0]
+  assign name = td_spec[1]
+  assign size = td_spec[2]
+  assign service = td_spec[3]
+  assign bolt = td_spec[4]
+
+  assign set_qty = 1
+  if kind == 'tire' or kind == 'wheel'
+    assign set_qty = 4
+  endif
+  assign unit_price = variant.price | default: product.price
+  assign unit_compare = variant.compare_at_price | default: 0
+  assign headline = unit_price | times: set_qty
+  assign list_total = unit_compare | times: set_qty
+  assign saving = 0
+  if unit_compare > unit_price
+    assign saving = list_total | minus: headline
+  endif
+
+  assign spec_line = ''
+  if size != ''
+    assign spec_line = size
+  endif
+  if service != ''
+    assign spec_line = spec_line | append: ' · ' | append: service
+  endif
+  if bolt != ''
+    assign spec_line = spec_line | append: ' · ' | append: bolt
+  endif
+  assign spec_line = spec_line | remove_first: ' · '
+  assign hl = heading_level | default: 3
+  assign image = product.featured_image
+-%}
+<article class="td-pcard td-shop-card">
+  <a class="td-pcard__media" href="{{ product.url }}" tabindex="-1" aria-hidden="true">
+    {%- if product.available == false -%}
+      <span class="td-pcard__badge td-shop-badge td-shop-badge--soft">Sold out</span>
+    {%- endif -%}
+    {%- if image -%}
+      <img src="{{ image | image_url: width: 480 }}"
+        srcset="{{ image | image_url: width: 240 }} 240w, {{ image | image_url: width: 480 }} 480w"
+        sizes="(min-width: 1280px) 300px, 50vw"
+        alt="" width="{{ image.width }}" height="{{ image.height }}" loading="lazy">
+    {%- else -%}
+      {%- render 'td-product-art', kind: kind -%}
+    {%- endif -%}
+  </a>
+
+  <div class="td-pcard__body">
+    {%- if product.vendor != blank -%}
+      <p class="td-pcard__brand td-shop-eyebrow">{{ product.vendor }}</p>
+    {%- endif -%}
+    <h{{ hl }} class="td-pcard__title">
+      <a href="{{ product.url }}">{{ name }}</a>
+    </h{{ hl }}>
+    {%- if spec_line != '' -%}
+      <p class="td-pcard__spec tnum">{{ spec_line }}</p>
+    {%- endif -%}
+
+    <div class="td-pcard__price">
+      <div class="td-pcard__pricerow">
+        <span class="td-pcard__amount tnum">{{ headline | money }}</span>
+        {%- if set_qty > 1 -%}<span class="td-pcard__unit">set of {{ set_qty }}</span>{%- endif -%}
+        {%- if saving > 0 -%}
+          <span class="td-pcard__list tnum"><span class="td-sr">Was </span>{{ list_total | money }}</span>
+          <span class="td-pcard__save tnum">Save {{ saving | money }}</span>
+        {%- endif -%}
+      </div>
+      {%- if set_qty > 1 -%}
+        <p class="td-pcard__each tnum">{{ unit_price | money }} each</p>
+      {%- endif -%}
+      <p class="td-pcard__ship">
+        <svg aria-hidden="true" focusable="false" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+        <span>Ships free</span>
+      </p>
+      {%- unless product.available -%}
+        <p class="td-pcard__soldout">Not available to ship right now</p>
+      {%- endunless -%}
+
+      <div class="td-pcard__actions">
+        {%- if product.available and product.has_only_default_variant -%}
+          <form method="post" action="{{ routes.cart_add_url }}" accept-charset="UTF-8">
+            <input type="hidden" name="form_type" value="product">
+            <input type="hidden" name="utf8" value="✓">
+            <input type="hidden" name="id" value="{{ variant.id }}">
+            <input type="hidden" name="quantity" value="{{ set_qty }}">
+            <button type="submit" class="td-shop-btn td-shop-btn--primary td-shop-btn--sm"
+              aria-label="{% if set_qty > 1 %}Add a set of {{ set_qty }} {% else %}Add {% endif %}{{ product.title | escape }} to the cart">
+              <svg aria-hidden="true" focusable="false" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+              {%- if set_qty > 1 -%}
+                <span class="td-when-narrow">Add {{ set_qty }}</span><span class="td-when-wide">Add set of {{ set_qty }}</span>
+              {%- else -%}
+                <span>Add to cart</span>
+              {%- endif -%}
+            </button>
+          </form>
+        {%- endif -%}
+        <a href="{{ product.url }}" class="td-shop-btn td-shop-btn--outline td-shop-btn--sm"
+          aria-label="{% if product.available and product.has_only_default_variant == false %}Choose a size for {% else %}View details for {% endif %}{{ product.title | escape }}">
+          {%- if product.available and product.has_only_default_variant == false -%}
+            <span>Choose size</span>
+          {%- else -%}
+            <span class="td-when-narrow">Details</span><span class="td-when-wide">View Details</span>
+          {%- endif -%}
+        </a>
+      </div>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,114 @@
+{%- comment -%}
+  Reads the fitment facts a shopper scans for out of a product, without
+  knowing yet what tags or metafields the ATD feed will carry.
+
+  Output (capture it and split on "~~"):
+    0 kind       "tire", "wheel" or "other" (from product.type)
+    1 name       the title with the brand and the size tokens removed,
+                 e.g. "Michelin Defender2 215/60R16 95H" -> "Defender2"
+    2 size       tire size "215/60R16" / "LT245/75R16" / "33x12.50R20",
+                 or wheel size "18x8.5"; a variant option named "Size" wins
+    3 service    load index + speed rating that follows a tire size, "95H"
+    4 bolt       wheel bolt pattern, "5x114.3"
+
+  Usage:
+    {%- capture td_specs -%}{%- render 'td-product-specs', product: product, variant: variant -%}{%- endcapture -%}
+    {%- assign td_spec = td_specs | split: '~~' -%}
+{%- endcomment -%}
+{%- liquid
+  assign digits = '0123456789'
+  assign type = product.type | downcase
+  assign kind = 'other'
+  if type contains 'wheel' or type contains 'rim'
+    assign kind = 'wheel'
+  elsif type contains 'tire' or type contains 'tyre'
+    assign kind = 'tire'
+  endif
+
+  assign title = product.title | strip
+  assign vendor = product.vendor | strip
+  assign vendor_prefix = vendor | append: ' '
+  assign title_lower = title | downcase
+  assign vendor_lower = vendor_prefix | downcase
+  assign name_source = title
+  if vendor != blank and title_lower contains vendor_lower
+    assign head = title | slice: 0, vendor_prefix.size | downcase
+    if head == vendor_lower
+      assign name_source = title | remove_first: vendor_prefix
+    endif
+  endif
+
+  assign words = name_source | split: ' '
+  assign size = ''
+  assign service = ''
+  assign bolt = ''
+  assign name = ''
+  assign expect_service = false
+  for w in words
+    assign wl = w | downcase
+    assign first = wl | slice: 0
+    assign two = wl | slice: 0, 2
+    assign starts_digit = false
+    if digits contains first
+      assign starts_digit = true
+    endif
+    assign sized_prefix = false
+    if starts_digit or first == 'p' or two == 'lt' or two == 'st'
+      assign sized_prefix = true
+    endif
+
+    if expect_service
+      assign expect_service = false
+      assign last = wl | slice: -1
+      unless digits contains last
+        if starts_digit and w.size <= 8
+          assign service = w
+          continue
+        endif
+      endunless
+    endif
+
+    if size == '' and sized_prefix and wl contains 'r'
+      if wl contains '/' or wl contains 'x'
+        assign size = w
+        assign expect_service = true
+        continue
+      endif
+    endif
+
+    if starts_digit and wl contains 'x' and wl.size >= 4
+      assign parts = wl | split: 'x'
+      assign lead = parts[0]
+      if lead.size == 1 and bolt == ''
+        assign bolt = w
+        continue
+      elsif lead.size == 2 and size == ''
+        assign size = w
+        continue
+      endif
+    endif
+
+    if name == ''
+      assign name = w
+    else
+      assign name = name | append: ' ' | append: w
+    endif
+  endfor
+
+  if name == ''
+    assign name = title
+  endif
+
+  for option in product.options_with_values
+    assign oname = option.name | downcase
+    if oname contains 'size'
+      if variant and variant.options
+        assign idx = option.position | minus: 1
+        assign size = variant.options[idx]
+      elsif option.selected_value != blank
+        assign size = option.selected_value
+      endif
+    endif
+  endfor
+-%}
+{{- kind }}~~{{ name | strip }}~~{{ size }}~~{{ service }}~~{{ bolt -}}

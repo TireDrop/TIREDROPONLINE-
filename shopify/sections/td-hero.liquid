@@ -1,53 +1,211 @@
 {% comment %}
-  TireDrop hero. Self-contained styling on purpose: it carries brand colours
-  that are not all expressible through Horizon's four-colour palette, and a
-  dark band whose text colour has to be pinned rather than inherited — a dark
-  section that inherits body ink renders black on navy.
+  TireDrop hero, ported from the React HomePage <Hero>. Three children, in
+  the order a phone reads them: headline, then the finder, then the supporting
+  copy. From 1024px an explicit grid puts headline and copy together on the
+  left with the finder spanning both rows on the right.
+
+  The finder has two tabs, like React's SearchPanel. "By size" is a real
+  search: it builds 225/50R17 from the three selects and hands it to
+  /search, the same query the tire size decoder sends. "By vehicle" cannot
+  match a year/make/model to a size, because the store holds no fitment data.
+  So it does not pretend to: it points at the Find My Tires tool and the phone
+  number. Without JS both panels show, and the size form still submits.
+
+  Dark band: every text colour is pinned, not inherited.
 {% endcomment %}
 
-<section class="td-hero" style="--td-ink:{{ section.settings.background }};">
+{{ 'td-home.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign sid = section.id | replace: '_', '-'
+  assign phone_digits = section.settings.phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
+-%}
+
+<section class="tdh td-hero" style="--td-ink:{{ section.settings.background }};" aria-labelledby="td-hero-title-{{ sid }}">
   <div aria-hidden="true" class="td-hero__tread"></div>
   <div aria-hidden="true" class="td-hero__ring"></div>
 
-  <div class="td-hero__inner">
-   <div class="td-hero__content">
-    {% if section.settings.eyebrow != blank %}
-      <p class="td-hero__eyebrow">{{ section.settings.eyebrow }}</p>
-    {% endif %}
-
-    <h1 class="td-hero__title">
-      {{ section.settings.heading }}
-      {% if section.settings.heading_accent != blank %}
-        <span class="td-hero__accent">{{ section.settings.heading_accent }}</span>
-      {% endif %}
-    </h1>
-
-    {% if section.settings.lede != blank %}
-      <p class="td-hero__lede">{{ section.settings.lede }}</p>
-    {% endif %}
-
-    <div class="td-hero__actions">
-      {% if section.settings.cta_label != blank %}
-        <a href="{{ section.settings.cta_link }}" class="td-btn td-btn--primary">
-          {{ section.settings.cta_label }}
-        </a>
-      {% endif %}
-      {% if section.settings.cta2_label != blank %}
-        <a href="{{ section.settings.cta2_link }}" class="td-btn td-btn--ghost">
-          {{ section.settings.cta2_label }}
-        </a>
-      {% endif %}
+  <div class="tdh-wrap td-hero__grid">
+    <div class="td-hero__top">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="tdh-eyebrow td-hero__eyebrow">
+          {%- render 'td-home-icon', name: 'truck', size: 16 -%}
+          {{ section.settings.eyebrow }}
+        </p>
+      {%- endif -%}
+      <h1 class="td-hero__title" id="td-hero-title-{{ sid }}">
+        {{ section.settings.heading }}
+        {%- if section.settings.heading_accent != blank %}
+          <span class="td-hero__accent">{{ section.settings.heading_accent }}</span>
+        {%- endif -%}
+      </h1>
     </div>
-   </div>
+
+    {%- if section.settings.show_finder -%}
+      <div class="td-hero__finder">
+        {%- if section.settings.finder_eyebrow != blank -%}
+          <p class="tdh-eyebrow td-hero__finder-eyebrow">{{ section.settings.finder_eyebrow }}</p>
+        {%- endif -%}
+        <h2 class="td-hero__finder-title">{{ section.settings.finder_heading }}</h2>
+        {%- if section.settings.finder_copy != blank -%}
+          <p class="td-hero__finder-copy">{{ section.settings.finder_copy }}</p>
+        {%- endif -%}
+
+        <div class="td-finder" data-td-finder>
+          <div class="td-finder__tabs" role="tablist" aria-label="Tire finder" hidden data-td-tabs>
+            <button type="button" role="tab" class="td-finder__tab" id="{{ sid }}-tab-vehicle" aria-controls="{{ sid }}-panel-vehicle" aria-selected="true" data-td-tab="vehicle">
+              {%- render 'td-home-icon', name: 'car', size: 18 -%}
+              Shop by Vehicle
+            </button>
+            <button type="button" role="tab" class="td-finder__tab" id="{{ sid }}-tab-size" aria-controls="{{ sid }}-panel-size" aria-selected="false" tabindex="-1" data-td-tab="size">
+              {%- render 'td-home-icon', name: 'ruler', size: 18 -%}
+              Shop by Tire Size
+            </button>
+          </div>
+
+          <div class="td-finder__panel" id="{{ sid }}-panel-vehicle" role="tabpanel" aria-labelledby="{{ sid }}-tab-vehicle" data-td-panel="vehicle">
+            <p class="td-finder__lead">{{ section.settings.vehicle_copy }}</p>
+            <div class="td-finder__actions">
+              {%- if section.settings.vehicle_link != blank -%}
+                <a class="tdh-btn tdh-btn--primary td-finder__submit" href="{{ section.settings.vehicle_link }}">
+                  {%- render 'td-home-icon', name: 'list-checks', size: 18 -%}
+                  {{ section.settings.vehicle_cta }}
+                </a>
+              {%- endif -%}
+              {%- if section.settings.phone != blank -%}
+                <a class="tdh-btn tdh-btn--outline td-finder__submit" href="tel:+1{{ phone_digits }}">
+                  {%- render 'td-home-icon', name: 'phone', size: 17 -%}
+                  Call {{ section.settings.phone }}
+                </a>
+              {%- endif -%}
+            </div>
+            {%- if section.settings.vehicle_note != blank -%}
+              <p class="td-finder__note">{{ section.settings.vehicle_note }}</p>
+            {%- endif -%}
+          </div>
+
+          <form class="td-finder__panel" id="{{ sid }}-panel-size" role="tabpanel" aria-labelledby="{{ sid }}-tab-size" action="{{ routes.search_url | default: '/search' }}" method="get" data-td-panel="size" data-td-size-form novalidate>
+            <input type="hidden" name="type" value="product">
+            <input type="hidden" name="q" value="" data-td-q>
+            <div class="td-finder__fields">
+              <div>
+                <label class="td-finder__label" for="{{ sid }}-w">Width</label>
+                <select class="td-finder__select" id="{{ sid }}-w" data-td-w>
+                  <option value="">Any width</option>
+                  {%- for w in (13..35) -%}
+                    {%- assign mm = w | times: 10 | plus: 5 -%}
+                    <option value="{{ mm }}">{{ mm }}</option>
+                  {%- endfor -%}
+                </select>
+              </div>
+              <div>
+                <label class="td-finder__label" for="{{ sid }}-a">Aspect Ratio</label>
+                <select class="td-finder__select" id="{{ sid }}-a" data-td-a>
+                  <option value="">Any ratio</option>
+                  {%- for a in (5..17) -%}
+                    {%- assign pct = a | times: 5 -%}
+                    <option value="{{ pct }}">{{ pct }}</option>
+                  {%- endfor -%}
+                </select>
+              </div>
+              <div>
+                <label class="td-finder__label" for="{{ sid }}-d">Rim Diameter</label>
+                <select class="td-finder__select" id="{{ sid }}-d" data-td-d>
+                  <option value="">Any diameter</option>
+                  {%- for d in (13..24) -%}
+                    <option value="{{ d }}">{{ d }}</option>
+                  {%- endfor -%}
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="tdh-btn tdh-btn--primary td-finder__submit">
+              {%- render 'td-home-icon', name: 'search', size: 18 -%}
+              Search Sizes
+            </button>
+            <p class="td-finder__note">{{ section.settings.size_note }}</p>
+            <p class="td-finder__error" role="alert" data-td-error></p>
+          </form>
+        </div>
+      </div>
+    {%- endif -%}
+
+    <div class="td-hero__body">
+      {%- if section.settings.lede != blank -%}
+        <p class="td-hero__lede">{{ section.settings.lede }}</p>
+      {%- endif -%}
+      <div class="td-hero__actions">
+        {%- if section.settings.cta_label != blank -%}
+          <a href="{{ section.settings.cta_link | default: '/collections/all' }}" class="tdh-btn tdh-btn--primary">
+            {{ section.settings.cta_label }}
+            {%- render 'td-home-icon', name: 'arrow-right', size: 17 -%}
+          </a>
+        {%- endif -%}
+        {%- if section.settings.cta2_label != blank -%}
+          <a href="{{ section.settings.cta2_link }}" class="tdh-btn tdh-btn--ghost">{{ section.settings.cta2_label }}</a>
+        {%- endif -%}
+      </div>
+      {%- if section.settings.footnote != blank -%}
+        <p class="td-hero__footnote">{{ section.settings.footnote }}</p>
+      {%- endif -%}
+    </div>
   </div>
 </section>
 
+<script>
+  (function () {
+    var root = document.currentScript && document.currentScript.previousElementSibling;
+    if (!root || !root.querySelector) return;
+    var finder = root.querySelector('[data-td-finder]');
+    if (!finder) return;
+
+    // Tabs: shown only once JS is here to drive them.
+    var tablist = finder.querySelector('[data-td-tabs]');
+    var tabs = [].slice.call(finder.querySelectorAll('[data-td-tab]'));
+    var panels = [].slice.call(finder.querySelectorAll('[data-td-panel]'));
+    function select(name, focus) {
+      tabs.forEach(function (t) {
+        var on = t.getAttribute('data-td-tab') === name;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        if (on && focus) t.focus();
+      });
+      panels.forEach(function (p) { p.hidden = p.getAttribute('data-td-panel') !== name; });
+    }
+    tablist.hidden = false;
+    finder.classList.add('is-tabbed');
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { select(t.getAttribute('data-td-tab')); });
+      t.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        var next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+        select(next.getAttribute('data-td-tab'), true);
+      });
+    });
+    select('vehicle');
+
+    // Size search: 225 / 50 / 17 -> "225/50R17", the form the sidewall uses.
+    var form = finder.querySelector('[data-td-size-form]');
+    form.addEventListener('submit', function (e) {
+      var w = form.querySelector('[data-td-w]').value;
+      var a = form.querySelector('[data-td-a]').value;
+      var d = form.querySelector('[data-td-d]').value;
+      var err = form.querySelector('[data-td-error]');
+      if (!w && !a && !d) {
+        e.preventDefault();
+        err.textContent = 'Pick at least one number from your sidewall to search.';
+        return;
+      }
+      err.textContent = '';
+      var q = (w || '') + (a ? (w ? '/' : '') + a : '') + (d ? 'R' + d : '');
+      form.querySelector('[data-td-q]').value = q;
+    });
+  })();
+</script>
+
 <style>
   .td-hero {
-    position: relative;
-    overflow: hidden;
+    position: relative; overflow: hidden;
     background: radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, var(--td-ink, #070E1A) 100%);
-    /* Pinned, not inherited. */
     color: #FFFFFF;
   }
   .td-hero__tread {
@@ -59,75 +217,128 @@
     height: 560px; width: 560px; border-radius: 9999px;
     border: 72px solid #22344C; pointer-events: none; display: none;
   }
-  .td-hero__inner {
-    position: relative;
-    max-width: 1280px; margin: 0 auto;
-    padding: 3.5rem 1rem 4rem;
+  .td-hero__grid {
+    position: relative; display: grid; gap: 1.75rem;
+    padding-top: 2.5rem; padding-bottom: 2.5rem;
   }
-  /* Phones: centred, with full-width buttons of equal size. Two buttons of
-     different widths stacked flush-left read as a mistake. */
-  .td-hero__content { text-align: center; }
-  .td-hero__lede { margin-left: auto; margin-right: auto; }
-  .td-hero__eyebrow {
-    font-family: var(--font-subheading--family, inherit);
-    font-size: .75rem; font-weight: 700; letter-spacing: .09em;
-    text-transform: uppercase; color: #00B4FC; margin: 0 0 .75rem;
-  }
+  .td-hero__eyebrow { display: flex; align-items: center; gap: .5rem; margin-bottom: .75rem; }
   .td-hero__title {
-    font-family: var(--font-heading--family, inherit);
-    font-weight: 800; letter-spacing: -.02em; line-height: 1.02;
-    font-size: clamp(2.25rem, 6vw, 3.75rem);
-    margin: 0; color: #FFFFFF; text-wrap: balance;
+    font-size: 2.4rem; line-height: .98; margin: 0; color: #FFFFFF; text-wrap: balance;
   }
   .td-hero__accent { display: block; color: #00B4FC; }
   .td-hero__lede {
-    margin: 1.25rem 0 0; max-width: 34rem;
-    font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.78);
+    margin: 0; max-width: 32rem; font-size: 1.0625rem; line-height: 1.6;
+    color: rgba(255,255,255,.72);
   }
-  .td-hero__actions { display: flex; flex-direction: column; gap: .75rem; margin-top: 2rem; }
-  .td-hero__actions .td-btn { width: 100%; }
-  .td-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-height: 48px; padding: 0 1.5rem; border-radius: 999px;
-    font-family: var(--font-heading--family, inherit);
-    font-weight: 700; font-size: .9375rem; text-decoration: none;
-    transition: background-color .15s ease, color .15s ease;
-  }
-  .td-btn--primary { background: #0068E8; color: #FFFFFF; }
-  .td-btn--primary:hover { background: #0053C4; }
-  .td-btn--ghost { border: 1px solid rgba(255,255,255,.5); color: #FFFFFF; }
-  .td-btn--ghost:hover { background: rgba(255,255,255,.1); }
+  .td-hero__actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+  .td-hero__footnote { margin: 1.25rem 0 0; font-size: .875rem; color: rgba(255,255,255,.62); }
 
-  @media (min-width: 768px) {
-    .td-hero__inner { padding: 5rem 2rem 5.5rem; }
-    /* From tablet up the text sits left on the page grid, balanced against
-       the ring on the right, and the buttons go back to natural width. */
-    .td-hero__content { text-align: left; max-width: 50rem; }
-    .td-hero__accent { white-space: nowrap; }
-    .td-hero__lede { margin-left: 0; }
-    .td-hero__actions { flex-direction: row; flex-wrap: wrap; }
-    .td-hero__actions .td-btn { width: auto; }
+  /* Finder card: white, lifted off the band with a cyan ring. */
+  .td-hero__finder {
+    background: #FFFFFF; color: #070E1A; border-radius: 12px; padding: 1.25rem;
+    box-shadow: 0 0 0 4px rgba(0,180,252,.25), 0 0 0 1px rgba(7,14,26,.05), 0 2px 4px rgba(7,14,26,.06), 0 18px 38px -10px rgba(7,14,26,.20);
   }
-  /* The ring only fits beside the headline once there is room for both. */
-  @media (min-width: 1200px) {
+  .td-hero__finder-eyebrow { margin-bottom: .375rem; }
+  .td-hero .td-hero__finder .tdh-eyebrow { color: #0068E8; }
+  .td-hero__finder-title { font-size: 1.875rem; line-height: 1.02; margin: 0 0 .25rem; color: #070E1A; }
+  .td-hero__finder-copy { margin: 0 0 1.25rem; font-size: .875rem; line-height: 1.45; color: #586274; }
+
+  .td-finder {
+    overflow: hidden; border-radius: 12px; border: 1px solid rgba(7,14,26,.1); background: #FFFFFF;
+    box-shadow: 0 0 0 1px rgba(7,14,26,.05), 0 2px 4px rgba(7,14,26,.06), 0 18px 38px -10px rgba(7,14,26,.20);
+  }
+  .td-finder__tabs { display: flex; }
+  .td-finder__tabs[hidden] { display: none; }
+  .td-finder__tab {
+    flex: 1; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: .5rem;
+    padding: .875rem .75rem; border: 0; border-top: 3px solid transparent; cursor: pointer;
+    font-family: var(--font-heading--family, "Archivo", system-ui, sans-serif);
+    font-size: 14px; font-weight: 700; line-height: 1.15; letter-spacing: -.008em;
+    background: #101C2E; color: rgba(255,255,255,.75); text-align: center;
+  }
+  .td-finder__tab:hover { background: #22344C; color: #FFFFFF; }
+  .td-finder__tab[aria-selected="true"] { border-top-color: #0068E8; background: #FFFFFF; color: #070E1A; }
+  .td-finder__panel { padding: 1.25rem; }
+  .td-finder__panel[hidden] { display: none; }
+  .td-finder:not(.is-tabbed) .td-finder__panel + .td-finder__panel { border-top: 1px solid rgba(7,14,26,.1); }
+  .td-finder__lead { margin: 0; font-size: .9375rem; line-height: 1.55; color: #070E1A; }
+  .td-finder__actions { display: flex; flex-wrap: wrap; gap: .625rem; margin-top: 1rem; }
+  .td-finder__fields { display: grid; gap: 1rem; }
+  .td-finder__label {
+    display: block; margin-bottom: .375rem;
+    font-family: var(--font-heading--family, "Archivo", system-ui, sans-serif);
+    font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #586274;
+  }
+  .td-finder__select {
+    width: 100%; min-height: 44px; appearance: none; -webkit-appearance: none;
+    border: 1px solid rgba(7,14,26,.12); border-radius: 6px; background-color: #FFFFFF;
+    padding: .625rem 2rem .625rem .875rem; font: inherit; font-size: 15px; color: #070E1A;
+    box-shadow: inset 0 1px 2px rgba(7,14,26,.04);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23586274' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right .75rem center;
+  }
+  .td-finder__select:focus { outline: none; border-color: #0068E8; box-shadow: 0 0 0 3px rgba(0,104,232,.15); }
+  .td-finder__submit { min-height: 48px; width: 100%; margin-top: 1rem; white-space: nowrap; }
+  .td-finder__actions .td-finder__submit { margin-top: 0; }
+  .td-finder__note { margin: .75rem 0 0; font-size: .75rem; line-height: 1.6; color: #586274; }
+  .td-finder__error:empty { display: none; }
+  .td-finder__error {
+    margin: .75rem 0 0; padding: .5rem .75rem; border-radius: 6px; background: #EFF5FF;
+    font-size: .875rem; font-weight: 500; color: #070E1A;
+  }
+
+  @media (min-width: 640px) {
+    .td-finder__fields { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .td-finder__submit { width: auto; }
+  }
+  @media (min-width: 768px) {
+    .td-hero__grid { padding-top: 3.5rem; padding-bottom: 3.5rem; }
+    .td-hero__title { font-size: 4.25rem; }
+    .td-hero__lede { font-size: 1.1875rem; }
+    .td-hero__finder { padding: 1.75rem; }
+    .td-hero__finder-title { font-size: 2.25rem; }
+    .td-finder__tab { font-size: 15px; padding: .875rem 1rem; }
+    .td-finder__panel { padding: 1.5rem; }
+  }
+  @media (min-width: 1024px) {
     .td-hero__ring { display: block; }
+    .td-hero__grid {
+      grid-template-columns: .9fr 1.1fr; column-gap: 3rem; row-gap: 1.5rem;
+      padding-top: 4rem; padding-bottom: 4rem;
+    }
+    .td-hero__top { grid-column: 1; grid-row: 1; align-self: end; }
+    .td-hero__finder { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+    .td-hero__body { grid-column: 1; grid-row: 2; align-self: start; }
+    .td-finder__fields { grid-template-columns: repeat(3, minmax(0,1fr)); }
   }
 </style>
 
 {% schema %}
 {
   "name": "TireDrop hero",
-  "tag": "section",
+  "tag": "div",
   "settings": [
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Tires shipped. Or installed." },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Order tires online." },
     { "type": "text", "id": "heading_accent", "label": "Heading second line", "default": "We ship them to you." },
-    { "type": "textarea", "id": "lede", "label": "Supporting copy", "default": "Free shipping to any address in the continental US — or free to our Sunrise shop, where we fit them for you." },
+    { "type": "textarea", "id": "lede", "label": "Supporting copy", "default": "An online tire and wheel store shipping to any address in the continental United States — or free to our South Florida shop, where we fit them for you." },
     { "type": "color", "id": "background", "label": "Base colour", "default": "#070E1A" },
-    { "type": "text", "id": "cta_label", "label": "Primary button", "default": "Shop tires" },
+    { "type": "text", "id": "cta_label", "label": "Primary button", "default": "Shop Tires" },
     { "type": "url", "id": "cta_link", "label": "Primary link" },
-    { "type": "text", "id": "cta2_label", "label": "Secondary button", "default": "Ship to store & install" },
-    { "type": "url", "id": "cta2_link", "label": "Secondary link" }
+    { "type": "text", "id": "cta2_label", "label": "Secondary button", "default": "How Shipping Works" },
+    { "type": "url", "id": "cta2_link", "label": "Secondary link" },
+    { "type": "text", "id": "footnote", "label": "Footnote", "default": "Powered by Extreme Tires." },
+    { "type": "header", "content": "Finder" },
+    { "type": "checkbox", "id": "show_finder", "label": "Show the finder", "default": true },
+    { "type": "text", "id": "finder_eyebrow", "label": "Finder eyebrow", "default": "Start here" },
+    { "type": "text", "id": "finder_heading", "label": "Finder heading", "default": "Find your fit" },
+    { "type": "text", "id": "finder_copy", "label": "Finder copy", "default": "Shop by vehicle, or by the size stamped on your sidewall." },
+    { "type": "textarea", "id": "vehicle_copy", "label": "Vehicle tab copy", "default": "Your tire size is printed on the sticker inside the driver's door, and on the sidewall of the tire itself. No sticker to hand? Answer five questions about your car and get the size and tire type that fit." },
+    { "type": "text", "id": "vehicle_cta", "label": "Vehicle tab button", "default": "Find my tires" },
+    { "type": "url", "id": "vehicle_link", "label": "Vehicle tab link" },
+    { "type": "text", "id": "vehicle_note", "label": "Vehicle tab note", "default": "Not sure? Call us and read the sidewall to us." },
+    { "type": "text", "id": "size_note", "label": "Size tab note", "default": "Your size is printed on the sidewall, e.g. 225/50R17 — that is a 225 width, 50 aspect ratio and a 17 inch rim." },
+    { "type": "text", "id": "phone", "label": "Phone number", "default": "(954) 773-1896" }
   ],
   "presets": [{ "name": "TireDrop hero" }]
 }
