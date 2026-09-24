@@ -125,9 +125,10 @@ REPORT BACK:
 ## 5. Remove the email address from Shopify's privacy policy
 
 > **Superseded (September 24, 2026).** The business email is now
-> info@tiredroponline.com. The four Shopify policies are switched from the
-> gmail address to it through the Admin API, not through this prompt. Skip
-> this prompt; use prompt 10 for the settings that still point at gmail.
+> info@tiredroponline.com, so the gmail address is replaced rather than just
+> removed. Skip this prompt; prompt 10 covers the policies and every other
+> setting that still points at gmail. (The Admin API connection used here has
+> no `write_legal_policies` scope, so policy text can only change in the admin.)
 
 The store owner decided the gmail address is not to be published. Shopify's
 auto-generated privacy policy publishes it anyway, and checkout links to it.
@@ -276,9 +277,9 @@ setting.
 ## 10. Point the store's email at info@tiredroponline.com
 
 info@tiredroponline.com is the single address for forms, business information
-and contact. The pages, footer and policies already publish it. Shopify's own
-settings still use the gmail address, and those can only be changed in the
-admin. The Horizon contact form delivers to the store contact email, so until
+and contact. The pages and footer already publish it. Shopify's own settings
+and the four legal policies still use the gmail address or the phone alone,
+and those can only be changed in the admin. The Horizon contact form delivers to the store contact email, so until
 step 2 is done, contact-form messages keep going to gmail.
 
 ```
@@ -306,15 +307,31 @@ Domain: tiredroponline.com (DNS at GoDaddy). Store: TireDrop.
    Back in Shopify, click Verify. Report the status (it may say pending; DNS
    can take up to 48 hours).
 
-4. TEST. Open https://tiredroponline.com/pages/contact in a new tab and
+4. POLICIES. Settings → Policies. Make ONLY these text edits, then Save each.
+   Do not change any other wording, even text that looks wrong.
+   a. Privacy policy, "Contact" section at the bottom: change
+      extremetiresmarketing@gmail.com  →  info@tiredroponline.com
+   b. Refund policy: in the three places it says "contact us at (954) 773-1896"
+      or "return question at (954) 773-1896", add " or info@tiredroponline.com"
+      right after the phone number.
+   c. Shipping policy, "Contact us about this document" block at the bottom:
+      add a new line info@tiredroponline.com under (954) 773-1896.
+   d. Terms of service, SECTION 25: change "should be sent to us at
+      (954) 773-1896." to "should be sent to us at info@tiredroponline.com or
+      by phone at (954) 773-1896.", and add a line info@tiredroponline.com
+      under the final (954) 773-1896.
+   After saving, search each policy for "gmail" and confirm it is gone.
+
+5. TEST. Open https://tiredroponline.com/pages/contact in a new tab and
    submit the contact form with name "Website test", your own email, and
    message "TEST from the website contact form — please ignore."
    Report exactly what the page says after submitting.
 
-5. REPORT BACK:
+6. REPORT BACK:
    - MX records found (or "none")
    - Store contact email: saved yes/no, verification needed yes/no
    - Sender email: status, and the DNS records you added (copy them)
+   - Policies: which of a–d were saved, and whether "gmail" still appears
    - Contact form test: the on-page message
    Justin will confirm the test message arrived in the info@ inbox.
 ```
