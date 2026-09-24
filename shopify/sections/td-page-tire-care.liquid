@@ -423,405 +423,73 @@
   "name": "TireDrop page: Tire care",
   "tag": "div",
   "settings": [
-    {
-      "type": "header",
-      "content": "Page header"
-    },
-    {
-      "type": "text",
-      "id": "hero_eyebrow",
-      "label": "Eyebrow",
-      "default": "Tire Care Guides"
-    },
-    {
-      "type": "text",
-      "id": "hero_title",
-      "label": "Heading",
-      "default": "Everything we end up explaining anyway"
-    },
-    {
-      "type": "textarea",
-      "id": "hero_lede",
-      "label": "Supporting copy",
-      "default": "The questions we answer every week, written out properly. No upsell attached — read it, do it yourself, or buy the tires and have someone else fit them."
-    },
-    {
-      "type": "text",
-      "id": "crumb",
-      "label": "Breadcrumb label",
-      "default": "Tire Care Guides"
-    },
-    {
-      "type": "text",
-      "id": "hero_cta_label",
-      "label": "Button (jumps to the guides)",
-      "default": "Browse the guides"
-    },
-    {
-      "type": "text",
-      "id": "hero_call_label",
-      "label": "Call button (the number is appended)",
-      "default": "Ask us:"
-    },
-    {
-      "type": "header",
-      "content": "Contact details"
-    },
-    {
-      "type": "text",
-      "id": "phone",
-      "label": "Phone number",
-      "default": "(954) 773-1896",
-      "info": "Shown as written; the call link is built from its digits."
-    },
-    {
-      "type": "header",
-      "content": "Jump navigation"
-    },
-    {
-      "type": "text",
-      "id": "jump_title",
-      "label": "Heading",
-      "default": "Jump to a topic"
-    },
-    {
-      "type": "header",
-      "content": "Guide index"
-    },
-    {
-      "type": "text",
-      "id": "library_eyebrow",
-      "label": "Eyebrow",
-      "default": "The Library"
-    },
-    {
-      "type": "text",
-      "id": "library_title",
-      "label": "Heading",
-      "default": "Start with the one that brought you here"
-    },
-    {
-      "type": "textarea",
-      "id": "library_lede",
-      "label": "Supporting copy",
-      "default": "Every guide stands on its own. They are grouped by what you are trying to do: keep a set alive, stay safe on it, work out what is wrong, or buy the next one."
-    },
-    {
-      "type": "textarea",
-      "id": "categories",
-      "label": "Categories, in order (one per line)",
-      "default": "Maintenance\nSafety\nDiagnosing\nBuying",
-      "info": "Each guide's category must match one of these exactly."
-    },
-    {
-      "type": "text",
-      "id": "guide_link_label",
-      "label": "Card link label",
-      "default": "Read the guide"
-    },
-    {
-      "type": "header",
-      "content": "Five-minute check"
-    },
-    {
-      "type": "text",
-      "id": "check_eyebrow",
-      "label": "Eyebrow",
-      "default": "Start Here"
-    },
-    {
-      "type": "text",
-      "id": "check_title",
-      "label": "Heading",
-      "default": "The five-minute monthly check"
-    },
-    {
-      "type": "textarea",
-      "id": "check_lede",
-      "label": "Supporting copy",
-      "default": "If you only ever do one thing from this library, do this: once a month, cold tires, walk around the car."
-    },
-    {
-      "type": "textarea",
-      "id": "check_steps",
-      "label": "Steps (one per line)",
-      "default": "Check pressure on all four plus the spare, against the door placard.\nLook at tread depth — penny test, and find the wear bars.\nScan the sidewalls for cuts, cracks or bulges.\nNote anything new: a pull, a shimmy, a warning light."
-    },
-    {
-      "type": "header",
-      "content": "Inside each guide"
-    },
-    {
-      "type": "text",
-      "id": "checklist_title",
-      "label": "Checklist heading",
-      "default": "Checklist"
-    },
-    {
-      "type": "text",
-      "id": "cadence_title",
-      "label": "Cadence heading",
-      "default": "How often"
-    },
-    {
-      "type": "text",
-      "id": "links_label",
-      "label": "Service links label",
-      "default": "Rather we did it? (South Florida)"
-    },
-    {
-      "type": "text",
-      "id": "elsewhere_note",
-      "label": "Note under the links",
-      "default": "Anywhere else in the continental United States, buy the tires here and have your own installer fit them."
-    },
-    {
-      "type": "header",
-      "content": "PSI callout (tire pressure guide)"
-    },
-    {
-      "type": "text",
-      "id": "psi_badge",
-      "label": "Badge",
-      "default": "PSI: where the real number comes from"
-    },
-    {
-      "type": "textarea",
-      "id": "psi_p1",
-      "label": "Paragraph 1",
-      "default": "Open the driver's door and look at the placard on the door jamb. That sticker is the number your vehicle's engineers chose for your car, at its weight, on its suspension — front and rear, plus the spare. It is the source of truth."
-    },
-    {
-      "type": "inline_richtext",
-      "id": "psi_p2",
-      "label": "Paragraph 2",
-      "default": "The big number molded into the tire sidewall is <strong>not</strong> your target. That is the maximum pressure the tire is rated to hold, not the pressure it should run at. Filling to the sidewall number gives you a hard ride, a narrow contact patch and tread that wears out down the middle."
-    },
-    {
-      "type": "textarea",
-      "id": "psi_p3",
-      "label": "Paragraph 3",
-      "default": "One more South Florida detail: check pressure cold, before you drive. Heat from a highway run or an afternoon in a parking lot can add several PSI, and topping off a hot tire leaves it low the next morning."
-    },
-    {
-      "type": "header",
-      "content": "Penny test (tread depth guide)"
-    },
-    {
-      "type": "text",
-      "id": "penny_title",
-      "label": "Heading",
-      "default": "The penny test"
-    },
-    {
-      "type": "textarea",
-      "id": "penny_steps",
-      "label": "Steps (one per line)",
-      "default": "Turn a penny so Lincoln's head points down into the tread.\nPush it into a groove — try several spots across the tire, not just one.\nIf you can see the top of Lincoln's head, you are at or below 2/32\" — legally worn out and done. Replace the tire.\nIf the tread covers part of his head, you have some life left — but start planning, especially before rainy season."
-    },
-    {
-      "type": "textarea",
-      "id": "penny_note",
-      "label": "Note",
-      "default": "A quarter is the stricter version of the same trick: if the tread reaches Washington's head you are around 4/32\", which is where wet braking really starts falling off. In Florida rain, we would rather you use the quarter."
-    },
-    {
-      "type": "header",
-      "content": "Guides being written"
-    },
-    {
-      "type": "text",
-      "id": "upcoming_eyebrow",
-      "label": "Eyebrow",
-      "default": "In Progress"
-    },
-    {
-      "type": "text",
-      "id": "upcoming_title",
-      "label": "Heading",
-      "default": "Guides we are still writing"
-    },
-    {
-      "type": "textarea",
-      "id": "upcoming_lede",
-      "label": "Supporting copy",
-      "default": "This library grows. These are the next ones on the bench — if one of them is the answer you need today, call and we will just tell you."
-    },
-    {
-      "type": "textarea",
-      "id": "upcoming_list",
-      "label": "Titles (one per line)",
-      "default": "Reading a tire sidewall, number by number\nAll-season, summer and all-terrain: what the labels actually promise\nLoad index and speed rating, and when they matter\nWet braking, hydroplaning and rainy-season driving\nRun-flats: what they cost you and what they buy you\nPlus-sizing wheels without wrecking the ride\nTorque specs, and why the tech uses a wrench instead of a gun\nWhat to check the week after a new set goes on\nStoring a seasonal set so it is still good next year\nTowing and payload: choosing a truck tire honestly"
-    },
-    {
-      "type": "inline_richtext",
-      "id": "upcoming_note",
-      "label": "Note",
-      "default": "Something you want covered that is not on either list? <a href=\"/pages/contact\">Tell us</a> — the questions people actually ask are where these come from."
-    },
-    {
-      "type": "header",
-      "content": "Closing band"
-    },
-    {
-      "type": "text",
-      "id": "cta_eyebrow",
-      "label": "Eyebrow",
-      "default": "Tires shipped. Or installed."
-    },
-    {
-      "type": "text",
-      "id": "cta_title",
-      "label": "Heading",
-      "default": "Read it, then buy the right ones"
-    },
-    {
-      "type": "textarea",
-      "id": "cta_lede",
-      "label": "Supporting copy",
-      "default": "Shipped to your door anywhere in the continental United States, or free to the Sunrise shop if you would rather we fit them. Not sure which size or rating you need? Call and read us the door placard."
-    },
-    {
-      "type": "text",
-      "id": "cta_label",
-      "label": "Button",
-      "default": "Shop Tires"
-    },
-    {
-      "type": "url",
-      "id": "cta_link",
-      "label": "Button link"
-    }
+    {"type": "header", "content": "Page header"},
+    {"type": "text", "id": "hero_eyebrow", "label": "Eyebrow", "default": "Tire Care Guides"},
+    {"type": "text", "id": "hero_title", "label": "Heading", "default": "Everything we end up explaining anyway"},
+    {"type": "textarea", "id": "hero_lede", "label": "Supporting copy", "default": "The questions we answer every week, written out properly. No upsell attached — read it, do it yourself, or buy the tires and have someone else fit them."},
+    {"type": "text", "id": "crumb", "label": "Breadcrumb label", "default": "Tire Care Guides"},
+    {"type": "text", "id": "hero_cta_label", "label": "Button (jumps to the guides)", "default": "Browse the guides"},
+    {"type": "text", "id": "hero_call_label", "label": "Call button (the number is appended)", "default": "Ask us:"},
+    {"type": "header", "content": "Contact details"},
+    {"type": "text", "id": "phone", "label": "Phone number", "default": "(954) 773-1896", "info": "Shown as written; the call link is built from its digits."},
+    {"type": "header", "content": "Jump navigation"},
+    {"type": "text", "id": "jump_title", "label": "Heading", "default": "Jump to a topic"},
+    {"type": "header", "content": "Guide index"},
+    {"type": "text", "id": "library_eyebrow", "label": "Eyebrow", "default": "The Library"},
+    {"type": "text", "id": "library_title", "label": "Heading", "default": "Start with the one that brought you here"},
+    {"type": "textarea", "id": "library_lede", "label": "Supporting copy", "default": "Every guide stands on its own. They are grouped by what you are trying to do: keep a set alive, stay safe on it, work out what is wrong, or buy the next one."},
+    {"type": "textarea", "id": "categories", "label": "Categories, in order (one per line)", "default": "Maintenance\nSafety\nDiagnosing\nBuying", "info": "Each guide's category must match one of these exactly."},
+    {"type": "text", "id": "guide_link_label", "label": "Card link label", "default": "Read the guide"},
+    {"type": "header", "content": "Five-minute check"},
+    {"type": "text", "id": "check_eyebrow", "label": "Eyebrow", "default": "Start Here"},
+    {"type": "text", "id": "check_title", "label": "Heading", "default": "The five-minute monthly check"},
+    {"type": "textarea", "id": "check_lede", "label": "Supporting copy", "default": "If you only ever do one thing from this library, do this: once a month, cold tires, walk around the car."},
+    {"type": "textarea", "id": "check_steps", "label": "Steps (one per line)", "default": "Check pressure on all four plus the spare, against the door placard.\nLook at tread depth — penny test, and find the wear bars.\nScan the sidewalls for cuts, cracks or bulges.\nNote anything new: a pull, a shimmy, a warning light."},
+    {"type": "header", "content": "Inside each guide"},
+    {"type": "text", "id": "checklist_title", "label": "Checklist heading", "default": "Checklist"},
+    {"type": "text", "id": "cadence_title", "label": "Cadence heading", "default": "How often"},
+    {"type": "text", "id": "links_label", "label": "Service links label", "default": "Rather we did it? (South Florida)"},
+    {"type": "text", "id": "elsewhere_note", "label": "Note under the links", "default": "Anywhere else in the continental United States, buy the tires here and have your own installer fit them."},
+    {"type": "header", "content": "PSI callout (tire pressure guide)"},
+    {"type": "text", "id": "psi_badge", "label": "Badge", "default": "PSI: where the real number comes from"},
+    {"type": "textarea", "id": "psi_p1", "label": "Paragraph 1", "default": "Open the driver's door and look at the placard on the door jamb. That sticker is the number your vehicle's engineers chose for your car, at its weight, on its suspension — front and rear, plus the spare. It is the source of truth."},
+    {"type": "inline_richtext", "id": "psi_p2", "label": "Paragraph 2", "default": "The big number molded into the tire sidewall is <strong>not</strong> your target. That is the maximum pressure the tire is rated to hold, not the pressure it should run at. Filling to the sidewall number gives you a hard ride, a narrow contact patch and tread that wears out down the middle."},
+    {"type": "textarea", "id": "psi_p3", "label": "Paragraph 3", "default": "One more South Florida detail: check pressure cold, before you drive. Heat from a highway run or an afternoon in a parking lot can add several PSI, and topping off a hot tire leaves it low the next morning."},
+    {"type": "header", "content": "Penny test (tread depth guide)"},
+    {"type": "text", "id": "penny_title", "label": "Heading", "default": "The penny test"},
+    {"type": "textarea", "id": "penny_steps", "label": "Steps (one per line)", "default": "Turn a penny so Lincoln's head points down into the tread.\nPush it into a groove — try several spots across the tire, not just one.\nIf you can see the top of Lincoln's head, you are at or below 2/32\" — legally worn out and done. Replace the tire.\nIf the tread covers part of his head, you have some life left — but start planning, especially before rainy season."},
+    {"type": "textarea", "id": "penny_note", "label": "Note", "default": "A quarter is the stricter version of the same trick: if the tread reaches Washington's head you are around 4/32\", which is where wet braking really starts falling off. In Florida rain, we would rather you use the quarter."},
+    {"type": "header", "content": "Guides being written"},
+    {"type": "text", "id": "upcoming_eyebrow", "label": "Eyebrow", "default": "In Progress"},
+    {"type": "text", "id": "upcoming_title", "label": "Heading", "default": "Guides we are still writing"},
+    {"type": "textarea", "id": "upcoming_lede", "label": "Supporting copy", "default": "This library grows. These are the next ones on the bench — if one of them is the answer you need today, call and we will just tell you."},
+    {"type": "textarea", "id": "upcoming_list", "label": "Titles (one per line)", "default": "Reading a tire sidewall, number by number\nAll-season, summer and all-terrain: what the labels actually promise\nLoad index and speed rating, and when they matter\nWet braking, hydroplaning and rainy-season driving\nRun-flats: what they cost you and what they buy you\nPlus-sizing wheels without wrecking the ride\nTorque specs, and why the tech uses a wrench instead of a gun\nWhat to check the week after a new set goes on\nStoring a seasonal set so it is still good next year\nTowing and payload: choosing a truck tire honestly"},
+    {"type": "inline_richtext", "id": "upcoming_note", "label": "Note", "default": "Something you want covered that is not on either list? <a href=\"/pages/contact\">Tell us</a> — the questions people actually ask are where these come from."},
+    {"type": "header", "content": "Closing band"},
+    {"type": "text", "id": "cta_eyebrow", "label": "Eyebrow", "default": "Tires shipped. Or installed."},
+    {"type": "text", "id": "cta_title", "label": "Heading", "default": "Read it, then buy the right ones"},
+    {"type": "textarea", "id": "cta_lede", "label": "Supporting copy", "default": "Shipped to your door anywhere in the continental United States, or free to the Sunrise shop if you would rather we fit them. Not sure which size or rating you need? Call and read us the door placard."},
+    {"type": "text", "id": "cta_label", "label": "Button", "default": "Shop Tires"},
+    {"type": "url", "id": "cta_link", "label": "Button link"}
   ],
   "max_blocks": 50,
   "blocks": [
-    {
-      "type": "topic",
-      "name": "Guide",
-      "settings": [
-        {
-          "type": "text",
-          "id": "anchor",
-          "label": "Anchor id",
-          "info": "Lower case with hyphens, e.g. tire-pressure. Links elsewhere point at #anchor."
-        },
-        {
-          "type": "text",
-          "id": "nav",
-          "label": "Jump-nav label"
-        },
-        {
-          "type": "text",
-          "id": "category",
-          "label": "Category"
-        },
-        {
-          "type": "select",
-          "id": "icon",
-          "label": "Icon",
-          "options": [
-            {
-              "value": "circle-gauge",
-              "label": "Gauge"
-            },
-            {
-              "value": "repeat",
-              "label": "Rotation"
-            },
-            {
-              "value": "disc-3",
-              "label": "Disc"
-            },
-            {
-              "value": "ruler",
-              "label": "Ruler"
-            },
-            {
-              "value": "compass",
-              "label": "Compass"
-            },
-            {
-              "value": "radio",
-              "label": "Radio"
-            },
-            {
-              "value": "shopping-cart",
-              "label": "Cart"
-            },
-            {
-              "value": "wrench",
-              "label": "Wrench"
-            }
-          ],
-          "default": "circle-gauge"
-        },
-        {
-          "type": "text",
-          "id": "title",
-          "label": "Title"
-        },
-        {
-          "type": "textarea",
-          "id": "summary",
-          "label": "Card summary"
-        },
-        {
-          "type": "textarea",
-          "id": "why",
-          "label": "Why it matters"
-        },
-        {
-          "type": "textarea",
-          "id": "checklist",
-          "label": "Checklist (one per line)"
-        },
-        {
-          "type": "textarea",
-          "id": "cadence",
-          "label": "How often"
-        },
-        {
-          "type": "select",
-          "id": "extra",
-          "label": "Extra panel",
-          "options": [
-            {
-              "value": "none",
-              "label": "None"
-            },
-            {
-              "value": "psi",
-              "label": "PSI callout"
-            },
-            {
-              "value": "penny",
-              "label": "Penny test"
-            }
-          ],
-          "default": "none"
-        },
-        {
-          "type": "text",
-          "id": "link1_label",
-          "label": "Service link 1 label"
-        },
-        {
-          "type": "url",
-          "id": "link1",
-          "label": "Service link 1"
-        },
-        {
-          "type": "text",
-          "id": "link2_label",
-          "label": "Service link 2 label"
-        },
-        {
-          "type": "url",
-          "id": "link2",
-          "label": "Service link 2"
-        }
-      ]
-    }
+    { "type": "topic", "name": "Guide", "settings": [
+      {"type": "text", "id": "anchor", "label": "Anchor id", "info": "Lower case with hyphens, e.g. tire-pressure. Links elsewhere point at #anchor."},
+      {"type": "text", "id": "nav", "label": "Jump-nav label"},
+      {"type": "text", "id": "category", "label": "Category"},
+      {"type": "select", "id": "icon", "label": "Icon", "options": [{"value": "circle-gauge", "label": "Gauge"}, {"value": "repeat", "label": "Rotation"}, {"value": "disc-3", "label": "Disc"}, {"value": "ruler", "label": "Ruler"}, {"value": "compass", "label": "Compass"}, {"value": "radio", "label": "Radio"}, {"value": "shopping-cart", "label": "Cart"}, {"value": "wrench", "label": "Wrench"}], "default": "circle-gauge"},
+      {"type": "text", "id": "title", "label": "Title"},
+      {"type": "textarea", "id": "summary", "label": "Card summary"},
+      {"type": "textarea", "id": "why", "label": "Why it matters"},
+      {"type": "textarea", "id": "checklist", "label": "Checklist (one per line)"},
+      {"type": "textarea", "id": "cadence", "label": "How often"},
+      {"type": "select", "id": "extra", "label": "Extra panel", "options": [{"value": "none", "label": "None"}, {"value": "psi", "label": "PSI callout"}, {"value": "penny", "label": "Penny test"}], "default": "none"},
+      {"type": "text", "id": "link1_label", "label": "Service link 1 label"},
+      {"type": "url", "id": "link1", "label": "Service link 1"},
+      {"type": "text", "id": "link2_label", "label": "Service link 2 label"},
+      {"type": "url", "id": "link2", "label": "Service link 2"}
+    ] }
   ]
 }
 {% endschema %}

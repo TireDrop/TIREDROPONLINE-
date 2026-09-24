@@ -280,249 +280,53 @@
   "name": "TireDrop page: Reviews",
   "tag": "div",
   "settings": [
-    {
-      "type": "header",
-      "content": "Page header"
-    },
-    {
-      "type": "text",
-      "id": "hero_eyebrow",
-      "label": "Eyebrow",
-      "default": "Reviews"
-    },
-    {
-      "type": "text",
-      "id": "hero_title",
-      "label": "Heading",
-      "default": "Shipped, fitted, and everything after"
-    },
-    {
-      "type": "textarea",
-      "id": "hero_lede",
-      "label": "Supporting copy",
-      "default": "Orders that went out to driveways in other states, sets fitted at the shop, van calls around Broward. The good ones, and the ones where we had to put something right."
-    },
-    {
-      "type": "text",
-      "id": "crumb",
-      "label": "Breadcrumb label",
-      "default": "Reviews"
-    },
-    {
-      "type": "header",
-      "content": "Contact details"
-    },
-    {
-      "type": "text",
-      "id": "phone",
-      "label": "Phone number",
-      "default": "(954) 773-1896",
-      "info": "Shown as written; the call link is built from its digits."
-    },
-    {
-      "type": "header",
-      "content": "Review profiles"
-    },
-    {
-      "type": "text",
-      "id": "google_url",
-      "label": "Google profile link",
-      "default": "https://www.google.com/maps/search/?api=1&query=Extreme+Tires+Sunrise+FL",
-      "info": "Swap in the direct review link once the Google Business Profile is confirmed."
-    },
-    {
-      "type": "text",
-      "id": "yelp_url",
-      "label": "Yelp profile link",
-      "default": "https://www.yelp.com/biz/extreme-tires-sunrise"
-    },
-    {
-      "type": "header",
-      "content": "Read the real ones"
-    },
-    {
-      "type": "text",
-      "id": "real_title",
-      "label": "Heading",
-      "default": "Read the real ones"
-    },
-    {
-      "type": "textarea",
-      "id": "real_copy",
-      "label": "Copy",
-      "default": "TireDrop is new, so its own reviews are still being collected. The shop behind it is not: Extreme Tires has been fitting tires in Sunrise for years, and its customers have been writing about it. Both profiles below are the shop's."
-    },
-    {
-      "type": "text",
-      "id": "google_label",
-      "label": "Google button",
-      "default": "Extreme Tires on Google"
-    },
-    {
-      "type": "text",
-      "id": "yelp_label",
-      "label": "Yelp button",
-      "default": "Extreme Tires on Yelp"
-    },
-    {
-      "type": "textarea",
-      "id": "real_note",
-      "label": "Note",
-      "default": "We do not reprint star counts here. They move, and a number typed into a page is out of date the week after. Open either profile and read what is actually there."
-    },
-    {
-      "type": "header",
-      "content": "Beside it"
-    },
-    {
-      "type": "text",
-      "id": "span_title",
-      "label": "Heading",
-      "default": "We are not hiding the three-star ones"
-    },
-    {
-      "type": "textarea",
-      "id": "span_copy",
-      "label": "Copy",
-      "default": "If we dropped the ball, you should be able to read about it."
-    },
-    {
-      "type": "textarea",
-      "id": "span_note",
-      "label": "Note",
-      "default": "Reviews span both halves of the business: orders shipped out to customers across the continental United States, and tires fitted here in Sunrise or at an address around Broward."
-    },
-    {
-      "type": "header",
-      "content": "Customer reviews (shown only when reviews are added)"
-    },
-    {
-      "type": "text",
-      "id": "list_eyebrow",
-      "label": "Eyebrow",
-      "default": "Customer Reviews"
-    },
-    {
-      "type": "text",
-      "id": "list_title",
-      "label": "Heading",
-      "default": "In their own words"
-    },
-    {
-      "type": "textarea",
-      "id": "list_lede",
-      "label": "Supporting copy",
-      "default": "Posted with permission, word for word."
-    },
-    {
-      "type": "header",
-      "content": "Leave a review"
-    },
-    {
-      "type": "text",
-      "id": "turn_eyebrow",
-      "label": "Eyebrow",
-      "default": "Your Turn"
-    },
-    {
-      "type": "text",
-      "id": "turn_title",
-      "label": "Heading",
-      "default": "Leave a review"
-    },
-    {
-      "type": "textarea",
-      "id": "turn_lede",
-      "label": "Supporting copy",
-      "default": "Feedback is how a family shop gets better, online or in the bay. Tell us what went right — and what did not, so we can fix it."
-    },
-    {
-      "type": "text",
-      "id": "wrong_title",
-      "label": "Something-wrong card: heading",
-      "default": "Something go wrong?"
-    },
-    {
-      "type": "textarea",
-      "id": "wrong_copy",
-      "label": "Something-wrong card: copy",
-      "default": "Call us before you post. Most complaints we hear are things we can still put right — a wrong size, a damaged box, a re-torque, a billing question. We would rather earn the stars back."
-    },
-    {
-      "type": "text",
-      "id": "wrong_link_label",
-      "label": "Something-wrong card: second button",
-      "default": "Contact form"
-    },
-    {
-      "type": "url",
-      "id": "wrong_link",
-      "label": "Something-wrong card: second button link"
-    },
-    {
-      "type": "text",
-      "id": "post_title",
-      "label": "Post card: heading",
-      "default": "Post it where it counts"
-    },
-    {
-      "type": "textarea",
-      "id": "post_copy",
-      "label": "Post card: copy",
-      "default": "Bought tires from us, or had them fitted? Tell us how it went. Google and Yelp are where a review counts for the shop, and where the next person shopping for tires will actually read it — it is a minute's work."
-    },
-    {
-      "type": "text",
-      "id": "post_google_label",
-      "label": "Post card: Google button",
-      "default": "Post it on Google"
-    },
-    {
-      "type": "text",
-      "id": "post_yelp_label",
-      "label": "Post card: Yelp button",
-      "default": "Post it on Yelp"
-    },
-    {
-      "type": "textarea",
-      "id": "post_note",
-      "label": "Post card: note (the phone number is appended)",
-      "default": "If something about your order or your install still needs fixing, call and ask for customer care — we would rather put it right than have you write about it."
-    }
+    {"type": "header", "content": "Page header"},
+    {"type": "text", "id": "hero_eyebrow", "label": "Eyebrow", "default": "Reviews"},
+    {"type": "text", "id": "hero_title", "label": "Heading", "default": "Shipped, fitted, and everything after"},
+    {"type": "textarea", "id": "hero_lede", "label": "Supporting copy", "default": "Orders that went out to driveways in other states, sets fitted at the shop, van calls around Broward. The good ones, and the ones where we had to put something right."},
+    {"type": "text", "id": "crumb", "label": "Breadcrumb label", "default": "Reviews"},
+    {"type": "header", "content": "Contact details"},
+    {"type": "text", "id": "phone", "label": "Phone number", "default": "(954) 773-1896", "info": "Shown as written; the call link is built from its digits."},
+    {"type": "header", "content": "Review profiles"},
+    {"type": "text", "id": "google_url", "label": "Google profile link", "default": "https://www.google.com/maps/search/?api=1&query=Extreme+Tires+Sunrise+FL", "info": "Swap in the direct review link once the Google Business Profile is confirmed."},
+    {"type": "text", "id": "yelp_url", "label": "Yelp profile link", "default": "https://www.yelp.com/biz/extreme-tires-sunrise"},
+    {"type": "header", "content": "Read the real ones"},
+    {"type": "text", "id": "real_title", "label": "Heading", "default": "Read the real ones"},
+    {"type": "textarea", "id": "real_copy", "label": "Copy", "default": "TireDrop is new, so its own reviews are still being collected. The shop behind it is not: Extreme Tires has been fitting tires in Sunrise for years, and its customers have been writing about it. Both profiles below are the shop's."},
+    {"type": "text", "id": "google_label", "label": "Google button", "default": "Extreme Tires on Google"},
+    {"type": "text", "id": "yelp_label", "label": "Yelp button", "default": "Extreme Tires on Yelp"},
+    {"type": "textarea", "id": "real_note", "label": "Note", "default": "We do not reprint star counts here. They move, and a number typed into a page is out of date the week after. Open either profile and read what is actually there."},
+    {"type": "header", "content": "Beside it"},
+    {"type": "text", "id": "span_title", "label": "Heading", "default": "We are not hiding the three-star ones"},
+    {"type": "textarea", "id": "span_copy", "label": "Copy", "default": "If we dropped the ball, you should be able to read about it."},
+    {"type": "textarea", "id": "span_note", "label": "Note", "default": "Reviews span both halves of the business: orders shipped out to customers across the continental United States, and tires fitted here in Sunrise or at an address around Broward."},
+    {"type": "header", "content": "Customer reviews (shown once added)"},
+    {"type": "text", "id": "list_eyebrow", "label": "Eyebrow", "default": "Customer Reviews"},
+    {"type": "text", "id": "list_title", "label": "Heading", "default": "In their own words"},
+    {"type": "textarea", "id": "list_lede", "label": "Supporting copy", "default": "Posted with permission, word for word."},
+    {"type": "header", "content": "Leave a review"},
+    {"type": "text", "id": "turn_eyebrow", "label": "Eyebrow", "default": "Your Turn"},
+    {"type": "text", "id": "turn_title", "label": "Heading", "default": "Leave a review"},
+    {"type": "textarea", "id": "turn_lede", "label": "Supporting copy", "default": "Feedback is how a family shop gets better, online or in the bay. Tell us what went right — and what did not, so we can fix it."},
+    {"type": "text", "id": "wrong_title", "label": "Something-wrong card: heading", "default": "Something go wrong?"},
+    {"type": "textarea", "id": "wrong_copy", "label": "Something-wrong card: copy", "default": "Call us before you post. Most complaints we hear are things we can still put right — a wrong size, a damaged box, a re-torque, a billing question. We would rather earn the stars back."},
+    {"type": "text", "id": "wrong_link_label", "label": "Something-wrong card: second button", "default": "Contact form"},
+    {"type": "url", "id": "wrong_link", "label": "Something-wrong card: second button link"},
+    {"type": "text", "id": "post_title", "label": "Post card: heading", "default": "Post it where it counts"},
+    {"type": "textarea", "id": "post_copy", "label": "Post card: copy", "default": "Bought tires from us, or had them fitted? Tell us how it went. Google and Yelp are where a review counts for the shop, and where the next person shopping for tires will actually read it — it is a minute's work."},
+    {"type": "text", "id": "post_google_label", "label": "Post card: Google button", "default": "Post it on Google"},
+    {"type": "text", "id": "post_yelp_label", "label": "Post card: Yelp button", "default": "Post it on Yelp"},
+    {"type": "textarea", "id": "post_note", "label": "Post card: note (number appended)", "default": "If something about your order or your install still needs fixing, call and ask for customer care — we would rather put it right than have you write about it."}
   ],
   "max_blocks": 50,
   "blocks": [
-    {
-      "type": "review",
-      "name": "Verified review",
-      "settings": [
-        {
-          "type": "paragraph",
-          "content": "Add only a genuine review you have permission to publish, word for word. Star ratings and counts are deliberately not shown, and no review markup is emitted."
-        },
-        {
-          "type": "textarea",
-          "id": "quote",
-          "label": "Review text"
-        },
-        {
-          "type": "text",
-          "id": "name",
-          "label": "Name as the customer gave it"
-        },
-        {
-          "type": "text",
-          "id": "context",
-          "label": "What it was for (optional)"
-        },
-        {
-          "type": "text",
-          "id": "source",
-          "label": "Where it was posted (optional)",
-          "info": "For example Google or Yelp."
-        }
-      ]
-    }
+    { "type": "review", "name": "Verified review", "settings": [
+      {"type": "paragraph", "content": "Add only a genuine review you have permission to publish, word for word. Star ratings and counts are deliberately not shown, and no review markup is emitted."},
+      {"type": "textarea", "id": "quote", "label": "Review text"},
+      {"type": "text", "id": "name", "label": "Name as the customer gave it"},
+      {"type": "text", "id": "context", "label": "What it was for (optional)"},
+      {"type": "text", "id": "source", "label": "Where it was posted (optional)", "info": "For example Google or Yelp."}
+    ] }
   ]
 }
 {% endschema %}

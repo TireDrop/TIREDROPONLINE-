@@ -563,479 +563,93 @@
   "name": "TireDrop page: Financing",
   "tag": "div",
   "settings": [
-    {
-      "type": "header",
-      "content": "Page header"
-    },
-    {
-      "type": "text",
-      "id": "hero_eyebrow",
-      "label": "Eyebrow",
-      "default": "Financing"
-    },
-    {
-      "type": "text",
-      "id": "hero_title",
-      "label": "Heading",
-      "default": "Tires now. Pay over time."
-    },
-    {
-      "type": "textarea",
-      "id": "hero_lede",
-      "label": "Supporting copy",
-      "default": "Nobody plans for a blown tire in the middle of the month. Here is every way you can pay for an order — including financing, where the terms are set by a third-party lender, not by us."
-    },
-    {
-      "type": "text",
-      "id": "crumb",
-      "label": "Breadcrumb label",
-      "default": "Financing"
-    },
-    {
-      "type": "text",
-      "id": "hero_cta_label",
-      "label": "Button (jumps to the form)",
-      "default": "Start a Request"
-    },
-    {
-      "type": "header",
-      "content": "Contact details"
-    },
-    {
-      "type": "text",
-      "id": "phone",
-      "label": "Phone number",
-      "default": "(954) 773-1896",
-      "info": "Shown as written; the call link is built from its digits."
-    },
-    {
-      "type": "header",
-      "content": "Ways to pay"
-    },
-    {
-      "type": "text",
-      "id": "pay_eyebrow",
-      "label": "Eyebrow",
-      "default": "Ways To Pay"
-    },
-    {
-      "type": "text",
-      "id": "pay_title",
-      "label": "Heading",
-      "default": "Four ways an order gets paid for"
-    },
-    {
-      "type": "textarea",
-      "id": "pay_lede",
-      "label": "Supporting copy",
-      "default": "Most customers use the first one. The rest exist because not every order is a card swipe."
-    },
-    {
-      "type": "textarea",
-      "id": "pay_note",
-      "label": "Note under the cards (the phone number is appended)",
-      "default": "We would rather under-promise here than list a payment method that turns out not to work at checkout. If you want to know exactly what is accepted and which financing program is running today, call"
-    },
-    {
-      "type": "header",
-      "content": "Plan shapes"
-    },
-    {
-      "type": "text",
-      "id": "plans_eyebrow",
-      "label": "Eyebrow",
-      "default": "Plan Options"
-    },
-    {
-      "type": "text",
-      "id": "plans_title",
-      "label": "Heading",
-      "default": "Three shapes a plan usually takes"
-    },
-    {
-      "type": "textarea",
-      "id": "plans_lede",
-      "label": "Supporting copy",
-      "default": "These are the kinds of programs financing providers commonly offer for tire and wheel purchases. What you are actually offered depends on the lender and on your application."
-    },
-    {
-      "type": "textarea",
-      "id": "plans_note",
-      "label": "Note under the plans",
-      "default": "We do not quote rates, approval odds or monthly payments on this page, because we do not set them. Ask us what programs are running the day you buy, and read the lender's offer before you accept it."
-    },
-    {
-      "type": "header",
-      "content": "Before you apply"
-    },
-    {
-      "type": "text",
-      "id": "req_eyebrow",
-      "label": "Eyebrow",
-      "default": "Before You Apply"
-    },
-    {
-      "type": "text",
-      "id": "req_title",
-      "label": "Heading",
-      "default": "What you will likely need"
-    },
-    {
-      "type": "textarea",
-      "id": "requirements",
-      "label": "Requirements (one per line)",
-      "default": "A valid, government-issued photo ID\nA Social Security number or ITIN, if the lender asks for one\nProof of a steady income source\nAn active checking account or debit card for payments\nA working phone number and email for the lender's verification step\nTo be at least 18 years old, with a billing address in the United States"
-    },
-    {
-      "type": "textarea",
-      "id": "req_note",
-      "label": "Requirements note",
-      "default": "Requirements come from the financing provider and can differ by program. This list is a general guide, not a checklist we control."
-    },
-    {
-      "type": "header",
-      "content": "How it works"
-    },
-    {
-      "type": "text",
-      "id": "steps_eyebrow",
-      "label": "Eyebrow",
-      "default": "How It Works"
-    },
-    {
-      "type": "text",
-      "id": "steps_title",
-      "label": "Heading",
-      "default": "Four steps, start to finish"
-    },
-    {
-      "type": "header",
-      "content": "Terms in plain language"
-    },
-    {
-      "type": "text",
-      "id": "terms_eyebrow",
-      "label": "Eyebrow",
-      "default": "Terms, In Plain Language"
-    },
-    {
-      "type": "text",
-      "id": "terms_title",
-      "label": "Heading",
-      "default": "The part you should actually read"
-    },
-    {
-      "type": "header",
-      "content": "Request form"
-    },
-    {
-      "type": "text",
-      "id": "apply_eyebrow",
-      "label": "Eyebrow",
-      "default": "Get Started"
-    },
-    {
-      "type": "text",
-      "id": "apply_title",
-      "label": "Heading",
-      "default": "Tell us what you need covered"
-    },
-    {
-      "type": "textarea",
-      "id": "apply_lede",
-      "label": "Supporting copy",
-      "default": "Send this over and we will call you with a real price for the order and whatever financing options are running that week."
-    },
-    {
-      "type": "inline_richtext",
-      "id": "apply_point1",
-      "label": "Point 1",
-      "default": "<strong>No credit check here.</strong> This form does not touch your credit and is not an application."
-    },
-    {
-      "type": "inline_richtext",
-      "id": "apply_point2",
-      "label": "Point 2",
-      "default": "<strong>We talk during business hours.</strong> Sent at night or on Sunday? You will hear from us the next day we are open. Eastern time."
-    },
-    {
-      "type": "inline_richtext",
-      "id": "apply_point3",
-      "label": "Point 3",
-      "default": "<strong>Cards work too.</strong> Financing is an option, never a requirement."
-    },
-    {
-      "type": "text",
-      "id": "form_title",
-      "label": "Form heading",
-      "default": "Start a financing conversation"
-    },
-    {
-      "type": "text",
-      "id": "form_intro",
-      "label": "Form intro",
-      "default": "This goes to us, not to a lender. No credit check happens here. All fields are required."
-    },
-    {
-      "type": "text",
-      "id": "label_name",
-      "label": "Name label",
-      "default": "Full name"
-    },
-    {
-      "type": "text",
-      "id": "ph_name",
-      "label": "Name placeholder",
-      "default": "Alex Moreno"
-    },
-    {
-      "type": "text",
-      "id": "label_phone",
-      "label": "Phone label",
-      "default": "Phone"
-    },
-    {
-      "type": "text",
-      "id": "ph_phone",
-      "label": "Phone placeholder",
-      "default": "(954) 555-0188"
-    },
-    {
-      "type": "text",
-      "id": "label_email",
-      "label": "Email label",
-      "default": "Email"
-    },
-    {
-      "type": "text",
-      "id": "ph_email",
-      "label": "Email placeholder",
-      "default": "you@example.com"
-    },
-    {
-      "type": "text",
-      "id": "label_amount",
-      "label": "Amount label",
-      "default": "Amount needed (USD)"
-    },
-    {
-      "type": "text",
-      "id": "ph_amount",
-      "label": "Amount placeholder",
-      "default": "850"
-    },
-    {
-      "type": "text",
-      "id": "amount_hint",
-      "label": "Amount hint",
-      "default": "A rough estimate is fine — we will quote the real number."
-    },
-    {
-      "type": "text",
-      "id": "submit_label",
-      "label": "Send button",
-      "default": "Send Request"
-    },
-    {
-      "type": "text",
-      "id": "success_title",
-      "label": "Sent: heading",
-      "default": "Request received."
-    },
-    {
-      "type": "textarea",
-      "id": "success_copy",
-      "label": "Sent: copy",
-      "default": "Thanks. Someone will call you during the hours the shop is open, to confirm what you are buying, price it properly, and point you to whichever financing program is running. If you would rather not wait for the call, the number below reaches the same people."
-    },
-    {
-      "type": "textarea",
-      "id": "success_note",
-      "label": "Sent: note",
-      "default": "This is not an application and it is not an approval — it only starts the conversation. Any credit decision is made by a third-party lender under their own terms."
-    },
-    {
-      "type": "text",
-      "id": "success_call_label",
-      "label": "Sent: call button",
-      "default": "Call instead"
-    },
-    {
-      "type": "text",
-      "id": "success_again_label",
-      "label": "Sent: second button",
-      "default": "Start over"
-    },
-    {
-      "type": "text",
-      "id": "error_title",
-      "label": "Not sent: heading",
-      "default": "We could not get that through just now."
-    },
-    {
-      "type": "textarea",
-      "id": "error_copy",
-      "label": "Not sent: copy",
-      "default": "Your request did not go through, so no call is queued. Fix what is marked below and send it again — or call, and whoever answers can price the order and tell you which financing program is running that day."
-    },
-    {
-      "type": "header",
-      "content": "FAQ"
-    },
-    {
-      "type": "text",
-      "id": "faq_eyebrow",
-      "label": "Eyebrow",
-      "default": "FAQ"
-    },
-    {
-      "type": "text",
-      "id": "faq_title",
-      "label": "Heading",
-      "default": "Questions we get on the phone"
-    },
-    {
-      "type": "inline_richtext",
-      "id": "faq_note",
-      "label": "Note under the questions",
-      "default": "Still unsure? <a href=\"/pages/contact\">Send us a message</a> or call"
-    }
+    {"type": "header", "content": "Page header"},
+    {"type": "text", "id": "hero_eyebrow", "label": "Eyebrow", "default": "Financing"},
+    {"type": "text", "id": "hero_title", "label": "Heading", "default": "Tires now. Pay over time."},
+    {"type": "textarea", "id": "hero_lede", "label": "Supporting copy", "default": "Nobody plans for a blown tire in the middle of the month. Here is every way you can pay for an order — including financing, where the terms are set by a third-party lender, not by us."},
+    {"type": "text", "id": "crumb", "label": "Breadcrumb label", "default": "Financing"},
+    {"type": "text", "id": "hero_cta_label", "label": "Button (jumps to the form)", "default": "Start a Request"},
+    {"type": "header", "content": "Contact details"},
+    {"type": "text", "id": "phone", "label": "Phone number", "default": "(954) 773-1896", "info": "Shown as written; the call link is built from its digits."},
+    {"type": "header", "content": "Ways to pay"},
+    {"type": "text", "id": "pay_eyebrow", "label": "Eyebrow", "default": "Ways To Pay"},
+    {"type": "text", "id": "pay_title", "label": "Heading", "default": "Four ways an order gets paid for"},
+    {"type": "textarea", "id": "pay_lede", "label": "Supporting copy", "default": "Most customers use the first one. The rest exist because not every order is a card swipe."},
+    {"type": "textarea", "id": "pay_note", "label": "Note under cards (number appended)", "default": "We would rather under-promise here than list a payment method that turns out not to work at checkout. If you want to know exactly what is accepted and which financing program is running today, call"},
+    {"type": "header", "content": "Plan shapes"},
+    {"type": "text", "id": "plans_eyebrow", "label": "Eyebrow", "default": "Plan Options"},
+    {"type": "text", "id": "plans_title", "label": "Heading", "default": "Three shapes a plan usually takes"},
+    {"type": "textarea", "id": "plans_lede", "label": "Supporting copy", "default": "These are the kinds of programs financing providers commonly offer for tire and wheel purchases. What you are actually offered depends on the lender and on your application."},
+    {"type": "textarea", "id": "plans_note", "label": "Note under the plans", "default": "We do not quote rates, approval odds or monthly payments on this page, because we do not set them. Ask us what programs are running the day you buy, and read the lender's offer before you accept it."},
+    {"type": "header", "content": "Before you apply"},
+    {"type": "text", "id": "req_eyebrow", "label": "Eyebrow", "default": "Before You Apply"},
+    {"type": "text", "id": "req_title", "label": "Heading", "default": "What you will likely need"},
+    {"type": "textarea", "id": "requirements", "label": "Requirements (one per line)", "default": "A valid, government-issued photo ID\nA Social Security number or ITIN, if the lender asks for one\nProof of a steady income source\nAn active checking account or debit card for payments\nA working phone number and email for the lender's verification step\nTo be at least 18 years old, with a billing address in the United States"},
+    {"type": "textarea", "id": "req_note", "label": "Requirements note", "default": "Requirements come from the financing provider and can differ by program. This list is a general guide, not a checklist we control."},
+    {"type": "header", "content": "How it works"},
+    {"type": "text", "id": "steps_eyebrow", "label": "Eyebrow", "default": "How It Works"},
+    {"type": "text", "id": "steps_title", "label": "Heading", "default": "Four steps, start to finish"},
+    {"type": "header", "content": "Terms in plain language"},
+    {"type": "text", "id": "terms_eyebrow", "label": "Eyebrow", "default": "Terms, In Plain Language"},
+    {"type": "text", "id": "terms_title", "label": "Heading", "default": "The part you should actually read"},
+    {"type": "header", "content": "Request form"},
+    {"type": "text", "id": "apply_eyebrow", "label": "Eyebrow", "default": "Get Started"},
+    {"type": "text", "id": "apply_title", "label": "Heading", "default": "Tell us what you need covered"},
+    {"type": "textarea", "id": "apply_lede", "label": "Supporting copy", "default": "Send this over and we will call you with a real price for the order and whatever financing options are running that week."},
+    {"type": "inline_richtext", "id": "apply_point1", "label": "Point 1", "default": "<strong>No credit check here.</strong> This form does not touch your credit and is not an application."},
+    {"type": "inline_richtext", "id": "apply_point2", "label": "Point 2", "default": "<strong>We talk during business hours.</strong> Sent at night or on Sunday? You will hear from us the next day we are open. Eastern time."},
+    {"type": "inline_richtext", "id": "apply_point3", "label": "Point 3", "default": "<strong>Cards work too.</strong> Financing is an option, never a requirement."},
+    {"type": "text", "id": "form_title", "label": "Form heading", "default": "Start a financing conversation"},
+    {"type": "text", "id": "form_intro", "label": "Form intro", "default": "This goes to us, not to a lender. No credit check happens here. All fields are required."},
+    {"type": "text", "id": "label_name", "label": "Name label", "default": "Full name"},
+    {"type": "text", "id": "ph_name", "label": "Name placeholder", "default": "Alex Moreno"},
+    {"type": "text", "id": "label_phone", "label": "Phone label", "default": "Phone"},
+    {"type": "text", "id": "ph_phone", "label": "Phone placeholder", "default": "(954) 555-0188"},
+    {"type": "text", "id": "label_email", "label": "Email label", "default": "Email"},
+    {"type": "text", "id": "ph_email", "label": "Email placeholder", "default": "you@example.com"},
+    {"type": "text", "id": "label_amount", "label": "Amount label", "default": "Amount needed (USD)"},
+    {"type": "text", "id": "ph_amount", "label": "Amount placeholder", "default": "850"},
+    {"type": "text", "id": "amount_hint", "label": "Amount hint", "default": "A rough estimate is fine — we will quote the real number."},
+    {"type": "text", "id": "submit_label", "label": "Send button", "default": "Send Request"},
+    {"type": "text", "id": "success_title", "label": "Sent: heading", "default": "Request received."},
+    {"type": "textarea", "id": "success_copy", "label": "Sent: copy", "default": "Thanks. Someone will call you during the hours the shop is open, to confirm what you are buying, price it properly, and point you to whichever financing program is running. If you would rather not wait for the call, the number below reaches the same people."},
+    {"type": "textarea", "id": "success_note", "label": "Sent: note", "default": "This is not an application and it is not an approval — it only starts the conversation. Any credit decision is made by a third-party lender under their own terms."},
+    {"type": "text", "id": "success_call_label", "label": "Sent: call button", "default": "Call instead"},
+    {"type": "text", "id": "success_again_label", "label": "Sent: second button", "default": "Start over"},
+    {"type": "text", "id": "error_title", "label": "Not sent: heading", "default": "We could not get that through just now."},
+    {"type": "textarea", "id": "error_copy", "label": "Not sent: copy", "default": "Your request did not go through, so no call is queued. Fix what is marked below and send it again — or call, and whoever answers can price the order and tell you which financing program is running that day."},
+    {"type": "header", "content": "FAQ"},
+    {"type": "text", "id": "faq_eyebrow", "label": "Eyebrow", "default": "FAQ"},
+    {"type": "text", "id": "faq_title", "label": "Heading", "default": "Questions we get on the phone"},
+    {"type": "inline_richtext", "id": "faq_note", "label": "Note under the questions", "default": "Still unsure? <a href=\"/pages/contact\">Send us a message</a> or call"}
   ],
   "max_blocks": 50,
   "blocks": [
-    {
-      "type": "method",
-      "name": "Way to pay",
-      "settings": [
-        {
-          "type": "select",
-          "id": "icon",
-          "label": "Icon",
-          "options": [
-            {
-              "value": "credit-card",
-              "label": "Card"
-            },
-            {
-              "value": "wallet",
-              "label": "Wallet"
-            },
-            {
-              "value": "store",
-              "label": "Store"
-            },
-            {
-              "value": "truck",
-              "label": "Truck"
-            },
-            {
-              "value": "phone",
-              "label": "Phone"
-            },
-            {
-              "value": "file-text",
-              "label": "Document"
-            }
-          ],
-          "default": "credit-card"
-        },
-        {
-          "type": "text",
-          "id": "title",
-          "label": "Title"
-        },
-        {
-          "type": "textarea",
-          "id": "copy",
-          "label": "Copy"
-        }
-      ]
-    },
-    {
-      "type": "plan",
-      "name": "Plan shape",
-      "settings": [
-        {
-          "type": "text",
-          "id": "name",
-          "label": "Name"
-        },
-        {
-          "type": "text",
-          "id": "tag",
-          "label": "Badge"
-        },
-        {
-          "type": "checkbox",
-          "id": "highlight",
-          "label": "Highlight this plan",
-          "default": false
-        },
-        {
-          "type": "textarea",
-          "id": "summary",
-          "label": "Summary"
-        },
-        {
-          "type": "textarea",
-          "id": "points",
-          "label": "Points (one per line)"
-        },
-        {
-          "type": "textarea",
-          "id": "note",
-          "label": "Footnote"
-        }
-      ]
-    },
-    {
-      "type": "step",
-      "name": "Step",
-      "settings": [
-        {
-          "type": "text",
-          "id": "title",
-          "label": "Title"
-        },
-        {
-          "type": "textarea",
-          "id": "copy",
-          "label": "Copy"
-        }
-      ]
-    },
-    {
-      "type": "term",
-      "name": "Plain-language term",
-      "settings": [
-        {
-          "type": "text",
-          "id": "lead",
-          "label": "Lead-in (bold)"
-        },
-        {
-          "type": "inline_richtext",
-          "id": "copy",
-          "label": "Copy"
-        }
-      ]
-    },
-    {
-      "type": "faq",
-      "name": "Question",
-      "settings": [
-        {
-          "type": "text",
-          "id": "q",
-          "label": "Question"
-        },
-        {
-          "type": "textarea",
-          "id": "a",
-          "label": "Answer"
-        }
-      ]
-    }
+    { "type": "method", "name": "Way to pay", "settings": [
+      {"type": "select", "id": "icon", "label": "Icon", "options": [{"value": "credit-card", "label": "Card"}, {"value": "wallet", "label": "Wallet"}, {"value": "store", "label": "Store"}, {"value": "truck", "label": "Truck"}, {"value": "phone", "label": "Phone"}, {"value": "file-text", "label": "Document"}], "default": "credit-card"},
+      {"type": "text", "id": "title", "label": "Title"},
+      {"type": "textarea", "id": "copy", "label": "Copy"}
+    ] },
+    { "type": "plan", "name": "Plan shape", "settings": [
+      {"type": "text", "id": "name", "label": "Name"},
+      {"type": "text", "id": "tag", "label": "Badge"},
+      {"type": "checkbox", "id": "highlight", "label": "Highlight this plan", "default": false},
+      {"type": "textarea", "id": "summary", "label": "Summary"},
+      {"type": "textarea", "id": "points", "label": "Points (one per line)"},
+      {"type": "textarea", "id": "note", "label": "Footnote"}
+    ] },
+    { "type": "step", "name": "Step", "settings": [
+      {"type": "text", "id": "title", "label": "Title"},
+      {"type": "textarea", "id": "copy", "label": "Copy"}
+    ] },
+    { "type": "term", "name": "Plain-language term", "settings": [
+      {"type": "text", "id": "lead", "label": "Lead-in (bold)"},
+      {"type": "inline_richtext", "id": "copy", "label": "Copy"}
+    ] },
+    { "type": "faq", "name": "Question", "settings": [
+      {"type": "text", "id": "q", "label": "Question"},
+      {"type": "textarea", "id": "a", "label": "Answer"}
+    ] }
   ]
 }
 {% endschema %}

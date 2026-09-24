@@ -471,392 +471,76 @@
   "name": "TireDrop page: Contact",
   "tag": "div",
   "settings": [
-    {
-      "type": "header",
-      "content": "Page header"
-    },
-    {
-      "type": "text",
-      "id": "hero_eyebrow",
-      "label": "Eyebrow",
-      "default": "Contact"
-    },
-    {
-      "type": "text",
-      "id": "hero_title",
-      "label": "Heading",
-      "default": "Talk to a person who actually works here"
-    },
-    {
-      "type": "textarea",
-      "id": "hero_lede",
-      "label": "Supporting copy",
-      "default": "Orders, shipping, returns, fitment, an install appointment or a fleet — wherever you are in the continental United States, it is the same phone and the same people."
-    },
-    {
-      "type": "text",
-      "id": "crumb",
-      "label": "Breadcrumb label",
-      "default": "Contact Us"
-    },
-    {
-      "type": "text",
-      "id": "hero_call_label",
-      "label": "Call button (the number is appended)",
-      "default": "Call"
-    },
-    {
-      "type": "header",
-      "content": "Contact details"
-    },
-    {
-      "type": "text",
-      "id": "phone",
-      "label": "Phone number",
-      "default": "(954) 773-1896",
-      "info": "Shown as written; the call link is built from its digits."
-    },
-    {
-      "type": "text",
-      "id": "email",
-      "label": "Email address",
-      "default": "info@tiredroponline.com"
-    },
-    {
-      "type": "text",
-      "id": "street",
-      "label": "Street",
-      "default": "7712 West Oakland Park Blvd"
-    },
-    {
-      "type": "text",
-      "id": "city_line",
-      "label": "City, state, ZIP",
-      "default": "Sunrise, FL 33351"
-    },
-    {
-      "type": "text",
-      "id": "maps_url",
-      "label": "Directions link (Google Maps)",
-      "default": "https://www.google.com/maps/search/?api=1&query=7712+West+Oakland+Park+Blvd+Sunrise+FL+33351"
-    },
-    {
-      "type": "header",
-      "content": "Reach us"
-    },
-    {
-      "type": "text",
-      "id": "reach_eyebrow",
-      "label": "Eyebrow",
-      "default": "Reach Us"
-    },
-    {
-      "type": "text",
-      "id": "reach_title",
-      "label": "Heading",
-      "default": "Two ways to get an answer"
-    },
-    {
-      "type": "textarea",
-      "id": "reach_lede",
-      "label": "Supporting copy",
-      "default": "TireDrop is the online store of Extreme Tires, 7712 West Oakland Park Blvd, Sunrise, FL 33351. One phone number, one shop, one set of people — whether you are ordering from Florida or from three states away."
-    },
-    {
-      "type": "text",
-      "id": "fast_title",
-      "label": "Fastest-way card: heading",
-      "default": "Fastest way to reach us"
-    },
-    {
-      "type": "textarea",
-      "id": "fast_copy",
-      "label": "Fastest-way card: copy",
-      "default": "Call. If an order has already been placed, if you are sitting on a flat, or you need something changed before it ships, the phone beats the form every time — the person who answers can pull the order up while you are talking."
-    },
-    {
-      "type": "text",
-      "id": "phone_title",
-      "label": "Phone card: heading",
-      "default": "By phone"
-    },
-    {
-      "type": "textarea",
-      "id": "phone_copy",
-      "label": "Phone card: copy",
-      "default": "Order status, shipping questions, returns, fitment advice, install appointments and fleet accounts."
-    },
-    {
-      "type": "textarea",
-      "id": "phone_note",
-      "label": "Phone card: note",
-      "default": "The phone is the channel that reaches a person fastest, and the form below reaches the same people."
-    },
-    {
-      "type": "text",
-      "id": "email_title",
-      "label": "Email card: heading",
-      "default": "By email"
-    },
-    {
-      "type": "textarea",
-      "id": "email_copy",
-      "label": "Email card: copy",
-      "default": "One address for everything — orders, returns, fleet quotes and dealer paperwork. Include an order number if you have one. If it cannot wait, call instead."
-    },
-    {
-      "type": "text",
-      "id": "shop_title",
-      "label": "Shop card: heading",
-      "default": "At the shop"
-    },
-    {
-      "type": "textarea",
-      "id": "shop_copy",
-      "label": "Shop card: copy",
-      "default": "Extreme Tires, the shop behind TireDrop — for pickups, installs and anything easier to explain in person."
-    },
-    {
-      "type": "text",
-      "id": "directions_label",
-      "label": "Shop card: directions button",
-      "default": "Directions"
-    },
-    {
-      "type": "text",
-      "id": "shop_link_label",
-      "label": "Shop card: second button",
-      "default": "The shop & install area"
-    },
-    {
-      "type": "url",
-      "id": "shop_link",
-      "label": "Shop card: second button link"
-    },
-    {
-      "type": "text",
-      "id": "hours_title",
-      "label": "Hours card: heading",
-      "default": "Hours"
-    },
-    {
-      "type": "textarea",
-      "id": "hours_note",
-      "label": "Hours card: note",
-      "default": "Eastern time. The store takes orders around the clock; people answer during the hours above."
-    },
-    {
-      "type": "header",
-      "content": "Message form"
-    },
-    {
-      "type": "text",
-      "id": "message_eyebrow",
-      "label": "Eyebrow",
-      "default": "Message Us"
-    },
-    {
-      "type": "text",
-      "id": "message_title",
-      "label": "Heading",
-      "default": "Not urgent? Write it down."
-    },
-    {
-      "type": "textarea",
-      "id": "message_lede",
-      "label": "Supporting copy",
-      "default": "Include an order number if you have one. Messages sent outside business hours get picked up the next morning we are open. If it is urgent, call instead — the form is not monitored around the clock."
-    },
-    {
-      "type": "text",
-      "id": "form_title",
-      "label": "Form heading",
-      "default": "Send us a message"
-    },
-    {
-      "type": "text",
-      "id": "form_intro",
-      "label": "Form intro",
-      "default": "Fields marked with an asterisk are required."
-    },
-    {
-      "type": "text",
-      "id": "label_name",
-      "label": "Name label",
-      "default": "Full name *"
-    },
-    {
-      "type": "text",
-      "id": "ph_name",
-      "label": "Name placeholder",
-      "default": "Alex Moreno"
-    },
-    {
-      "type": "text",
-      "id": "label_phone",
-      "label": "Phone label",
-      "default": "Phone *"
-    },
-    {
-      "type": "text",
-      "id": "ph_phone",
-      "label": "Phone placeholder",
-      "default": "(954) 555-0188"
-    },
-    {
-      "type": "text",
-      "id": "label_email",
-      "label": "Email label",
-      "default": "Email *"
-    },
-    {
-      "type": "text",
-      "id": "ph_email",
-      "label": "Email placeholder",
-      "default": "you@example.com"
-    },
-    {
-      "type": "text",
-      "id": "label_subject",
-      "label": "Topic label",
-      "default": "What is this about? *"
-    },
-    {
-      "type": "textarea",
-      "id": "subjects",
-      "label": "Topics (one per line)",
-      "default": "Order Question\nShipping & Delivery\nReturns & Warranty\nBook an Install\nCommercial & Fleet\nSomething Else"
-    },
-    {
-      "type": "text",
-      "id": "label_message",
-      "label": "Message label",
-      "default": "Message *"
-    },
-    {
-      "type": "textarea",
-      "id": "ph_message",
-      "label": "Message placeholder",
-      "default": "Order number if you have one. Otherwise: year, make and model, tire size, and whether you want it shipped to you or to the shop."
-    },
-    {
-      "type": "text",
-      "id": "submit_label",
-      "label": "Send button",
-      "default": "Send Message"
-    },
-    {
-      "type": "inline_richtext",
-      "id": "privacy_note",
-      "label": "Privacy note",
-      "default": "We use what you send here to answer your question and nothing else. It is not added to a mailing list — there isn't one — and it is not passed to anyone outside the shop. See our <a href=\"/pages/privacy\">privacy policy</a>."
-    },
-    {
-      "type": "text",
-      "id": "success_title",
-      "label": "Sent: heading",
-      "default": "Message received."
-    },
-    {
-      "type": "textarea",
-      "id": "success_copy",
-      "label": "Sent: copy",
-      "default": "Thanks for reaching out. A real person reads these during the hours listed on this page, and will reply by email or phone. We do not put a clock on that, because we would rather answer properly than answer fast."
-    },
-    {
-      "type": "textarea",
-      "id": "success_urgent",
-      "label": "Sent: urgent note (the phone number is appended)",
-      "default": "If the car is down right now, or your order needs changing before it ships, do not wait on the reply — the phone is the only channel we treat as urgent. Call"
-    },
-    {
-      "type": "text",
-      "id": "success_call_label",
-      "label": "Sent: call button",
-      "default": "Call the shop"
-    },
-    {
-      "type": "text",
-      "id": "success_again_label",
-      "label": "Sent: second button",
-      "default": "Send another message"
-    },
-    {
-      "type": "text",
-      "id": "error_title",
-      "label": "Not sent: heading",
-      "default": "We could not get that through just now."
-    },
-    {
-      "type": "textarea",
-      "id": "error_copy",
-      "label": "Not sent: copy",
-      "default": "Your message did not go through, so nobody here has read it yet. Fix what is marked below and send it again — or call, and the person who answers can help straight away."
-    },
-    {
-      "type": "header",
-      "content": "Closing band"
-    },
-    {
-      "type": "text",
-      "id": "cta_eyebrow",
-      "label": "Eyebrow",
-      "default": "Before you write"
-    },
-    {
-      "type": "text",
-      "id": "cta_title",
-      "label": "Heading",
-      "default": "A lot of it is already answered"
-    },
-    {
-      "type": "textarea",
-      "id": "cta_lede",
-      "label": "Supporting copy",
-      "default": "How shipping works, what ship-to-store costs, and what happens if a tire shows up wrong — all written out, no hold music."
-    },
-    {
-      "type": "text",
-      "id": "cta1_label",
-      "label": "First button",
-      "default": "Shipping & Returns"
-    },
-    {
-      "type": "url",
-      "id": "cta1_link",
-      "label": "First button link"
-    },
-    {
-      "type": "text",
-      "id": "cta2_label",
-      "label": "Second button",
-      "default": "Book an Install"
-    },
-    {
-      "type": "url",
-      "id": "cta2_link",
-      "label": "Second button link"
-    }
+    {"type": "header", "content": "Page header"},
+    {"type": "text", "id": "hero_eyebrow", "label": "Eyebrow", "default": "Contact"},
+    {"type": "text", "id": "hero_title", "label": "Heading", "default": "Talk to a person who actually works here"},
+    {"type": "textarea", "id": "hero_lede", "label": "Supporting copy", "default": "Orders, shipping, returns, fitment, an install appointment or a fleet — wherever you are in the continental United States, it is the same phone and the same people."},
+    {"type": "text", "id": "crumb", "label": "Breadcrumb label", "default": "Contact Us"},
+    {"type": "text", "id": "hero_call_label", "label": "Call button (the number is appended)", "default": "Call"},
+    {"type": "header", "content": "Contact details"},
+    {"type": "text", "id": "phone", "label": "Phone number", "default": "(954) 773-1896", "info": "Shown as written; the call link is built from its digits."},
+    {"type": "text", "id": "email", "label": "Email address", "default": "info@tiredroponline.com"},
+    {"type": "text", "id": "street", "label": "Street", "default": "7712 West Oakland Park Blvd"},
+    {"type": "text", "id": "city_line", "label": "City, state, ZIP", "default": "Sunrise, FL 33351"},
+    {"type": "text", "id": "maps_url", "label": "Directions link (Google Maps)", "default": "https://www.google.com/maps/search/?api=1&query=7712+West+Oakland+Park+Blvd+Sunrise+FL+33351"},
+    {"type": "header", "content": "Reach us"},
+    {"type": "text", "id": "reach_eyebrow", "label": "Eyebrow", "default": "Reach Us"},
+    {"type": "text", "id": "reach_title", "label": "Heading", "default": "Two ways to get an answer"},
+    {"type": "textarea", "id": "reach_lede", "label": "Supporting copy", "default": "TireDrop is the online store of Extreme Tires, 7712 West Oakland Park Blvd, Sunrise, FL 33351. One phone number, one shop, one set of people — whether you are ordering from Florida or from three states away."},
+    {"type": "text", "id": "fast_title", "label": "Fastest-way card: heading", "default": "Fastest way to reach us"},
+    {"type": "textarea", "id": "fast_copy", "label": "Fastest-way card: copy", "default": "Call. If an order has already been placed, if you are sitting on a flat, or you need something changed before it ships, the phone beats the form every time — the person who answers can pull the order up while you are talking."},
+    {"type": "text", "id": "phone_title", "label": "Phone card: heading", "default": "By phone"},
+    {"type": "textarea", "id": "phone_copy", "label": "Phone card: copy", "default": "Order status, shipping questions, returns, fitment advice, install appointments and fleet accounts."},
+    {"type": "textarea", "id": "phone_note", "label": "Phone card: note", "default": "The phone is the channel that reaches a person fastest, and the form below reaches the same people."},
+    {"type": "text", "id": "email_title", "label": "Email card: heading", "default": "By email"},
+    {"type": "textarea", "id": "email_copy", "label": "Email card: copy", "default": "One address for everything — orders, returns, fleet quotes and dealer paperwork. Include an order number if you have one. If it cannot wait, call instead."},
+    {"type": "text", "id": "shop_title", "label": "Shop card: heading", "default": "At the shop"},
+    {"type": "textarea", "id": "shop_copy", "label": "Shop card: copy", "default": "Extreme Tires, the shop behind TireDrop — for pickups, installs and anything easier to explain in person."},
+    {"type": "text", "id": "directions_label", "label": "Shop card: directions button", "default": "Directions"},
+    {"type": "text", "id": "shop_link_label", "label": "Shop card: second button", "default": "The shop & install area"},
+    {"type": "url", "id": "shop_link", "label": "Shop card: second button link"},
+    {"type": "text", "id": "hours_title", "label": "Hours card: heading", "default": "Hours"},
+    {"type": "textarea", "id": "hours_note", "label": "Hours card: note", "default": "Eastern time. The store takes orders around the clock; people answer during the hours above."},
+    {"type": "header", "content": "Message form"},
+    {"type": "text", "id": "message_eyebrow", "label": "Eyebrow", "default": "Message Us"},
+    {"type": "text", "id": "message_title", "label": "Heading", "default": "Not urgent? Write it down."},
+    {"type": "textarea", "id": "message_lede", "label": "Supporting copy", "default": "Include an order number if you have one. Messages sent outside business hours get picked up the next morning we are open. If it is urgent, call instead — the form is not monitored around the clock."},
+    {"type": "text", "id": "form_title", "label": "Form heading", "default": "Send us a message"},
+    {"type": "text", "id": "form_intro", "label": "Form intro", "default": "Fields marked with an asterisk are required."},
+    {"type": "text", "id": "label_name", "label": "Name label", "default": "Full name *"},
+    {"type": "text", "id": "ph_name", "label": "Name placeholder", "default": "Alex Moreno"},
+    {"type": "text", "id": "label_phone", "label": "Phone label", "default": "Phone *"},
+    {"type": "text", "id": "ph_phone", "label": "Phone placeholder", "default": "(954) 555-0188"},
+    {"type": "text", "id": "label_email", "label": "Email label", "default": "Email *"},
+    {"type": "text", "id": "ph_email", "label": "Email placeholder", "default": "you@example.com"},
+    {"type": "text", "id": "label_subject", "label": "Topic label", "default": "What is this about? *"},
+    {"type": "textarea", "id": "subjects", "label": "Topics (one per line)", "default": "Order Question\nShipping & Delivery\nReturns & Warranty\nBook an Install\nCommercial & Fleet\nSomething Else"},
+    {"type": "text", "id": "label_message", "label": "Message label", "default": "Message *"},
+    {"type": "textarea", "id": "ph_message", "label": "Message placeholder", "default": "Order number if you have one. Otherwise: year, make and model, tire size, and whether you want it shipped to you or to the shop."},
+    {"type": "text", "id": "submit_label", "label": "Send button", "default": "Send Message"},
+    {"type": "inline_richtext", "id": "privacy_note", "label": "Privacy note", "default": "We use what you send here to answer your question and nothing else. It is not added to a mailing list — there isn't one — and it is not passed to anyone outside the shop. See our <a href=\"/pages/privacy\">privacy policy</a>."},
+    {"type": "text", "id": "success_title", "label": "Sent: heading", "default": "Message received."},
+    {"type": "textarea", "id": "success_copy", "label": "Sent: copy", "default": "Thanks for reaching out. A real person reads these during the hours listed on this page, and will reply by email or phone. We do not put a clock on that, because we would rather answer properly than answer fast."},
+    {"type": "textarea", "id": "success_urgent", "label": "Sent: urgent note (number appended)", "default": "If the car is down right now, or your order needs changing before it ships, do not wait on the reply — the phone is the only channel we treat as urgent. Call"},
+    {"type": "text", "id": "success_call_label", "label": "Sent: call button", "default": "Call the shop"},
+    {"type": "text", "id": "success_again_label", "label": "Sent: second button", "default": "Send another message"},
+    {"type": "text", "id": "error_title", "label": "Not sent: heading", "default": "We could not get that through just now."},
+    {"type": "textarea", "id": "error_copy", "label": "Not sent: copy", "default": "Your message did not go through, so nobody here has read it yet. Fix what is marked below and send it again — or call, and the person who answers can help straight away."},
+    {"type": "header", "content": "Closing band"},
+    {"type": "text", "id": "cta_eyebrow", "label": "Eyebrow", "default": "Before you write"},
+    {"type": "text", "id": "cta_title", "label": "Heading", "default": "A lot of it is already answered"},
+    {"type": "textarea", "id": "cta_lede", "label": "Supporting copy", "default": "How shipping works, what ship-to-store costs, and what happens if a tire shows up wrong — all written out, no hold music."},
+    {"type": "text", "id": "cta1_label", "label": "First button", "default": "Shipping & Returns"},
+    {"type": "url", "id": "cta1_link", "label": "First button link"},
+    {"type": "text", "id": "cta2_label", "label": "Second button", "default": "Book an Install"},
+    {"type": "url", "id": "cta2_link", "label": "Second button link"}
   ],
   "max_blocks": 50,
   "blocks": [
-    {
-      "type": "hours",
-      "name": "Hours row",
-      "settings": [
-        {
-          "type": "text",
-          "id": "days",
-          "label": "Days"
-        },
-        {
-          "type": "text",
-          "id": "time",
-          "label": "Hours",
-          "info": "Write Closed for a closed day."
-        }
-      ]
-    }
+    { "type": "hours", "name": "Hours row", "settings": [
+      {"type": "text", "id": "days", "label": "Days"},
+      {"type": "text", "id": "time", "label": "Hours", "info": "Write Closed for a closed day."}
+    ] }
   ]
 }
 {% endschema %}
