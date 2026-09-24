@@ -433,12 +433,10 @@ the checkout page, and the order confirmation.
 17. **Is the business family-owned?** Three references to "family" were changed
     to "independent" because nothing on record confirms it. Say the word and
     they go back.
-18. **The team page names five people** — Luis (Founder & Owner), Yani, Keisha,
-    Marco, Andre — with roles and biographies. Nobody on the build side can
-    verify these. **Confirm each name and role, or replace them.** This matters
-    more than it looks: a distributor reviewer may compare the owner named on
-    the website against the name on the dealer application, and a mismatch is a
-    bad look at exactly the wrong moment.
+18. **Resolved — no personal names on the site.** The team section and every
+    staff, reviewer and sample name were removed from both the React site and
+    the Shopify theme at the owner's request. If names are added back later,
+    they must match the dealer application exactly.
 19. **"A fleet of vans"** — both About and Locations say vans, plural, and a
     stat counts ten towns covered. Confirm the real number of mobile units.
 20. **Founding year 2007** — confirm; every "years in business" figure on the

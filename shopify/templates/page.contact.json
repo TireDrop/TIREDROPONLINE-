@@ -35,7 +35,7 @@
         "form_title": "Send us a message",
         "form_intro": "Fields marked with an asterisk are required.",
         "label_name": "Full name *",
-        "ph_name": "Alex Moreno",
+        "ph_name": "First and last name",
         "label_phone": "Phone *",
         "ph_phone": "(954) 555-0188",
         "label_email": "Email *",
