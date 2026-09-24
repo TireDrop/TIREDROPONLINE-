@@ -1,99 +1,36 @@
 {% comment %}
   TireDrop footer, replacing Horizon's `footer` + `footer-utilities` pair.
-  Modelled on the React footer (src/components/layout/Footer.jsx): ink band
-  with a light-source wash, amber column headings, muted links that brighten
-  on hover, and a hairline-divided bottom bar.
+  A port of the React footer (src/components/layout/Footer.jsx), structure
+  and all: link columns on a 1 / 2 / 4 column grid, "The Shop Behind Us"
+  contact block after them, then a bottom bar with the logo and copyright on
+  the left and the legal links on the right. React's tire-brand strip is
+  deliberately left out: naming brands implies stock, and the catalog is
+  empty until the distributor feed is connected.
 
   The root is a <div>, not a <footer>: layout/theme.liquid already wraps the
   whole footer group in <footer>, and a footer nested in a footer is invalid
   HTML (and would announce a second contentinfo landmark).
 
-  Menu columns are blocks so they can be reordered in the editor. A column
-  whose menu is missing or empty is skipped rather than rendered as a heading
-  over nothing.
+  Link columns are `menu` blocks so they can be reordered in the editor. A
+  column whose menu is missing or empty is skipped rather than rendered as a
+  heading over nothing. The legal links are a menu too (section setting).
 
-  Below 768px each column is a <details> disclosure. From 768px the columns
-  sit side by side and are always open: the script below sets `open` and
-  takes the summary out of the tab order, and ::details-content keeps a
-  closed <details> readable if the script never runs.
+  The lists are open at every width, as on React. On phones each link gets a
+  44px row so it is comfortable to tap, which makes the lists taller there
+  than React's 32px rhythm.
 {% endcomment %}
 
 {%- liquid
   assign logo = section.settings.logo | default: settings.logo
   assign phone_digits = section.settings.phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
-  assign address_full = section.settings.address_line_1 | append: ', ' | append: section.settings.address_line_2
+  assign address_query = section.settings.address_line_1 | append: ', ' | append: section.settings.address_line_2
+  assign legal_handle = section.settings.legal_menu.handle | default: section.settings.legal_menu
+  assign legal = linklists[legal_handle]
 -%}
 
 <div class="td-ft" id="td-ft-{{ section.id }}">
   <div class="td-ft-inner">
-    <div class="td-ft-top">
-      <div class="td-ft-brand">
-        <a class="td-ft-brand__home" href="{{ routes.root_url }}">
-          {%- if logo != blank -%}
-            {{
-              logo
-              | image_url: width: 320
-              | image_tag:
-                widths: '160, 240, 320',
-                sizes: '160px',
-                loading: 'lazy',
-                alt: shop.name,
-                class: 'td-ft-brand__logo'
-            }}
-          {%- else -%}
-            <span class="td-ft-brand__wordmark">{{ shop.name | default: 'TireDrop' }}</span>
-          {%- endif -%}
-        </a>
-        <p class="td-ft-brand__parent">Powered by <span>Extreme Tires</span></p>
-        {%- if section.settings.brand_copy != blank -%}
-          <p class="td-ft-brand__copy">{{ section.settings.brand_copy }}</p>
-        {%- endif -%}
-      </div>
-
-      <address class="td-ft-contact">
-        <ul class="td-ft-contact__list">
-          {%- if section.settings.phone != blank -%}
-            <li class="td-ft-contact__item">
-              <p class="td-ft-label">Phone</p>
-              <a class="td-ft-contact__link td-ft-contact__link--phone" href="tel:+1{{ phone_digits }}">
-                <svg aria-hidden="true" focusable="false" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                <span>{{ section.settings.phone }}</span>
-              </a>
-            </li>
-          {%- endif -%}
-          {%- if section.settings.email != blank -%}
-            <li class="td-ft-contact__item">
-              <p class="td-ft-label">Email</p>
-              <a class="td-ft-contact__link td-ft-contact__link--email" href="mailto:{{ section.settings.email }}">
-                <svg aria-hidden="true" focusable="false" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                <span class="td-ft-contact__email">{{ section.settings.email }}</span>
-              </a>
-            </li>
-          {%- endif -%}
-          {%- if section.settings.address_line_1 != blank -%}
-            <li class="td-ft-contact__item">
-              <p class="td-ft-label">{{ section.settings.address_label }}</p>
-              <a
-                class="td-ft-contact__link td-ft-contact__link--address"
-                href="https://www.google.com/maps/search/?api=1&amp;query={{ address_full | url_encode }}"
-                target="_blank"
-                rel="noopener"
-              >
-                <svg aria-hidden="true" focusable="false" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span>
-                  {{- section.settings.address_line_1 -}}
-                  <br>
-                  {{- section.settings.address_line_2 -}}
-                  <span class="td-ft-sr"> (opens Google Maps in a new tab)</span>
-                </span>
-              </a>
-            </li>
-          {%- endif -%}
-        </ul>
-      </address>
-    </div>
-
-    <div class="td-ft-cols">
+    <div class="td-ft-grid">
       {%- for block in section.blocks -%}
         {%- liquid
           assign menu_handle = block.settings.menu.handle | default: block.settings.menu
@@ -101,301 +38,271 @@
           assign heading = block.settings.heading | default: menu.title
         -%}
         {%- if menu.links.size > 0 -%}
-          <nav class="td-ft-col" aria-label="{{ heading | escape }}" {{ block.shopify_attributes }}>
-            <details class="td-ft-col__details">
-              <summary class="td-ft-col__summary">
-                <span class="td-ft-col__title">{{ heading }}</span>
-                <svg class="td-ft-col__chev" aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-              </summary>
-              <ul class="td-ft-col__list">
-                {%- for link in menu.links -%}
-                  <li>
-                    <a class="td-ft-link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
-                      {{- link.title -}}
-                    </a>
-                  </li>
-                {%- endfor -%}
-              </ul>
-            </details>
+          <nav class="td-ft-col" aria-labelledby="td-ft-h-{{ block.id }}" {{ block.shopify_attributes }}>
+            <h2 class="td-ft-heading" id="td-ft-h-{{ block.id }}">{{ heading }}</h2>
+            <ul class="td-ft-links">
+              {%- for link in menu.links -%}
+                <li>
+                  <a class="td-ft-link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
+                    {{- link.title -}}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
           </nav>
         {%- endif -%}
       {%- endfor -%}
+
+      <div class="td-ft-col td-ft-shop">
+        {%- if section.settings.contact_heading != blank -%}
+          <h2 class="td-ft-heading">{{ section.settings.contact_heading }}</h2>
+        {%- endif -%}
+        <ul class="td-ft-shop__list">
+          {%- if section.settings.phone != blank -%}
+            <li>
+              <p class="td-ft-label">Phone Number</p>
+              <a class="td-ft-strong td-ft-strong--lg" href="tel:+1{{ phone_digits }}">
+                <svg aria-hidden="true" focusable="false" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                {{ section.settings.phone }}
+              </a>
+            </li>
+          {%- endif -%}
+
+          {%- if section.settings.email != blank -%}
+            <li>
+              <p class="td-ft-label">Email</p>
+              <a class="td-ft-strong" href="mailto:{{ section.settings.email }}">
+                <svg aria-hidden="true" focusable="false" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                <span class="td-ft-strong__email">{{ section.settings.email }}</span>
+              </a>
+            </li>
+          {%- endif -%}
+
+          {%- if section.settings.address_line_1 != blank -%}
+            <li>
+              <p class="td-ft-label">Ship to store &amp; install</p>
+              <a
+                class="td-ft-address"
+                href="https://www.google.com/maps/search/?api=1&amp;query={{ address_query | url_encode }}"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <svg aria-hidden="true" focusable="false" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>
+                  {%- if section.settings.shop_name != blank -%}
+                    {{- section.settings.shop_name -}}<br>
+                  {%- endif -%}
+                  {{- section.settings.address_line_1 -}}<br>
+                  {{- section.settings.address_line_2 -}}
+                  <span class="td-ft-sr"> (opens Google Maps in a new tab)</span>
+                </span>
+              </a>
+            </li>
+          {%- endif -%}
+
+          {%- capture hours_rows -%}
+            {%- for i in (1..4) -%}
+              {%- liquid
+                assign days_key = 'hours_' | append: i | append: '_days'
+                assign time_key = 'hours_' | append: i | append: '_time'
+                assign days = section.settings[days_key]
+                assign time = section.settings[time_key]
+              -%}
+              {%- if days != blank -%}
+                <li class="td-ft-hours__row">
+                  <svg aria-hidden="true" focusable="false" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span><span class="td-ft-hours__days">{{ days }}:</span> {{ time }}</span>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endcapture -%}
+          {%- if hours_rows != blank -%}
+            <li>
+              <p class="td-ft-label">Shop Hours</p>
+              <ul class="td-ft-hours">{{ hours_rows }}</ul>
+            </li>
+          {%- endif -%}
+
+          {%- if section.settings.facebook_url != blank -%}
+            <li>
+              <p class="td-ft-label td-ft-label--socials">Socials</p>
+              <a
+                class="td-ft-social"
+                href="{{ section.settings.facebook_url }}"
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label="TireDrop on Facebook"
+              >
+                <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+              </a>
+            </li>
+          {%- endif -%}
+        </ul>
+      </div>
     </div>
   </div>
 
   <div class="td-ft-bar">
     <div class="td-ft-bar__inner">
-      <p class="td-ft-bar__copy">
-        &copy; {{ 'now' | date: '%Y' }} TireDrop &middot; Powered by Extreme Tires
-      </p>
+      <div class="td-ft-bar__brand">
+        <a class="td-ft-bar__home" href="{{ routes.root_url }}">
+          {%- if logo != blank -%}
+            {{
+              logo
+              | image_url: width: 192
+              | image_tag:
+                widths: '96, 144, 192',
+                sizes: '64px',
+                loading: 'lazy',
+                alt: 'TireDrop home',
+                class: 'td-ft-bar__logo'
+            }}
+          {%- else -%}
+            <span class="td-ft-bar__wordmark">TireDrop</span>
+          {%- endif -%}
+        </a>
+        <p>&copy; {{ 'now' | date: '%Y' }} TireDrop &middot; Powered by Extreme Tires</p>
+      </div>
 
-      {%- liquid
-        assign has_policies = false
-        if shop.privacy_policy or shop.refund_policy or shop.shipping_policy or shop.terms_of_service
-          assign has_policies = true
-        endif
-      -%}
-      {%- if has_policies -%}
-        <nav class="td-ft-bar__policies" aria-label="Store policies">
-          <ul class="td-ft-bar__list">
-            {%- if shop.privacy_policy -%}
-              <li><a class="td-ft-bar__link" href="{{ shop.privacy_policy.url }}">{{ shop.privacy_policy.title }}</a></li>
-            {%- endif -%}
-            {%- if shop.refund_policy -%}
-              <li><a class="td-ft-bar__link" href="{{ shop.refund_policy.url }}">{{ shop.refund_policy.title }}</a></li>
-            {%- endif -%}
-            {%- if shop.shipping_policy -%}
-              <li><a class="td-ft-bar__link" href="{{ shop.shipping_policy.url }}">{{ shop.shipping_policy.title }}</a></li>
-            {%- endif -%}
-            {%- if shop.terms_of_service -%}
-              <li><a class="td-ft-bar__link" href="{{ shop.terms_of_service.url }}">{{ shop.terms_of_service.title }}</a></li>
-            {%- endif -%}
+      {%- if legal.links.size > 0 -%}
+        <nav aria-label="{{ legal.title | default: 'Legal' | escape }}">
+          <ul class="td-ft-bar__links">
+            {%- for link in legal.links -%}
+              <li>
+                <a class="td-ft-bar__link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
+                  {{- link.title -}}
+                </a>
+              </li>
+            {%- endfor -%}
           </ul>
         </nav>
       {%- endif -%}
-
-      <div class="td-ft-bar__end">
-        {%- if section.settings.facebook_url != blank -%}
-          <a
-            class="td-ft-social"
-            href="{{ section.settings.facebook_url }}"
-            target="_blank"
-            rel="noopener"
-            aria-label="TireDrop on Facebook (opens in a new tab)"
-          >
-            <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-          </a>
-        {%- endif -%}
-
-        {%- if section.settings.show_payment_icons and shop.enabled_payment_types.size > 0 -%}
-          <ul class="td-ft-pay" aria-label="Payment methods accepted">
-            {%- for type in shop.enabled_payment_types -%}
-              <li class="td-ft-pay__item">{{ type | payment_type_svg_tag: class: 'td-ft-pay__icon' }}</li>
-            {%- endfor -%}
-          </ul>
-        {%- endif -%}
-      </div>
     </div>
   </div>
 </div>
 
-<script>
-  (function () {
-    var root = document.getElementById('td-ft-{{ section.id }}');
-    if (!root || !window.matchMedia) return;
-    var wide = window.matchMedia('(min-width: 768px)');
-
-    function sync() {
-      var cols = root.querySelectorAll('.td-ft-col__details');
-      for (var i = 0; i < cols.length; i++) {
-        var summary = cols[i].querySelector('.td-ft-col__summary');
-        if (wide.matches) {
-          cols[i].open = true;
-          summary.setAttribute('tabindex', '-1');
-        } else {
-          cols[i].open = false;
-          summary.removeAttribute('tabindex');
-        }
-      }
-    }
-
-    // On desktop the summary is a heading, not a toggle. Clicks and the
-    // Enter/Space activation (which the browser turns into a click) are
-    // cancelled so the columns cannot be collapsed.
-    root.addEventListener('click', function (event) {
-      if (wide.matches && event.target.closest('.td-ft-col__summary')) event.preventDefault();
-    });
-
-    sync();
-    if (wide.addEventListener) wide.addEventListener('change', sync);
-    else if (wide.addListener) wide.addListener(sync);
-  })();
-</script>
-
 <style>
-  /* Colours are literal and pinned. The band is dark whatever colour scheme
-     Horizon assigns, so nothing here may inherit Horizon's foreground. */
+  /* Values are React's Tailwind tokens written out: ink #070E1A with the
+     ink-wash gradient, graphite #22344C hairlines, amber #F5A623 headings,
+     bone (white) at React's opacities. Colours are pinned so Horizon's
+     colour scheme cannot leak into the dark band. */
   .td-ft {
     background-color: #070E1A;
     background-image: radial-gradient(120% 90% at 50% -10%, #17293F 0%, #0A1526 45%, #070E1A 100%);
     color: #FFFFFF;
     font-family: var(--font-body--family, inherit);
-    font-size: 15px;
-    line-height: 1.5;
+    font-size: 14px;
+    line-height: 20px;
   }
   .td-ft *, .td-ft *::before, .td-ft *::after { box-sizing: border-box; }
   .td-ft p { margin: 0; }
   .td-ft ul { list-style: none; margin: 0; padding: 0; }
+  .td-ft svg { flex-shrink: 0; }
   .td-ft-sr {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
   }
-
-  .td-ft a:focus-visible,
-  .td-ft summary:focus-visible {
+  .td-ft a { text-decoration: none; }
+  .td-ft a:focus-visible {
     outline: 2px solid #00B4FC;
     outline-offset: 2px;
     border-radius: 4px;
   }
 
-  .td-ft-inner { max-width: 1280px; margin: 0 auto; padding: 3rem 1rem 1rem; }
+  /* React: wrap grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-4 */
+  .td-ft-inner { max-width: 1280px; margin: 0 auto; padding: 3.5rem 1rem; }
+  .td-ft-grid { display: grid; gap: 2.5rem; align-items: start; }
 
-  /* ---------- Brand + contact ---------- */
-  .td-ft-top { display: grid; gap: 2rem; padding-bottom: 2rem; }
-
-  .td-ft-brand__home { display: inline-flex; align-items: center; min-height: 44px; }
-  .td-ft-brand__logo { display: block; height: 72px; width: auto; max-width: 200px; object-fit: contain; }
-  .td-ft-brand__wordmark {
+  .td-ft-heading {
+    margin: 0 0 1rem;
     font-family: var(--font-heading--family, inherit);
-    font-size: 1.75rem; font-weight: 700; letter-spacing: -0.018em; line-height: 1;
-    color: #FFFFFF;
-  }
-  .td-ft-brand__parent {
-    margin-top: .625rem !important;
-    font-family: var(--font-heading--family, inherit);
-    font-size: 11px; line-height: 1; letter-spacing: .12em; text-transform: uppercase;
-    color: rgba(255,255,255,.62);
-  }
-  .td-ft-brand__parent span { color: rgba(255,255,255,.82); }
-  .td-ft-brand__copy {
-    margin-top: 1rem !important; max-width: 30rem;
-    font-size: .9375rem; line-height: 1.6; color: rgba(255,255,255,.72);
-    text-wrap: balance;
+    font-size: 15px; font-weight: 700; line-height: 22.5px; letter-spacing: -0.018em;
+    font-variation-settings: "wdth" 108;
+    text-transform: none; color: #F5A623; text-wrap: balance;
   }
 
-  .td-ft-contact { font-style: normal; }
-  .td-ft-contact__list { display: grid; gap: 1.25rem; }
-  .td-ft-label {
-    margin-bottom: .25rem !important;
-    font-family: var(--font-heading--family, inherit);
-    font-size: 11px; font-weight: 700; line-height: 1.4; letter-spacing: .07em; text-transform: uppercase;
-    color: rgba(255,255,255,.62);
-  }
-  .td-ft .td-ft-contact__link {
-    display: inline-flex; align-items: center; gap: .5rem; min-height: 44px;
-    color: #FFFFFF; text-decoration: none; transition: color .15s;
-  }
-  .td-ft .td-ft-contact__link svg { flex-shrink: 0; }
-  .td-ft .td-ft-contact__link--phone,
-  .td-ft .td-ft-contact__link--email {
-    font-family: var(--font-heading--family, inherit); font-weight: 700; letter-spacing: -0.012em;
-  }
-  .td-ft .td-ft-contact__link--phone { font-size: 1.125rem; }
-  .td-ft .td-ft-contact__link--email { font-size: 1rem; }
-  .td-ft-contact__email { overflow-wrap: anywhere; }
-  .td-ft .td-ft-contact__link--address {
-    align-items: flex-start; padding: .625rem 0;
-    font-size: .9375rem; line-height: 1.45; color: rgba(255,255,255,.72);
-  }
-  .td-ft .td-ft-contact__link--address svg { margin-top: .1875rem; }
-  .td-ft .td-ft-contact__link--phone:hover,
-  .td-ft .td-ft-contact__link--email:hover { color: #F5A623; }
-  .td-ft .td-ft-contact__link--address:hover { color: #FFFFFF; }
-
-  /* ---------- Menu columns: accordions on phones ---------- */
-  .td-ft-cols { border-top: 1px solid #22344C; }
-  .td-ft-col { border-bottom: 1px solid #22344C; }
-  .td-ft-col__summary {
-    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-    min-height: 52px; padding: .25rem 0; cursor: pointer; list-style: none;
-    color: #F5A623;
-  }
-  .td-ft-col__summary::-webkit-details-marker { display: none; }
-  .td-ft-col__summary::marker { content: ''; }
-  .td-ft-col__title {
-    font-family: var(--font-heading--family, inherit);
-    font-size: 15px; font-weight: 700; line-height: 1.3; letter-spacing: -0.018em;
-    color: #F5A623; text-wrap: balance;
-  }
-  .td-ft-col__chev { flex-shrink: 0; color: rgba(255,255,255,.72); transition: transform .2s; }
-  .td-ft-col__details[open] .td-ft-col__chev { transform: rotate(180deg); }
-  .td-ft-col__list { padding-bottom: .75rem !important; }
+  /* Link lists. Phones get 44px rows; from 768px React's 20px + 8px rhythm. */
   .td-ft .td-ft-link {
     display: flex; align-items: center; min-height: 44px;
-    font-size: .9375rem; line-height: 1.4; color: rgba(255,255,255,.72);
-    text-decoration: none; transition: color .15s;
+    color: rgba(255,255,255,.65); transition: color .15s;
   }
   .td-ft .td-ft-link:hover,
   .td-ft .td-ft-link[aria-current="page"] { color: #FFFFFF; }
 
-  /* ---------- Bottom bar ---------- */
-  .td-ft-bar { border-top: 1px solid #22344C; }
-  .td-ft-bar__inner {
-    max-width: 1280px; margin: 0 auto; padding: 1.25rem 1rem 1.5rem;
-    display: flex; flex-direction: column; align-items: center; gap: .75rem;
-    font-size: .8125rem; line-height: 1.5; color: rgba(255,255,255,.62); text-align: center;
+  /* The Shop Behind Us */
+  .td-ft-shop__list { display: grid; gap: 1rem; }
+  .td-ft-label {
+    margin-bottom: .375rem !important;
+    font-family: var(--font-heading--family, inherit);
+    font-size: 11px; font-weight: 700; line-height: 20px; letter-spacing: .07em; text-transform: uppercase;
+    color: rgba(255,255,255,.55);
   }
-  .td-ft-bar__copy { text-wrap: balance; }
-  .td-ft-bar__list { display: flex; flex-wrap: wrap; justify-content: center; column-gap: .25rem; }
-  .td-ft .td-ft-bar__link {
-    display: inline-flex; align-items: center; min-height: 44px; padding: 0 .5rem;
-    color: rgba(255,255,255,.62); text-decoration: none; transition: color .15s;
+  .td-ft-label--socials { margin-bottom: .5rem !important; }
+  .td-ft .td-ft-strong {
+    display: flex; align-items: center; gap: .5rem; min-height: 44px;
+    font-family: var(--font-heading--family, inherit);
+    font-size: 16px; line-height: 24px; font-weight: 700; letter-spacing: -0.012em;
+    color: #FFFFFF; transition: color .15s;
   }
-  .td-ft .td-ft-bar__link:hover { color: #FFFFFF; }
-  .td-ft-bar__end { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .75rem 1rem; }
+  .td-ft .td-ft-strong--lg { font-size: 18px; line-height: 28px; }
+  .td-ft .td-ft-strong:hover { color: #F5A623; }
+  .td-ft-strong__email { word-break: break-all; }
+  .td-ft .td-ft-address {
+    display: flex; align-items: flex-start; gap: .5rem; min-height: 44px;
+    color: rgba(255,255,255,.65); transition: color .15s;
+  }
+  .td-ft .td-ft-address:hover { color: #FFFFFF; }
+  .td-ft-address svg, .td-ft-hours__row svg { margin-top: 2px; }
+  .td-ft-hours { display: grid; gap: 2px; color: rgba(255,255,255,.65); }
+  .td-ft-hours__row { display: flex; align-items: flex-start; gap: .5rem; }
+  .td-ft-hours__days { color: #FFFFFF; }
   .td-ft .td-ft-social {
     display: inline-flex; align-items: center; justify-content: center;
     width: 44px; height: 44px; border: 1px solid #22344C; border-radius: 6px;
-    color: rgba(255,255,255,.72); transition: color .15s, border-color .15s, background-color .15s;
+    color: rgba(255,255,255,.65); transition: color .15s, border-color .15s, background-color .15s;
   }
   .td-ft .td-ft-social:hover { color: #FFFFFF; border-color: #FFFFFF; background-color: rgba(255,255,255,.05); }
-  .td-ft-pay { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; }
-  .td-ft-pay__item { display: flex; }
-  .td-ft-pay__icon { display: block; width: 38px; height: 24px; }
 
-  /* ---------- 768px: columns side by side, always open ---------- */
+  /* Bottom bar. React: border-t py-5 text-xs text-bone/50, stacked and
+     centred on phones, one row from md. */
+  .td-ft-bar { border-top: 1px solid #22344C; }
+  .td-ft-bar__inner {
+    max-width: 1280px; margin: 0 auto; padding: 1.25rem 1rem;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: .75rem;
+    font-size: 12px; line-height: 16px; color: rgba(255,255,255,.55);
+  }
+  .td-ft-bar__brand { display: flex; align-items: center; gap: .75rem; }
+  .td-ft-bar__home { display: flex; flex-shrink: 0; }
+  .td-ft-bar__logo { display: block; height: 64px; width: auto; max-width: 160px; object-fit: contain; }
+  .td-ft-bar__wordmark {
+    font-family: var(--font-heading--family, inherit);
+    font-size: 20px; line-height: 44px; font-weight: 700; letter-spacing: -0.018em; color: #FFFFFF;
+  }
+  .td-ft-bar__links { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; column-gap: 1rem; }
+  .td-ft .td-ft-bar__link {
+    display: inline-flex; align-items: center; min-height: 44px;
+    color: rgba(255,255,255,.55); transition: color .15s;
+  }
+  .td-ft .td-ft-bar__link:hover { color: #FFFFFF; }
+
   @media (min-width: 768px) {
-    .td-ft-inner { padding: 3.5rem 2rem 3.5rem; }
-    .td-ft-brand__logo { height: 80px; }
-    .td-ft-top {
-      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-      gap: 2rem 3rem; padding-bottom: 2.5rem;
-    }
-    .td-ft-cols {
-      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 2.5rem 2rem; align-items: start; padding-top: 2.5rem;
-    }
-    .td-ft-col { border-bottom: 0; }
-    .td-ft-col__summary { min-height: 0; padding: 0; margin-bottom: 1rem; cursor: default; pointer-events: none; }
-    .td-ft-col__chev { display: none; }
-    /* A closed <details> still shows its list here, for the moment before
-       the script runs or if it never does. */
-    .td-ft-col__details::details-content { content-visibility: visible; display: block; }
-    .td-ft-col__list { display: grid; gap: .5rem; padding-bottom: 0 !important; }
-    .td-ft .td-ft-link { min-height: 0; padding: .125rem 0; font-size: .875rem; }
-    .td-ft .td-ft-contact__link { min-height: 36px; }
-    .td-ft .td-ft-contact__link--address { min-height: 0; padding: .25rem 0; font-size: .875rem; }
-    .td-ft-bar__inner { padding: 1.25rem 2rem; font-size: .75rem; }
-    .td-ft .td-ft-bar__link { min-height: 32px; }
+    .td-ft-inner { padding: 3.5rem 2rem; }
+    .td-ft-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* React's <li> keeps the 16px/24px body strut around a 14px inline
+       link, so each row is 24px plus the 8px gap: a 32px rhythm. */
+    .td-ft-links { display: grid; gap: .5rem; }
+    .td-ft-links li { font-size: 16px; line-height: 24px; }
+    .td-ft .td-ft-link { display: inline; min-height: 0; font-size: 14px; line-height: 20px; }
+    .td-ft .td-ft-strong { min-height: 36px; margin: -.25rem 0; padding: .25rem 0; }
+    .td-ft .td-ft-address { min-height: 0; }
     .td-ft .td-ft-social { width: 40px; height: 40px; }
+    .td-ft-bar__inner { flex-direction: row; padding: 1.25rem 2rem; }
+    .td-ft-bar__links { row-gap: .25rem; }
+    .td-ft .td-ft-bar__link { min-height: 0; }
   }
 
   @media (min-width: 1024px) {
-    .td-ft-top { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-    .td-ft-contact__list { grid-template-columns: repeat(2, minmax(0, max-content)); gap: 1.25rem 2.5rem; justify-content: end; }
-    .td-ft-contact__item:last-child { grid-column: 1 / -1; }
-    .td-ft-cols { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
-    /* Copyright over the policy links on the left, social and payment
-       icons on the right. The list's negative margin cancels the first
-       link's padding so its text lines up with the copyright. */
-    .td-ft-bar__inner {
-      display: grid; grid-template-columns: minmax(0, 1fr) auto;
-      grid-template-areas: "copy end" "pol end";
-      align-items: center; column-gap: 2rem; row-gap: 0; text-align: left;
-    }
-    .td-ft-bar__copy { grid-area: copy; }
-    .td-ft-bar__policies { grid-area: pol; }
-    .td-ft-bar__end { grid-area: end; justify-content: flex-end; }
-    .td-ft-bar__list { justify-content: flex-start; margin-left: -.5rem !important; }
-  }
-
-  /* Room for the three contact details in one row beside the brand copy. */
-  @media (min-width: 1280px) {
-    .td-ft-top { grid-template-columns: minmax(0, 1fr) auto; }
-    .td-ft-contact__list { grid-template-columns: repeat(3, max-content); }
-    .td-ft-contact__item:last-child { grid-column: auto; }
-    .td-ft-bar__inner { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "copy pol end"; }
-    .td-ft-bar__list { justify-content: center; margin-left: 0 !important; }
+    .td-ft-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -411,18 +318,25 @@
   "enabled_on": { "groups": ["footer"] },
   "max_blocks": 6,
   "settings": [
-    { "type": "header", "content": "Brand" },
     { "type": "image_picker", "id": "logo", "label": "Logo override", "info": "Leave empty to use the theme logo." },
-    { "type": "textarea", "id": "brand_copy", "label": "Brand copy", "default": "Tires shipped free to any address in the continental US, or free to our Sunrise, FL shop where we fit them for you." },
-    { "type": "header", "content": "Contact" },
+    { "type": "header", "content": "The Shop Behind Us" },
+    { "type": "text", "id": "contact_heading", "label": "Heading", "default": "The Shop Behind Us" },
     { "type": "text", "id": "phone", "label": "Phone", "default": "(954) 773-1896", "info": "US number; the call link is built from its digits." },
     { "type": "text", "id": "email", "label": "Email", "default": "info@tiredroponline.com" },
-    { "type": "text", "id": "address_label", "label": "Address label", "default": "Ship to store & install" },
+    { "type": "text", "id": "shop_name", "label": "Shop name", "default": "Extreme Tires — Sunrise" },
     { "type": "text", "id": "address_line_1", "label": "Street", "default": "7712 West Oakland Park Blvd" },
     { "type": "text", "id": "address_line_2", "label": "City, state, ZIP", "default": "Sunrise, FL 33351" },
+    { "type": "text", "id": "hours_1_days", "label": "Hours row 1: days", "default": "Mon – Fri" },
+    { "type": "text", "id": "hours_1_time", "label": "Hours row 1: time", "default": "8:00 AM – 6:30 PM" },
+    { "type": "text", "id": "hours_2_days", "label": "Hours row 2: days", "default": "Saturday" },
+    { "type": "text", "id": "hours_2_time", "label": "Hours row 2: time", "default": "8:00 AM – 4:00 PM" },
+    { "type": "text", "id": "hours_3_days", "label": "Hours row 3: days", "default": "Sunday" },
+    { "type": "text", "id": "hours_3_time", "label": "Hours row 3: time", "default": "Closed" },
+    { "type": "text", "id": "hours_4_days", "label": "Hours row 4: days", "info": "Leave the days empty to hide a row." },
+    { "type": "text", "id": "hours_4_time", "label": "Hours row 4: time" },
+    { "type": "text", "id": "facebook_url", "label": "Facebook URL", "default": "https://www.facebook.com/Extremetires/", "info": "A text field because Shopify's url setting cannot default to an external address. Leave empty to hide Socials." },
     { "type": "header", "content": "Bottom bar" },
-    { "type": "text", "id": "facebook_url", "label": "Facebook URL", "default": "https://www.facebook.com/Extremetires/", "info": "A text field because Shopify's url setting cannot default to an external address. Leave empty to hide the icon." },
-    { "type": "checkbox", "id": "show_payment_icons", "label": "Show payment icons", "default": true }
+    { "type": "link_list", "id": "legal_menu", "label": "Legal links menu", "info": "Shown on the right of the bottom bar. TireDrop uses td-footer-legal." }
   ],
   "blocks": [
     {
@@ -439,10 +353,9 @@
       "name": "TireDrop footer",
       "blocks": [
         { "type": "menu", "settings": { "heading": "Shop", "menu": "td-footer-shop" } },
-        { "type": "menu", "settings": { "heading": "Free Tools", "menu": "td-footer-tools" } },
         { "type": "menu", "settings": { "heading": "Shipping & Install", "menu": "td-footer-shipping" } },
-        { "type": "menu", "settings": { "heading": "Learn", "menu": "td-footer-learn" } },
-        { "type": "menu", "settings": { "heading": "Legal", "menu": "td-footer-legal" } }
+        { "type": "menu", "settings": { "heading": "Free Tools", "menu": "td-footer-tools" } },
+        { "type": "menu", "settings": { "heading": "Learn", "menu": "td-footer-learn" } }
       ]
     }
   ]

@@ -9,33 +9,37 @@
           "type": "menu",
           "settings": { "heading": "Shop", "menu": "td-footer-shop" }
         },
-        "menu_tools": {
-          "type": "menu",
-          "settings": { "heading": "Free Tools", "menu": "td-footer-tools" }
-        },
         "menu_shipping": {
           "type": "menu",
           "settings": { "heading": "Shipping & Install", "menu": "td-footer-shipping" }
         },
+        "menu_tools": {
+          "type": "menu",
+          "settings": { "heading": "Free Tools", "menu": "td-footer-tools" }
+        },
         "menu_learn": {
           "type": "menu",
           "settings": { "heading": "Learn", "menu": "td-footer-learn" }
-        },
-        "menu_legal": {
-          "type": "menu",
-          "settings": { "heading": "Legal", "menu": "td-footer-legal" }
         }
       },
-      "block_order": ["menu_shop", "menu_tools", "menu_shipping", "menu_learn", "menu_legal"],
+      "block_order": ["menu_shop", "menu_shipping", "menu_tools", "menu_learn"],
       "settings": {
-        "brand_copy": "Tires shipped free to any address in the continental US, or free to our Sunrise, FL shop where we fit them for you.",
+        "contact_heading": "The Shop Behind Us",
         "phone": "(954) 773-1896",
         "email": "info@tiredroponline.com",
-        "address_label": "Ship to store & install",
+        "shop_name": "Extreme Tires — Sunrise",
         "address_line_1": "7712 West Oakland Park Blvd",
         "address_line_2": "Sunrise, FL 33351",
+        "hours_1_days": "Mon – Fri",
+        "hours_1_time": "8:00 AM – 6:30 PM",
+        "hours_2_days": "Saturday",
+        "hours_2_time": "8:00 AM – 4:00 PM",
+        "hours_3_days": "Sunday",
+        "hours_3_time": "Closed",
+        "hours_4_days": "",
+        "hours_4_time": "",
         "facebook_url": "https://www.facebook.com/Extremetires/",
-        "show_payment_icons": true
+        "legal_menu": "td-footer-legal"
       }
     }
   },
