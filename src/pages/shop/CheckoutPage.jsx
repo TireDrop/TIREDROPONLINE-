@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
   Building2,
@@ -11,7 +12,6 @@ import {
   Package,
   Phone,
   ShoppingCart,
-  Truck,
   User,
 } from "lucide-react";
 
@@ -23,7 +23,8 @@ import {
 } from "../../components/ui/index.jsx";
 import { useCart, money } from "../../context/CartContext.jsx";
 import { BUSINESS } from "../../data/business.js";
-import { submitForm } from "../../data/forms.js";
+import { ApiError, submitCheckout } from "../../data/api.js";
+import { useApiStatus } from "../../data/useApi.js";
 import { summarize } from "./CartPage.jsx";
 
 /* ------------------------------------------------------------------ */
@@ -72,33 +73,74 @@ function windowsForDate(iso) {
 const windowLabel = (value) =>
   TIME_WINDOWS.find((w) => w.value === value)?.label || "";
 
-const PROPERTY_TYPES = [
-  "Single-family home",
-  "Townhouse or villa",
-  "Condo or apartment complex",
-  "Office or business park",
-  "Jobsite, lot or warehouse",
+// Free shipping covers the lower 48 states and DC, and nowhere else, so the
+// state list is exactly those. The server checks again and says so if not.
+const SHIP_STATES = [
+  ["AL", "Alabama"],
+  ["AZ", "Arizona"],
+  ["AR", "Arkansas"],
+  ["CA", "California"],
+  ["CO", "Colorado"],
+  ["CT", "Connecticut"],
+  ["DE", "Delaware"],
+  ["DC", "District of Columbia"],
+  ["FL", "Florida"],
+  ["GA", "Georgia"],
+  ["ID", "Idaho"],
+  ["IL", "Illinois"],
+  ["IN", "Indiana"],
+  ["IA", "Iowa"],
+  ["KS", "Kansas"],
+  ["KY", "Kentucky"],
+  ["LA", "Louisiana"],
+  ["ME", "Maine"],
+  ["MD", "Maryland"],
+  ["MA", "Massachusetts"],
+  ["MI", "Michigan"],
+  ["MN", "Minnesota"],
+  ["MS", "Mississippi"],
+  ["MO", "Missouri"],
+  ["MT", "Montana"],
+  ["NE", "Nebraska"],
+  ["NV", "Nevada"],
+  ["NH", "New Hampshire"],
+  ["NJ", "New Jersey"],
+  ["NM", "New Mexico"],
+  ["NY", "New York"],
+  ["NC", "North Carolina"],
+  ["ND", "North Dakota"],
+  ["OH", "Ohio"],
+  ["OK", "Oklahoma"],
+  ["OR", "Oregon"],
+  ["PA", "Pennsylvania"],
+  ["RI", "Rhode Island"],
+  ["SC", "South Carolina"],
+  ["SD", "South Dakota"],
+  ["TN", "Tennessee"],
+  ["TX", "Texas"],
+  ["UT", "Utah"],
+  ["VT", "Vermont"],
+  ["VA", "Virginia"],
+  ["WA", "Washington"],
+  ["WV", "West Virginia"],
+  ["WI", "Wisconsin"],
+  ["WY", "Wyoming"],
 ];
 
-// Order matters: shipping is the default path, the two local options follow.
+// Order matters: shipping is the default path, ship-to-store follows. The
+// values are the API's `delivery` field.
 const FULFILLMENT = [
   {
     value: "ship",
     icon: Package,
-    title: "Ship to my address",
-    copy: `Delivered free anywhere in ${BUSINESS.shipping.area}. The delivery estimate is confirmed before payment.`,
+    title: "Ship to my address (free, continental US)",
+    copy: "Delivered free to any address in the lower 48 states and DC. The delivery estimate is confirmed before your order ships.",
   },
   {
-    value: "shop",
+    value: "pickup",
     icon: Building2,
-    title: "Ship free to the shop — we'll fit them",
-    copy: `Free delivery to ${BUSINESS.shop.name}, then book an install in the bay. South Florida.`,
-  },
-  {
-    value: "mobile",
-    icon: Truck,
-    title: "Mobile install at my address",
-    copy: "South Florida only. The van comes to your home, office or jobsite and fits them there.",
+    title: `Free ship-to-store at ${BUSINESS.parent}, ${BUSINESS.shop.city}`,
+    copy: `Free delivery to ${BUSINESS.shop.full}, where we can fit them in the bay. South Florida.`,
   },
 ];
 
@@ -140,22 +182,21 @@ function validateInstall(f, { hasShopInstall = false } = {}) {
   // then promises both at once.
   else if (f.fulfillment === "ship" && hasShopInstall)
     e.fulfillment =
-      "Your cart has a set booked for installation at the shop, which is included in the total below. Choose \u201cShip free to the shop\u201d above, or turn installation off in your cart to have it shipped to you.";
+      "Your cart has a set booked for installation at the shop, which is included in the total below. Choose \u201cFree ship-to-store\u201d above, or turn installation off in your cart to have it shipped to you.";
 
-  const needsAddress = f.fulfillment === "mobile" || f.fulfillment === "ship";
-  if (needsAddress) {
+  // Only a shipped order needs an address; ship-to-store goes to the shop.
+  if (f.fulfillment === "ship") {
     if (!f.street.trim()) e.street = "Enter the street address.";
     if (!f.city.trim()) e.city = "Enter the city.";
+    if (!f.state) e.state = "Choose the state.";
+    else if (!SHIP_STATES.some(([code]) => code === f.state))
+      e.state = "We only ship to the lower 48 states and DC.";
     if (!f.zip.trim()) e.zip = "Enter a ZIP code.";
     else if (!ZIP_RE.test(f.zip.trim()))
       e.zip = "Enter a 5-digit ZIP code, like 33351.";
   }
-  if (f.fulfillment === "mobile" && !f.propertyType) {
-    e.propertyType =
-      "Tell us what kind of property so the tech brings the right gear.";
-  }
 
-  const needsDate = f.fulfillment === "mobile" || f.fulfillment === "shop";
+  const needsDate = f.fulfillment === "pickup";
   if (needsDate) {
     if (!f.date) {
       e.date = "Pick a preferred date.";
@@ -186,10 +227,12 @@ function validateVehicle(f) {
   return e;
 }
 
-function validateReview(f) {
+function validateReview(f, { payOnline = false } = {}) {
   const e = {};
   if (!f.agree)
-    e.agree = "Please confirm you understand this order is a request.";
+    e.agree = payOnline
+      ? "Please confirm you understand we check fitment before anything ships."
+      : "Please confirm you understand this order is a request.";
   return e;
 }
 
@@ -349,10 +392,10 @@ const EMPTY_FORM = {
   phone: "",
   fulfillment: "ship",
   street: "",
+  line2: "",
   city: "",
+  state: "",
   zip: "",
-  propertyType: "",
-  accessNotes: "",
   date: "",
   timeWindow: "",
   year: "",
@@ -362,7 +405,10 @@ const EMPTY_FORM = {
   agree: false,
 };
 
-/** TD-YYMMDD-XXXX — short enough to read over the phone. */
+/**
+ * TD-YYMMDD-XXXX — short enough to read over the phone. Only used when the
+ * order never reached the API, so the shopper still has something to quote.
+ */
 function makeOrderRef() {
   const d = new Date();
   const stamp = toISODate(d).slice(2).replace(/-/g, "");
@@ -383,6 +429,14 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState({});
   const [placed, setPlaced] = useState(null);
   const [sending, setSending] = useState(false);
+  // Set once the API hands back a Tire Guru payment page, just before the
+  // browser leaves for it.
+  const [redirecting, setRedirecting] = useState(false);
+  // A rejection from the server ("We only ship to the lower 48 states and
+  // DC"), shown inline on the review step.
+  const [serverError, setServerError] = useState("");
+  const status = useApiStatus();
+  const payOnline = status?.checkout === "tireguru";
   const headingRef = useRef(null);
   // Once the shopper picks a delivery option it is theirs; until then the
   // cart decides the default.
@@ -398,8 +452,9 @@ export default function CheckoutPage() {
   const stepContext = useMemo(
     () => ({
       hasShopInstall: Array.isArray(lines) && lines.some((l) => l.install),
+      payOnline,
     }),
-    [lines],
+    [lines, payOnline],
   );
 
   // Move focus to the new step heading so screen readers and keyboards follow along.
@@ -411,6 +466,7 @@ export default function CheckoutPage() {
     if (name === "fulfillment") fulfillmentTouched.current = true;
     setForm((f) => ({ ...f, [name]: value }));
     setErrors((e) => (e[name] ? { ...e, [name]: undefined } : e));
+    setServerError("");
   };
   const onInput = (e) => set(e.target.name, e.target.value);
 
@@ -433,7 +489,7 @@ export default function CheckoutPage() {
         stepContext.hasShopInstall &&
         form.fulfillment === "ship"
       ) {
-        setForm((f) => ({ ...f, fulfillment: "shop" }));
+        setForm((f) => ({ ...f, fulfillment: "pickup" }));
       }
       setStepIndex((i) => i + 1);
       return;
@@ -453,48 +509,78 @@ export default function CheckoutPage() {
 
   async function placeOrder() {
     if (sending) return; // a second click must not place a second order
-    const ref = makeOrderRef();
-
-    // The order has to reach the shop, or the reference on the next screen is
-    // a number nobody can look up. It rides the same transport as the forms,
-    // so one VITE_FORM_ENDPOINT turns orders on with everything else.
+    setServerError("");
     setSending(true);
-    const outcome = await submitForm("order", {
-      reference: ref,
-      placedFor: `${form.firstName} ${form.lastName}`.trim(),
-      phone: form.phone,
-      email: form.email,
-      fulfillment: form.fulfillment,
-      address:
-        form.fulfillment === "shop"
-          ? `${BUSINESS.parent} — ${BUSINESS.shop.full}`
-          : [form.street, form.city, form.zip].filter(Boolean).join(", "),
-      vehicle: [form.year, form.make, form.model, form.trim]
-        .filter(Boolean)
-        .join(" "),
-      installDate: form.date || "",
-      installWindow: form.timeWindow || "",
-      items: safeLines
-        .map(
-          (l) =>
-            `${l.qty}x ${l.brand} ${l.name} ${l.size}${l.install ? " (fit at shop)" : ""} — ${money(l.price * l.qty)}`,
-        )
-        .join("\n"),
-      subtotal: money(totals.subtotal),
-      installation: money(totals.installTotal),
-      shipping: "Free",
-      tax: money(totals.tax),
-      total: money(totals.total),
-    });
-    setSending(false);
 
+    const ship = form.fulfillment === "ship";
+    const installLines = safeLines.filter((l) => l.install);
+    // Everything the API has no field for rides in `notes`, so the shop sees
+    // the vehicle and any install booking alongside the order.
+    const notes = [
+      `Vehicle: ${[form.year, form.make, form.model, form.trim]
+        .filter(Boolean)
+        .join(" ")}`,
+      !ship &&
+        form.date &&
+        `Preferred install: ${formatLongDate(form.date)}, ${windowLabel(form.timeWindow)}`,
+      installLines.length > 0 &&
+        `Install at the shop: ${installLines
+          .map((l) => `${l.qty}x ${l.brand} ${l.name} ${l.size}`.trim())
+          .join("; ")}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    let outcome;
+    try {
+      outcome = await submitCheckout({
+        items: safeLines.map((l) => ({ sku: l.sku ?? l.id, qty: l.qty })),
+        delivery: ship ? "ship" : "pickup",
+        customer: {
+          name: `${form.firstName} ${form.lastName}`.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+        },
+        ...(ship
+          ? {
+              address: {
+                line1: form.street.trim(),
+                line2: form.line2.trim(),
+                city: form.city.trim(),
+                state: form.state,
+                zip: form.zip.trim(),
+              },
+            }
+          : null),
+        notes,
+      });
+    } catch (err) {
+      setSending(false);
+      setServerError(
+        err instanceof ApiError
+          ? err.message
+          : `Something went wrong sending your order. Try again, or call ${BUSINESS.phone}.`,
+      );
+      return;
+    }
+
+    if (outcome.mode === "redirect") {
+      // Say where the shopper is going before the page changes under them.
+      // The cart is left alone: if they come back without paying, it is
+      // still there.
+      setRedirecting(true);
+      window.setTimeout(() => window.location.assign(outcome.url), 600);
+      return;
+    }
+
+    setSending(false);
     setPlaced({
-      ref,
+      ref: outcome.orderRef || makeOrderRef(),
       lines: safeLines,
       totals,
+      serverTotal: outcome.total,
       form,
       delivered: outcome.delivered,
-      sendError: outcome.error,
     });
     clear();
   }
@@ -538,17 +624,32 @@ export default function CheckoutPage() {
   /* ---------- confirmation ---------- */
   if (placed) {
     const f = placed.form;
-    const mobile = f.fulfillment === "mobile";
     const ship = f.fulfillment === "ship";
+    const shipTo = [
+      f.street,
+      f.line2,
+      `${f.city}, ${f.state} ${f.zip}`.trim(),
+    ]
+      .filter(Boolean)
+      .join(", ");
+    // The server prices the tires itself (before tax and installation, which
+    // the shop adds when it takes payment). Where its figure differs from
+    // the cart's, say so rather than let two numbers disagree silently.
+    const serverTotalDiffers =
+      typeof placed.serverTotal === "number" &&
+      Math.abs(placed.serverTotal - placed.totals.subtotal) >= 0.01;
 
     return (
       <>
         <Seo
-          title="Order Received"
-          description="Your TireDrop order is in. We call to confirm fitment, lock in delivery or your install window, and confirm payment."
+          title="Order Request Received"
+          description="Your TireDrop order request is in. It is not paid yet: we call to confirm fitment, delivery or your install window, and payment."
         />
         <Breadcrumbs
-          trail={[{ label: "Cart", to: "/cart" }, { label: "Order Received" }]}
+          trail={[
+            { label: "Cart", to: "/cart" },
+            { label: "Order Request Received" },
+          ]}
         />
 
         <div className="wrap py-12 md:py-16">
@@ -561,25 +662,34 @@ export default function CheckoutPage() {
               />
               <div className="min-w-0">
                 <p className="eyebrow mb-1">
-                  {placed.delivered ? "Order received" : "Call to confirm it"}
+                  {placed.delivered
+                    ? "Order request received"
+                    : "Not sent — please call"}
                 </p>
                 <h1 className="h1" tabIndex={-1} ref={headingRef}>
                   {placed.delivered
-                    ? "Your order is in"
+                    ? "Your order request is in"
                     : "Finish this by phone"}
                 </h1>
                 <p className="lede mt-3">
                   {placed.delivered ? (
                     <>
-                      Thanks, {f.firstName}. We call to confirm fitment and
-                      payment before anything ships.
+                      Thanks, {f.firstName}. It is not paid yet — we&rsquo;ll
+                      call to confirm fitment and payment before anything
+                      ships.
                     </>
                   ) : (
                     <>
-                      Thanks, {f.firstName}. This order has not reached the shop
-                      yet, so call{" "}
-                      {BUSINESS.phone} and read out the reference below. Your
-                      order is written out underneath it.
+                      Thanks, {f.firstName}. This order request was not sent to
+                      the shop, and nothing has been charged. Please call{" "}
+                      <a
+                        href={BUSINESS.phoneHref}
+                        className="whitespace-nowrap text-ink underline underline-offset-4 hover:text-drop"
+                      >
+                        {BUSINESS.phone}
+                      </a>{" "}
+                      and read out the reference below. Your order is written
+                      out underneath it.
                     </>
                   )}
                 </p>
@@ -595,7 +705,7 @@ export default function CheckoutPage() {
               </div>
               <Badge tone="amber">
                 {placed.delivered
-                  ? "Awaiting confirmation call"
+                  ? "Not paid yet · awaiting our call"
                   : "Not placed until you call"}
               </Badge>
             </div>
@@ -621,18 +731,12 @@ export default function CheckoutPage() {
                     {
                       title: ship
                         ? "Your order ships out"
-                        : mobile
-                          ? "The van comes to you"
-                          : "We fit them at the shop",
+                        : "We fit them at the shop",
                       copy: ship
-                        ? `Your order ships to ${f.street}, ${f.city} ${f.zip} once payment clears. Tracking follows by phone.`
-                        : mobile
-                          ? `We arrive at ${f.street}, ${f.city} ${f.zip} on ${formatLongDate(
-                              f.date,
-                            )}, ${windowLabel(f.timeWindow)}.`
-                          : `Your order ships free to ${BUSINESS.shop.full}. Meet us there on ${formatLongDate(
-                              f.date,
-                            )}, ${windowLabel(f.timeWindow)}.`,
+                        ? `Your order ships to ${shipTo} once payment clears. Tracking follows by phone.`
+                        : `Your order ships free to ${BUSINESS.shop.full}. Meet us there on ${formatLongDate(
+                            f.date,
+                          )}, ${windowLabel(f.timeWindow)}.`,
                     },
                   ].map((s, i) => (
                     <li key={s.title} className="flex gap-3">
@@ -669,7 +773,19 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <OrderSummary lines={placed.lines} totals={placed.totals} />
+              <div className="min-w-0">
+                <OrderSummary lines={placed.lines} totals={placed.totals} />
+                {serverTotalDiffers && (
+                  <p className="mt-4 text-xs leading-relaxed text-smoke">
+                    Our order system priced the tires at{" "}
+                    <span className="tnum text-ink">
+                      {money(placed.serverTotal)}
+                    </span>{" "}
+                    before tax and installation. We confirm the final figure
+                    with you on the call.
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -812,7 +928,7 @@ export default function CheckoutPage() {
                     value={form.phone}
                     onChange={onInput}
                     error={errors.phone}
-                    hint="We text delivery updates and, for local installs, when the van is close."
+                    hint="We use it to confirm your order and send delivery updates."
                   />
                 </div>
               </section>
@@ -824,7 +940,7 @@ export default function CheckoutPage() {
                 <StepHeading
                   step={2}
                   title="Where should this go?"
-                  lede="Ship it anywhere in the continental US, or — if you are in South Florida — send it free to our shop and let us fit it."
+                  lede="Ship it free anywhere in the lower 48 states and DC, or — if you are in South Florida — send it free to our shop and let us fit it."
                   headingRef={headingRef}
                 />
 
@@ -881,7 +997,7 @@ export default function CheckoutPage() {
                   )}
                 </fieldset>
 
-                {form.fulfillment === "shop" && (
+                {form.fulfillment === "pickup" && (
                   <div className="card mb-7 flex items-start gap-3 p-5">
                     <MapPin
                       size={20}
@@ -919,30 +1035,49 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                {(form.fulfillment === "mobile" ||
-                  form.fulfillment === "ship") && (
+                {form.fulfillment === "ship" && (
                   <div className="mb-7 grid gap-5 sm:grid-cols-2">
                     <TextField
                       id="street"
-                      label={
-                        form.fulfillment === "ship"
-                          ? "Shipping address"
-                          : "Street address"
-                      }
-                      autoComplete="street-address"
+                      label="Shipping address"
+                      autoComplete="address-line1"
                       className="sm:col-span-2"
                       value={form.street}
                       onChange={onInput}
                       error={errors.street}
                     />
                     <TextField
+                      id="line2"
+                      label="Apt, suite or unit (optional)"
+                      autoComplete="address-line2"
+                      className="sm:col-span-2"
+                      value={form.line2}
+                      onChange={onInput}
+                    />
+                    <TextField
                       id="city"
                       label="City"
                       autoComplete="address-level2"
+                      className="sm:col-span-2"
                       value={form.city}
                       onChange={onInput}
                       error={errors.city}
                     />
+                    <SelectField
+                      id="state"
+                      label="State"
+                      autoComplete="address-level1"
+                      value={form.state}
+                      onChange={onInput}
+                      error={errors.state}
+                    >
+                      <option value="">Select a state…</option>
+                      {SHIP_STATES.map(([code, name]) => (
+                        <option key={code} value={code}>
+                          {name}
+                        </option>
+                      ))}
+                    </SelectField>
                     <TextField
                       id="zip"
                       label="ZIP code"
@@ -953,54 +1088,14 @@ export default function CheckoutPage() {
                       onChange={onInput}
                       error={errors.zip}
                     />
-
-                    {form.fulfillment === "mobile" && (
-                      <>
-                        <SelectField
-                          id="propertyType"
-                          label="Property type"
-                          className="sm:col-span-2"
-                          value={form.propertyType}
-                          onChange={onInput}
-                          error={errors.propertyType}
-                        >
-                          <option value="">Select one…</option>
-                          {PROPERTY_TYPES.map((p) => (
-                            <option key={p} value={p}>
-                              {p}
-                            </option>
-                          ))}
-                        </SelectField>
-
-                        <div className="sm:col-span-2">
-                          <label htmlFor="accessNotes" className="label">
-                            Parking &amp; gate notes (optional)
-                          </label>
-                          <textarea
-                            id="accessNotes"
-                            name="accessNotes"
-                            rows={3}
-                            value={form.accessNotes}
-                            onChange={onInput}
-                            placeholder="Gate code, guard gate name, covered parking, which side of the building — anything that saves the tech a lap."
-                            aria-describedby="accessNotes-hint"
-                            className="field resize-y"
-                          />
-                          <p
-                            id="accessNotes-hint"
-                            className="mt-1 text-xs text-smoke"
-                          >
-                            The van needs about one parking space plus room to
-                            work on one side.
-                          </p>
-                        </div>
-                      </>
-                    )}
+                    <p className="-mt-2 text-xs leading-relaxed text-smoke sm:col-span-2">
+                      Free shipping covers the lower 48 states and DC. We
+                      can&rsquo;t ship to Alaska, Hawaii or US territories.
+                    </p>
                   </div>
                 )}
 
-                {(form.fulfillment === "mobile" ||
-                  form.fulfillment === "shop") && (
+                {form.fulfillment === "pickup" && (
                   <fieldset>
                     <legend className="label mb-2">
                       Preferred install appointment
@@ -1116,7 +1211,11 @@ export default function CheckoutPage() {
                 <StepHeading
                   step={4}
                   title="Review your order"
-                  lede="Check the details, then send it over. Payment happens on the confirmation call, not here."
+                  lede={
+                    payOnline
+                      ? "Check the details, then continue to payment on our shop's payment page."
+                      : "Check the details, then send it over. Nothing is charged here — payment is confirmed on the call."
+                  }
                   headingRef={headingRef}
                 />
 
@@ -1139,21 +1238,18 @@ export default function CheckoutPage() {
                         FULFILLMENT.find((o) => o.value === form.fulfillment)
                           ?.title || "—",
                       ],
-                      form.fulfillment === "shop"
+                      form.fulfillment === "pickup"
                         ? ["Ships to", BUSINESS.shop.full]
                         : [
                             "Address",
-                            `${form.street}, ${form.city} ${form.zip}`,
+                            [
+                              form.street,
+                              form.line2.trim(),
+                              `${form.city}, ${form.state} ${form.zip}`,
+                            ]
+                              .filter(Boolean)
+                              .join(", "),
                           ],
-                      form.fulfillment === "mobile" && [
-                        "Property",
-                        form.propertyType,
-                      ],
-                      form.fulfillment === "mobile" &&
-                        form.accessNotes.trim() && [
-                          "Access notes",
-                          form.accessNotes.trim(),
-                        ],
                       form.fulfillment !== "ship" && [
                         "Date",
                         formatLongDate(form.date),
@@ -1190,12 +1286,29 @@ export default function CheckoutPage() {
                         We confirm before anything ships
                       </p>
                       <p className="mt-1 text-sm leading-relaxed text-smoke">
-                        When you place this order, a team member calls you at{" "}
-                        <span className="text-ink">
-                          {form.phone || "the number you gave us"}
-                        </span>{" "}
-                        within one business day to confirm fitment, delivery and
-                        payment. We never ask for card details by email or text.
+                        {payOnline ? (
+                          <>
+                            After you pay, a team member calls you at{" "}
+                            <span className="text-ink">
+                              {form.phone || "the number you gave us"}
+                            </span>{" "}
+                            within one business day to confirm fitment and
+                            delivery. If a size doesn&rsquo;t fit, we sort it
+                            out with you before anything ships. We never ask
+                            for card details by email or text.
+                          </>
+                        ) : (
+                          <>
+                            When you send this order, a team member calls you
+                            at{" "}
+                            <span className="text-ink">
+                              {form.phone || "the number you gave us"}
+                            </span>{" "}
+                            within one business day to confirm fitment,
+                            delivery and payment. We never ask for card details
+                            by email or text.
+                          </>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -1218,9 +1331,19 @@ export default function CheckoutPage() {
                         htmlFor="agree"
                         className="text-sm leading-relaxed text-ink"
                       >
-                        I understand this order is a request, and that{" "}
-                        {BUSINESS.name} will call me to confirm fitment and
-                        payment before anything ships or is scheduled.
+                        {payOnline ? (
+                          <>
+                            I understand {BUSINESS.name} will call me to
+                            confirm fitment before anything ships or is
+                            scheduled.
+                          </>
+                        ) : (
+                          <>
+                            I understand this order is a request, and that{" "}
+                            {BUSINESS.name} will call me to confirm fitment and
+                            payment before anything ships or is scheduled.
+                          </>
+                        )}
                       </label>
                       {errors.agree && (
                         <p
@@ -1258,18 +1381,72 @@ export default function CheckoutPage() {
                 </Link>
               )}
 
-              <button type="submit" className="btn-primary" disabled={sending}>
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={sending || redirecting}
+              >
                 {stepIndex === STEPS.length - 1
-                  ? sending
-                    ? "Placing…"
-                    : "Place Order"
+                  ? redirecting
+                    ? "Opening payment…"
+                    : sending
+                      ? payOnline
+                        ? "Preparing payment…"
+                        : "Sending…"
+                      : payOnline
+                        ? "Continue to Payment"
+                        : "Place Order Request"
                   : "Continue"}
                 <ArrowRight size={16} aria-hidden />
               </button>
 
-              {Object.keys(errors).length > 0 && (
+              {Object.values(errors).some(Boolean) && (
                 <p role="alert" className="w-full text-sm text-drop">
                   Fix the highlighted fields above to continue.
+                </p>
+              )}
+
+              {serverError && (
+                <div
+                  role="alert"
+                  className="flex w-full items-start gap-2.5 rounded-sm border border-drop/40 bg-drop/5 p-4 text-sm text-ink"
+                >
+                  <AlertTriangle
+                    size={18}
+                    aria-hidden
+                    className="mt-0.5 shrink-0 text-drop"
+                  />
+                  <p className="min-w-0 leading-relaxed">
+                    {serverError}{" "}
+                    <span className="text-smoke">
+                      Edit the details above, or call{" "}
+                      <a
+                        href={BUSINESS.phoneHref}
+                        className="whitespace-nowrap text-ink underline underline-offset-4 hover:text-drop"
+                      >
+                        {BUSINESS.phone}
+                      </a>
+                      .
+                    </span>
+                  </p>
+                </div>
+              )}
+
+              {redirecting && (
+                <p
+                  role="status"
+                  className="w-full text-sm font-semibold text-ink"
+                >
+                  Taking you to secure payment with our shop&rsquo;s payment
+                  system…
+                </p>
+              )}
+
+              {status && (
+                <p className="w-full text-xs leading-relaxed text-smoke">
+                  {payOnline
+                    ? "Payment is handled securely by Extreme Tires\u2019 payment system (Tire Guru). Card details never touch this site."
+                    : "Checkout sends an order request; nothing is charged online yet."}
                 </p>
               )}
             </div>

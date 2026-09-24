@@ -163,6 +163,7 @@ export default function ProductPage({ kind = "tire" }) {
     addItem(
       {
         id: product.id,
+        sku: product.sku ?? product.id,
         kind: product.kind,
         // `name` here is "<brand> <model>" for the page headline and the SEO
         // title. The cart prints the brand itself, so the line carries the

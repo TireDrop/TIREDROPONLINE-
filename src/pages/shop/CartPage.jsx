@@ -95,8 +95,10 @@ function QtyStepper({ line, setQty }) {
 }
 
 function CartLine({ line, setQty, remove, addItem }) {
-  const href =
-    line.kind === "wheel" ? `/wheels/${line.slug}` : `/tires/${line.slug}`;
+  // A live distributor tire has no product page, so its line links back to
+  // the listing instead of to a page that does not exist.
+  const base = line.kind === "wheel" ? "/wheels" : "/tires";
+  const href = line.slug ? `${base}/${line.slug}` : base;
   const toggleId = `install-${line.key}`;
 
   // Installation is part of the line's identity, so flipping it means

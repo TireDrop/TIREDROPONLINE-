@@ -17,13 +17,15 @@
 // TWO RULES FOR EDITING THIS FILE:
 //   1. The privacy policy must describe what the code actually does, not what
 //      a tire site usually does. As built, this site sets no cookies, runs no
-//      analytics, loads no tracking pixels, captures no email addresses and
-//      has no backend: the only browser storage is localStorage for the cart
-//      and the comparison tray. Section 3 says exactly that. Card payments
-//      are taken by the live store's checkout (Shopify), so the policy names
-//      a payment processor without claiming the site takes no payment. If
-//      analytics or an email platform is ever added, that section has to
-//      change in the same commit.
+//      analytics, loads no tracking pixels and captures no email addresses.
+//      The only server code is the site's own API (`api/`), which asks ATD
+//      for tire data and passes orders to Tire Guru, the shop's management
+//      system. The only browser storage is localStorage for the cart and the
+//      comparison tray. Section 3 says exactly that. Card payments are
+//      processed by the shop's payment provider through Tire Guru, on its
+//      payment page, so the policy names that without claiming the site
+//      takes no payment. If analytics or an email platform is ever added,
+//      that section has to change in the same commit.
 //   2. Nothing here may point at a document that does not exist. Section 9
 //      used to say the return window was "stated at checkout" — it was not
 //      stated anywhere. Do not reintroduce a forward reference until the
@@ -100,6 +102,7 @@ const DOCS = {
         paragraphs: [
           "Adding something to the cart does not reserve it. When you complete checkout you are making an offer to buy, and we accept that offer when the order is confirmed as placed with the distributor. Until then, no contract exists between us.",
           "We may decline or cancel an order — before or after payment — if the item turns out to be unavailable, if a price or specification was listed in error, if we cannot verify the payment or the shipping address, or if the order looks fraudulent. If we do, you get a full refund of anything you have paid, and we will tell you why.",
+          "Payment: where online payment is offered, checkout hands you to the payment page of the shop's payment provider, run through Tire Guru, the management system Extreme Tires uses. Your card details go to them, not to this site. Where online payment is not offered, checkout sends an order request, and nothing is charged until we have confirmed the order with you.",
           "Every order gets an order number. Quote it when you call; it is the fastest way for us to find you.",
         ],
       },
@@ -237,7 +240,7 @@ const DOCS = {
           `Messages you send through the contact form or to ${BUSINESS.email}, or leave on the phone`,
         ],
         after: [
-          "We do not store card numbers. Card payments are handled by our payment processor, which receives the card details directly and handles them under its own security obligations; we see only that a payment went through.",
+          "We do not store card numbers. Card payments are processed by the shop's payment provider through Tire Guru, on their payment page: they receive the card details directly and handle them under their own security obligations, and we see only that a payment went through.",
           "We do not ask for information we have no use for. You do not need an account to browse the site, and there is no newsletter sign-up anywhere on it.",
         ],
       },
@@ -270,9 +273,10 @@ const DOCS = {
         heading: "4. Who else sees your information",
         paragraphs: ["A short list, and only where there is a reason:"],
         list: [
-          "Distributors, who receive the shipping address and order details because they are the ones packing and dispatching your tires",
+          "Tire Guru, the shop management system Extreme Tires runs its orders through, which receives your order, contact details and address so the shop can process it",
+          "ATD (American Tire Distributors), our distributor, which receives the shipping address and order details because it packs and dispatches your tires",
           "Shipping carriers, for delivery and tracking",
-          "The payment processor that handles card payments — they receive the card details, not us",
+          "The shop's payment provider, which processes card payments through Tire Guru — it receives the card details, not us",
           "Financing providers, if you choose to apply; your application goes to them under their own privacy policy, not ours",
           "Manufacturers, when a warranty claim requires it",
           "The company that hosts this website, which keeps ordinary server logs of requests made to it",

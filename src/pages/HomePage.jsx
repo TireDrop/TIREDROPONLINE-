@@ -30,6 +30,7 @@ import { MOBILE_SERVICES, SHOP_SERVICES } from "../data/services.js";
 import { TIRES, TIRE_CATEGORIES } from "../data/products.js";
 import ProductCard from "../components/shop/ProductCard.jsx";
 import SearchPanel from "../components/shop/SearchPanel.jsx";
+import { searchTires } from "../data/api.js";
 import { Seo, Section, SectionHead } from "../components/ui/index.jsx";
 
 /* ---------------------------------- Hero --------------------------------- */
@@ -72,6 +73,18 @@ function Hero() {
     const query = new URLSearchParams(
       Object.entries(fields).filter(([, value]) => value),
     );
+    // Start the search now rather than after the route change, so the tire
+    // listing usually finds it already answered. A partial size has nothing
+    // to send and is narrowed on the listing itself. Failure is handled
+    // there too: the listing falls back to the sample catalog.
+    const full = payload.width && payload.aspect && payload.diameter;
+    if (payload.type === "vehicle" || full) {
+      searchTires(
+        payload.type === "vehicle"
+          ? { year: payload.year, make: payload.make, model: payload.model }
+          : { size: `${payload.width}/${payload.aspect}R${payload.diameter}` },
+      ).catch(() => {});
+    }
     navigate(`/tires?${query.toString()}`);
   };
 

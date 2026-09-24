@@ -41,5 +41,21 @@
       "source": "/(robots.txt|sitemap.xml)",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=300" }]
     }
+  ],
+  "redirects": [
+    { "source": "/collections/tires", "destination": "/tires", "statusCode": 301 },
+    { "source": "/collections/wheels", "destination": "/wheels", "statusCode": 301 },
+    {
+      "source": "/pages/:page(about|shipping|install|mobile-service|auto-service|commercial-tires|locations|contact|reviews|gallery|financing|tire-care|terms|privacy|accessibility|find-my-tires|tire-size|tire-check)",
+      "destination": "/:page",
+      "statusCode": 301
+    },
+    { "source": "/cart/:path+", "destination": "/cart", "statusCode": 301 },
+    {
+      "source": "/policies/privacy-policy",
+      "destination": "/privacy",
+      "statusCode": 301
+    },
+    { "source": "/policies/:path*", "destination": "/terms", "statusCode": 301 }
   ]
 }

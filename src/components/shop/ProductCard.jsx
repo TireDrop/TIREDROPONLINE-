@@ -20,8 +20,14 @@ function specLine(product) {
 }
 
 export default function ProductCard({ product }) {
-  const href = `${product.kind === "wheel" ? "/wheels" : "/tires"}/${product.slug}`;
+  // A live distributor tire has no product page of its own (the pages are the
+  // sample catalog's), so it gets no link and no compare box rather than a
+  // link to a page quoting a different price.
+  const href = product.slug
+    ? `${product.kind === "wheel" ? "/wheels" : "/tires"}/${product.slug}`
+    : null;
   const isTire = product.kind === "tire";
+  const canCompare = isTire && Boolean(product.slug);
 
   // Wheels are sold in fours too, so both get the set-of-four headline that a
   // shopper is really comparing between sites.
@@ -42,6 +48,8 @@ export default function ProductCard({ product }) {
     addItem(
       {
         id: product.id,
+        // What the checkout sends to the API. Sample tires use their id.
+        sku: product.sku ?? product.id,
         kind: product.kind,
         // The cart and the order summary both print the brand next to this,
         // so the brand must not be in here as well.
@@ -65,7 +73,7 @@ export default function ProductCard({ product }) {
   return (
     <article className="card-hover group flex h-full flex-col overflow-hidden">
       <div className="relative flex items-center justify-center border-b border-ink/[0.05] bg-gradient-to-b from-bone to-fog p-3 sm:p-5">
-        {isTire && (
+        {canCompare && (
           <label
             // `z-10` is load-bearing, not decoration. The art below scales on
             // hover, and a transform promotes it into the positioned paint
@@ -113,9 +121,13 @@ export default function ProductCard({ product }) {
         {/* A card title is the second line of a card, not a page headline —
             it carries the display face and the weight, not the size. */}
         <h3 className="h3 mt-1 text-[0.9375rem] leading-[1.2] sm:text-[1.0625rem] sm:leading-[1.15] md:text-[1.15rem]">
-          <Link to={href} className="transition-colors hover:text-drop">
-            {product.model}
-          </Link>
+          {href ? (
+            <Link to={href} className="transition-colors hover:text-drop">
+              {product.model}
+            </Link>
+          ) : (
+            product.model
+          )}
         </h3>
         <p className="tnum mt-1 text-[11px] leading-snug text-smoke sm:mt-1.5 sm:text-xs">
           {specLine(product)}
@@ -149,7 +161,7 @@ export default function ProductCard({ product }) {
               over the artwork costs a quarter of that while covering the
               product. Down here it gets a full row, its own label, and a tap
               target that does not fight the image. */}
-          {isTire && (
+          {canCompare && (
             <label
               className={`mt-2.5 flex min-h-[44px] items-center gap-2 rounded-sm border border-ink/10 px-2.5 sm:hidden ${
                 lockedOut ? "cursor-not-allowed opacity-60" : "cursor-pointer"
@@ -194,14 +206,16 @@ export default function ProductCard({ product }) {
               )}
             </button>
 
-            <Link
-              to={href}
-              className="btn-outline btn-sm min-h-[44px] w-full px-2 sm:px-4"
-              aria-label={`View details for ${product.brand} ${product.model}`}
-            >
-              <span className="sm:hidden">Details</span>
-              <span className="hidden sm:inline">View Details</span>
-            </Link>
+            {href && (
+              <Link
+                to={href}
+                className="btn-outline btn-sm min-h-[44px] w-full px-2 sm:px-4"
+                aria-label={`View details for ${product.brand} ${product.model}`}
+              >
+                <span className="sm:hidden">Details</span>
+                <span className="hidden sm:inline">View Details</span>
+              </Link>
+            )}
           </div>
 
           {/* Announced rather than only shown, so the confirmation reaches a

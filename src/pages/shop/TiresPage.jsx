@@ -27,6 +27,7 @@ import { ratingsFor } from "../../data/tireRatings.js";
 import { setPrice } from "../../data/pricing.js";
 import { BUSINESS } from "../../data/business.js";
 import { oeSizeFor } from "../../data/fitment.js";
+import { useTireSearch } from "../../data/useApi.js";
 import { money } from "../../context/CartContext.jsx";
 
 // Tires sell as sets of four, so the price sorts are sorted on the set — the
@@ -132,6 +133,26 @@ export default function TiresPage() {
   const hasSize = Boolean(
     sizeQuery.width || sizeQuery.aspect || sizeQuery.diameter,
   );
+  const fullSize =
+    sizeQuery.width && sizeQuery.aspect && sizeQuery.diameter
+      ? `${sizeQuery.width}/${sizeQuery.aspect}R${sizeQuery.diameter}`
+      : "";
+
+  // Vehicle and full-size searches go through the API (ATD when it is live).
+  // Until it answers, or when there is no API at all, the search answers from
+  // the sample catalog, which is exactly what this page always showed.
+  const search = useTireSearch(
+    hasVehicle
+      ? { year: vehicle.year, make: vehicle.make, model: vehicle.model }
+      : fullSize
+        ? { size: fullSize }
+        : null,
+  );
+  const live = search.active && search.source === "atd";
+  // Live results replace the sample catalog outright: a page that mixed
+  // distributor stock with sample listings would be quoting two sources as
+  // one. Partial sizes ("any"/45/R17) still narrow the catalog locally.
+  const pool = live ? search.items : TIRES;
 
   /** Writes only the keys we own, so ?view and ?search survive. */
   const patchParams = (patch) => {
@@ -185,7 +206,7 @@ export default function TiresPage() {
   const results = useMemo(() => {
     const min = Number(filters.minPrice) || 0;
     const max = Number(filters.maxPrice) || Infinity;
-    const filtered = TIRES.filter((t) => {
+    const filtered = pool.filter((t) => {
       if (filters.brands.length && !filters.brands.includes(t.brand))
         return false;
       if (filters.categories.length && !filters.categories.includes(t.category))
@@ -204,19 +225,30 @@ export default function TiresPage() {
       return true;
     });
     return sortProducts(filtered, sort);
-  }, [filters, sizeQuery.width, sizeQuery.aspect, sizeQuery.diameter, sort]);
+  }, [
+    pool,
+    filters,
+    sizeQuery.width,
+    sizeQuery.aspect,
+    sizeQuery.diameter,
+    sort,
+  ]);
 
   // A vehicle narrows the page rather than replacing it. Filtering the catalog
   // down to one size outright can leave a single card on screen, and someone
   // who arrived by vehicle still wants to see what else is stocked — so the
   // sizes that fit come first and the rest keep their own heading below.
-  const fitsVehicle = (t) =>
-    oe != null &&
-    t.width === oe.width &&
-    t.aspect === oe.aspect &&
-    t.rimDiameter === oe.rimDiameter;
-  const fitting = oe ? results.filter(fitsVehicle) : [];
-  const others = oe ? results.filter((t) => !fitsVehicle(t)) : results;
+  //
+  // What "fits" is the vehicle search's answer: the distributor's fitment
+  // when ATD is live, the typical original size from the fitment table when
+  // it is not.
+  const fitIds = new Set(hasVehicle ? search.items.map((t) => t.id) : []);
+  const fitSizes = [...new Set(hasVehicle ? search.items.map((t) => t.size) : [])];
+  const fitSize = live ? fitSizes.join(", ") || oe?.size : oe?.size;
+  const showFit = hasVehicle && (oe != null || (live && fitSizes.length > 0));
+  const fitsVehicle = (t) => fitIds.has(t.id);
+  const fitting = showFit ? results.filter(fitsVehicle) : [];
+  const others = showFit ? results.filter((t) => !fitsVehicle(t)) : results;
 
   const activeFilterCount = countActiveFilters(filters);
   const sizeLabel = `${sizeQuery.width || "any"}/${sizeQuery.aspect || "any"}R${
@@ -447,18 +479,18 @@ export default function TiresPage() {
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-smoke" aria-live="polite">
                 <span className="font-semibold text-ink">
-                  {oe ? fitting.length : results.length}{" "}
-                  {(oe ? fitting.length : results.length) === 1
+                  {showFit ? fitting.length : results.length}{" "}
+                  {(showFit ? fitting.length : results.length) === 1
                     ? "tire"
                     : "tires"}
                 </span>{" "}
-                {oe ? (
+                {showFit ? (
                   <>
-                    in {oe.size}
+                    in {fitSize}
                     {others.length > 0 && <> · {others.length} other sizes</>}
                   </>
                 ) : (
-                  <>of {TIRES.length}</>
+                  <>of {pool.length}</>
                 )}
                 {hasSize && (
                   <>
@@ -531,7 +563,7 @@ export default function TiresPage() {
                   </div>
                 }
               />
-            ) : oe ? (
+            ) : showFit ? (
               <div className="space-y-10">
                 <section aria-labelledby="fits-heading">
                   <h2
@@ -541,7 +573,9 @@ export default function TiresPage() {
                     Fits your {vehicle.year} {vehicle.make} {vehicle.model}
                   </h2>
                   <p className="mb-4 text-sm text-smoke">
-                    Tires on this page in {oe.size}, the typical original size.
+                    {oe && !live
+                      ? `Tires on this page in ${oe.size}, the typical original size.`
+                      : `Tires on this page in ${fitSize}.`}
                   </p>
                   {fitting.length > 0 ? (
                     <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
@@ -552,7 +586,7 @@ export default function TiresPage() {
                   ) : (
                     <div className="card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
                       <p className="text-sm leading-relaxed text-ink">
-                        Nothing on this page comes in {oe.size} right now. We
+                        Nothing on this page comes in {fitSize} right now. We
                         can order it — call with the size and we will quote it.
                       </p>
                       <a
@@ -575,7 +609,7 @@ export default function TiresPage() {
                       Other sizes we stock
                     </h2>
                     <p className="mb-4 text-sm text-smoke">
-                      These are not {oe.size} and will not fit without a wheel
+                      These are not {fitSize} and will not fit without a wheel
                       change.
                     </p>
                     <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">

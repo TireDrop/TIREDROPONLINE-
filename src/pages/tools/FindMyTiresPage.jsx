@@ -25,6 +25,7 @@ import {
 import ProductCard from "../../components/shop/ProductCard.jsx";
 import { TIRES, VEHICLE_DATA, VEHICLE_MAKES } from "../../data/products.js";
 import { FITMENT, fitmentFor } from "../../data/fitment.js";
+import { useTireSearch } from "../../data/useApi.js";
 import { RATING_AXES, ratingsFor } from "../../data/tireRatings.js";
 import { compareSizes, parseSize } from "../../data/tireMath.js";
 import { SET_SIZE, setPrice } from "../../data/pricing.js";
@@ -438,9 +439,9 @@ function buildConstraints({
 }
 
 /** Runs every constraint over the catalog and keeps the paper trail. */
-function evaluate(constraints, relaxed) {
+function evaluate(constraints, relaxed, catalog = TIRES) {
   const active = constraints.filter((c) => !relaxed.includes(c.id));
-  const rows = TIRES.map((tire) => {
+  const rows = catalog.map((tire) => {
     const r = ratingsFor(tire);
     const failed = active.filter((c) => !c.keep(tire, r)).map((c) => c.id);
     return { tire, r, failed };
@@ -1139,6 +1140,15 @@ export default function FindMyTiresPage() {
 
   const weights = weightsFor(answers);
 
+  // The shopper's size goes to the API. When ATD answers live, its tires are
+  // what gets ranked; otherwise (sample data, or no API) the sample catalog
+  // is, exactly as before.
+  const search = useTireSearch(
+    showResults && size ? { size: size.normalized } : null,
+  );
+  const catalog =
+    search.active && search.source === "atd" ? search.items : TIRES;
+
   // Twenty tires and six axes: the whole evaluation is cheap enough to run on
   // every render, which keeps the answers and the ranking impossible to
   // disagree with each other.
@@ -1149,6 +1159,7 @@ export default function FindMyTiresPage() {
   } = evaluate(
     buildConstraints({ size, vclass, knownVehicle, vehicleLabel, answers }),
     answers.relaxed,
+    catalog,
   );
 
   const ranked = rankPool(pool, weights);
