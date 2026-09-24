@@ -10,6 +10,7 @@
   <div aria-hidden="true" class="td-hero__ring"></div>
 
   <div class="td-hero__inner">
+   <div class="td-hero__content">
     {% if section.settings.eyebrow != blank %}
       <p class="td-hero__eyebrow">{{ section.settings.eyebrow }}</p>
     {% endif %}
@@ -37,6 +38,7 @@
         </a>
       {% endif %}
     </div>
+   </div>
   </div>
 </section>
 
@@ -62,6 +64,10 @@
     max-width: 1280px; margin: 0 auto;
     padding: 3.5rem 1rem 4rem;
   }
+  /* Phones: centred, with full-width buttons of equal size. Two buttons of
+     different widths stacked flush-left read as a mistake. */
+  .td-hero__content { text-align: center; }
+  .td-hero__lede { margin-left: auto; margin-right: auto; }
   .td-hero__eyebrow {
     font-family: var(--font-subheading--family, inherit);
     font-size: .75rem; font-weight: 700; letter-spacing: .09em;
@@ -78,7 +84,8 @@
     margin: 1.25rem 0 0; max-width: 34rem;
     font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.78);
   }
-  .td-hero__actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2rem; }
+  .td-hero__actions { display: flex; flex-direction: column; gap: .75rem; margin-top: 2rem; }
+  .td-hero__actions .td-btn { width: 100%; }
   .td-btn {
     display: inline-flex; align-items: center; justify-content: center;
     min-height: 48px; padding: 0 1.5rem; border-radius: 999px;
@@ -93,10 +100,17 @@
 
   @media (min-width: 768px) {
     .td-hero__inner { padding: 5rem 2rem 5.5rem; }
+    /* From tablet up the text sits left on the page grid, balanced against
+       the ring on the right, and the buttons go back to natural width. */
+    .td-hero__content { text-align: left; max-width: 50rem; }
+    .td-hero__accent { white-space: nowrap; }
+    .td-hero__lede { margin-left: 0; }
+    .td-hero__actions { flex-direction: row; flex-wrap: wrap; }
+    .td-hero__actions .td-btn { width: auto; }
   }
-  @media (min-width: 1024px) {
+  /* The ring only fits beside the headline once there is room for both. */
+  @media (min-width: 1200px) {
     .td-hero__ring { display: block; }
-    .td-hero__inner { max-width: 68%; }
   }
 </style>
 

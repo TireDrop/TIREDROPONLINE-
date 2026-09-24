@@ -18,11 +18,19 @@
 
     <div class="td-tools__grid">
       {% for block in section.blocks %}
-        <a href="{{ block.settings.link }}" class="td-tools__card" {{ block.shopify_attributes }}>
+        {% if block.settings.link != blank %}
+          <a href="{{ block.settings.link }}" class="td-tools__card" {{ block.shopify_attributes }}>
+        {% else %}
+          <div class="td-tools__card" {{ block.shopify_attributes }}>
+        {% endif %}
           <h3 class="td-tools__title">{{ block.settings.title }}</h3>
           <p class="td-tools__copy">{{ block.settings.copy }}</p>
-          <span class="td-tools__cta">Open it <span aria-hidden="true">&rarr;</span></span>
-        </a>
+          {% if block.settings.link != blank %}
+            <span class="td-tools__cta">Open it <span aria-hidden="true">&rarr;</span></span>
+          </a>
+          {% else %}
+          </div>
+          {% endif %}
       {% endfor %}
     </div>
   </div>
@@ -34,7 +42,7 @@
     color: #FFFFFF;
   }
   .td-tools__inner { max-width: 1280px; margin: 0 auto; padding: 3.5rem 1rem; }
-  .td-tools__head { max-width: 40rem; margin-bottom: 2rem; }
+  .td-tools__head { max-width: 40rem; margin-bottom: 2rem; margin-left: auto; margin-right: auto; text-align: center; }
   .td-tools__eyebrow {
     font-family: var(--font-subheading--family, inherit);
     font-size: .75rem; font-weight: 700; letter-spacing: .09em;
@@ -44,8 +52,9 @@
     font-family: var(--font-heading--family, inherit);
     font-weight: 800; letter-spacing: -.02em; line-height: 1.05;
     font-size: clamp(1.75rem, 4vw, 2.5rem); margin: 0; color: #FFFFFF;
+    text-wrap: balance;
   }
-  .td-tools__lede { margin: .875rem 0 0; font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.75); }
+  .td-tools__lede { margin: .875rem auto 0; max-width: 36rem; text-wrap: pretty; font-size: 1.0625rem; line-height: 1.6; color: rgba(255,255,255,.75); }
   .td-tools__grid { display: grid; gap: .75rem; }
   .td-tools__card {
     display: flex; flex-direction: column; text-decoration: none;
@@ -65,7 +74,7 @@
     display: inline-flex; align-items: center; gap: .375rem;
   }
   @media (min-width: 768px) { .td-tools__inner { padding: 4.5rem 2rem; } }
-  @media (min-width: 1024px) { .td-tools__grid { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; } }
+  @media (min-width: 900px) { .td-tools__grid { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; } }
 </style>
 
 {% schema %}
