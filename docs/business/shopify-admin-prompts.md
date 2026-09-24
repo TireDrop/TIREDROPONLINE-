@@ -341,3 +341,70 @@ Domain: tiredroponline.com (DNS at GoDaddy). Store: TireDrop.
    Justin will confirm the test message arrived in the info@ inbox.
 ```
 
+
+---
+
+## 11. Visual audit of the live site (read only)
+
+Run after any publish. It checks the live storefront at desktop and phone
+width for layout, symmetry and broken pieces. It changes nothing.
+
+```
+TASK: Visual audit of https://tiredroponline.com. CHANGE NOTHING. Screenshot
+every problem you find.
+
+Check every page below twice: once with the browser window at full desktop width
+(about 1440px), then with it narrowed to phone width (about 390px, or use
+DevTools device mode, iPhone 12/13/14).
+
+PAGES:
+/ · /collections/tires · /collections/wheels · /cart · /search?q=225/45R17
+/pages/find-my-tires · /pages/tire-size · /pages/tire-check
+/pages/shipping · /pages/install · /pages/mobile-service · /pages/auto-service
+/pages/commercial-tires · /pages/about · /pages/locations · /pages/contact
+/pages/reviews · /pages/gallery · /pages/financing · /pages/tire-care
+/pages/terms · /pages/privacy · /pages/accessibility · /pages/data-sharing-opt-out
+/this-page-does-not-exist (404)
+
+ON EVERY PAGE CHECK:
+1. Nothing runs off the side. Scroll right; there must be no sideways scroll.
+2. Left and right edges line up. Headings, text and cards share the same left
+   margin, and the margins are equal on both sides.
+3. Headings that should be centred are centred. There are no one-word orphan
+   lines in big headings.
+4. Cards in the same row are the same height, with their buttons lined up.
+5. There is no blank section, no raw code or "Liquid error" text, and no
+   broken images or icons.
+6. Text is readable: no light grey on white, and no dark text on the dark
+   bands.
+7. PHONE: tapping buttons and links is easy, and none overlap. The bottom
+   "Shop Tires / Call" bar never covers content or the footer.
+
+SITE-WIDE CHECKS:
+- Header: desktop dropdowns (Tires, Wheels, Shipping & Install, Service,
+  Tools, More) open on hover or click and close on Esc. The search box
+  submits. The cart icon goes to /cart.
+- Phone header: the menu button opens the drawer, sub-menus expand, and it
+  closes on X and Esc.
+- Footer: 4 link columns, then "The Shop Behind Us" (phone, email, address,
+  hours, Facebook), then the bottom bar (logo, ©, Terms of Use · Privacy ·
+  Your Privacy Choices · Accessibility). Click each footer link once and
+  report any 404.
+- Homepage hero "Find your fit" card: pick Year, Make and Model, then press
+  Find Tires. Switch to the size tab, enter 225/45R17 and press Find Tires.
+  Report where each one lands.
+- Tools: Tire Size Decoder with 225/45R17 shows numbers. Tire Check with
+  4/32 and DOT 1015 shows a verdict. Find My Tires can be completed.
+- Tables on Auto Service and Mobile Service: at phone width they turn into
+  stacked cards, with no sideways scroll.
+- Contact, Financing and Commercial forms: DO NOT SUBMIT. Only confirm the
+  fields line up and an empty submit shows error messages.
+- Cart (empty is fine): it shows "Shipping: Free" and has no promo code
+  field.
+- Nothing anywhere mentions rebates, coupons, "since 2006", star ratings or
+  staff names.
+
+REPORT BACK: a list grouped by page. For each problem give desktop or phone,
+what's wrong, where on the page it is, and a screenshot. Finish with the pages
+that had no problems.
+```
