@@ -125,13 +125,13 @@ export default function AboutPage() {
     <>
       <Seo
         title="About TireDrop"
-        description={`${BUSINESS.name} is the national online store of ${BUSINESS.parent}, an independent tire shop in ${BUSINESS.shop.city}, FL since ${BUSINESS.foundedYear}. Tires and wheels shipped across the continental US, or fitted at the shop.`}
+        description={`${BUSINESS.name} is the national online store of ${BUSINESS.parent}, a family-owned tire shop in ${BUSINESS.shop.city}, FL since ${BUSINESS.foundedYear}. Tires and wheels shipped across the continental US, or fitted at the shop.`}
       />
 
       <PageHero
         eyebrow="About Us"
         title="A real tire shop, with a national counter"
-        lede={`${BUSINESS.name} is the online store of ${BUSINESS.parent} — an independent shop that has been fitting tires in South Florida since ${BUSINESS.foundedYear}. We ship anywhere in ${BUSINESS.shipping.area}. Near ${BUSINESS.shop.city}, we will also put them on for you.`}
+        lede={`${BUSINESS.name} is the online store of ${BUSINESS.parent} — a family-owned shop that has been fitting tires in South Florida since ${BUSINESS.foundedYear}. We ship anywhere in ${BUSINESS.shipping.area}. Near ${BUSINESS.shop.city}, we will also put them on for you.`}
       >
         <div className="flex flex-wrap gap-3">
           <Link to="/tires" className="btn-primary">

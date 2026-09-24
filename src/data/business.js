@@ -26,7 +26,7 @@ export const BUSINESS = {
   poweredBy: "Powered by Extreme Tires",
   domain: "tiredroponline.com",
   tagline: "Tires shipped. Or installed.",
-  foundedYear: 2007, // Extreme Tires, the parent business
+  foundedYear: 2006, // Extreme Tires — per the parent site and its listings
 
   phone: "(954) 773-1896",
   phoneHref: "tel:+19547731896",
@@ -81,7 +81,7 @@ export const BUSINESS = {
 // those rather than rendering a link that goes nowhere, which is what three
 // href="#" icons were doing. Fill a URL in and the icon appears.
 export const SOCIAL = {
-  facebook: null,
+  facebook: "https://www.facebook.com/Extremetires/",
   instagram: null,
   youtube: null,
 };
