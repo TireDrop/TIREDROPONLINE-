@@ -173,6 +173,7 @@ Type: **Barlow Condensed** (`font-display`) for headings, uppercase.
 | ----------------------------------------------- | ----------------------------------- |
 | `/`                                             | Home                                |
 | `/tires`, `/tires/:slug`                        | Tire catalog + product detail       |
+| `/tires/p/:sku`                                 | Product page for an API tire by sku |
 | `/wheels`, `/wheels/:slug`                      | Wheel catalog + product detail      |
 | `/commercial-tires`                             | Fleet tires + quote request         |
 | `/compare`                                      | Side-by-side tire comparison        |

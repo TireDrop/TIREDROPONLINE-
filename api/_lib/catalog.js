@@ -13,7 +13,12 @@
 import { TIRES } from "../../src/data/products.js";
 import { FITMENT, oeSizeFor } from "../../src/data/fitment.js";
 import { parseSize } from "../../src/data/tireMath.js";
-import { ENDPOINTS as ATD_ENDPOINTS, lookupAtdSkus, searchAtd } from "./atd.js";
+import {
+  ENDPOINTS as ATD_ENDPOINTS,
+  getBySku as getAtdBySku,
+  lookupAtdSkus,
+  searchAtd,
+} from "./atd.js";
 import { HttpError } from "./http.js";
 
 // ---- Sample catalog ---------------------------------------------------------
@@ -127,6 +132,21 @@ export async function searchTires(query, config, deps = {}) {
   }
   const items = SAMPLE_ITEMS.filter((item) => matchesSize(item, size));
   return { source: "sample", query: echo, items: applyFilters(items, query) };
+}
+
+// ---- One tire by sku (product pages) --------------------------------------
+
+/**
+ * `{ source, item }` for one sku, with `item` null when the catalog in play
+ * does not carry it. Sample mode reads the sample catalog; live mode asks
+ * ATD, priced exactly like a search result (dealer cost never included).
+ */
+export async function getTireBySku(sku, config, deps = {}) {
+  if (config.atd.mode === "live") {
+    const item = await getAtdBySku(sku, config.atd, deps);
+    return { source: "atd", item };
+  }
+  return { source: "sample", item: SAMPLE_BY_SKU.get(sku) ?? null };
 }
 
 // ---- Server-side pricing for checkout ---------------------------------------

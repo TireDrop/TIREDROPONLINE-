@@ -12,6 +12,7 @@ import {
   Package,
   Phone,
   ShoppingCart,
+  Truck,
   User,
 } from "lucide-react";
 
@@ -22,7 +23,13 @@ import {
   Badge,
 } from "../../components/ui/index.jsx";
 import { useCart, money } from "../../context/CartContext.jsx";
-import { BUSINESS } from "../../data/business.js";
+import {
+  BUSINESS,
+  INSTALL_AREA_LIST,
+  MOBILE_AREA_ERROR,
+  installAreaCity,
+} from "../../data/business.js";
+import { getService } from "../../data/services.js";
 import { ApiError, submitCheckout } from "../../data/api.js";
 import { useApiStatus } from "../../data/useApi.js";
 import { summarize } from "./CartPage.jsx";
@@ -127,8 +134,15 @@ const SHIP_STATES = [
   ["WY", "Wyoming"],
 ];
 
-// Order matters: shipping is the default path, ship-to-store follows. The
-// values are the API's `delivery` field.
+// The mobile install labour price is quoted on the call; the only figure the
+// page may name is the service's published "starting at" price.
+const MOBILE_INSTALL = getService("tire-installation");
+const MOBILE_INSTALL_FROM = MOBILE_INSTALL
+  ? `Tire installation starts at $${MOBILE_INSTALL.priceFrom} ${MOBILE_INSTALL.priceUnit}; your exact install price is quoted on the call.`
+  : "Your install price is quoted on the call.";
+
+// Order matters: shipping is the default path, ship-to-store follows, then
+// the van. The values are the API's `delivery` field.
 const FULFILLMENT = [
   {
     value: "ship",
@@ -141,6 +155,12 @@ const FULFILLMENT = [
     icon: Building2,
     title: `Free ship-to-store at ${BUSINESS.parent}, ${BUSINESS.shop.city}`,
     copy: `Free delivery to ${BUSINESS.shop.full}, where we can fit them in the bay. South Florida.`,
+  },
+  {
+    value: "mobile",
+    icon: Truck,
+    title: "Mobile install at my address (South Florida)",
+    copy: `Our van brings the tires and fits them where you park. Covers ${INSTALL_AREA_LIST}.`,
   },
 ];
 
@@ -179,18 +199,28 @@ function validateInstall(f, { hasShopInstall = false } = {}) {
   // A line set to "ship free to the shop and we'll fit them" is already
   // carrying an installation charge. Letting the order ship to a house
   // instead bills for a fitting nobody is booked for, and the confirmation
-  // then promises both at once.
+  // then promises both at once. Mobile install is quoted separately on the
+  // call, so the same shop charge would double up there too.
   else if (f.fulfillment === "ship" && hasShopInstall)
     e.fulfillment =
       "Your cart has a set booked for installation at the shop, which is included in the total below. Choose \u201cFree ship-to-store\u201d above, or turn installation off in your cart to have it shipped to you.";
+  else if (f.fulfillment === "mobile" && hasShopInstall)
+    e.fulfillment =
+      "Your cart has a set booked for installation at the shop, which is included in the total below. Choose \u201cFree ship-to-store\u201d above, or turn shop installation off in your cart to book mobile install instead.";
 
-  // Only a shipped order needs an address; ship-to-store goes to the shop.
-  if (f.fulfillment === "ship") {
+  // Shipping and mobile install need an address; ship-to-store goes to the
+  // shop. Mobile is Florida only, inside the install area, and the server
+  // checks both again.
+  const mobile = f.fulfillment === "mobile";
+  if (f.fulfillment === "ship" || mobile) {
     if (!f.street.trim()) e.street = "Enter the street address.";
     if (!f.city.trim()) e.city = "Enter the city.";
-    if (!f.state) e.state = "Choose the state.";
-    else if (!SHIP_STATES.some(([code]) => code === f.state))
-      e.state = "We only ship to the lower 48 states and DC.";
+    else if (mobile && !installAreaCity(f.city)) e.city = MOBILE_AREA_ERROR;
+    if (!mobile) {
+      if (!f.state) e.state = "Choose the state.";
+      else if (!SHIP_STATES.some(([code]) => code === f.state))
+        e.state = "We only ship to the lower 48 states and DC.";
+    }
     if (!f.zip.trim()) e.zip = "Enter a ZIP code.";
     else if (!ZIP_RE.test(f.zip.trim()))
       e.zip = "Enter a 5-digit ZIP code, like 33351.";
@@ -229,8 +259,10 @@ function validateVehicle(f) {
 
 function validateReview(f, { payOnline = false } = {}) {
   const e = {};
+  // Mobile install is never paid online: it is booked and priced on the call.
+  const payNow = payOnline && f.fulfillment !== "mobile";
   if (!f.agree)
-    e.agree = payOnline
+    e.agree = payNow
       ? "Please confirm you understand we check fitment before anything ships."
       : "Please confirm you understand this order is a request.";
   return e;
@@ -339,7 +371,7 @@ function SummaryRow({ term, value }) {
 }
 
 /** Money rail rendered on the review step and again on the confirmation. */
-function OrderSummary({ lines, totals }) {
+function OrderSummary({ lines, totals, mobile = false }) {
   return (
     <div className="card p-6">
       <h3 className="h3">Order Summary</h3>
@@ -372,6 +404,9 @@ function OrderSummary({ lines, totals }) {
           term="Installation at the shop"
           value={totals.installTotal > 0 ? money(totals.installTotal) : "—"}
         />
+        {mobile && (
+          <SummaryRow term="Mobile install" value="Quoted on the call" />
+        )}
         <SummaryRow term="Shipping" value="Free" />
         <SummaryRow term="Sales tax (7%)" value={money(totals.tax)} />
       </dl>
@@ -429,14 +464,16 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState({});
   const [placed, setPlaced] = useState(null);
   const [sending, setSending] = useState(false);
-  // Set once the API hands back a Tire Guru payment page, just before the
+  // Set once the API hands back a hosted payment page, just before the
   // browser leaves for it.
   const [redirecting, setRedirecting] = useState(false);
   // A rejection from the server ("We only ship to the lower 48 states and
   // DC"), shown inline on the review step.
   const [serverError, setServerError] = useState("");
   const status = useApiStatus();
-  const payOnline = status?.checkout === "tireguru";
+  // Online payment is on whenever the server's checkout flag says anything
+  // other than "request".
+  const payOnline = Boolean(status) && status.checkout !== "request";
   const headingRef = useRef(null);
   // Once the shopper picks a delivery option it is theirs; until then the
   // cart decides the default.
@@ -513,6 +550,8 @@ export default function CheckoutPage() {
     setSending(true);
 
     const ship = form.fulfillment === "ship";
+    const mobile = form.fulfillment === "mobile";
+    const pickup = form.fulfillment === "pickup";
     const installLines = safeLines.filter((l) => l.install);
     // Everything the API has no field for rides in `notes`, so the shop sees
     // the vehicle and any install booking alongside the order.
@@ -520,9 +559,11 @@ export default function CheckoutPage() {
       `Vehicle: ${[form.year, form.make, form.model, form.trim]
         .filter(Boolean)
         .join(" ")}`,
-      !ship &&
+      pickup &&
         form.date &&
         `Preferred install: ${formatLongDate(form.date)}, ${windowLabel(form.timeWindow)}`,
+      mobile &&
+        "Mobile install at the address above: schedule the van and quote the install on the call.",
       installLines.length > 0 &&
         `Install at the shop: ${installLines
           .map((l) => `${l.qty}x ${l.brand} ${l.name} ${l.size}`.trim())
@@ -535,19 +576,23 @@ export default function CheckoutPage() {
     try {
       outcome = await submitCheckout({
         items: safeLines.map((l) => ({ sku: l.sku ?? l.id, qty: l.qty })),
-        delivery: ship ? "ship" : "pickup",
+        delivery: form.fulfillment,
         customer: {
           name: `${form.firstName} ${form.lastName}`.trim(),
           email: form.email.trim(),
           phone: form.phone.trim(),
         },
-        ...(ship
+        ...(ship || mobile
           ? {
               address: {
                 line1: form.street.trim(),
                 line2: form.line2.trim(),
-                city: form.city.trim(),
-                state: form.state,
+                // The install area's own spelling, so "coral springs" reads
+                // cleanly on the order.
+                city: mobile
+                  ? (installAreaCity(form.city) ?? form.city.trim())
+                  : form.city.trim(),
+                state: mobile ? "FL" : form.state,
                 zip: form.zip.trim(),
               },
             }
@@ -625,10 +670,11 @@ export default function CheckoutPage() {
   if (placed) {
     const f = placed.form;
     const ship = f.fulfillment === "ship";
+    const mobile = f.fulfillment === "mobile";
     const shipTo = [
       f.street,
       f.line2,
-      `${f.city}, ${f.state} ${f.zip}`.trim(),
+      `${mobile ? (installAreaCity(f.city) ?? f.city) : f.city}, ${mobile ? "FL" : f.state} ${f.zip}`.trim(),
     ]
       .filter(Boolean)
       .join(", ");
@@ -642,13 +688,17 @@ export default function CheckoutPage() {
     return (
       <>
         <Seo
-          title="Order Request Received"
+          title={mobile ? "Booking Request Received" : "Order Request Received"}
           description="Your TireDrop order request is in. It is not paid yet: we call to confirm fitment, delivery or your install window, and payment."
         />
         <Breadcrumbs
           trail={[
             { label: "Cart", to: "/cart" },
-            { label: "Order Request Received" },
+            {
+              label: mobile
+                ? "Booking Request Received"
+                : "Order Request Received",
+            },
           ]}
         />
 
@@ -663,16 +713,26 @@ export default function CheckoutPage() {
               <div className="min-w-0">
                 <p className="eyebrow mb-1">
                   {placed.delivered
-                    ? "Order request received"
+                    ? mobile
+                      ? "Mobile install booking"
+                      : "Order request received"
                     : "Not sent — please call"}
                 </p>
                 <h1 className="h1" tabIndex={-1} ref={headingRef}>
                   {placed.delivered
-                    ? "Your order request is in"
+                    ? mobile
+                      ? "Your booking request is in"
+                      : "Your order request is in"
                     : "Finish this by phone"}
                 </h1>
                 <p className="lede mt-3">
-                  {placed.delivered ? (
+                  {placed.delivered && mobile ? (
+                    <>
+                      Booking request received — we&rsquo;ll call to confirm
+                      fitment, schedule the van and take payment. Nothing has
+                      been charged.
+                    </>
+                  ) : placed.delivered ? (
                     <>
                       Thanks, {f.firstName}. It is not paid yet — we&rsquo;ll
                       call to confirm fitment and payment before anything
@@ -722,7 +782,9 @@ export default function CheckoutPage() {
                     placed.delivered
                       ? {
                           title: "We call you back",
-                          copy: `Expect a call at ${f.phone} to confirm delivery and payment.`,
+                          copy: mobile
+                            ? `Expect a call at ${f.phone} to schedule the van, quote the install and take payment.`
+                            : `Expect a call at ${f.phone} to confirm delivery and payment.`,
                         }
                       : {
                           title: "You call us",
@@ -731,12 +793,16 @@ export default function CheckoutPage() {
                     {
                       title: ship
                         ? "Your order ships out"
-                        : "We fit them at the shop",
+                        : mobile
+                          ? "The van comes to you"
+                          : "We fit them at the shop",
                       copy: ship
                         ? `Your order ships to ${shipTo} once payment clears. Tracking follows by phone.`
-                        : `Your order ships free to ${BUSINESS.shop.full}. Meet us there on ${formatLongDate(
-                            f.date,
-                          )}, ${windowLabel(f.timeWindow)}.`,
+                        : mobile
+                          ? `We fit them at ${shipTo} at the time we agree on the call. ${MOBILE_INSTALL_FROM}`
+                          : `Your order ships free to ${BUSINESS.shop.full}. Meet us there on ${formatLongDate(
+                              f.date,
+                            )}, ${windowLabel(f.timeWindow)}.`,
                     },
                   ].map((s, i) => (
                     <li key={s.title} className="flex gap-3">
@@ -774,7 +840,11 @@ export default function CheckoutPage() {
               </div>
 
               <div className="min-w-0">
-                <OrderSummary lines={placed.lines} totals={placed.totals} />
+                <OrderSummary
+                  lines={placed.lines}
+                  totals={placed.totals}
+                  mobile={mobile}
+                />
                 {serverTotalDiffers && (
                   <p className="mt-4 text-xs leading-relaxed text-smoke">
                     Our order system priced the tires at{" "}
@@ -805,6 +875,10 @@ export default function CheckoutPage() {
   /* ---------- wizard ---------- */
   const step = STEPS[stepIndex];
   const availableWindows = windowsForDate(form.date);
+  const mobile = form.fulfillment === "mobile";
+  // Mobile install is booked and priced on the call, so it never goes to the
+  // online payment page even when that is switched on.
+  const payNow = payOnline && !mobile;
 
   return (
     <>
@@ -940,7 +1014,7 @@ export default function CheckoutPage() {
                 <StepHeading
                   step={2}
                   title="Where should this go?"
-                  lede="Ship it free anywhere in the lower 48 states and DC, or — if you are in South Florida — send it free to our shop and let us fit it."
+                  lede="Ship it free anywhere in the lower 48 states and DC, or — if you are in South Florida — send it free to our shop and let us fit it, or have our van fit it at your address."
                   headingRef={headingRef}
                 />
 
@@ -1035,11 +1109,27 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                {form.fulfillment === "ship" && (
+                {(form.fulfillment === "ship" || mobile) && (
                   <div className="mb-7 grid gap-5 sm:grid-cols-2">
+                    {mobile && (
+                      <div className="card flex items-start gap-3 p-4 sm:col-span-2">
+                        <Truck
+                          size={20}
+                          aria-hidden
+                          className="mt-0.5 shrink-0 text-drop"
+                        />
+                        <p className="min-w-0 text-sm leading-relaxed text-smoke">
+                          <span className="font-display font-bold text-ink">
+                            The van covers {INSTALL_AREA_LIST}.
+                          </span>{" "}
+                          We call to confirm fitment, schedule the van and take
+                          payment. {MOBILE_INSTALL_FROM}
+                        </p>
+                      </div>
+                    )}
                     <TextField
                       id="street"
-                      label="Shipping address"
+                      label={mobile ? "Install address" : "Shipping address"}
                       autoComplete="address-line1"
                       className="sm:col-span-2"
                       value={form.street}
@@ -1062,22 +1152,47 @@ export default function CheckoutPage() {
                       value={form.city}
                       onChange={onInput}
                       error={errors.city}
+                      list={mobile ? "install-area-cities" : undefined}
+                      placeholder={mobile ? "Sunrise" : undefined}
+                      hint={
+                        mobile
+                          ? "Pick one of the towns the van covers."
+                          : undefined
+                      }
                     />
-                    <SelectField
-                      id="state"
-                      label="State"
-                      autoComplete="address-level1"
-                      value={form.state}
-                      onChange={onInput}
-                      error={errors.state}
-                    >
-                      <option value="">Select a state…</option>
-                      {SHIP_STATES.map(([code, name]) => (
-                        <option key={code} value={code}>
-                          {name}
-                        </option>
-                      ))}
-                    </SelectField>
+                    {mobile && (
+                      <datalist id="install-area-cities">
+                        {BUSINESS.installArea.map((c) => (
+                          <option key={c} value={c} />
+                        ))}
+                      </datalist>
+                    )}
+                    {mobile ? (
+                      <TextField
+                        id="state-fixed"
+                        label="State"
+                        value="Florida (FL)"
+                        readOnly
+                        aria-readonly="true"
+                        hint="Mobile install is South Florida only."
+                      />
+                    ) : (
+                      <SelectField
+                        id="state"
+                        label="State"
+                        autoComplete="address-level1"
+                        value={form.state}
+                        onChange={onInput}
+                        error={errors.state}
+                      >
+                        <option value="">Select a state…</option>
+                        {SHIP_STATES.map(([code, name]) => (
+                          <option key={code} value={code}>
+                            {name}
+                          </option>
+                        ))}
+                      </SelectField>
+                    )}
                     <TextField
                       id="zip"
                       label="ZIP code"
@@ -1088,10 +1203,12 @@ export default function CheckoutPage() {
                       onChange={onInput}
                       error={errors.zip}
                     />
-                    <p className="-mt-2 text-xs leading-relaxed text-smoke sm:col-span-2">
-                      Free shipping covers the lower 48 states and DC. We
-                      can&rsquo;t ship to Alaska, Hawaii or US territories.
-                    </p>
+                    {!mobile && (
+                      <p className="-mt-2 text-xs leading-relaxed text-smoke sm:col-span-2">
+                        Free shipping covers the lower 48 states and DC. We
+                        can&rsquo;t ship to Alaska, Hawaii or US territories.
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -1212,7 +1329,9 @@ export default function CheckoutPage() {
                   step={4}
                   title="Review your order"
                   lede={
-                    payOnline
+                    mobile
+                      ? "Check the details, then send the booking request. Nothing is charged here — we schedule the van and take payment on the call."
+                      : payNow
                       ? "Check the details, then continue to payment on our shop's payment page."
                       : "Check the details, then send it over. Nothing is charged here — payment is confirmed on the call."
                   }
@@ -1241,20 +1360,27 @@ export default function CheckoutPage() {
                       form.fulfillment === "pickup"
                         ? ["Ships to", BUSINESS.shop.full]
                         : [
-                            "Address",
+                            mobile ? "Install at" : "Address",
                             [
                               form.street,
                               form.line2.trim(),
-                              `${form.city}, ${form.state} ${form.zip}`,
+                              mobile
+                                ? `${installAreaCity(form.city) ?? form.city}, FL ${form.zip}`
+                                : `${form.city}, ${form.state} ${form.zip}`,
                             ]
                               .filter(Boolean)
                               .join(", "),
                           ],
-                      form.fulfillment !== "ship" && [
+                      mobile && ["Install", "Quoted on the call"],
+                      mobile && [
+                        "Scheduling",
+                        "We book the van with you on the call",
+                      ],
+                      form.fulfillment === "pickup" && [
                         "Date",
                         formatLongDate(form.date),
                       ],
-                      form.fulfillment !== "ship" && [
+                      form.fulfillment === "pickup" && [
                         "Window",
                         windowLabel(form.timeWindow),
                       ],
@@ -1286,7 +1412,7 @@ export default function CheckoutPage() {
                         We confirm before anything ships
                       </p>
                       <p className="mt-1 text-sm leading-relaxed text-smoke">
-                        {payOnline ? (
+                        {payNow ? (
                           <>
                             After you pay, a team member calls you at{" "}
                             <span className="text-ink">
@@ -1305,8 +1431,10 @@ export default function CheckoutPage() {
                               {form.phone || "the number you gave us"}
                             </span>{" "}
                             within one business day to confirm fitment,
-                            delivery and payment. We never ask for card details
-                            by email or text.
+                            {mobile
+                              ? " schedule the van and take payment"
+                              : " delivery and payment"}
+                            . We never ask for card details by email or text.
                           </>
                         )}
                       </p>
@@ -1331,7 +1459,7 @@ export default function CheckoutPage() {
                         htmlFor="agree"
                         className="text-sm leading-relaxed text-ink"
                       >
-                        {payOnline ? (
+                        {payNow ? (
                           <>
                             I understand {BUSINESS.name} will call me to
                             confirm fitment before anything ships or is
@@ -1390,12 +1518,14 @@ export default function CheckoutPage() {
                   ? redirecting
                     ? "Opening payment…"
                     : sending
-                      ? payOnline
+                      ? payNow
                         ? "Preparing payment…"
                         : "Sending…"
-                      : payOnline
+                      : payNow
                         ? "Continue to Payment"
-                        : "Place Order Request"
+                        : mobile
+                          ? "Send Booking Request"
+                          : "Place Order Request"
                   : "Continue"}
                 <ArrowRight size={16} aria-hidden />
               </button>
@@ -1444,9 +1574,11 @@ export default function CheckoutPage() {
 
               {status && (
                 <p className="w-full text-xs leading-relaxed text-smoke">
-                  {payOnline
-                    ? "Payment is handled securely by Extreme Tires\u2019 payment system (Tire Guru). Card details never touch this site."
-                    : "Checkout sends an order request; nothing is charged online yet."}
+                  {payNow
+                    ? "Payment is handled securely by our shop\u2019s payment page. Card details never touch this site."
+                    : mobile
+                      ? "Mobile install is booked on the call; nothing is charged online."
+                      : "Checkout sends an order request; nothing is charged online yet."}
                 </p>
               )}
             </div>
@@ -1455,7 +1587,7 @@ export default function CheckoutPage() {
           {/* Summary rail */}
           <aside aria-label="Order summary" className="min-w-0">
             <div className="lg:sticky lg:top-24">
-              <OrderSummary lines={safeLines} totals={totals} />
+              <OrderSummary lines={safeLines} totals={totals} mobile={mobile} />
               <p className="mt-4 text-xs leading-relaxed text-smoke">
                 Mounting, balancing, new valve stems and disposal of your old
                 tires are included on any line set to install at the shop.{" "}

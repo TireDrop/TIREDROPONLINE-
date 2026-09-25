@@ -58,47 +58,42 @@ function relatedTo(product) {
   return [...sameCategory, ...rest].slice(0, 4);
 }
 
+/**
+ * What the distributor reported about stock, in words, or null when it said
+ * nothing. A count is never shown: it is the difference between "In stock"
+ * and "Low stock" (fewer than a set), and nothing finer.
+ */
+export function stockLabel(product) {
+  const qty = Number.isFinite(product?.qty) ? product.qty : null;
+  if (qty !== null) {
+    if (qty <= 0) return { level: "out", text: "Out of stock" };
+    return qty < SET_SIZE
+      ? { level: "low", text: "Low stock" }
+      : { level: "in", text: "In stock" };
+  }
+  if (product?.available === true) return { level: "in", text: "In stock" };
+  if (product?.available === false) return { level: "out", text: "Out of stock" };
+  return null;
+}
+
+/** The spec table rows: the catalog's own, else what the listing carries. */
+function specRows(product, isTire) {
+  const rows = Object.entries(product.specs ?? {}).filter(
+    ([, v]) => v !== null && v !== undefined && String(v).trim() !== "",
+  );
+  if (rows.length || !isTire) return rows;
+  return [
+    ["Tire Size", product.size],
+    ["Load Index", product.loadIndex],
+    ["Speed Rating", product.speedRating],
+    ["SKU", product.sku],
+  ].filter(([, v]) => v !== null && v !== undefined && String(v).trim() !== "");
+}
+
 export default function ProductPage({ kind = "tire" }) {
   const { slug } = useParams();
   const product = getProduct(kind, slug);
-  const { addItem } = useCart();
-  const compare = useCompare();
-
   const isTire = kind !== "wheel";
-  const unit = isTire ? "tire" : "wheel";
-  const [qty, setQty] = useState(SET_SIZE);
-  const [install, setInstall] = useState(false);
-  const [added, setAdded] = useState(false);
-
-  // The sticky bar only earns its place once the real buy box has scrolled
-  // away; before that it would cover the page for no reason.
-  const buyBoxRef = useRef(null);
-  const [buyBoxGone, setBuyBoxGone] = useState(false);
-
-  // A new slug is a new product — reset the buy box.
-  useEffect(() => {
-    setQty(SET_SIZE);
-    setInstall(false);
-    setAdded(false);
-  }, [slug]);
-
-  useEffect(() => {
-    const el = buyBoxRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return undefined;
-    const observer = new IntersectionObserver(
-      ([entry]) => setBuyBoxGone(!entry.isIntersecting),
-      { threshold: 0 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [slug, product]);
-
-  const related = useMemo(() => (product ? relatedTo(product) : []), [product]);
-
-  const clampQty = useCallback(
-    (n) => (Number.isFinite(n) ? Math.min(MAX_QTY, Math.max(1, n)) : 1),
-    [],
-  );
 
   if (!product) {
     return (
@@ -148,6 +143,56 @@ export default function ProductPage({ kind = "tire" }) {
     );
   }
 
+  // Keyed by product so moving to another product starts a fresh buy box.
+  return <ProductDetail key={product.id} product={product} kind={kind} />;
+}
+
+/**
+ * The product page body. Used by the catalog's /tires/:slug and
+ * /wheels/:slug pages and by /tires/p/:sku for tires that come from the API.
+ *
+ * `reportStock` switches the availability line from the catalog's "Available
+ * to order." to whatever the distributor reported (and nothing at all when it
+ * reported nothing).
+ */
+export function ProductDetail({ product, kind = "tire", reportStock = false }) {
+  const { addItem } = useCart();
+  const compare = useCompare();
+
+  const isTire = kind !== "wheel";
+  const unit = isTire ? "tire" : "wheel";
+  const [qty, setQty] = useState(SET_SIZE);
+  const [install, setInstall] = useState(false);
+  const [added, setAdded] = useState(false);
+
+  // The sticky bar only earns its place once the real buy box has scrolled
+  // away; before that it would cover the page for no reason.
+  const buyBoxRef = useRef(null);
+  const [buyBoxGone, setBuyBoxGone] = useState(false);
+
+  useEffect(() => {
+    const el = buyBoxRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => setBuyBoxGone(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [product]);
+
+  // Related picks are the catalog's; a tire from outside it gets none rather
+  // than a row of unrelated sample tires.
+  const related = useMemo(
+    () => (product.slug ? relatedTo(product) : []),
+    [product],
+  );
+
+  const clampQty = useCallback(
+    (n) => (Number.isFinite(n) ? Math.min(MAX_QTY, Math.max(1, n)) : 1),
+    [],
+  );
+
   const name = `${product.brand} ${product.model}`;
   const sizeLabel = isTire
     ? product.size
@@ -155,11 +200,21 @@ export default function ProductPage({ kind = "tire" }) {
   const bill = priceBreakdown(product, qty);
   const installTotal = install ? bill.install : 0;
   const orderTotal = bill.price + installTotal;
-  const inCompare = compare.has(product.slug);
+  const canCompare = isTire && Boolean(product.slug);
+  const inCompare = canCompare && compare.has(product.slug);
   const compareLocked = !inCompare && compare.isFull;
   const plural = (n) => (n === 1 ? unit : `${unit}s`);
+  const stock = reportStock ? stockLabel(product) : null;
+  const soldOut = stock?.level === "out";
+  const specs = specRows(product, isTire);
+  const features = Array.isArray(product.features) ? product.features : [];
+  const photo =
+    typeof product.image === "string" && /^https:\/\//i.test(product.image)
+      ? product.image
+      : null;
 
   const handleAdd = () => {
+    if (soldOut) return;
     addItem(
       {
         id: product.id,
@@ -175,7 +230,7 @@ export default function ProductPage({ kind = "tire" }) {
         installPrice: product.installPrice,
         install,
         accent: product.accent,
-        slug: product.slug,
+        slug: product.slug ?? null,
       },
       qty,
     );
@@ -209,13 +264,23 @@ export default function ProductPage({ kind = "tire" }) {
               column is far taller than the art, and stretching the panel to
               match just floats the product in an empty box. */}
           <div className="card flex items-center justify-center bg-fog p-8 lg:sticky lg:top-[calc(var(--header-h)+1.5rem)]">
-            <ProductArt
-              kind={product.kind}
-              accent={product.accent}
-              size={420}
-              label={`${name}, ${sizeLabel}`}
-              className="h-auto w-full max-w-[420px]"
-            />
+            {photo ? (
+              <img
+                src={photo}
+                alt={`${name}, ${sizeLabel}`}
+                width={420}
+                height={420}
+                className="h-auto w-full max-w-[420px] object-contain"
+              />
+            ) : (
+              <ProductArt
+                kind={product.kind}
+                accent={product.accent}
+                size={420}
+                label={`${name}, ${sizeLabel}`}
+                className="h-auto w-full max-w-[420px]"
+              />
+            )}
           </div>
 
           {/* Buy box */}
@@ -241,7 +306,21 @@ export default function ProductPage({ kind = "tire" }) {
               <p className="mt-2 text-sm text-smoke">
                 {money(product.price)} per {unit}
               </p>
-              <p className="mt-2 text-sm text-smoke">Available to order.</p>
+              {reportStock ? (
+                stock && (
+                  <p
+                    className={`mt-2 text-sm font-medium ${
+                      stock.level === "out" ? "text-drop" : "text-ink"
+                    }`}
+                  >
+                    {stock.text}
+                    {stock.level === "low" &&
+                      " — we confirm the full set before anything ships."}
+                  </p>
+                )
+              ) : (
+                <p className="mt-2 text-sm text-smoke">Available to order.</p>
+              )}
             </div>
 
             {/* Quantity. Presets first, because tapping "4" is faster than
@@ -426,11 +505,24 @@ export default function ProductPage({ kind = "tire" }) {
             <button
               type="button"
               onClick={handleAdd}
-              className="btn-primary mt-5 w-full"
+              disabled={soldOut}
+              className="btn-primary mt-5 w-full disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ShoppingCart size={18} aria-hidden />
               Add to Cart
             </button>
+            {soldOut && (
+              <p className="mt-2 text-sm text-smoke">
+                Call{" "}
+                <a
+                  href={BUSINESS.phoneHref}
+                  className="whitespace-nowrap text-ink underline underline-offset-4 hover:text-drop"
+                >
+                  {BUSINESS.phone}
+                </a>{" "}
+                and we&rsquo;ll find this size from another source.
+              </p>
+            )}
 
             <div aria-live="polite">
               {added && (
@@ -446,7 +538,7 @@ export default function ProductPage({ kind = "tire" }) {
               )}
             </div>
 
-            {isTire && (
+            {canCompare && (
               <div className="mt-3">
                 <button
                   type="button"
@@ -530,7 +622,7 @@ export default function ProductPage({ kind = "tire" }) {
                   {name} {sizeLabel} specifications
                 </caption>
                 <tbody className="divide-y divide-ink/10 border-y border-ink/10">
-                  {Object.entries(product.specs).map(([key, val]) => (
+                  {specs.map(([key, val]) => (
                     <tr key={key}>
                       <th
                         scope="row"
@@ -562,21 +654,25 @@ export default function ProductPage({ kind = "tire" }) {
           </div>
 
           <div>
-            <h2 className="h2 text-3xl md:text-4xl">Why this one</h2>
-            <ul className="mt-5 space-y-3">
-              {product.features.map((f) => (
-                <li key={f} className="flex gap-3 text-sm leading-relaxed">
-                  <Check
-                    size={18}
-                    aria-hidden
-                    className="mt-0.5 shrink-0 text-drop"
-                  />
-                  <span>{f}</span>
-                </li>
-              ))}
-            </ul>
+            {features.length > 0 && (
+              <>
+                <h2 className="h2 text-3xl md:text-4xl">Why this one</h2>
+                <ul className="mt-5 space-y-3">
+                  {features.map((f) => (
+                    <li key={f} className="flex gap-3 text-sm leading-relaxed">
+                      <Check
+                        size={18}
+                        aria-hidden
+                        className="mt-0.5 shrink-0 text-drop"
+                      />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
 
-            <div className="card mt-6 p-5">
+            <div className={`card p-5 ${features.length > 0 ? "mt-6" : ""}`}>
               <h3 className="h3">Questions before you buy?</h3>
               <p className="mt-1 text-sm text-smoke">
                 Call {BUSINESS.phone} during shop hours, send a note through the
@@ -592,25 +688,27 @@ export default function ProductPage({ kind = "tire" }) {
       </Section>
 
       {/* Related */}
-      <Section className="bg-bone">
-        <SectionHead
-          eyebrow="You might also like"
-          title={`More ${product.category} ${isTire ? "tires" : "wheels"}`}
-          action={
-            <Link
-              to={isTire ? "/tires" : "/wheels"}
-              className="btn-outline btn-sm"
-            >
-              Shop all {isTire ? "tires" : "wheels"}
-            </Link>
-          }
-        />
-        <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-4">
-          {related.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
-      </Section>
+      {related.length > 0 && (
+        <Section className="bg-bone">
+          <SectionHead
+            eyebrow="You might also like"
+            title={`More ${product.category} ${isTire ? "tires" : "wheels"}`}
+            action={
+              <Link
+                to={isTire ? "/tires" : "/wheels"}
+                className="btn-outline btn-sm"
+              >
+                Shop all {isTire ? "tires" : "wheels"}
+              </Link>
+            }
+          />
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-4">
+            {related.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* Sticky phone buy bar. It sits on top of the global MobileCallBar
           (fixed, `--call-bar-h` tall) rather than over it, so both stay tappable. */}
@@ -628,7 +726,8 @@ export default function ProductPage({ kind = "tire" }) {
             <button
               type="button"
               onClick={handleAdd}
-              className="btn-primary btn-sm ml-auto shrink-0 min-h-[44px]"
+              disabled={soldOut}
+              className="btn-primary btn-sm ml-auto shrink-0 min-h-[44px] disabled:opacity-50"
             >
               <ShoppingCart size={16} aria-hidden />
               Add to cart

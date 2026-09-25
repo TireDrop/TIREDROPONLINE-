@@ -1180,6 +1180,21 @@ export const WHEELS = WHEEL_CATALOG.map((wheel) => ({
   accent: FINISH_COLOR[wheel.finish] ?? wheel.accent,
 }));
 
+/**
+ * Where a product's page lives: its catalog slug page, else (for a tire from
+ * the distributor that the catalog does not list) its /tires/p/:sku page.
+ * Null when it has neither.
+ */
+export function productHref(product) {
+  if (!product) return null;
+  const base = product.kind === "wheel" ? "/wheels" : "/tires";
+  if (product.slug) return `${base}/${product.slug}`;
+  const sku = product.sku ?? product.id;
+  return product.kind !== "wheel" && sku
+    ? `/tires/p/${encodeURIComponent(sku)}`
+    : null;
+}
+
 /** Lookup used by both product routes. Returns undefined for unknown slugs. */
 export function getProduct(kind, slug) {
   const list = kind === "wheel" ? WHEELS : TIRES;

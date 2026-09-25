@@ -12,7 +12,13 @@ field name, endpoint and auth detail in it is a placeholder** marked
 server**. Client-sent prices are ignored. Shipping is free to the 48
 contiguous states and DC; any other state is rejected for `ship` with a clear
 error. `pickup` is free ship-to-store at Extreme Tires, 7712 West Oakland Park
-Blvd, Sunrise, FL 33351.
+Blvd, Sunrise, FL 33351. `mobile` is van install at the customer's address: it
+needs an FL address in one of the install-area cities in
+`src/data/business.js` (anything else is a 400) and is **always** request
+mode, whatever `checkout` says, because the van is booked and the install is
+quoted on the call. Its response adds `delivery: "mobile"`,
+`installNote: "Install quoted on the call"` and `serviceAddress`; `total` is
+the tires only.
 
 What happens next depends on `checkout` in `/api/status`:
 

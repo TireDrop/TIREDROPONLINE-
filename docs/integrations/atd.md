@@ -60,9 +60,11 @@ Everything the adapter needs from ATD sits in these functions in
 | `ENDPOINTS.searchBySize` | Path for searching catalog and stock by size | `null` → 501 |
 | `ENDPOINTS.searchByVehicle` | Path for fitment search by year/make/model, if ATD offers one | `null`. Vehicle searches fall back to the local OE-size table (`src/data/fitment.js`) and then run a size search. |
 | `ENDPOINTS.lookupSkus` | Path for current price and stock of specific SKUs, used at checkout | `null` → 501 |
+| `ENDPOINTS.getBySku` | Path for one product's details, price and stock, for its `/tires/p/:sku` page (`GET /api/tires?sku=`). May be the same call as `lookupSkus` | `null` → 501 |
 | `atdAuthHeaders` | The real auth scheme | HTTP Basic `key:secret` |
 | `build*Request` | Real parameter names; where the account and ship-to go | `size`, `year`/`make`/`model`, `skus`, `account`, `shipTo` |
 | `extractAtdList` | Where the product list sits in a response | bare array or `items` array; anything else throws |
+| `extractAtdItem` | Where one product sits in a single-SKU response, and whether an unknown SKU is a 404 or an empty result | one record, a bare array or `items`; a 404 or no match is "not found" |
 | `mapAtdProduct` | Real field names | `sku`, `dealerCost`, `brand`, `model`, `size`, `loadIndex`, `speedRating`, `quantityAvailable`, `imageUrl` |
 
 Behaviour that is real and tested (`npm run test:api`):
@@ -73,8 +75,9 @@ Behaviour that is real and tested (`npm run test:api`):
 - **Cache.** Search results are cached in memory for **5 minutes** per function
   instance, keyed by account, pricing and query. Brand and limit filters run
   after the cache, so one ATD call serves every filter. On top of that, the
-  CDN caches `/api/tires` for 60 s (`s-maxage=60`). SKU lookups at checkout
-  are never cached.
+  CDN caches `/api/tires` for 60 s (`s-maxage=60`). Single-tire lookups for
+  product pages (`GET /api/tires?sku=`) are cached the same way. SKU lookups
+  at checkout are never cached.
 - **Stock honesty.** If ATD gives no usable quantity, `available` and `qty`
   stay `null`. They are never reported as in stock.
 

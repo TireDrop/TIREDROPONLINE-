@@ -9,6 +9,7 @@ import {
   SET_SIZE,
   priceBreakdown,
 } from "../../data/pricing.js";
+import { productHref } from "../../data/products.js";
 import ProductArt from "./ProductArt.jsx";
 
 /** Short spec line under the product name — size for tires, fitment for wheels. */
@@ -20,12 +21,11 @@ function specLine(product) {
 }
 
 export default function ProductCard({ product }) {
-  // A live distributor tire has no product page of its own (the pages are the
-  // sample catalog's), so it gets no link and no compare box rather than a
-  // link to a page quoting a different price.
-  const href = product.slug
-    ? `${product.kind === "wheel" ? "/wheels" : "/tires"}/${product.slug}`
-    : null;
+  // Catalog products link to their /tires/:slug page. A live distributor tire
+  // has no slug (it must not land on a sample page quoting a sample price),
+  // so it links to its own /tires/p/:sku page instead. It still gets no
+  // compare box: comparison runs on the catalog's specs.
+  const href = productHref(product);
   const isTire = product.kind === "tire";
   const canCompare = isTire && Boolean(product.slug);
 

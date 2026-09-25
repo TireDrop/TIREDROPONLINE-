@@ -28,18 +28,37 @@ export const PICKUP_LOCATION = {
   phone: BUSINESS.phone,
 };
 
+/**
+ * Mobile install labour is never priced online: the shop quotes it on the
+ * call, once it knows the vehicle and the address. This is the wording every
+ * mobile response and order request carries in place of a figure.
+ */
+export const MOBILE_INSTALL_NOTE = "Install quoted on the call";
+
+function fulfillmentFor(input, shipping) {
+  if (input.delivery === "pickup") {
+    return { type: "pickup", shipping, location: PICKUP_LOCATION };
+  }
+  if (input.delivery === "mobile") {
+    return {
+      type: "mobile",
+      shipping,
+      address: input.address,
+      install: MOBILE_INSTALL_NOTE,
+    };
+  }
+  return { type: "ship", shipping, address: input.address };
+}
+
 export function buildOrder(input, lines, now = new Date()) {
   const subtotal = cents(lines.reduce((sum, line) => sum + line.lineTotal, 0));
-  const shipping = 0; // free: contiguous US + DC, or ship-to-store
+  const shipping = 0; // free: contiguous US + DC, ship-to-store, or to the van
   return {
     orderRef: makeOrderRef(now),
     createdAt: now.toISOString(),
     currency: "USD",
     customer: input.customer,
-    fulfillment:
-      input.delivery === "pickup"
-        ? { type: "pickup", shipping, location: PICKUP_LOCATION }
-        : { type: "ship", shipping, address: input.address },
+    fulfillment: fulfillmentFor(input, shipping),
     lines,
     subtotal,
     shipping,
@@ -50,19 +69,30 @@ export function buildOrder(input, lines, now = new Date()) {
   };
 }
 
+const oneLine = (a) =>
+  [a.line1, a.line2, `${a.city}, ${a.state} ${a.zip}`].filter(Boolean).join(", ");
+
 function summary(order) {
   const f = order.fulfillment;
   const where =
     f.type === "pickup"
       ? `Ship-to-store pickup at ${f.location.name}, ${f.location.address}`
-      : `Ship to ${[f.address.line1, f.address.line2, `${f.address.city}, ${f.address.state} ${f.address.zip}`].filter(Boolean).join(", ")}`;
+      : f.type === "mobile"
+        ? `MOBILE INSTALL at ${oneLine(f.address)}. ${MOBILE_INSTALL_NOTE}: confirm fitment, schedule the van and quote the install on the call.`
+        : `Ship to ${oneLine(f.address)}`;
+  const heading =
+    f.type === "mobile"
+      ? `MOBILE INSTALL BOOKING REQUEST ${order.orderRef} — NOT PAID. No card has been charged; call the customer to confirm fitment, schedule the van and take payment.`
+      : `ORDER REQUEST ${order.orderRef} — NOT PAID. No card has been charged; contact the customer to confirm stock and take payment.`;
   return [
-    `ORDER REQUEST ${order.orderRef} — NOT PAID. No card has been charged; contact the customer to confirm stock and take payment.`,
+    heading,
     "",
     ...order.lines.map(
       (l) => `${l.qty} x ${l.title} (${l.sku}) @ $${l.price.toFixed(2)} = $${l.lineTotal.toFixed(2)}`,
     ),
-    `Total before tax and fees: $${order.total.toFixed(2)} (shipping free)`,
+    f.type === "mobile"
+      ? `Tires total before tax and fees: $${order.total.toFixed(2)} (install not included — ${MOBILE_INSTALL_NOTE.toLowerCase()})`
+      : `Total before tax and fees: $${order.total.toFixed(2)} (shipping free)`,
     "",
     where,
     `Customer: ${order.customer.name}, ${order.customer.email}, ${order.customer.phone}`,
@@ -96,7 +126,7 @@ export async function deliverOrderRequest(order, webhookUrl, deps = {}) {
   const payload = {
     // Formspree conventions: `_subject` sets the email subject, `email` the
     // reply-to. Other receivers can ignore them.
-    _subject: `TireDrop order request ${order.orderRef} (NOT PAID)`,
+    _subject: `TireDrop ${order.fulfillment.type === "mobile" ? "mobile install booking request" : "order request"} ${order.orderRef} (NOT PAID)`,
     email: order.customer.email,
     orderRef: order.orderRef,
     paymentStatus: "NOT PAID - order request only",

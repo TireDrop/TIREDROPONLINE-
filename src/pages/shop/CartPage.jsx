@@ -20,6 +20,7 @@ import {
 import { useCart, money } from "../../context/CartContext.jsx";
 import ProductArt from "../../components/shop/ProductArt.jsx";
 import { BUSINESS } from "../../data/business.js";
+import { productHref } from "../../data/products.js";
 
 /* ------------------------------------------------------------------ */
 /*  Totals                                                             */
@@ -95,10 +96,10 @@ function QtyStepper({ line, setQty }) {
 }
 
 function CartLine({ line, setQty, remove, addItem }) {
-  // A live distributor tire has no product page, so its line links back to
-  // the listing instead of to a page that does not exist.
+  // Catalog lines link to their slug page, live distributor tires to their
+  // sku page, and anything with neither back to the listing.
   const base = line.kind === "wheel" ? "/wheels" : "/tires";
-  const href = line.slug ? `${base}/${line.slug}` : base;
+  const href = productHref(line) ?? base;
   const toggleId = `install-${line.key}`;
 
   // Installation is part of the line's identity, so flipping it means

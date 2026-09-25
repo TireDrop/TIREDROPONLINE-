@@ -26,6 +26,7 @@ const InstallPage = lazy(() => import("./pages/InstallPage.jsx"));
 const TiresPage = lazy(() => import("./pages/shop/TiresPage.jsx"));
 const WheelsPage = lazy(() => import("./pages/shop/WheelsPage.jsx"));
 const ProductPage = lazy(() => import("./pages/shop/ProductPage.jsx"));
+const TireSkuPage = lazy(() => import("./pages/shop/TireSkuPage.jsx"));
 const CommercialTiresPage = lazy(
   () => import("./pages/shop/CommercialTiresPage.jsx"),
 );
@@ -86,6 +87,9 @@ export default function App() {
             {/* Tires & wheels e-commerce */}
             <Route path="/tires" element={<TiresPage />} />
             <Route path="/tires/:slug" element={<ProductPage kind="tire" />} />
+            {/* Tires looked up by sku — live distributor tires the catalog
+                does not list. Three segments, so it never matches :slug. */}
+            <Route path="/tires/p/:sku" element={<TireSkuPage />} />
             <Route path="/wheels" element={<WheelsPage />} />
             <Route
               path="/wheels/:slug"

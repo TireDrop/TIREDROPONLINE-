@@ -3,7 +3,11 @@
 // shopper can read, because the frontend shows it as-is.
 
 import { parseSize } from "../../src/data/tireMath.js";
-import { BUSINESS } from "../../src/data/business.js";
+import {
+  BUSINESS,
+  MOBILE_AREA_ERROR,
+  installAreaCity,
+} from "../../src/data/business.js";
 
 // ---- Tire sizes ------------------------------------------------------------
 
@@ -102,13 +106,27 @@ export function checkShipState(raw) {
   };
 }
 
+/** Mobile install is South Florida only, so the one state it accepts is FL. */
+export function checkMobileState(raw) {
+  const state = String(raw ?? "").trim().toUpperCase();
+  if (state === "FL") return { ok: true, value: state };
+  return {
+    ok: false,
+    error: `Mobile install is South Florida only, so the state must be FL. Choose shipping instead, or call ${BUSINESS.phone}.`,
+  };
+}
+
 // ---- GET /api/tires --------------------------------------------------------
 
 const text = (v) => (typeof v === "string" ? v.trim() : "");
 export const DEFAULT_LIMIT = 50;
 export const MAX_LIMIT = 100;
 
+/** Same character set checkout accepts for a sku. */
+const SKU = /^[\w.\-/]+$/;
+
 export function validateTiresQuery(query = {}) {
+  const sku = text(query.sku);
   const size = text(query.size);
   const year = text(query.year);
   const make = text(query.make);
@@ -125,6 +143,21 @@ export function validateTiresQuery(query = {}) {
     limit = Number(rawLimit);
   }
   if (brand.length > 40) return { ok: false, error: "brand is too long." };
+
+  // A single tire by sku, for its product page. It stands alone: mixing it
+  // with a search would leave two answers to one question.
+  if (sku) {
+    if (size || hasVehicle || brand) {
+      return {
+        ok: false,
+        error: "Look a tire up by sku on its own, without a size, vehicle or brand.",
+      };
+    }
+    if (sku.length > 64 || !SKU.test(sku)) {
+      return { ok: false, error: "That isn't a valid sku." };
+    }
+    return { ok: true, value: { type: "sku", sku } };
+  }
 
   if (size && hasVehicle) {
     return {
@@ -182,6 +215,7 @@ export function validateTiresQuery(query = {}) {
 
 // ---- POST /api/checkout ----------------------------------------------------
 
+export const DELIVERY_MODES = ["ship", "pickup", "mobile"];
 export const MAX_LINES = 10;
 export const MAX_QTY_PER_LINE = 12;
 export const MAX_TIRES_PER_ORDER = 24;
@@ -218,7 +252,7 @@ export function validateCheckout(body) {
   const merged = new Map();
   for (const item of body.items) {
     const sku = text(item?.sku);
-    if (!sku || sku.length > 64 || !/^[\w.\-/]+$/.test(sku)) {
+    if (!sku || sku.length > 64 || !SKU.test(sku)) {
       return { ok: false, error: "Every item needs a valid sku." };
     }
     const qty = item?.qty;
@@ -242,10 +276,11 @@ export function validateCheckout(body) {
     };
   }
 
-  // Delivery.
+  // Delivery. "mobile" is van installation at the customer's address, inside
+  // the South Florida install area only.
   const delivery = body.delivery;
-  if (delivery !== "ship" && delivery !== "pickup") {
-    return { ok: false, error: 'delivery must be "ship" or "pickup".' };
+  if (!DELIVERY_MODES.includes(delivery)) {
+    return { ok: false, error: 'delivery must be "ship", "pickup" or "mobile".' };
   }
 
   // Customer.
@@ -268,12 +303,18 @@ export function validateCheckout(body) {
     return { ok: false, error: "Enter a 10-digit US phone number." };
   }
 
-  // Address: required to ship, ignored for pickup.
+  // Address: required to ship and for mobile install, ignored for pickup.
   let address = null;
-  if (delivery === "ship") {
+  if (delivery === "ship" || delivery === "mobile") {
+    const mobile = delivery === "mobile";
     const a = body.address;
     if (!a || typeof a !== "object") {
-      return { ok: false, error: "A shipping address is required." };
+      return {
+        ok: false,
+        error: mobile
+          ? "Mobile install needs the address where the van should meet you."
+          : "A shipping address is required.",
+      };
     }
     const line1 = field(a, "line1", { label: "Street address" });
     if (line1.error) return { ok: false, error: line1.error };
@@ -281,17 +322,21 @@ export function validateCheckout(body) {
     if (line2.error) return { ok: false, error: line2.error };
     const city = field(a, "city", { max: 60, label: "City" });
     if (city.error) return { ok: false, error: city.error };
-    const state = checkShipState(a.state);
+    const state = mobile ? checkMobileState(a.state) : checkShipState(a.state);
     if (!state.ok) return state;
     const zip = field(a, "zip", { max: 10, label: "ZIP code" });
     if (zip.error) return { ok: false, error: zip.error };
     if (!ZIP.test(zip.value)) {
       return { ok: false, error: "Enter a 5-digit ZIP code." };
     }
+    // The van only runs inside the install area. The city is stored in the
+    // area list's own spelling, so "fort lauderdale " reads cleanly.
+    const areaCity = mobile ? installAreaCity(city.value) : null;
+    if (mobile && !areaCity) return { ok: false, error: MOBILE_AREA_ERROR };
     address = {
       line1: line1.value,
       line2: line2.value || null,
-      city: city.value,
+      city: areaCity ?? city.value,
       state: state.value,
       zip: zip.value,
     };

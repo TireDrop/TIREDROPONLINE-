@@ -1,27 +1,47 @@
 // POST /api/checkout
-//   { items: [{ sku, qty }], delivery: "ship" | "pickup",
+//   { items: [{ sku, qty }], delivery: "ship" | "pickup" | "mobile",
 //     customer: { name, email, phone },
 //     address?: { line1, line2, city, state, zip }, notes? }
 //
 // The server prices every line itself; any client price is ignored.
-// Shipping is free to the 48 contiguous states + DC, and "pickup" is free
-// ship-to-store at Extreme Tires in Sunrise.
+// Shipping is free to the 48 contiguous states + DC, "pickup" is free
+// ship-to-store at Extreme Tires in Sunrise, and "mobile" is van install at
+// the customer's address inside the South Florida install area
+// (BUSINESS.installArea). Mobile needs an FL address in one of those cities.
 //
 // Responses:
-//   { mode: "redirect", url, orderRef, total }   Tire Guru hosted payment
+//   { mode: "redirect", url, orderRef, total }   hosted payment page
 //   { mode: "request", orderRef, total, delivered, paid: false, ... }
 //       No payment taken. `delivered` says whether the order request actually
 //       reached the shop (via ORDER_WEBHOOK_URL).
+// Mobile orders are always "request", with `delivery: "mobile"`, `total` as
+// the tires total and `installNote: "Install quoted on the call"`: the van
+// is booked and the install priced on the phone, so nothing is charged here.
 
 import { getConfig } from "./_lib/config.js";
 import { HttpError, methodNotAllowed, readJsonBody, send } from "./_lib/http.js";
 import { validateCheckout } from "./_lib/validate.js";
 import { priceLines } from "./_lib/catalog.js";
-import { buildOrder, deliverOrderRequest } from "./_lib/orders.js";
+import {
+  buildOrder,
+  deliverOrderRequest,
+  MOBILE_INSTALL_NOTE,
+} from "./_lib/orders.js";
 import { createCheckoutRedirect, TireGuruError } from "./_lib/tireguru.js";
 import { AtdError } from "./_lib/atd.js";
 
 const NO_STORE = { "Cache-Control": "no-store" };
+
+/**
+ * "redirect" when this order goes to the online payment page, "request"
+ * otherwise. Online payment needs the checkout provider to be live
+ * (`config.checkout` is anything but "request"), and never applies to mobile
+ * install: that is booked and priced on the call.
+ */
+export function paymentModeFor(order, config) {
+  if (order.fulfillment.type === "mobile") return "request";
+  return config.checkout !== "request" ? "redirect" : "request";
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return methodNotAllowed(res, "POST");
@@ -51,7 +71,7 @@ export default async function handler(req, res) {
     const lines = await priceLines(checked.value.items, config);
     const order = buildOrder(checked.value, lines);
 
-    if (config.checkout === "tireguru") {
+    if (paymentModeFor(order, config) === "redirect") {
       const url = await createCheckoutRedirect(order, config.tireguru);
       return send(
         res,
@@ -74,6 +94,11 @@ export default async function handler(req, res) {
     };
     if (order.fulfillment.type === "pickup") {
       response.pickup = order.fulfillment.location;
+    }
+    if (order.fulfillment.type === "mobile") {
+      // `total` above is the tires only; install labour is not added.
+      response.installNote = MOBILE_INSTALL_NOTE;
+      response.serviceAddress = order.fulfillment.address;
     }
     // A configured webhook that failed is a server-side failure; an absent
     // webhook is a supported state the UI explains.

@@ -65,9 +65,18 @@ The store runs on Vercel instead of Shopify. The React site is static; the
 |                      | live/off, `checkout` tireguru/request.                    |
 | `GET /api/tires`     | Tire search by `size=225/45R17` or `year`/`make`/`model`. |
 |                      | Live ATD data when configured, the sample catalog if not. |
+|                      | `?sku=<sku>` alone returns one tire, `{ source, item }`,  |
+|                      | or 404 `{ error }`; it feeds the `/tires/p/:sku` pages.   |
 | `POST /api/checkout` | Creates the order. With Tire Guru on, it returns Tire     |
 |                      | Guru's hosted payment page and the shopper pays there.    |
 |                      | Otherwise it records an order request (nothing charged).  |
+|                      | `delivery` is `ship` (free, lower 48 + DC), `pickup`      |
+|                      | (free ship-to-store, Sunrise) or `mobile` (van install    |
+|                      | at an FL address in the install area listed in            |
+|                      | `src/data/business.js`).                                  |
+|                      | Mobile is always an order request, even when online       |
+|                      | payment is on: the van is booked and the install quoted   |
+|                      | on the call.                                              |
 
 Payments and orders run through **Tire Guru**, Extreme Tires' shop
 management system; card payments are processed by the shop's payment

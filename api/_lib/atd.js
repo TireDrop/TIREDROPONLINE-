@@ -7,8 +7,8 @@
 //   * ENDPOINTS are null on purpose. Until a path is filled in from ATD's
 //     docs, LIVE mode throws AtdNotConfirmedError (HTTP 501) instead of
 //     guessing a URL. Nothing here is a real ATD endpoint.
-//   * atdAuthHeaders, build*Request, extractAtdList and mapAtdProduct are the
-//     only places that know ATD's wire format. Each carries a
+//   * atdAuthHeaders, build*Request, extractAtdList, extractAtdItem and
+//     mapAtdProduct are the only places that know ATD's wire format. Each carries a
 //     TODO(confirm with ATD docs) naming what needs checking.
 //
 // What IS real and tested: the timeout, the single retry, the 5-minute
@@ -33,14 +33,20 @@ export const ENDPOINTS = Object.freeze({
   searchBySize: null, // TODO(confirm with ATD docs): catalog/inventory search by tire size
   searchByVehicle: null, // TODO(confirm with ATD docs): fitment search by year/make/model, if ATD offers it
   lookupSkus: null, // TODO(confirm with ATD docs): price + stock for specific SKUs (used at checkout)
+  // TODO(confirm with ATD docs): one product's details, price and stock by
+  // SKU, for its product page. It may turn out to be the same call as
+  // lookupSkus with a single SKU; if so, point both at the same path.
+  getBySku: null,
 });
 
 export class AtdError extends Error {
-  constructor(message, { status = 502, retryable = false } = {}) {
+  constructor(message, { status = 502, retryable = false, upstreamStatus = null } = {}) {
     super(message);
     this.name = "AtdError";
     this.status = status;
     this.retryable = retryable;
+    // ATD's own HTTP status, when it answered with one.
+    this.upstreamStatus = upstreamStatus;
   }
 }
 
@@ -134,6 +140,21 @@ export function buildSkuLookupRequest(skus, cfg, endpoints = ENDPOINTS) {
     query: {
       // Placeholder parameter names — not from ATD docs.
       skus: skus.join(","),
+      account: cfg.accountNumber,
+      shipTo: cfg.shipTo,
+    },
+  };
+}
+
+/** TODO(confirm with ATD docs): single-product lookup parameters. */
+export function buildGetBySkuRequest(sku, cfg, endpoints = ENDPOINTS) {
+  if (!endpoints.getBySku) throw new AtdNotConfirmedError("getBySku");
+  return {
+    method: "GET",
+    path: endpoints.getBySku,
+    query: {
+      // Placeholder parameter names — not from ATD docs.
+      sku,
       account: cfg.accountNumber,
       shipTo: cfg.shipTo,
     },
@@ -247,6 +268,7 @@ export async function atdFetch(request, cfg, deps = {}) {
       const retryable = res.status === 429 || res.status >= 500;
       lastError = new AtdError(`ATD responded with HTTP ${res.status}.`, {
         retryable,
+        upstreamStatus: res.status,
       });
       if (!retryable) throw lastError;
     } catch (err) {
@@ -321,6 +343,57 @@ export async function searchAtd(query, cfg, deps = {}) {
   const items = extractAtdList(json).map((raw) => mapAtdProduct(raw, cfg));
   cacheSet(key, items, now());
   return items;
+}
+
+/**
+ * TODO(confirm with ATD docs): the shape of a single-product response. The
+ * placeholder accepts one product record, a bare array or an `items` array,
+ * and picks the record whose SKU matches. An empty list means "no such SKU".
+ */
+export function extractAtdItem(json, sku) {
+  const records =
+    json && typeof json === "object" && !Array.isArray(json) && "sku" in json
+      ? [json]
+      : extractAtdList(json);
+  return records.find((raw) => String(raw?.sku) === String(sku)) ?? null; // TODO(confirm with ATD docs): the SKU field
+}
+
+/**
+ * One tire by SKU, for its product page: mapped and priced like a search
+ * result (markup + freight on dealer cost, cost dropped), or null when ATD
+ * does not carry it. Cached like a search, because a product page is a
+ * display; checkout re-prices through lookupAtdSkus, uncached.
+ *
+ * TODO(confirm with ATD docs): whether an unknown SKU is a 404 or an empty
+ * result. Both are treated as "not found" here; any other failure throws.
+ */
+export async function getBySku(sku, cfg, deps = {}) {
+  const { endpoints = ENDPOINTS, now = Date.now } = deps;
+  const request = buildGetBySkuRequest(sku, cfg, endpoints);
+  const key = JSON.stringify([
+    "sku",
+    cfg.base,
+    cfg.accountNumber,
+    cfg.shipTo,
+    cfg.markupPct,
+    cfg.freightPerTire,
+    request.path,
+    request.query,
+  ]);
+  const cached = cacheGet(key, now());
+  if (cached !== undefined) return cached;
+
+  let json;
+  try {
+    json = await atdFetch(request, cfg, deps);
+  } catch (err) {
+    if (err instanceof AtdError && err.upstreamStatus === 404) return null;
+    throw err;
+  }
+  const raw = extractAtdItem(json, sku);
+  const item = raw ? mapAtdProduct(raw, cfg) : null;
+  cacheSet(key, item, now());
+  return item;
 }
 
 /**

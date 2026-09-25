@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   cachedSearch,
   getStatus,
+  getTire,
   searchSample,
   searchTires,
   tireQuery,
@@ -79,4 +80,43 @@ export function useApiStatus() {
     };
   }, []);
   return status;
+}
+
+/**
+ * One tire by sku, for its product page. Returns
+ * `{ loading, product, source, fallback, error }`: `product` is null while
+ * loading and when there is no such tire (`loading: false`, no `error`).
+ */
+export function useTire(sku) {
+  const key = String(sku ?? "").trim();
+  const [answer, setAnswer] = useState({ key: "", result: null, error: null });
+
+  useEffect(() => {
+    if (!key) return undefined;
+    let alive = true;
+    getTire(key)
+      .then((result) => {
+        if (alive) setAnswer({ key, result, error: null });
+      })
+      .catch((error) => {
+        if (alive) setAnswer({ key, result: null, error });
+      });
+    return () => {
+      alive = false;
+    };
+  }, [key]);
+
+  return useMemo(() => {
+    if (!key) {
+      return { loading: false, product: null, source: null, fallback: false, error: null };
+    }
+    const fresh = answer.key === key ? answer : null;
+    return {
+      loading: !fresh,
+      product: fresh?.result?.product ?? null,
+      source: fresh?.result?.source ?? null,
+      fallback: fresh?.result?.fallback ?? false,
+      error: fresh?.error ?? null,
+    };
+  }, [key, answer]);
 }

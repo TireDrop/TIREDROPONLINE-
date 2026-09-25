@@ -223,8 +223,9 @@ function catalogMatch(item) {
  * fallback renders exactly as the catalog always has. Live ATD items keep
  * their own SKU, size, price and stock, and borrow the model-level facts
  * (category, UTQG, warranty) from the catalog entry for the same model when
- * there is one. They carry no slug: the product pages are the sample catalog's,
- * and a live tire must not link to a page quoting a sample price.
+ * there is one. They carry no slug, because a live tire must not link to a
+ * sample page quoting a sample price; their page is /tires/p/:sku instead
+ * (see productHref in products.js, and getTire).
  */
 export function toProduct(item, source) {
   const match = catalogMatch(item);
@@ -367,6 +368,68 @@ export function cachedSearch(query) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  One tire by sku (product pages for tires the catalog doesn't list) */
+/* ------------------------------------------------------------------ */
+
+/** The sample catalog's answer for a sku (its id) or slug, or null. */
+export function sampleTire(sku) {
+  const key = String(sku ?? "").trim();
+  const tire = key && TIRES.find((t) => t.id === key || t.slug === key);
+  if (!tire) return null;
+  return {
+    source: "sample",
+    product: { ...tire, sku: tire.id, available: null, qty: null },
+    fallback: true,
+  };
+}
+
+const tireCache = new Map();
+
+/**
+ * `{ source, product, fallback }` for one sku, the product already in the
+ * shape the product page reads, or null when there is no such tire.
+ *
+ * A 404 from the API is its real answer and resolves null, even if the sample
+ * catalog happens to hold that id: a live catalog must not show a sample
+ * price. Only when the API cannot be reached does the sample catalog answer.
+ * Throws ApiError when the API rejects the lookup itself (a malformed sku).
+ */
+export function getTire(sku) {
+  const key = String(sku ?? "").trim();
+  if (!key) return Promise.resolve(null);
+  if (tireCache.has(key)) return tireCache.get(key);
+
+  const pending = apiPresent()
+    .then((present) =>
+      present
+        ? request(`/tires?sku=${encodeURIComponent(key)}`, {
+            timeout: TIMEOUT_MS.search,
+          })
+        : Promise.reject(new Unreachable("no api", { absent: true })),
+    )
+    .then((data) => {
+      const item = data.item;
+      if (!item || typeof item !== "object" || !(item.sku || item.id)) {
+        throw new Unreachable("no item");
+      }
+      const source = data.source === "atd" ? "atd" : "sample";
+      return { source, product: toProduct(item, source), fallback: false };
+    })
+    .catch((err) => {
+      if (err instanceof ApiError) {
+        if (err.status === 404) return null;
+        tireCache.delete(key);
+        throw err;
+      }
+      tireCache.delete(key);
+      return sampleTire(key);
+    });
+
+  tireCache.set(key, pending);
+  return pending;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Checkout                                                           */
 /* ------------------------------------------------------------------ */
 
@@ -374,8 +437,10 @@ export function cachedSearch(query) {
  * Sends the order.
  *
  * Resolves one of:
- *   { mode: "redirect", url }                       — pay on Tire Guru's page
+ *   { mode: "redirect", url }                       — pay on the payment page
  *   { mode: "request", orderRef, total, delivered } — an order request
+ * A mobile install order is always a request; it also carries
+ * `delivery: "mobile"` and `installNote` ("Install quoted on the call").
  * When the API cannot be reached it resolves request mode with
  * `delivered: false` and `orderRef: null`, so the page can say plainly that
  * nothing reached the shop. Throws ApiError when the server rejects the order
@@ -398,6 +463,9 @@ export async function submitCheckout(order) {
         orderRef: data.orderRef ?? null,
         total: typeof data.total === "number" ? data.total : null,
         delivered: data.delivered === true,
+        delivery: typeof data.delivery === "string" ? data.delivery : null,
+        installNote:
+          typeof data.installNote === "string" ? data.installNote : null,
       };
     }
     if (typeof data.error === "string" && data.error.trim()) {
