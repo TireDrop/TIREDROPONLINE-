@@ -41,7 +41,28 @@
         "facebook_url": "https://www.facebook.com/Extremetires/",
         "legal_menu": "td-footer-legal"
       }
+    },
+    "td_newsletter_popup": {
+      "type": "td-newsletter-popup",
+      "settings": {
+        "enabled": true,
+        "delay_seconds": 20,
+        "scroll_percent": 50,
+        "exit_intent": true,
+        "dismiss_days": 14,
+        "exclude_paths": "/cart\n/checkout\n/checkouts\n/account\n/challenge\n/password\n/pages/contact\n/pages/financing\n/pages/commercial-tires",
+        "eyebrow": "The TireDrop list",
+        "heading": "Tire tips that save you money",
+        "body": "Seasonal tire checks, fitment help for your vehicle, and first word when new sizes and brands land. No spam — unsubscribe anytime.",
+        "email_label": "Email address",
+        "email_placeholder": "you@example.com",
+        "button_label": "Sign me up",
+        "consent": "By signing up you agree to receive marketing emails from TireDrop. Unsubscribe anytime. See our <a href=\"/pages/privacy\">Privacy Policy</a>.",
+        "decline_label": "No thanks",
+        "success_message": "You're on the list. Watch your inbox.",
+        "success_button": "Keep browsing"
+      }
     }
   },
-  "order": ["td_footer"]
+  "order": ["td_footer", "td_newsletter_popup"]
 }

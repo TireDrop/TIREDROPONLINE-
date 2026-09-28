@@ -1,0 +1,673 @@
+{% comment %}
+  TireDrop newsletter sign-up pop-up. Lives in the footer group so it is on
+  every page and editable in the theme editor.
+
+  Sign-up is Shopify's native customer form: it creates (or updates) a
+  customer with email marketing consent and the tags "newsletter, popup",
+  which Shopify Email, Klaviyo and Omnisend all sync. There is no discount
+  or coupon: the business does not offer one, so the copy promises tips and
+  news only.
+
+  After a successful post Shopify reloads the page with
+  ?customer_posted=true#td-nl-form. The pop-up then opens straight away on
+  "You're on the list", remembers the visitor as subscribed for good, and
+  strips the parameter so a reload does not show it again. A post with
+  errors reloads with form.errors and the pop-up opens on the error.
+
+  Otherwise it opens once per page view, after `delay` seconds or at
+  `scroll`% of the page, whichever comes first, and on desktop also when the
+  pointer leaves through the top of the window. It waits while Shopify's
+  cookie banner is up, while the header's menu <dialog> (or any other open
+  dialog) is showing, and while the visitor is typing in a field. A
+  dismissal is remembered for `dismiss_days`; every storage access is in
+  try/catch.
+
+  - 768px and up: a modal <dialog> (showModal), focus trapped and returned,
+    page scroll locked, backdrop click closes it.
+  - Phones: a non-modal card that floats above the 68px call bar and stays
+    under 60% of the viewport, so it is not an intrusive interstitial. No
+    backdrop, no scroll lock.
+
+  The dialog is rendered `hidden`: no space, no layout shift until it opens.
+  Plain inline JS, no requests.
+
+  Never rendered on the cart, password or customer-account templates; the
+  path list setting covers the rest in the browser. In the theme editor it
+  does not open on its own: select the section to preview it.
+
+  Dark band: text colours are pinned, not inherited.
+{% endcomment %}
+
+{%- liquid
+  assign td_skip = false
+  if section.settings.enabled == false
+    assign td_skip = true
+  endif
+  if template.name == 'cart' or template.name == 'password' or template.name == 'gift_card' or template.directory == 'customers'
+    assign td_skip = true
+  endif
+  if request.design_mode
+    assign td_skip = false
+  endif
+
+  assign logo = section.settings.logo | default: settings.logo
+  assign td_member = false
+  if customer and customer.accepts_marketing
+    assign td_member = true
+  endif
+  assign td_exclude = section.settings.exclude_paths | newline_to_br | strip_newlines | replace: '<br />', '|' | replace: '<br>', '|'
+  assign td_btn = section.settings.button_label | default: 'Sign me up'
+  assign td_email_label = section.settings.email_label | default: 'Email address'
+-%}
+
+{%- unless td_skip -%}
+<dialog
+  class="td-nl"
+  id="td-nl-{{ section.id }}"
+  aria-labelledby="td-nl-title"
+  aria-describedby="td-nl-desc"
+  hidden
+  data-td-nl
+  data-delay="{{ section.settings.delay_seconds }}"
+  data-scroll="{{ section.settings.scroll_percent }}"
+  data-exit="{{ section.settings.exit_intent }}"
+  data-days="{{ section.settings.dismiss_days }}"
+  data-exclude="{{ td_exclude | escape }}"
+  data-member="{{ td_member }}"
+  data-design="{% if request.design_mode %}true{% else %}false{% endif %}"
+  data-section="{{ section.id }}"
+>
+  <div class="td-nl__card">
+    <div class="td-nl__band">
+      <span class="td-nl__brand">
+        {%- if logo != blank -%}
+          {{
+            logo
+            | image_url: width: 320
+            | image_tag:
+              widths: '120, 240, 320',
+              sizes: '160px',
+              loading: 'lazy',
+              alt: shop.name,
+              class: 'td-nl__logo'
+          }}
+        {%- else -%}
+          <span class="td-nl__wordmark" role="img" aria-label="TireDrop">Tire<span class="td-nl__wordmark-drop">Drop<span class="td-nl__wordmark-dot"></span></span></span>
+        {%- endif -%}
+      </span>
+      <button class="td-nl__close" type="button" aria-label="Close" data-td-nl-close>
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="td-nl__body">
+      <div class="td-nl__pitch" data-td-nl-pitch>
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="td-nl__eyebrow">{{ section.settings.eyebrow }}</p>
+        {%- endif -%}
+        <h2 class="td-nl__title" id="td-nl-title" tabindex="-1">{{ section.settings.heading }}</h2>
+        {%- if section.settings.body != blank -%}
+          <p class="td-nl__text" id="td-nl-desc">{{ section.settings.body }}</p>
+        {%- endif -%}
+
+        {%- form 'customer', id: 'td-nl-form', class: 'td-nl__form' -%}
+          {%- liquid
+            assign td_state = ''
+            if form.posted_successfully?
+              assign td_state = 'success'
+            elsif form.errors
+              assign td_state = 'error'
+            endif
+          -%}
+          <span hidden data-td-nl-state="{{ td_state }}"></span>
+          <input type="hidden" name="contact[tags]" value="newsletter,popup">
+          <label class="td-nl__label" for="td-nl-email">{{ td_email_label }}</label>
+          <div class="td-nl__row">
+            <input
+              class="td-nl__input"
+              id="td-nl-email"
+              type="email"
+              name="contact[email]"
+              value="{{ form.email | escape }}"
+              {% if section.settings.email_placeholder != blank %}placeholder="{{ section.settings.email_placeholder | escape }}"{% endif %}
+              autocomplete="email"
+              autocapitalize="off"
+              spellcheck="false"
+              required
+              {% if td_state == 'error' %}aria-invalid="true" aria-describedby="td-nl-error"{% endif %}
+            >
+            <button class="td-nl__submit" type="submit" data-td-nl-submit>{{ td_btn }}</button>
+          </div>
+          {%- if td_state == 'error' -%}
+            <p class="td-nl__error" id="td-nl-error" role="alert">
+              {%- for field in form.errors -%}
+                {%- if field == 'form' -%}
+                  {{ form.errors.messages[field] }}
+                {%- else -%}
+                  {{ form.errors.translated_fields[field] | capitalize }} {{ form.errors.messages[field] }}
+                {%- endif -%}
+                {%- unless forloop.last %} {% endunless -%}
+              {%- endfor -%}
+            </p>
+          {%- endif -%}
+          {%- if section.settings.consent != blank -%}
+            <p class="td-nl__consent">{{ section.settings.consent }}</p>
+          {%- endif -%}
+        {%- endform -%}
+
+        {%- if section.settings.decline_label != blank -%}
+          <button class="td-nl__skip" type="button" data-td-nl-skip>{{ section.settings.decline_label }}</button>
+        {%- endif -%}
+      </div>
+
+      <div class="td-nl__done" data-td-nl-done hidden>
+        <span class="td-nl__check" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+        <p class="td-nl__done-text" id="td-nl-done-title" role="status" tabindex="-1">{{ section.settings.success_message }}</p>
+        <button class="td-nl__submit td-nl__submit--block" type="button" data-td-nl-ok>{{ section.settings.success_button | default: 'Keep browsing' }}</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  (function () {
+    var root = document.currentScript && document.currentScript.parentElement;
+    if (!root || root.__tdNl) return;
+    var dlg = root.querySelector('[data-td-nl]');
+    if (!dlg) return;
+    root.__tdNl = true;
+
+    var KEY = 'td-nl-popup';
+    var DAY = 864e5;
+    var html = document.documentElement;
+    var ds = dlg.dataset;
+    var cfg = {
+      delay: parseFloat(ds.delay) || 0,
+      scroll: parseFloat(ds.scroll) || 0,
+      exit: ds.exit === 'true',
+      days: parseFloat(ds.days) || 14,
+      exclude: (ds.exclude || '').split('|'),
+      member: ds.member === 'true',
+      design: ds.design === 'true'
+    };
+    var mqPhone = window.matchMedia('(max-width: 767.98px)');
+    var mqPointer = window.matchMedia('(min-width: 768px) and (hover: hover) and (pointer: fine)');
+
+    var pitch = dlg.querySelector('[data-td-nl-pitch]');
+    var done = dlg.querySelector('[data-td-nl-done]');
+    var form = dlg.querySelector('form');
+    var email = dlg.querySelector('#td-nl-email');
+    var stateEl = dlg.querySelector('[data-td-nl-state]');
+    var title = dlg.querySelector('#td-nl-title');
+    var doneTitle = dlg.querySelector('#td-nl-done-title');
+
+    /* ---------- Storage: every access guarded ---------- */
+    var memo = null;
+    function readState() {
+      try {
+        var raw = window.localStorage.getItem(KEY);
+        return raw ? JSON.parse(raw) : memo;
+      } catch (e) { return memo; }
+    }
+    function writeState(obj) {
+      memo = obj;
+      try { window.localStorage.setItem(KEY, JSON.stringify(obj)); } catch (e) {}
+    }
+    function suppressed() {
+      var s = readState();
+      if (!s) return false;
+      if (s.s === 'subscribed') return true;
+      if (s.s === 'dismissed' && typeof s.t === 'number') return Date.now() - s.t < cfg.days * DAY;
+      return false;
+    }
+
+    /* ---------- Where it may show ---------- */
+    function currentPath() {
+      var p = window.location.pathname || '/';
+      var r = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+      if (r !== '/' && p.indexOf(r) === 0) p = '/' + p.slice(r.length);
+      return (p.replace(/\/+$/, '') || '/').toLowerCase();
+    }
+    function excluded() {
+      var p = currentPath();
+      return cfg.exclude.some(function (x) {
+        x = (x || '').trim().toLowerCase().replace(/\/+$/, '');
+        if (!x) return false;
+        if (x.charAt(0) !== '/') x = '/' + x;
+        return p === x || p.indexOf(x + '/') === 0;
+      });
+    }
+    function visible(el) {
+      if (!el || el.hidden) return false;
+      var cs = window.getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return false;
+      var r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    }
+    function blocked() {
+      if (document.hidden) return true;
+      if (html.classList.contains('td-hd-locked')) return true;
+      if (visible(document.getElementById('shopify-pc__banner'))) return true;
+      var dialogs = document.querySelectorAll('dialog[open]');
+      for (var i = 0; i < dialogs.length; i++) if (dialogs[i] !== dlg) return true;
+      var a = document.activeElement;
+      if (a && a !== document.body && !dlg.contains(a) &&
+          (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))) return true;
+      return false;
+    }
+
+    /* ---------- Open / close ---------- */
+    var shown = false;      /* one pop-up per page view */
+    var subscribed = false;
+    var preview = false;    /* theme editor preview: nothing is remembered */
+    var modal = false;
+    var lastFocus = null;
+    var waitTimer = null;
+
+    function setDone(on) {
+      pitch.hidden = on;
+      done.hidden = !on;
+      dlg.setAttribute('aria-labelledby', on ? 'td-nl-done-title' : 'td-nl-title');
+      if (on) dlg.removeAttribute('aria-describedby');
+      else if (dlg.querySelector('#td-nl-desc')) dlg.setAttribute('aria-describedby', 'td-nl-desc');
+    }
+
+    function focusables() {
+      return Array.prototype.slice.call(
+        dlg.querySelectorAll('a[href], button:not([disabled]), input:not([type="hidden"]):not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])')
+      ).filter(function (el) { return el.offsetParent !== null || el.getClientRects().length > 0; });
+    }
+
+    function open(focusTarget) {
+      if (dlg.open) return;
+      shown = true;
+      disarm();
+      lastFocus = document.activeElement;
+      modal = !mqPhone.matches;
+      dlg.hidden = false;
+      dlg.classList.toggle('td-nl--modal', modal);
+      dlg.classList.toggle('td-nl--sheet', !modal);
+      if (modal && typeof dlg.showModal === 'function') {
+        dlg.showModal();
+        html.classList.add('td-nl-locked');
+      } else if (typeof dlg.show === 'function') {
+        dlg.show();
+      } else {
+        dlg.setAttribute('open', '');
+      }
+      var target = focusTarget;
+      if (!target) target = modal && !subscribed ? email : (subscribed ? doneTitle : title);
+      if (target) {
+        try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
+      }
+    }
+
+    function close(remember) {
+      if (!dlg.open) return;
+      if (remember && !subscribed && !preview) writeState({ s: 'dismissed', t: Date.now() });
+      if (typeof dlg.close === 'function') dlg.close();
+      else { dlg.removeAttribute('open'); onClosed(); }
+    }
+    function onClosed() {
+      dlg.hidden = true;
+      html.classList.remove('td-nl-locked');
+      var back = lastFocus;
+      lastFocus = null;
+      if (back && back !== document.body && back.isConnected && typeof back.focus === 'function') {
+        try { back.focus({ preventScroll: true }); } catch (e) { back.focus(); }
+      }
+    }
+    function dismiss() { close(true); }
+
+    dlg.addEventListener('close', onClosed);
+    /* Esc on a modal dialog fires `cancel`: count it as a dismissal. */
+    dlg.addEventListener('cancel', function (e) { e.preventDefault(); dismiss(); });
+    dlg.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' || e.key === 'Esc') { e.preventDefault(); dismiss(); return; }
+      if (e.key !== 'Tab' || !modal) return;
+      var list = focusables();
+      if (!list.length) return;
+      var first = list[0], last = list[list.length - 1];
+      var active = document.activeElement;
+      if (e.shiftKey && (active === first || !dlg.contains(active) || active === title || active === doneTitle)) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault(); first.focus();
+      }
+    });
+    /* Esc on the phone card, which is non-modal and gets no `cancel`. */
+    document.addEventListener('keydown', function (e) {
+      if (!dlg.open || modal) return;
+      if ((e.key === 'Escape' || e.key === 'Esc') && !dlg.contains(e.target)) dismiss();
+    });
+    /* A click on the <dialog> box itself is a click on the backdrop: the
+       card fills the box. Both ends of the click must be on it, so a text
+       selection dragged out of the card does not close it. */
+    var downOnBackdrop = false;
+    dlg.addEventListener('pointerdown', function (e) { downOnBackdrop = e.target === dlg; });
+    dlg.addEventListener('click', function (e) {
+      if (e.target === dlg && downOnBackdrop) dismiss();
+      downOnBackdrop = false;
+    });
+    dlg.querySelector('[data-td-nl-close]').addEventListener('click', dismiss);
+    var skip = dlg.querySelector('[data-td-nl-skip]');
+    if (skip) skip.addEventListener('click', dismiss);
+    dlg.querySelector('[data-td-nl-ok]').addEventListener('click', function () { close(false); });
+
+    if (form) {
+      form.addEventListener('submit', function () {
+        var btn = form.querySelector('[data-td-nl-submit]');
+        if (btn) { btn.setAttribute('aria-disabled', 'true'); btn.classList.add('is-busy'); }
+      });
+    }
+
+    /* Crossing the 768px line while open: reopen in the other mode. */
+    function onBreakpoint() {
+      if (!dlg.open) return;
+      var keep = lastFocus;
+      dlg.removeEventListener('close', onClosed);
+      dlg.close();
+      html.classList.remove('td-nl-locked');
+      dlg.addEventListener('close', onClosed);
+      open();
+      lastFocus = keep;
+    }
+    if (mqPhone.addEventListener) mqPhone.addEventListener('change', onBreakpoint);
+
+    /* ---------- Triggers ---------- */
+    var timer = null;
+    var armed = false;
+
+    function request() {
+      if (shown || !armed) return;
+      if (blocked()) {
+        if (!waitTimer) waitTimer = setTimeout(function () { waitTimer = null; request(); }, 1000);
+        return;
+      }
+      open();
+    }
+    function scrollRatio() {
+      var best = 0;
+      [document.scrollingElement || html, document.querySelector('.page-wrapper')].forEach(function (el) {
+        if (!el) return;
+        var max = el.scrollHeight - el.clientHeight;
+        if (max > 0) best = Math.max(best, el.scrollTop / max);
+      });
+      return best;
+    }
+    var ticking = false;
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(function () {
+        ticking = false;
+        if (armed && scrollRatio() * 100 >= cfg.scroll) request();
+      });
+    }
+    function onLeave(e) {
+      if (!mqPointer.matches) return;
+      if (e.relatedTarget || e.toElement) return;
+      if (e.clientY > 0) return;
+      request();
+    }
+    function arm() {
+      armed = true;
+      if (cfg.delay > 0) timer = setTimeout(request, cfg.delay * 1000);
+      if (cfg.scroll > 0) document.addEventListener('scroll', onScroll, { passive: true, capture: true });
+      if (cfg.exit) document.addEventListener('mouseout', onLeave);
+    }
+    function disarm() {
+      armed = false;
+      clearTimeout(timer);
+      clearTimeout(waitTimer);
+      waitTimer = null;
+      document.removeEventListener('scroll', onScroll, { capture: true });
+      document.removeEventListener('mouseout', onLeave);
+    }
+
+    /* ---------- Theme editor preview ---------- */
+    if (cfg.design) {
+      var sid = ds.section;
+      document.addEventListener('shopify:section:select', function (e) {
+        if (!e.detail || e.detail.sectionId !== sid) return;
+        preview = true; shown = false; setDone(false); open();
+      });
+      document.addEventListener('shopify:section:deselect', function (e) {
+        if (e.detail && e.detail.sectionId === sid) close(false);
+      });
+      return;
+    }
+
+    /* ---------- Start ---------- */
+    var state = stateEl ? stateEl.getAttribute('data-td-nl-state') : '';
+    var hashOk = !window.location.hash || window.location.hash === '#td-nl-form';
+    var posted = /[?&]customer_posted=true(&|$)/.test(window.location.search);
+
+    if ((posted || state === 'success') && hashOk) {
+      subscribed = true;
+      writeState({ s: 'subscribed', t: Date.now() });
+      try {
+        var q = window.location.search.replace(/([?&])customer_posted=true(&|$)/, '$1').replace(/[?&]$/, '');
+        window.history.replaceState(window.history.state, '', window.location.pathname + q);
+      } catch (e) {}
+      setDone(true);
+      if (!excluded()) open();
+      return;
+    }
+    if (state === 'error' && hashOk) {
+      if (!excluded()) open(email);
+      return;
+    }
+    if (cfg.member || excluded() || suppressed()) return;
+    arm();
+  })();
+</script>
+
+<style>
+  html.td-nl-locked, html.td-nl-locked .page-wrapper { overflow: hidden; }
+  html:not(.shopify-design-mode) .td-nl-section { display: contents; }
+
+  .td-nl {
+    --td-ink: #070E1A; --td-smoke: #586274; --td-fog: #F4F6FA; --td-drop: #0068E8; --td-dive: #0053C4;
+    --td-amber: #F5A623; --td-red: #C20A0E;
+    --td-display: var(--font-heading--family, "Archivo", system-ui, sans-serif);
+    --td-body: var(--font-body--family, "Inter", system-ui, sans-serif);
+    box-sizing: border-box;
+    position: fixed; inset: 0; z-index: 60;
+    width: calc(100% - 32px); max-width: 440px; height: auto; max-height: calc(100% - 32px);
+    margin: auto; padding: 0; border: 0; border-radius: 16px; overflow: hidden;
+    background: #FFFFFF; color: var(--td-ink);
+    font-family: var(--td-body); font-size: 15px; line-height: 1.5; text-align: left;
+    -webkit-font-smoothing: antialiased;
+    box-shadow: 0 0 0 1px rgba(7,14,26,.06), 0 24px 60px -12px rgba(7,14,26,.45);
+  }
+  .td-nl[hidden], .td-nl:not([open]) { display: none; }
+  .td-nl *, .td-nl *::before, .td-nl *::after { box-sizing: border-box; }
+  .td-nl::backdrop { background: rgba(7,14,26,.6); }
+  .td-nl svg { display: block; flex-shrink: 0; }
+  .td-nl :is(a, button, input):focus-visible { outline: 2px solid var(--td-drop); outline-offset: 2px; }
+  .td-nl :is(h2, p) { margin: 0; }
+  .td-nl [tabindex="-1"]:focus { outline: none; }
+
+  .td-nl__card { display: flex; flex-direction: column; max-height: inherit; }
+
+  /* Ink band: logo and close. Colours pinned. */
+  .td-nl__band {
+    position: relative; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 96px; padding: 16px 56px;
+    background-color: var(--td-ink);
+    background-image: linear-gradient(180deg, #14233A 0%, #0B1524 100%);
+    border-bottom: 3px solid var(--td-amber);
+    color: #FFFFFF;
+  }
+  .td-nl__brand { display: flex; align-items: center; }
+  .td-nl .td-nl__logo { display: block; height: 64px; width: auto; max-width: 200px; object-fit: contain; }
+  .td-nl__wordmark {
+    font-family: var(--td-display); font-weight: 800; font-size: 28px; line-height: 1;
+    letter-spacing: -0.025em; text-transform: uppercase; color: #FFFFFF; white-space: nowrap;
+  }
+  .td-nl__wordmark-drop { color: #4C9AFF; }
+  .td-nl__wordmark-dot {
+    display: inline-block; width: 6px; height: 6px; margin-left: 2px; border-radius: 50%;
+    background: var(--td-amber); vertical-align: super;
+  }
+  .td-nl__close {
+    position: absolute; top: 8px; right: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; margin: 0; padding: 0; border: 0; border-radius: 8px;
+    background: transparent; color: #FFFFFF; cursor: pointer; transition: background-color .15s;
+  }
+  .td-nl__close svg { width: 22px; height: 22px; }
+  .td-nl__close:hover { background: rgba(255,255,255,.12); }
+  .td-nl__close:focus-visible { outline-color: #FFFFFF; outline-offset: -4px; }
+
+  .td-nl__body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 24px 28px 16px; }
+  .td-nl__pitch[hidden], .td-nl__done[hidden] { display: none; }
+
+  .td-nl__eyebrow {
+    display: inline-block; margin-bottom: 12px !important; padding: 4px 10px; border-radius: 9999px;
+    background: var(--td-amber); color: var(--td-ink);
+    font-family: var(--td-display); font-size: 12px; line-height: 16px; font-weight: 800;
+    letter-spacing: .08em; text-transform: uppercase;
+  }
+  .td-nl__title {
+    font-family: var(--td-display); font-size: 26px; line-height: 1.15; font-weight: 800;
+    letter-spacing: -0.02em; color: var(--td-ink); text-wrap: balance;
+  }
+  .td-nl__text { margin-top: 10px !important; font-size: 15px; line-height: 1.55; color: #3E4859; text-wrap: pretty; }
+
+  .td-nl__form { margin: 20px 0 0; }
+  .td-nl__label {
+    display: block; margin-bottom: 6px;
+    font-size: 14px; line-height: 20px; font-weight: 600; color: var(--td-ink);
+  }
+  .td-nl__row { display: grid; gap: 10px; }
+  .td-nl .td-nl__input {
+    display: block; width: 100%; height: 48px; margin: 0; padding: 0 14px;
+    border: 1px solid rgba(7,14,26,.28); border-radius: 8px;
+    background: #FFFFFF; color: var(--td-ink); box-shadow: inset 0 1px 2px rgba(7,14,26,.04);
+    font-family: var(--td-body); font-size: 16px; line-height: 1.25;
+    -webkit-appearance: none; appearance: none; outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .td-nl .td-nl__input::placeholder { color: #6B7485; opacity: 1; }
+  .td-nl .td-nl__input:focus { border-color: var(--td-drop); box-shadow: 0 0 0 3px rgba(0,104,232,.2); }
+  .td-nl .td-nl__input[aria-invalid="true"] { border-color: var(--td-red); }
+  .td-nl__submit {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 48px; margin: 0; padding: 0 22px; border: 0; border-radius: 8px;
+    background: var(--td-drop); color: #FFFFFF; cursor: pointer; white-space: nowrap;
+    box-shadow: 0 4px 14px -2px rgba(0,104,232,.35);
+    font-family: var(--td-display); font-size: 16px; font-weight: 700; line-height: 1; letter-spacing: -0.005em;
+    transition: background-color .15s, box-shadow .15s;
+  }
+  .td-nl__submit:hover { background: var(--td-dive); box-shadow: none; color: #FFFFFF; }
+  .td-nl__submit.is-busy { opacity: .75; cursor: progress; }
+  .td-nl__submit--block { width: 100%; margin-top: 20px; }
+  .td-nl__error {
+    margin-top: 8px !important; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--td-red);
+  }
+  .td-nl__consent { margin-top: 12px !important; font-size: 12px; line-height: 17px; color: var(--td-smoke); }
+  .td-nl__consent a { color: var(--td-dive); text-decoration: underline; text-underline-offset: 2px; }
+  .td-nl__consent a:hover { color: var(--td-ink); }
+  .td-nl__skip {
+    display: flex; align-items: center; justify-content: center; width: 100%; min-height: 44px;
+    margin: 6px 0 0; padding: 0 12px; border: 0; background: transparent; cursor: pointer;
+    font-family: var(--td-body); font-size: 14px; font-weight: 500; color: var(--td-smoke);
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .td-nl__skip:hover { color: var(--td-ink); }
+
+  .td-nl__done { padding: 8px 0 8px; text-align: center; }
+  .td-nl__check {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%;
+    background: rgba(0,104,232,.1); color: var(--td-drop);
+  }
+  .td-nl__check svg { width: 28px; height: 28px; }
+  .td-nl__done-text {
+    font-family: var(--td-display); font-size: 22px; line-height: 1.25; font-weight: 800;
+    letter-spacing: -0.015em; color: var(--td-ink); text-wrap: balance;
+  }
+
+  @media (min-width: 768px) {
+    .td-nl__row { grid-template-columns: minmax(0, 1fr) auto; }
+  }
+
+  /* Phones: a card above the call bar, never more than 60% of the screen. */
+  @media (max-width: 767.98px) {
+    .td-nl {
+      inset: auto 12px calc(76px + env(safe-area-inset-bottom)) 12px;
+      width: auto; max-width: 480px; max-height: 60vh; max-height: 60dvh;
+      margin: 0 auto; border-radius: 14px;
+      box-shadow: 0 0 0 1px rgba(7,14,26,.08), 0 18px 44px -8px rgba(7,14,26,.5);
+    }
+    .td-nl__band { min-height: 52px; padding: 6px 52px 6px 16px; justify-content: flex-start; }
+    .td-nl .td-nl__logo { height: 38px; max-width: 150px; }
+    .td-nl__wordmark { font-size: 20px; }
+    .td-nl__close { top: 4px; right: 4px; }
+    .td-nl__body { padding: 16px 16px 8px; }
+    .td-nl__eyebrow { margin-bottom: 8px !important; font-size: 11px; padding: 3px 9px; }
+    .td-nl__title { font-size: 21px; }
+    .td-nl__text { margin-top: 6px !important; font-size: 14px; line-height: 1.5; }
+    .td-nl__form { margin-top: 14px; }
+    .td-nl__row { grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+    .td-nl__submit { padding: 0 16px; font-size: 15px; }
+    .td-nl__consent { margin-top: 10px !important; font-size: 12px; line-height: 16px; }
+    .td-nl__skip { margin-top: 2px; }
+    .td-nl__done-text { font-size: 19px; }
+  }
+  /* No call bar on the page: sit near the bottom edge instead. */
+  @media (max-width: 767.98px) {
+    body:not(:has(.td-hd-callbar)) .td-nl { bottom: calc(12px + env(safe-area-inset-bottom)); }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .td-nl[open] { animation: td-nl-pop .22s cubic-bezier(.2,.8,.2,1); }
+    .td-nl[open]::backdrop { animation: td-nl-fade .22s ease-out; }
+    @media (max-width: 767.98px) {
+      .td-nl[open] { animation: td-nl-rise .28s cubic-bezier(.2,.8,.2,1); }
+    }
+  }
+  @keyframes td-nl-pop { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+  @keyframes td-nl-rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+  @keyframes td-nl-fade { from { opacity: 0; } to { opacity: 1; } }
+</style>
+{%- endunless -%}
+
+{% schema %}
+{
+  "name": "TireDrop sign-up pop-up",
+  "tag": "div",
+  "class": "td-nl-section",
+  "enabled_on": { "groups": ["footer"] },
+  "settings": [
+    { "type": "checkbox", "id": "enabled", "label": "Show the pop-up", "default": true },
+    { "type": "paragraph", "content": "Sign-ups create a customer with email marketing consent, tagged newsletter and popup. In the editor, select this section to preview it." },
+    { "type": "header", "content": "When it opens" },
+    { "type": "range", "id": "delay_seconds", "label": "Open after", "min": 0, "max": 90, "step": 1, "unit": "s", "default": 20, "info": "0 turns the timer off." },
+    { "type": "range", "id": "scroll_percent", "label": "Or at page scroll", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 50, "info": "Whichever comes first. 0 turns the scroll trigger off." },
+    { "type": "checkbox", "id": "exit_intent", "label": "Also open on exit intent (desktop)", "default": true, "info": "When the pointer leaves through the top of the window." },
+    { "type": "range", "id": "dismiss_days", "label": "After a close, hide for", "min": 1, "max": 90, "step": 1, "unit": "d", "default": 14, "info": "After a sign-up it never shows again on that browser." },
+    { "type": "textarea", "id": "exclude_paths", "label": "Never show on these paths", "default": "/cart\n/checkout\n/checkouts\n/account\n/challenge\n/password\n/pages/contact\n/pages/financing\n/pages/commercial-tires", "info": "One per line. A path also covers everything under it." },
+    { "type": "header", "content": "Logo" },
+    { "type": "image_picker", "id": "logo", "label": "Logo override", "info": "Leave empty to use the theme logo. Without either, the TireDrop wordmark is shown." },
+    { "type": "header", "content": "Copy" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The TireDrop list" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Tire tips that save you money" },
+    { "type": "textarea", "id": "body", "label": "Body", "default": "Seasonal tire checks, fitment help for your vehicle, and first word when new sizes and brands land. No spam — unsubscribe anytime." },
+    { "type": "text", "id": "email_label", "label": "Email field label", "default": "Email address" },
+    { "type": "text", "id": "email_placeholder", "label": "Email placeholder", "default": "you@example.com" },
+    { "type": "text", "id": "button_label", "label": "Button", "default": "Sign me up" },
+    { "type": "inline_richtext", "id": "consent", "label": "Consent line", "default": "By signing up you agree to receive marketing emails from TireDrop. Unsubscribe anytime. See our <a href=\"/pages/privacy\">Privacy Policy</a>." },
+    { "type": "text", "id": "decline_label", "label": "Decline link", "default": "No thanks", "info": "Leave empty to hide it; the close button still works." },
+    { "type": "header", "content": "After sign-up" },
+    { "type": "text", "id": "success_message", "label": "Success message", "default": "You're on the list. Watch your inbox." },
+    { "type": "text", "id": "success_button", "label": "Success button", "default": "Keep browsing" }
+  ],
+  "presets": [{ "name": "TireDrop sign-up pop-up" }]
+}
+{% endschema %}
