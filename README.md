@@ -7,8 +7,8 @@ Sunrise, FL and installed there.
 **Powered by Extreme Tires** — the parent business, a tire shop in Sunrise, FL.
 TireDrop is its online storefront.
 
-> This project is self-contained. It shares a repository with, but is
-> completely independent of, the unrelated `cannavibe` app at the repo root.
+> Repository: `TireDrop/TIREDROPONLINE-` (app at the repo root, production
+> branch `main`). The Shopify theme sections live in `shopify/`.
 
 ---
 

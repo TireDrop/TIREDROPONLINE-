@@ -1,28 +1,24 @@
 # Deploying TireDrop
 
-## The one thing that goes wrong
+## Repository
 
-This repository holds **two** sites:
-
-| Path        | Site      | Vercel project |
-| ----------- | --------- | -------------- |
-| `/`         | Cannavibe | `cannavibe`    |
-| `/tiredrop` | TireDrop  | (new)          |
-
-TireDrop needs its **own Vercel project** with **Root Directory set to
-`tiredrop`**. Deploy the repository without that and Vercel builds the root
-app and publishes Cannavibe under the TireDrop domain.
+TireDrop has its own repository: **`TireDrop/TIREDROPONLINE-`**, with the app
+at the repo root and production on the `main` branch. (It used to live in a
+`tiredrop/` folder of another repository; that history came across with it.)
 
 ## Steps
 
-1. Vercel → Add New → Project → import `jja8991/cannavibe`.
-2. **Root Directory: `tiredrop`.** This is the step that matters.
+1. Vercel (the TireDrop account) → Add New → Project → import
+   `TireDrop/TIREDROPONLINE-`.
+2. Root Directory: leave it as the repo root (`./`). Production branch: `main`.
 3. Framework preset: Vite. Build `npm run build`, output `dist` — both are
    detected automatically. `engines.node` in `package.json` pins Node 22
    (Vercel ignores `.nvmrc`).
-4. Deploy. `vercel.json` in this folder already handles SPA rewrites, security
+4. Deploy. `vercel.json` already handles SPA rewrites, security
    headers, immutable asset caching, and `noindex` on `*.vercel.app` previews
-   so a preview URL can never outrank the real domain.
+   so a preview URL can never outrank the real domain. Its cron runs once a
+   day so the deploy works on Hobby; see `docs/integrations/atd-forwarder.md`
+   before switching to Pro.
 
 ## Environment variables
 
@@ -97,8 +93,8 @@ retired for payments. Details: `docs/integrations/shopify-checkout.md`.
 
 ### Project settings
 
-- **Root Directory: `tiredrop`** (same as above). `api/` sits inside it, so
-  Vercel picks the functions up automatically.
+- **Root Directory: the repo root.** `api/` sits there, so Vercel picks the
+  functions up automatically.
 - Framework preset Vite, build `npm run build`, output `dist`.
 
 ### Environment variables (server side)
@@ -250,8 +246,7 @@ Shopify serving the domain until the Vercel site is verified.
 ## Free alternative
 
 Cloudflare Pages runs this at $0 with commercial use permitted, where Vercel's
-free Hobby tier does not allow it. It needs the same Root Directory setting
-and a `public/_redirects` file containing `/*  /index.html  200` in place of
+free Hobby tier does not allow it. It needs a `public/_redirects` file containing `/*  /index.html  200` in place of
 `vercel.json`'s rewrite. It would not run the `api/` functions, so search
 would stay on the sample catalog and checkout in request mode. Worth it only
 if the $20/month matters.
