@@ -921,3 +921,81 @@ appeared, the sender-email status, and the SPF/DKIM/DMARC results.
 
 **Undo:** delete the Vercel variables and redeploy. The site goes back to
 sample/request mode with forms not sent.
+
+## 20. Brand the Shopify checkout to match tiredroponline.com
+
+**What the Basic plan allows:** full checkout styling (the Checkout Branding
+API and custom layouts) is Shopify Plus only. Basic uses the **checkout
+editor**, which covers logo, banner image, colors, fonts and backgrounds.
+That's enough to make checkout read as TireDrop.
+
+**Brand values** (from `tailwind.config.js` and `index.html`):
+
+| Token | Hex |
+|---|---|
+| ink | #070E1A |
+| drop blue | #0068E8 |
+| dive (hover) | #0053C4 |
+| fog | #F4F6FA |
+| smoke | #586274 |
+| red | #D40C10 |
+
+Fonts: Archivo (headings) and Instrument Sans (body).
+
+**Assets** (served by the live site):
+- https://tiredroponline.com/brand/tiredrop.png (wordmark)
+- https://tiredroponline.com/brand/checkout-banner.png (dark band, 2000×500)
+- https://tiredroponline.com/brand/icon-512.png (square)
+- https://tiredroponline.com/brand/og-tiredrop.jpg (cover)
+
+```
+TASK: Brand TireDrop's Shopify checkout, Shop Pay and order emails to match
+tiredroponline.com. I'm logged into Shopify admin (TireDrop store).
+Report after each PART with before/after screenshots or descriptions.
+STOP and ask if an option below doesn't exist. Don't guess a substitute
+for anything except fonts (fallbacks listed).
+
+PART A: Download the assets (to my Downloads folder)
+1. Download:
+   https://tiredroponline.com/brand/tiredrop.png
+   https://tiredroponline.com/brand/checkout-banner.png
+   https://tiredroponline.com/brand/icon-512.png
+   https://tiredroponline.com/brand/og-tiredrop.jpg
+
+PART B: Checkout editor
+2. Settings → Checkout → Customize (opens the checkout editor). Make sure
+   you're editing the checkout that's live (not a copy).
+3. Branding / Settings (paintbrush icon):
+   - Logo: upload tiredrop.png. Size: Medium (or ~200px wide). Position:
+     Left.
+   - Banner: upload checkout-banner.png. (The logo sits on the dark band,
+     like the website header.)
+   - Main area: background color #FFFFFF.
+   - Order summary: background color #F4F6FA.
+   - Colors: Accent #0068E8, Buttons #0068E8, Errors #D40C10.
+   - Typography: Headings = Archivo (fallback: Archivo Narrow, then
+     Montserrat). Body = Instrument Sans (fallback: Inter, then Work Sans).
+   - Corner radius / field style, if offered: small/rounded (not pill).
+4. Save. Preview on desktop and mobile. Report: the logo is readable on the
+   banner Y/N, and the buttons are blue Y/N.
+
+PART C: Shop Pay / brand settings
+5. Settings → Brand (or Sales channels → Shop → Brand):
+   - Logo: tiredrop.png. Square logo: icon-512.png.
+   - Colors: Primary #0068E8, Contrast/Secondary #070E1A.
+   - Cover image: og-tiredrop.jpg.
+   - Short description: "Tires shipped. Or installed. Free shipping to the
+     48 contiguous states + DC; installation in South Florida."
+   Save.
+
+PART D: Email look
+6. Settings → Notifications → Customize email templates: Logo tiredrop.png
+   (width ~200px), Accent color #0068E8. Save. Send a test "Order
+   confirmation" to info@tiredroponline.com and report how it looks.
+
+DO NOT change checkout fields, payment settings, shipping, policies, or
+publish/duplicate themes.
+
+REPORT BACK: each PART Y/N, the fonts actually chosen, and a description or
+screenshots of checkout (desktop + mobile) and the test email.
+```
