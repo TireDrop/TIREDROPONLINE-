@@ -24,6 +24,74 @@
     {%- render 'theme-styles-variables' -%}
     {%- render 'color-palette' -%}
 
+    <style>
+      /* TD-FIX: typography orphans. Storefront headings balance their lines;
+         paragraphs and list items avoid a one-word last line. Headings take
+         the shorthand as specified. p/li use the text-wrap-style longhand so
+         they do NOT reset text-wrap-mode: a `white-space: nowrap` on a p/li
+         (e.g. an ellipsis meta line, a chip) keeps working. Browsers without
+         the longhand get the shorthand at zero specificity, so any class rule
+         still wins. Header nav links, buttons and chips are a/button/span
+         and are not targeted. */
+      .page-wrapper :is(h1, h2, h3, h4) { text-wrap: balance; }
+      .page-wrapper :is(p, li) { text-wrap-style: pretty; }
+      @supports not (text-wrap-style: pretty) {
+        :where(.page-wrapper) :where(p, li) { text-wrap: pretty; }
+      }
+
+      /* TD-FIX: Shopify's privacy opt-out form (/pages/data-sharing-opt-out)
+         rendered with a grey 3px square "Opt out" outline, a round
+         appearance:none checkbox floated off its label and a bare email
+         field. Restyled to the site's primary button, a native square
+         checkbox and the site's 44px field. Scoped to the form container. */
+      #pc--optOutFormContainer {
+        font-family: var(--font-body--family, Inter, system-ui, sans-serif);
+        color: #070E1A;
+      }
+      #pc--optOutFormContainer .pc--show-email-field { margin: 1rem 0 0; }
+      #pc--optOutFormContainer .pc--show-email-field label {
+        position: static !important; display: inline-flex !important; align-items: center; gap: 10px;
+        min-height: 44px; margin: 0 !important; padding: 0 !important;
+        font-size: 15px; line-height: 1.4; color: #070E1A; cursor: pointer;
+      }
+      #pc--optOutFormContainer .pc--show-email-field label::before,
+      #pc--optOutFormContainer .pc--show-email-field label::after { content: none !important; display: none !important; }
+      #pc--optOutFormContainer .pc--show-email-field input[type="checkbox"] {
+        -webkit-appearance: checkbox !important; appearance: auto !important;
+        position: static !important; display: inline-block !important; flex: none;
+        width: 18px !important; height: 18px !important; min-width: 18px; margin: 0 !important; padding: 0 !important;
+        border-radius: 3px !important; opacity: 1 !important; visibility: visible !important; clip: auto !important;
+        accent-color: #0068E8; cursor: pointer;
+      }
+      #pc--optOutFormContainer .pc--opt-out-form-field { display: grid; gap: 6px; max-width: 24rem; margin-top: .75rem; }
+      #pc--optOutFormContainer .pc--opt-out-form-field label {
+        position: static !important; font-size: 14px; font-weight: 600; color: #070E1A;
+      }
+      #pc--optOutFormContainer #pc--opt-out-email_input {
+        box-sizing: border-box; width: 100%; height: 44px; margin: 0; padding: 0 14px;
+        border: 1px solid rgba(7,14,26,.15) !important; border-radius: 6px !important;
+        background: #FFFFFF; color: #070E1A; box-shadow: inset 0 1px 2px rgba(7,14,26,.04);
+        font: inherit; font-size: 16px; -webkit-appearance: none; appearance: none; outline: none;
+      }
+      #pc--optOutFormContainer #pc--opt-out-email_input:focus {
+        border-color: #0068E8 !important; box-shadow: 0 0 0 2px rgba(0,104,232,.15);
+      }
+      #pc--optOutFormContainer #pc--opt-out-button {
+        display: inline-flex; align-items: center; justify-content: center; min-height: 44px;
+        margin-top: 1rem; padding: 12px 24px !important;
+        border: 0 !important; border-radius: 6px !important; outline: none;
+        background: #0068E8 !important; color: #FFFFFF !important;
+        box-shadow: 0 4px 14px -2px rgba(0,104,232,.35);
+        font-family: var(--font-heading--family, "Archivo", system-ui, sans-serif);
+        font-size: 15px; font-weight: 700; line-height: 1; letter-spacing: -0.005em; text-transform: none;
+        cursor: pointer; transition: background-color .15s, box-shadow .15s;
+      }
+      #pc--optOutFormContainer #pc--opt-out-button:hover { background: #0053C4 !important; box-shadow: none; }
+      #pc--optOutFormContainer #pc--opt-out-button:focus-visible { outline: 2px solid #0068E8; outline-offset: 2px; }
+      #pc--optOutFormContainer #pc--opt-out-button::before,
+      #pc--optOutFormContainer #pc--opt-out-button::after { content: none !important; }
+    </style>
+
     {% if request.design_mode %}
       {%- render 'theme-editor' -%}
     {% endif %}

@@ -121,7 +121,12 @@
           <div class="td-pg-vs__head td-pg-vs__head--them">{% render 'td-pg-icon', name: 'home', size: 18 %}<h3>{{ ss.vs_them_heading | default: 'Ship to your house' }}</h3></div>
           <ul class="td-pg-vs td-pg-vs--them">
             {%- for block in section.blocks -%}{%- if block.type == 'compare' and block.settings.them != blank -%}
-              <li>{% render 'td-pg-icon', name: 'x', size: 18 %}<span>{{ block.settings.them }}</span></li>
+              {%- comment -%} TD-FIX: a right-hand item that is also a selling point (them_positive) gets the check icon, not the ✕. {%- endcomment -%}
+              {%- if block.settings.them_positive -%}
+                <li class="td-pg-vs__pro">{% render 'td-pg-icon', name: 'check', size: 18 %}<span>{{ block.settings.them }}</span></li>
+              {%- else -%}
+                <li>{% render 'td-pg-icon', name: 'x', size: 18 %}<span>{{ block.settings.them }}</span></li>
+              {%- endif -%}
             {%- endif -%}{%- endfor -%}
           </ul>
         </div>
@@ -243,6 +248,14 @@
   .td-pg-inst__grow { flex: 1; }
   .td-pg-inst__book-btns { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.5rem; }
   .td-pg-inst__cta-eyebrow { margin-left: .5rem; }
+  /* TD-FIX: positive item in the "Ship to your house" list reads like the pros column (blue check, ink text). */
+  .td-pg-inst .td-pg-vs--them .td-pg-vs__pro { color: #070E1A; }
+  .td-pg-inst .td-pg-vs--them .td-pg-vs__pro .td-pg-icon { color: #0068E8; }
+  /* TD-FIX: town chips in balanced rows of at most five on desktop (equal-width columns sized to the
+     longest name, left-aligned with the section head); phones keep the natural flex wrap. */
+  @media (min-width: 1024px) {
+    .td-pg-inst .td-pg-chips { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); width: max-content; max-width: 100%; }
+  }
 </style>
 
 {% schema %}
@@ -326,7 +339,8 @@
     ] },
     { "type": "compare", "name": "Comparison row", "settings": [
       { "type": "text", "id": "us", "label": "Ship to the store" },
-      { "type": "text", "id": "them", "label": "Ship to your house" }
+      { "type": "text", "id": "them", "label": "Ship to your house" },
+      { "type": "checkbox", "id": "them_positive", "label": "Right-hand item is a plus, not a minus", "default": false, "info": "Shows a check instead of a cross, e.g. for 'Also free to any continental-US address'." }
     ] },
     { "type": "faq", "name": "FAQ", "settings": [
       { "type": "text", "id": "question", "label": "Question" },

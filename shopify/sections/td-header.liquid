@@ -51,6 +51,62 @@
     assign cart_label = 'Cart, ' | append: count | append: ' items'
   endif
   assign sid = section.id | handle
+
+  # TD-FIX: exactly one top-level item is active. link.active / child_active
+  # lit up every parent that had a child pointing at the current page (e.g.
+  # four items on /pages/contact). Pre-pass order:
+  #   (a) Home only on the index template; any other top-level link whose own
+  #       url is the current page;
+  #   (b) else the FIRST parent with a current child, ignoring "Book…" and
+  #       "Ask…" children (CTA duplicates of /pages/contact);
+  #   (c) else the first non-home link Shopify marks active (collection
+  #       subpages / products), so those keep a highlight.
+  # td_active_index is a 1-based forloop.index; 0 means none.
+  assign td_active_index = 0
+  for link in menu.links
+    if link.type == 'frontpage_link' or link.url == routes.root_url
+      if template.name == 'index'
+        assign td_active_index = forloop.index
+        break
+      endif
+    elsif link.current
+      assign td_active_index = forloop.index
+      break
+    endif
+  endfor
+  if td_active_index == 0
+    for link in menu.links
+      if link.type == 'frontpage_link' or link.url == routes.root_url
+        continue
+      endif
+      assign td_parent_i = forloop.index
+      for child in link.links
+        if child.current
+          assign td_child_t = child.title | strip
+          assign td_child_t4 = td_child_t | slice: 0, 4
+          assign td_child_t3 = td_child_t | slice: 0, 3
+          unless td_child_t4 == 'Book' or td_child_t3 == 'Ask'
+            assign td_active_index = td_parent_i
+            break
+          endunless
+        endif
+      endfor
+      if td_active_index > 0
+        break
+      endif
+    endfor
+  endif
+  if td_active_index == 0
+    for link in menu.links
+      if link.type == 'frontpage_link' or link.url == routes.root_url
+        continue
+      endif
+      if link.active
+        assign td_active_index = forloop.index
+        break
+      endif
+    endfor
+  endif
 -%}
 
 {%- capture icon_phone -%}<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>{%- endcapture -%}
@@ -164,17 +220,13 @@
         {%- if menu.links.size > 0 -%}
           <ul class="td-hd-nav__list">
             {%- for link in menu.links -%}
+              {%- comment -%} TD-FIX: Gallery hidden until real photos exist. {%- endcomment -%}
+              {%- if link.url contains '/pages/gallery' -%}{%- continue -%}{%- endif -%}
               {%- liquid
-                if link.type == 'frontpage_link' or link.url == routes.root_url
-                  assign is_active = false
-                  if template.name == 'index'
-                    assign is_active = true
-                  endif
-                else
-                  assign is_active = false
-                  if link.active or link.child_active or link.current
-                    assign is_active = true
-                  endif
+                # TD-FIX: single active item from the pre-pass (td_active_index).
+                assign is_active = false
+                if forloop.index == td_active_index
+                  assign is_active = true
                 endif
               -%}
               {%- if link.links.size > 0 -%}
@@ -195,6 +247,8 @@
                   <div class="td-hd-nav__panel" id="td-hd-sub-{{ sid }}-{{ forloop.index }}">
                     <ul class="td-hd-nav__sublist">
                       {%- for child in link.links -%}
+                        {%- comment -%} TD-FIX: Gallery hidden until real photos exist. {%- endcomment -%}
+                        {%- if child.url contains '/pages/gallery' -%}{%- continue -%}{%- endif -%}
                         <li>
                           <a class="td-hd-nav__sublink{% if child.current %} is-current{% endif %}" href="{{ child.url }}"{% if child.current %} aria-current="page"{% endif %}>
                             {{- child.title -}}
@@ -270,6 +324,14 @@
       {%- if menu.links.size > 0 -%}
         <ul class="td-hd-dnav__list">
           {%- for link in menu.links -%}
+            {%- comment -%} TD-FIX: Gallery hidden; only the pre-pass's single active parent starts expanded. {%- endcomment -%}
+            {%- if link.url contains '/pages/gallery' -%}{%- continue -%}{%- endif -%}
+            {%- liquid
+              assign td_d_open = false
+              if forloop.index == td_active_index and link.links.size > 0
+                assign td_d_open = true
+              endif
+            -%}
             <li class="td-hd-dnav__item">
               <div class="td-hd-dnav__row">
                 <a class="td-hd-dnav__link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
@@ -279,7 +341,7 @@
                   <button
                     class="td-hd-dnav__toggle"
                     type="button"
-                    aria-expanded="{% if link.child_active %}true{% else %}false{% endif %}"
+                    aria-expanded="{% if td_d_open %}true{% else %}false{% endif %}"
                     aria-controls="td-hd-dsub-{{ sid }}-{{ forloop.index }}"
                     aria-label="{{ link.title | escape }} submenu"
                     data-td-hd-acc
@@ -289,8 +351,9 @@
                 {%- endif -%}
               </div>
               {%- if link.links.size > 0 -%}
-                <ul class="td-hd-dnav__sub" id="td-hd-dsub-{{ sid }}-{{ forloop.index }}"{% unless link.child_active %} hidden{% endunless %}>
+                <ul class="td-hd-dnav__sub" id="td-hd-dsub-{{ sid }}-{{ forloop.index }}"{% unless td_d_open %} hidden{% endunless %}>
                   {%- for child in link.links -%}
+                    {%- if child.url contains '/pages/gallery' -%}{%- continue -%}{%- endif -%}
                     <li>
                       <a class="td-hd-dnav__sublink{% if child.current %} is-current{% endif %}" href="{{ child.url }}"{% if child.current %} aria-current="page"{% endif %}>
                         {{- child.title -}}
@@ -863,6 +926,75 @@
     .td-hd-drawer[open] { animation-name: td-hd-slide-left; }
   }
   @keyframes td-hd-slide-left { from { transform: translateX(-100%); } to { transform: none; } }
+
+  /* ---------- 6. Shopify cookie banner ----------
+     TD-FIX: Shopify injects #shopify-pc__banner with its own style tag (2px
+     radius, both Accept and Decline solid blue, a full-width sheet on phones
+     that covers the hero and the call bar). The ID + !important beat the
+     injected rules wherever they land in the document. Below 1024px the
+     banner becomes a compact card that floats above the call bar (68px +
+     8px gap + safe area) and scrolls internally past 45vh. It is never
+     hidden or auto-dismissed. */
+  #shopify-pc__banner.shopify-pc__banner__dialog {
+    font-family: var(--font-body--family, Inter, system-ui, sans-serif) !important;
+    color: #070E1A !important;
+  }
+  #shopify-pc__banner.shopify-pc__banner__dialog h2 {
+    font-family: var(--font-heading--family, "Archivo", system-ui, sans-serif) !important;
+    color: #070E1A !important; letter-spacing: -0.012em !important;
+  }
+  #shopify-pc__banner.shopify-pc__banner__dialog p,
+  #shopify-pc__banner.shopify-pc__banner__dialog a { color: #070E1A !important; }
+  #shopify-pc__banner.shopify-pc__banner__dialog button {
+    font-family: var(--font-heading--family, "Archivo", system-ui, sans-serif) !important;
+    font-size: 15px !important; font-weight: 700 !important; line-height: 1.2 !important;
+    min-height: 44px !important; padding: 12px 24px !important; border-radius: 6px !important;
+    box-shadow: none !important; transition: background-color .15s, border-color .15s, color .15s;
+  }
+  /* Accept and Decline are styled identically so neither choice is nudged. */
+  #shopify-pc__banner.shopify-pc__banner__dialog button.shopify-pc__banner__btn-accept,
+  #shopify-pc__banner.shopify-pc__banner__dialog button.shopify-pc__banner__btn-decline {
+    background: #0068E8 !important; color: #FFFFFF !important; border: 1px solid #0068E8 !important;
+  }
+  #shopify-pc__banner.shopify-pc__banner__dialog button.shopify-pc__banner__btn-accept:hover,
+  #shopify-pc__banner.shopify-pc__banner__dialog button.shopify-pc__banner__btn-decline:hover {
+    background: #0053C4 !important; border-color: #0053C4 !important;
+  }
+  #shopify-pc__banner.shopify-pc__banner__dialog button.shopify-pc__banner__btn-manage-prefs {
+    background: transparent !important; color: #070E1A !important; border: 0 !important;
+    padding-inline: 8px !important; font-family: var(--font-body--family, Inter, system-ui, sans-serif) !important;
+    font-size: 14px !important; font-weight: 500 !important; text-decoration: underline !important;
+    text-underline-offset: 3px;
+  }
+  #shopify-pc__banner.shopify-pc__banner__dialog button.shopify-pc__banner__btn-manage-prefs:hover { color: #0068E8 !important; }
+  #shopify-pc__banner.shopify-pc__banner__dialog button:focus-visible {
+    outline: 2px solid #0068E8 !important; outline-offset: 2px !important;
+  }
+  @media (max-width: 1023.98px) {
+    #shopify-pc__banner.shopify-pc__banner__dialog {
+      top: auto !important; left: 12px !important; right: 12px !important;
+      bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+      width: auto !important; min-width: 0 !important; max-width: 36rem !important; margin: 0 auto !important;
+      max-height: 45vh !important; max-height: 45dvh !important; overflow-y: auto !important;
+      overscroll-behavior: contain; padding: 16px !important; border-radius: 12px !important;
+      border: 1px solid rgba(7,14,26,.1) !important;
+      box-shadow: 0 2px 4px rgba(7,14,26,.06), 0 18px 38px -10px rgba(7,14,26,.35) !important;
+      font-size: 14px !important;
+    }
+    #shopify-pc__banner.shopify-pc__banner__dialog h2 { font-size: 16px !important; line-height: 1.3 !important; margin: 0 0 4px !important; }
+    #shopify-pc__banner.shopify-pc__banner__dialog p { font-size: 14px !important; line-height: 1.45 !important; }
+    #shopify-pc__banner .shopify-pc__banner__body { margin-bottom: 12px !important; }
+    /* Accept and Decline share a row; Manage preferences sits under them. */
+    #shopify-pc__banner .shopify-pc__banner__btns {
+      flex-direction: row !important; flex-wrap: wrap !important; gap: 8px !important;
+    }
+    #shopify-pc__banner.shopify-pc__banner__dialog button { margin: 0 !important; }
+    #shopify-pc__banner.shopify-pc__banner__dialog button.shopify-pc__banner__btn-accept { order: 1 !important; flex: 1 1 0 !important; }
+    #shopify-pc__banner.shopify-pc__banner__dialog button.shopify-pc__banner__btn-decline { order: 2 !important; flex: 1 1 0 !important; }
+    #shopify-pc__banner.shopify-pc__banner__dialog button.shopify-pc__banner__btn-manage-prefs {
+      order: 3 !important; flex: 1 1 100% !important; min-height: 36px !important; padding-block: 8px !important;
+    }
+  }
 </style>
 
 {% schema %}

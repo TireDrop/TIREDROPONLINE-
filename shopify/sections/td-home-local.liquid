@@ -106,7 +106,10 @@
   .td-local a.td-local__row:hover { color: #0068E8; }
   .td-local .td-local__name { font-weight: 500; }
   .td-local .td-local__meta { flex-shrink: 0; font-size: .75rem; color: #586274; font-variant-numeric: tabular-nums; }
-  .td-local .td-local__cta { align-self: flex-start; margin-top: 1.5rem; }
+  /* TD-FIX: the list keeps a 1.5rem gap above the button, and margin-top:auto pins the
+     button to the bottom of each flex-column card so both buttons line up when the lists differ in length. */
+  .td-local .td-local__list { margin-bottom: 1.5rem; }
+  .td-local .td-local__cta { align-self: flex-start; margin-top: auto; }
   .td-local .td-local__towns-title {
     margin: 2.5rem 0 0; text-align: center;
     font-size: .75rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #586274;

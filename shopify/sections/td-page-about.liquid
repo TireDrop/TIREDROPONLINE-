@@ -21,6 +21,14 @@
   if tdp_stat_cols > 4
     assign tdp_stat_cols = 4
   endif
+  # TD-FIX: phone column count that never strands a stat alone — 2 for an even count, 3 for odd (1 for one).
+  assign tdp_stat_cols_sm = 2
+  assign tdp_stat_odd = tdp_stat_count | modulo: 2
+  if tdp_stat_count < 3
+    assign tdp_stat_cols_sm = tdp_stat_count
+  elsif tdp_stat_odd == 1
+    assign tdp_stat_cols_sm = 3
+  endif
   assign tdp_vendors = collections['tires'].products | map: 'vendor' | uniq | sort
 -%}
 <div class="tdp tdp-about">
@@ -95,7 +103,7 @@
     <section class="tdp-ink tdp-about__stats">
       <div class="tdp-wrap">
         <h2 class="tdp-sr">{{ section.settings.stats_heading }}</h2>
-        <dl class="tdp-about__statgrid" style="--tdp-cols: {{ tdp_stat_cols }};">
+        <dl class="tdp-about__statgrid{% if tdp_stat_cols_sm > 2 %} tdp-about__statgrid--tight{% endif %}" style="--tdp-cols: {{ tdp_stat_cols }}; --tdp-cols-sm: {{ tdp_stat_cols_sm }};">{% comment %} TD-FIX: --tdp-cols-sm / --tight {% endcomment %}
           {%- for block in section.blocks -%}
             {%- if block.type == 'stat' -%}
               <div {{ block.shopify_attributes }}>
@@ -145,6 +153,7 @@
           {%- endfor -%}
         </div>
         <p class="tdp-small tdp-about__brandnote">{{ section.settings.brands_note }}</p>
+      {%- comment -%} TD-FIX: the "catalog is being loaded" placeholder no longer ships as a default; this only renders if a merchant fills the setting in. {%- endcomment -%}
       {%- elsif section.settings.brands_empty != blank -%}
         <p class="tdp-small tdp-about__brandnote tdp-about__brandnote--empty">{{ section.settings.brands_empty }} <a href="{{ tdp_tel }}">{{ section.settings.phone }}</a></p>
       {%- endif -%}
@@ -300,7 +309,14 @@
   .tdp-about__timeline .tdp-h3 { margin-bottom: .5rem; }
   .tdp-about__node { position: absolute; left: -7px; top: 6px; height: 12px; width: 12px; border-radius: 999px; background: #0068E8; }
   .tdp-about__stats { padding: 3rem 0; }
-  .tdp-about__statgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }
+  /* TD-FIX: phone columns come from --tdp-cols-sm (3 equal columns for three stats, so "10 South Florida
+     towns" is no longer alone on a second row); odd counts get a tighter gap and smaller numerals. */
+  .tdp-about__statgrid { display: grid; grid-template-columns: repeat(var(--tdp-cols-sm, 2), minmax(0, 1fr)); gap: 2rem; }
+  @media (max-width: 767px) {
+    .tdp-about__statgrid--tight { gap: 1.5rem 1rem; }
+    .tdp-about__statgrid--tight .tdp-about__figure { font-size: 2rem; }
+    .tdp-about__statgrid--tight .tdp-about__statlabel { font-size: .8125rem; }
+  }
   .tdp-about__figure { display: block; font-family: var(--font-heading--family, inherit); font-size: 2.25rem; line-height: 1; color: #F5A623; }
   .tdp-about__statlabel { display: block; margin-top: .5rem; font-size: .875rem; line-height: 1.43; color: rgba(255,255,255,.72); }
   .tdp-about__statnote { margin-top: 2rem; font-size: .75rem; line-height: 1.5; color: rgba(255,255,255,.65); }
@@ -358,7 +374,7 @@
     {"type": "textarea", "id": "work_lede", "label": "Supporting copy", "default": "Nothing here is a trade secret. It is the short list of things we refuse to cut corners on, online or in the bay."},
     {"type": "text", "id": "brands_badge", "label": "Brand row badge", "default": "Brands in the catalog"},
     {"type": "textarea", "id": "brands_note", "label": "Brand row note", "default": "Every brand named here has tires you can filter to and buy on this site right now. The catalog widens as distributor access does — if you want something that is not listed, call and ask before you assume we cannot get it.", "info": "Shown under the brand names, which are read from the tires collection."},
-    {"type": "textarea", "id": "brands_empty", "label": "Note while the catalog is empty", "default": "The catalog is being loaded now. If you want a particular brand or size, call and ask before you assume we cannot get it."},
+    {"type": "textarea", "id": "brands_empty", "label": "Note while the catalog is empty", "info": "Optional. Leave blank to show nothing when the tires collection has no products."},
     {"type": "header", "content": "Closing band"},
     {"type": "text", "id": "cta_eyebrow", "label": "Eyebrow", "default": "Tires shipped. Or installed."},
     {"type": "text", "id": "cta_title", "label": "Heading", "default": "Tell us the vehicle. We will find the tire."},

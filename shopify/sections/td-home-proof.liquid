@@ -1,7 +1,7 @@
 {% comment %}
   "Why TireDrop" (React HomePage <Proof>), ported without anything the store
   cannot stand behind:
-  - React's 4.8 star rating and its placeholder quote are not real, so they
+  - React's 4.8 star rating and its placeholder quote are not real and
     are not ported. The quotes on /pages/reviews are labelled there as written
     examples, so none of those are reused either. The card instead links to
     the shop's real Google and Yelp profiles (the URLs React and /pages/reviews
@@ -65,7 +65,7 @@
 <style>
   .td-proof .td-proof__grid { display: grid; gap: 2.5rem; }
   .td-proof .td-proof__eyebrow { margin-bottom: .5rem; }
-  .td-proof .tdh-h2 { text-wrap: wrap; }
+  .td-proof .tdh-h2 { text-wrap: balance; } /* TD-FIX: balance headings */
   .td-proof .td-proof__lede { margin-top: 1rem; max-width: 36rem; }
   .td-proof .td-proof__stats {
     margin: 2rem 0 0; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1.25rem;

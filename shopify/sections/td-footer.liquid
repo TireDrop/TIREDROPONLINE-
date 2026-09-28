@@ -42,6 +42,8 @@
             <h2 class="td-ft-heading" id="td-ft-h-{{ block.id }}">{{ heading }}</h2>
             <ul class="td-ft-links">
               {%- for link in menu.links -%}
+                {%- comment -%} TD-FIX: Gallery hidden until real photos exist. {%- endcomment -%}
+                {%- if link.url contains '/pages/gallery' -%}{%- continue -%}{%- endif -%}
                 <li>
                   <a class="td-ft-link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
                     {{- link.title -}}
@@ -59,7 +61,7 @@
         {%- endif -%}
         <ul class="td-ft-shop__list">
           {%- if section.settings.phone != blank -%}
-            <li>
+            <li class="td-ft-shop__item td-ft-shop__item--phone">{%- comment -%} TD-FIX: item classes place the desktop row {%- endcomment -%}
               <p class="td-ft-label">Phone Number</p>
               <a class="td-ft-strong td-ft-strong--lg" href="tel:+1{{ phone_digits }}">
                 <svg aria-hidden="true" focusable="false" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
@@ -69,7 +71,7 @@
           {%- endif -%}
 
           {%- if section.settings.email != blank -%}
-            <li>
+            <li class="td-ft-shop__item td-ft-shop__item--email">
               <p class="td-ft-label">Email</p>
               <a class="td-ft-strong" href="mailto:{{ section.settings.email }}">
                 <svg aria-hidden="true" focusable="false" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
@@ -79,7 +81,7 @@
           {%- endif -%}
 
           {%- if section.settings.address_line_1 != blank -%}
-            <li>
+            <li class="td-ft-shop__item td-ft-shop__item--address">
               <p class="td-ft-label">Ship to store &amp; install</p>
               <a
                 class="td-ft-address"
@@ -117,14 +119,14 @@
             {%- endfor -%}
           {%- endcapture -%}
           {%- if hours_rows != blank -%}
-            <li>
+            <li class="td-ft-shop__item td-ft-shop__item--hours">
               <p class="td-ft-label">Shop Hours</p>
               <ul class="td-ft-hours">{{ hours_rows }}</ul>
             </li>
           {%- endif -%}
 
           {%- if section.settings.facebook_url != blank -%}
-            <li>
+            <li class="td-ft-shop__item td-ft-shop__item--social">
               <p class="td-ft-label td-ft-label--socials">Socials</p>
               <a
                 class="td-ft-social"
@@ -167,8 +169,13 @@
       {%- if legal.links.size > 0 -%}
         <nav aria-label="{{ legal.title | default: 'Legal' | escape }}">
           <ul class="td-ft-bar__links">
+            {%- assign td_legal_n = 0 -%}
             {%- for link in legal.links -%}
+              {%- comment -%} TD-FIX: Gallery filter; a visual "·" (aria-hidden) before every link but the first. {%- endcomment -%}
+              {%- if link.url contains '/pages/gallery' -%}{%- continue -%}{%- endif -%}
+              {%- assign td_legal_n = td_legal_n | plus: 1 -%}
               <li>
+                {%- if td_legal_n > 1 -%}<span class="td-ft-bar__sep" aria-hidden="true">&middot;</span>{%- endif -%}
                 <a class="td-ft-bar__link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
                   {{- link.title -}}
                 </a>
@@ -284,6 +291,18 @@
     color: rgba(255,255,255,.55); transition: color .15s;
   }
   .td-ft .td-ft-bar__link:hover { color: #FFFFFF; }
+  /* TD-FIX: "·" separators between legal links. On phones the links sit in
+     two balanced rows (2 + 2): odd items right-aligned in column 1, even
+     items (with their separator) left-aligned in column 2, so the dots line
+     up on the centre axis and "Accessibility" never ends up alone. The
+     separator that would lead a row is hidden. Rows stay 44px tall. */
+  .td-ft-bar__links {
+    display: grid; grid-template-columns: repeat(2, auto); justify-content: center; column-gap: 0;
+  }
+  .td-ft-bar__links li { display: flex; align-items: center; }
+  .td-ft-bar__links li:nth-child(odd) { justify-content: flex-end; }
+  .td-ft-bar__links li:nth-child(odd) .td-ft-bar__sep { display: none; }
+  .td-ft-bar__sep { padding: 0 .375rem; color: rgba(255,255,255,.35); user-select: none; }
 
   @media (min-width: 768px) {
     .td-ft-inner { padding: 3.5rem 2rem; }
@@ -299,10 +318,29 @@
     .td-ft-bar__inner { flex-direction: row; padding: 1.25rem 2rem; }
     .td-ft-bar__links { row-gap: .25rem; }
     .td-ft .td-ft-bar__link { min-height: 0; }
+    /* TD-FIX: one row again from 768px, every separator shown. */
+    .td-ft-bar__links { display: flex; flex-wrap: wrap; justify-content: center; }
+    .td-ft-bar__links li:nth-child(odd) { justify-content: flex-start; }
+    .td-ft-bar__links li:nth-child(odd) .td-ft-bar__sep { display: inline; }
   }
 
   @media (min-width: 1024px) {
     .td-ft-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    /* TD-FIX: "The Shop Behind Us" spans the whole 1280px container instead
+       of sitting in the first 1/4 column. Its items use the same four tracks
+       and 2.5rem gap as the link columns, so they line up under them:
+       phone + email | ship-to-store address | hours | socials. A graphite
+       hairline sets the band off from the link columns. Phones and tablets
+       keep the stacked list. */
+    .td-ft-shop { grid-column: 1 / -1; padding-top: 2.5rem; border-top: 1px solid #22344C; }
+    .td-ft-shop__list {
+      grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 2.5rem; row-gap: 1.25rem; align-items: start;
+    }
+    .td-ft-shop__item--phone { grid-column: 1; grid-row: 1; }
+    .td-ft-shop__item--email { grid-column: 1; grid-row: 2; }
+    .td-ft-shop__item--address { grid-column: 2; grid-row: 1 / span 2; }
+    .td-ft-shop__item--hours { grid-column: 3; grid-row: 1 / span 2; }
+    .td-ft-shop__item--social { grid-column: 4; grid-row: 1 / span 2; }
   }
 
   @media (prefers-reduced-motion: reduce) {

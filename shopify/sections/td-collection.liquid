@@ -38,6 +38,8 @@
   assign finder_url = ss.finder_link | default: '/pages/find-my-tires'
   assign phone = ss.phone | default: '(954) 773-1896'
   assign phone_href = phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | prepend: 'tel:+1'
+  # TD-FIX: quote requests go to the contact page's form (id="tdp-contact-form" in td-page-contact).
+  assign quote_url = '/pages/contact#tdp-contact-form'
 
   assign sort_by = collection.sort_by | default: collection.default_sort_by
   assign catalog_empty = false
@@ -98,12 +100,22 @@
       </div>
       <div class="td-finder__body">
         <div role="tabpanel" id="{{ sid }}-panel-vehicle" aria-labelledby="{{ sid }}-tab-vehicle">
-          <p class="td-finder__intro">{{ ss.vehicle_copy }}</p>
-          <a href="{{ finder_url }}" class="td-shop-btn td-shop-btn--primary td-finder__submit">
-            <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            {{ ss.vehicle_button }}
-          </a>
-          <p class="td-finder__note">Not sure? Call us on <a href="{{ phone_href }}">{{ phone }}</a> and read the sidewall to us.</p>
+          {%- comment -%} TD-FIX: the wheels collection gets wheel fitment copy and a fitment CTA; the tire copy stays on tires. {%- endcomment -%}
+          {%- if is_wheel -%}
+            <p class="td-finder__intro">{{ ss.wheel_vehicle_copy }}</p>
+            <a href="{{ quote_url }}" class="td-shop-btn td-shop-btn--primary td-finder__submit">
+              <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              {{ ss.wheel_vehicle_button | default: 'Ask about fitment' }}
+            </a>
+            <p class="td-finder__note">Rather talk it through? Call us on <a href="{{ phone_href }}">{{ phone }}</a>.</p>
+          {%- else -%}
+            <p class="td-finder__intro">{{ ss.vehicle_copy }}</p>
+            <a href="{{ finder_url }}" class="td-shop-btn td-shop-btn--primary td-finder__submit">
+              <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              {{ ss.vehicle_button }}
+            </a>
+            <p class="td-finder__note">Not sure? Call us on <a href="{{ phone_href }}">{{ phone }}</a> and read the sidewall to us.</p>
+          {%- endif -%}
         </div>
         <form role="tabpanel" id="{{ sid }}-panel-size" aria-labelledby="{{ sid }}-tab-size" action="{{ routes.search_url }}" method="get" hidden data-td-size-form data-kind="{% if is_wheel %}wheel{% else %}tire{% endif %}">
           <input type="hidden" name="type" value="product">
@@ -217,19 +229,31 @@
 
         <div class="td-col__results">
           {%- if catalog_empty -%}
-            <div class="td-shop-card td-shop-empty">
+            {%- comment -%}
+              TD-FIX: quote mode. With no products in the collection (all_products_count == 0) the
+              dead-end "catalog is still being loaded" block becomes a quote panel: request a quote,
+              call, or look up the size. Filters, sort and the result count are already hidden
+              (show_filters is false and the meta bar only renders in the else branch). The page
+              returns to the normal grid on its own as soon as the collection has products.
+            {%- endcomment -%}
+            <div class="td-shop-card td-shop-empty td-col__quote">
               <span class="td-shop-empty__icon" aria-hidden="true">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.27 16.5 9.42"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg>
               </span>
               <h2 class="td-shop-empty__title">{% if is_wheel %}{{ ss.wheel_empty_title }}{% else %}{{ ss.tire_empty_title }}{% endif %}</h2>
               <p class="td-shop-empty__lede">{% if is_wheel %}{{ ss.wheel_empty_lede }}{% else %}{{ ss.tire_empty_lede }}{% endif %}</p>
               <div class="td-shop-empty__actions">
-                <a href="{{ phone_href }}" class="td-shop-btn td-shop-btn--primary td-shop-btn--sm">
+                <a href="{{ quote_url }}" class="td-shop-btn td-shop-btn--primary">
+                  {%- if is_wheel -%}Ask about fitment{%- else -%}Request a quote{%- endif -%}
+                </a>
+                <a href="{{ phone_href }}" class="td-shop-btn td-shop-btn--outline">
                   <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                   Call {{ phone }}
                 </a>
-                <a href="{{ finder_url }}" class="td-shop-btn td-shop-btn--outline td-shop-btn--sm">Find My Tires</a>
               </div>
+              {%- unless is_wheel -%}
+                <p class="td-col__quotelink">Not sure of your size? <a href="{{ finder_url }}">Find My Tires</a></p>
+              {%- endunless -%}
             </div>
           {%- else -%}
             {%- if show_filters -%}
@@ -378,11 +402,19 @@
     .td-finder__submit { width: auto; }
   }
   @media (min-width: 768px) {
-    .td-col__finderwrap { margin-top: -2rem; }
+    /* TD-FIX: the old margin-top:-2rem pulled the finder card up over the breadcrumb bar
+       (not the hero), hiding the breadcrumb on desktop. The card now sits below it, as on phones. */
     .td-finder__tab { font-size: 15px; padding-left: 1rem; padding-right: 1rem; }
     .td-finder__body { padding: 1.5rem; }
   }
   @media (min-width: 1024px) { .td-finder__grid { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+
+  /* TD-FIX: quote-mode panel (empty collection). Reuses td-shop-empty; wider copy and a brand-tinted icon. */
+  .td-col__quote .td-shop-empty__icon { background: var(--td-sky); color: var(--td-drop); }
+  .td-col__quote .td-shop-empty__lede { max-width: 34rem; font-size: 15px; }
+  .td-col__quotelink { margin-top: 1rem !important; font-size: 14px; color: var(--td-smoke); }
+  .td-col__quotelink a { color: var(--td-ink); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+  .td-col__quotelink a:hover { color: var(--td-drop); }
 
   .td-col__layout { display: block; }
   .td-col__aside { display: none; }
@@ -582,8 +614,8 @@
     { "type": "text", "id": "tire_eyebrow", "label": "Eyebrow", "default": "Tires" },
     { "type": "text", "id": "tire_heading", "label": "Heading", "default": "Shop Tires" },
     { "type": "textarea", "id": "tire_lede", "label": "Intro", "default": "Find your size, pick your set, then choose where it lands — your address anywhere in the continental US, or free to our South Florida shop where we fit them for you." },
-    { "type": "text", "id": "tire_empty_title", "label": "No products yet: heading", "default": "No tires listed online yet" },
-    { "type": "textarea", "id": "tire_empty_lede", "label": "No products yet: text", "default": "Our online catalog is still being loaded. Call us with your size and we will quote it, or use Find My Tires to look up the size your vehicle takes." },
+    { "type": "text", "id": "tire_empty_title", "label": "No products yet: heading", "default": "Get a price on your size" },
+    { "type": "textarea", "id": "tire_empty_lede", "label": "No products yet: text", "default": "Tell us the size on your sidewall, like 225/45R17, or your year, make and model. We reply with a price for a set, shipped to your door or fitted at our Sunrise shop." },
     { "type": "textarea", "id": "tire_nomatch_lede", "label": "No filter matches: text", "default": "Try widening the price range or clearing a size. If you know your size and cannot find it listed, call us — we can order sizes this page does not carry." },
     { "type": "text", "id": "tire_band_title", "label": "Band heading", "default": "Shipped to you, or fitted by us" },
     { "type": "textarea", "id": "tire_band_copy", "label": "Band text", "default": "Every order ships free anywhere in the continental US. In South Florida, send it free to the shop instead and we mount, balance and dispose of the old set." },
@@ -593,8 +625,8 @@
     { "type": "text", "id": "wheel_eyebrow", "label": "Eyebrow", "default": "Wheels" },
     { "type": "text", "id": "wheel_heading", "label": "Heading", "default": "Shop Wheels" },
     { "type": "textarea", "id": "wheel_lede", "label": "Intro", "default": "Cast, flow-formed and forged wheels, fitment-checked before they ship. Send them to your address anywhere in the continental US, or free to our South Florida shop where we fit them for you." },
-    { "type": "text", "id": "wheel_empty_title", "label": "No products yet: heading", "default": "No wheels listed online yet" },
-    { "type": "textarea", "id": "wheel_empty_lede", "label": "No products yet: text", "default": "Our online catalog is still being loaded. Call us with your vehicle and the look you want and we will quote the right wheel, or use Find My Tires to look up your size." },
+    { "type": "text", "id": "wheel_empty_title", "label": "No products yet: heading", "default": "Get a price on wheels that fit" },
+    { "type": "textarea", "id": "wheel_empty_lede", "label": "No products yet: text", "default": "Tell us your year, make and model and the look you want. We confirm bolt pattern, offset and clearance, then reply with a price, shipped to your door or fitted at our Sunrise shop." },
     { "type": "textarea", "id": "wheel_nomatch_lede", "label": "No filter matches: text", "default": "Tell us the look you want and your vehicle, and we will source the right bolt pattern and offset." },
     { "type": "text", "id": "wheel_band_title", "label": "Band heading", "default": "Wheel and tire packages" },
     { "type": "textarea", "id": "wheel_band_copy", "label": "Band text", "default": "Buy the wheels and tires together and they ship as one order. In South Florida, send it free to the shop and we mount, balance and fit the whole package." },
@@ -604,6 +636,8 @@
     { "type": "checkbox", "id": "show_finder", "label": "Show the vehicle / size finder", "default": true },
     { "type": "textarea", "id": "vehicle_copy", "label": "Vehicle tab text", "default": "Look up the tire size your vehicle takes with Find My Tires, then come back and shop that size." },
     { "type": "text", "id": "vehicle_button", "label": "Vehicle tab button", "default": "Open Find My Tires" },
+    { "type": "textarea", "id": "wheel_vehicle_copy", "label": "Vehicle tab text (wheels)", "default": "Tell us your year, make and model. We confirm the bolt pattern, offset and clearance before we quote, so the wheels you order are the wheels that fit." },
+    { "type": "text", "id": "wheel_vehicle_button", "label": "Vehicle tab button (wheels)", "default": "Ask about fitment" },
     { "type": "url", "id": "finder_link", "label": "Find My Tires page" },
     { "type": "text", "id": "phone", "label": "Phone", "default": "(954) 773-1896" },
     { "type": "range", "id": "per_page", "label": "Products per page", "min": 12, "max": 48, "step": 6, "default": 24 }

@@ -86,8 +86,9 @@
               </div>
               <div>
                 <label class="td-finder__label" for="{{ sid }}-vmd">Model</label>
+                {%- comment -%} TD-FIX: short placeholder; "Select a make first" truncated at 1440px. The disabled state already says a make comes first. {%- endcomment -%}
                 <select class="td-finder__select" id="{{ sid }}-vmd" name="vmd" data-td-vmd disabled>
-                  <option value="">Select a make first</option>
+                  <option value="">Select model</option>
                 </select>
               </div>
             </div>
@@ -218,7 +219,8 @@
     mk.addEventListener('change', function () {
       md.length = 1;
       (models[mk.value] || []).forEach(function (m) { md.add(new Option(m, m)); });
-      md.options[0].text = mk.value ? 'Select model' : 'Select a make first';
+      // TD-FIX: same short placeholder whether or not a make is picked (matches the markup).
+      md.options[0].text = 'Select model';
       md.disabled = !mk.value;
     });
     vform.addEventListener('submit', function (e) {

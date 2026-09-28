@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -69,7 +78,8 @@
         "v1": { "type": "compare", "settings": { "us": "Tires go straight to the shop from the truck", "them": "Four heavy tires land on your driveway" } },
         "v2": { "type": "compare", "settings": { "us": "Delivery and fitting happen at one address", "them": "You load them up and drive them somewhere" } },
         "v3": { "type": "compare", "settings": { "us": "Nothing to store while you find an appointment", "them": "They live in your garage until you book" } },
-        "v4": { "type": "compare", "settings": { "us": "Free — ship-to-store costs nothing", "them": "Also free to any continental-US address" } },
+        "v4": { "type": "compare", "settings": { "us": "Free — ship-to-store costs nothing", "them": "Also free to any continental-US address",
+            "them_positive": true } },
         "v5": { "type": "compare", "settings": { "us": "Old set taken away and recycled", "them": "Disposal is yours to sort out" } },
         "q1": { "type": "faq", "settings": { "question": "Does ship to store really cost nothing?", "answer": "Yes. Shipping to the Sunrise shop is free, the same as shipping to any address in the continental US. You still pay for the tires and, separately, for the installation when you come in." } },
         "q2": { "type": "faq", "settings": { "question": "What does the installation itself cost?", "answer": "Tire installation starts at $25 per tire and takes about 45–75 min for a set. What you actually pay depends on wheel size, run-flats, TPMS work and anything seized, and the shop confirms the total with you before a tool comes out." } },

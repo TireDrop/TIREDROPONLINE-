@@ -67,7 +67,18 @@
               <span class="td-pg-step__icon">{% render 'td-pg-icon', name: block.settings.icon, size: 20 %}</span>
               <span class="td-pg-step__num" aria-hidden="true">{% if n < 10 %}0{% endif %}{{ n }}</span>
             </div>
-            <h3 class="td-pg-h3">{{ block.settings.title }}</h3>
+            {%- comment -%}
+              TD-FIX: a word that starts with a digit and contains a hyphen ("2-hour", "45-minute") is wrapped
+              in a nowrap span so the heading never breaks as "2- / hour".
+            {%- endcomment -%}
+            {%- assign step_words = block.settings.title | split: ' ' -%}
+            <h3 class="td-pg-h3">
+              {%- for w in step_words -%}
+                {%- assign w_first = w | slice: 0 -%}
+                {%- if w contains '-' and '0123456789' contains w_first -%}<span class="td-pg-nowrap">{{ w }}</span>{%- else -%}{{ w }}{%- endif -%}
+                {%- unless forloop.last -%}{{ ' ' }}{%- endunless -%}{%- comment -%} TD-FIX: whitespace-only blocks render nothing in Liquid, so output the space explicitly {%- endcomment -%}
+              {%- endfor -%}
+            </h3>
             <p class="td-pg-body td-pg-mt1">{{ block.settings.body }}</p>
           </li>
         {%- endif -%}{%- endfor -%}
@@ -94,7 +105,8 @@
           <a class="td-pg-btn td-pg-btn--outline td-pg-btn--sm" href="{{ services_url }}">{{ ss.svc_all_label | default: 'See all services' }}{% render 'td-pg-icon', name: 'arrow-right', size: 16 %}</a>
         </div>
       </div>
-      <ul class="td-pg-grid td-pg-grid--3">
+      {%- comment -%} TD-FIX: td-pg-mob__svc centres an incomplete last row (see page styles). {%- endcomment -%}
+      <ul class="td-pg-grid td-pg-grid--3 td-pg-mob__svc">
         {%- for block in section.blocks -%}{%- if block.type == 'service' -%}
           {%- assign bs = block.settings -%}
           <li {{ block.shopify_attributes }}>
@@ -234,6 +246,21 @@
   .td-pg-mob__kit p { margin-top: .375rem; font-size: .875rem; line-height: 1.625; color: rgba(255,255,255,.65); }
   @media (min-width: 640px) { .td-pg-mob__kit { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (min-width: 1024px) { .td-pg-mob__kit { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  /* TD-FIX: keep hyphenated figures such as "2-hour" on one line in step headings. */
+  .td-pg-mob .td-pg-nowrap { white-space: nowrap; }
+  /* TD-FIX: town chips in balanced rows of at most five on desktop; phones keep the natural flex wrap. */
+  @media (min-width: 1024px) {
+    .td-pg-mob .td-pg-chips { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); width: max-content; max-width: 100%; }
+  }
+  /* TD-FIX: service cards wrap as centred rows, so an incomplete last row (7 cards → 3+3+1) sits in the
+     middle instead of stranded at the left. Same column widths as the kit's 2/3-column grid. */
+  @media (min-width: 640px) {
+    .td-pg-mob .td-pg-mob__svc { display: flex; flex-wrap: wrap; justify-content: center; }
+    .td-pg-mob .td-pg-mob__svc > li { flex: 0 0 calc((100% - 1.25rem) / 2); min-width: 0; }
+  }
+  @media (min-width: 1024px) {
+    .td-pg-mob .td-pg-mob__svc > li { flex-basis: calc((100% - 2.5rem) / 3); }
+  }
 </style>
 
 {% schema %}

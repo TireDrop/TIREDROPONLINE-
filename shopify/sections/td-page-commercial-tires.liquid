@@ -24,6 +24,22 @@
   if ss.collection != blank
     assign fleet_count = ss.collection.products_count
   endif
+
+  # TD-FIX: work out whether the catalog the header button points at has any products.
+  # When it is empty the button asks for a fleet quote on this page instead of
+  # sending people to an empty collection; it switches back once products exist.
+  assign cat_href = ss.cat_link | default: ss.collection.url | default: routes.all_products_collection_url
+  assign cat_target_count = 0
+  if cat_href contains '/collections/'
+    assign cat_handle = cat_href | split: '/collections/' | last | split: '?' | first | split: '/' | first
+    if cat_handle == 'all'
+      assign cat_target_count = collections.all.products_count | default: 0
+    else
+      assign cat_target_count = collections[cat_handle].products_count | default: 0
+    endif
+  else
+    assign cat_target_count = 1
+  endif
 -%}
 {%- render 'td-pg-kit' -%}
 
@@ -80,7 +96,12 @@
         </div>
         {%- if ss.cat_link_label != blank -%}
           <div class="td-pg-head__action">
-            <a class="td-pg-btn td-pg-btn--outline td-pg-btn--sm" href="{{ ss.cat_link | default: ss.collection.url | default: routes.all_products_collection_url }}">{{ ss.cat_link_label }}</a>
+            {%- comment -%} TD-FIX: empty catalog -> "Request a fleet quote" jumps to the quote form (#fleet-quote) below. {%- endcomment -%}
+            {%- if cat_target_count > 0 -%}
+              <a class="td-pg-btn td-pg-btn--outline td-pg-btn--sm" href="{{ cat_href }}">{{ ss.cat_link_label }}</a>
+            {%- else -%}
+              <a class="td-pg-btn td-pg-btn--outline td-pg-btn--sm" href="#fleet-quote">Request a fleet quote</a>
+            {%- endif -%}
           </div>
         {%- endif -%}
       </div>

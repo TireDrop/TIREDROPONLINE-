@@ -272,6 +272,20 @@
   @media (min-width: 1024px) {
     .tdp-rev__top { grid-template-columns: 320px 1fr; gap: 2.5rem; }
     .tdp-rev__turn { grid-template-columns: 1fr 1fr; gap: 3rem; }
+    /* TD-FIX: equal-height cards in both rows. Top row: the short "three-star" card stretches to match
+       "Read the real ones" and becomes a centred callout (content vertically centred, heading/copy one
+       step larger, note under a hairline) so the extra height reads as intentional, not empty.
+       Second row: "Post it where it counts" spans the full column (heading + card on the left) so both
+       columns end on the same line; its note sits at the bottom. */
+    .tdp-rev__top { align-items: stretch; }
+    .tdp-rev__span { justify-content: center; }
+    .tdp-rev__span .tdp-h3 { font-size: 1.75rem; }
+    .tdp-rev__span > .tdp-small { font-size: 1.0625rem; }
+    .tdp-rev__span .tdp-rev__truck { padding-top: 1.25rem; border-top: 1px solid rgba(0,104,232,.15); }
+    .tdp-rev__turn > div:first-child { display: flex; flex-direction: column; }
+    .tdp-rev__turn > div:first-child > .tdp-card { flex: 1 1 auto; }
+    .tdp-rev__post { align-self: stretch; display: flex; flex-direction: column; }
+    .tdp-rev__post > .tdp-rev__gap5:last-child { margin-top: auto; padding-top: 1.25rem; }
   }
 </style>
 

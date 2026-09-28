@@ -398,9 +398,12 @@
   }
   .tdp-field::placeholder { color: rgba(88,98,116,.6); }
   .tdp-field:focus { outline: none; border-color: #0068E8; box-shadow: 0 0 0 3px rgba(0,104,232,.15); }
-  .tdp-field[aria-invalid="true"] { border-color: #0068E8; }
+  /* TD-FIX: invalid fields and their messages read as errors (red), not as blue helper text. */
+  .tdp-field[aria-invalid="true"] { border-color: #C3342B; }
+  .tdp-field[aria-invalid="true"]:focus { border-color: #C3342B; box-shadow: 0 0 0 3px rgba(195,52,43,.15); }
+  .tdp-contact__radio input[aria-invalid="true"] { outline: 2px solid rgba(195,52,43,.55); outline-offset: 1px; border-radius: 50%; }
   textarea.tdp-field { resize: vertical; }
-  .tdp-err { margin-top: .375rem; display: flex; align-items: flex-start; gap: .375rem; font-size: .75rem; line-height: 1.5; color: #0068E8; }
+  .tdp-err { margin-top: .375rem; display: flex; align-items: flex-start; gap: .375rem; font-size: .75rem; line-height: 1.5; color: #C3342B; }
   .tdp-err svg { margin-top: 1px; }
   .tdp-err[hidden] { display: none; }
   .tdp-formerr { margin-bottom: 1.25rem; }
@@ -517,7 +520,7 @@
     {"type": "text", "id": "form_title", "label": "Form heading", "default": "Send us a message"},
     {"type": "text", "id": "form_intro", "label": "Form intro", "default": "Fields marked with an asterisk are required."},
     {"type": "text", "id": "label_name", "label": "Name label", "default": "Full name *"},
-    {"type": "text", "id": "ph_name", "label": "Name placeholder", "default": "Alex Moreno"},
+    {"type": "text", "id": "ph_name", "label": "Name placeholder", "default": "First and last name"},
     {"type": "text", "id": "label_phone", "label": "Phone label", "default": "Phone *"},
     {"type": "text", "id": "ph_phone", "label": "Phone placeholder", "default": "(954) 555-0188"},
     {"type": "text", "id": "label_email", "label": "Email label", "default": "Email *"},

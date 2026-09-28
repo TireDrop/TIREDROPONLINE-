@@ -341,7 +341,8 @@
           </div>
           <a href="{{ search_url }}" class="td-tc-btn td-tc-btn--outline" data-tc-out="size-link" hidden></a>
         </div>
-        <p id="td-tc-size-msg-{{ section.id }}" class="td-tc-small" aria-live="polite" data-tc-out="size-msg">Optional. Everything above works without it.</p>
+        {%- comment -%} TD-FIX: td-tc-help gives the optional-size helper a readable size, spacing and colour. {%- endcomment -%}
+        <p id="td-tc-size-msg-{{ section.id }}" class="td-tc-small td-tc-help" aria-live="polite" data-tc-out="size-msg">Optional. Everything above works without it.</p>
       </div>
     </div>
   </div>
@@ -457,6 +458,8 @@
   .td-tc-copy { margin-top: .875rem; font-size: .9375rem; line-height: 1.6; color: #586274; }
   .td-tc .td-tc-copy--flush { margin-top: 0; }
   .td-tc-small { margin-top: .5rem; font-size: .8125rem; line-height: 1.6; color: #586274; }
+  /* TD-FIX: pinned 13px, normal tracking, slightly darker muted ink so the helper reads clearly. */
+  .td-tc .td-tc-help { font-size: 13px; letter-spacing: normal; text-transform: none; line-height: 1.55; color: #4A5466; }
   .td-tc .td-tc-rule { margin-top: .875rem; padding-top: .75rem; border-top: 1px solid #E3E8EF; }
   .td-tc-ink { color: #070E1A; font-weight: 600; }
 
@@ -765,6 +768,23 @@
       var label = "Cross-section of a " + c.label.toLowerCase() + " standing head-down in a tread groove " +
         fmt32(depth) + " thirty-seconds of an inch deep. The top of " + c.possessive + " head is " +
         (headShowing ? "showing above the tread" : "buried below the tread") + ".";
+      /* TD-FIX: keep the "Top of the head" tag off the coin. It starts at the right
+         edge of the groove (the rubber hides the coin below the surface) and moves
+         under the dashed line when the coin shows above the tread beside it. */
+      var tagX = CENTER_X + GROOVE_HALF + 6, tagW = 392 - tagX;
+      function coinReach(y0) {
+        var y1 = Math.min(y0 + 26, SURFACE);
+        if (y0 >= SURFACE) return 0;
+        var dy = coinCy >= y0 && coinCy <= y1 ? 0 : Math.min(Math.abs(y0 - coinCy), Math.abs(y1 - coinCy));
+        return dy >= radius ? 0 : CENTER_X + Math.sqrt(radius * radius - dy * dy);
+      }
+      /* Try: just above the line, above it but flush with the tread, just below it, then flush with the tread. */
+      var tagY = headLine - 30, tagTry = [headLine - 30, SURFACE <= headLine - 28 ? SURFACE : headLine - 30, headLine + 4, SURFACE];
+      for (var ti = 0; ti < tagTry.length; ti++) {
+        if (tagTry[ti] > headLine - 28 && tagTry[ti] < headLine) continue; /* would sit on the line */
+        if (coinReach(tagTry[ti]) <= tagX - 2) { tagY = tagTry[ti]; break; }
+        if (coinReach(tagTry[ti]) < coinReach(tagY)) tagY = tagTry[ti];
+      }
       var dim = "";
       if (depth >= 3) {
         dim =
@@ -801,8 +821,8 @@
         '<line x1="' + (CENTER_X + GROOVE_HALF) + '" y1="' + (SURFACE + 1) + '" x2="392" y2="' + (SURFACE + 1) + '"/></g>' +
         dim +
         '<line x1="' + CENTER_X + '" y1="' + headLine + '" x2="392" y2="' + headLine + '" stroke="#0068E8" stroke-width="2" stroke-dasharray="6 5"/>' +
-        '<rect x="214" y="' + (headLine - 30) + '" width="178" height="26" rx="5" fill="#070E1A"/>' +
-        '<text x="386" y="' + (headLine - 11) + '" text-anchor="end" font-size="17" font-weight="700" fill="#FFFFFF">Top of the head</text>' +
+        '<rect x="' + tagX + '" y="' + tagY + '" width="' + tagW + '" height="26" rx="5" fill="#070E1A"/>' +
+        '<text x="386" y="' + (tagY + 19) + '" text-anchor="end" font-size="17" font-weight="700" fill="#FFFFFF">Top of the head</text>' +
         '</svg>'
       );
     }

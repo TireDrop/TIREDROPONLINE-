@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -16,7 +25,8 @@
           "settings": {
             "handles": "privacy",
             "eyebrow": "Legal",
-            "lede": "What we collect, why we collect it, who else touches it, and how to tell us to stop. Plain language, no dark patterns."
+            "lede": "What we collect, why we collect it, who else touches it, and how to tell us to stop. Plain language, no dark patterns.",
+            "note": "<p>This policy explains what TireDrop collects when you shop, book or get in touch, why we collect it, and the choices you have. Questions about your data? Call <a href=\"tel:+19547731896\">(954) 773-1896</a> or use our <a href=\"/pages/contact\">contact form</a>.</p>"
           }
         },
         "intro_accessibility": {
@@ -24,7 +34,8 @@
           "settings": {
             "handles": "accessibility",
             "eyebrow": "Legal",
-            "lede": "We want this site to work for every customer, including those using a screen reader, a keyboard, magnification or voice control."
+            "lede": "We want this site to work for every customer, including those using a screen reader, a keyboard, magnification or voice control.",
+            "note": "<p>We want everyone to be able to shop for tires and book service on this site. If anything here is hard to use with your device or assistive technology, call <a href=\"tel:+19547731896\">(954) 773-1896</a> or use our <a href=\"/pages/contact\">contact form</a> and we will help you directly and fix the problem.</p>"
           }
         },
         "intro_privacy_choices": {
@@ -46,7 +57,8 @@
         "toc_heading": "On this page",
         "show_help": true,
         "help_text": "Questions about any of this? Call — a person will answer and explain it.",
-        "help_phone": "(954) 773-1896"
+        "help_phone": "(954) 773-1896",
+        "contact_email": "info@tiredroponline.com"
       }
     }
   },

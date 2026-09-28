@@ -514,6 +514,85 @@
   var YEARS = [];
   for (var y = 2026; y > 2026 - 22; y--) YEARS.push(String(y));
 
+  /* ---------------------- vehicle sizes by model year ---------------------- *
+   * TD-FIX: td-tiremath.js has one size per model, which is only right for one
+   * generation (a 2020 Camry was being sized as a 2007-2011 car, 215/60R16).
+   * This table narrows it to the generation that contains the chosen year:
+   * the size on the mainstream trim (LE, LX, XLT, SE…), not the fleet-only
+   * base or the sport and luxury packages.
+   *   "Make|Model": [[firstYear, lastYear, size, bodyStyle?], …]
+   * bodyStyle is only given where it differs from td-tiremath.js (the body-on-
+   * frame Explorer and Pathfinder). A year outside every range means the model
+   * was not sold in the US that year, so no size is guessed. Makes and models
+   * still come from td-tiremath.js; a model missing here falls back to it.
+   * Source: tiresize.com trim-by-trim OE listings for every model year
+   * 2005–2026, checked September 2026. Trims still vary — the sidewall and the
+   * door-jamb sticker stay the authority, and the copy says so.
+   * ------------------------------------------------------------------------ */
+  var FITMENT_YEARS = {
+    "Toyota|Camry": [[2005, 2006, "205/65R15"], [2007, 2011, "215/60R16"], [2012, 2017, "205/65R16"], [2018, 2024, "215/55R17"], [2025, 2026, "205/65R16"]],
+    "Toyota|Corolla": [[2005, 2011, "195/65R15"], [2012, 2026, "205/55R16"]],
+    "Toyota|RAV4": [[2005, 2008, "215/70R16"], [2009, 2025, "225/65R17"], [2026, 2026, "235/65R17"]],
+    "Toyota|Tacoma": [[2005, 2023, "245/75R16"], [2024, 2026, "245/70R17"]],
+    "Toyota|Highlander": [[2005, 2007, "225/70R16"], [2008, 2013, "245/65R17"], [2014, 2019, "245/60R18"], [2020, 2026, "235/65R18"]],
+    "Toyota|4Runner": [[2005, 2009, "265/70R16"], [2010, 2024, "265/70R17"], [2025, 2026, "245/70R17"]],
+    "Honda|Accord": [[2005, 2007, "205/65R15"], [2008, 2012, "215/60R16"], [2013, 2017, "205/65R16"], [2018, 2026, "225/50R17"]],
+    "Honda|Civic": [[2005, 2005, "195/60R15"], [2006, 2011, "205/55R16"], [2012, 2015, "195/65R15"], [2016, 2026, "215/55R16"]],
+    "Honda|CR-V": [[2005, 2006, "215/65R16"], [2007, 2011, "225/65R17"], [2012, 2016, "215/70R16"], [2017, 2026, "235/65R17"]],
+    "Honda|Pilot": [[2005, 2008, "235/70R16"], [2009, 2011, "245/65R17"], [2012, 2015, "235/65R17"], [2016, 2022, "245/60R18"], [2023, 2026, "255/60R18"]],
+    "Honda|Odyssey": [[2005, 2010, "235/65R16"], [2011, 2017, "235/65R17"], [2018, 2026, "235/60R18"]],
+    "Ford|F-150": [[2005, 2008, "255/70R17"], [2009, 2009, "235/75R17"], [2010, 2026, "265/70R17"]],
+    "Ford|Explorer": [[2005, 2010, "235/70R16", "truck"], [2011, 2014, "245/65R17"], [2015, 2019, "245/60R18"], [2020, 2026, "255/65R18"]],
+    "Ford|Escape": [[2005, 2012, "235/70R16"], [2013, 2019, "235/55R17"], [2020, 2026, "225/65R17"]],
+    "Ford|Mustang": [[2005, 2009, "215/65R16"], [2010, 2010, "215/60R17"], [2011, 2014, "225/60R17"], [2015, 2023, "235/55R17"], [2024, 2026, "235/50R18"]],
+    "Ford|Transit-250": [[2015, 2026, "235/65R16"]],
+    "Chevrolet|Silverado": [[2005, 2006, "265/70R17"], [2007, 2013, "245/70R17"], [2014, 2026, "255/70R17"]],
+    "Chevrolet|Equinox": [[2005, 2009, "235/65R16"], [2010, 2024, "225/65R17"], [2025, 2026, "235/65R17"]],
+    "Chevrolet|Tahoe": [[2005, 2006, "265/70R16"], [2007, 2014, "265/70R17"], [2015, 2026, "265/65R18"]],
+    "Chevrolet|Malibu": [[2005, 2007, "205/65R15"], [2008, 2008, "215/60R16"], [2009, 2012, "215/55R17"], [2013, 2015, "215/60R16"], [2016, 2025, "205/65R16"]],
+    "Chevrolet|Colorado": [[2005, 2008, "225/75R15"], [2009, 2012, "235/75R16"], [2015, 2026, "255/65R17"]],
+    "Nissan|Altima": [[2005, 2025, "215/60R16"], [2026, 2026, "215/55R17"]],
+    "Nissan|Rogue": [[2008, 2013, "215/70R16"], [2014, 2026, "225/65R17"]],
+    "Nissan|Sentra": [[2005, 2006, "195/60R15"], [2007, 2012, "205/60R15"], [2013, 2019, "205/55R16"], [2020, 2026, "205/60R16"]],
+    "Nissan|Frontier": [[2005, 2026, "265/70R16"]],
+    "Nissan|Pathfinder": [[2005, 2007, "265/70R16", "truck"], [2008, 2012, "265/65R17", "truck"], [2013, 2020, "235/65R18"], [2022, 2026, "255/60R18"]],
+    "Jeep|Wrangler": [[2005, 2006, "225/75R15"], [2007, 2017, "225/75R16"], [2018, 2026, "245/75R17"]],
+    "Jeep|Grand Cherokee": [[2005, 2006, "235/65R17"], [2007, 2010, "245/65R17"], [2011, 2026, "245/70R17"]],
+    "Jeep|Cherokee": [[2014, 2023, "225/60R17"], [2026, 2026, "225/60R18"]],
+    "Jeep|Gladiator": [[2020, 2026, "245/75R17"]],
+    "BMW|3 Series": [[2005, 2011, "205/55R16"], [2012, 2018, "225/50R17"], [2019, 2026, "225/45R18"]],
+    "BMW|5 Series": [[2005, 2010, "225/50R17"], [2011, 2016, "225/55R17"], [2017, 2023, "245/45R18"], [2024, 2026, "245/45R19"]],
+    "BMW|X3": [[2005, 2010, "235/55R17"], [2011, 2012, "245/55R17"], [2013, 2017, "245/50R18"], [2018, 2021, "225/60R18"], [2022, 2026, "245/50R19"]],
+    "BMW|X5": [[2005, 2006, "235/65R17"], [2007, 2018, "255/55R18"], [2019, 2023, "265/50R19"], [2024, 2026, "275/45R20"]],
+    "Mercedes-Benz|C-Class": [[2005, 2007, "205/55R16"], [2008, 2014, "225/45R17"], [2015, 2021, "225/50R17"], [2022, 2026, "225/45R18"]],
+    "Mercedes-Benz|E-Class": [[2005, 2005, "225/55R16"], [2006, 2016, "245/45R17"], [2017, 2021, "225/55R17"], [2022, 2023, "245/45R18"], [2024, 2026, "225/55R18"]],
+    "Mercedes-Benz|GLC": [[2016, 2026, "235/60R18"]],
+    "Mercedes-Benz|Sprinter 2500": [[2005, 2006, "225/75R16"], [2007, 2026, "245/75R16"]],
+    "Hyundai|Elantra": [[2005, 2006, "195/60R15"], [2007, 2012, "195/65R15"], [2013, 2013, "205/55R16"], [2014, 2026, "195/65R15"]],
+    "Hyundai|Sonata": [[2005, 2005, "205/65R15"], [2006, 2010, "215/60R16"], [2011, 2026, "205/65R16"]],
+    "Hyundai|Tucson": [[2005, 2009, "215/65R16"], [2010, 2021, "225/60R17"], [2022, 2026, "235/65R17"]],
+    "Hyundai|Santa Fe": [[2005, 2006, "225/70R16"], [2007, 2009, "235/70R16"], [2010, 2020, "235/65R17"], [2021, 2026, "235/60R18"]],
+    "Ram|1500": [[2005, 2008, "245/70R17"], [2009, 2018, "265/70R17"], [2019, 2026, "275/65R18"]],
+    "Ram|2500": [[2005, 2008, "245/70R17"], [2009, 2013, "265/70R17"], [2014, 2026, "275/70R18"]],
+    "Ram|ProMaster": [[2014, 2026, "225/75R16"]]
+  };
+
+  /** [size, bodyStyle] for the generation that contains `year`. The size is null
+      until a year is picked (it cannot be told without one) and for a year the
+      model was not sold. */
+  function fitFor(make, model, year) {
+    var base = TD.fitmentFor(make, model);
+    if (!base) return null;
+    var gens = FITMENT_YEARS[make + "|" + model];
+    var y = Number(year);
+    if (!gens) return base;
+    if (!y) return [null, base[1]];
+    for (var i = 0; i < gens.length; i++) {
+      if (y >= gens[i][0] && y <= gens[i][1]) return [gens[i][2], gens[i][3] || base[1]];
+    }
+    return [null, base[1]];
+  }
+
   /* ---------------------------- URL state ---------------------------- */
 
   var params = new URLSearchParams(window.location.search);
@@ -557,6 +636,17 @@
     sizeText: first.sizeText
   };
   if (local.make && MODELS[local.make].indexOf(first.model) >= 0) local.model = first.model;
+  // TD-FIX: the size filled in from the table, so a later year change can swap it
+  // without overwriting a size the customer typed; a vehicle handed over with no
+  // size (the home page finder) gets its generation's size straight away.
+  local.autoSize = "";
+  (function () {
+    var f = local.model ? fitFor(local.make, local.model, local.year) : null;
+    if (f && f[0]) {
+      if (!local.sizeText) local.sizeText = f[0];
+      if (local.sizeText === f[0]) local.autoSize = f[0];
+    }
+  })();
   var stepError = "";
 
   /* ---------------------------- elements ---------------------------- */
@@ -667,7 +757,11 @@
 
   /* ---------------------------- step 1 UI ---------------------------- */
 
-  function guess() { return local.make && local.model ? TD.fitmentFor(local.make, local.model) : null; }
+  // TD-FIX: year-aware; null when there is no size for that model year.
+  function guess() {
+    var f = local.make && local.model ? fitFor(local.make, local.model, local.year) : null;
+    return f && f[0] ? f : null;
+  }
 
   function syncStep1() {
     $$("[data-fm-mode]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-fm-mode") === local.mode)); });
@@ -677,7 +771,7 @@
     if (sizeInput.value !== local.sizeText) sizeInput.value = local.sizeText;
     var g = local.mode === "vehicle" ? guess() : null;
     sizeHelp.textContent = g
-      ? g[0] + " is the most common original fitment for a " + local.model + ". Trims and model years move it around, so the size printed on your sidewall — or the sticker in your driver’s door jamb — is the one that counts. Change it here if it differs."
+      ? g[0] + " is the most common original fitment for a " + (local.year ? local.year + " " : "") + local.model + ". Trims and model years move it around, so the size printed on your sidewall — or the sticker in your driver’s door jamb — is the one that counts. Change it here if it differs."
       : "It is printed on the sidewall: three numbers and a letter, like 225/50R17. LT and flotation sizes such as LT265/70R17 or 31x10.50R15 work too.";
     if (g && g[1] === "sports") {
       stagger.hidden = false;
@@ -711,15 +805,26 @@
     render(false);
     sizeInput.focus();
   });
-  yearSel.addEventListener("change", function () { local.year = yearSel.value; stepError = ""; render(false); });
+  yearSel.addEventListener("change", function () {
+    local.year = yearSel.value; stepError = "";
+    // TD-FIX: a different year can mean a different generation and size. Swap
+    // the filled-in size, but never one the customer typed themselves.
+    if (local.model && (!local.sizeText.trim() || local.sizeText === local.autoSize)) {
+      var f = fitFor(local.make, local.model, local.year);
+      local.sizeText = f && f[0] ? f[0] : "";
+      local.autoSize = local.sizeText;
+    }
+    render(false);
+  });
   makeSel.addEventListener("change", function () {
     local.make = makeSel.value; local.model = ""; local.sizeText = ""; stepError = "";
     fillModels(); render(false);
   });
   modelSel.addEventListener("change", function () {
     local.model = modelSel.value;
-    var f = TD.fitmentFor(local.make, local.model);
-    local.sizeText = f ? f[0] : "";
+    var f = fitFor(local.make, local.model, local.year); // TD-FIX: year-aware
+    local.sizeText = f && f[0] ? f[0] : "";
+    local.autoSize = local.sizeText;
     stepError = "";
     render(false);
   });
@@ -809,7 +914,7 @@
   function profileFor(a) {
     var size = a.sizeText ? TD.parseSize(a.sizeText) : null;
     var known = !!(a.year && a.make && a.model);
-    var fit = known ? TD.fitmentFor(a.make, a.model) : null;
+    var fit = known ? fitFor(a.make, a.model, a.year) : null; // TD-FIX: year-aware
     var vclass = known ? (fit ? fit[1] : "sedan") : classFromSize(size);
     var rules = CLASS_RULES[vclass] || CLASS_RULES.sedan;
     var vehicleLabel = known
@@ -986,7 +1091,7 @@
       var text = local.sizeText.trim();
       if (!text) {
         stepError = local.mode === "vehicle"
-          ? "We do not have a typical size for that model. Type the size off your sidewall instead."
+          ? "We do not have a typical size for a " + local.year + " " + local.model + ". Type the size off your sidewall instead."
           : "Type the size off your sidewall — it looks like 225/50R17.";
         return render(false);
       }
@@ -1013,7 +1118,7 @@
   });
 
   function startOver() {
-    local = { mode: "vehicle", year: "", make: "", model: "", sizeText: "" };
+    local = { mode: "vehicle", year: "", make: "", model: "", sizeText: "", autoSize: "" };
     stepError = "";
     resumeNotice = null;
     params = new URLSearchParams();
@@ -1044,7 +1149,12 @@
     chipList.forEach(function (c) {
       if (!c.label) return;
       chips.appendChild(el("button", { type: "button", class: "td-fm__chip", onclick: function () {
-        if (c.step === 1) { local.mode = a.mode; local.year = a.year; local.make = a.make; local.model = a.model; local.sizeText = a.sizeText; fillModels(); }
+        if (c.step === 1) {
+          local.mode = a.mode; local.year = a.year; local.make = a.make; local.model = a.model; local.sizeText = a.sizeText;
+          var f1 = a.model ? fitFor(a.make, a.model, a.year) : null; // TD-FIX: keep year swaps working after "change"
+          local.autoSize = f1 && f1[0] === a.sizeText ? a.sizeText : "";
+          fillModels();
+        }
         goTo(c.step);
       } }, [c.label, el("span", { class: "td-fm__chip-edit", text: "change" })]));
     });
@@ -1213,11 +1323,11 @@
   }
 
   function sizeNoteFor(a, prof) {
-    var fit = prof.known ? TD.fitmentFor(a.make, a.model) : null;
-    var isOe = fit && prof.size && fit[0] === prof.size.normalized;
+    var fit = prof.known ? fitFor(a.make, a.model, a.year) : null; // TD-FIX: year-aware
+    var isOe = fit && fit[0] && prof.size && fit[0] === prof.size.normalized;
     return {
       main: isOe
-        ? fit[0] + " is the most common original fitment for a " + a.model + ". Trims and model years move it around, so the size printed on your sidewall — or the sticker in your driver’s door jamb — is the one that counts."
+        ? fit[0] + " is the most common original fitment for a " + a.year + " " + a.model + ". Trims and model years move it around, so the size printed on your sidewall — or the sticker in your driver’s door jamb — is the one that counts."
         : readAs(prof.size) + " Check it against the size printed on your sidewall.",
       stagger: fit && fit[1] === "sports"
         ? "A " + a.model + " may be staggered — a wider tire on the rear than the front. Check both ends before you buy four of anything. If the sizes differ, call and we will go through both."

@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -23,7 +32,7 @@
         "work_lede": "Nothing here is a trade secret. It is the short list of things we refuse to cut corners on, online or in the bay.",
         "brands_badge": "Brands in the catalog",
         "brands_note": "Every brand named here has tires you can filter to and buy on this site right now. The catalog widens as distributor access does — if you want something that is not listed, call and ask before you assume we cannot get it.",
-        "brands_empty": "The catalog is being loaded now. If you want a particular brand or size, call and ask before you assume we cannot get it.",
+        "brands_empty": "",
         "cta_eyebrow": "Tires shipped. Or installed.",
         "cta_title": "Tell us the vehicle. We will find the tire.",
         "cta_lede": "Shipping anywhere in the continental United States, free to the Sunrise shop if you would rather we fit them, and the van for driveways around Broward.",

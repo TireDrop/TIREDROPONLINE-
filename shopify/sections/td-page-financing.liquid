@@ -459,9 +459,11 @@
   }
   .tdp-field::placeholder { color: rgba(88,98,116,.6); }
   .tdp-field:focus { outline: none; border-color: #0068E8; box-shadow: 0 0 0 3px rgba(0,104,232,.15); }
-  .tdp-field[aria-invalid="true"] { border-color: #0068E8; }
+  /* TD-FIX: invalid fields and their messages read as errors (red), not as blue helper text. */
+  .tdp-field[aria-invalid="true"] { border-color: #C3342B; }
+  .tdp-field[aria-invalid="true"]:focus { border-color: #C3342B; box-shadow: 0 0 0 3px rgba(195,52,43,.15); }
   textarea.tdp-field { resize: vertical; }
-  .tdp-err { margin-top: .375rem; display: flex; align-items: flex-start; gap: .375rem; font-size: .75rem; line-height: 1.5; color: #0068E8; }
+  .tdp-err { margin-top: .375rem; display: flex; align-items: flex-start; gap: .375rem; font-size: .75rem; line-height: 1.5; color: #C3342B; }
   .tdp-err svg { margin-top: 1px; }
   .tdp-err[hidden] { display: none; }
   .tdp-formerr { margin-bottom: 1.25rem; }
@@ -496,7 +498,9 @@
   .tdp-fin__u { text-decoration: underline; }
   .tdp-fin__plan { display: flex; flex-direction: column; }
   .tdp-fin__plan.is-highlight { border-color: #0068E8; box-shadow: 0 0 0 1px #0068E8, 0 1px 2px rgba(7,14,26,.06), 0 8px 20px -6px rgba(7,14,26,.10); }
-  .tdp-fin__planhead { margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+  /* TD-FIX: header wraps the badge onto its own line instead of squeezing the title; badge never breaks. */
+  .tdp-fin__planhead { margin-bottom: 1rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem .75rem; }
+  .tdp-fin__planhead .tdp-badge { white-space: nowrap; flex: none; }
   .tdp-fin__points { margin-top: 1.25rem; flex: 1; }
   .tdp-fin__foot { margin-top: 1.25rem; border-top: 1px solid rgba(7,14,26,.1); padding-top: 1rem; }
   .tdp-fin__info { margin-top: 1.5rem; display: flex; align-items: flex-start; gap: .5rem; }
@@ -602,7 +606,7 @@
     {"type": "text", "id": "form_title", "label": "Form heading", "default": "Start a financing conversation"},
     {"type": "text", "id": "form_intro", "label": "Form intro", "default": "This goes to us, not to a lender. No credit check happens here. All fields are required."},
     {"type": "text", "id": "label_name", "label": "Name label", "default": "Full name"},
-    {"type": "text", "id": "ph_name", "label": "Name placeholder", "default": "Alex Moreno"},
+    {"type": "text", "id": "ph_name", "label": "Name placeholder", "default": "First and last name"},
     {"type": "text", "id": "label_phone", "label": "Phone label", "default": "Phone"},
     {"type": "text", "id": "ph_phone", "label": "Phone placeholder", "default": "(954) 555-0188"},
     {"type": "text", "id": "label_email", "label": "Email label", "default": "Email"},

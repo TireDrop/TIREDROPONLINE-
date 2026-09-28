@@ -26,6 +26,8 @@
   assign handle = page.handle | default: ''
   assign eyebrow = section.settings.eyebrow
   assign lede = section.settings.lede
+  # TD-FIX: a Page intro block can also replace the body's intro note, so privacy and accessibility do not show the terms note.
+  assign intro_note = ''
   for block in section.blocks
     assign block_handles = block.settings.handles | split: ','
     for h in block_handles
@@ -36,6 +38,9 @@
         endif
         if block.settings.lede != blank
           assign lede = block.settings.lede
+        endif
+        if block.settings.note != blank
+          assign intro_note = block.settings.note
         endif
       endif
     endfor
@@ -86,6 +91,16 @@
       assign keys_html = chunk_out | replace: '</a> — ', '</a>'
       assign article_sections = article_sections | append: '<nav class="td-page__keys" aria-labelledby="' | append: sid | append: '">' | append: keys_html | append: '</nav>'
     elsif sid == 'contact'
+      # TD-FIX: add the contact email to the address block when the page body lists only the phone.
+      if section.settings.contact_email != blank and chunk_out contains 'tel:'
+        unless chunk_out contains 'mailto:'
+          assign contact_first_p = chunk_out | split: '</p>' | first
+          if contact_first_p contains 'tel:'
+            assign contact_mail = '<br>' | append: '<a href="mailto:' | append: section.settings.contact_email | append: '">' | append: section.settings.contact_email | append: '</a></p>'
+            assign chunk_out = chunk_out | replace_first: '</p>', contact_mail
+          endif
+        endunless
+      endif
       assign article_sections = article_sections | append: '<div class="td-page__contact">' | append: chunk_out | append: '</div>'
     else
       assign article_sections = article_sections | append: chunk_out
@@ -111,6 +126,10 @@
       assign note_html = preamble | remove_first: first_p | strip
       assign preamble = ''
     endif
+  endif
+  # TD-FIX: page-specific intro note from the matching Page intro block wins over the body's note.
+  if intro_note != blank
+    assign note_html = intro_note
   endif
 
   assign help_phone_digits = section.settings.help_phone | remove: '(' | remove: ')' | remove: ' ' | remove: '-' | remove: '.'
@@ -204,6 +223,11 @@
     font-family: var(--font-heading--family, inherit);
     font-size: 2.4rem; font-weight: 800; line-height: .98; letter-spacing: -.018em; text-transform: none;
     color: #FFFFFF; text-wrap: balance; overflow-wrap: break-word;
+  }
+  /* TD-FIX: phones scale the title with the viewport so short three-word titles
+     ("Your Privacy Choices") fit one line at 390px; 768px+ keeps 4.25rem below. */
+  @media (max-width: 767px) {
+    .td-pagehero__title.td-pagehero__title { font-size: clamp(30px, 8.6vw, 2.4rem); }
   }
   .td-pagehero__lede {
     max-width: 42rem; margin: 1.25rem 0 0;
@@ -380,7 +404,9 @@
     { "type": "text", "id": "toc_heading", "label": "Contents heading", "default": "On this page" },
     { "type": "checkbox", "id": "show_help", "label": "Show call card under built contents", "default": true },
     { "type": "text", "id": "help_text", "label": "Call card text", "default": "Questions about any of this? Call — a person will answer and explain it." },
-    { "type": "text", "id": "help_phone", "label": "Call card phone", "default": "(954) 773-1896" }
+    { "type": "text", "id": "help_phone", "label": "Call card phone", "default": "(954) 773-1896" },
+    { "type": "header", "content": "Contact block" },
+    { "type": "text", "id": "contact_email", "label": "Contact email", "default": "info@tiredroponline.com", "info": "Added under the phone in a page's \"Contact us\" block when the page body lists no email." }
   ],
   "blocks": [
     {
@@ -389,7 +415,8 @@
       "settings": [
         { "type": "text", "id": "handles", "label": "Page handles", "info": "Comma-separated, e.g. terms, privacy" },
         { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
-        { "type": "textarea", "id": "lede", "label": "Lede" }
+        { "type": "textarea", "id": "lede", "label": "Lede" },
+        { "type": "html", "id": "note", "label": "Intro note", "info": "Replaces the boxed note under \"Last updated\" on these pages. Leave blank to use the note in the page content." }
       ]
     }
   ],

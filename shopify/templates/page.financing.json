@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -34,7 +43,7 @@
         "form_title": "Start a financing conversation",
         "form_intro": "This goes to us, not to a lender. No credit check happens here. All fields are required.",
         "label_name": "Full name",
-        "ph_name": "Alex Moreno",
+        "ph_name": "First and last name",
         "label_phone": "Phone",
         "ph_phone": "(954) 555-0188",
         "label_email": "Email",
