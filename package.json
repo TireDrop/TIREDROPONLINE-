@@ -13,6 +13,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "audit:mobile": "node scripts/mobile-audit.mjs",
+    "check:popup": "node scripts/newsletter-popup-check.mjs",
     "test:api": "node --test \"api/_lib/*.test.mjs\""
   },
   "dependencies": {

@@ -27,7 +27,7 @@ const BASE = String(import.meta.env?.VITE_API_BASE || "/api").replace(
   "",
 );
 
-const TIMEOUT_MS = { status: 5000, search: 9000, checkout: 25000 };
+const TIMEOUT_MS = { status: 5000, search: 9000, checkout: 25000, newsletter: 15000 };
 
 /** A real rejection from the API. `message` is safe to show a shopper. */
 export class ApiError extends Error {
@@ -128,6 +128,7 @@ export const OFFLINE_STATUS = Object.freeze({
   atd: "sample",
   shopify: "off",
   checkout: "request",
+  newsletter: "off",
   version: null,
   offline: true,
 });
@@ -139,7 +140,7 @@ let statusPromise = null;
 /** False only when this host definitely has no API. */
 const apiPresent = () => getStatus().then((s) => !s.absent);
 
-/** `{ atd, shopify, checkout, version }`. Never throws; cached per page load. */
+/** `{ atd, shopify, checkout, newsletter, version }`. Never throws; cached per page load. */
 export function getStatus() {
   if (!statusPromise) {
     statusPromise = request("/status", { timeout: TIMEOUT_MS.status })
@@ -147,6 +148,8 @@ export function getStatus() {
         atd: s.atd === "live" ? "live" : "sample",
         shopify: s.shopify === "live" ? "live" : "off",
         checkout: s.checkout === "shopify" ? "shopify" : "request",
+        // Only an explicit "on" lets the sign-up pop-up collect an email.
+        newsletter: s.newsletter === "on" ? "on" : "off",
         version: s.version ?? null,
         offline: false,
       }))
@@ -485,4 +488,25 @@ export async function submitCheckout(order) {
       offline: true,
     };
   }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Newsletter sign-up                                                 */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Signs an email up (POST /api/newsletter). Resolves `{ ok: true }`. Throws
+ * ApiError when the server rejects the input (bad email, too many tries),
+ * with a message safe to show; anything else (unreachable, Shopify down,
+ * not configured) throws a plain Error for the caller's generic message.
+ * `website` is the honeypot's value, normally empty.
+ */
+export async function subscribeNewsletter({ email, source = "popup", website = "" }) {
+  const data = await request("/newsletter", {
+    method: "POST",
+    body: { email, source, website },
+    timeout: TIMEOUT_MS.newsletter,
+  });
+  if (data?.ok !== true) throw new Error("unexpected answer");
+  return data;
 }
