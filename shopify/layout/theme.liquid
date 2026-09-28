@@ -6,6 +6,49 @@
   lang="{{ request.locale.iso_code }}"
 >
   <head>
+    {%- comment -%}
+      TD-REDIRECT: shop.tiredroponline.com is checkout-only. The storefront
+      lives on the Vercel site at tiredroponline.com, so any theme page served
+      on shop.tiredroponline.com sends the visitor to the same path there
+      (Vercel 301s the old /collections, /products, /pages, /policies, /blogs
+      and /search paths to its own pages; / and /cart map 1:1).
+      Runs first in <head> so nothing else loads before the jump.
+      Never redirects:
+      - other domains (etwheelz.com, account.etwheelz.com, *.myshopify.com)
+      - the theme editor (design_mode / visual_preview_mode)
+      - theme previews (?preview_theme_id=..., checked in JS)
+      - customers/* (account, login, register, order, addresses, activate,
+        reset_password), password and gift_card: Vercel sends /account back
+        here, so redirecting them would loop.
+      Checkout, invoices and order status are not theme pages and are never
+      touched. The path goes through | json for the script and | escape for
+      attributes; < and > are percent-encoded first so a crafted path cannot
+      close the <script>. JS carries over the query string and hash.
+    {%- endcomment -%}
+    {%- liquid
+      assign td_offsite = false
+      if request.host == 'shop.tiredroponline.com'
+        assign td_offsite = true
+        if request.design_mode or request.visual_preview_mode
+          assign td_offsite = false
+        endif
+        if template.directory == 'customers' or template.name == 'password' or template.name == 'gift_card'
+          assign td_offsite = false
+        endif
+      endif
+    -%}
+    {%- if td_offsite -%}
+      {%- assign td_path = request.path | default: '/' | replace: '<', '%3C' | replace: '>', '%3E' -%}
+      {%- assign td_target = 'https://tiredroponline.com' | append: td_path -%}
+      <script>
+        if (!/[?&]preview_theme_id=/.test(location.search)) {
+          location.replace('https://tiredroponline.com' + {{ td_path | json }} + location.search + location.hash);
+        }
+      </script>
+      <noscript><meta http-equiv="refresh" content="0;url={{ td_target | escape }}"></noscript>
+      <link rel="canonical" href="{{ td_target | escape }}">
+      <meta name="robots" content="noindex">
+    {%- endif -%}
     {%- if settings.favicon != blank -%}
       <link
         rel="icon"
