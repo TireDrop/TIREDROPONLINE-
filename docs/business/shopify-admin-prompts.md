@@ -710,7 +710,7 @@ ID (the ID is fine to share, the secret is NOT), and the myshopify.com domain.
 Checkout stays in "request" mode (orders are emailed, no card is charged)
 until these are set **and** ATD is live, so no one pays against sample prices.
 
-## 17. Form delivery to info@ for the Vercel site (Formspree)
+## 17. (OBSOLETE: replaced by the custom forms in prompt 19) Form delivery via Formspree
 
 The React site's forms (contact, financing, fleet quote, booking) and its
 order requests post JSON to one endpoint. Formspree turns each submission into
@@ -837,90 +837,112 @@ DNS values used, the final Vercel domain status, and the four checks.
   Shopify.
 - Update the Shopify store address used in emails if Shopify asks.
 
-## 19. Go-live setup in one run (forms, Shopify app, Vercel settings, email check)
+## 19. Go-live setup in one run (Shopify app, Vercel settings, lead-alert Flow, tests, email check)
 
-This combines prompts 16 and 17 with the Vercel settings and the post-migration
-checks. It does not include Vercel Pro or publishing a theme.
+**Rewritten 2026-09-28:** there's no Formspree. Forms and order requests go to
+TireDrop's own backend: `/api/forms` → the Shopify customer record (plus a
+draft order for order requests) → the Shopify Flow "Website lead alert" →
+info@. See `docs/integrations/website-leads.md`. **Prompt 17 (Formspree) is
+obsolete; skip it.**
 
 ```
-TASK: Finish TireDrop's go-live setup. I'm logged into Formspree (or will
-sign up), Shopify (store 3rxp1x-ym.myshopify.com / admin
-"extrememobiletires"), the Shopify Dev Dashboard, Vercel (team TIRE DROP
-ONLINE, project "tiredrop"), and Outlook/Microsoft 365 for
-info@tiredroponline.com, plus a Gmail account for testing. Go step by step,
-report after each PART, and STOP and ask me if anything differs from this.
+TASK: Finish TireDrop's go-live setup. I'm logged into Shopify (store
+3rxp1x-ym.myshopify.com / admin "extrememobiletires"), the Shopify Dev
+Dashboard, Vercel (team TIRE DROP ONLINE, project "tiredrop"),
+Outlook/Microsoft 365 for info@tiredroponline.com, and a Gmail account for
+testing. Go step by step, report after each PART, and STOP and ask me if
+anything differs from this.
 
 SECRETS RULE: never write any secret (client secret, token, password) into
 your report or anywhere except the Vercel environment-variable value box.
 IDs and URLs are fine to report.
 
-PART A: Formspree (form emails to info@)
-1. formspree.io → sign up or log in with info@tiredroponline.com and verify
-   the email if asked.
-2. New form "TireDrop website", recipient info@tiredroponline.com.
-3. Settings: spam filtering ON. reCAPTCHA OFF. "Restrict to domain" /
-   allowed domains OFF. (The site sends orders from its server.)
-4. Pick the FREE plan. If it asks for payment, STOP.
-5. Copy the endpoint URL (https://formspree.io/f/...).
-
-PART B: Shopify app for checkout + newsletter
-6. Shopify Dev Dashboard (Shopify admin → Settings → Apps → Develop apps
+PART A: Shopify app (checkout, forms, newsletter)
+1. Shopify Dev Dashboard (Shopify admin → Settings → Apps → Develop apps
    / "Build apps in Dev Dashboard", or dev.shopify.com), in the SAME
    organization as the TireDrop store.
-7. Create app "TireDrop Vercel Checkout". Admin API scopes, ONLY these:
+2. Create app "TireDrop Vercel Checkout". Admin API scopes, ONLY these:
    write_draft_orders, read_draft_orders, read_orders, write_orders,
    read_merchant_managed_fulfillment_orders,
    write_merchant_managed_fulfillment_orders, read_customers,
    write_customers. Save / release.
-8. Install it on the TireDrop store and approve.
-9. Open its credentials: note the Client ID (fine to report). Keep the
-   Client secret on screen for Part C, but do NOT report it.
-   (If it only offers an "Admin API access token", use that instead in
-   Part C as SHOPIFY_ADMIN_TOKEN, and don't report it either.)
+3. Install it on the TireDrop store and approve.
+4. Open its credentials: note the Client ID (fine to report). Keep the
+   Client secret on screen for Part B, but do NOT report it.
+   (If it only offers an "Admin API access token", use that in Part B as
+   SHOPIFY_ADMIN_TOKEN instead, and don't report it either.)
 
-PART C: Vercel settings
-10. Vercel → tiredrop → Settings → Environment Variables. Add each for
-    Production AND Preview:
-    - VITE_FORM_ENDPOINT = the Formspree URL
-    - ORDER_WEBHOOK_URL = the same Formspree URL
-    - SHOPIFY_STORE_DOMAIN = 3rxp1x-ym.myshopify.com
-    - SHOPIFY_CLIENT_ID = the Client ID
-    - SHOPIFY_CLIENT_SECRET = paste the Client secret (mark Sensitive)
-    (Or SHOPIFY_ADMIN_TOKEN instead of the two CLIENT ones. Never both.)
-    Do NOT add any ATD_ variables or CRON_SECRET.
-11. Deployments → latest Production → "…" → Redeploy (no build cache).
-    Wait for "Ready".
+PART B: Vercel settings
+5. Vercel → tiredrop → Settings → Environment Variables. Add each for
+   Production AND Preview:
+   - SHOPIFY_STORE_DOMAIN = 3rxp1x-ym.myshopify.com
+   - SHOPIFY_CLIENT_ID = the Client ID
+   - SHOPIFY_CLIENT_SECRET = paste the Client secret (mark Sensitive)
+   (Or SHOPIFY_ADMIN_TOKEN instead of the two CLIENT ones. Never both.)
+   If VITE_FORM_ENDPOINT or ORDER_WEBHOOK_URL exist, DELETE them.
+   Do NOT add any ATD_ variables or CRON_SECRET.
+6. Deployments → latest Production → "…" → Redeploy (no build cache).
+   Wait for "Ready".
+
+PART C: Shopify Flow "Website lead alert"
+7. Shopify admin → Apps → Flow → Create workflow.
+8. Trigger: "Customer tags added".
+9. Condition: Customer / Tags → includes → new-lead
+10. Then action 1: "Send internal email":
+    To: info@tiredroponline.com
+    Subject: New website lead: {{ customer.displayName }}
+    Message:
+{% for mf in customer.metafields %}{% if mf.namespace == "tiredrop" and mf.key == "last_lead" %}{{ mf.value | newline_to_br }}{% endif %}{% endfor %}
+
+Customer: {{ customer.displayName }}
+Email: {{ customer.defaultEmailAddress.emailAddress }}
+Phone: {{ customer.defaultPhoneNumber.phoneNumber }}
+Open in Shopify: https://{{ shop.myshopifyDomain }}/admin/customers/{{ customer.legacyResourceId }}
+    (If Flow rejects the message when saving: first remove
+    " | newline_to_br". If it still errors, replace the whole first line
+    with {{ customer.note }}. Report which version saved.)
+11. Then action 2: "Remove customer tags" → new-lead
+12. Name it "Website lead alert" → Turn on. Report saved Y/N.
 
 PART D: Test the live site
-12. Open https://tiredroponline.com/api/status and copy the text.
-    Expected: newsletter "on", checkout "request", atd "sample".
-13. https://tiredroponline.com/contact → submit: name "Website test",
+13. Open https://tiredroponline.com/api/status and copy the text.
+    Expected: forms "on", newsletter "on", checkout "request",
+    atd "sample".
+14. https://tiredroponline.com/contact → submit: name "Website test",
     email = my Gmail, message "TEST, please ignore". Report the on-page
-    confirmation. Then check the info@ inbox for an email with subject
-    "TireDrop contact form" (wait up to 5 minutes; also check Junk).
-14. Private window → https://tiredroponline.com, scroll halfway to trigger
+    confirmation.
+15. Within 5 minutes, in the info@ inbox (and Junk): an email "New website
+    lead: Website test" with the message in it? Report Y/N and folder.
+16. Shopify → Customers → that Gmail customer: tags lead, lead-contact
+    (and NOT new-lead)? Note shows the message? Report.
+17. Private window → https://tiredroponline.com, scroll halfway to trigger
     the sign-up pop-up, and sign up with my Gmail address. Report the
-    success message. Then Shopify admin → Customers: does that email appear
-    with tags newsletter, popup, vercel?
-15. On /tires, confirm the blue "Online catalog preview…" notice shows.
+    success message, and whether that customer now has tags newsletter,
+    popup, vercel.
+18. Order-request test: https://tiredroponline.com/tires → add any tire →
+    cart → checkout → choose "Pickup" (ship to store) → fill in my
+    name/Gmail/phone → submit. Report the confirmation text (it should say
+    nothing was charged). Then Shopify → Orders → Drafts: is there a new
+    draft tagged order-request? Did a "New website lead" email arrive?
+    (Do NOT send its invoice. Leave it for me.)
 
 PART E: Shopify email sender
-16. Shopify → Settings → Notifications → Sender email: report the address
+19. Shopify → Settings → Notifications → Sender email: report the address
     and whether it shows verified / domain authenticated. Don't change it.
 
 PART F: Email authentication check (no DNS changes)
-17. From Outlook as info@tiredroponline.com, send "SPF test" to my Gmail.
-18. In Gmail open it → ⋮ → Show original. Report the SPF, DKIM and DMARC
+20. From Outlook as info@tiredroponline.com, send "SPF test" to my Gmail.
+21. In Gmail open it → ⋮ → Show original. Report the SPF, DKIM and DMARC
     results (PASS/FAIL/other) exactly.
-19. Also confirm my earlier test email to info@ arrived.
 
-REPORT BACK: each step Y/N, Formspree URL, Client ID (NOT the secret),
-/api/status text, whether the contact test email and the Shopify customer
-appeared, the sender-email status, and the SPF/DKIM/DMARC results.
+REPORT BACK: each step Y/N, Client ID (NOT the secret), /api/status text,
+which Flow message version saved, results of tests 14–18, sender-email
+status, and the SPF/DKIM/DMARC results.
 ```
 
-**Undo:** delete the Vercel variables and redeploy. The site goes back to
-sample/request mode with forms not sent.
+**Undo:** delete the Vercel variables and redeploy. Forms go back to "not sent,
+please call" and the site to sample/request mode. Turn the Flow workflow off
+if needed.
 
 ## 20. Brand the Shopify checkout to match tiredroponline.com
 
