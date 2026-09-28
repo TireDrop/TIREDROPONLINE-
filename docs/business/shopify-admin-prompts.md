@@ -465,7 +465,21 @@ after saving (except #5, leave it OFF), and don't change any other settings.
 
 2) "Order routing: local vs ship"
    Trigger: Order created
+   FIRST, Condition S (ship-to-store): Order / Custom attributes has at
+     least one item with Key equal to "Delivery" AND Value contains
+     "Ship to store"
+   Then (S true): Add order tags "ship-to-store-install"
+     + nested Condition: at least one of Order / Fulfillment orders has
+       Delivery method / Method type equal to PICK_UP
+       If NOT true: Send internal email
+         Subject: [CHECK] {{order.name}}: chose ship-to-store but checkout shipped
+         Message: {{order.name}} ({{order.email}}) picked "Ship to store for
+         install" on the site but checked out with a home address
+         ({{order.shippingAddress.city}} {{order.shippingAddress.zip}}).
+         Call them before it ships: send to the shop or to the address?
+   (Then continue to the LOCAL check below, as a separate step after S.)
    LOCAL means ANY of these is true:
+     s) Condition S above was true
      a) at least one of Order / Fulfillment orders has Delivery method /
         Method type equal to PICK_UP (if that field isn't offered, use:
         Order / Shipping line / Title contains "Pickup")
@@ -601,7 +615,14 @@ money, and the Appointo booking URL.
 
 ## 15. Local vs ship: different order-confirmation email for customers
 
-Customers get one of three blocks in their order confirmation:
+Customers get one of five blocks in their order confirmation. The first two
+come from the product-page and cart choice "Ship to store for install":
+- **Ship to store (with Pickup at checkout):** says the tires are shipping to
+  the shop, and to book a bay time.
+- **Ship to store, but a home address at checkout:** "want it switched?"
+  note. Flow also sends you a `[CHECK]` email.
+
+The other three:
 - **Pickup:** ready-at-Sunrise details, with an offer to install while they're there.
 - **Local (South Florida):** free shipping, plus an offer of shop or mobile
   install.
