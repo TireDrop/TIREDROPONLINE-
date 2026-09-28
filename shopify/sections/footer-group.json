@@ -42,6 +42,10 @@
         "legal_menu": "td-footer-legal"
       }
     },
+    "td_polish": {
+      "type": "td-polish",
+      "settings": {}
+    },
     "td_newsletter_popup": {
       "type": "td-newsletter-popup",
       "settings": {
@@ -64,5 +68,5 @@
       }
     }
   },
-  "order": ["td_footer", "td_newsletter_popup"]
+  "order": ["td_footer", "td_newsletter_popup", "td_polish"]
 }

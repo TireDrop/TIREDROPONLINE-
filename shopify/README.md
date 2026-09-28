@@ -1,5 +1,14 @@
 # Shopify theme source
 
+> Synced from EDIT HERE (166982615192) on 2026-09-28: a complete copy of the
+> draft theme, Horizon base files included, 547 files in all (assets 130,
+> blocks 95, config 2, layout 2, locales 57, sections 78, snippets 156,
+> templates 27). Every file matches the theme's checksumMd5 except JSON the
+> theme editor saved with its auto-generated `/* ... */` header, which is
+> stripped here, and `config/settings_data.json`, which Shopify stores
+> minified and the API serves pretty-printed (same content).
+> `notifications/` and `order-printer/` are not theme files.
+
 The Liquid half of TireDrop. These files are the source of truth for the custom
 sections on the Shopify store; they are uploaded to the theme with
 `themeFilesUpsert` rather than edited in the theme editor, so that a change

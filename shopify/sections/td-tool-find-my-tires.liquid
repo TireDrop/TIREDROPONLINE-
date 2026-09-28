@@ -404,6 +404,7 @@
 </style>
 
 <script src="{{ 'td-tiremath.js' | asset_url }}"></script>
+<script src="{{ 'td-vehicles.js' | asset_url }}"></script>
 <script>
 (function () {
   "use strict";
@@ -501,18 +502,18 @@
   };
   var money = function (n) { return Number(n).toLocaleString("en-US", { style: "currency", currency: "USD" }); };
 
-  /* ---------------------- vehicle lists, from FITMENT ---------------------- */
-
-  var MAKES = [];
-  var MODELS = {};
-  Object.keys(TD.FITMENT).forEach(function (key) {
-    var parts = key.split("|");
-    if (!MODELS[parts[0]]) { MODELS[parts[0]] = []; MAKES.push(parts[0]); }
-    MODELS[parts[0]].push(parts[1]);
-  });
-  // The React selector offered the 22 model years back from 2026.
-  var YEARS = [];
-  for (var y = 2026; y > 2026 - 22; y--) YEARS.push(String(y));
+  /* ---------------------- vehicle lists ---------------------- *
+   * TD-VEHICLES: every make and model year 1981-2027 (assets/td-vehicles.js).
+   * Models load live from NHTSA per make + year, with the FITMENT table merged
+   * in under its own spelling. A vehicle with no size on file is still fine:
+   * the size field asks for the sidewall size instead.
+   * ------------------------------------------------------------- */
+  var TV = window.TireDropVehicles || {
+    YEARS: [], OTHER: "Other",
+    makesFor: function () { return []; },
+    modelsFor: function () { return Promise.resolve({ models: [], source: "none" }); }
+  };
+  var YEARS = TV.YEARS;
 
   /* ---------------------- vehicle sizes by model year ---------------------- *
    * TD-FIX: td-tiremath.js has one size per model, which is only right for one
@@ -631,11 +632,17 @@
   var local = {
     mode: first.mode,
     year: YEARS.indexOf(first.year) >= 0 ? first.year : "",
-    make: MODELS[first.make] ? first.make : "",
+    make: "",
     model: "",
     sizeText: first.sizeText
   };
-  if (local.make && MODELS[local.make].indexOf(first.model) >= 0) local.model = first.model;
+  if (TV.makesFor(local.year).indexOf(first.make) >= 0) local.make = first.make;
+  // The model list loads async; a model handed over by the home page finder
+  // came from the same list, so it is kept and re-checked once models arrive.
+  if (local.make && local.year && first.model) {
+    if (first.model === TV.OTHER) { local.mode = "size"; }
+    else local.model = first.model;
+  }
   // TD-FIX: the size filled in from the table, so a later year change can swap it
   // without overwriting a size the customer typed; a vehicle handed over with no
   // size (the home page finder) gets its generation's size straight away.
@@ -682,15 +689,39 @@
   function option(value, label) { var o = document.createElement("option"); o.value = value; o.textContent = label; return o; }
 
   YEARS.forEach(function (yr) { yearSel.appendChild(option(yr, yr)); });
-  MAKES.forEach(function (m) { makeSel.appendChild(option(m, m)); });
 
-  function fillModels() {
-    while (modelSel.options.length) modelSel.remove(0);
-    modelSel.appendChild(option("", local.make ? "Select model" : "Pick a make first"));
-    (MODELS[local.make] || []).forEach(function (m) { modelSel.appendChild(option(m, m)); });
-    modelSel.disabled = !local.make;
-    modelSel.value = local.model;
+  function fillMakes() {
+    var list = TV.makesFor(local.year);
+    while (makeSel.options.length > 1) makeSel.remove(1);
+    list.forEach(function (m) { makeSel.appendChild(option(m, m)); });
+    if (list.indexOf(local.make) < 0) local.make = "";
+    makeSel.value = local.make;
   }
+
+  var modelReq = 0;
+  function fillModels() {
+    var req = ++modelReq;
+    while (modelSel.options.length) modelSel.remove(0);
+    if (!local.make || !local.year) {
+      modelSel.appendChild(option("", !local.year ? "Pick a year first" : "Pick a make first"));
+      modelSel.disabled = true;
+      return;
+    }
+    modelSel.appendChild(option("", "Loading models…"));
+    modelSel.disabled = true;
+    TV.modelsFor(local.make, local.year).then(function (res) {
+      if (req !== modelReq) return; // a newer year/make pick won
+      while (modelSel.options.length) modelSel.remove(0);
+      modelSel.appendChild(option("", "Select model"));
+      var list = res.models.slice();
+      if (local.model && list.indexOf(local.model) < 0) list.push(local.model); // handed over from the finder
+      list.forEach(function (m) { modelSel.appendChild(option(m, m)); });
+      modelSel.appendChild(option(TV.OTHER, "Other / not listed"));
+      modelSel.disabled = false;
+      modelSel.value = local.model;
+    });
+  }
+  fillMakes();
 
   /* ---------------------------- answer cards ---------------------------- */
 
@@ -772,7 +803,9 @@
     var g = local.mode === "vehicle" ? guess() : null;
     sizeHelp.textContent = g
       ? g[0] + " is the most common original fitment for a " + (local.year ? local.year + " " : "") + local.model + ". Trims and model years move it around, so the size printed on your sidewall — or the sticker in your driver’s door jamb — is the one that counts. Change it here if it differs."
-      : "It is printed on the sidewall: three numbers and a letter, like 225/50R17. LT and flotation sizes such as LT265/70R17 or 31x10.50R15 work too.";
+      : (local.mode === "vehicle" && local.model
+        ? "Type the size printed on your sidewall — or on the sticker in your driver’s door jamb. It looks like 225/50R17; LT265/70R17 and 31x10.50R15 work too."
+        : "It is printed on the sidewall: three numbers and a letter, like 225/50R17. LT and flotation sizes such as LT265/70R17 or 31x10.50R15 work too.");
     if (g && g[1] === "sports") {
       stagger.hidden = false;
       stagger.textContent = "";
@@ -807,6 +840,10 @@
   });
   yearSel.addEventListener("change", function () {
     local.year = yearSel.value; stepError = "";
+    var hadMake = local.make;
+    fillMakes();
+    if (!local.make && hadMake) { local.model = ""; }
+    fillModels();
     // TD-FIX: a different year can mean a different generation and size. Swap
     // the filled-in size, but never one the customer typed themselves.
     if (local.model && (!local.sizeText.trim() || local.sizeText === local.autoSize)) {
@@ -821,6 +858,14 @@
     fillModels(); render(false);
   });
   modelSel.addEventListener("change", function () {
+    if (modelSel.value === TV.OTHER) {
+      // Not in the list: same as "My vehicle isn't listed".
+      modelSel.value = "";
+      local.model = ""; local.mode = "size"; stepError = "";
+      render(false);
+      sizeInput.focus();
+      return;
+    }
     local.model = modelSel.value;
     var f = fitFor(local.make, local.model, local.year); // TD-FIX: year-aware
     local.sizeText = f && f[0] ? f[0] : "";
@@ -915,7 +960,7 @@
     var size = a.sizeText ? TD.parseSize(a.sizeText) : null;
     var known = !!(a.year && a.make && a.model);
     var fit = known ? fitFor(a.make, a.model, a.year) : null; // TD-FIX: year-aware
-    var vclass = known ? (fit ? fit[1] : "sedan") : classFromSize(size);
+    var vclass = fit ? fit[1] : classFromSize(size); // TD-VEHICLES: no table entry -> read the class off the size
     var rules = CLASS_RULES[vclass] || CLASS_RULES.sedan;
     var vehicleLabel = known
       ? a.year + " " + a.make + " " + a.model
@@ -1091,7 +1136,7 @@
       var text = local.sizeText.trim();
       if (!text) {
         stepError = local.mode === "vehicle"
-          ? "We do not have a typical size for a " + local.year + " " + local.model + ". Type the size off your sidewall instead."
+          ? "We do not have the factory size for a " + local.year + " " + local.make + " " + local.model + " on file. Type the size off your sidewall (or the sticker in your driver’s door jamb) instead."
           : "Type the size off your sidewall — it looks like 225/50R17.";
         return render(false);
       }
@@ -1123,6 +1168,7 @@
     resumeNotice = null;
     params = new URLSearchParams();
     patch({});
+    fillMakes();
     fillModels();
     render(true);
   }
@@ -1153,6 +1199,7 @@
           local.mode = a.mode; local.year = a.year; local.make = a.make; local.model = a.model; local.sizeText = a.sizeText;
           var f1 = a.model ? fitFor(a.make, a.model, a.year) : null; // TD-FIX: keep year swaps working after "change"
           local.autoSize = f1 && f1[0] === a.sizeText ? a.sizeText : "";
+          fillMakes();
           fillModels();
         }
         goTo(c.step);

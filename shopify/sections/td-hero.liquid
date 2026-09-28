@@ -5,10 +5,11 @@
   left with the finder spanning both rows on the right.
 
   The finder has two tabs, like React's SearchPanel.
-  - By vehicle: year, make and model. Makes and models come from the fitment
-    table in td-tiremath.js (window.TireDrop.FITMENT), the one the Find My
-    Tires tool sizes against, and the form hands vy/vmk/vmd to that tool,
-    which works out the original size and says to check the sidewall.
+  - By vehicle: year, make and model for every make and model year 1981-2027
+    (assets/td-vehicles.js: NHTSA vPIC models, with the td-tiremath.js size
+    table merged in). The form hands vy/vmk/vmd to the Find My Tires tool,
+    which fills the typical size when it has one and otherwise asks for the
+    size off the sidewall.
   - By size: builds 225/50R17 from the three selects and hands it to
     /search, the same query the tire size decoder sends.
   Without JS both panels show; the size form still submits, and the vehicle
@@ -71,9 +72,9 @@
                 <label class="td-finder__label" for="{{ sid }}-vy">Year</label>
                 <select class="td-finder__select" id="{{ sid }}-vy" name="vy" data-td-vy>
                   <option value="">Select year</option>
-                  {%- comment -%} The same 22 model years the Find My Tires tool accepts. {%- endcomment -%}
-                  {%- for i in (0..21) -%}
-                    {%- assign yr = 2026 | minus: i -%}
+                  {%- comment -%} TD-VEHICLES: every model year 1981-2027, the same list the Find My Tires tool accepts (assets/td-vehicles.js). {%- endcomment -%}
+                  {%- for i in (0..46) -%}
+                    {%- assign yr = 2027 | minus: i -%}
                     <option value="{{ yr }}">{{ yr }}</option>
                   {%- endfor -%}
                 </select>
@@ -171,6 +172,7 @@
 
 {%- if section.settings.show_finder -%}
 <script src="{{ 'td-tiremath.js' | asset_url }}"></script>
+<script src="{{ 'td-vehicles.js' | asset_url }}"></script>
 <script>
   (function () {
     var root = document.getElementById('td-hero-{{ sid }}');
@@ -203,29 +205,52 @@
     });
     select('vehicle');
 
-    // Vehicle: makes and models come from the fitment table the Find My
-    // Tires tool uses (td-tiremath.js), so every choice here is one that tool
-    // can size. The form hands vy/vmk/vmd to the tool, which reads them.
+    // TD-VEHICLES: every make and model year (1981-2027). Makes are filtered
+    // to the ones sold in the chosen year; models load live from NHTSA through
+    // assets/td-vehicles.js, with the Find My Tires size table merged in so
+    // every vehicle that tool can size keeps its exact spelling. "Other / not
+    // listed" is always offered; the tool then asks for the sidewall size.
     var vform = finder.querySelector('[data-td-vehicle-form]');
+    var vy = vform.querySelector('[data-td-vy]');
     var mk = vform.querySelector('[data-td-vmk]');
     var md = vform.querySelector('[data-td-vmd]');
-    var models = {};
-    var fit = (window.TireDrop && window.TireDrop.FITMENT) || {};
-    Object.keys(fit).forEach(function (key) {
-      var p = key.split('|');
-      if (!models[p[0]]) { models[p[0]] = []; mk.add(new Option(p[0], p[0])); }
-      models[p[0]].push(p[1]);
-    });
-    mk.addEventListener('change', function () {
+    var TV = window.TireDropVehicles;
+    var modelReq = 0;
+
+    function fillMakes() {
+      var keep = mk.value;
+      mk.length = 1;
+      var list = TV ? TV.makesFor(vy.value) : [];
+      list.forEach(function (m) { mk.add(new Option(m, m)); });
+      mk.value = list.indexOf(keep) >= 0 ? keep : '';
+    }
+    function fillModels() {
+      var keep = md.value;
+      var req = ++modelReq;
       md.length = 1;
-      (models[mk.value] || []).forEach(function (m) { md.add(new Option(m, m)); });
-      // TD-FIX: same short placeholder whether or not a make is picked (matches the markup).
-      md.options[0].text = 'Select model';
-      md.disabled = !mk.value;
-    });
+      if (!TV || !vy.value || !mk.value) {
+        md.options[0].text = 'Select model';
+        md.disabled = true;
+        return;
+      }
+      md.options[0].text = 'Loading models…';
+      md.disabled = true;
+      TV.modelsFor(mk.value, vy.value).then(function (res) {
+        if (req !== modelReq) return; // a newer year/make pick won
+        md.length = 1;
+        res.models.forEach(function (m) { md.add(new Option(m, m)); });
+        md.add(new Option('Other / not listed', TV.OTHER));
+        md.options[0].text = 'Select model';
+        md.disabled = false;
+        md.value = keep && [].some.call(md.options, function (o) { return o.value === keep; }) ? keep : '';
+      });
+    }
+    fillMakes();
+    vy.addEventListener('change', function () { fillMakes(); fillModels(); });
+    mk.addEventListener('change', fillModels);
     vform.addEventListener('submit', function (e) {
       var err = vform.querySelector('[data-td-error]');
-      if (!vform.querySelector('[data-td-vy]').value || !mk.value || !md.value) {
+      if (!vy.value || !mk.value || !md.value) {
         e.preventDefault();
         err.textContent = 'Choose a year, make and model to see what fits.';
         return;

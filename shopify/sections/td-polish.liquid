@@ -1,0 +1,15 @@
+{%- comment -%}
+  TD-POLISH loader: pulls in assets/td-polish.css (visual-flow pass) on every page.
+  Lives in the footer group so it loads site-wide without editing layout/theme.liquid.
+{%- endcomment -%}
+{{ 'td-polish.css' | asset_url | stylesheet_tag }}
+
+{% schema %}
+{
+  "name": "TireDrop polish styles",
+  "tag": "div",
+  "class": "td-polish",
+  "enabled_on": { "groups": ["footer"] },
+  "settings": []
+}
+{% endschema %}
