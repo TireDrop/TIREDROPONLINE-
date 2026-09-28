@@ -726,9 +726,10 @@ info@tiredroponline.com.
    and verify that email address when Formspree asks.
 2. Create a new form named "TireDrop website", recipient
    info@tiredroponline.com.
-3. In the form's settings, turn ON spam filtering (reCAPTCHA OFF: the site
-   posts JSON). Allowed domains: tiredroponline.com, www.tiredroponline.com
-   and the project's .vercel.app domain.
+3. In the form's settings: keep Formspree's built-in spam filtering ON,
+   but leave reCAPTCHA OFF and "Restrict to domain" / allowed domains OFF.
+   (The site posts JSON, and order requests are sent from Vercel's
+   server, which a domain restriction would block.)
 4. Copy the form endpoint URL (looks like https://formspree.io/f/xxxxxxx).
    It's not secret, so paste it in your report.
 5. Choose the FREE plan. If it asks for payment, stop and tell me.
@@ -741,8 +742,9 @@ monthly limit.
 - `VITE_FORM_ENDPOINT` = the Formspree URL
 - `ORDER_WEBHOOK_URL` = the same URL
 
-Redeploy (VITE_ variables are read at build time). Test by submitting
-/contact on the .vercel.app site, then check the info@ inbox.
+Redeploy (VITE_ variables are read at build time). Test one of each form
+(contact, financing, fleet quote, booking) on the .vercel.app site, then
+check the info@ inbox for subjects like "TireDrop contact form".
 
 ## 18. Move tiredroponline.com from Shopify to Vercel (Shopify keeps checkout)
 
