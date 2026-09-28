@@ -662,8 +662,8 @@ arrived with the blue box.
 The Vercel site shows live ATD prices. At checkout it creates a Shopify
 **draft order** made of custom line items: no products are created or changed
 in Shopify. It then sends the shopper to that draft's Shopify checkout. For
-this, Vercel needs an Admin API token that can **only** create draft orders
-and read orders.
+this, Vercel needs an Admin API token limited to draft orders, orders and
+fulfillment (for ATD tracking).
 
 ⚠️ **Keep the token private.** Never paste it into a chat, email or doc. It
 goes straight into Vercel → Project → Settings → Environment Variables as
@@ -679,8 +679,12 @@ logged into Shopify admin.
      follow its link and make the app there instead. Tell me which route
      you used.
 2. Create an app named "TireDrop Vercel Checkout".
-3. Admin API access scopes: turn on ONLY write_draft_orders and
-   read_orders. Nothing else. Save.
+3. Admin API access scopes: turn on ONLY these, nothing else:
+   write_draft_orders, read_orders, write_orders,
+   read_merchant_managed_fulfillment_orders,
+   write_merchant_managed_fulfillment_orders. Save.
+   (Checkout creates the draft order. The ATD forwarder reads paid orders,
+   tags them with the ATD PO and adds tracking when ATD ships.)
 4. Install the app on the TireDrop store.
 5. Reveal the Admin API access token ONCE, and stop. Do NOT copy it into this
    chat or anywhere else: I'll copy it into Vercel myself.
