@@ -680,7 +680,11 @@ test("forwarder config: switches never flip ATD to live; status reports forwarde
 
 test("vercel.json: the cron is scheduled and the SPA rewrite does not swallow it", () => {
   const vercel = JSON.parse(readFileSync(new URL("../../vercel.json", import.meta.url), "utf8"));
-  assert.deepEqual(vercel.crons, [{ path: "/api/cron/atd-sweep", schedule: "*/5 * * * *" }]);
+  // Once a day while the project is on Hobby (the only schedule Hobby
+  // deploys accept); switch to "*/5 * * * *" on Pro. See atd-forwarder.md.
+  assert.equal(vercel.crons.length, 1);
+  assert.equal(vercel.crons[0].path, "/api/cron/atd-sweep");
+  assert.ok(["0 12 * * *", "*/5 * * * *"].includes(vercel.crons[0].schedule), vercel.crons[0].schedule);
   for (const { source } of vercel.rewrites) {
     const re = new RegExp(`^${source}$`);
     assert.equal(re.test("/api/cron/atd-sweep"), false, source);

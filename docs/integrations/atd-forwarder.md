@@ -134,13 +134,20 @@ tracking), so `read_all_orders` is not required.
 
 ## Vercel Cron
 
-`vercel.json` schedules `GET /api/cron/atd-sweep` every 5 minutes
-(`*/5 * * * *`) and gives it a 60 s `maxDuration`. The SPA rewrite
+`vercel.json` schedules `GET /api/cron/atd-sweep` **once a day for now**
+(`0 12 * * *`) and gives it a 60 s `maxDuration`. That is the only schedule
+the Hobby plan accepts, so the project can deploy while it is still on
+Hobby. With ordering switched off (`ATD_ORDERING_ENABLED` unset) the daily
+run does nothing.
+
+**Before going live on Vercel Pro,** change the schedule to every 5 minutes
+(`"schedule": "*/5 * * * *"`) in `vercel.json` and redeploy. The SPA rewrite
 `/((?!api/).*)` excludes every `/api/` path, so it does not swallow the cron
 (a test checks this).
 
 **Sub-daily cron jobs need Vercel Pro.** On the Hobby plan a cron may run at
-most once a day and a deploy with a 5-minute schedule is rejected. Hobby also
+most once a day, and a deploy with a 5-minute schedule is rejected. That is
+why the schedule above starts at once a day. Hobby also
 does not allow commercial use, so the store needs Pro anyway.
 
 Cron runs only on the **production** deployment. To run a sweep by hand
