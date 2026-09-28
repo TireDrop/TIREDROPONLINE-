@@ -433,15 +433,95 @@ info@tiredroponline.com. I'm logged into Shopify admin (TireDrop) and GoDaddy.
 3. Settings → Notifications → Staff notifications → Add recipient →
    Email → info@tiredroponline.com, with "New order" ON → Save →
    Send test notification.
-4. Apps → install "Shopify Flow" (free) if missing → Create workflow:
-   Trigger "Customer created" → Condition: customer tags include
-   "newsletter" → Action "Send internal email" to info@tiredroponline.com,
-   Subject "New TireDrop newsletter signup",
-   Body "{{customer.email}} just joined the list." →
-   name it "Newsletter signup alert" → Turn on.
+4. Skip: the newsletter alert is workflow 1 in prompt 13.
 5. TEST: https://tiredroponline.com/pages/contact → name "Website test",
    message "TEST — please ignore" → submit. Report the on-page message.
 
 REPORT BACK: each step done Y/N, the sender-email status and the DNS
 records added, and the contact-form test result.
 ```
+
+## 13. Shopify Flow workflows (all alerts to info@tiredroponline.com)
+
+Flow is already installed (checked via the API on 2026-09-28). Workflows can
+only be built inside the Flow app: Shopify has no API for creating them and
+says not to hand-edit `.flow` files. So this prompt builds them in the browser.
+Workflow 1 replaces step 4 of prompt 12. If that step already made
+"Newsletter signup alert", skip workflow 1.
+
+```
+TASK: Build 5 Shopify Flow workflows for TireDrop. I'm logged into Shopify
+admin. Go to Apps → Flow → Create workflow for each one. Every email goes to
+info@tiredroponline.com. Name each workflow exactly as written, turn it ON
+after saving (except #5, leave it OFF), and don't change any other settings.
+
+1) "Newsletter signup alert"
+   Trigger: Customer created
+   Condition: Customer / Tags → includes "newsletter"
+   Then: Send internal email
+     To: info@tiredroponline.com
+     Subject: New TireDrop newsletter signup
+     Message: {{customer.email}} just joined the TireDrop list (sign-up pop-up).
+
+2) "Order routing – pickup, ship, South FL install"
+   Trigger: Order created
+   Condition A: at least one of Order / Fulfillment orders has
+     Delivery method / Method type equal to PICK_UP
+     (if that field isn't offered, use: Order / Shipping line / Title
+      contains "Pickup")
+   Then (A true): Add order tags "pickup-sunrise"
+     + Send internal email
+       Subject: PICKUP order {{order.name}}: prep tires in Sunrise
+       Message: {{order.name}} will be picked up at 7712 W Oakland Park Blvd.
+       Customer: {{order.email}}
+       {% for li in order.lineItems %}{{li.quantity}} x {{li.title}}
+       {% endfor %}
+   Otherwise (A false): Add order tags "ship"
+     then Condition B: Order / Shipping address / Zip starts with 330
+       OR starts with 331 OR 332 OR 333 OR 334
+     Then (B true): Add order tags "sfl-install-lead"
+       + Send internal email
+         Subject: South FL order {{order.name}}: offer installation
+         Message: {{order.name}} ships to {{order.shippingAddress.city}}
+         {{order.shippingAddress.zip}}. Contact {{order.email}} to offer
+         installation or mobile service.
+
+3) "High-risk order review"
+   Trigger: Order risk analyzed
+   Condition: Order / Risk level equal to HIGH
+   Then: Add order tags "fraud-review"
+     + Hold fulfillment orders (if that action exists; skip if not)
+     + Send internal email
+       Subject: HIGH RISK order {{order.name}}: review before shipping
+       Message: Shopify flagged {{order.name}} ({{order.email}},
+       {{order.totalPriceSet.shopMoney.amount}}) as high risk. Review in
+       Orders before anything ships or goes to the supplier.
+
+4) "Cancelled order: stop supplier PO"
+   Trigger: Order cancelled
+   Then: Add order tags "cancelled-check-po"
+     + Send internal email
+       Subject: CANCELLED {{order.name}}: cancel supplier PO
+       Message: {{order.name}} was cancelled. If it was already sent to
+       ATD / the supplier, cancel that PO now.
+
+5) "Low stock: under a set of 4"  (build it, leave it OFF)
+   Trigger: Product variant inventory quantity changed
+   Condition: Product variant / Inventory quantity less than 4
+   Then: Send internal email
+     Subject: Low stock: {{productVariant.product.title}}
+     Message: {{productVariant.displayName}} is down to
+     {{productVariant.inventoryQuantity}}. Under a full set of 4.
+
+REPORT BACK: each workflow name, saved Y/N, ON/OFF, and any step where a
+field or action didn't exist and what you used instead. Don't create test
+orders.
+```
+
+**Why these:**
+- **#2 and #3:** once an ATD sync app is live, it forwards orders to the
+  supplier automatically. Tagging and holding orders here is the checkpoint
+  before that happens.
+- **#4:** a cancelled Shopify order doesn't cancel the supplier PO.
+- **#5 stays off** until products exist, and it also depends on how the sync
+  app handles stock. Turn it on only if tire stock is held at the shop.
