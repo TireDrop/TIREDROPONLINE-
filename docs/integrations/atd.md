@@ -130,3 +130,75 @@ Behaviour that is real and tested (`npm run test:api`):
     in-memory caching of search results for 5 minutes acceptable?
 12. **Returns:** How do returns and damaged deliveries work for a Ship to Home
     order?
+
+## Market check (researched 2026-09-28)
+
+**Caveat on sources:** the proxy blocked every vendor and trade-press page, so
+everything here comes from search-result summaries. Confirm it with ATD and
+the vendors before relying on it.
+
+### ATD has lost major brands
+- **Oct 2024:** ATD filed for Chapter 11.
+- **Mar 5, 2025:** its assets were sold to its lenders.
+- **Brands gone:**
+  - Bridgestone (passenger and light truck)
+  - Goodyear, including Cooper and Mastercraft
+  - Michelin, BFGoodrich and Uniroyal (from Jul 1, 2025)
+- **Second distributor:** plan for one. TireHub, US AutoForce and Wheel Pros all
+  have Spark Shipping / Flxpoint connectors, so one sync tool can cover more
+  than one supplier.
+
+### Who sells tires online, and on what
+- **Shopify:**
+  - Tire Discounters, 200+ stores (Shopify Plus, agency case study)
+  - WheelWiz (Shopify Plus, drop-ship catalog)
+  - Too Fast Inc (Shopify + Convermax, Turn 14 data)
+  - Tire Guys Online (a myshopify.com store)
+  - Tracking sites count about 800–2,000 Shopify tire stores.
+  - **No public example** of a Shopify store naming ATD as its source.
+- **Other platforms:**
+  - Priority Tire Outlet: BigCommerce + Brightpearl, plus Walmart/Amazon/eBay
+  - Tires.auto, BB Wheels: BigCommerce
+  - Discount Tire: SAP Commerce Cloud
+  - Tires-easy: custom build
+  - TireBuyer, now Treadsy (owned by ATD): reportedly Magento
+- **Tire-dealer website platforms with ATD connections:**
+  - TireConnect (Bridgestone-owned)
+  - Tireweb (ATD is in its connections directory)
+  - Net Driven (ATD's "Preferred Website Provider")
+  - Tire Guru (ATD on its partner list)
+  - RideStyler (lists a live ATD connection)
+
+  These are strong on local install booking. None showed proof of consumer
+  ship-to-door.
+- **Drop-ship tools with ATD connectors:**
+
+  | Tool | Price (as found) | Works with |
+  | --- | --- | --- |
+  | Spark Shipping | $249–$999/mo | Shopify, Woo, BigCommerce, Magento |
+  | Flxpoint | ~$399–$1,299/mo + $800+ onboarding | Shopify, Woo, BigCommerce, Magento |
+  | Slingshot / Data Here-to-There | $0–$199/mo | Shopify |
+  | InfiPlex | not found | — |
+  | X-Cart ATD add-on | not found | X-Cart |
+
+  These handle ship-to-door and tracking, but not install booking.
+- **ATD's own channel:** Treadsy / Radius sends shoppers to local installers,
+  with ATD setting the price. It is both an alternative to TireDrop's own store
+  and a competitor to it.
+
+### Gotchas to raise
+- **Sandbox test order:** ATD requires one, and confirms it, before live orders
+  are accepted.
+- **Brand internet-sales rules:** some brands restrict online selling. Nitto's
+  MAP policy bars online sales without written consent. Check each brand's MAP
+  and internet-sales policy.
+- **Not found:** ATD drop-ship fees, order minimums, or an ATD-level MAP policy.
+
+### Extra questions for the ATD rep
+13. Which brands can you drop-ship to consumers for us today, after the
+    Bridgestone, Goodyear and Michelin exits?
+14. Which platforms and sync tools are approved for Ship to Home (Spark
+    Shipping, Flxpoint, Slingshot, direct API)?
+15. What is the sandbox test-order process, and how long does approval take?
+16. Are Treadsy / Radius still offered to dealers, and does joining them limit
+    selling on our own site?
