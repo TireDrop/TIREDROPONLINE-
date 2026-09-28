@@ -14,6 +14,12 @@
 {% endcomment %}
 {%- liquid
   assign ss = section.settings
+  comment
+    Delivery values must match the cart section's ship_value / store_value.
+  endcomment
+  assign ship_value = ss.ship_value | default: 'Ship to my address'
+  assign store_value = ss.store_value | default: 'Ship to store for install (Extreme Tires, Sunrise)'
+  assign delivery = cart.attributes.Delivery | default: ship_value
   assign variant = product.selected_or_first_available_variant
   capture td_specs
     render 'td-product-specs', product: product, variant: variant
@@ -190,28 +196,35 @@
             {%- endif -%}
           </div>
 
-          <div class="td-pdp__block">
-            <p class="td-shop-label">Delivery</p>
+          <fieldset class="td-pdp__block td-pdp__delivery">
+            <legend class="td-shop-label">Delivery: choose one</legend>
             <div class="td-pdp__options">
-              <div class="td-pdp__option">
-                <p class="td-pdp__optitle">{{ ss.ship_title }}</p>
-                <p class="td-pdp__optline">
-                  <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
-                  <span>{{ ss.ship_line }}</span>
-                </p>
-                <p class="td-pdp__optcopy">{{ ss.ship_copy }}</p>
-              </div>
-              <div class="td-pdp__option">
-                <p class="td-pdp__optitle">{{ ss.store_title }}</p>
-                <p class="td-pdp__optline">
-                  <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/></svg>
-                  <span>{{ ss.store_line }}</span>
-                </p>
-                <p class="td-pdp__optcopy">{{ ss.store_copy }}</p>
-              </div>
+              <label class="td-pdp__option" for="{{ sid }}-del-ship">
+                <input type="radio" class="td-pdp__radio" id="{{ sid }}-del-ship" name="attributes[Delivery]" value="{{ ship_value | escape }}"{% unless delivery == store_value %} checked{% endunless %} data-td-delivery="ship">
+                <span class="td-pdp__optbody">
+                  <span class="td-pdp__optitle">{{ ss.ship_title }}</span>
+                  <span class="td-pdp__optline">
+                    <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+                    <span>{{ ss.ship_line }}</span>
+                  </span>
+                  <span class="td-pdp__optcopy">{{ ss.ship_copy }}</span>
+                </span>
+              </label>
+              <label class="td-pdp__option" for="{{ sid }}-del-store">
+                <input type="radio" class="td-pdp__radio" id="{{ sid }}-del-store" name="attributes[Delivery]" value="{{ store_value | escape }}"{% if delivery == store_value %} checked{% endif %} data-td-delivery="store">
+                <span class="td-pdp__optbody">
+                  <span class="td-pdp__optitle">{{ ss.store_title }} <span class="td-pdp__local">South Florida only</span></span>
+                  <span class="td-pdp__optline">
+                    <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/></svg>
+                    <span>{{ ss.store_line }}</span>
+                  </span>
+                  <span class="td-pdp__optcopy">{{ ss.store_copy }}</span>
+                </span>
+              </label>
             </div>
+            <p class="td-pdp__pickupnote" data-td-pickupnote{% unless delivery == store_value %} hidden{% endunless %}>{{ ss.store_checkout_note }}</p>
             <p class="td-pdp__hint">{{ ss.delivery_note }}</p>
-          </div>
+          </fieldset>
 
           <dl class="td-pdp__bill tnum">
             <div data-td-listrow{% if each_saving == 0 %} hidden{% endif %}>
@@ -228,7 +241,7 @@
             </div>
             <div>
               <dt>Shipping</dt>
-              <dd>Free</dd>
+              <dd data-td-shipline>{% if delivery == store_value %}{{ ss.store_bill_line }}{% else %}Free{% endif %}</dd>
             </div>
             <div class="td-pdp__billtotal">
               <dt>Estimated total</dt>
@@ -416,12 +429,21 @@
   .td-pdp__qtyinput::-webkit-inner-spin-button, .td-pdp__qtyinput::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   .td-pdp__hint { margin-top: .5rem !important; font-size: 12px; color: var(--td-smoke); }
   .td-pdp__options { display: grid; gap: .75rem; }
-  .td-pdp__option { border: 1px solid rgba(7,14,26,.15); border-radius: 6px; background: #FFFFFF; padding: 1rem; }
-  .td-pdp__option:first-child { border-color: var(--td-drop); background: rgba(0,104,232,.05); }
-  .td-pdp__optitle { font-family: var(--td-display); font-size: 1rem; font-weight: 700; }
-  .td-pdp__optline { margin-top: .25rem !important; display: flex; align-items: flex-start; gap: .5rem; font-size: 14px; font-weight: 500; }
+  .td-pdp__delivery { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .td-pdp__delivery legend { padding: 0; margin-bottom: .5rem; }
+  .td-pdp__option { display: flex; align-items: flex-start; gap: .75rem; border: 1px solid rgba(7,14,26,.15); border-radius: 6px; background: #FFFFFF; padding: 1rem; cursor: pointer; transition: border-color .15s, background-color .15s; }
+  .td-pdp__option:hover { border-color: rgba(0,104,232,.5); }
+  .td-pdp__option:has(.td-pdp__radio:checked) { border-color: var(--td-drop); background: rgba(0,104,232,.05); box-shadow: 0 0 0 1px var(--td-drop) inset; }
+  .td-pdp__option:has(.td-pdp__radio:focus-visible) { outline: 2px solid var(--td-drop); outline-offset: 2px; }
+  .td-pdp__radio { flex-shrink: 0; width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--td-drop); cursor: pointer; }
+  .td-pdp__optbody { display: block; min-width: 0; }
+  .td-pdp__optitle { display: block; font-family: var(--td-display); font-size: 1rem; font-weight: 700; }
+  .td-pdp__local { display: inline-block; margin-left: .25rem; padding: .125rem .5rem; border-radius: 999px; background: var(--td-fog); font-family: inherit; font-size: 11px; font-weight: 600; color: var(--td-smoke); vertical-align: middle; }
+  .td-pdp__optline { margin-top: .25rem; display: flex; align-items: flex-start; gap: .5rem; font-size: 14px; font-weight: 500; }
   .td-pdp__optline svg { flex-shrink: 0; margin-top: 2px; color: var(--td-drop); }
-  .td-pdp__optcopy { margin-top: .25rem !important; font-size: 14px; color: var(--td-smoke); }
+  .td-pdp__optcopy { display: block; margin-top: .25rem; font-size: 14px; color: var(--td-smoke); }
+  .td-pdp__pickupnote { margin-top: .75rem !important; padding: .625rem .75rem; border-left: 3px solid var(--td-drop); background: rgba(0,104,232,.06); font-size: 13px; font-weight: 500; color: var(--td-ink); }
+  .td-pdp__pickupnote[hidden] { display: none; }
   .td-pdp__bill { margin: 1.5rem 0 0; font-size: 14px; }
   .td-pdp__bill > div { display: flex; justify-content: space-between; gap: 1rem; margin-top: .375rem; }
   .td-pdp__bill > div[hidden] { display: none; }
@@ -546,6 +568,43 @@
     });
     paint();
 
+    // Delivery choice: saved as the cart attribute "Delivery" (the same one
+    // the cart page shows), on change and again before the add goes through.
+    var form = $("[data-td-form]");
+    var delivery = function () { var r = root.querySelector("[data-td-delivery]:checked"); return r ? r.value : null; };
+    var saveDelivery = function () {
+      var v = delivery();
+      if (!v || !window.fetch) return Promise.resolve();
+      return fetch({{ routes.cart_update_url | append: '.js' | json }}, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ attributes: { Delivery: v } }),
+      }).catch(function () {});
+    };
+    var paintDelivery = function () {
+      var r = root.querySelector("[data-td-delivery]:checked");
+      var isStore = r && r.dataset.tdDelivery === "store";
+      var note = $("[data-td-pickupnote]"); if (note) note.hidden = !isStore;
+      var line = $("[data-td-shipline]"); if (line) line.textContent = isStore ? {{ ss.store_bill_line | json }} : "Free";
+    };
+    root.querySelectorAll("[data-td-delivery]").forEach(function (r) {
+      r.addEventListener("change", function () { paintDelivery(); saveDelivery(); });
+    });
+    if (form) form.addEventListener("submit", function (e) {
+      if (form.dataset.tdSaved === "1") return;
+      e.preventDefault();
+      if (form.dataset.tdSaved === "wait") return;
+      form.dataset.tdSaved = "wait";
+      var btns = document.querySelectorAll('[name="add"]');
+      btns.forEach(function (b) { b.setAttribute("aria-busy", "true"); });
+      saveDelivery().then(function () {
+        form.dataset.tdSaved = "1";
+        if (form.requestSubmit) form.requestSubmit(); else form.submit();
+        setTimeout(function () { form.dataset.tdSaved = ""; btns.forEach(function (b) { b.removeAttribute("aria-busy"); }); }, 0);
+      });
+    });
+    paintDelivery();
+
     // Gallery thumbnails swap the main image.
     var stage = $("[data-td-stage]");
     root.querySelectorAll("[data-td-thumb]").forEach(function (t) {
@@ -575,14 +634,18 @@
     { "type": "text", "id": "available_text", "label": "Available line", "default": "Available to order." },
     { "type": "text", "id": "unavailable_text", "label": "Not available line", "default": "Not available to ship right now — call us and we will try to source it." },
     { "type": "range", "id": "max_qty", "label": "Maximum quantity per add", "min": 4, "max": 24, "step": 1, "default": 12 },
-    { "type": "header", "content": "Delivery explainer" },
+    { "type": "header", "content": "Delivery choice (cart attribute \"Delivery\")" },
+    { "type": "text", "id": "ship_value", "label": "Ship-to-me value", "default": "Ship to my address", "info": "Must match the cart section's value." },
+    { "type": "text", "id": "store_value", "label": "Ship-to-store value", "default": "Ship to store for install (Extreme Tires, Sunrise)", "info": "Must match the cart section's value. Flow and the order email look for \"Ship to store\"." },
     { "type": "text", "id": "ship_title", "label": "Option 1 title", "default": "Ship it to me" },
     { "type": "text", "id": "ship_line", "label": "Option 1 line", "default": "Ships free, no minimum" },
     { "type": "textarea", "id": "ship_copy", "label": "Option 1 text", "default": "Delivered to your address anywhere in the continental United States." },
     { "type": "text", "id": "store_title", "label": "Option 2 title", "default": "Ship to the shop and we'll fit them" },
     { "type": "text", "id": "store_line", "label": "Option 2 line", "default": "Free to Extreme Tires — Sunrise, fitted there" },
     { "type": "textarea", "id": "store_copy", "label": "Option 2 text", "default": "Mounting, balancing, new valve stems and disposal of your old tires. South Florida only — Sunrise, Plantation, Fort Lauderdale, Davie and nearby." },
-    { "type": "text", "id": "delivery_note", "label": "Delivery note", "default": "You choose between these in your cart." },
+    { "type": "text", "id": "delivery_note", "label": "Delivery note", "default": "You can change this in your cart." },
+    { "type": "textarea", "id": "store_checkout_note", "label": "Ship-to-store checkout note", "default": "At checkout, choose \"Pickup\" at Extreme Tires, Sunrise. We'll email you when your tires arrive so you can book your install." },
+    { "type": "text", "id": "store_bill_line", "label": "Ship-to-store shipping line", "default": "Free to Extreme Tires" },
     { "type": "header", "content": "South Florida band" },
     { "type": "text", "id": "band_eyebrow", "label": "Eyebrow", "default": "South Florida" },
     { "type": "text", "id": "band_title", "label": "Heading", "default": "Ship it free to the shop" },
