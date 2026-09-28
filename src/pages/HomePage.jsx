@@ -21,11 +21,7 @@ import {
   Wrench,
 } from "lucide-react";
 
-import {
-  BUSINESS,
-  YELP_PROFILE,
-  googleReviewHref,
-} from "../data/business.js";
+import { BUSINESS, YELP_PROFILE, googleReviewHref } from "../data/business.js";
 import { MOBILE_SERVICES, SHOP_SERVICES } from "../data/services.js";
 import { TIRES, TIRE_CATEGORIES } from "../data/products.js";
 import ProductCard from "../components/shop/ProductCard.jsx";
@@ -61,15 +57,24 @@ const TOOLS_LIST = [
 function Hero() {
   const navigate = useNavigate();
 
-  // The finder used to sit here with nothing wired to it, so a submitted
-  // search went nowhere. Shopping by vehicle or by sidewall size is the entry
-  // path on every competitor, so it hands straight off to the catalog using
-  // the same query keys the tire listing reads back.
+  // Shopping by vehicle or by sidewall size is the entry path on every
+  // competitor. The finder offers every make and model year 1981-2027, most
+  // of which the size table cannot size, so — like the theme's hero — a
+  // vehicle goes to Find My Tires: it fills the typical size when the table
+  // has one and otherwise asks for the size off the sidewall ("Other / not
+  // listed" lands on that size field). A size goes straight to the catalog
+  // with the query keys the tire listing reads back.
   const onSearch = (payload) => {
-    const fields =
-      payload.type === "vehicle"
-        ? { vy: payload.year, vmk: payload.make, vmd: payload.model }
-        : { w: payload.width, a: payload.aspect, d: payload.diameter };
+    if (payload.type === "vehicle") {
+      const query = new URLSearchParams({
+        vy: payload.year,
+        vmk: payload.make,
+        vmd: payload.model,
+      });
+      navigate(`/find-my-tires?${query.toString()}`);
+      return;
+    }
+    const fields = { w: payload.width, a: payload.aspect, d: payload.diameter };
     const query = new URLSearchParams(
       Object.entries(fields).filter(([, value]) => value),
     );
@@ -77,13 +82,10 @@ function Hero() {
     // listing usually finds it already answered. A partial size has nothing
     // to send and is narrowed on the listing itself. Failure is handled
     // there too: the listing falls back to the sample catalog.
-    const full = payload.width && payload.aspect && payload.diameter;
-    if (payload.type === "vehicle" || full) {
-      searchTires(
-        payload.type === "vehicle"
-          ? { year: payload.year, make: payload.make, model: payload.model }
-          : { size: `${payload.width}/${payload.aspect}R${payload.diameter}` },
-      ).catch(() => {});
+    if (payload.width && payload.aspect && payload.diameter) {
+      searchTires({
+        size: `${payload.width}/${payload.aspect}R${payload.diameter}`,
+      }).catch(() => {});
     }
     navigate(`/tires?${query.toString()}`);
   };
@@ -131,7 +133,7 @@ function Hero() {
           <p className="mb-5 text-sm text-smoke">
             Shop by vehicle, or by the size stamped on your sidewall.
           </p>
-          <SearchPanel onSearch={onSearch} />
+          <SearchPanel vehicles="all" onSearch={onSearch} />
         </div>
 
         <div className="order-3 lg:col-start-1 lg:row-start-2 lg:self-start">
@@ -150,10 +152,8 @@ function Hero() {
               How Shipping Works
             </Link>
           </div>
-
-          <p className="mt-5 text-sm text-bone/55">
-            {BUSINESS.poweredBy}.
-          </p>
+          {/* No "Powered by" footnote here: it already sits in the header,
+              the final CTA and the footer. */}
         </div>
       </div>
     </section>
@@ -192,15 +192,17 @@ const TRUST = [
 
 function TrustBar() {
   return (
-    <section className="border-b border-ink/10 bg-bone">
-      <ul className="wrap grid grid-cols-2 gap-x-5 gap-y-7 py-8 lg:grid-cols-4 lg:gap-x-8">
+    <section className="border-b border-ink/[0.07] bg-bone">
+      <ul className="wrap grid grid-cols-2 gap-x-4 gap-y-6 py-8 md:gap-x-5 md:gap-y-7 lg:grid-cols-4 lg:gap-x-8">
         {TRUST.map(({ Icon, title, copy }) => (
           <li key={title} className="flex flex-col gap-2">
             <Icon size={22} aria-hidden className="text-drop" />
             <h3 className="text-balance text-[15px] leading-snug md:text-base">
               {title}
             </h3>
-            <p className="text-xs leading-relaxed text-smoke">{copy}</p>
+            <p className="line-clamp-3 text-xs leading-relaxed text-smoke md:line-clamp-none">
+              {copy}
+            </p>
           </li>
         ))}
       </ul>
@@ -242,14 +244,16 @@ function ShopByCategory() {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      {/* On a phone the five cards are a swipe row rather than a 900px
+          stack; the row bleeds to the screen edge and snaps card by card. */}
+      <div className="-mx-5 grid auto-cols-[68%] grid-flow-col gap-3 overflow-x-auto overscroll-x-contain scroll-px-5 px-5 pb-5 pt-1 [scrollbar-width:none] snap-x snap-mandatory sm:mx-0 sm:auto-cols-auto sm:grid-flow-row sm:grid-cols-2 sm:overflow-visible sm:p-0 sm:snap-none lg:grid-cols-5 [&::-webkit-scrollbar]:hidden">
         {TIRE_CATEGORIES.map((category) => {
           const Icon = CATEGORY_ICONS[category] ?? BadgeCheck;
           return (
             <Link
               key={category}
               to={`/tires?category=${encodeURIComponent(category)}`}
-              className="card-hover group flex flex-col p-5 transition-colors hover:border-drop/40"
+              className="card-hover group flex snap-start flex-col p-5 transition-colors hover:border-drop/40"
             >
               <Icon size={24} aria-hidden className="mb-3 text-drop" />
               <h3 className="text-lg leading-tight">{category}</h3>
@@ -328,6 +332,10 @@ function DeliveryChoice() {
 }
 
 /* ------------------------------ Category tiles ---------------------------- */
+
+// Switched off on the storefront theme ("td_tiles" is disabled in the home
+// template); kept so it can come back with one flag.
+const SHOW_CATEGORY_TILES = false;
 
 const CATEGORIES = [
   {
@@ -412,8 +420,10 @@ const STEPS = [
 ];
 
 function HowItWorks() {
+  // Fog, so it reads as its own band between the white category and
+  // delivery sections.
   return (
-    <Section className="bg-bone">
+    <Section className="bg-fog">
       <SectionHead
         eyebrow="How it works"
         title="Four steps from search to installed"
@@ -430,7 +440,7 @@ function HowItWorks() {
           <li key={s.n} className="card relative p-6">
             <span
               aria-hidden
-              className="font-display text-5xl leading-none text-drop/15"
+              className="font-display text-5xl font-bold leading-none text-drop/35"
             >
               {s.n}
             </span>
@@ -744,21 +754,18 @@ export default function HomePage() {
         title="Tires & Wheels Shipped Nationwide"
         description="TireDrop is an online tire and wheel store shipping anywhere in the continental US. Ship to your address, or free to our South Florida shop where we install them. Powered by Extreme Tires."
       />
-      {/* Ordered against the sequence a tire buyer actually moves through:
-          can you fit my car, what does it cost, can I trust you, how do the
-          tires get on. Explanation earns its place after an offer, not
-          before one — a shopper who has not yet seen a price has no reason
-          to read four steps about delivery. */}
+      {/* Same order as the storefront theme's home template. Real products
+          and real prices come third, the first proof that there is a shop
+          here at all; the four steps follow the catalog so the process is
+          explained right after the offer, then the two ways to get the tires
+          and the tools for anyone who does not know their size. */}
       <Hero />
       <TrustBar />
-
-      {/* Real products and real prices, third. This is the first proof that
-          there is a shop here at all, and it used to sit seventh, behind
-          five sections of explanation. */}
       <FeaturedTires />
 
       {/* For the shopper the four featured tires did not suit. */}
       <ShopByCategory />
+      <HowItWorks />
       <DeliveryChoice />
 
       {/* The way in for someone who cannot answer the finder because they do
@@ -766,13 +773,10 @@ export default function HomePage() {
           shopper leaves a site. */}
       <ToolsBand />
 
-      {/* Trust, then the local pitch it underwrites. */}
-      <Proof />
+      {/* The local pitch, then the proof behind it. */}
       <LocalAdvantage />
-
-      {/* Still undecided: the process and the rest of the store. */}
-      <HowItWorks />
-      <CategoryTiles />
+      <Proof />
+      {SHOW_CATEGORY_TILES && <CategoryTiles />}
       <FinalCta />
     </>
   );

@@ -21,7 +21,9 @@ export default function Footer() {
 
   return (
     <footer className="mt-auto bg-ink bg-ink-wash text-bone">
-      <div className="wrap grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-4">
+      {/* Two link columns on a phone rather than one long stack; the shop
+          column spans both. */}
+      <div className="wrap grid grid-cols-2 gap-x-5 gap-y-8 py-14 md:gap-10 lg:grid-cols-4">
         {FOOTER_COLUMNS.map((col) => (
           <div key={col.title}>
             <h3 className="mb-4 font-display text-[15px] text-amber">
@@ -32,7 +34,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     to={link.to}
-                    className="text-sm text-bone/65 transition-colors hover:text-bone"
+                    className="text-[15px] text-bone/65 transition-colors hover:text-bone md:text-sm"
                   >
                     {link.label}
                   </Link>
@@ -43,7 +45,7 @@ export default function Footer() {
         ))}
 
         {/* Visit & Contact column — built from live business data. */}
-        <div>
+        <div className="col-span-full md:col-span-1">
           <h3 className="mb-4 font-display text-[15px] text-amber">
             The Shop Behind Us
           </h3>
