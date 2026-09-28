@@ -13,6 +13,7 @@
 // No discount, coupon or offer is attached to a sign-up. There is none.
 
 import { shopifyGraphQL, ShopifyCheckoutError } from "./shopify.js";
+import { clientIp, createRateLimiter } from "./ratelimit.js";
 
 export const CUSTOMER_CREATE = `mutation customerCreate($input: CustomerInput!) {
   customerCreate(input: $input) {
@@ -111,36 +112,19 @@ export async function subscribeEmail(email, source, cfg, deps = {}) {
 // ---- Rate limit ---------------------------------------------------------------
 //
 // Per client IP, per warm function instance: at most RATE_LIMIT attempts in
-// RATE_WINDOW_MS. Instances are not shared, so this is a brake on one noisy
-// client rather than a hard global quota; with the honeypot it keeps casual
-// bots from turning the endpoint into a customer-creation loop.
+// RATE_WINDOW_MS (see api/_lib/ratelimit.js).
 
+export { clientIp };
 export const RATE_LIMIT = 5;
 export const RATE_WINDOW_MS = 10 * 60 * 1000;
-const hits = new Map();
+const limiter = createRateLimiter({ limit: RATE_LIMIT, windowMs: RATE_WINDOW_MS });
 
 /** Test hook. */
 export function resetNewsletterRateLimit() {
-  hits.clear();
-}
-
-/** The caller's IP as Vercel reports it, or "unknown". */
-export function clientIp(req) {
-  const h = req?.headers ?? {};
-  const forwarded = String(h["x-forwarded-for"] ?? "").split(",")[0].trim();
-  return forwarded || String(h["x-real-ip"] ?? "").trim() || req?.socket?.remoteAddress || "unknown";
+  limiter.reset();
 }
 
 /** Records one attempt; true when the caller is over the limit. */
 export function rateLimited(ip, now = Date.now()) {
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
-  recent.push(now);
-  hits.set(ip, recent);
-  if (hits.size > 5000) {
-    // Drop idle entries so a flood of distinct IPs cannot grow this forever.
-    for (const [key, times] of hits) {
-      if (!times.some((t) => now - t < RATE_WINDOW_MS)) hits.delete(key);
-    }
-  }
-  return recent.length > RATE_LIMIT;
+  return limiter.hit(ip, now);
 }

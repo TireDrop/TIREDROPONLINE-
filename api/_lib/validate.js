@@ -394,3 +394,155 @@ export function validateNewsletter(body) {
   }
   return { ok: true, bot: false, value: { email, source } };
 }
+
+// ---- POST /api/forms -------------------------------------------------------
+
+/**
+ * The website forms `/api/forms` accepts, and each one's own fields as
+ * [key, label, max length, multi-line?], in the order the lead lists them.
+ * The free-text message is always last. Anything not listed is dropped.
+ * Name, email and phone are common to every form (see validateLead).
+ */
+export const LEAD_FORM_FIELDS = Object.freeze({
+  contact: [
+    ["subject", "About", 80, false],
+    ["message", "Message", 2000, true],
+  ],
+  financing: [["amount", "Amount to finance", 40, false]],
+  "fleet-quote": [
+    ["company", "Company", 120, false],
+    ["fleetSize", "Fleet size", 40, false],
+    ["sizes", "Tire sizes", 500, true],
+    ["message", "Notes", 2000, true],
+  ],
+  booking: [
+    ["reference", "Reference", 40, false],
+    ["service", "Service", 80, false],
+    ["year", "Year", 10, false],
+    ["make", "Make", 40, false],
+    ["model", "Model", 60, false],
+    ["tireSize", "Tire size", 40, false],
+    ["locationType", "Where", 20, false],
+    ["address", "Street address", 120, false],
+    ["city", "City", 60, false],
+    ["zip", "ZIP code", 10, false],
+    ["parkingNotes", "Parking", 300, true],
+    ["date", "Preferred date", 20, false],
+    ["window", "Time window", 20, false],
+    ["notes", "Notes", 2000, true],
+  ],
+});
+
+export const LEAD_FORMS = Object.keys(LEAD_FORM_FIELDS);
+
+/**
+ * A form value as clean text: control characters removed (a multi-line field
+ * keeps its line breaks, a single-line field collapses them to spaces) and
+ * surrounding whitespace trimmed. Non-strings other than numbers read as "".
+ */
+/** C0/C1 control characters and the bidi override/isolate marks. */
+function isControl(code) {
+  return (
+    code <= 0x1f ||
+    (code >= 0x7f && code <= 0x9f) ||
+    (code >= 0x202a && code <= 0x202e) ||
+    (code >= 0x2066 && code <= 0x2069)
+  );
+}
+
+export function cleanText(raw, { multiline = false } = {}) {
+  if (typeof raw !== "string" && typeof raw !== "number") return "";
+  const input = String(raw).normalize("NFC").replace(/\r\n?/g, "\n");
+  let out = "";
+  for (const ch of input) {
+    const code = ch.codePointAt(0);
+    if (ch === "\n") out += multiline ? "\n" : " ";
+    else if (ch === "\t") out += " ";
+    else if (!isControl(code)) out += ch;
+  }
+  if (multiline) {
+    return out
+      .split("\n")
+      .map((line) => line.replace(/\s+$/, ""))
+      .join("\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }
+  return out.replace(/\s+/g, " ").trim();
+}
+
+/** Ten NANP digits from a typed phone, or null. */
+function usPhoneDigits(raw) {
+  let digits = String(raw ?? "").replace(/\D/g, "");
+  if (digits.length === 11 && digits.startsWith("1")) digits = digits.slice(1);
+  return /^[2-9]\d{2}[2-9]\d{6}$/.test(digits) ? digits : null;
+}
+
+/**
+ * Validates a website form: `{ form, name, email, phone, ...form fields,
+ * website? }`.
+ *
+ * Returns `{ ok: true, bot: true }` when the `website` honeypot is filled
+ * (answered like a success, nothing stored), `{ ok: false, error }`, or
+ * `{ ok: true, bot: false, value: { form, name, email, phone, phoneE164,
+ * fields } }`, where `fields` is the form's own [label, value] pairs in
+ * order, empty ones left out.
+ *
+ * A lead needs a way to reply: a valid email or a valid 10-digit US phone.
+ * A phone that is not a US number is kept as text on the lead but not used
+ * to find or create the customer.
+ */
+export function validateLead(body) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return { ok: false, error: "Send the form as a JSON object." };
+  }
+  if (cleanText(body.website)) return { ok: true, bot: true };
+
+  const form = cleanText(body.form);
+  const spec = LEAD_FORM_FIELDS[form];
+  if (!spec) return { ok: false, error: "Unknown form." };
+
+  // The fleet form calls its person field "contact".
+  const name = cleanText(body.name) || (form === "fleet-quote" ? cleanText(body.contact) : "");
+  if (name.length > 100) return { ok: false, error: "Name is too long." };
+
+  const email = cleanText(body.email).toLowerCase();
+  if (email && (email.length > 254 || !EMAIL.test(email))) {
+    return { ok: false, error: "Enter a valid email address." };
+  }
+  const phone = cleanText(body.phone);
+  if (phone.length > 30) return { ok: false, error: "Phone is too long." };
+  const digits = usPhoneDigits(phone);
+  if (!email && !digits) {
+    return {
+      ok: false,
+      error: "Enter an email address or a 10-digit US phone number so we can reply.",
+    };
+  }
+
+  const fields = [];
+  for (const [key, label, max, multiline] of spec) {
+    const value = cleanText(body[key], { multiline });
+    if (!value) continue;
+    if (value.length > max) {
+      return {
+        ok: false,
+        error: `${label} is too long (${max.toLocaleString("en-US")} characters at most).`,
+      };
+    }
+    fields.push([label, value]);
+  }
+
+  return {
+    ok: true,
+    bot: false,
+    value: {
+      form,
+      name,
+      email: email || null,
+      phone: phone || null,
+      phoneE164: digits ? `+1${digits}` : null,
+      fields,
+    },
+  };
+}

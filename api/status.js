@@ -8,6 +8,9 @@
 //
 // `newsletter` is "on" when POST /api/newsletter can reach Shopify (Shopify
 // fully configured). The React sign-up pop-up only renders when it is "on".
+//
+// `forms` is "on" when POST /api/forms can record leads in Shopify (Shopify
+// fully configured). The site's forms only claim delivery when it is "on".
 
 import { getConfig } from "./_lib/config.js";
 import { methodNotAllowed, send } from "./_lib/http.js";
@@ -35,6 +38,7 @@ export function statusBody(config, endpoints = ATD_ENDPOINTS) {
     checkout: config.checkout,
     forwarder: config.forwarder.mode,
     newsletter: config.newsletter.mode,
+    forms: config.forms.mode,
     version: config.version,
   };
   if (issues.length) body.issues = issues;

@@ -20,7 +20,12 @@
 //     on the draft order itself.
 //   * No guessed URLs. A response without an https invoiceUrl is an error,
 //     never a fallback link.
-//   * Mobile install never comes here; it stays an order request.
+//   * Mobile install is never paid here; it stays an order request.
+//
+// Order requests (checkout's "request" mode, and every mobile install) also
+// become a draft order, through buildRequestDraftInput: the same custom lines
+// and attributes, tagged "order-request", and NO invoice is sent. The shop
+// confirms price and availability, then clicks "Send invoice" in Shopify.
 //
 // See docs/integrations/shopify-checkout.md.
 
@@ -43,8 +48,27 @@ export const SHIPPING_LINE_TITLE = Object.freeze({
   pickup: "Pickup at Extreme Tires (Sunrise, FL)",
 });
 
+/**
+ * `Delivery` value for a mobile install request's draft. Only request drafts
+ * carry it (mobile is never paid online). The ATD forwarder does not know it,
+ * so a paid mobile order is flagged for the shop rather than sent to ATD.
+ */
+export const MOBILE_DELIVERY_ATTRIBUTE = "Mobile install at my address";
+
 export const SOURCE_ATTRIBUTE = "TireDrop live (Vercel)";
 export const ORDER_TAG = "vercel-live";
+export const REQUEST_TAG = "order-request";
+
+/** Tag naming how the order is delivered, on every draft this API creates. */
+export const DELIVERY_TAG = Object.freeze({
+  ship: "ship-to-home",
+  pickup: "ship-to-store",
+  mobile: "mobile-install",
+});
+
+/** First line of every order-request draft's note. */
+export const REQUEST_NOTE_HEADING =
+  "Request only — confirm price and availability, then Send invoice.";
 
 export const DRAFT_ORDER_CREATE = `mutation draftOrderCreate($input: DraftOrderInput!) {
   draftOrderCreate(input: $input) {
@@ -134,7 +158,7 @@ export function buildDraftOrderInput(order) {
     email: order.customer.email,
     ...(phone ? { phone } : {}),
     note: noteFor(order),
-    tags: [ORDER_TAG, f.type === "pickup" ? "ship-to-store" : "ship-to-home"],
+    tags: [ORDER_TAG, DELIVERY_TAG[f.type]],
     customAttributes: [
       { key: "Delivery", value: DELIVERY_ATTRIBUTE[f.type] },
       { key: "Source", value: SOURCE_ATTRIBUTE },
@@ -164,6 +188,45 @@ export function buildDraftOrderInput(order) {
     };
     if (!input.shippingAddress.firstName) delete input.shippingAddress.firstName;
   }
+  return input;
+}
+
+/**
+ * The DraftOrderInput for an ORDER REQUEST: nothing is charged and no invoice
+ * is sent. It is the checkout draft (same custom lines at the server's
+ * prices, same Delivery / Source / Order ref attributes, discounts off) with
+ * the "order-request" tag and a note telling the shop what to do. Mobile
+ * install requests are drafts too, addressed to the service address, with no
+ * shipping line: the install is quoted on the call and added before the
+ * invoice goes out. `customerId`, when known, links the draft to the customer.
+ */
+export function buildRequestDraftInput(order, { customerId = null } = {}) {
+  const f = order.fulfillment;
+  const mobile = f.type === "mobile";
+  const input = buildDraftOrderInput(
+    mobile ? { ...order, fulfillment: { ...f, type: "ship" } } : order,
+  );
+  const delivery = mobile ? MOBILE_DELIVERY_ATTRIBUTE : DELIVERY_ATTRIBUTE[f.type];
+  input.tags = [REQUEST_TAG, ORDER_TAG, DELIVERY_TAG[f.type]];
+  input.note = [
+    REQUEST_NOTE_HEADING,
+    mobile
+      ? "Mobile install: add the install charge quoted on the call before you send the invoice."
+      : null,
+    `TireDrop order request ${order.orderRef}`,
+    `Customer: ${order.customer.name}, ${order.customer.phone}`,
+    `Delivery: ${delivery}`,
+    order.notes ? `Customer notes: ${order.notes}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+  if (mobile) {
+    input.customAttributes = input.customAttributes.map((a) =>
+      a.key === "Delivery" ? { key: "Delivery", value: delivery } : a,
+    );
+    delete input.shippingLine;
+  }
+  if (customerId) input.purchasingEntity = { customerId };
   return input;
 }
 
@@ -360,6 +423,19 @@ export function extractInvoiceUrl(data) {
     );
   }
   return parsed.toString();
+}
+
+/**
+ * Creates an order-request draft and returns `{ id, name }`. No invoice is
+ * sent: draftOrderCreate never sends one, and this API never calls
+ * draftOrderInvoiceSend.
+ */
+export async function createRequestDraft(order, cfg, deps = {}, { customerId } = {}) {
+  const input = buildRequestDraftInput(order, { customerId });
+  const data = await shopifyGraphQL(cfg, DRAFT_ORDER_CREATE, { input }, deps);
+  const draft = data?.draftOrderCreate?.draftOrder;
+  if (!draft?.id) throw new ShopifyCheckoutError("Shopify created no draft order.");
+  return { id: draft.id, name: draft.name ?? null };
 }
 
 /**

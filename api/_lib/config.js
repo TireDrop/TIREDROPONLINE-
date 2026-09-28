@@ -200,14 +200,14 @@ export function getConfig(env = process.env) {
     );
   }
 
-  // ---- Order request delivery (used when online payment is off, and for
-  // mobile install always) ----------------------------------------------------
-  const orderWebhookUrl = clean(env.ORDER_WEBHOOK_URL);
-  const webhookIssues = [];
-  if (orderWebhookUrl && !isHttpsUrl(orderWebhookUrl)) {
-    webhookIssues.push("ORDER_WEBHOOK_URL must be an https:// URL.");
+  // ORDER_WEBHOOK_URL (order requests POSTed to Formspree) is retired: order
+  // requests are now recorded in Shopify (api/_lib/leads.js). A leftover value
+  // is ignored, and said so, rather than silently obeyed.
+  if (clean(env.ORDER_WEBHOOK_URL) !== "") {
+    issues.push(
+      "ORDER_WEBHOOK_URL is no longer used (order requests are recorded in Shopify) and is ignored. Remove it.",
+    );
   }
-  issues.push(...webhookIssues);
 
   // Payment is only taken once BOTH sides are live. Charging a card against
   // the representative sample catalog would sell tires nobody has confirmed
@@ -279,17 +279,19 @@ export function getConfig(env = process.env) {
     mode: shopify.mode === "live" && shopify.ok ? "on" : "off",
   };
 
+  // ---- Website forms and order requests (POST /api/forms, checkout) --------
+  // Leads are stored on the Shopify customer and emailed to info@ by Shopify
+  // Flow (docs/integrations/website-leads.md). Same app and scopes as the
+  // newsletter, and on under the same condition: Shopify fully configured.
+  const forms = { mode: newsletter.mode };
+
   const sha = clean(env.VERCEL_GIT_COMMIT_SHA);
   return {
     atd,
     shopify,
     forwarder,
     newsletter,
-    orderWebhook: {
-      url: webhookIssues.length ? "" : orderWebhookUrl,
-      ok: webhookIssues.length === 0,
-      issues: webhookIssues,
-    },
+    forms,
     checkout: paymentsReady ? "shopify" : "request",
     issues,
     version: sha ? `${API_VERSION}+${sha.slice(0, 7)}` : API_VERSION,

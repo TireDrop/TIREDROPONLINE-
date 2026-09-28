@@ -16,8 +16,11 @@
 //       items at the server's prices, and `url` is its invoiceUrl. The shopper
 //       pays there and the order lands in Shopify (api/_lib/shopify.js).
 //   { mode: "request", orderRef, total, delivered, paid: false, ... }
-//       No payment taken. `delivered` says whether the order request actually
-//       reached the shop (via ORDER_WEBHOOK_URL).
+//       No payment taken. The request is recorded in Shopify: a lead on the
+//       customer, which Shopify Flow emails to info@, and a draft order with
+//       no invoice sent (api/_lib/orders.js). `delivered` says whether that
+//       actually reached the shop. With Shopify off it is only logged
+//       (`delivered: false`, 200); a Shopify failure is a 502.
 // Mobile orders are always "request", with `delivery: "mobile"`, `total` as
 // the tires total and `installNote: "Install quoted on the call"`: the van
 // is booked and the install priced on the phone, so nothing is charged here.
@@ -66,7 +69,6 @@ export function createCheckoutHandler({ env, atd = {}, shopify = {} } = {}) {
       const blocking = [
         ...config.atd.issues.filter(() => config.atd.mode === "live"),
         ...config.shopify.issues,
-        ...config.orderWebhook.issues,
       ];
       if (blocking.length) {
         console.error("[checkout] misconfigured:", blocking.join(" "));
@@ -91,7 +93,7 @@ export function createCheckoutHandler({ env, atd = {}, shopify = {} } = {}) {
         );
       }
 
-      const result = await deliverOrderRequest(order, config.orderWebhook.url);
+      const result = await deliverOrderRequest(order, config.shopify, shopify);
       const response = {
         mode: "request",
         orderRef: order.orderRef,
@@ -110,9 +112,9 @@ export function createCheckoutHandler({ env, atd = {}, shopify = {} } = {}) {
         response.installNote = MOBILE_INSTALL_NOTE;
         response.serviceAddress = order.fulfillment.address;
       }
-      // A configured webhook that failed is a server-side failure; an absent
-      // webhook is a supported state the UI explains.
-      const status = result.reason === "webhook-error" ? 502 : 200;
+      // Shopify refusing is a server-side failure; Shopify switched off is a
+      // supported state the UI explains.
+      const status = result.reason === "shopify-error" ? 502 : 200;
       return send(res, status, response, NO_STORE);
     } catch (err) {
       if (err instanceof HttpError || err instanceof AtdError || err instanceof ShopifyCheckoutError) {

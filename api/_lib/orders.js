@@ -1,14 +1,17 @@
 // Order assembly and "request mode" delivery.
 //
-// Request mode is what checkout does when payment is not live: the order is
-// sent to the shop as a request (by POSTing JSON to ORDER_WEBHOOK_URL, e.g. a
-// Formspree form) and the shop follows up by phone or email to take payment.
-// Nothing here charges a card or claims one was charged.
+// Request mode is what checkout does when payment is not live (and for every
+// mobile install): the order is recorded in Shopify as a lead on the customer
+// (form "order-request", emailed to info@ by Shopify Flow, see
+// api/_lib/leads.js) and as a DRAFT order with no invoice sent. The shop
+// confirms price and availability, then clicks "Send invoice" in Shopify and
+// the customer pays on Shopify's checkout. Nothing here charges a card or
+// claims one was charged.
 
 import { randomBytes } from "node:crypto";
 import { BUSINESS } from "../../src/data/business.js";
-
-export const WEBHOOK_TIMEOUT_MS = 6000;
+import { findOrCreateLeadCustomer, formatLead, saveLead } from "./leads.js";
+import { createRequestDraft, toE164 } from "./shopify.js";
 
 const cents = (n) => Math.round(n * 100) / 100;
 
@@ -73,88 +76,111 @@ export function buildOrder(input, lines, now = new Date()) {
 const oneLine = (a) =>
   [a.line1, a.line2, `${a.city}, ${a.state} ${a.zip}`].filter(Boolean).join(", ");
 
-function summary(order) {
+const usd = (n) => `$${n.toFixed(2)}`;
+
+/**
+ * The order request's own lead fields, as [label, value] pairs, customer
+ * notes last. `draft` is the Shopify draft ({ name }) or null when it could
+ * not be created.
+ */
+export function orderRequestFields(order, draft) {
   const f = order.fulfillment;
-  const where =
-    f.type === "pickup"
-      ? `Ship-to-store pickup at ${f.location.name}, ${f.location.address}`
-      : f.type === "mobile"
-        ? `MOBILE INSTALL at ${oneLine(f.address)}. ${MOBILE_INSTALL_NOTE}: confirm fitment, schedule the van and quote the install on the call.`
-        : `Ship to ${oneLine(f.address)}`;
-  const heading =
-    f.type === "mobile"
-      ? `MOBILE INSTALL BOOKING REQUEST ${order.orderRef} — NOT PAID. No card has been charged; call the customer to confirm fitment, schedule the van and take payment.`
-      : `ORDER REQUEST ${order.orderRef} — NOT PAID. No card has been charged; contact the customer to confirm stock and take payment.`;
+  const mobile = f.type === "mobile";
   return [
-    heading,
-    "",
-    ...order.lines.map(
-      (l) => `${l.qty} x ${l.title} (${l.sku}) @ $${l.price.toFixed(2)} = $${l.lineTotal.toFixed(2)}`,
-    ),
-    f.type === "mobile"
-      ? `Tires total before tax and fees: $${order.total.toFixed(2)} (install not included — ${MOBILE_INSTALL_NOTE.toLowerCase()})`
-      : `Total before tax and fees: $${order.total.toFixed(2)} (shipping free)`,
-    "",
-    where,
-    `Customer: ${order.customer.name}, ${order.customer.email}, ${order.customer.phone}`,
-    order.notes ? `Notes: ${order.notes}` : null,
-  ]
-    .filter((line) => line !== null)
-    .join("\n");
+    ["Order ref", order.orderRef],
+    [
+      "Status",
+      "NOT PAID. Request only: nothing was charged. Confirm price and availability with the customer.",
+    ],
+    [
+      "Delivery",
+      f.type === "pickup"
+        ? `Ship-to-store pickup at ${f.location.name}, ${f.location.address}`
+        : mobile
+          ? `Mobile install at ${oneLine(f.address)}. ${MOBILE_INSTALL_NOTE}: confirm fitment, schedule the van and quote the install on the call.`
+          : `Ship to ${oneLine(f.address)}`,
+    ],
+    [
+      "Items",
+      order.lines
+        .map((l) => `${l.qty} x ${l.title} (${l.sku}) @ ${usd(l.price)} = ${usd(l.lineTotal)}`)
+        .join("\n"),
+    ],
+    mobile
+      ? ["Tires total", `${usd(order.total)} before tax and fees (install not included, ${MOBILE_INSTALL_NOTE.toLowerCase()})`]
+      : ["Total", `${usd(order.total)} before tax and fees (shipping free)`],
+    [
+      "Shopify draft",
+      draft
+        ? `${draft.name ?? draft.id}: in Shopify, Orders → Drafts. Confirm the price${mobile ? ", add the install" : ""}, then Send invoice.`
+        : "NOT created (see the Vercel function log). Enter the order by hand.",
+    ],
+    ["Customer notes", order.notes],
+  ];
 }
 
 /**
- * Sends the order request to ORDER_WEBHOOK_URL. Returns
- * { delivered: true } or { delivered: false, reason }.
- * With no webhook configured it logs the order and reports delivered: false,
- * so the UI can say plainly that nothing reached the shop.
+ * Records an order request in Shopify: the customer and a draft order (no
+ * invoice sent), then the lead that alerts info@. Resolves
+ * `{ customerId, draft }`. A draft that fails is logged and named as missing
+ * in the lead, because the alert still reaches the shop; a lead that fails
+ * throws, because then nothing reached anyone.
  */
-export async function deliverOrderRequest(order, webhookUrl, deps = {}) {
-  const {
-    fetchImpl = globalThis.fetch,
-    log = console,
-    timeoutMs = WEBHOOK_TIMEOUT_MS,
-  } = deps;
+export async function recordOrderRequest(order, cfg, deps = {}) {
+  const { log = console, now = () => new Date() } = deps;
+  const c = order.customer;
+  const customer = await findOrCreateLeadCustomer(
+    { name: c.name, email: c.email, phoneE164: toE164(c.phone) },
+    cfg,
+    deps,
+  );
+  let draft = null;
+  try {
+    draft = await createRequestDraft(order, cfg, deps, { customerId: customer.id });
+  } catch (err) {
+    log.error(
+      `[checkout] Draft order for request ${order.orderRef} failed (${err?.message}). Order:`,
+      JSON.stringify(order),
+    );
+  }
+  const text = formatLead(
+    {
+      form: "order-request",
+      name: c.name,
+      email: c.email,
+      phone: c.phone,
+      fields: orderRequestFields(order, draft),
+    },
+    now(),
+  );
+  await saveLead(customer, "order-request", text, cfg, deps);
+  return { customerId: customer.id, draft };
+}
 
-  if (!webhookUrl) {
+/**
+ * Delivers an order request to the shop through Shopify. Returns
+ * `{ delivered: true, draft }` or `{ delivered: false, reason }`:
+ *   "not-configured"  Shopify is off; the order is only logged, so the UI can
+ *                     say plainly that nothing reached the shop.
+ *   "shopify-error"   Shopify refused or did not answer; logged in full.
+ */
+export async function deliverOrderRequest(order, cfg, deps = {}) {
+  const { log = console } = deps;
+  if (!(cfg?.mode === "live" && cfg.ok)) {
     log.warn(
-      `[checkout] ORDER_WEBHOOK_URL is not set; order request ${order.orderRef} was NOT sent anywhere. Logged here only:`,
+      `[checkout] Shopify is not configured; order request ${order.orderRef} was NOT sent anywhere. Logged here only:`,
       JSON.stringify(order),
     );
     return { delivered: false, reason: "not-configured" };
   }
-
-  const payload = {
-    // Formspree conventions: `_subject` sets the email subject, `email` the
-    // reply-to. Other receivers can ignore them.
-    _subject: `TireDrop ${order.fulfillment.type === "mobile" ? "mobile install booking request" : "order request"} #${order.orderRef} (NOT PAID)`,
-    email: order.customer.email,
-    orderRef: order.orderRef,
-    paymentStatus: "NOT PAID - order request only",
-    message: summary(order),
-    order,
-  };
-
   try {
-    const res = await fetchImpl(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(timeoutMs),
-    });
-    if (!res.ok) {
-      log.error(
-        `[checkout] Order webhook rejected ${order.orderRef} with HTTP ${res.status}. Order:`,
-        JSON.stringify(order),
-      );
-      return { delivered: false, reason: "webhook-error" };
-    }
-    return { delivered: true };
+    const { draft } = await recordOrderRequest(order, cfg, deps);
+    return { delivered: true, draft };
   } catch (err) {
     log.error(
-      `[checkout] Order webhook failed for ${order.orderRef} (${err?.name === "TimeoutError" ? "timed out" : err?.message}). Order:`,
+      `[checkout] Could not record order request ${order.orderRef} in Shopify (${err?.message}). Order:`,
       JSON.stringify(order),
     );
-    return { delivered: false, reason: "webhook-error" };
+    return { delivered: false, reason: "shopify-error" };
   }
 }

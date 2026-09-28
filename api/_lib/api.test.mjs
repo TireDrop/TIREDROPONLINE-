@@ -11,7 +11,6 @@ import statusHandler from "../status.js";
 import tiresHandler from "../tires.js";
 import checkoutHandler, { paymentModeFor, createCheckoutHandler } from "../checkout.js";
 import { buildOrder } from "./orders.js";
-import { formPayload, FORM_SUBJECTS } from "../../src/data/forms.js";
 import {
   createDraftCheckout,
   clearShopifyTokenCache,
@@ -231,39 +230,6 @@ test("with no env: checkout is an undelivered, unpaid order request", async () =
   assert.ok(warnings.some((w) => w.includes("was NOT sent")), "order is logged");
 });
 
-test("with ORDER_WEBHOOK_URL: the order request is POSTed and reported delivered", async (t) => {
-  process.env.ORDER_WEBHOOK_URL = "https://formspree.io/f/test";
-  const sent = [];
-  t.mock.method(globalThis, "fetch", async (url, init) => {
-    sent.push({ url: String(url), headers: init.headers, body: JSON.parse(init.body) });
-    return new Response("{}", { status: 200 });
-  });
-  const res = await call(checkoutHandler, { method: "POST", body: validOrder({ delivery: "pickup", address: undefined }) });
-  assert.equal(res.body.delivered, true);
-  assert.equal(res.body.pickup.address, "7712 West Oakland Park Blvd, Sunrise, FL 33351");
-  assert.equal(sent.length, 1);
-  assert.match(sent[0].body.message, /NOT PAID/);
-  // Formspree: JSON in and out, a subject naming the order, the customer's
-  // email as reply-to.
-  assert.equal(sent[0].headers["Content-Type"], "application/json");
-  assert.equal(sent[0].headers.Accept, "application/json");
-  assert.equal(sent[0].body._subject, `TireDrop order request #${res.body.orderRef} (NOT PAID)`);
-  assert.equal(sent[0].body.email, "buyer@example.com");
-});
-
-test("site forms post a Formspree-ready body: subject, reply-to email, form name", () => {
-  const body = formPayload("contact", { name: "Pat", email: "pat@example.com", message: "Hi" }, new Date("2026-01-02T03:04:05Z"));
-  assert.equal(body._subject, "TireDrop contact form");
-  assert.equal(body.email, "pat@example.com");
-  assert.equal(body.form, "contact");
-  assert.equal(body._form, "contact");
-  assert.equal(body._submittedAt, "2026-01-02T03:04:05.000Z");
-  for (const name of ["contact", "financing", "fleet-quote", "booking"]) {
-    assert.match(formPayload(name, {})._subject, /^TireDrop /);
-    assert.ok(FORM_SUBJECTS[name], name);
-  }
-});
-
 // ---- fail-loud configuration --------------------------------------------------
 
 test("half-configured ATD is a 503, never a quiet fallback to sample", async () => {
@@ -413,32 +379,8 @@ test("mobile always returns request mode even when a payment provider is live", 
   assert.equal(paymentModeFor(buildOrder(input("pickup", null), lines), live), "redirect");
   assert.equal(paymentModeFor(buildOrder(input("mobile", addr), lines), live), "request");
 
-  // End to end with ATD and Shopify both live: Shopify is never called.
-  const { deps, shopifyCalls } = liveDeps();
-  const handler = createCheckoutHandler({ env: { ...LIVE_ATD_ENV, ...SHOPIFY_ENV }, ...deps });
-  const res = await call(handler, { method: "POST", body: mobileOrder() });
-  assert.equal(res.statusCode, 200);
-  assert.equal(res.body.mode, "request");
-  assert.equal(res.body.delivery, "mobile");
-  assert.equal(res.body.url, undefined);
-  assert.equal(shopifyCalls.length, 0);
-});
-
-test("a mobile order request reaches the shop marked NOT PAID with the install unquoted", async (t) => {
-  process.env.ORDER_WEBHOOK_URL = "https://formspree.io/f/test";
-  const sent = [];
-  t.mock.method(globalThis, "fetch", async (url, init) => {
-    sent.push(JSON.parse(init.body));
-    return new Response("{}", { status: 200 });
-  });
-  const res = await call(checkoutHandler, { method: "POST", body: mobileOrder() });
-  assert.equal(res.body.delivered, true);
-  assert.equal(sent.length, 1);
-  assert.match(sent[0]._subject, /mobile install/);
-  assert.match(sent[0].message, /NOT PAID/);
-  assert.match(sent[0].message, /MOBILE INSTALL at 10 NW 1st Ave, Coral Springs, FL 33065/);
-  assert.match(sent[0].message, /Install quoted on the call/);
-  assert.equal(sent[0].order.fulfillment.type, "mobile");
+  // End to end (mobile becomes a request draft and a lead, never a
+  // checkout link): api/_lib/leads.test.mjs.
 });
 
 test("an unknown delivery mode is still a 400", async () => {
