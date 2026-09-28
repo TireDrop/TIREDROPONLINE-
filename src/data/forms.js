@@ -16,7 +16,8 @@
 
 import { BUSINESS } from "./business.js";
 
-const ENDPOINT = (import.meta.env.VITE_FORM_ENDPOINT || "").trim();
+// `?.` keeps this importable outside Vite (node tests).
+const ENDPOINT = (import.meta.env?.VITE_FORM_ENDPOINT || "").trim();
 
 /**
  * The address the confirmations name: VITE_CONTACT_EMAIL if set, otherwise the
@@ -24,7 +25,37 @@ const ENDPOINT = (import.meta.env.VITE_FORM_ENDPOINT || "").trim();
  * `isWired()` decides whether a form may say its message arrived.
  */
 export const CONTACT_EMAIL =
-  (import.meta.env.VITE_CONTACT_EMAIL || "").trim() || BUSINESS.email || null;
+  (import.meta.env?.VITE_CONTACT_EMAIL || "").trim() || BUSINESS.email || null;
+
+/**
+ * The email subject line for each form (Formspree reads `_subject`). One
+ * Formspree form takes all of them, so the subject is what tells the inbox
+ * which form a message came from.
+ */
+export const FORM_SUBJECTS = Object.freeze({
+  contact: "TireDrop contact form",
+  financing: "TireDrop financing request",
+  "fleet-quote": "TireDrop fleet quote request",
+  booking: "TireDrop install booking request",
+  review: "TireDrop review",
+});
+
+/**
+ * The JSON body for one form. Formspree conventions: `_subject` sets the
+ * email subject and `email` (every form has one) becomes the reply-to, so
+ * "Reply" in the inbox answers the customer. `form` repeats `_form` without
+ * the underscore, because Formspree treats underscore fields as settings and
+ * may leave them out of the email. Other receivers can ignore all three.
+ */
+export function formPayload(formName, values, now = new Date()) {
+  return {
+    _subject: FORM_SUBJECTS[formName] ?? `TireDrop ${formName} form`,
+    _form: formName,
+    form: formName,
+    _submittedAt: now.toISOString(),
+    ...values,
+  };
+}
 
 /** True once a real destination is configured, so copy may claim delivery. */
 export const isWired = () => ENDPOINT !== "";
@@ -48,11 +79,7 @@ export async function submitForm(formName, values) {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      body: JSON.stringify({
-        _form: formName,
-        _submittedAt: new Date().toISOString(),
-        ...values,
-      }),
+      body: JSON.stringify(formPayload(formName, values)),
     });
     if (!response.ok) {
       return {

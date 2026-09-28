@@ -127,7 +127,7 @@ export async function deliverOrderRequest(order, webhookUrl, deps = {}) {
   const payload = {
     // Formspree conventions: `_subject` sets the email subject, `email` the
     // reply-to. Other receivers can ignore them.
-    _subject: `TireDrop ${order.fulfillment.type === "mobile" ? "mobile install booking request" : "order request"} ${order.orderRef} (NOT PAID)`,
+    _subject: `TireDrop ${order.fulfillment.type === "mobile" ? "mobile install booking request" : "order request"} #${order.orderRef} (NOT PAID)`,
     email: order.customer.email,
     orderRef: order.orderRef,
     paymentStatus: "NOT PAID - order request only",

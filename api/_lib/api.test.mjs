@@ -11,6 +11,7 @@ import statusHandler from "../status.js";
 import tiresHandler from "../tires.js";
 import checkoutHandler, { paymentModeFor, createCheckoutHandler } from "../checkout.js";
 import { buildOrder } from "./orders.js";
+import { formPayload, FORM_SUBJECTS } from "../../src/data/forms.js";
 import {
   createDraftCheckout,
   clearShopifyTokenCache,
@@ -234,7 +235,7 @@ test("with ORDER_WEBHOOK_URL: the order request is POSTed and reported delivered
   process.env.ORDER_WEBHOOK_URL = "https://formspree.io/f/test";
   const sent = [];
   t.mock.method(globalThis, "fetch", async (url, init) => {
-    sent.push({ url: String(url), body: JSON.parse(init.body) });
+    sent.push({ url: String(url), headers: init.headers, body: JSON.parse(init.body) });
     return new Response("{}", { status: 200 });
   });
   const res = await call(checkoutHandler, { method: "POST", body: validOrder({ delivery: "pickup", address: undefined }) });
@@ -242,6 +243,25 @@ test("with ORDER_WEBHOOK_URL: the order request is POSTed and reported delivered
   assert.equal(res.body.pickup.address, "7712 West Oakland Park Blvd, Sunrise, FL 33351");
   assert.equal(sent.length, 1);
   assert.match(sent[0].body.message, /NOT PAID/);
+  // Formspree: JSON in and out, a subject naming the order, the customer's
+  // email as reply-to.
+  assert.equal(sent[0].headers["Content-Type"], "application/json");
+  assert.equal(sent[0].headers.Accept, "application/json");
+  assert.equal(sent[0].body._subject, `TireDrop order request #${res.body.orderRef} (NOT PAID)`);
+  assert.equal(sent[0].body.email, "buyer@example.com");
+});
+
+test("site forms post a Formspree-ready body: subject, reply-to email, form name", () => {
+  const body = formPayload("contact", { name: "Pat", email: "pat@example.com", message: "Hi" }, new Date("2026-01-02T03:04:05Z"));
+  assert.equal(body._subject, "TireDrop contact form");
+  assert.equal(body.email, "pat@example.com");
+  assert.equal(body.form, "contact");
+  assert.equal(body._form, "contact");
+  assert.equal(body._submittedAt, "2026-01-02T03:04:05.000Z");
+  for (const name of ["contact", "financing", "fleet-quote", "booking"]) {
+    assert.match(formPayload(name, {})._subject, /^TireDrop /);
+    assert.ok(FORM_SUBJECTS[name], name);
+  }
 });
 
 // ---- fail-loud configuration --------------------------------------------------

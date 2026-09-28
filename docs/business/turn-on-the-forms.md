@@ -27,9 +27,9 @@ needs no server of our own:
 1. Sign up at <https://formspree.io> with **info@tiredroponline.com** — the
    business address, and the inbox that should receive the messages.
 2. Create a form. Name it something like "TireDrop site forms" — one form
-   handles all five, because every submission carries a `_form` field naming
-   which one it came from (`contact`, `financing`, `fleet-quote`, `review`,
-   `booking`).
+   handles all five, because every submission names the form it came from
+   (`contact`, `financing`, `fleet-quote`, `review`, `booking`) in its
+   subject line and in a `form` field.
 3. Copy the endpoint it gives you. It looks like
    `https://formspree.io/f/xxxxxxxx`.
 4. Confirm the address when Formspree emails to verify it, or nothing is
@@ -38,6 +38,45 @@ needs no server of our own:
 The free tier allows 50 submissions a month, which is ample for a site that has
 not launched. Basin, Netlify Forms and a Cloudflare Worker all work the same
 way if you would rather not use Formspree.
+
+## What Formspree receives
+
+Each form sends one JSON POST (`Content-Type` and `Accept` both
+`application/json`, which is how Formspree answers with JSON instead of a
+redirect). Besides the fields the visitor filled in, the body carries:
+
+| Field          | Why                                                        |
+| -------------- | ---------------------------------------------------------- |
+| `_subject`     | The email subject: "TireDrop contact form", "TireDrop financing request", "TireDrop fleet quote request", "TireDrop install booking request", "TireDrop review" |
+| `email`        | The visitor's email. Formspree uses it as the reply-to, so "Reply" answers the customer. Every form requires it. |
+| `form`, `_form`| Which form it came from (`form` is the copy Formspree shows; underscore fields are settings to Formspree) |
+| `_submittedAt` | When the browser sent it                                   |
+
+`src/data/forms.js` (`formPayload`) builds this body; a test pins it.
+
+### Order requests use Formspree too
+
+Checkout's order requests (and every mobile install booking) are sent by the
+server, not the browser, to `ORDER_WEBHOOK_URL`. That can be the **same**
+Formspree endpoint. The body has `_subject` "TireDrop order request
+#TD-… (NOT PAID)" (or "TireDrop mobile install booking request #TD-…"), the
+customer's `email` as reply-to, a readable `message` and the structured
+`order`. It is a runtime variable, so a change takes effect on the next
+request after a redeploy; no rebuild needed for it.
+
+Two Formspree settings to leave alone for that to work:
+
+- **Don't restrict the form to a domain** (Settings → "Restrict to domain").
+  That check uses the browser's `Origin`/`Referer`, which a server-side POST
+  from Vercel does not send, so order requests would be refused. If you want
+  the restriction for the browser forms, create a second Formspree form for
+  `ORDER_WEBHOOK_URL`.
+- **Leave reCAPTCHA off** for the form. JSON submissions have no way to
+  solve one.
+
+If Formspree ever refuses an order request, checkout answers `delivered:
+false` and the shopper is told to call; the full order is in the Vercel
+function log.
 
 ## Setting them
 
