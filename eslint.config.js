@@ -10,8 +10,12 @@ import reactHooks from "eslint-plugin-react-hooks";
 // `no-unused-vars` is off rather than configured, because tracking JSX usage
 // needs eslint-plugin-react and its only finding here would be tidiness, not
 // correctness. Add it when there is a reason to.
+//
+// `shopify/` is a byte-for-byte mirror of the live theme (Dawn-based script
+// globals, no modules), synced from the store rather than written here, so it
+// is not linted as app code.
 export default [
-  { ignores: ["dist/**", "node_modules/**", ".scratch/**"] },
+  { ignores: ["dist/**", "node_modules/**", ".scratch/**", "shopify/**"] },
   js.configs.recommended,
   {
     files: ["src/**/*.{js,jsx}"],
