@@ -28,16 +28,15 @@ at the repo root and production on the `main` branch. (It used to live in a
 
 ## Environment variables
 
-Set these in Vercel → Settings → Environment Variables. Both are read at
-**build** time, so changing either needs a redeploy.
+Set these in Vercel → Settings → Environment Variables. They are read at
+**build** time, so changing one needs a redeploy.
 
 | Variable             | Effect when set                                            |
 | -------------------- | ---------------------------------------------------------- |
-| `VITE_FORM_ENDPOINT` | The five forms start sending. Until then the site says      |
-|                      | plainly that nothing was sent and leads with the phone. See |
-|                      | `docs/business/turn-on-the-forms.md`. Orders no longer use  |
-|                      | this; they go through `/api/checkout` (below).              |
-| `VITE_CONTACT_EMAIL` | The address confirmations quote back.                       |
+| `VITE_CONTACT_EMAIL` | The address confirmations quote back (default: info@).     |
+
+The forms need no build variable: they post to `/api/forms` (below) and turn
+on when Shopify is configured. `VITE_FORM_ENDPOINT` is retired; delete it.
 
 Do **not** set `VITE_HASH_ROUTER` on Vercel. That is only for static hosts
 with no SPA rewrite; `vercel.json` provides the rewrite, so the production
@@ -50,30 +49,29 @@ collects leads: its forms and its newsletter pop-up. Do every item here
 **before** DNS changes, or leads land nowhere. Then follow the step-by-step
 [cutover checklist](#cutover-checklist-shopify--vercel) below.
 
-- [ ] **Formspree is set up and both lead variables are set.** One Formspree
-      form (created with info@tiredroponline.com, address confirmed) takes
-      everything: set **`VITE_FORM_ENDPOINT`** (contact, financing, fleet
-      quote, booking forms) and **`ORDER_WEBHOOK_URL`** (order requests and
-      mobile install bookings) to its `https://formspree.io/f/<id>`
-      endpoint in Vercel → Settings → Environment Variables, Production.
-      Then **redeploy**: `VITE_` variables are baked in at build time, so the
-      forms stay off until a new build runs. Leave Formspree's "Restrict to
-      domain" and reCAPTCHA **off**; order requests are posted by the server
-      and would be refused. Check: submit the contact form on the Vercel URL
-      and receive an email with subject "TireDrop contact form" whose Reply
-      goes to the address you typed. Details:
-      `docs/business/turn-on-the-forms.md`.
+- [ ] **Website leads reach info@ through Shopify.** The forms (contact,
+      financing, fleet quote, booking) and order requests are stored on the
+      Shopify customer by `/api/forms` and checkout, with the Shopify app
+      below; no form service. Build the Shopify Flow workflow **"Website
+      lead alert"** exactly as in `docs/integrations/website-leads.md`
+      (trigger "Customer tags added", tag `new-lead`, internal email to
+      info@, then remove the tag) and turn it on. Check: `/api/status`
+      shows `forms: "on"`; submit the contact form with your own details;
+      an email "New website lead: …" reaches info@ and the customer in
+      Shopify has tags `lead`, `lead-contact`. Details:
+      `docs/business/turn-on-the-forms.md`. Delete `VITE_FORM_ENDPOINT` and
+      `ORDER_WEBHOOK_URL` from Vercel if they are still set.
 - [ ] **The Shopify app has the customer scopes.** Besides the checkout and
-      forwarder scopes, the newsletter needs **`read_customers`** and
-      **`write_customers`** (table in
+      forwarder scopes, the newsletter and the website forms need
+      **`read_customers`** and **`write_customers`** (table in
       `docs/integrations/shopify-checkout.md`). Re-approve the app after
-      adding them. Then `/api/status` shows `newsletter: "on"` and the
-      sign-up pop-up appears on the Vercel site; sign up once with a test
-      address and confirm a customer appears in Shopify, subscribed to
-      email marketing and tagged `newsletter`, `popup`, `vercel`. With
-      Shopify not configured the pop-up simply does not render, so no email
-      is collected into nowhere, but the theme's sign-ups also stop at
-      cutover.
+      adding them. Then `/api/status` shows `newsletter: "on"` and
+      `forms: "on"`, and the sign-up pop-up appears on the Vercel site; sign
+      up once with a test address and confirm a customer appears in
+      Shopify, subscribed to email marketing and tagged `newsletter`,
+      `popup`, `vercel`. With Shopify not configured the pop-up simply does
+      not render and the forms say plainly that nothing was sent, so no
+      email is collected into nowhere.
 - [ ] **Vercel Pro.** Hobby is for non-commercial use only, and the ATD
       forwarder's 5-minute cron needs Pro (`docs/integrations/atd-forwarder.md`).
       Upgrade the TireDrop team before the store takes real traffic.
@@ -118,7 +116,14 @@ that do the server-side work:
 | -------------------- | -------------------------------------------------------- |
 | `GET /api/status`    | Which integrations are on: `atd` live/sample, `shopify`   |
 |                      | live/off, `checkout` shopify/request, `forwarder` on/off, |
-|                      | `newsletter` on/off.                                      |
+|                      | `newsletter` on/off, `forms` on/off.                      |
+| `POST /api/forms`    | The site's forms (contact, financing, fleet quote,        |
+|                      | booking). Finds or creates the Shopify customer (no       |
+|                      | marketing consent), stores the lead in the note and the   |
+|                      | `tiredrop.last_lead` metafield, and re-adds the tag       |
+|                      | `new-lead` so Shopify Flow emails info@. Honeypot and     |
+|                      | per-IP rate limit; 503 `{ configured: false }` without    |
+|                      | Shopify. `docs/integrations/website-leads.md`.            |
 | `POST /api/newsletter` | `{ email }`: newsletter sign-up from the pop-up. Makes  |
 |                      | the email a Shopify customer subscribed to email          |
 |                      | marketing, tagged `newsletter`, `popup`, `vercel` (an     |
@@ -133,7 +138,9 @@ that do the server-side work:
 |                      | every line, creates a Shopify draft order of custom line  |
 |                      | items and returns its `invoiceUrl`; the shopper pays on   |
 |                      | Shopify's checkout. Otherwise it records an order request |
-|                      | (nothing charged).                                        |
+|                      | in Shopify (nothing charged): a lead emailed to info@ by  |
+|                      | Flow, and a draft order tagged `order-request` with no    |
+|                      | invoice sent, to confirm and "Send invoice" from Drafts.  |
 |                      | `delivery` is `ship` (free, lower 48 + DC), `pickup`      |
 |                      | (free ship-to-store, Sunrise) or `mobile` (van install    |
 |                      | at an FL address in the install area listed in            |
@@ -190,19 +197,12 @@ word on each one.
 |                         | orders for checkout; orders and merchant-managed    |
 |                         | fulfillment orders for the ATD forwarder;           |
 |                         | `read_customers` + `write_customers` for the        |
-|                         | newsletter sign-up).                                |
+|                         | newsletter sign-up and the website forms).          |
 | `SHOPIFY_CLIENT_ID`     | Instead of the token, for an app made in Shopify's  |
 | `SHOPIFY_CLIENT_SECRET` | Dev Dashboard: its client ID and secret. The API    |
 |                         | swaps them for a 24-hour token itself.              |
 | `SHOPIFY_API_VERSION`   | Optional. Admin API version, default `2026-07`;     |
 |                         | must be `2026-07` or newer.                         |
-| `ORDER_WEBHOOK_URL`     | Where order requests are POSTed (Formspree, Zapier, |
-|                         | an email relay) while online payment is off, and    |
-|                         | every mobile install booking. JSON with `_subject`  |
-|                         | "TireDrop order request #TD-…" and the customer's   |
-|                         | `email` for Formspree's reply-to. Unset,            |
-|                         | the request is only logged and the shopper is told  |
-|                         | it was not sent and to call (954) 773-1896.         |
 | `ATD_ORDERING_ENABLED`  | Kill switch for the ATD forwarder. Exactly `true`   |
 |                         | lets paid orders be placed with ATD; anything else  |
 |                         | (the default) is off.                               |
@@ -234,6 +234,13 @@ How the groups switch on:
   ATD). The app needs `read_customers` and `write_customers` for it; without
   them sign-ups fail with a 502 and the pop-up shows "try again", so add the
   scopes before setting the `SHOPIFY_*` variables.
+- **Website forms and order requests** are recorded in Shopify whenever
+  Shopify is configured (`forms: "on"`; it does not wait for ATD). Without
+  Shopify, forms say plainly that nothing was sent, and an order request is
+  only logged and the shopper is told to call. The info@ email comes from
+  the Flow workflow in `docs/integrations/website-leads.md`.
+  `ORDER_WEBHOOK_URL` is retired: if it is still set, `/api/status` lists
+  it under `issues`; delete it.
 - **ATD forwarder** runs only with Shopify checkout on, ATD live,
   `CRON_SECRET` set and `ATD_ORDERING_ENABLED=true`. The two `ATD_*`
   switches never turn ATD's catalog on by themselves. Until ATD's order

@@ -1,116 +1,88 @@
 # Turning the forms on
 
-The five forms on this site — contact, financing, fleet quote, review and
-install booking — collect and validate what people type, and then hand it to
-`submitForm()` in `src/data/forms.js`. Whether that goes anywhere depends on
-two environment variables. Nothing in the code needs changing.
+The site's forms (contact, financing, fleet quote and install booking) and
+checkout's order requests send to TireDrop's **own** backend, not to a
+form service. Each message is stored on the customer in Shopify and Shopify
+Flow emails it to **info@tiredroponline.com**. No Formspree, no Zapier, no
+other app.
 
-Until they are set, every confirmation says plainly that the message was not
+Until it is on, every confirmation says plainly that the message was not
 sent and points at the phone. That is deliberate: a form that tells a real
 visitor "a specialist will follow up" while sending their message nowhere is
 the one thing on this site that makes a promise nothing keeps.
 
-## What is needed
+## What turns it on
 
-Two values, both filled in at deploy time:
+1. **The TireDrop Shopify app is connected.** The same `SHOPIFY_*` variables
+   in Vercel that checkout and the newsletter use (`DEPLOY.md`). The app
+   needs `read_customers` and `write_customers` (and the draft-order scopes
+   for order requests). Once Shopify is configured, `/api/status` shows
+   `forms: "on"` and every form starts sending. Nothing is rebuilt: the
+   forms ask the server when the page loads.
+2. **The Flow workflow "Website lead alert" is built and on.** It is what
+   turns a stored lead into an email. The exact trigger, condition, email
+   and tag step are in `docs/integrations/website-leads.md`. Without it,
+   leads are still stored on the customer in Shopify, but nobody is emailed.
 
-| Variable             | What it is                                              |
-| -------------------- | ------------------------------------------------------- |
-| `VITE_FORM_ENDPOINT` | The URL the forms POST to                               |
-| `VITE_CONTACT_EMAIL` | The address the confirmations quote back to the visitor |
+## What arrives
 
-## Getting an endpoint
+One email per message, to info@, subject "New website lead: <name>". The
+body starts with the lead exactly as stored, for example:
 
-Any service that accepts a JSON POST works. The quickest is Formspree, which
-needs no server of our own:
+```text
+TireDrop fleet quote request — 2026-09-28 14:05 ET
+Name: Jo Park
+Email: jo@acme.test
+Company: Acme Vans
+Fleet size: 6-15
+Tire sizes: LT245/75R16 x 24
+Notes: Box trucks.
+```
 
-1. Sign up at <https://formspree.io> with **info@tiredroponline.com** — the
-   business address, and the inbox that should receive the messages.
-2. Create a form. Name it something like "TireDrop site forms" — one form
-   handles all five, because every submission names the form it came from
-   (`contact`, `financing`, `fleet-quote`, `review`, `booking`) in its
-   subject line and in a `form` field.
-3. Copy the endpoint it gives you. It looks like
-   `https://formspree.io/f/xxxxxxxx`.
-4. Confirm the address when Formspree emails to verify it, or nothing is
-   delivered.
+The first line names the form: "TireDrop contact form", "TireDrop financing
+request", "TireDrop fleet quote request", "TireDrop install booking request"
+or "TireDrop order request". The email is sent by Shopify, not by the
+customer, so answer by writing to the customer's address in it or calling
+the phone in it; check where "Reply" goes before relying on it.
 
-The free tier allows 50 submissions a month, which is ample for a site that has
-not launched. Basin, Netlify Forms and a Cloudflare Worker all work the same
-way if you would rather not use Formspree.
+In Shopify, the customer carries tags `lead` and `lead-<form>`, the newest
+lead in the "last lead" metafield, and every lead (newest first) in the
+customer's notes. Nobody is subscribed to marketing by sending a form.
 
-## What Formspree receives
+## Order requests
 
-Each form sends one JSON POST (`Content-Type` and `Accept` both
-`application/json`, which is how Formspree answers with JSON instead of a
-redirect). Besides the fields the visitor filled in, the body carries:
-
-| Field          | Why                                                        |
-| -------------- | ---------------------------------------------------------- |
-| `_subject`     | The email subject: "TireDrop contact form", "TireDrop financing request", "TireDrop fleet quote request", "TireDrop install booking request", "TireDrop review" |
-| `email`        | The visitor's email. Formspree uses it as the reply-to, so "Reply" answers the customer. Every form requires it. |
-| `form`, `_form`| Which form it came from (`form` is the copy Formspree shows; underscore fields are settings to Formspree) |
-| `_submittedAt` | When the browser sent it                                   |
-
-`src/data/forms.js` (`formPayload`) builds this body; a test pins it.
-
-### Order requests use Formspree too
-
-Checkout's order requests (and every mobile install booking) are sent by the
-server, not the browser, to `ORDER_WEBHOOK_URL`. That can be the **same**
-Formspree endpoint. The body has `_subject` "TireDrop order request
-#TD-… (NOT PAID)" (or "TireDrop mobile install booking request #TD-…"), the
-customer's `email` as reply-to, a readable `message` and the structured
-`order`. It is a runtime variable, so a change takes effect on the next
-request after a redeploy; no rebuild needed for it.
-
-Two Formspree settings to leave alone for that to work:
-
-- **Don't restrict the form to a domain** (Settings → "Restrict to domain").
-  That check uses the browser's `Origin`/`Referer`, which a server-side POST
-  from Vercel does not send, so order requests would be refused. If you want
-  the restriction for the browser forms, create a second Formspree form for
-  `ORDER_WEBHOOK_URL`.
-- **Leave reCAPTCHA off** for the form. JSON submissions have no way to
-  solve one.
-
-If Formspree ever refuses an order request, checkout answers `delivered:
-false` and the shopper is told to call; the full order is in the Vercel
-function log.
-
-## Setting them
-
-Locally, copy `.env.example` to `.env` and fill both in. On the host (Netlify,
-Vercel, Cloudflare Pages), set them as build environment variables.
-
-Both are read at **build** time, so a change means a rebuild and a redeploy.
+Until ATD is live, checkout does not take payment. An order request (and
+every mobile install booking) sends the same kind of email, and also puts a
+**draft order** in Shopify → Orders → Drafts with the tires, quantities and
+the site's prices. No invoice is sent. Confirm the price and availability
+(add the install for mobile), then click **Send invoice**; the customer pays
+on Shopify's checkout. Details: `docs/integrations/website-leads.md`.
 
 ## Checking it worked
 
-1. Build and open the site.
-2. Submit the contact form with your own details.
-3. The confirmation should now say the message is on its way and name the
-   address from `VITE_CONTACT_EMAIL`. If it still says the form is not
-   connected, the variable did not reach the build.
-4. The message should arrive in the inbox within a minute.
+1. Open `https://tiredroponline.com/api/status`: it should include
+   `"forms":"on"`.
+2. Submit the contact form with your own details. The confirmation should
+   say "Message received". If it says the form is not connected, Shopify is
+   not configured yet (step 1 above).
+3. The email should reach info@ within a minute or two. If it does not,
+   check the customer in Shopify: if the note and tags are there, the site
+   worked and the Flow workflow is off or wrong.
 
-If the endpoint is set but the POST fails — the service is down, the address
-was never confirmed, a network block — the confirmation says so specifically
-rather than claiming delivery. That branch is deliberate and should not be
-removed.
+If the server cannot reach Shopify, the confirmation says so specifically
+("We could not get that through just now…") rather than claiming delivery.
+That branch is deliberate and should not be removed.
 
-## The other email
+## The email address
 
-`BUSINESS.email` in `src/data/business.js` is now `info@tiredroponline.com`.
-The owner confirmed it as the single address for every form, business enquiry
-and contact, and the site publishes it — in the footer, on the contact,
-locations and legal pages, and in structured data.
+`BUSINESS.email` in `src/data/business.js` is `info@tiredroponline.com`, the
+single address for every form, business enquiry and contact.
+`VITE_CONTACT_EMAIL` (optional, build time) is the address a confirmation
+quotes back to the visitor; left empty it falls back to `BUSINESS.email`.
+It does not turn anything on.
 
-`VITE_CONTACT_EMAIL` is what a confirmation quotes back to the person who just
-typed a message. When it is left empty it falls back to `BUSINESS.email`, so
-the confirmations already name info@tiredroponline.com; set it to that same
-address anyway so the deploy environment says so explicitly.
+## Retired
 
-Neither value turns the forms on. Only `VITE_FORM_ENDPOINT` does: until it is
-set, every confirmation still says the message was not sent, whatever address
-it quotes.
+`VITE_FORM_ENDPOINT` and `ORDER_WEBHOOK_URL` (Formspree) are no longer read.
+Delete them from Vercel; while `ORDER_WEBHOOK_URL` is still set,
+`/api/status` lists it under `issues`. The Formspree form can be deleted.

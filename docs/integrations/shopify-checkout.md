@@ -28,9 +28,14 @@ The site never creates, reads or changes a Shopify product.
    Shopify turns the draft into a real order, so Flow, the order emails and
    Order Printer run as for any other order.
 
-**Mobile install** is never sent to Shopify. It stays an order request
-(emailed through `ORDER_WEBHOOK_URL`), because the van is booked and the
-install quoted on the call.
+**Mobile install** is never paid through Shopify's checkout. It stays an
+order request, because the van is booked and the install quoted on the call.
+
+**Order requests** (every checkout while ATD is not live, and every mobile
+install) do not redirect anywhere. They are recorded in Shopify as a lead on
+the customer, which Shopify Flow emails to info@, and as a **request draft**
+with no invoice sent; see "Order-request drafts" below and
+`docs/integrations/website-leads.md`.
 
 ## What the draft order carries
 
@@ -64,6 +69,29 @@ product sections write (`shopify/sections/td-cart.liquid`,
 `td-product.liquid`) and that the Flow workflows and the order-confirmation
 block key on. Change them in all places or none.
 
+## Order-request drafts
+
+`buildRequestDraftInput` in `api/_lib/shopify.js` builds them from the same
+function as the checkout draft, with these differences:
+
+| Field | Request draft |
+| --- | --- |
+| `tags` | `order-request`, `vercel-live`, plus `ship-to-home`, `ship-to-store` or `mobile-install` |
+| `note` | starts "Request only — confirm price and availability, then Send invoice."; mobile adds "add the install charge quoted on the call before you send the invoice" |
+| `purchasingEntity` | `{ customerId }` of the customer the lead was recorded on |
+| `customAttributes` | same three; `Delivery` = `Mobile install at my address` for mobile |
+| `shippingAddress` | ship: the shipping address; mobile: the service address; pickup: none |
+| `shippingLine` | same free line for ship and pickup; **none** for mobile |
+
+Discounts stay off. **No invoice is sent**: `draftOrderCreate` sends none and
+the API never calls `draftOrderInvoiceSend`. The shop opens the draft in
+Shopify → Orders → Drafts, confirms the price and availability, then clicks
+**Send invoice**; the customer pays on Shopify's checkout. Because the draft
+carries `vercel-live`, a paid request is picked up by the ATD forwarder once
+that is on, like any checkout order; a mobile one has no `Delivery` value
+the forwarder knows, so it is tagged `atd-failed` for the shop instead of
+being sent to ATD.
+
 **Never sent:** dealer cost. The priced lines carry only sku, title, brand,
 size, quantity, retail price and line total; a test checks that the cost
 figure appears nowhere in the request.
@@ -87,20 +115,21 @@ app and the store are in the same Shopify organization.
 
 | Scope | Used by |
 | --- | --- |
-| `write_draft_orders` | checkout: creates the draft order |
+| `write_draft_orders` | checkout: creates the draft order; order requests: creates the request draft |
 | `read_draft_orders` | checkout: the schema check listed it; add it if Shopify refuses the call without it |
 | `read_orders` | the ATD forwarder: finds paid orders |
 | `write_orders` | the ATD forwarder: order tags, note and metafields |
 | `read_merchant_managed_fulfillment_orders` | the ATD forwarder: reads the order's fulfillment orders |
 | `write_merchant_managed_fulfillment_orders` | the ATD forwarder: creates the fulfillment with ATD's tracking |
-| `read_customers` | the newsletter (`POST /api/newsletter`): finds an existing customer by email |
-| `write_customers` | the newsletter: creates the customer, sets email marketing consent, adds tags |
+| `read_customers` | the newsletter (`POST /api/newsletter`), the website forms (`POST /api/forms`) and order requests: find an existing customer by email or phone |
+| `write_customers` | the newsletter: creates the customer, sets email marketing consent, adds tags. Forms and order requests: create the customer (never with consent), write the note and the `tiredrop.last_lead` metafield, remove and add tags |
 
 No product scopes are needed. Checkout alone needs only the draft-order
 scopes; the four order and fulfillment scopes are for the ATD forwarder
 (`docs/integrations/atd-forwarder.md`), and the two customer scopes are for
 the newsletter sign-up that replaces the Shopify theme's pop-up (see
-"Newsletter sign-up" below). Changing an app's scopes needs the
+"Newsletter sign-up" below) and for website leads
+(`docs/integrations/website-leads.md`). Changing an app's scopes needs the
 app to be re-approved (a new token for an admin-created custom app, or a
 new version release for a Dev Dashboard app).
 
@@ -112,8 +141,9 @@ once, a non-`myshopify.com` domain or a bad API version makes checkout answer
 Shopify configured but ATD still in sample mode, checkout stays in request
 mode (no card is charged against sample prices) and `/api/status` says so.
 
-`/api/status` reports `shopify: "live" | "off"` and
-`checkout: "shopify" | "request"`.
+`/api/status` reports `shopify: "live" | "off"`,
+`checkout: "shopify" | "request"`, and `forms: "on" | "off"` (website forms
+and order requests recorded in Shopify; on whenever Shopify is configured).
 
 ## Newsletter sign-up
 

@@ -282,8 +282,11 @@ All of these need the client or a supplier:
    `components/shop/ProductArt.jsx`.
 5. **No payment processing.** Checkout collects the order and says a team member
    will call to confirm. Wire a real processor before taking money.
-6. **Forms have no backend.** Contact, quote, booking, financing and review
-   forms validate and confirm, but nothing is sent.
+6. **Forms send to the site's own backend.** Contact, fleet quote, booking
+   and financing forms post to `/api/forms`, which stores each message on the
+   customer in Shopify; Shopify Flow emails it to info@. Until Shopify is
+   configured they say plainly that nothing was sent. See
+   `docs/business/turn-on-the-forms.md`.
 7. **No reviews are published on the site.** `/reviews` and the homepage link
    to the shop's real Google and Yelp profiles instead, and review or rating
    markup is deliberately off.
@@ -292,8 +295,8 @@ All of these need the client or a supplier:
 9. **Social links are placeholders** in the footer.
 10. **Business email is published.** `BUSINESS.email` is
     `info@tiredroponline.com`, confirmed by the owner as the single address for
-    forms, business enquiries and contact. Formspree should be signed up with it
-    — see `docs/business/turn-on-the-forms.md`.
+    forms, business enquiries and contact; the Shopify Flow lead alert sends
+    to it (`docs/integrations/website-leads.md`).
 11. **Crawling is disabled.** `ALLOW_INDEXING` in
     `scripts/generate-seo-files.mjs` is `false` and `robots.txt` says
     `Disallow: /`. Flip it on launch day — see _Crawling, metadata and the
