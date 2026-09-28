@@ -463,28 +463,37 @@ after saving (except #5, leave it OFF), and don't change any other settings.
      Subject: New TireDrop newsletter signup
      Message: {{customer.email}} just joined the TireDrop list (sign-up pop-up).
 
-2) "Order routing – pickup, ship, South FL install"
+2) "Order routing: local vs ship"
    Trigger: Order created
-   Condition A: at least one of Order / Fulfillment orders has
-     Delivery method / Method type equal to PICK_UP
-     (if that field isn't offered, use: Order / Shipping line / Title
-      contains "Pickup")
-   Then (A true): Add order tags "pickup-sunrise"
+   LOCAL means ANY of these is true:
+     a) at least one of Order / Fulfillment orders has Delivery method /
+        Method type equal to PICK_UP (if that field isn't offered, use:
+        Order / Shipping line / Title contains "Pickup")
+     b) Order / Shipping address / Zip starts with 330, 331, 332, 333 or 334
+        AND Zip does NOT start with any of these Florida Keys ZIPs:
+        33001, 33036, 33037, 33040, 33041, 33042, 33043, 33045, 33050,
+        33051, 33052, 33070
+   Then (LOCAL): Add order tags "local"
+     (+ also "pickup-sunrise" if (a) was true: use a nested condition)
+     + Add customer tags "local-customer"
      + Send internal email
-       Subject: PICKUP order {{order.name}}: prep tires in Sunrise
-       Message: {{order.name}} will be picked up at 7712 W Oakland Park Blvd.
-       Customer: {{order.email}}
+       Subject: [LOCAL] {{order.name}}: pickup / install / mobile
+       Message: LOCAL order {{order.name}} ({{order.email}})
+       Ship-to: {{order.shippingAddress.city}} {{order.shippingAddress.zip}}
        {% for li in order.lineItems %}{{li.quantity}} x {{li.title}}
        {% endfor %}
-   Otherwise (A false): Add order tags "ship"
-     then Condition B: Order / Shipping address / Zip starts with 330
-       OR starts with 331 OR 332 OR 333 OR 334
-     Then (B true): Add order tags "sfl-install-lead"
-       + Send internal email
-         Subject: South FL order {{order.name}}: offer installation
-         Message: {{order.name}} ships to {{order.shippingAddress.city}}
-         {{order.shippingAddress.zip}}. Contact {{order.email}} to offer
-         installation or mobile service.
+       Next step: call the customer to offer bay install or mobile service,
+       or prep the tires for pickup.
+   Otherwise (NOT LOCAL): Add order tags "ship"
+     + Add customer tags "ship-customer"
+     + Send internal email
+       Subject: [SHIP] {{order.name}}: ship to {{order.shippingAddress.provinceCode}}
+       Message: SHIP order {{order.name}} ({{order.email}}) to
+       {{order.shippingAddress.city}}, {{order.shippingAddress.provinceCode}}
+       {{order.shippingAddress.zip}}
+       {% for li in order.lineItems %}{{li.quantity}} x {{li.title}}
+       {% endfor %}
+       Next step: confirm the supplier order and tracking.
 
 3) "High-risk order review"
    Trigger: Order risk analyzed
@@ -589,3 +598,40 @@ money, and the Appointo booking URL.
   2025 FTC action against accessiBe)
 - fake sales pop-ups or countdown timers
 - review importers
+
+## 15. Local vs ship: different order-confirmation email for customers
+
+Customers get one of three blocks in their order confirmation:
+- **Pickup:** ready-at-Sunrise details, with an offer to install while they're there.
+- **Local (South Florida):** free shipping, plus an offer of shop or mobile
+  install.
+- **Ship (everyone else):** a shipping and tracking note, and a suggestion to
+  have a local shop mount the tires.
+
+The block is saved at `shopify/notifications/order-confirmation-local-block.liquid`.
+It uses the same ZIP rules as Flow workflow 2: prefixes 330–334, minus the
+Florida Keys. It passed 8 local test cases (pickup, Sunrise, ZIP+4, Palm Beach,
+Key West, Treasure Coast, out-of-state, no address). Shopify has no API for
+notification templates, so this has to be done in the browser.
+
+```
+TASK: Add TireDrop's local-vs-ship block to the Order confirmation email.
+I'm logged into Shopify admin.
+
+1. Settings → Notifications → Customer notifications → Order confirmation
+   → Edit code.
+2. Copy the ENTIRE current template code into a note first, as a backup, and
+   keep it in your report.
+3. Find the first place the code shows {{ email_body }}. Put the cursor
+   right after the closing tag of the element that contains it (usually
+   </p>), press Enter, and paste the block I give you below exactly.
+4. Click Preview. Report whether it shows a blue box that starts with
+   "Free shipping to your door" (the preview has a non-local address).
+5. Save. Then "Send test email" to info@tiredroponline.com.
+6. Do NOT edit any other notification.
+
+REPORT BACK: saved Y/N, the preview result, and whether the test email
+arrived with the blue box.
+```
+
+**Undo:** paste the backup from step 2 back in, or click "Revert to default".

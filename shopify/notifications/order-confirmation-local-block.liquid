@@ -1,0 +1,40 @@
+{%- comment -%}
+  TireDrop: local vs non-local block for the Shopify "Order confirmation" email.
+  Paste into Settings → Notifications → Customer notifications → Order confirmation →
+  Edit code, on a new line directly after the element that contains {{ email_body }}.
+
+  LOCAL = local pickup, or a shipping ZIP in Miami-Dade / Broward / Palm Beach
+  (prefixes 330–334), excluding the Florida Keys (Monroe County ZIPs).
+  To change the area, edit the two lists below. The Flow workflow
+  "Order routing: local vs ship" uses the same lists.
+{%- endcomment -%}
+{%- assign td_local_prefixes = "330,331,332,333,334" | split: "," -%}
+{%- assign td_excluded_zips = "33001,33036,33037,33040,33041,33042,33043,33045,33050,33051,33052,33070" | split: "," -%}
+{%- assign td_zip = shipping_address.zip | default: "" | strip -%}
+{%- assign td_zip5 = td_zip | slice: 0, 5 -%}
+{%- assign td_zip3 = td_zip | slice: 0, 3 -%}
+{%- assign td_mode = "ship" -%}
+{%- if delivery_method == "pick-up" -%}
+  {%- assign td_mode = "pickup" -%}
+{%- elsif td_local_prefixes contains td_zip3 -%}
+  {%- unless td_excluded_zips contains td_zip5 -%}
+    {%- assign td_mode = "local" -%}
+  {%- endunless -%}
+{%- endif -%}
+<div style="margin: 20px 0; padding: 16px 18px; border: 1px solid #0068E8; border-radius: 8px; background: #F2F7FF; font-family: Arial, sans-serif; font-size: 15px; line-height: 1.5; color: #111;">
+{%- if td_mode == "pickup" %}
+  <strong style="font-size: 16px;">Pickup at Extreme Tires, Sunrise FL</strong><br>
+  We'll email you when your tires are ready. Bring your order number ({{ order_name }}) and a photo ID.<br>
+  <strong>Want them installed while you're here?</strong> Reply to this email or call <a href="tel:+19547731896" style="color: #0068E8;">(954) 773-1896</a> to book a bay time.<br>
+  <span style="color: #444;">7712 West Oakland Park Blvd, Sunrise, FL 33351</span>
+{%- elsif td_mode == "local" %}
+  <strong style="font-size: 16px;">You're in our South Florida install area</strong><br>
+  Your tires ship free to your address. Prefer them installed? We can mount them at our Sunrise shop or come to you with mobile service.<br>
+  Reply to this email or call <a href="tel:+19547731896" style="color: #0068E8;">(954) 773-1896</a> and mention {{ order_name }}.<br>
+  <span style="color: #444;">Extreme Tires · 7712 West Oakland Park Blvd, Sunrise, FL 33351</span>
+{%- else %}
+  <strong style="font-size: 16px;">Free shipping to your door</strong><br>
+  We'll send tracking as soon as your tires ship. When they arrive, any local tire shop can mount and balance them. Bring your order confirmation.<br>
+  Questions about fitment or delivery? Reply to this email or write to <a href="mailto:info@tiredroponline.com" style="color: #0068E8;">info@tiredroponline.com</a>.
+{%- endif %}
+</div>
