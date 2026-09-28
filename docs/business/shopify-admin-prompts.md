@@ -686,7 +686,8 @@ Shopify (the account that owns the TireDrop store).
 3. Access scopes (Admin API): turn on ONLY these, nothing else:
    write_draft_orders, read_draft_orders, read_orders, write_orders,
    read_merchant_managed_fulfillment_orders,
-   write_merchant_managed_fulfillment_orders.
+   write_merchant_managed_fulfillment_orders,
+   read_customers, write_customers (for the newsletter pop-up).
    Release/save the version.
 4. Install the app on the TireDrop store and approve the scopes.
 5. Open the app's credentials/settings page. Tell me you can see the
@@ -708,3 +709,128 @@ ID (the ID is fine to share, the secret is NOT), and the myshopify.com domain.
 
 Checkout stays in "request" mode (orders are emailed, no card is charged)
 until these are set **and** ATD is live, so no one pays against sample prices.
+
+## 17. Form delivery to info@ for the Vercel site (Formspree)
+
+The React site's forms (contact, financing, fleet quote, booking) and its
+order requests post JSON to one endpoint. Formspree turns each submission into
+an email to info@tiredroponline.com, with spam filtering, and needs no code.
+Its free plan has a monthly submission cap. Check the current limit and move
+to a paid plan if leads outgrow it.
+
+```
+TASK: Set up Formspree so TireDrop's website forms email
+info@tiredroponline.com.
+
+1. Go to formspree.io → sign up (or log in) with info@tiredroponline.com
+   and verify that email address when Formspree asks.
+2. Create a new form named "TireDrop website", recipient
+   info@tiredroponline.com.
+3. In the form's settings, turn ON spam filtering (reCAPTCHA OFF: the site
+   posts JSON). Allowed domains: tiredroponline.com, www.tiredroponline.com
+   and the project's .vercel.app domain.
+4. Copy the form endpoint URL (looks like https://formspree.io/f/xxxxxxx).
+   It's not secret, so paste it in your report.
+5. Choose the FREE plan. If it asks for payment, stop and tell me.
+
+REPORT BACK: account verified Y/N, the endpoint URL, the plan and its
+monthly limit.
+```
+
+**Then in Vercel:** Project → Settings → Environment Variables (Production):
+- `VITE_FORM_ENDPOINT` = the Formspree URL
+- `ORDER_WEBHOOK_URL` = the same URL
+
+Redeploy (VITE_ variables are read at build time). Test by submitting
+/contact on the .vercel.app site, then check the info@ inbox.
+
+## 18. Move tiredroponline.com from Shopify to Vercel (Shopify keeps checkout)
+
+**Do this only after ALL of these are true:**
+- The Vercel site is deployed from `TireDrop/TIREDROPONLINE-` and checked.
+- Prompt 17 is done and a test form reached info@.
+- Vercel is on Pro (Hobby doesn't allow commercial use).
+- The newsletter pop-up on the React site is deployed (it needs the prompt
+  16 app with the customers scopes).
+
+What changes:
+- `tiredroponline.com` + `www` → Vercel (the React site).
+- `shop.tiredroponline.com` → Shopify (checkout, order status, customer
+  accounts).
+
+**Email is not touched.** The MX / TXT records that deliver info@ stay exactly
+as they are.
+
+```
+TASK: Move TireDrop's website domain to Vercel and keep Shopify on
+shop.tiredroponline.com. I'm logged into GoDaddy (DNS for
+tiredroponline.com), Shopify admin, and Vercel (TireDrop account).
+Go slowly. Report after each PART. If anything looks different from what's
+described, STOP and ask me.
+
+PART A: Back up the DNS (no changes)
+1. GoDaddy → My Products → tiredroponline.com → DNS → DNS Records.
+2. Copy EVERY record (Type, Name, Value, TTL) into your report, exactly.
+   This is the rollback copy.
+3. Point out which records are for email (MX, and TXT containing spf,
+   dkim, dmarc, or google/microsoft/zoho). These must NEVER be edited or
+   deleted in the steps below.
+
+PART B: Give Shopify its new address
+4. GoDaddy DNS → Add New Record: Type CNAME, Name "shop", Value
+   "shops.myshopify.com", TTL 1 hour → Save.
+5. Shopify admin → Settings → Domains → Connect existing domain →
+   "shop.tiredroponline.com" → Next → Verify connection. If it says
+   pending, wait 5 minutes and click Verify again (up to 30 minutes).
+6. When it's connected: Settings → Domains → "Change primary domain" →
+   choose shop.tiredroponline.com → Save.
+7. In Settings → Domains, for tiredroponline.com and www.tiredroponline.com:
+   choose "Remove" for each (the "…" menu). Confirm. (Only these two. Do not
+   remove the myshopify.com address or shop.tiredroponline.com.)
+8. Open https://shop.tiredroponline.com in a new tab. Report what loads.
+
+PART C: Add the domain to Vercel
+9. Vercel → the "tiredrop" project → Settings → Domains → Add
+   "tiredroponline.com". If it offers "redirect www to apex" or add
+   both, choose: add tiredroponline.com AND www.tiredroponline.com, with www
+   redirecting to tiredroponline.com.
+10. Vercel will show "Invalid Configuration" plus the DNS records it wants
+    (an A record for @ and a CNAME for www). Copy the EXACT values it shows
+    into your report. Don't assume them.
+
+PART D: Point the domain at Vercel (GoDaddy)
+11. GoDaddy DNS: EDIT the existing A record with Name "@" → Value = the
+    A value Vercel showed → Save. (If there are two A records for "@",
+    edit one and DELETE the other; if it's parked/forwarding, report and stop.)
+12. EDIT the existing CNAME with Name "www" → Value = the CNAME value
+    Vercel showed → Save.
+13. Do NOT touch MX, TXT, the "shop" CNAME, or any other record.
+
+PART E: Check
+14. Vercel → Domains: wait until both show "Valid Configuration" (refresh
+    every few minutes, up to 1 hour). Report the status.
+15. Open https://tiredroponline.com and https://www.tiredroponline.com in a
+    private window. Report: does the TireDrop Vercel site load, with the
+    padlock (https)?
+16. Open https://tiredroponline.com/collections/tires. Does it redirect to
+    /tires?
+17. Open https://shop.tiredroponline.com: does Shopify load?
+18. Send a test email to info@tiredroponline.com from another account
+    and confirm it arrives.
+
+REPORT BACK: Part A backup (all records), each step done Y/N, the Vercel
+DNS values used, the final Vercel domain status, and the four checks.
+```
+
+**Rollback, if the site is down more than an hour or email breaks:**
+1. In GoDaddy, set the "@" A record back to its old value from the Part A
+   backup (Shopify's is normally 23.227.38.65) and "www" back to
+   `shops.myshopify.com`.
+2. In Shopify → Domains, reconnect tiredroponline.com and make it primary.
+
+**After the move:**
+- The Shopify theme is still reachable on shop.tiredroponline.com. Later, a
+  small redirect on EDIT HERE (published by Justin) can send those pages to
+  tiredroponline.com, keeping checkout, order-status and account pages on
+  Shopify.
+- Update the Shopify store address used in emails if Shopify asks.
