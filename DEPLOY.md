@@ -1,5 +1,11 @@
 # Deploying TireDrop
 
+## Domain status
+
+**Moved on 2026-09-28:** tiredroponline.com → Vercel, and Shopify →
+shop.tiredroponline.com (checkout only). The record, rollback and open
+follow-ups are in `docs/ops/domain-migration-2026-09-28.md`.
+
 ## Repository
 
 TireDrop has its own repository: **`TireDrop/TIREDROPONLINE-`**, with the app
