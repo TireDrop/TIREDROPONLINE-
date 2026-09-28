@@ -83,9 +83,22 @@ comes from the Dev Dashboard, which issues a client ID and secret rather
 than a permanent token, and the client credentials grant only works when the
 app and the store are in the same Shopify organization.
 
-**Scopes for the app:** `write_draft_orders` (creates the draft) and
-`read_orders`. The schema check also listed `read_draft_orders`; add it if
-Shopify refuses the call without it. No product scopes are needed.
+**Scopes for the app:**
+
+| Scope | Used by |
+| --- | --- |
+| `write_draft_orders` | checkout: creates the draft order |
+| `read_draft_orders` | checkout: the schema check listed it; add it if Shopify refuses the call without it |
+| `read_orders` | the ATD forwarder: finds paid orders |
+| `write_orders` | the ATD forwarder: order tags, note and metafields |
+| `read_merchant_managed_fulfillment_orders` | the ATD forwarder: reads the order's fulfillment orders |
+| `write_merchant_managed_fulfillment_orders` | the ATD forwarder: creates the fulfillment with ATD's tracking |
+
+No product scopes are needed. Checkout alone needs only the draft-order
+scopes; the other four are for the ATD forwarder
+(`docs/integrations/atd-forwarder.md`). Changing an app's scopes needs the
+app to be re-approved (a new token for an admin-created custom app, or a
+new version release for a Dev Dashboard app).
 
 **Fail-loud rules** (same as ATD): with no `SHOPIFY_*` variables Shopify is
 off and checkout is an order request. Setting any of them turns Shopify on.
@@ -127,11 +140,13 @@ items**, with no product or variant behind them. Spark Shipping (or any
 drop-ship connector) routes orders to a supplier by matching line items to
 products or variants it has synced. **It may not route custom line items at
 all.** Until that is confirmed with Spark, treat ATD order placement for
-these orders as **manual**: the SKU on each line is the ATD SKU the site
-priced, and the order carries the shipping address and `Delivery` attribute
-needed to place it. A later option is a Shopify `orders/paid` webhook that
-places the ATD order automatically once ATD's order endpoint is confirmed
-(see `docs/integrations/atd.md`).
+these orders as needing their own path to ATD: the SKU on each line is the
+ATD SKU the site priced, and the order carries the shipping address and
+`Delivery` attribute needed to place it. That path is the **ATD forwarder**
+(`docs/integrations/atd-forwarder.md`): a Vercel Cron sweep that places
+paid `vercel-live` orders with ATD and brings tracking back, once ATD's
+order endpoint is confirmed and `ATD_ORDERING_ENABLED=true`. Until then,
+place them by hand.
 
 ## Before going live
 

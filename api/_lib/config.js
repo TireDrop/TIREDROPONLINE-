@@ -38,6 +38,16 @@ export const SHOPIFY_DEFAULT_API_VERSION = "2026-07";
 /** Older versions may lack fields buildDraftOrderInput sends. */
 export const SHOPIFY_MIN_API_VERSION = "2026-07";
 
+/**
+ * ATD_* variables that are switches for the ATD forwarder, not ATD
+ * credentials. Setting them must not flip the catalog to live mode (and so
+ * must not trigger the "partially configured" error on their own).
+ */
+export const ATD_FORWARDER_SWITCHES = [
+  "ATD_ORDERING_ENABLED",
+  "ATD_FORWARD_TEST_ORDERS",
+];
+
 const clean = (v) => (typeof v === "string" ? v.trim() : "");
 
 function isHttpsUrl(value) {
@@ -67,7 +77,10 @@ export function getConfig(env = process.env) {
 
   // ---- ATD (tire data and stock) -----------------------------------------
   const atdTouched = Object.keys(env).some(
-    (k) => k.startsWith("ATD_") && clean(env[k]) !== "",
+    (k) =>
+      k.startsWith("ATD_") &&
+      !ATD_FORWARDER_SWITCHES.includes(k) &&
+      clean(env[k]) !== "",
   );
   const atdMissing = atdTouched
     ? ATD_REQUIRED.filter((k) => clean(env[k]) === "")
@@ -208,10 +221,61 @@ export function getConfig(env = process.env) {
     );
   }
 
+  // ---- ATD forwarder (paid Shopify orders -> ATD orders) -------------------
+  // OFF unless ATD_ORDERING_ENABLED is exactly "true": an explicit kill
+  // switch, separate from the credentials, so ordering can be stopped in one
+  // step without taking the catalog or checkout down. It also needs payments
+  // to be live (Shopify + ATD, i.e. checkout "shopify") and CRON_SECRET, the
+  // bearer secret Vercel Cron sends; without it the sweep endpoint answers
+  // 401 to everyone, Vercel included.
+  const orderingRaw = clean(env.ATD_ORDERING_ENABLED);
+  const testRaw = clean(env.ATD_FORWARD_TEST_ORDERS);
+  const cronSecret = clean(env.CRON_SECRET);
+  const fwIssues = [];
+  for (const [name, raw] of [
+    ["ATD_ORDERING_ENABLED", orderingRaw],
+    ["ATD_FORWARD_TEST_ORDERS", testRaw],
+  ]) {
+    if (raw !== "" && raw !== "true" && raw !== "false") {
+      fwIssues.push(`${name} must be "true" or "false"; anything else counts as off.`);
+    }
+  }
+  const orderingEnabled = orderingRaw === "true";
+  let fwReason = null;
+  if (!orderingEnabled) {
+    fwReason = 'ATD_ORDERING_ENABLED is not "true" (the forwarder\'s kill switch is off).';
+  } else if (!(shopify.mode === "live" && shopify.ok)) {
+    fwReason = "Shopify checkout is not configured.";
+  } else if (!(atd.mode === "live" && atd.ok)) {
+    fwReason = "ATD is not live.";
+  } else if (!cronSecret) {
+    fwReason = "CRON_SECRET is not set.";
+  }
+  // Only a switched-on forwarder that cannot run is an issue; "off" is a
+  // normal state.
+  if (orderingEnabled && fwReason) {
+    fwIssues.push(`ATD_ORDERING_ENABLED is "true" but the forwarder cannot run: ${fwReason}`);
+  }
+  issues.push(...fwIssues);
+  const forwarder = {
+    mode: fwReason ? "off" : "on",
+    ok: fwIssues.length === 0,
+    issues: fwIssues,
+    // Why it is off, for the sweep's { skipped } answer. null when on.
+    reason: fwReason,
+    orderingEnabled,
+    // Shopify test orders (Bogus Gateway / test mode) are only forwarded
+    // when this is "true" — for the ATD sandbox test order, never in
+    // production, where a test order would buy real tires.
+    forwardTestOrders: testRaw === "true",
+    cronSecret,
+  };
+
   const sha = clean(env.VERCEL_GIT_COMMIT_SHA);
   return {
     atd,
     shopify,
+    forwarder,
     orderWebhook: {
       url: webhookIssues.length ? "" : orderWebhookUrl,
       ok: webhookIssues.length === 0,

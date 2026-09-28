@@ -66,6 +66,8 @@ Everything the adapter needs from ATD sits in these functions in
 | `extractAtdList` | Where the product list sits in a response | bare array or `items` array; anything else throws |
 | `extractAtdItem` | Where one product sits in a single-SKU response, and whether an unknown SKU is a 404 or an empty result | one record, a bare array or `items`; a 404 or no match is "not found" |
 | `mapAtdProduct` | Real field names | `sku`, `dealerCost`, `brand`, `model`, `size`, `loadIndex`, `speedRating`, `quantityAvailable`, `imageUrl` |
+| `ENDPOINTS.placeOrder` / `orderStatus` / `cancelOrder` | Paths for placing an order, reading its status and tracking, and cancelling it (used by the ATD forwarder) | `null`: the forwarder places nothing and syncs no tracking |
+| `buildPlaceOrderRequest`, `extractAtdPo`, `extractAtdOrderStatus` | The order wire format | `clientReference`, `account`, `shipTo`, `deliveryType`, `deliveryAddress`, `lines[{ sku, quantity }]`; PO from `poNumber`/`orderNumber`; tracking from `shipments[{ carrier, trackingNumber, trackingUrl }]` |
 
 Behaviour that is real and tested (`npm run test:api`):
 
@@ -92,9 +94,9 @@ Behaviour that is real and tested (`npm run test:api`):
   drop-ship or freight charge per tire or per order.
 - Fitment data (vehicle → size), and whether it covers staggered and
   trim-level fitments.
-- Order submission and tracking. Neither is built yet. Today an order becomes
-  either a Tire Guru payment or an emailed request (see `tireguru.md`), and
-  someone places the ATD order by hand.
+- Order submission and tracking. The code is built (the ATD forwarder,
+  `atd-forwarder.md`) but every ATD order endpoint and field is a
+  placeholder, so today paid orders are still placed in ATDOnline by hand.
 
 ## Questions for the ATD rep
 

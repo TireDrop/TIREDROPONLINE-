@@ -22,7 +22,7 @@ import {
 
 // ---- helpers ----------------------------------------------------------------
 
-const INTEGRATION_VARS = /^(ATD_|TIREGURU_|SHOPIFY_|ORDER_WEBHOOK_URL$|PRICE_MARKUP_PCT$|FREIGHT_PER_TIRE$)/;
+const INTEGRATION_VARS = /^(ATD_|TIREGURU_|SHOPIFY_|ORDER_WEBHOOK_URL$|PRICE_MARKUP_PCT$|FREIGHT_PER_TIRE$|CRON_SECRET$)/;
 let savedEnv;
 let savedWarn;
 let warnings;
@@ -213,6 +213,7 @@ test("with no env: status is sample/off/request", async () => {
   assert.equal(res.body.shopify, "off");
   assert.equal("tireguru" in res.body, false, "Tire Guru is retired");
   assert.equal(res.body.checkout, "request");
+  assert.equal(res.body.forwarder, "off");
   assert.equal(res.body.issues, undefined);
   assert.ok(res.body.version);
 });

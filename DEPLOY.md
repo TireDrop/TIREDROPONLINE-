@@ -64,7 +64,7 @@ that do the server-side work:
 | Endpoint             | Does                                                     |
 | -------------------- | -------------------------------------------------------- |
 | `GET /api/status`    | Which integrations are on: `atd` live/sample, `shopify`   |
-|                      | live/off, `checkout` shopify/request.                     |
+|                      | live/off, `checkout` shopify/request, `forwarder` on/off. |
 | `GET /api/tires`     | Tire search by `size=225/45R17` or `year`/`make`/`model`. |
 |                      | Live ATD data when configured, the sample catalog if not. |
 |                      | `?sku=<sku>` alone returns one tire, `{ source, item }`,  |
@@ -81,6 +81,11 @@ that do the server-side work:
 |                      | Mobile is always an order request, even when online       |
 |                      | payment is on: the van is booked and the install quoted   |
 |                      | on the call.                                              |
+| `GET /api/cron/atd-sweep` | Vercel Cron, every 5 min: the ATD forwarder. Places  |
+|                      | paid Shopify orders with ATD and syncs tracking back.     |
+|                      | Needs `Authorization: Bearer $CRON_SECRET`; off unless    |
+|                      | `ATD_ORDERING_ENABLED=true`. See                          |
+|                      | `docs/integrations/atd-forwarder.md`.                     |
 
 Payment runs on **Shopify's hosted checkout** (Shopify Payments / Shop Pay),
 and the paid order lives in Shopify, so Flow, the order emails and Order
@@ -120,8 +125,10 @@ word on each one.
 | `SHOPIFY_STORE_DOMAIN`  | The store's `xxx.myshopify.com` domain (not         |
 |                         | tiredroponline.com).                                |
 | `SHOPIFY_ADMIN_TOKEN`   | Admin API access token (`shpat_...`) of an existing |
-|                         | admin-created custom app with `write_draft_orders`  |
-|                         | and `read_orders`.                                  |
+|                         | admin-created custom app. Scopes: see               |
+|                         | `docs/integrations/shopify-checkout.md` (draft      |
+|                         | orders for checkout; orders and merchant-managed    |
+|                         | fulfillment orders for the ATD forwarder).          |
 | `SHOPIFY_CLIENT_ID`     | Instead of the token, for an app made in Shopify's  |
 | `SHOPIFY_CLIENT_SECRET` | Dev Dashboard: its client ID and secret. The API    |
 |                         | swaps them for a 24-hour token itself.              |
@@ -131,6 +138,14 @@ word on each one.
 |                         | an email relay) while online payment is off. Unset, |
 |                         | the request is only logged and the shopper is told  |
 |                         | it was not sent and to call (954) 773-1896.         |
+| `ATD_ORDERING_ENABLED`  | Kill switch for the ATD forwarder. Exactly `true`   |
+|                         | lets paid orders be placed with ATD; anything else  |
+|                         | (the default) is off.                               |
+| `CRON_SECRET`           | Random string (16+ characters). Vercel Cron sends   |
+|                         | it as a bearer token; `/api/cron/atd-sweep` answers |
+|                         | 401 without it.                                     |
+| `ATD_FORWARD_TEST_ORDERS` | Optional, ATD sandbox only: `true` also forwards  |
+|                         | Shopify test orders. Never set in production.       |
 
 How the groups switch on:
 
@@ -150,6 +165,13 @@ How the groups switch on:
   request; nothing is charged online yet." With both on it reads "Payment is
   handled securely by Shopify checkout. Card details never touch this site."
 - Mobile install is always an order request, whatever the checkout mode.
+- **ATD forwarder** runs only with Shopify checkout on, ATD live,
+  `CRON_SECRET` set and `ATD_ORDERING_ENABLED=true`. The two `ATD_*`
+  switches never turn ATD's catalog on by themselves. Until ATD's order
+  endpoint is confirmed it places nothing, and `/api/status` says so under
+  `issues`. **The 5-minute cron needs Vercel Pro**: Hobby allows one run a
+  day and rejects a deploy with a sub-daily schedule. Details and the
+  sandbox test plan: `docs/integrations/atd-forwarder.md`.
 - `TIREGURU_*` variables are ignored; `/api/status` lists any that are still
   set under `issues`, so they can be removed.
 

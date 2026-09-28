@@ -14,8 +14,16 @@
 // What IS real and tested: the timeout, the single retry, the 5-minute
 // in-memory cache, the retail pricing formula and the fail-loud behaviour.
 // See docs/integrations/atd.md for the questions to put to the ATD rep.
+//
+// ORDER PLACEMENT (placeAtdOrder, getAtdOrderStatus, cancelAtdOrder) is used
+// by the ATD forwarder (api/_lib/forwarder.js, docs/integrations/atd-forwarder.md).
+// It follows the same rules: endpoints null until confirmed, every wire
+// field a TODO(confirm with ATD docs), and one extra rule of its own — an
+// order is NEVER retried automatically, because a retry after a lost answer
+// could buy the same tires twice.
 
 import { Buffer } from "node:buffer";
+import { BUSINESS } from "../../src/data/business.js";
 
 export const ATD_TIMEOUT_MS = 4500; // x2 attempts stays inside a 10s function
 export const ATD_RETRY_DELAY_MS = 250;
@@ -37,7 +45,19 @@ export const ENDPOINTS = Object.freeze({
   // SKU, for its product page. It may turn out to be the same call as
   // lookupSkus with a single SKU; if so, point both at the same path.
   getBySku: null,
+  // TODO(confirm with ATD docs): submit a Ship to Home order (consumer or
+  // store delivery address, SKUs, quantities, our reference). POST expected.
+  placeOrder: null,
+  // TODO(confirm with ATD docs): an order's status and shipment tracking by
+  // ATD order / PO number. Unknown whether ATD offers polling at all, or only
+  // webhooks (question 10 in docs/integrations/atd.md).
+  orderStatus: null,
+  // TODO(confirm with ATD docs): cancel an order before it ships, and the
+  // cutoff after which it can no longer be cancelled.
+  cancelOrder: null,
 });
+
+export const ATD_ORDER_TIMEOUT_MS = 10000; // one attempt only; see placeAtdOrder
 
 export class AtdError extends Error {
   constructor(message, { status = 502, retryable = false, upstreamStatus = null } = {}) {
@@ -53,10 +73,11 @@ export class AtdError extends Error {
 export class AtdNotConfirmedError extends AtdError {
   constructor(endpointName) {
     super(
-      `ATD live mode is on, but the ATD "${endpointName}" endpoint has not been confirmed from ATD's documentation yet. Fill in ENDPOINTS.${endpointName} in api/_lib/atd.js (see docs/integrations/atd.md).`,
+      `The ATD "${endpointName}" endpoint is not configured: confirm with ATD docs, then fill in ENDPOINTS.${endpointName} in api/_lib/atd.js (see docs/integrations/atd.md). No request was sent.`,
       { status: 501 },
     );
     this.name = "AtdNotConfirmedError";
+    this.endpointName = endpointName;
   }
 }
 
@@ -239,6 +260,9 @@ export async function atdFetch(request, cfg, deps = {}) {
     fetchImpl = globalThis.fetch,
     timeoutMs = ATD_TIMEOUT_MS,
     retryDelayMs = ATD_RETRY_DELAY_MS,
+    // 1 turns the retry off. Order placement and cancellation pass 1: those
+    // calls change something at ATD, so a retry is not safe.
+    attempts = 2,
   } = deps;
   const url = buildUrl(cfg.base, request.path, request.query);
   const init = {
@@ -251,7 +275,7 @@ export async function atdFetch(request, cfg, deps = {}) {
   };
 
   let lastError;
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
     if (attempt > 0) await sleep(retryDelayMs);
     try {
       const res = await fetchImpl(url, {
@@ -405,4 +429,197 @@ export async function lookupAtdSkus(skus, cfg, deps = {}) {
   const request = buildSkuLookupRequest(skus, cfg, endpoints);
   const json = await atdFetch(request, cfg, deps);
   return extractAtdList(json).map((raw) => mapAtdProduct(raw, cfg));
+}
+
+// ---- Order placement (used by the ATD forwarder) ----------------------------
+//
+// The forwarder (api/_lib/forwarder.js) turns a PAID Shopify order into an
+// ATD order. Everything that knows ATD's order wire format is below, and all
+// of it is a placeholder until ATD's order documentation is in hand.
+//
+// What is sent: our reference (the Shopify order name, e.g. "#1001"), the ATD
+// account and ship-to numbers, where the tires go, and SKU + quantity per
+// line. What is NOT sent: any price. ATD bills its own dealer cost; retail
+// prices and the customer's email stay in Shopify.
+
+/**
+ * Where ship-to-store orders are delivered: the Sunrise shop, built from the
+ * single source of business facts (src/data/business.js) so the address is
+ * never typed twice.
+ */
+export const STORE_SHIP_TO = Object.freeze({
+  name: BUSINESS.parent, // "Extreme Tires"
+  company: BUSINESS.parent,
+  address1: BUSINESS.shop.street, // 7712 West Oakland Park Blvd
+  address2: null,
+  city: BUSINESS.shop.city, // Sunrise
+  state: BUSINESS.shop.state, // FL
+  zip: BUSINESS.shop.zip, // 33351
+  country: "US",
+  phone: BUSINESS.phone, // (954) 773-1896
+});
+
+/**
+ * The request for one ATD order.
+ *
+ * `order` is the forwarder's neutral shape, never a raw Shopify object:
+ *   { reference: "#1001", delivery: "ship" | "pickup",
+ *     shipTo: { name, company, address1, address2, city, state, zip, country, phone },
+ *     lines: [{ sku, qty }] }
+ * For "pickup" the forwarder passes STORE_SHIP_TO as shipTo.
+ *
+ * TODO(confirm with ATD docs): every body field name below, whether the
+ * account / ship-to numbers go in the body, a header or the path, whether a
+ * residential flag or a shipping method must be named, and — most important —
+ * that ATD rejects or de-duplicates a second order carrying the same client
+ * reference. The forwarder never resends an order whose outcome it does not
+ * know, but ATD-side de-duplication is the second lock on that door.
+ */
+export function buildPlaceOrderRequest(order, cfg, endpoints = ENDPOINTS) {
+  if (!endpoints.placeOrder) throw new AtdNotConfirmedError("placeOrder");
+  const a = order.shipTo;
+  return {
+    method: "POST",
+    path: endpoints.placeOrder,
+    body: {
+      // Placeholder field names — not from ATD docs.
+      clientReference: order.reference, // TODO(confirm with ATD docs): the idempotency / customer PO field
+      account: cfg.accountNumber, // TODO(confirm with ATD docs)
+      shipTo: cfg.shipTo, // TODO(confirm with ATD docs): our ATD ship-to (billing location) number
+      deliveryType: order.delivery === "pickup" ? "store" : "residential", // TODO(confirm with ATD docs)
+      deliveryAddress: {
+        // TODO(confirm with ATD docs): address field names and length limits.
+        name: a.name,
+        company: a.company ?? null,
+        address1: a.address1,
+        address2: a.address2 ?? null,
+        city: a.city,
+        state: a.state,
+        zip: a.zip,
+        country: a.country ?? "US",
+        phone: a.phone ?? null,
+      },
+      lines: order.lines.map((l) => ({ sku: l.sku, quantity: l.qty })), // TODO(confirm with ATD docs)
+    },
+  };
+}
+
+/**
+ * TODO(confirm with ATD docs): where ATD puts its order / PO number in the
+ * answer to an order. The placeholder accepts `poNumber` or `orderNumber`.
+ * An answer without one is NOT a success: the forwarder treats it as an
+ * unknown outcome (ATD may or may not have taken the order).
+ */
+export function extractAtdPo(json) {
+  const po = json?.poNumber ?? json?.orderNumber; // TODO(confirm with ATD docs)
+  if (po === undefined || po === null || String(po).trim() === "") {
+    throw new AtdError(
+      "ATD answered the order request but returned no order number (see extractAtdPo in api/_lib/atd.js).",
+      { upstreamStatus: 200 },
+    );
+  }
+  return String(po).trim();
+}
+
+/**
+ * Places one order with ATD and returns `{ po }`. ONE attempt, never a
+ * retry: if the answer is lost, ATD may have the order, and only a person
+ * checking ATDOnline can say. The caller decides what an error means
+ * (see classifyAtdOrderError in forwarder.js).
+ *
+ * Only the PO number is returned. ATD's answer may carry dealer cost or
+ * totals, so the raw response never leaves this function.
+ */
+export async function placeAtdOrder(order, cfg, deps = {}) {
+  const { endpoints = ENDPOINTS, orderTimeoutMs = ATD_ORDER_TIMEOUT_MS } = deps;
+  const request = buildPlaceOrderRequest(order, cfg, endpoints);
+  const json = await atdFetch(request, cfg, {
+    ...deps,
+    timeoutMs: orderTimeoutMs,
+    attempts: 1,
+  });
+  return { po: extractAtdPo(json) };
+}
+
+/** TODO(confirm with ATD docs): status lookup parameters. */
+export function buildOrderStatusRequest(po, cfg, endpoints = ENDPOINTS) {
+  if (!endpoints.orderStatus) throw new AtdNotConfirmedError("orderStatus");
+  return {
+    method: "GET",
+    path: endpoints.orderStatus,
+    query: {
+      // Placeholder parameter names — not from ATD docs.
+      po,
+      account: cfg.accountNumber,
+    },
+  };
+}
+
+function httpsUrlOrNull(value) {
+  try {
+    const url = new URL(String(value));
+    return url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * TODO(confirm with ATD docs): the shape of an order-status answer. The
+ * placeholder reads `status` and a `shipments` array of
+ * `{ carrier, trackingNumber, trackingUrl }`. Shipments without a tracking
+ * number are dropped; a tracking URL that is not https is dropped (Shopify
+ * builds one from the carrier name instead).
+ */
+export function extractAtdOrderStatus(json) {
+  if (!json || typeof json !== "object") {
+    throw new AtdError("ATD order status response was not an object (see extractAtdOrderStatus in api/_lib/atd.js).");
+  }
+  const shipments = Array.isArray(json.shipments) ? json.shipments : []; // TODO(confirm with ATD docs)
+  const tracking = shipments
+    .map((s) => ({
+      company: s?.carrier ? String(s.carrier) : null, // TODO(confirm with ATD docs)
+      number: s?.trackingNumber ? String(s.trackingNumber).trim() : "", // TODO(confirm with ATD docs)
+      url: s?.trackingUrl ? httpsUrlOrNull(s.trackingUrl) : null, // TODO(confirm with ATD docs)
+    }))
+    .filter((t) => t.number !== "");
+  return {
+    status: typeof json.status === "string" ? json.status : null, // TODO(confirm with ATD docs)
+    tracking,
+  };
+}
+
+/**
+ * `{ status, tracking: [{ company, number, url }] }` for one ATD order. A
+ * read, so the normal single retry applies.
+ */
+export async function getAtdOrderStatus(po, cfg, deps = {}) {
+  const { endpoints = ENDPOINTS } = deps;
+  const request = buildOrderStatusRequest(po, cfg, endpoints);
+  return extractAtdOrderStatus(await atdFetch(request, cfg, deps));
+}
+
+/** TODO(confirm with ATD docs): cancellation method, path and body. */
+export function buildCancelOrderRequest(po, cfg, endpoints = ENDPOINTS) {
+  if (!endpoints.cancelOrder) throw new AtdNotConfirmedError("cancelOrder");
+  return {
+    method: "POST", // TODO(confirm with ATD docs): may be DELETE
+    path: endpoints.cancelOrder,
+    body: { po, account: cfg.accountNumber }, // Placeholder field names — not from ATD docs.
+  };
+}
+
+/**
+ * Asks ATD to cancel an order. One attempt, like placement. Not called by
+ * the sweep: cancelling stays a person's decision (for example after a
+ * Shopify refund). Exported so a later admin tool can use it.
+ *
+ * TODO(confirm with ATD docs): what a successful cancellation answer looks
+ * like. The placeholder accepts any 2xx JSON answer as "cancelled".
+ */
+export async function cancelAtdOrder(po, cfg, deps = {}) {
+  const { endpoints = ENDPOINTS } = deps;
+  const request = buildCancelOrderRequest(po, cfg, endpoints);
+  await atdFetch(request, cfg, { ...deps, attempts: 1 });
+  return { cancelled: true };
 }
