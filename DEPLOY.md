@@ -18,7 +18,8 @@ app and publishes Cannavibe under the TireDrop domain.
 1. Vercel → Add New → Project → import `jja8991/cannavibe`.
 2. **Root Directory: `tiredrop`.** This is the step that matters.
 3. Framework preset: Vite. Build `npm run build`, output `dist` — both are
-   detected automatically, and `.nvmrc` pins Node 22.
+   detected automatically. `engines.node` in `package.json` pins Node 22
+   (Vercel ignores `.nvmrc`).
 4. Deploy. `vercel.json` in this folder already handles SPA rewrites, security
    headers, immutable asset caching, and `noindex` on `*.vercel.app` previews
    so a preview URL can never outrank the real domain.
