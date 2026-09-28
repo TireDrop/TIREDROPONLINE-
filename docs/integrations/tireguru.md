@@ -1,6 +1,14 @@
 # Tire Guru integration (payments and orders)
 
-**Status: not connected. Checkout runs in REQUEST mode.** No Tire Guru
+> **RETIRED FOR PAYMENTS (2026-09-28).** Tire Guru is no longer the payment
+> path and checkout does not call it. Online payment is Shopify's hosted
+> checkout through a draft order: see
+> [shopify-checkout.md](shopify-checkout.md). `api/_lib/config.js` ignores
+> any `TIREGURU_*` variables and lists them under `issues` in `/api/status`
+> so they can be removed. `api/_lib/tireguru.js` is kept for reference only.
+> Everything below is the historical record of the Tire Guru plan.
+
+**Status (historical): not connected. Checkout runs in REQUEST mode.** No Tire Guru
 credentials or API documentation exist yet. The adapter in
 `api/_lib/tireguru.js` prepares two paths, API and hosted link, but **every
 field name, endpoint and auth detail in it is a placeholder** marked

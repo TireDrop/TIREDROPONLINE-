@@ -29,12 +29,14 @@ export const ATD_REQUIRED = [
   "FREIGHT_PER_TIRE",
 ];
 
-/** Tire Guru's API mode needs all three; the hosted link needs only its URL. */
-export const TIREGURU_API_VARS = [
-  "TIREGURU_API_BASE",
-  "TIREGURU_API_KEY",
-  "TIREGURU_STORE_ID",
-];
+/**
+ * Shopify Admin API version the draft-order input was validated against.
+ * Shopify releases a version each quarter and supports each for about a
+ * year; bump this (and re-check DraftOrderInput) when it ages out.
+ */
+export const SHOPIFY_DEFAULT_API_VERSION = "2026-07";
+/** Older versions may lack fields buildDraftOrderInput sends. */
+export const SHOPIFY_MIN_API_VERSION = "2026-07";
 
 const clean = (v) => (typeof v === "string" ? v.trim() : "");
 
@@ -108,43 +110,85 @@ export function getConfig(env = process.env) {
     freightPerTire: freightPerTire ?? 0,
   };
 
-  // ---- Tire Guru (payments and orders) -----------------------------------
-  const tgIssues = [];
-  const apiSet = TIREGURU_API_VARS.filter((k) => clean(env[k]) !== "");
-  const checkoutUrl = clean(env.TIREGURU_CHECKOUT_URL);
-  if (apiSet.length > 0 && apiSet.length < TIREGURU_API_VARS.length) {
-    const missing = TIREGURU_API_VARS.filter((k) => !apiSet.includes(k));
-    tgIssues.push(
-      `Tire Guru API is partially configured. Missing: ${missing.join(", ")}.`,
+  // ---- Shopify (hosted checkout through draft orders) ---------------------
+  // On as soon as any SHOPIFY_* variable is set; then the store domain and
+  // exactly one way to authenticate must be present, or checkout answers 503.
+  const shopifyTouched = Object.keys(env).some(
+    (k) => k.startsWith("SHOPIFY_") && clean(env[k]) !== "",
+  );
+  const shIssues = [];
+  // Accept a pasted "https://x.myshopify.com/" but store the bare host.
+  const shDomain = clean(env.SHOPIFY_STORE_DOMAIN)
+    .replace(/^https:\/\//i, "")
+    .replace(/\/+$/, "")
+    .toLowerCase();
+  const shToken = clean(env.SHOPIFY_ADMIN_TOKEN);
+  const shClientId = clean(env.SHOPIFY_CLIENT_ID);
+  const shClientSecret = clean(env.SHOPIFY_CLIENT_SECRET);
+  const shVersion = clean(env.SHOPIFY_API_VERSION) || SHOPIFY_DEFAULT_API_VERSION;
+  let shAuth = null;
+  if (shopifyTouched) {
+    const missing = [];
+    if (!shDomain) missing.push("SHOPIFY_STORE_DOMAIN");
+    if (shToken && (shClientId || shClientSecret)) {
+      shIssues.push(
+        "Set SHOPIFY_ADMIN_TOKEN or SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET, not both.",
+      );
+    } else if (shToken) {
+      shAuth = "token";
+    } else if (shClientId && shClientSecret) {
+      shAuth = "client-credentials";
+    } else if (shClientId || shClientSecret) {
+      missing.push(shClientId ? "SHOPIFY_CLIENT_SECRET" : "SHOPIFY_CLIENT_ID");
+    } else {
+      missing.push("SHOPIFY_ADMIN_TOKEN (or SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET)");
+    }
+    if (missing.length) {
+      shIssues.unshift(
+        `Shopify is partially configured. Missing: ${missing.join(", ")}.`,
+      );
+    }
+    if (shDomain && !/^[a-z0-9][a-z0-9-]*\.myshopify\.com$/.test(shDomain)) {
+      shIssues.push(
+        "SHOPIFY_STORE_DOMAIN must be the store's xxx.myshopify.com domain.",
+      );
+    }
+    if (!/^\d{4}-(01|04|07|10)$/.test(shVersion)) {
+      shIssues.push(
+        `SHOPIFY_API_VERSION must look like ${SHOPIFY_DEFAULT_API_VERSION} (year-01, -04, -07 or -10).`,
+      );
+    } else if (shVersion < SHOPIFY_MIN_API_VERSION) {
+      shIssues.push(
+        `SHOPIFY_API_VERSION must be ${SHOPIFY_MIN_API_VERSION} or newer; the draft order fields were checked against ${SHOPIFY_MIN_API_VERSION}.`,
+      );
+    }
+  }
+  const shopify = {
+    mode: shopifyTouched ? "live" : "off",
+    ok: shIssues.length === 0,
+    issues: shIssues,
+    domain: shDomain,
+    apiVersion: shVersion,
+    auth: shIssues.length ? null : shAuth,
+    token: shToken,
+    clientId: shClientId,
+    clientSecret: shClientSecret,
+  };
+  issues.push(...shIssues);
+
+  // Tire Guru payments are retired (see docs/integrations/tireguru.md). Left-
+  // over variables are ignored, and said so, rather than silently obeyed.
+  const tgLeftover = Object.keys(env).filter(
+    (k) => k.startsWith("TIREGURU_") && clean(env[k]) !== "",
+  );
+  if (tgLeftover.length) {
+    issues.push(
+      `Tire Guru payments are retired; ${tgLeftover.sort().join(", ")} ${tgLeftover.length === 1 ? "is" : "are"} ignored. Remove ${tgLeftover.length === 1 ? "it" : "them"}.`,
     );
   }
-  const tgBase = clean(env.TIREGURU_API_BASE);
-  if (tgBase && !isHttpsUrl(tgBase)) {
-    tgIssues.push("TIREGURU_API_BASE must be an https:// URL.");
-  }
-  if (checkoutUrl && !isHttpsUrl(checkoutUrl.replace(/\{[a-zA-Z]+\}/g, "x"))) {
-    tgIssues.push("TIREGURU_CHECKOUT_URL must be an https:// URL.");
-  }
-  const tgOn = apiSet.length > 0 || checkoutUrl !== "";
-  const tireguru = {
-    mode: tgOn ? "live" : "off",
-    ok: tgIssues.length === 0,
-    issues: tgIssues,
-    // API wins when fully configured; the hosted link is the fallback.
-    via:
-      apiSet.length === TIREGURU_API_VARS.length
-        ? "api"
-        : checkoutUrl
-          ? "link"
-          : null,
-    base: tgBase,
-    key: clean(env.TIREGURU_API_KEY),
-    storeId: clean(env.TIREGURU_STORE_ID),
-    checkoutUrl,
-  };
-  issues.push(...tgIssues);
 
-  // ---- Order request delivery (used when Tire Guru is not taking payment) -
+  // ---- Order request delivery (used when online payment is off, and for
+  // mobile install always) ----------------------------------------------------
   const orderWebhookUrl = clean(env.ORDER_WEBHOOK_URL);
   const webhookIssues = [];
   if (orderWebhookUrl && !isHttpsUrl(orderWebhookUrl)) {
@@ -155,25 +199,25 @@ export function getConfig(env = process.env) {
   // Payment is only taken once BOTH sides are live. Charging a card against
   // the representative sample catalog would sell tires nobody has confirmed
   // are in stock at prices nobody has confirmed, so until ATD is live the
-  // checkout stays an order request even if Tire Guru is configured.
+  // checkout stays an order request even if Shopify is configured.
   const paymentsReady =
-    tireguru.mode === "live" && tireguru.ok && atd.mode === "live" && atd.ok;
-  if (tireguru.mode === "live" && atd.mode !== "live") {
+    shopify.mode === "live" && shopify.ok && atd.mode === "live" && atd.ok;
+  if (shopify.mode === "live" && atd.mode !== "live") {
     issues.push(
-      "Tire Guru is configured but ATD is in sample mode, so checkout stays in request mode until ATD is live.",
+      "Shopify checkout is configured but ATD is in sample mode, so checkout stays in request mode until ATD is live.",
     );
   }
 
   const sha = clean(env.VERCEL_GIT_COMMIT_SHA);
   return {
     atd,
-    tireguru,
+    shopify,
     orderWebhook: {
       url: webhookIssues.length ? "" : orderWebhookUrl,
       ok: webhookIssues.length === 0,
       issues: webhookIssues,
     },
-    checkout: paymentsReady ? "tireguru" : "request",
+    checkout: paymentsReady ? "shopify" : "request",
     issues,
     version: sha ? `${API_VERSION}+${sha.slice(0, 7)}` : API_VERSION,
   };

@@ -1,9 +1,11 @@
 /**
  * Client for the site's own API (`/api/*`, Vercel functions).
  *
- * Tire data comes from ATD through `/api/tires`; orders and payment go through
- * Tire Guru via `/api/checkout`. The front end never talks to either company
- * directly — the keys live on the server.
+ * Tire data comes from ATD through `/api/tires`; orders go through
+ * `/api/checkout`, which (when online payment is on) creates a Shopify draft
+ * order and hands back Shopify's hosted checkout to pay on. The front end
+ * never talks to ATD or the Shopify Admin API directly — the keys live on the
+ * server.
  *
  * The site still has to work when there is no API behind it: `vite dev`
  * without `vercel dev`, a static preview, or a function that is down. So:
@@ -124,7 +126,7 @@ async function request(path, { method = "GET", body, timeout } = {}) {
 /** What the site assumes when it cannot ask: sample data, request checkout. */
 export const OFFLINE_STATUS = Object.freeze({
   atd: "sample",
-  tireguru: "off",
+  shopify: "off",
   checkout: "request",
   version: null,
   offline: true,
@@ -137,14 +139,14 @@ let statusPromise = null;
 /** False only when this host definitely has no API. */
 const apiPresent = () => getStatus().then((s) => !s.absent);
 
-/** `{ atd, tireguru, checkout, version }`. Never throws; cached per page load. */
+/** `{ atd, shopify, checkout, version }`. Never throws; cached per page load. */
 export function getStatus() {
   if (!statusPromise) {
     statusPromise = request("/status", { timeout: TIMEOUT_MS.status })
       .then((s) => ({
         atd: s.atd === "live" ? "live" : "sample",
-        tireguru: s.tireguru === "live" ? "live" : "off",
-        checkout: s.checkout === "tireguru" ? "tireguru" : "request",
+        shopify: s.shopify === "live" ? "live" : "off",
+        checkout: s.checkout === "shopify" ? "shopify" : "request",
         version: s.version ?? null,
         offline: false,
       }))
@@ -437,7 +439,7 @@ export function getTire(sku) {
  * Sends the order.
  *
  * Resolves one of:
- *   { mode: "redirect", url }                       — pay on the payment page
+ *   { mode: "redirect", url }                       — pay on Shopify's checkout
  *   { mode: "request", orderRef, total, delivered } — an order request
  * A mobile install order is always a request; it also carries
  * `delivery: "mobile"` and `installNote` ("Install quoted on the call").

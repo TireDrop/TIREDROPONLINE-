@@ -189,9 +189,13 @@ export async function priceLines(items, config, deps = {}) {
         `Only ${item.qty} of ${item.title} ${item.qty === 1 ? "is" : "are"} in stock.`,
       );
     }
+    // brand and size ride along for the order record (and the Shopify line
+    // item's attributes). Dealer cost is never on `item`, so never here.
     return {
       sku,
       title: item.title,
+      brand: item.brand ?? null,
+      size: item.size ?? null,
       qty,
       price: item.price,
       lineTotal: cents(item.price * qty),

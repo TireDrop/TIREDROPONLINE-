@@ -1332,7 +1332,7 @@ export default function CheckoutPage() {
                     mobile
                       ? "Check the details, then send the booking request. Nothing is charged here — we schedule the van and take payment on the call."
                       : payNow
-                      ? "Check the details, then continue to payment on our shop's payment page."
+                      ? "Check the details, then continue to our secure Shopify checkout to pay."
                       : "Check the details, then send it over. Nothing is charged here — payment is confirmed on the call."
                   }
                   headingRef={headingRef}
@@ -1567,15 +1567,14 @@ export default function CheckoutPage() {
                   role="status"
                   className="w-full text-sm font-semibold text-ink"
                 >
-                  Taking you to secure payment with our shop&rsquo;s payment
-                  system…
+                  Taking you to our secure Shopify checkout…
                 </p>
               )}
 
               {status && (
                 <p className="w-full text-xs leading-relaxed text-smoke">
                   {payNow
-                    ? "Payment is handled securely by our shop\u2019s payment page. Card details never touch this site."
+                    ? "Payment is handled securely by Shopify checkout. Card details never touch this site."
                     : mobile
                       ? "Mobile install is booked on the call; nothing is charged online."
                       : "Checkout sends an order request; nothing is charged online yet."}

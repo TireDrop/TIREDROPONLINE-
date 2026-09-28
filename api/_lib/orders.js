@@ -62,8 +62,9 @@ export function buildOrder(input, lines, now = new Date()) {
     lines,
     subtotal,
     shipping,
-    // Sales tax and Florida's per-tire fee are not computed here; the shop
-    // (or Tire Guru, once live) adds them when taking payment.
+    // Sales tax and Florida's per-tire fee are not computed here. Shopify's
+    // checkout calculates sales tax on paid orders; on order requests the
+    // shop adds tax and fees when it takes payment.
     total: subtotal,
     notes: input.notes,
   };

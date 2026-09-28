@@ -12,7 +12,7 @@ export default function handler(req, res) {
   const config = getConfig();
   const body = {
     atd: config.atd.mode,
-    tireguru: config.tireguru.mode,
+    shopify: config.shopify.mode,
     checkout: config.checkout,
     version: config.version,
   };

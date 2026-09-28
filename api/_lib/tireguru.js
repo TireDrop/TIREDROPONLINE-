@@ -1,6 +1,12 @@
 // Tire Guru adapter — payments and orders.
 //
-// STATUS: UNCONFIRMED. No Tire Guru credentials or API documentation exist
+// RETIRED FOR PAYMENTS. Checkout no longer calls this file: online payment is
+// Shopify's hosted checkout through a draft order (api/_lib/shopify.js), and
+// config.js ignores (and flags) any TIREGURU_* variables. The code is kept
+// only for reference in case Tire Guru is revisited for something other than
+// taking payment. See docs/integrations/shopify-checkout.md.
+//
+// STATUS (as it was): UNCONFIRMED. No Tire Guru credentials or API documentation exist
 // yet, and it is not known whether Tire Guru offers a public API, a hosted
 // payment link, or an embeddable payment form. Two paths are prepared:
 //

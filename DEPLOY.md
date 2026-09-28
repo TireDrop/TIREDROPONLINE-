@@ -54,22 +54,25 @@ you cut over, but do these in order:
    and `www` at Vercel; it issues the certificate automatically.
 3. Submit `https://tiredroponline.com/sitemap.xml` in Google Search Console.
 
-## Vercel + Tire Guru + ATD
+## Vercel + Shopify checkout + ATD
 
-The store runs on Vercel instead of Shopify. The React site is static; the
-`api/` folder holds Vercel functions that do the server-side work:
+The storefront runs on Vercel; payment and the finished order run on
+Shopify. The React site is static; the `api/` folder holds Vercel functions
+that do the server-side work:
 
 | Endpoint             | Does                                                     |
 | -------------------- | -------------------------------------------------------- |
-| `GET /api/status`    | Which integrations are on: `atd` live/sample, `tireguru`  |
-|                      | live/off, `checkout` tireguru/request.                    |
+| `GET /api/status`    | Which integrations are on: `atd` live/sample, `shopify`   |
+|                      | live/off, `checkout` shopify/request.                     |
 | `GET /api/tires`     | Tire search by `size=225/45R17` or `year`/`make`/`model`. |
 |                      | Live ATD data when configured, the sample catalog if not. |
 |                      | `?sku=<sku>` alone returns one tire, `{ source, item }`,  |
 |                      | or 404 `{ error }`; it feeds the `/tires/p/:sku` pages.   |
-| `POST /api/checkout` | Creates the order. With Tire Guru on, it returns Tire     |
-|                      | Guru's hosted payment page and the shopper pays there.    |
-|                      | Otherwise it records an order request (nothing charged).  |
+| `POST /api/checkout` | Creates the order. With Shopify checkout on, it prices    |
+|                      | every line, creates a Shopify draft order of custom line  |
+|                      | items and returns its `invoiceUrl`; the shopper pays on   |
+|                      | Shopify's checkout. Otherwise it records an order request |
+|                      | (nothing charged).                                        |
 |                      | `delivery` is `ship` (free, lower 48 + DC), `pickup`      |
 |                      | (free ship-to-store, Sunrise) or `mobile` (van install    |
 |                      | at an FL address in the install area listed in            |
@@ -78,11 +81,13 @@ The store runs on Vercel instead of Shopify. The React site is static; the
 |                      | payment is on: the van is booked and the install quoted   |
 |                      | on the call.                                              |
 
-Payments and orders run through **Tire Guru**, Extreme Tires' shop
-management system; card payments are processed by the shop's payment
-provider through it. Tire data and fulfilment come from **ATD**. Card
-details are entered on Tire Guru's payment page and never reach this site or
-its functions.
+Payment runs on **Shopify's hosted checkout** (Shopify Payments / Shop Pay),
+and the paid order lives in Shopify, so Flow, the order emails and Order
+Printer handle it like any other order. The site never creates or changes a
+Shopify product: each order is a draft order of custom line items at the
+server's price. Tire data comes from **ATD**. Card details are entered on
+Shopify's checkout and never reach this site or its functions. Tire Guru is
+retired for payments. Details: `docs/integrations/shopify-checkout.md`.
 
 ### Project settings
 
@@ -111,14 +116,16 @@ word on each one.
 | `FREIGHT_PER_TIRE`      | Dollars added per tire to cover freight, since      |
 |                         | shipping is shown to the shopper as free.           |
 |                         | Shelf price = cost × (1 + markup/100) + freight.    |
-| `TIREGURU_API_BASE`     | Base URL of the Tire Guru API.                      |
-| `TIREGURU_API_KEY`      | Tire Guru API key for the shop.                     |
-| `TIREGURU_STORE_ID`     | The Extreme Tires store in Tire Guru that orders    |
-|                         | are created under.                                  |
-| `TIREGURU_CHECKOUT_URL` | Alternative to the three API variables: a Tire Guru |
-|                         | hosted payment link. It may carry `{orderRef}`,     |
-|                         | `{total}`, `{email}`, `{name}`, `{phone}`           |
-|                         | placeholders.                                       |
+| `SHOPIFY_STORE_DOMAIN`  | The store's `xxx.myshopify.com` domain (not         |
+|                         | tiredroponline.com).                                |
+| `SHOPIFY_ADMIN_TOKEN`   | Admin API access token (`shpat_...`) of an existing |
+|                         | admin-created custom app with `write_draft_orders`  |
+|                         | and `read_orders`.                                  |
+| `SHOPIFY_CLIENT_ID`     | Instead of the token, for an app made in Shopify's  |
+| `SHOPIFY_CLIENT_SECRET` | Dev Dashboard: its client ID and secret. The API    |
+|                         | swaps them for a 24-hour token itself.              |
+| `SHOPIFY_API_VERSION`   | Optional. Admin API version, default `2026-07`;     |
+|                         | must be `2026-07` or newer.                         |
 | `ORDER_WEBHOOK_URL`     | Where order requests are POSTed (Formspree, Zapier, |
 |                         | an email relay) while online payment is off. Unset, |
 |                         | the request is only logged and the shopper is told  |
@@ -131,14 +138,19 @@ How the groups switch on:
   then all five **plus** `PRICE_MARKUP_PCT` and `FREIGHT_PER_TIRE` must be
   set (`0` is allowed but must be explicit), or tire search answers 503
   naming what is missing. `/api/status` lists the problem under `issues`.
-- **Tire Guru** is on with either the three `TIREGURU_API_*`/`STORE_ID`
-  variables or `TIREGURU_CHECKOUT_URL` alone. Payment is only taken once ATD
-  is **also** live, so no card is ever charged against sample prices.
+- **Shopify checkout** is on once any `SHOPIFY_*` variable is set. Then
+  `SHOPIFY_STORE_DOMAIN` and exactly one way to authenticate
+  (`SHOPIFY_ADMIN_TOKEN`, or `SHOPIFY_CLIENT_ID` + `SHOPIFY_CLIENT_SECRET`)
+  must be set, or checkout answers 503 naming what is missing. Payment is
+  only taken once ATD is **also** live, so no card is ever charged against
+  sample prices.
 - Until both are on, checkout sends an order request and charges nothing,
   and the line under the checkout button says so: "Checkout sends an order
   request; nothing is charged online yet." With both on it reads "Payment is
-  handled securely by Extreme Tires' payment system (Tire Guru). Card
-  details never touch this site."
+  handled securely by Shopify checkout. Card details never touch this site."
+- Mobile install is always an order request, whatever the checkout mode.
+- `TIREGURU_*` variables are ignored; `/api/status` lists any that are still
+  set under `issues`, so they can be removed.
 
 `.env.example` and `docs/integrations/` have the details; the code in `api/`
 is the final word.
@@ -162,8 +174,10 @@ vercel dev           # site + /api on http://localhost:3000
 ```
 
 Then check `http://localhost:3000/api/status`, search a size on `/tires`,
-and run a checkout. Use ATD's and Tire Guru's sandbox credentials until the
-live ones are confirmed. Do not commit `.env.local`.
+and run a checkout. Use ATD's sandbox credentials until the live ones are
+confirmed, and a Shopify development store (not the live store) for the
+Shopify variables until a test order has gone through end to end. Do not
+commit `.env.local`.
 
 ### Cutover checklist (Shopify → Vercel)
 
@@ -172,20 +186,28 @@ Shopify serving the domain until the Vercel site is verified.
 
 1. **Verify on the Vercel URL first.** `/api/status` shows `atd: "live"` and
    the expected checkout mode; a size search returns ATD tires; one real
-   test order goes through Tire Guru end to end (payment page, order in Tire
-   Guru, confirmation) and one ship-to-store order does too.
-2. **Add the domain in Vercel** (Settings → Domains): `tiredroponline.com`
+   test order goes through Shopify end to end (draft order, Shopify
+   checkout, order in Shopify with the `Delivery` attribute, Flow alert,
+   confirmation email) and one ship-to-store order does too.
+2. **Move Shopify's primary domain off tiredroponline.com first.** Shopify
+   builds draft-order `invoiceUrl`s on the store's primary domain. If
+   that is still tiredroponline.com when DNS points at Vercel, the checkout
+   link lands on the Vercel site instead of Shopify. In Shopify → Settings →
+   Domains, make a subdomain (for example `shop.tiredroponline.com`, CNAME to
+   Shopify) or the `myshopify.com` domain primary, then confirm a test
+   `invoiceUrl` opens Shopify's checkout.
+3. **Add the domain in Vercel** (Settings → Domains): `tiredroponline.com`
    and `www.tiredroponline.com`. Vercel shows the DNS records it wants.
-3. **Change DNS in GoDaddy** to exactly what Vercel shows: the apex `A`
+4. **Change DNS in GoDaddy** to exactly what Vercel shows: the apex `A`
    record to Vercel's IP, and `www` as a `CNAME` to Vercel's target. Remove
    the old Shopify `A`/`CNAME` records for those names; leave MX and other
    email records alone. Wait for Vercel to show the domain as valid and the
    certificate as issued.
-4. **Flip indexing.** Set `ALLOW_INDEXING = true` in
+5. **Flip indexing.** Set `ALLOW_INDEXING = true` in
    `scripts/generate-seo-files.mjs`, rebuild, commit, deploy, and confirm
    `https://tiredroponline.com/robots.txt` no longer says `Disallow: /`.
    Then submit `https://tiredroponline.com/sitemap.xml` in Search Console.
-5. **Check the 301s** from the old Shopify URLs (they live in `vercel.json`
+6. **Check the 301s** from the old Shopify URLs (they live in `vercel.json`
    under `redirects`):
    - `/collections/tires` → `/tires`, `/collections/wheels` → `/wheels`
    - `/pages/<x>` → `/<x>` for about, shipping, install, mobile-service,
@@ -199,9 +221,8 @@ Shopify serving the domain until the Vercel site is verified.
 
    Spot-check a few with `curl -sI https://tiredroponline.com/pages/about`
    and look for `301` and the right `location`.
-6. **Pause the Shopify plan** only once the domain has served from Vercel
-   cleanly for a few days and orders are arriving in Tire Guru. Export
-   Shopify's customers and order history first if you want to keep them.
+7. **Keep the Shopify plan.** Checkout, the orders, Flow, the order emails
+   and Order Printer all run on it. Only the storefront moves to Vercel.
 
 ## Free alternative
 
