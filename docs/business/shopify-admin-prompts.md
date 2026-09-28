@@ -408,3 +408,40 @@ REPORT BACK: a list grouped by page. For each problem give desktop or phone,
 what's wrong, where on the page it is, and a screenshot. Finish with the pages
 that had no problems.
 ```
+
+---
+
+## 12. Route every form, order and sign-up alert to info@tiredroponline.com
+
+Checked from the code side: the Contact, Financing and Commercial quote forms
+all use Shopify's native contact form, so they deliver to the store contact
+email. A test message sent to info@tiredroponline.com on 2026-09-28 did not
+bounce. The newsletter pop-up creates customers tagged `newsletter`, so an
+email alert for new sign-ups needs a Shopify Flow workflow.
+
+```
+TASK: Point TireDrop's store email, order alerts and newsletter alerts at
+info@tiredroponline.com. I'm logged into Shopify admin (TireDrop) and GoDaddy.
+
+1. Settings → General → Store details → Contact information:
+   Store email / contact email = info@tiredroponline.com → Save.
+   Report if Shopify asks to verify the address.
+2. Settings → Notifications → Sender email = info@tiredroponline.com.
+   If "Authenticate domain" appears, copy each DNS record exactly, ADD it in
+   GoDaddy DNS (don't edit or delete existing records), then click Verify.
+   Report the status.
+3. Settings → Notifications → Staff notifications → Add recipient →
+   Email → info@tiredroponline.com, with "New order" ON → Save →
+   Send test notification.
+4. Apps → install "Shopify Flow" (free) if missing → Create workflow:
+   Trigger "Customer created" → Condition: customer tags include
+   "newsletter" → Action "Send internal email" to info@tiredroponline.com,
+   Subject "New TireDrop newsletter signup",
+   Body "{{customer.email}} just joined the list." →
+   name it "Newsletter signup alert" → Turn on.
+5. TEST: https://tiredroponline.com/pages/contact → name "Website test",
+   message "TEST — please ignore" → submit. Report the on-page message.
+
+REPORT BACK: each step done Y/N, the sender-email status and the DNS
+records added, and the contact-form test result.
+```
