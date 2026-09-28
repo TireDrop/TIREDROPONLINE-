@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -23,8 +23,15 @@ import {
   Section,
 } from "../../components/ui/index.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
-import { TIRES, VEHICLE_DATA, VEHICLE_MAKES } from "../../data/products.js";
-import { FITMENT, fitmentFor } from "../../data/fitment.js";
+import { TIRES } from "../../data/products.js";
+import { fitmentForYear } from "../../data/fitment.js";
+import {
+  OTHER,
+  OTHER_LABEL,
+  YEARS,
+  makesFor,
+  useVehicleModels,
+} from "../../data/vehicles.js";
 import { useTireSearch } from "../../data/useApi.js";
 import { RATING_AXES, ratingsFor } from "../../data/tireRatings.js";
 import { compareSizes, parseSize } from "../../data/tireMath.js";
@@ -95,7 +102,6 @@ const CLASS_RULES = {
 // The most common original fitment for each model in the vehicle selector.
 // It is a starting point, not a VIN lookup: trims and model years move these
 // around, so the size stays editable and the UI says where it came from.
-
 
 /** When all we have is a size, the size itself is the only clue to the car. */
 function classFromSize(p) {
@@ -1028,14 +1034,6 @@ function ResultCard({ entry, entries, answers, weights, rank, size, group }) {
 
 /* ---------------------------- the page ---------------------------- */
 
-const YEARS = (() => {
-  const set = new Set();
-  Object.values(VEHICLE_DATA).forEach((models) =>
-    Object.values(models).forEach((list) => list.forEach((y) => set.add(y))),
-  );
-  return [...set].sort((a, b) => b - a);
-})();
-
 export default function FindMyTiresPage() {
   const [params, setParams] = useSearchParams();
 
@@ -1071,16 +1069,78 @@ export default function FindMyTiresPage() {
   };
 
   /* ---- step 1 lives in local state until it is committed to the URL ---- */
-  const [mode, setMode] = useState(answers.mode);
-  const [year, setYear] = useState(answers.year);
-  const [make, setMake] = useState(answers.make);
-  const [model, setModel] = useState(answers.model);
-  const [sizeText, setSizeText] = useState(answers.sizeText);
+  // Every make and model year 1981-2027 (data/vehicles.js): makes are those
+  // sold in the chosen year, and models load live from NHTSA with the size
+  // table merged in. A vehicle with no size on file is still fine — the size
+  // field asks for the sidewall size instead. A vehicle handed over by the
+  // home page finder arrives without a size and gets its generation's size
+  // straight away; "Other / not listed" arrives as the size route.
+  const [first] = useState(() => {
+    const y = YEARS.includes(answers.year) ? answers.year : "";
+    const mk = makesFor(y).includes(answers.make) ? answers.make : "";
+    let m = answers.mode;
+    let md = "";
+    if (mk && y && answers.model) {
+      if (answers.model === OTHER) m = "size";
+      else md = answers.model;
+    }
+    let size = answers.sizeText;
+    let auto = "";
+    const f = md ? fitmentForYear(mk, md, y) : null;
+    if (f && f[0]) {
+      if (!size) size = f[0];
+      if (size === f[0]) auto = f[0];
+    }
+    return { mode: m, year: y, make: mk, model: md, sizeText: size, auto };
+  });
+  const [mode, setMode] = useState(first.mode);
+  const [year, setYear] = useState(first.year);
+  const [make, setMake] = useState(first.make);
+  const [model, setModel] = useState(first.model);
+  const [sizeText, setSizeText] = useState(first.sizeText);
+  // The size filled in from the table, so a later year change can swap it
+  // without overwriting a size the shopper typed themselves.
+  const [autoSize, setAutoSize] = useState(first.auto);
   const [stepError, setStepError] = useState("");
+  const sizeRef = useRef(null);
 
-  const models = make ? Object.keys(VEHICLE_DATA[make] ?? {}) : [];
-  const guess = make && model ? fitmentFor(make, model) : null;
+  const makes = makesFor(year);
+  const live = useVehicleModels(make, year);
+  // A model handed over by the finder stays selectable even if this year's
+  // list spells it differently.
+  const models =
+    model && !live.loading && !live.models.includes(model)
+      ? [...live.models, model]
+      : live.models;
+  const modelReady = Boolean(year && make && !live.loading);
+  const fit = make && model ? fitmentForYear(make, model, year) : null;
+  const guess = fit && fit[0] ? fit : null;
 
+  const typeSizeInstead = () => {
+    setModel("");
+    setMode("size");
+    setStepError("");
+    sizeRef.current?.focus();
+  };
+
+  const pickYear = (value) => {
+    setYear(value);
+    setStepError("");
+    const keepMake = makesFor(value).includes(make) ? make : "";
+    const keepModel = keepMake ? model : "";
+    if (!keepMake) {
+      setMake("");
+      setModel("");
+    }
+    // A different year can mean a different generation and size. Swap the
+    // filled-in size, but never one the shopper typed themselves.
+    if (keepModel && (!sizeText.trim() || sizeText === autoSize)) {
+      const f = fitmentForYear(keepMake, keepModel, value);
+      const next = f && f[0] ? f[0] : "";
+      setSizeText(next);
+      setAutoSize(next);
+    }
+  };
   const pickMake = (value) => {
     setMake(value);
     setModel("");
@@ -1088,9 +1148,16 @@ export default function FindMyTiresPage() {
     setStepError("");
   };
   const pickModel = (value) => {
+    // Not in the list: same as "My vehicle isn't listed".
+    if (value === OTHER) {
+      typeSizeInstead();
+      return;
+    }
     setModel(value);
-    const f = fitmentFor(make, value);
-    setSizeText(f ? f[0] : "");
+    const f = fitmentForYear(make, value, year);
+    const next = f && f[0] ? f[0] : "";
+    setSizeText(next);
+    setAutoSize(next);
     setStepError("");
   };
 
@@ -1100,11 +1167,10 @@ export default function FindMyTiresPage() {
   const size = answers.sizeText ? parseSize(answers.sizeText) : null;
   const knownVehicle = Boolean(answers.year && answers.make && answers.model);
   const fitClass = knownVehicle
-    ? fitmentFor(answers.make, answers.model)
+    ? fitmentForYear(answers.make, answers.model, answers.year)
     : null;
-  const vclass = knownVehicle
-    ? (fitClass?.[1] ?? "sedan")
-    : classFromSize(size);
+  // No table entry for the vehicle: read the class off the size.
+  const vclass = fitClass ? fitClass[1] : classFromSize(size);
   const vehicleLabel = knownVehicle
     ? `${answers.year} ${answers.make} ${answers.model}`
     : size
@@ -1210,7 +1276,7 @@ export default function FindMyTiresPage() {
       if (!sizeText.trim()) {
         setStepError(
           mode === "vehicle"
-            ? "We do not have a typical size for that model. Type the size off your sidewall instead."
+            ? `We do not have the factory size for a ${year} ${make} ${model} on file. Type the size off your sidewall (or the sticker in your driver's door jamb) instead.`
             : "Type the size off your sidewall — it looks like 225/50R17.",
         );
         return;
@@ -1272,6 +1338,7 @@ export default function FindMyTiresPage() {
     setMake("");
     setModel("");
     setSizeText("");
+    setAutoSize("");
     setStepError("");
     setParams(new URLSearchParams(), { replace: false });
   };
@@ -1688,10 +1755,7 @@ export default function FindMyTiresPage() {
                       <select
                         id="quiz-year"
                         value={year}
-                        onChange={(e) => {
-                          setYear(e.target.value);
-                          setStepError("");
-                        }}
+                        onChange={(e) => pickYear(e.target.value)}
                         className="field min-h-[44px] appearance-none bg-bone pr-8"
                       >
                         <option value="">Select year</option>
@@ -1713,7 +1777,7 @@ export default function FindMyTiresPage() {
                         className="field min-h-[44px] appearance-none bg-bone pr-8"
                       >
                         <option value="">Select make</option>
-                        {VEHICLE_MAKES.map((m) => (
+                        {makes.map((m) => (
                           <option key={m} value={m}>
                             {m}
                           </option>
@@ -1726,22 +1790,41 @@ export default function FindMyTiresPage() {
                       </label>
                       <select
                         id="quiz-model"
-                        value={model}
-                        disabled={!make}
+                        value={modelReady ? model : ""}
+                        disabled={!modelReady}
                         onChange={(e) => pickModel(e.target.value)}
                         className="field min-h-[44px] appearance-none bg-bone pr-8 disabled:opacity-60"
                       >
                         <option value="">
-                          {make ? "Select model" : "Pick a make first"}
+                          {!year
+                            ? "Pick a year first"
+                            : !make
+                              ? "Pick a make first"
+                              : live.loading
+                                ? "Loading models…"
+                                : "Select model"}
                         </option>
-                        {models.map((m) => (
-                          <option key={m} value={m}>
-                            {m}
-                          </option>
-                        ))}
+                        {modelReady &&
+                          models.map((m) => (
+                            <option key={m} value={m}>
+                              {m}
+                            </option>
+                          ))}
+                        {modelReady && (
+                          <option value={OTHER}>{OTHER_LABEL}</option>
+                        )}
                       </select>
                     </div>
                   </div>
+                )}
+                {mode === "vehicle" && (
+                  <button
+                    type="button"
+                    onClick={typeSizeInstead}
+                    className="mt-2 inline-flex min-h-[44px] items-center text-left text-[15px] font-semibold text-drop underline underline-offset-[3px] hover:text-dive"
+                  >
+                    My vehicle isn&rsquo;t listed — I&rsquo;ll type my size
+                  </button>
                 )}
 
                 <div className={mode === "vehicle" ? "mt-5" : ""}>
@@ -1750,6 +1833,7 @@ export default function FindMyTiresPage() {
                   </label>
                   <input
                     id="quiz-size"
+                    ref={sizeRef}
                     type="text"
                     inputMode="text"
                     autoComplete="off"
@@ -1758,6 +1842,8 @@ export default function FindMyTiresPage() {
                       setSizeText(e.target.value);
                       setStepError("");
                     }}
+                    autoCapitalize="characters"
+                    spellCheck={false}
                     placeholder="225/50R17"
                     aria-describedby="quiz-size-help"
                     className="field min-h-[44px] font-display text-[17px] tracking-[-0.01em]"
@@ -1767,8 +1853,10 @@ export default function FindMyTiresPage() {
                     className="mt-2 text-[13px] leading-snug text-smoke"
                   >
                     {mode === "vehicle" && guess
-                      ? `${guess[0]} is the most common original fitment for a ${model}. Trims and model years move it around, so the size printed on your sidewall — or the sticker in your driver's door jamb — is the one that counts. Change it here if it differs.`
-                      : "It is printed on the sidewall: three numbers and a letter, like 225/50R17. LT and flotation sizes such as LT265/70R17 or 31x10.50R15 work too."}
+                      ? `${guess[0]} is the most common original fitment for a ${year ? `${year} ` : ""}${model}. Trims and model years move it around, so the size printed on your sidewall — or the sticker in your driver's door jamb — is the one that counts. Change it here if it differs.`
+                      : mode === "vehicle" && model
+                        ? "Type the size printed on your sidewall — or on the sticker in your driver's door jamb. It looks like 225/50R17; LT265/70R17 and 31x10.50R15 work too."
+                        : "It is printed on the sidewall: three numbers and a letter, like 225/50R17. LT and flotation sizes such as LT265/70R17 or 31x10.50R15 work too."}
                   </p>
 
                   {/* Staggered fitments are the one way this quiz can send

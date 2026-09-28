@@ -11,18 +11,40 @@ import {
   WHEELS,
   WHEEL_DIAMETERS,
 } from "../../data/products.js";
+import {
+  OTHER,
+  OTHER_LABEL,
+  YEARS as ALL_YEARS,
+  makesFor,
+  useVehicleModels,
+} from "../../data/vehicles.js";
 
 // The storefront's primary finder. Tab one narrows by vehicle, tab two by the
 // numbers stamped on the sidewall (or, on the wheel catalog, by rim size).
 // `?search=vehicle` / `?search=size` from the nav pre-selects a tab.
+//
+// `vehicles="all"` (the home page hero) offers every make and model year
+// 1981-2027, with models loaded live from NHTSA and an "Other / not listed"
+// choice, like the theme's hero finder. The default keeps the catalog's own
+// make/model table, which every listing page can size.
 //
 // Only the visible panel is mounted, so `aria-controls` is set on the selected
 // tab alone: pointing it at an id that is not in the document is a dangling
 // ARIA reference rather than a useful one.
 
 const SELECT = "field appearance-none bg-bone pr-8";
+const TAB_ICON = "h-4 w-4 shrink-0 md:h-[18px] md:w-[18px]";
 
-function Field({ id, label, value, onChange, options, placeholder, disabled }) {
+function Field({
+  id,
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+  disabled,
+  extra,
+}) {
   return (
     <div>
       <label htmlFor={id} className="label">
@@ -41,12 +63,17 @@ function Field({ id, label, value, onChange, options, placeholder, disabled }) {
             {o}
           </option>
         ))}
+        {extra}
       </select>
     </div>
   );
 }
 
-export default function SearchPanel({ kind = "tire", onSearch }) {
+export default function SearchPanel({
+  kind = "tire",
+  vehicles = "catalog",
+  onSearch,
+}) {
   const [params] = useSearchParams();
   const requested = params.get("search");
   const [tab, setTab] = useState(requested === "size" ? "size" : "vehicle");
@@ -68,18 +95,45 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
     }
   }, [requested]);
 
-  const years = useMemo(() => {
+  const allVehicles = vehicles === "all";
+
+  const catalogYears = useMemo(() => {
     const set = new Set();
     Object.values(VEHICLE_DATA).forEach((models) =>
       Object.values(models).forEach((list) => list.forEach((y) => set.add(y))),
     );
     return [...set].sort((a, b) => b - a);
   }, []);
-
-  const models = useMemo(
+  const catalogModels = useMemo(
     () => (make ? Object.keys(VEHICLE_DATA[make] || {}) : []),
     [make],
   );
+
+  // Every make sold in the chosen year, and that year's models from NHTSA.
+  const liveMakes = useMemo(() => makesFor(year), [year]);
+  const years = allVehicles ? ALL_YEARS : catalogYears;
+  const makes = allVehicles ? liveMakes : VEHICLE_MAKES;
+  // A pick survives a year change only while the new year still lists it.
+  const makeValue = !allVehicles || makes.includes(make) ? make : "";
+  const live = useVehicleModels(
+    allVehicles ? makeValue : "",
+    allVehicles ? year : "",
+  );
+  const models = allVehicles ? live.models : catalogModels;
+  const modelValue =
+    !allVehicles || (makeValue && (model === OTHER || models.includes(model)))
+      ? model
+      : "";
+  const modelReady = allVehicles
+    ? Boolean(year && makeValue && !live.loading)
+    : Boolean(make);
+  const modelPlaceholder = allVehicles
+    ? live.loading
+      ? "Loading models…"
+      : "Select model"
+    : make
+      ? "Select model"
+      : "Select a make first";
 
   const isWheel = kind === "wheel";
   const boltPatterns = useMemo(
@@ -95,12 +149,12 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
 
   const submitVehicle = (e) => {
     e.preventDefault();
-    if (!year || !make || !model) {
+    if (!year || !makeValue || !modelValue) {
       setError("Choose a year, make and model to see what fits.");
       return;
     }
     setError("");
-    onSearch({ type: "vehicle", year, make, model });
+    onSearch({ type: "vehicle", year, make: makeValue, model: modelValue });
   };
 
   const submitSize = (e) => {
@@ -117,8 +171,9 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
     onSearch({ type: "size", width, aspect, diameter });
   };
 
+  // Below md each label stays on one line: tighter padding and a 16px icon.
   const tabClass = (id) =>
-    `flex min-h-[48px] flex-1 items-center justify-center gap-2 border-t-[3px] px-3 py-3.5 font-display text-[14px] font-bold leading-tight tracking-[-0.008em] transition-colors md:px-4 md:text-[15px] ${
+    `flex min-h-[48px] flex-1 items-center justify-center gap-[.4rem] whitespace-nowrap border-t-[3px] px-2 py-[.8rem] font-display text-[14px] font-bold leading-tight tracking-[-0.008em] transition-colors md:gap-2 md:whitespace-normal md:px-4 md:py-3.5 md:text-[15px] ${
       tab === id
         ? "border-drop bg-bone text-ink"
         : "border-transparent bg-steel text-bone/70 hover:bg-graphite hover:text-bone"
@@ -141,7 +196,7 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
           }}
           className={tabClass("vehicle")}
         >
-          <Car size={18} aria-hidden />
+          <Car size={18} aria-hidden className={TAB_ICON} />
           Shop by Vehicle
         </button>
         <button
@@ -158,7 +213,7 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
           }}
           className={tabClass("size")}
         >
-          <Ruler size={18} aria-hidden />
+          <Ruler size={18} aria-hidden className={TAB_ICON} />
           {sizeTabLabel}
         </button>
       </div>
@@ -183,22 +238,27 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
               <Field
                 id="finder-make"
                 label="Make"
-                value={make}
+                value={makeValue}
                 onChange={(v) => {
                   setMake(v);
                   setModel("");
                 }}
-                options={VEHICLE_MAKES}
+                options={makes}
                 placeholder="Select make"
               />
               <Field
                 id="finder-model"
                 label="Model"
-                value={model}
+                value={modelReady ? modelValue : ""}
                 onChange={setModel}
-                options={models}
-                placeholder={make ? "Select model" : "Select a make first"}
-                disabled={!make}
+                options={modelReady ? models : []}
+                placeholder={modelPlaceholder}
+                disabled={!modelReady}
+                extra={
+                  allVehicles && modelReady ? (
+                    <option value={OTHER}>{OTHER_LABEL}</option>
+                  ) : null
+                }
               />
             </div>
             <button
@@ -209,8 +269,8 @@ export default function SearchPanel({ kind = "tire", onSearch }) {
               Find {isWheel ? "Wheels" : "Tires"}
             </button>
             <p className="mt-3 text-xs leading-relaxed text-smoke">
-              We match your vehicle to the sizes we stock, then install at your
-              home or office. Not sure? Call us and read the sidewall to us.
+              We match your vehicle to the sizes that fit. Not sure? Call us and
+              read the sidewall to us.
             </p>
           </form>
         ) : (
