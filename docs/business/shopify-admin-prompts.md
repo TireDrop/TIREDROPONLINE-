@@ -657,43 +657,54 @@ arrived with the blue box.
 
 **Undo:** paste the backup from step 2 back in, or click "Revert to default".
 
-## 16. Access key so the Vercel live-price site can open Shopify checkouts
+## 16. App credentials so the Vercel live-price site can open Shopify checkouts
 
 The Vercel site shows live ATD prices. At checkout it creates a Shopify
 **draft order** made of custom line items: no products are created or changed
-in Shopify. It then sends the shopper to that draft's Shopify checkout. For
-this, Vercel needs an Admin API token limited to draft orders, orders and
-fulfillment (for ATD tracking).
+in Shopify. It then sends the shopper to that draft's Shopify checkout. The
+ATD forwarder later reads paid orders, tags them with the ATD PO number and
+adds tracking. For all of this, Vercel needs its own Shopify app.
 
-⚠️ **Keep the token private.** Never paste it into a chat, email or doc. It
-goes straight into Vercel → Project → Settings → Environment Variables as
-`SHOPIFY_ADMIN_TOKEN`.
+**Shopify change:** new custom apps can no longer be made from the admin
+("Develop apps"); they come from the **Dev Dashboard**. A Dev Dashboard app
+gives a **Client ID + Client secret**, not a permanent token, and the Vercel
+code exchanges them for a short-lived token by itself. The app has to be made
+in the **same Shopify organization** as the TireDrop store.
+
+⚠️ **Keep the secret private.** Never paste the Client secret into a chat,
+email or doc. It goes straight into Vercel → Project → Settings →
+Environment Variables as `SHOPIFY_CLIENT_SECRET`.
 
 ```
-TASK: Create a private Shopify app for TireDrop's Vercel checkout. I'm
-logged into Shopify admin.
+TASK: Create a Shopify app for TireDrop's Vercel checkout. I'm logged into
+Shopify (the account that owns the TireDrop store).
 
-1. Settings → Apps and sales channels → Develop apps.
-   - If it asks to allow custom app development, allow it.
-   - If Shopify says new custom apps must be made in the Dev Dashboard,
-     follow its link and make the app there instead. Tell me which route
-     you used.
+1. Open the Shopify Dev Dashboard (Shopify admin → Settings → Apps →
+   "Develop apps" / "Build apps in Dev Dashboard", or dev.shopify.com).
+   Use the SAME organization that owns the TireDrop store.
 2. Create an app named "TireDrop Vercel Checkout".
-3. Admin API access scopes: turn on ONLY these, nothing else:
-   write_draft_orders, read_orders, write_orders,
+3. Access scopes (Admin API): turn on ONLY these, nothing else:
+   write_draft_orders, read_draft_orders, read_orders, write_orders,
    read_merchant_managed_fulfillment_orders,
-   write_merchant_managed_fulfillment_orders. Save.
-   (Checkout creates the draft order. The ATD forwarder reads paid orders,
-   tags them with the ATD PO and adds tracking when ATD ships.)
-4. Install the app on the TireDrop store.
-5. Reveal the Admin API access token ONCE, and stop. Do NOT copy it into this
-   chat or anywhere else: I'll copy it into Vercel myself.
-6. Also tell me the store's myshopify.com domain (Settings → Domains).
+   write_merchant_managed_fulfillment_orders.
+   Release/save the version.
+4. Install the app on the TireDrop store and approve the scopes.
+5. Open the app's credentials/settings page. Tell me you can see the
+   Client ID and Client secret. Do NOT copy the secret into this chat or
+   anywhere else.
+6. Tell me the store's myshopify.com domain (Settings → Domains).
+7. If the Dev Dashboard offers ONLY a permanent "Admin API access token"
+   instead of client credentials, say so. That works too
+   (SHOPIFY_ADMIN_TOKEN). Still do not copy it here.
 
-REPORT BACK: app created Y/N, the route used (Develop apps or Dev
-Dashboard), the scopes shown, and the myshopify.com domain. NOT the token.
+REPORT BACK: app created Y/N, installed Y/N, the scopes shown, the Client
+ID (the ID is fine to share, the secret is NOT), and the myshopify.com domain.
 ```
 
-**Then in Vercel** (Justin): add `SHOPIFY_STORE_DOMAIN` (the myshopify.com
-domain) and `SHOPIFY_ADMIN_TOKEN`, then redeploy. Until both are set, checkout
-stays in "request" mode, where orders are emailed and no payment is taken.
+**Then in Vercel** (Justin, by hand):
+- `SHOPIFY_STORE_DOMAIN` = the myshopify.com domain
+- `SHOPIFY_CLIENT_ID` + `SHOPIFY_CLIENT_SECRET`, or `SHOPIFY_ADMIN_TOKEN`.
+  Use one kind of credential, never both.
+
+Checkout stays in "request" mode (orders are emailed, no card is charged)
+until these are set **and** ATD is live, so no one pays against sample prices.
