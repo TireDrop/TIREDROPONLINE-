@@ -13,11 +13,12 @@ import {
   Wallet,
 } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
-import { CONTACT_EMAIL, isWired, submitForm } from "../../data/forms.js";
+import { CONTACT_EMAIL, submitForm, useFormsWired } from "../../data/forms.js";
 import {
   Accordion,
   Badge,
   Breadcrumbs,
+  FormTrap,
   PageHero,
   Section,
   SectionHead,
@@ -194,6 +195,7 @@ function FieldError({ id, children }) {
 }
 
 function ApplicationForm() {
+  const wired = useFormsWired();
   const [values, setValues] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [sending, setSending] = useState(false);
@@ -218,7 +220,7 @@ function ApplicationForm() {
     if (Object.keys(found).length > 0) return;
 
     setSending(true);
-    const outcome = await submitForm("financing", values);
+    const outcome = await submitForm("financing", values, event.currentTarget);
     setSending(false);
     setResult(outcome);
   };
@@ -330,9 +332,10 @@ function ApplicationForm() {
 
   return (
     <form noValidate onSubmit={handleSubmit} className="card p-6 md:p-8">
+      <FormTrap id="financing-website" />
       <h3 className="h3 mb-1">Start a financing conversation</h3>
       <p className="mb-6 text-sm text-smoke">
-        {isWired()
+        {wired
           ? "This goes to us, not to a lender."
           : "Nothing here goes to a lender, and this form is not connected to an inbox yet — it lays out what to tell us on the phone."}{" "}
         No credit check happens here. All fields are required.
@@ -439,6 +442,7 @@ function ApplicationForm() {
 }
 
 export default function FinancingPage() {
+  const wired = useFormsWired();
   return (
     <>
       <Seo
@@ -674,7 +678,7 @@ export default function FinancingPage() {
               eyebrow="Get Started"
               title="Tell us what you need covered"
               lede={
-                isWired()
+                wired
                   ? "Send this over and we will call you with a real price for the order and whatever financing options are running that week."
                   : "Fill this in, then call it through — whoever answers can give you a real price for the order and whatever financing options are running that week."
               }
@@ -698,7 +702,7 @@ export default function FinancingPage() {
                   <span className="text-ink">
                     We talk during business hours.
                   </span>{" "}
-                  {isWired()
+                  {wired
                     ? "Sent at night or on Sunday? You will hear from us the next day we are open."
                     : "Reading this at night or on a Sunday? The line opens again the next day we are open."}{" "}
                   Eastern time.

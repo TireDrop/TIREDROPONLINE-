@@ -15,9 +15,9 @@ import {
   Warehouse,
 } from "lucide-react";
 
-import { Badge, PageHero, Section, Seo } from "../../components/ui/index.jsx";
+import { Badge, FormTrap, PageHero, Section, Seo } from "../../components/ui/index.jsx";
 import { BUSINESS } from "../../data/business.js";
-import { CONTACT_EMAIL, isWired, submitForm } from "../../data/forms.js";
+import { CONTACT_EMAIL, submitForm, useFormsWired } from "../../data/forms.js";
 import { SERVICES, getService } from "../../data/services.js";
 
 const STEP_LABELS = ["Service", "Vehicle", "Location", "Time", "Contact"];
@@ -333,6 +333,7 @@ function BookingSummary({ form, callOrder = false }) {
 }
 
 export default function SchedulePage() {
+  const wired = useFormsWired();
   const [searchParams] = useSearchParams();
 
   const [form, setForm] = useState(() => {
@@ -432,11 +433,18 @@ export default function SchedulePage() {
     }
     setErrors({});
     setSubmitting(true);
-    const outcome = await submitForm("booking", form);
+    // The reference goes out with the booking, so the shop sees the same
+    // number the customer is shown; it is only shown once delivered.
+    const reference = makeReference();
+    const outcome = await submitForm(
+      "booking",
+      { ...form, reference },
+      event.currentTarget,
+    );
     setSubmitting(false);
     setSubmission({
       ...outcome,
-      reference: outcome.delivered ? makeReference() : null,
+      reference: outcome.delivered ? reference : null,
     });
   }
 
@@ -640,7 +648,7 @@ export default function SchedulePage() {
         eyebrow="Schedule"
         title="Book your appointment"
         lede={`Five quick steps. Pick the service, tell us about the vehicle, and choose where and when. Booking the fitting for tires you ordered on ${BUSINESS.name}? Choose Tire Installation. ${
-          isWired()
+          wired
             ? "A dispatcher confirms your two-hour window by phone."
             : "At the end this lays out what to read down the phone — the window is confirmed on that call."
         }`}
@@ -660,6 +668,7 @@ export default function SchedulePage() {
             noValidate
             className="card mt-8 p-6 md:p-8"
           >
+            <FormTrap id="booking-website" />
             <p className="eyebrow mb-1">
               Step {step} of {LAST_STEP}
             </p>
@@ -1114,7 +1123,7 @@ export default function SchedulePage() {
                   How do we reach you?
                 </h2>
                 <p className="mt-2 text-sm text-smoke">
-                  {isWired()
+                  {wired
                     ? "A dispatcher calls to confirm your window and the exact price before anyone rolls out."
                     : "Your window and the exact price for your vehicle are settled on the phone call at the end, before anyone rolls out."}
                 </p>
@@ -1175,7 +1184,7 @@ export default function SchedulePage() {
                   <h3 className="h3">Review before you send</h3>
                   <p className="mt-2 text-sm text-smoke">
                     Check it over. Anything wrong, step back and fix it —
-                    {isWired()
+                    {wired
                       ? " nothing is locked in until a dispatcher confirms by phone."
                       : " nothing is booked until you call it through."}
                   </p>

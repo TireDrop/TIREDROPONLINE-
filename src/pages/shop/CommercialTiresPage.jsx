@@ -16,11 +16,12 @@ import {
   Breadcrumbs,
   Section,
   SectionHead,
+  FormTrap,
 } from "../../components/ui/index.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
 import { TIRES } from "../../data/products.js";
 import { BUSINESS } from "../../data/business.js";
-import { CONTACT_EMAIL, isWired, submitForm } from "../../data/forms.js";
+import { CONTACT_EMAIL, submitForm, useFormsWired } from "../../data/forms.js";
 
 const FLEET_TIRES = TIRES.filter((t) => t.category === "Commercial");
 
@@ -119,6 +120,7 @@ function FieldError({ id, message }) {
 }
 
 export default function CommercialTiresPage() {
+  const wired = useFormsWired();
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [sending, setSending] = useState(false);
@@ -137,7 +139,7 @@ export default function CommercialTiresPage() {
     if (Object.keys(found).length > 0) return;
 
     setSending(true);
-    setResult(await submitForm("fleet-quote", form));
+    setResult(await submitForm("fleet-quote", form, e.currentTarget));
     setSending(false);
   };
 
@@ -209,7 +211,7 @@ export default function CommercialTiresPage() {
               eyebrow="Fleet quote"
               title="Request a quote"
               lede={
-                isWired()
+                wired
                   ? "Tell us what you run and we will come back with per-tire pricing, delivery to your yard, and — if you are local — what it costs to have us fit them."
                   : "Tell us what you run, then call the list in — we will price it per tire, quote delivery to your yard, and, if you are local, what it costs to have us fit them."
               }
@@ -329,6 +331,7 @@ export default function CommercialTiresPage() {
                 noValidate
                 className="card p-6 md:p-8"
               >
+                <FormTrap id="fleet-website" />
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div>
                     <label htmlFor="company" className="label">

@@ -27,7 +27,7 @@ const BASE = String(import.meta.env?.VITE_API_BASE || "/api").replace(
   "",
 );
 
-const TIMEOUT_MS = { status: 5000, search: 9000, checkout: 25000, newsletter: 15000 };
+const TIMEOUT_MS = { status: 5000, search: 9000, checkout: 25000, newsletter: 15000, forms: 20000 };
 
 /** A real rejection from the API. `message` is safe to show a shopper. */
 export class ApiError extends Error {
@@ -129,6 +129,7 @@ export const OFFLINE_STATUS = Object.freeze({
   shopify: "off",
   checkout: "request",
   newsletter: "off",
+  forms: "off",
   version: null,
   offline: true,
 });
@@ -140,7 +141,7 @@ let statusPromise = null;
 /** False only when this host definitely has no API. */
 const apiPresent = () => getStatus().then((s) => !s.absent);
 
-/** `{ atd, shopify, checkout, newsletter, version }`. Never throws; cached per page load. */
+/** `{ atd, shopify, checkout, newsletter, forms, version }`. Never throws; cached per page load. */
 export function getStatus() {
   if (!statusPromise) {
     statusPromise = request("/status", { timeout: TIMEOUT_MS.status })
@@ -150,6 +151,8 @@ export function getStatus() {
         checkout: s.checkout === "shopify" ? "shopify" : "request",
         // Only an explicit "on" lets the sign-up pop-up collect an email.
         newsletter: s.newsletter === "on" ? "on" : "off",
+        // Only an explicit "on" lets a form say its message was delivered.
+        forms: s.forms === "on" ? "on" : "off",
         version: s.version ?? null,
         offline: false,
       }))
@@ -506,6 +509,26 @@ export async function subscribeNewsletter({ email, source = "popup", website = "
     method: "POST",
     body: { email, source, website },
     timeout: TIMEOUT_MS.newsletter,
+  });
+  if (data?.ok !== true) throw new Error("unexpected answer");
+  return data;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Website forms                                                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Sends one website form (POST /api/forms), which records it in Shopify for
+ * the shop. Resolves `{ ok: true }`. Throws ApiError when the server rejects
+ * the input (with a message safe to show); anything else (unreachable,
+ * Shopify down, not configured) throws a plain Error.
+ */
+export async function sendForm(body) {
+  const data = await request("/forms", {
+    method: "POST",
+    body,
+    timeout: TIMEOUT_MS.forms,
   });
   if (data?.ok !== true) throw new Error("unexpected answer");
   return data;

@@ -719,3 +719,32 @@ export function EmptyState({
     </div>
   );
 }
+
+/* ------------------------------------------------------------------ *
+ * Form honeypot
+ * ------------------------------------------------------------------ */
+
+/**
+ * A field people never see or reach: off-screen, out of the tab order and
+ * hidden from screen readers. Bots that fill every input fill this one, and
+ * /api/forms answers them like a success while storing nothing. Put it
+ * inside the <form> and pass the form element to submitForm().
+ */
+export function FormTrap({ id }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="absolute -left-[10000px] top-auto h-px w-px overflow-hidden"
+    >
+      <label htmlFor={id}>Leave this empty</label>
+      <input
+        id={id}
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        defaultValue=""
+      />
+    </div>
+  );
+}

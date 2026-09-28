@@ -729,14 +729,14 @@ export default function CheckoutPage() {
                   {placed.delivered && mobile ? (
                     <>
                       Booking request received — we&rsquo;ll call to confirm
-                      fitment, schedule the van and take payment. Nothing has
-                      been charged.
+                      fitment and the price, schedule the van and take
+                      payment. Nothing has been charged.
                     </>
                   ) : placed.delivered ? (
                     <>
-                      Thanks, {f.firstName}. It is not paid yet — we&rsquo;ll
-                      call to confirm fitment and payment before anything
-                      ships.
+                      Thanks, {f.firstName}. Nothing has been charged. We&rsquo;ll
+                      call to confirm fitment, the price and payment before
+                      anything ships.
                     </>
                   ) : (
                     <>
@@ -784,7 +784,7 @@ export default function CheckoutPage() {
                           title: "We call you back",
                           copy: mobile
                             ? `Expect a call at ${f.phone} to schedule the van, quote the install and take payment.`
-                            : `Expect a call at ${f.phone} to confirm delivery and payment.`,
+                            : `Expect a call at ${f.phone} to confirm the price, delivery and payment.`,
                         }
                       : {
                           title: "You call us",

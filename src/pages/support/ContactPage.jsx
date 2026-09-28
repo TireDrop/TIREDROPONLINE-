@@ -11,9 +11,10 @@ import {
   Phone,
 } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
-import { CONTACT_EMAIL, isWired, submitForm } from "../../data/forms.js";
+import { CONTACT_EMAIL, submitForm, useFormsWired } from "../../data/forms.js";
 import {
   Breadcrumbs,
+  FormTrap,
   PageHero,
   Section,
   SectionHead,
@@ -106,7 +107,7 @@ function ContactForm() {
     if (Object.keys(found).length > 0) return;
 
     setSending(true);
-    const outcome = await submitForm("contact", values);
+    const outcome = await submitForm("contact", values, event.currentTarget);
     setSending(false);
     setResult(outcome);
   };
@@ -234,6 +235,7 @@ function ContactForm() {
 
   return (
     <form noValidate onSubmit={handleSubmit} className="card p-6 md:p-8">
+      <FormTrap id="contact-website" />
       <h3 className="h3 mb-1">Send us a message</h3>
       <p className="mb-6 text-sm text-smoke">
         Fields marked with an asterisk are required.
@@ -383,6 +385,7 @@ function ContactForm() {
 }
 
 export default function ContactPage() {
+  const wired = useFormsWired();
   return (
     <>
       <Seo
@@ -448,7 +451,7 @@ export default function ContactPage() {
                 </p>
                 <p className="mt-3 text-xs leading-relaxed text-smoke">
                   The phone is the channel that reaches a person fastest
-                  {isWired()
+                  {wired
                     ? ", and the form below reaches the same people."
                     : " — the form below is not connected to an inbox yet."}
                 </p>
@@ -544,7 +547,7 @@ export default function ContactPage() {
               eyebrow="Message Us"
               title="Not urgent? Write it down."
               lede={
-                isWired()
+                wired
                   ? "Include an order number if you have one. Messages sent outside business hours get picked up the next morning we are open. If it is urgent, call instead — the form is not monitored around the clock."
                   : "Include an order number if you have one. This form is not connected to an inbox yet, so it will lay out what to tell us rather than send it — the phone is the channel that reaches a person."
               }

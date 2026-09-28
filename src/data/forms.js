@@ -1,23 +1,26 @@
 /**
  * Where the site's forms send what people type.
  *
- * There is no backend. Until one exists, every form on this site collected a
- * message, validated it carefully, and threw it away while telling the visitor
- * a person would reply. That is the one thing on the site that makes a promise
- * to a real visitor which nothing keeps, so the transport lives here and every
- * form asks `isWired()` before it claims anything.
+ * Every form posts to the site's own backend, POST /api/forms, which stores
+ * the message on the customer in Shopify and has Shopify Flow email it to
+ * info@ (api/_lib/leads.js, docs/integrations/website-leads.md). There is no
+ * third-party form service.
  *
- * To turn it on, set VITE_FORM_ENDPOINT in the deploy environment, and set
- * VITE_CONTACT_EMAIL to the address the confirmations quote back (it falls
- * back to BUSINESS.email, info@tiredroponline.com, when left empty). Any
- * endpoint that accepts a JSON POST works — Formspree, Basin, Netlify Forms, a
- * Worker. No code change is needed; the forms read it at build time.
+ * A form may only claim its message arrived when it did, so every form asks
+ * the server first: /api/status reports `forms: "on"` once Shopify is
+ * configured. Until then (or when the API cannot be reached) `isWired()` is
+ * false and each form says plainly that nothing was sent and points at the
+ * phone. The status is fetched once per page load and shared with the rest
+ * of the site (getStatus in api.js).
+ *
+ * VITE_CONTACT_EMAIL sets the address the confirmations quote back (it falls
+ * back to BUSINESS.email, info@tiredroponline.com, when left empty).
  */
 
-import { BUSINESS } from "./business.js";
+import { useEffect, useState } from "react";
 
-// `?.` keeps this importable outside Vite (node tests).
-const ENDPOINT = (import.meta.env?.VITE_FORM_ENDPOINT || "").trim();
+import { BUSINESS } from "./business.js";
+import { ApiError, getStatus, sendForm } from "./api.js";
 
 /**
  * The address the confirmations name: VITE_CONTACT_EMAIL if set, otherwise the
@@ -27,70 +30,72 @@ const ENDPOINT = (import.meta.env?.VITE_FORM_ENDPOINT || "").trim();
 export const CONTACT_EMAIL =
   (import.meta.env?.VITE_CONTACT_EMAIL || "").trim() || BUSINESS.email || null;
 
-/**
- * The email subject line for each form (Formspree reads `_subject`). One
- * Formspree form takes all of them, so the subject is what tells the inbox
- * which form a message came from.
- */
-export const FORM_SUBJECTS = Object.freeze({
-  contact: "TireDrop contact form",
-  financing: "TireDrop financing request",
-  "fleet-quote": "TireDrop fleet quote request",
-  booking: "TireDrop install booking request",
-  review: "TireDrop review",
-});
+// What /api/status last said, so a page rendered after the first answer
+// starts from it instead of flashing the "not connected" copy.
+let lastKnown = false;
 
-/**
- * The JSON body for one form. Formspree conventions: `_subject` sets the
- * email subject and `email` (every form has one) becomes the reply-to, so
- * "Reply" in the inbox answers the customer. `form` repeats `_form` without
- * the underscore, because Formspree treats underscore fields as settings and
- * may leave them out of the email. Other receivers can ignore all three.
- */
-export function formPayload(formName, values, now = new Date()) {
-  return {
-    _subject: FORM_SUBJECTS[formName] ?? `TireDrop ${formName} form`,
-    _form: formName,
-    form: formName,
-    _submittedAt: now.toISOString(),
-    ...values,
-  };
+/** Asks /api/status (cached per page load) whether the forms deliver. */
+export async function formsOn() {
+  const status = await getStatus();
+  lastKnown = status?.forms === "on";
+  return lastKnown;
 }
 
-/** True once a real destination is configured, so copy may claim delivery. */
-export const isWired = () => ENDPOINT !== "";
+/**
+ * True once /api/status has reported `forms: "on"`, so copy may claim
+ * delivery. Synchronous: false until the status has been read. Components
+ * use `useFormsWired()`, which re-renders when the answer lands.
+ */
+export const isWired = () => lastKnown;
+
+/** `isWired()` as a hook: false until /api/status says `forms: "on"`. */
+export function useFormsWired() {
+  const [wired, setWired] = useState(lastKnown);
+  useEffect(() => {
+    let alive = true;
+    formsOn().then((on) => {
+      if (alive) setWired(on);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+  return wired;
+}
 
 /**
- * Posts one form's values.
+ * The honeypot every form carries (`<FormTrap />`): a field people never
+ * see, so a value in it means a bot filled the form. The server answers a
+ * bot like a success and stores nothing.
+ */
+function trapValue(formElement) {
+  const field = formElement?.elements?.namedItem?.("website");
+  return typeof field?.value === "string" ? field.value : "";
+}
+
+/**
+ * Posts one form's values to /api/forms. `formElement` is the submitted
+ * <form>, read only for its honeypot.
  *
  * Resolves `{ delivered: boolean, error: string | null }` and never throws:
  * a form that has already validated its input should show its confirmation
  * either way, because the visitor's next step — calling the shop — is the
  * same whether or not the POST landed. `delivered` decides which confirmation
- * they see, so it is never optimistic.
+ * they see, so it is never optimistic. `error` is null when the forms are
+ * simply not connected, and a sentence when a send was tried and failed.
  */
-export async function submitForm(formName, values) {
-  if (!isWired()) return { delivered: false, error: null };
+export async function submitForm(formName, values, formElement = null) {
+  // Read the trap before any await: the form may re-render meanwhile.
+  const website = trapValue(formElement);
+  if (!(await formsOn())) return { delivered: false, error: null };
 
   try {
-    const response = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(formPayload(formName, values)),
-    });
-    if (!response.ok) {
-      return {
-        delivered: false,
-        error: `The form service answered ${response.status}.`,
-      };
-    }
+    await sendForm({ ...values, form: formName, website });
     return { delivered: true, error: null };
-  } catch {
-    // Offline, blocked, or the endpoint is down. The visitor still gets a
-    // confirmation — one that does not pretend the message arrived.
+  } catch (err) {
+    if (err instanceof ApiError) return { delivered: false, error: err.message };
+    // Offline, blocked, or the server could not store it. The visitor still
+    // gets a confirmation — one that does not pretend the message arrived.
     return { delivered: false, error: "We could not reach the form service." };
   }
 }
