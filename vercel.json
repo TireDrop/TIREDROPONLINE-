@@ -51,9 +51,22 @@
   "redirects": [
     { "source": "/collections/tires", "destination": "/tires", "statusCode": 301 },
     { "source": "/collections/wheels", "destination": "/wheels", "statusCode": 301 },
+    { "source": "/collections/tires/:path+", "destination": "/tires", "statusCode": 301 },
+    { "source": "/collections/wheels/:path+", "destination": "/wheels", "statusCode": 301 },
+    { "source": "/collections", "destination": "/tires", "statusCode": 301 },
+    { "source": "/collections/:path*", "destination": "/tires", "statusCode": 301 },
+    { "source": "/products", "destination": "/tires", "statusCode": 301 },
+    { "source": "/products/:path*", "destination": "/tires", "statusCode": 301 },
     {
       "source": "/pages/:page(about|shipping|install|mobile-service|auto-service|commercial-tires|locations|contact|reviews|gallery|financing|tire-care|terms|privacy|accessibility|find-my-tires|tire-size|tire-check)",
       "destination": "/:page",
+      "statusCode": 301
+    },
+    { "source": "/pages", "destination": "/", "statusCode": 301 },
+    { "source": "/pages/:path*", "destination": "/", "statusCode": 301 },
+    {
+      "source": "/cart/c/:path*",
+      "destination": "https://shop.tiredroponline.com/cart/c/:path*",
       "statusCode": 301
     },
     { "source": "/cart/:path+", "destination": "/cart", "statusCode": 301 },
@@ -62,6 +75,33 @@
       "destination": "/privacy",
       "statusCode": 301
     },
-    { "source": "/policies/:path*", "destination": "/terms", "statusCode": 301 }
+    { "source": "/policies/refund-policy", "destination": "/terms#returns", "statusCode": 301 },
+    { "source": "/policies/shipping-policy", "destination": "/terms#shipping", "statusCode": 301 },
+    { "source": "/policies/terms-of-service", "destination": "/terms", "statusCode": 301 },
+    { "source": "/policies/contact-information", "destination": "/contact", "statusCode": 301 },
+    { "source": "/policies/:path*", "destination": "/terms", "statusCode": 301 },
+    { "source": "/blogs", "destination": "/tire-care", "statusCode": 301 },
+    { "source": "/blogs/:path*", "destination": "/tire-care", "statusCode": 301 },
+    { "source": "/search", "destination": "/tires", "statusCode": 301 },
+    {
+      "source": "/account",
+      "destination": "https://shop.tiredroponline.com/account",
+      "statusCode": 301
+    },
+    {
+      "source": "/account/:path*",
+      "destination": "https://shop.tiredroponline.com/account/:path*",
+      "statusCode": 301
+    },
+    {
+      "source": "/checkouts/:path*",
+      "destination": "https://shop.tiredroponline.com/checkouts/:path*",
+      "statusCode": 301
+    },
+    {
+      "source": "/:shopId(\\d+)/:kind(invoices|orders|checkouts)/:path*",
+      "destination": "https://shop.tiredroponline.com/:shopId/:kind/:path*",
+      "statusCode": 301
+    }
   ]
 }

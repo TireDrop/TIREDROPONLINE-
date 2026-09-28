@@ -93,10 +93,14 @@ app and the store are in the same Shopify organization.
 | `write_orders` | the ATD forwarder: order tags, note and metafields |
 | `read_merchant_managed_fulfillment_orders` | the ATD forwarder: reads the order's fulfillment orders |
 | `write_merchant_managed_fulfillment_orders` | the ATD forwarder: creates the fulfillment with ATD's tracking |
+| `read_customers` | the newsletter (`POST /api/newsletter`): finds an existing customer by email |
+| `write_customers` | the newsletter: creates the customer, sets email marketing consent, adds tags |
 
 No product scopes are needed. Checkout alone needs only the draft-order
-scopes; the other four are for the ATD forwarder
-(`docs/integrations/atd-forwarder.md`). Changing an app's scopes needs the
+scopes; the four order and fulfillment scopes are for the ATD forwarder
+(`docs/integrations/atd-forwarder.md`), and the two customer scopes are for
+the newsletter sign-up that replaces the Shopify theme's pop-up (see
+"Newsletter sign-up" below). Changing an app's scopes needs the
 app to be re-approved (a new token for an admin-created custom app, or a
 new version release for a Dev Dashboard app).
 
@@ -110,6 +114,27 @@ mode (no card is charged against sample prices) and `/api/status` says so.
 
 `/api/status` reports `shopify: "live" | "off"` and
 `checkout: "shopify" | "request"`.
+
+## Newsletter sign-up
+
+`POST /api/newsletter` (`api/newsletter.js`, `api/_lib/newsletter.js`) does
+what the theme's pop-up form did, through the same app. Validated against
+the Admin schema; never run against a real store from this repository.
+
+1. `customerCreate(input: { email, emailMarketingConsent: { marketingState:
+   SUBSCRIBED, marketingOptInLevel: SINGLE_OPT_IN }, tags: ["newsletter",
+   "popup", "vercel"] })`.
+2. If Shopify answers the userError "Email has already been taken":
+   `customerByIdentifier(identifier: { emailAddress })` finds the customer,
+   `customerEmailMarketingConsentUpdate` sets SUBSCRIBED / SINGLE_OPT_IN
+   (skipped when `defaultEmailAddress.marketingState` is already
+   SUBSCRIBED, so the original opt-in date stands), and `tagsAdd` adds the
+   three tags without replacing existing ones.
+
+The shopper gets the same `{ ok: true }` either way, so the endpoint cannot
+be used to learn whether an email has an account. `/api/status` reports
+`newsletter: "on"` whenever Shopify is configured, and the React pop-up
+renders only then. No discount or coupon is attached to a sign-up.
 
 ## Failure behaviour
 

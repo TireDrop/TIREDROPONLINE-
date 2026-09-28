@@ -37,6 +37,57 @@ Do **not** set `VITE_HASH_ROUTER` on Vercel. That is only for static hosts
 with no SPA rewrite; `vercel.json` provides the rewrite, so the production
 build uses real paths.
 
+## Before moving the domain
+
+tiredroponline.com is on Shopify today, and the Shopify theme is what
+collects leads: its forms and its newsletter pop-up. Do every item here
+**before** DNS changes, or leads land nowhere. Then follow the step-by-step
+[cutover checklist](#cutover-checklist-shopify--vercel) below.
+
+- [ ] **Formspree is set up and both lead variables are set.** One Formspree
+      form (created with info@tiredroponline.com, address confirmed) takes
+      everything: set **`VITE_FORM_ENDPOINT`** (contact, financing, fleet
+      quote, booking forms) and **`ORDER_WEBHOOK_URL`** (order requests and
+      mobile install bookings) to its `https://formspree.io/f/<id>`
+      endpoint in Vercel → Settings → Environment Variables, Production.
+      Then **redeploy**: `VITE_` variables are baked in at build time, so the
+      forms stay off until a new build runs. Leave Formspree's "Restrict to
+      domain" and reCAPTCHA **off**; order requests are posted by the server
+      and would be refused. Check: submit the contact form on the Vercel URL
+      and receive an email with subject "TireDrop contact form" whose Reply
+      goes to the address you typed. Details:
+      `docs/business/turn-on-the-forms.md`.
+- [ ] **The Shopify app has the customer scopes.** Besides the checkout and
+      forwarder scopes, the newsletter needs **`read_customers`** and
+      **`write_customers`** (table in
+      `docs/integrations/shopify-checkout.md`). Re-approve the app after
+      adding them. Then `/api/status` shows `newsletter: "on"` and the
+      sign-up pop-up appears on the Vercel site; sign up once with a test
+      address and confirm a customer appears in Shopify, subscribed to
+      email marketing and tagged `newsletter`, `popup`, `vercel`. With
+      Shopify not configured the pop-up simply does not render, so no email
+      is collected into nowhere, but the theme's sign-ups also stop at
+      cutover.
+- [ ] **Vercel Pro.** Hobby is for non-commercial use only, and the ATD
+      forwarder's 5-minute cron needs Pro (`docs/integrations/atd-forwarder.md`).
+      Upgrade the TireDrop team before the store takes real traffic.
+- [ ] **Shopify's primary domain is `shop.tiredroponline.com`, BEFORE DNS
+      moves.** In Shopify → Settings → Domains, connect
+      `shop.tiredroponline.com` (a CNAME to `shops.myshopify.com`), make it
+      primary, and confirm a test draft-order `invoiceUrl` opens on it.
+      Checkout links, order-status pages, customer accounts and the
+      redirects below all point there. If tiredroponline.com is still
+      Shopify's primary domain when DNS moves, checkout links land on the
+      Vercel site instead of Shopify.
+- [ ] **Old Shopify URLs redirect.** `vercel.json` carries 301s for every
+      common Shopify path (listed in step 6 of the cutover checklist):
+      `/pages/*`, `/collections/*`, `/products/*`, `/cart/*`, `/policies/*`,
+      `/blogs/*`, `/search`, and `/account`, `/checkouts/*` and the
+      `/<shop id>/invoices|orders|checkouts/...` links, which go on to
+      `shop.tiredroponline.com` so account logins, abandoned-checkout emails
+      and invoices sent before the move keep working. `/cart` itself is the
+      same path on both sites.
+
 ## Before pointing tiredroponline.com at it
 
 The domain currently serves the previous site. Nothing here is urgent until
@@ -60,7 +111,14 @@ that do the server-side work:
 | Endpoint             | Does                                                     |
 | -------------------- | -------------------------------------------------------- |
 | `GET /api/status`    | Which integrations are on: `atd` live/sample, `shopify`   |
-|                      | live/off, `checkout` shopify/request, `forwarder` on/off. |
+|                      | live/off, `checkout` shopify/request, `forwarder` on/off, |
+|                      | `newsletter` on/off.                                      |
+| `POST /api/newsletter` | `{ email }`: newsletter sign-up from the pop-up. Makes  |
+|                      | the email a Shopify customer subscribed to email          |
+|                      | marketing, tagged `newsletter`, `popup`, `vercel` (an     |
+|                      | existing customer is subscribed and tagged). Honeypot and |
+|                      | per-IP rate limit; 503 `{ configured: false }` without    |
+|                      | Shopify. On whenever Shopify is configured.               |
 | `GET /api/tires`     | Tire search by `size=225/45R17` or `year`/`make`/`model`. |
 |                      | Live ATD data when configured, the sample catalog if not. |
 |                      | `?sku=<sku>` alone returns one tire, `{ source, item }`,  |
@@ -124,14 +182,19 @@ word on each one.
 |                         | admin-created custom app. Scopes: see               |
 |                         | `docs/integrations/shopify-checkout.md` (draft      |
 |                         | orders for checkout; orders and merchant-managed    |
-|                         | fulfillment orders for the ATD forwarder).          |
+|                         | fulfillment orders for the ATD forwarder;           |
+|                         | `read_customers` + `write_customers` for the        |
+|                         | newsletter sign-up).                                |
 | `SHOPIFY_CLIENT_ID`     | Instead of the token, for an app made in Shopify's  |
 | `SHOPIFY_CLIENT_SECRET` | Dev Dashboard: its client ID and secret. The API    |
 |                         | swaps them for a 24-hour token itself.              |
 | `SHOPIFY_API_VERSION`   | Optional. Admin API version, default `2026-07`;     |
 |                         | must be `2026-07` or newer.                         |
 | `ORDER_WEBHOOK_URL`     | Where order requests are POSTed (Formspree, Zapier, |
-|                         | an email relay) while online payment is off. Unset, |
+|                         | an email relay) while online payment is off, and    |
+|                         | every mobile install booking. JSON with `_subject`  |
+|                         | "TireDrop order request #TD-…" and the customer's   |
+|                         | `email` for Formspree's reply-to. Unset,            |
 |                         | the request is only logged and the shopper is told  |
 |                         | it was not sent and to call (954) 773-1896.         |
 | `ATD_ORDERING_ENABLED`  | Kill switch for the ATD forwarder. Exactly `true`   |
@@ -161,6 +224,10 @@ How the groups switch on:
   request; nothing is charged online yet." With both on it reads "Payment is
   handled securely by Shopify checkout. Card details never touch this site."
 - Mobile install is always an order request, whatever the checkout mode.
+- **Newsletter** is on whenever Shopify is configured (it does not wait for
+  ATD). The app needs `read_customers` and `write_customers` for it; without
+  them sign-ups fail with a 502 and the pop-up shows "try again", so add the
+  scopes before setting the `SHOPIFY_*` variables.
 - **ATD forwarder** runs only with Shopify checkout on, ATD live,
   `CRON_SECRET` set and `ATD_ORDERING_ENABLED=true`. The two `ATD_*`
   switches never turn ATD's catalog on by themselves. Until ATD's order
@@ -212,9 +279,10 @@ Shopify serving the domain until the Vercel site is verified.
    builds draft-order `invoiceUrl`s on the store's primary domain. If
    that is still tiredroponline.com when DNS points at Vercel, the checkout
    link lands on the Vercel site instead of Shopify. In Shopify → Settings →
-   Domains, make a subdomain (for example `shop.tiredroponline.com`, CNAME to
-   Shopify) or the `myshopify.com` domain primary, then confirm a test
-   `invoiceUrl` opens Shopify's checkout.
+   Domains, make `shop.tiredroponline.com` (CNAME to Shopify) primary, then
+   confirm a test `invoiceUrl` opens Shopify's checkout. Use that exact
+   subdomain: the account, checkout and invoice redirects in `vercel.json`
+   send visitors to it.
 3. **Add the domain in Vercel** (Settings → Domains): `tiredroponline.com`
    and `www.tiredroponline.com`. Vercel shows the DNS records it wants.
 4. **Change DNS in GoDaddy** to exactly what Vercel shows: the apex `A`
@@ -235,8 +303,24 @@ Shopify serving the domain until the Vercel site is verified.
      tire-size and tire-check
    - `/cart` is the same path on both sites, so it needs no redirect;
      Shopify's `/cart/...` sub-paths go to `/cart`
-   - `/policies/privacy-policy` → `/privacy`; every other `/policies/*`
-     (terms, refund, shipping) → `/terms`
+   - `/collections/tires/*` → `/tires`, `/collections/wheels/*` → `/wheels`,
+     any other `/collections` or `/collections/*` (e.g. `/collections/all`)
+     and `/products/*` → `/tires` (Shopify product handles have no
+     one-to-one page here)
+   - any other `/pages/*` → `/`
+   - `/cart/c/*` (Shopify cart-recovery links) →
+     `shop.tiredroponline.com/cart/c/*`
+   - `/policies/privacy-policy` → `/privacy`, `refund-policy` →
+     `/terms#returns`, `shipping-policy` → `/terms#shipping`,
+     `terms-of-service` → `/terms`, `contact-information` → `/contact`;
+     any other `/policies/*` → `/terms`
+   - `/blogs` and `/blogs/*` → `/tire-care`; `/search` → `/tires`
+   - `/account` and `/account/*` → `shop.tiredroponline.com/account/*`
+     (customer accounts stay on Shopify)
+   - `/checkouts/*` and `/<shop id>/invoices|orders|checkouts/*` →
+     the same path on `shop.tiredroponline.com`, so abandoned-checkout
+     emails, draft-order invoices and order-status links sent before the
+     move still open on Shopify
 
    Spot-check a few with `curl -sI https://tiredroponline.com/pages/about`
    and look for `301` and the right `location`.
