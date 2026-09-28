@@ -1,0 +1,94 @@
+{%- comment -%}
+  TireDrop install work order, for the Shopify Order Printer app.
+  Paste into Order Printer → Templates → Create template → "Install Work Order".
+  Uses only standard order fields. Vehicle and mileage lines are written by hand at check-in.
+{%- endcomment -%}
+<div style="font-family: Arial, sans-serif; font-size: 13px; color: #111; max-width: 720px;">
+  <table style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td>
+        <strong style="font-size: 20px;">TireDrop · Install Work Order</strong><br>
+        Extreme Tires · 7712 West Oakland Park Blvd, Sunrise, FL 33351 · (954) 773-1896
+      </td>
+      <td style="text-align: right;">
+        <strong style="font-size: 18px;">{{ order.name }}</strong><br>
+        {{ order.created_at | date: "%b %d, %Y %I:%M %p" }}
+      </td>
+    </tr>
+  </table>
+
+  <hr>
+
+  <table style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td style="vertical-align: top; width: 50%;">
+        <strong>Customer</strong><br>
+        {% if order.shipping_address %}
+          {{ order.shipping_address.name }}<br>
+          {{ order.shipping_address.address1 }} {{ order.shipping_address.address2 }}<br>
+          {{ order.shipping_address.city }}, {{ order.shipping_address.province_code }} {{ order.shipping_address.zip }}<br>
+          {{ order.shipping_address.phone }}
+        {% elsif order.billing_address %}
+          {{ order.billing_address.name }}<br>
+          {{ order.billing_address.phone }}
+        {% endif %}
+        <br>{{ order.email }}
+      </td>
+      <td style="vertical-align: top;">
+        <strong>Service type</strong> (circle one)<br>
+        In-bay install &nbsp;·&nbsp; Mobile service &nbsp;·&nbsp; Pickup only<br><br>
+        <strong>Order tags:</strong> {{ order.tags | join: ", " }}
+      </td>
+    </tr>
+  </table>
+
+  <hr>
+
+  <strong>Vehicle</strong><br>
+  Year ______ &nbsp; Make ______________ &nbsp; Model ______________ &nbsp; Trim ________<br><br>
+  Mileage __________ &nbsp; Plate / VIN (last 6) ______________ &nbsp; Appointment __________
+
+  <hr>
+
+  <strong>Tires / items</strong>
+  <table style="width: 100%; border-collapse: collapse; margin-top: 6px;">
+    <tr style="background: #eee;">
+      <th style="text-align: left; padding: 4px; border: 1px solid #ccc;">Qty</th>
+      <th style="text-align: left; padding: 4px; border: 1px solid #ccc;">Item</th>
+      <th style="text-align: left; padding: 4px; border: 1px solid #ccc;">SKU</th>
+      <th style="text-align: left; padding: 4px; border: 1px solid #ccc;">Position(s)</th>
+    </tr>
+    {% for line_item in order.line_items %}
+    <tr>
+      <td style="padding: 4px; border: 1px solid #ccc;">{{ line_item.quantity }}</td>
+      <td style="padding: 4px; border: 1px solid #ccc;">{{ line_item.title }}{% if line_item.variant_title != blank %} · {{ line_item.variant_title }}{% endif %}</td>
+      <td style="padding: 4px; border: 1px solid #ccc;">{{ line_item.sku }}</td>
+      <td style="padding: 4px; border: 1px solid #ccc;">LF / RF / LR / RR / Spare</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  {% if order.note != blank %}
+    <p><strong>Customer note:</strong> {{ order.note }}</p>
+  {% endif %}
+
+  <hr>
+
+  <strong>Tech checklist</strong> (initial each)
+  <table style="width: 100%; border-collapse: collapse; margin-top: 6px;">
+    <tr><td style="padding: 3px;">☐ Tires match order (size, load, speed rating, DOT date) ____</td><td style="padding: 3px;">☐ Mount &amp; balance ____</td></tr>
+    <tr><td style="padding: 3px;">☐ Valve stems / TPMS service ____</td><td style="padding: 3px;">☐ TPMS relearn ____</td></tr>
+    <tr><td style="padding: 3px;">☐ Lug nuts torqued to spec: ______ ft-lb ____</td><td style="padding: 3px;">☐ Pressure set to door placard: ______ PSI ____</td></tr>
+    <tr><td style="padding: 3px;">☐ Old tires: returned / disposed ____</td><td style="padding: 3px;">☐ Re-torque reminder given ____</td></tr>
+  </table>
+
+  <p><strong>Tech notes:</strong><br>______________________________________________________________________<br>______________________________________________________________________</p>
+
+  <table style="width: 100%; margin-top: 18px;">
+    <tr>
+      <td>Technician ______________________</td>
+      <td>Customer signature ______________________</td>
+      <td>Date ________</td>
+    </tr>
+  </table>
+</div>

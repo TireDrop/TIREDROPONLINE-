@@ -525,3 +525,67 @@ orders.
 - **#4:** a cancelled Shopify order doesn't cancel the supplier PO.
 - **#5 stays off** until products exist, and it also depends on how the sync
   app handles stock. Turn it on only if tire stock is held at the shop.
+
+## 14. Install the free apps TireDrop needs now
+
+Picks come from a research pass on 2026-09-28. The app pages were blocked
+from this environment, so prices were taken from search results and need
+rechecking on the App Store listing before installing.
+- **Newsletter pop-up:** already built into the theme, so Shopify Forms is
+  not needed for it.
+- **Work-order template:** saved at `shopify/order-printer/install-work-order.liquid`.
+
+```
+TASK: Install and set up free apps for TireDrop. I'm logged into Shopify
+admin. Install ONLY the apps listed. Don't turn on any discount, coupon,
+"spin to win", review-reward or countdown feature in any of them. Don't
+publish any theme or language. If an app asks for a paid plan, pick the
+free plan or stop and tell me the price.
+
+1. Shopify Email (by Shopify): install. Then Settings → Notifications →
+   Customer notifications → Abandoned checkout: turn automatic emails ON,
+   send after 10 hours, no discount code in the email → Save.
+2. Translate & Adapt (by Shopify): install → Settings → Languages →
+   Add language → Spanish (Español) → leave it UNPUBLISHED → in Translate &
+   Adapt, auto-translate Spanish for the theme "EDIT HERE ". Report
+   how many words were translated. Do not publish Spanish.
+3. Shopify Inbox (by Shopify): install → chat button ON, greeting:
+   "Tire questions? Ask us: size, fitment, shipping or install."
+   Business hours = the store hours in Settings → Store details.
+   Instant answers: add "Is shipping free?" → "Yes, free shipping to the
+   48 contiguous US states and DC." and "Do you install?" → "Yes, in South
+   Florida at our Sunrise shop or with mobile service."
+4. Order Printer (by Shopify): install → Templates → Create template,
+   name "Install Work Order", paste the template text I give you below
+   → Save. Preview it on any order or the sample, and report whether it
+   renders.
+5. Appointo (appointment booking): install on the FREE plan → create
+   service "Tire Installation (Sunrise shop)", 60 min, and service
+   "Mobile Tire Service (South Florida)", 90 min. Location: 7712 West
+   Oakland Park Blvd, Sunrise, FL 33351. No deposits, no prices. Don't add
+   the booking widget to any theme. Report the booking page URL it creates.
+
+Wait (do NOT install yet): Search & Discovery filters, a fitment app
+(Convermax / EasySearch), Google & YouTube, Facebook & Instagram, Judge.me.
+They need real products first.
+
+REPORT BACK: each app installed Y/N, plan chosen, anything that asked for
+money, and the Appointo booking URL.
+```
+
+**Install later, in this order:**
+1. Once the ATD sync app is live: Search & Discovery (tire-size filters on
+   numeric variant metafields), then a fitment app. Demo Convermax first and
+   ask whether it takes ATD fitment data.
+2. Once products have UPCs and images: the Google & YouTube channel. Keep
+   installation as a separate product, because Google Merchant Center rejects
+   tires bundled with a service.
+3. Once the first orders ship: Judge.me on the free plan, with review rewards
+   turned off. Offering rewards would break the no-discount rule and the FTC
+   fake-review rule.
+
+**Never install:**
+- accessibility overlay widgets (they're linked to ADA lawsuits and led to the
+  2025 FTC action against accessiBe)
+- fake sales pop-ups or countdown timers
+- review importers
