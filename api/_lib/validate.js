@@ -362,3 +362,35 @@ export function validateCheckout(body) {
     },
   };
 }
+
+// ---- POST /api/newsletter --------------------------------------------------
+
+/** Where a sign-up may come from; each becomes a customer tag in Shopify. */
+export const NEWSLETTER_SOURCES = ["popup", "footer"];
+
+/**
+ * Validates a newsletter sign-up: `{ email, source?, website? }`.
+ *
+ * `website` is the honeypot: a field people never see, so anything in it
+ * means a bot filled the form. That is reported as `{ ok: true, bot: true }`
+ * rather than an error, so the bot gets no signal to try again differently;
+ * the handler answers it like a success and sends nothing to Shopify.
+ */
+export function validateNewsletter(body) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return { ok: false, error: "Send the sign-up as a JSON object." };
+  }
+  if (text(body.website)) return { ok: true, bot: true };
+
+  const email = text(body.email).toLowerCase();
+  if (!email) return { ok: false, error: "Enter your email address." };
+  if (email.length > 254 || !EMAIL.test(email)) {
+    return { ok: false, error: "Enter a valid email address." };
+  }
+
+  const source = text(body.source) || "popup";
+  if (!NEWSLETTER_SOURCES.includes(source)) {
+    return { ok: false, error: "Unknown sign-up source." };
+  }
+  return { ok: true, bot: false, value: { email, source } };
+}

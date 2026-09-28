@@ -5,6 +5,9 @@
 // `forwarder` is "on" when the ATD forwarder cron will place orders:
 // ATD_ORDERING_ENABLED is "true", checkout is on Shopify with ATD live, and
 // CRON_SECRET is set (docs/integrations/atd-forwarder.md).
+//
+// `newsletter` is "on" when POST /api/newsletter can reach Shopify (Shopify
+// fully configured). The React sign-up pop-up only renders when it is "on".
 
 import { getConfig } from "./_lib/config.js";
 import { methodNotAllowed, send } from "./_lib/http.js";
@@ -31,6 +34,7 @@ export function statusBody(config, endpoints = ATD_ENDPOINTS) {
     shopify: config.shopify.mode,
     checkout: config.checkout,
     forwarder: config.forwarder.mode,
+    newsletter: config.newsletter.mode,
     version: config.version,
   };
   if (issues.length) body.issues = issues;

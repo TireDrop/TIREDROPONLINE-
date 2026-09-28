@@ -271,11 +271,20 @@ export function getConfig(env = process.env) {
     cronSecret,
   };
 
+  // ---- Newsletter sign-up (POST /api/newsletter) ---------------------------
+  // Rides on the same Shopify app (it needs read_customers + write_customers).
+  // "on" whenever Shopify is fully configured; it does not wait for ATD,
+  // because a sign-up charges nothing and quotes no price.
+  const newsletter = {
+    mode: shopify.mode === "live" && shopify.ok ? "on" : "off",
+  };
+
   const sha = clean(env.VERCEL_GIT_COMMIT_SHA);
   return {
     atd,
     shopify,
     forwarder,
+    newsletter,
     orderWebhook: {
       url: webhookIssues.length ? "" : orderWebhookUrl,
       ok: webhookIssues.length === 0,
