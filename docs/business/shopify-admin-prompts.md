@@ -656,3 +656,40 @@ arrived with the blue box.
 ```
 
 **Undo:** paste the backup from step 2 back in, or click "Revert to default".
+
+## 16. Access key so the Vercel live-price site can open Shopify checkouts
+
+The Vercel site shows live ATD prices. At checkout it creates a Shopify
+**draft order** made of custom line items: no products are created or changed
+in Shopify. It then sends the shopper to that draft's Shopify checkout. For
+this, Vercel needs an Admin API token that can **only** create draft orders
+and read orders.
+
+⚠️ **Keep the token private.** Never paste it into a chat, email or doc. It
+goes straight into Vercel → Project → Settings → Environment Variables as
+`SHOPIFY_ADMIN_TOKEN`.
+
+```
+TASK: Create a private Shopify app for TireDrop's Vercel checkout. I'm
+logged into Shopify admin.
+
+1. Settings → Apps and sales channels → Develop apps.
+   - If it asks to allow custom app development, allow it.
+   - If Shopify says new custom apps must be made in the Dev Dashboard,
+     follow its link and make the app there instead. Tell me which route
+     you used.
+2. Create an app named "TireDrop Vercel Checkout".
+3. Admin API access scopes: turn on ONLY write_draft_orders and
+   read_orders. Nothing else. Save.
+4. Install the app on the TireDrop store.
+5. Reveal the Admin API access token ONCE, and stop. Do NOT copy it into this
+   chat or anywhere else: I'll copy it into Vercel myself.
+6. Also tell me the store's myshopify.com domain (Settings → Domains).
+
+REPORT BACK: app created Y/N, the route used (Develop apps or Dev
+Dashboard), the scopes shown, and the myshopify.com domain. NOT the token.
+```
+
+**Then in Vercel** (Justin): add `SHOPIFY_STORE_DOMAIN` (the myshopify.com
+domain) and `SHOPIFY_ADMIN_TOKEN`, then redeploy. Until both are set, checkout
+stays in "request" mode, where orders are emailed and no payment is taken.
