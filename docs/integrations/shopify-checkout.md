@@ -116,8 +116,9 @@ app and the store are in the same Shopify organization.
 | Scope | Used by |
 | --- | --- |
 | `write_draft_orders` | checkout: creates the draft order; order requests: creates the request draft |
-| `read_draft_orders` | checkout: the schema check listed it; add it if Shopify refuses the call without it |
-| `read_orders` | the ATD forwarder: finds paid orders |
+| `read_draft_orders` | checkout: the schema check listed it; add it if Shopify refuses the call without it. Track My Order (`POST /api/track`): finds a `TD-` order request's draft |
+| `read_orders` | the ATD forwarder: finds paid orders. Track My Order (`POST /api/track`): reads the order by number and email |
+| `read_all_orders` | optional: Track My Order for orders older than 60 days (without it they read as not found) |
 | `write_orders` | the ATD forwarder: order tags, note and metafields |
 | `read_merchant_managed_fulfillment_orders` | the ATD forwarder: reads the order's fulfillment orders |
 | `write_merchant_managed_fulfillment_orders` | the ATD forwarder: creates the fulfillment with ATD's tracking |

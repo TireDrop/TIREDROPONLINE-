@@ -27,7 +27,7 @@ const BASE = String(import.meta.env?.VITE_API_BASE || "/api").replace(
   "",
 );
 
-const TIMEOUT_MS = { status: 5000, search: 9000, checkout: 25000, newsletter: 15000, forms: 20000 };
+const TIMEOUT_MS = { status: 5000, search: 9000, checkout: 25000, newsletter: 15000, forms: 20000, track: 20000 };
 
 /** A real rejection from the API. `message` is safe to show a shopper. */
 export class ApiError extends Error {
@@ -531,5 +531,27 @@ export async function sendForm(body) {
     timeout: TIMEOUT_MS.forms,
   });
   if (data?.ok !== true) throw new Error("unexpected answer");
+  return data;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Track My Order                                                     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Looks an order up (POST /api/track) by order number or TD- request
+ * reference plus email. Resolves `{ found: true, kind, order | request }`.
+ * Throws ApiError for the server's own answers: 404 is "no order with that
+ * number and email" (the same for either being wrong), 400 bad input, 429
+ * too many lookups. Anything else (unreachable, Shopify down, not
+ * configured) throws a plain Error for the page's "call us" message.
+ */
+export async function trackOrder({ order, email, website = "" }) {
+  const data = await request("/track", {
+    method: "POST",
+    body: { order, email, website },
+    timeout: TIMEOUT_MS.track,
+  });
+  if (data?.found !== true) throw new Error("unexpected answer");
   return data;
 }

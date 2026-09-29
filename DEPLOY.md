@@ -159,6 +159,13 @@ that do the server-side work:
 |                      | `orders/cancelled` tags `atd-cancel-needed` or            |
 |                      | `cancelled-before-atd`. Needs `SHOPIFY_WEBHOOK_SECRET`.   |
 |                      | Setup: `docs/integrations/webhooks.md`.                   |
+| `POST /api/track`    | Track My Order (`/track`). `{ order, email }`: an order   |
+|                      | number (`#1001`) or a `TD-` request ref plus the email on |
+|                      | it. Answers only when the email matches (else the same    |
+|                      | 404 for any miss): status, items, tracking, ATD state.    |
+|                      | Honeypot and per-IP rate limit; 503 without Shopify.      |
+|                      | Scopes: `read_orders`, `read_draft_orders` (orders older  |
+|                      | than 60 days also need `read_all_orders`).                |
 
 Payment runs on **Shopify's hosted checkout** (Shopify Payments / Shop Pay),
 and the paid order lives in Shopify, so Flow, the order emails and Order
