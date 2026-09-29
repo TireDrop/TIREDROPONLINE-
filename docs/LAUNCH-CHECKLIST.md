@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-09-29_
+_Last updated: 2026-09-29 (rule fixes live)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -14,7 +14,7 @@ _Last updated: 2026-09-29_
 - [x] ~~GA4: correct page titles on route changes~~ (`08df057`)
 - [x] ~~robots.txt: Google allowed to crawl~~ (`9719552`)
 - [x] ~~Site audit saved~~ (`f2d786e`, docs/audit/2026-09-29-site-audit.md)
-- [ ] Rule fixes: APR/"no interest", volume pricing, fake 7% tax, firm pickup date, Reviews/Gallery (building)
+- [x] ~~Rule fixes: APR/"no interest" removed, volume pricing removed, tax "calculated at checkout", preferred pickup day (no firm date), honest Reviews + "Example" Gallery~~ (`aefaed6`…`006010f`)
 - [ ] Instant order alerts: Shopify → Vercel webhooks (building)
 - [ ] Track My Order page `/track` (building)
 - [ ] Track Order / Account links in header, menu and footer (building)
@@ -58,6 +58,8 @@ _Last updated: 2026-09-29_
 - [ ] Security headers: CSP, HSTS, Permissions-Policy
 - [ ] NHTSA lookup timeout
 - [ ] Returns window + warranty/road-hazard links
+- [ ] "Continental US" wording (~40 places) → "48 contiguous states + DC"
+- [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search)
 
 ## Big upgrades (Claude)
 - [ ] Prerender pages for Google
