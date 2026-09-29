@@ -38,7 +38,7 @@ const VALUE_PROPS = [
   {
     icon: Truck,
     title: "Shipped to your yard",
-    body: "Orders ship direct from a distributor warehouse to your address, anywhere in the continental US. No counter trips, no driver paid to wait.",
+    body: "Orders ship direct from a distributor warehouse to your address, anywhere in the 48 contiguous states and DC. No counter trips, no driver paid to wait.",
   },
   {
     icon: Clock,
@@ -47,8 +47,8 @@ const VALUE_PROPS = [
   },
   {
     icon: DollarSign,
-    title: "Fleet pricing on volume",
-    body: "Sets of eight or more are quoted at fleet rates, with one consolidated invoice instead of a stack of counter receipts.",
+    title: "Fleet and multi-vehicle orders",
+    body: "Send the list of vehicles and sizes and we will quote each tire. You get one written quote for the whole list instead of pricing it truck by truck.",
   },
   {
     icon: Wrench,
@@ -204,7 +204,7 @@ export default function CommercialTiresPage() {
         <SectionHead
           eyebrow="In the catalog"
           title="Commercial tires we ship"
-          lede="Load Range E casings approved for dual fitment, priced per tire. Volume pricing applies to sets of eight or more."
+          lede="Load Range E casings approved for dual fitment, priced per tire. Fleet and multi-vehicle orders: send the list and we'll quote each tire."
           action={
             <Link to="/tires?cats=Commercial" className="btn-outline btn-sm">
               View in the tire catalog

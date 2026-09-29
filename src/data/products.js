@@ -662,7 +662,7 @@ export const TIRES = [
       "Five-rib tread design resists irregular wear",
       "Stone ejectors protect the belt package on gravel lots",
       "High-load casing for box trucks and shuttle vans",
-      "Volume pricing available on sets of eight or more",
+      "Dual-fitment approved for rear-axle duals",
     ],
     specs: {
       "Tire Size": "225/75R16",
