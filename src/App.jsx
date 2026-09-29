@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import Header from "./components/layout/Header.jsx";
@@ -8,6 +8,7 @@ import NewsletterGate from "./components/layout/NewsletterGate.jsx";
 import CompareTray from "./components/shop/CompareTray.jsx";
 import { InPageAnchors, ScrollToTop } from "./components/ui/index.jsx";
 import { trackPageView } from "./lib/analytics.js";
+import { lazyPage } from "./lib/lazyPage.js";
 
 // Every route except the home page is loaded on demand.
 //
@@ -21,51 +22,99 @@ import { trackPageView } from "./lib/analytics.js";
 // visitors, and making it wait on a second round trip would trade the win away
 // at exactly the moment it matters.
 import HomePage from "./pages/HomePage.jsx";
-const ShippingPage = lazy(() => import("./pages/ShippingPage.jsx"));
-const InstallPage = lazy(() => import("./pages/InstallPage.jsx"));
+const ShippingPage = lazyPage("pages/ShippingPage.jsx", () =>
+  import("./pages/ShippingPage.jsx"),
+);
+const InstallPage = lazyPage("pages/InstallPage.jsx", () =>
+  import("./pages/InstallPage.jsx"),
+);
 
 // Shop
-const TiresPage = lazy(() => import("./pages/shop/TiresPage.jsx"));
-const WheelsPage = lazy(() => import("./pages/shop/WheelsPage.jsx"));
-const ProductPage = lazy(() => import("./pages/shop/ProductPage.jsx"));
-const TireSkuPage = lazy(() => import("./pages/shop/TireSkuPage.jsx"));
-const CommercialTiresPage = lazy(
-  () => import("./pages/shop/CommercialTiresPage.jsx"),
+const TiresPage = lazyPage("pages/shop/TiresPage.jsx", () =>
+  import("./pages/shop/TiresPage.jsx"),
 );
-const CartPage = lazy(() => import("./pages/shop/CartPage.jsx"));
-const CheckoutPage = lazy(() => import("./pages/shop/CheckoutPage.jsx"));
-const ComparePage = lazy(() => import("./pages/shop/ComparePage.jsx"));
+const WheelsPage = lazyPage("pages/shop/WheelsPage.jsx", () =>
+  import("./pages/shop/WheelsPage.jsx"),
+);
+const ProductPage = lazyPage("pages/shop/ProductPage.jsx", () =>
+  import("./pages/shop/ProductPage.jsx"),
+);
+const TireSkuPage = lazyPage("pages/shop/TireSkuPage.jsx", () =>
+  import("./pages/shop/TireSkuPage.jsx"),
+);
+const CommercialTiresPage = lazyPage("pages/shop/CommercialTiresPage.jsx", () =>
+  import("./pages/shop/CommercialTiresPage.jsx"),
+);
+const CartPage = lazyPage("pages/shop/CartPage.jsx", () =>
+  import("./pages/shop/CartPage.jsx"),
+);
+const CheckoutPage = lazyPage("pages/shop/CheckoutPage.jsx", () =>
+  import("./pages/shop/CheckoutPage.jsx"),
+);
+const ComparePage = lazyPage("pages/shop/ComparePage.jsx", () =>
+  import("./pages/shop/ComparePage.jsx"),
+);
 
 // Free tools. They answer the questions that stop someone buying tires
 // online — what size, which tire, and do I even need them yet.
-const TireSizePage = lazy(() => import("./pages/tools/TireSizePage.jsx"));
-const FindMyTiresPage = lazy(() => import("./pages/tools/FindMyTiresPage.jsx"));
-const TireCheckPage = lazy(() => import("./pages/tools/TireCheckPage.jsx"));
+const TireSizePage = lazyPage("pages/tools/TireSizePage.jsx", () =>
+  import("./pages/tools/TireSizePage.jsx"),
+);
+const FindMyTiresPage = lazyPage("pages/tools/FindMyTiresPage.jsx", () =>
+  import("./pages/tools/FindMyTiresPage.jsx"),
+);
+const TireCheckPage = lazyPage("pages/tools/TireCheckPage.jsx", () =>
+  import("./pages/tools/TireCheckPage.jsx"),
+);
 
 // Services
-const MobileServicePage = lazy(
-  () => import("./pages/services/MobileServicePage.jsx"),
+const MobileServicePage = lazyPage("pages/services/MobileServicePage.jsx", () =>
+  import("./pages/services/MobileServicePage.jsx"),
 );
-const AutoServicePage = lazy(
-  () => import("./pages/services/AutoServicePage.jsx"),
+const AutoServicePage = lazyPage("pages/services/AutoServicePage.jsx", () =>
+  import("./pages/services/AutoServicePage.jsx"),
 );
-const ServiceDetailPage = lazy(
-  () => import("./pages/services/ServiceDetailPage.jsx"),
+const ServiceDetailPage = lazyPage("pages/services/ServiceDetailPage.jsx", () =>
+  import("./pages/services/ServiceDetailPage.jsx"),
 );
-const SchedulePage = lazy(() => import("./pages/services/SchedulePage.jsx"));
+const SchedulePage = lazyPage("pages/services/SchedulePage.jsx", () =>
+  import("./pages/services/SchedulePage.jsx"),
+);
 
 // About & Support
-const AboutPage = lazy(() => import("./pages/support/AboutPage.jsx"));
-const LocationsPage = lazy(() => import("./pages/support/LocationsPage.jsx"));
-const ContactPage = lazy(() => import("./pages/support/ContactPage.jsx"));
-const ReviewsPage = lazy(() => import("./pages/support/ReviewsPage.jsx"));
-const FinancingPage = lazy(() => import("./pages/support/FinancingPage.jsx"));
-const TireCarePage = lazy(() => import("./pages/support/TireCarePage.jsx"));
-const GalleryPage = lazy(() => import("./pages/support/GalleryPage.jsx"));
-const TrackOrderPage = lazy(() => import("./pages/support/TrackOrderPage.jsx"));
-const SitemapPage = lazy(() => import("./pages/support/SitemapPage.jsx"));
-const LegalPage = lazy(() => import("./pages/support/LegalPage.jsx"));
-const NotFoundPage = lazy(() => import("./pages/NotFoundPage.jsx"));
+const AboutPage = lazyPage("pages/support/AboutPage.jsx", () =>
+  import("./pages/support/AboutPage.jsx"),
+);
+const LocationsPage = lazyPage("pages/support/LocationsPage.jsx", () =>
+  import("./pages/support/LocationsPage.jsx"),
+);
+const ContactPage = lazyPage("pages/support/ContactPage.jsx", () =>
+  import("./pages/support/ContactPage.jsx"),
+);
+const ReviewsPage = lazyPage("pages/support/ReviewsPage.jsx", () =>
+  import("./pages/support/ReviewsPage.jsx"),
+);
+const FinancingPage = lazyPage("pages/support/FinancingPage.jsx", () =>
+  import("./pages/support/FinancingPage.jsx"),
+);
+const TireCarePage = lazyPage("pages/support/TireCarePage.jsx", () =>
+  import("./pages/support/TireCarePage.jsx"),
+);
+const GalleryPage = lazyPage("pages/support/GalleryPage.jsx", () =>
+  import("./pages/support/GalleryPage.jsx"),
+);
+const TrackOrderPage = lazyPage("pages/support/TrackOrderPage.jsx", () =>
+  import("./pages/support/TrackOrderPage.jsx"),
+);
+const SitemapPage = lazyPage("pages/support/SitemapPage.jsx", () =>
+  import("./pages/support/SitemapPage.jsx"),
+);
+const LegalPage = lazyPage("pages/support/LegalPage.jsx", () =>
+  import("./pages/support/LegalPage.jsx"),
+);
+const NotFoundPage = lazyPage("pages/NotFoundPage.jsx", () =>
+  import("./pages/NotFoundPage.jsx"),
+);
 
 /**
  * Sends the GA4 page_view for each route change (src/lib/analytics.js).

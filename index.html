@@ -66,13 +66,14 @@
       name="twitter:description"
       content="A full tire and wheel catalog shipped to your door, or installed at our shop in Sunrise, FL. Powered by Extreme Tires."
     />
-    <!-- No canonical here on purpose. Every route is served this same file,
-         so a static canonical would read "https://tiredroponline.com/" on all
-         73 URLs and tell any crawler that does not run JavaScript that the
-         whole site is a duplicate of the home page — worse than having none.
-         The Seo component sets the correct canonical per route once React
-         renders, which is what Google reads. Making it correct in the served
-         HTML needs prerendering; see docs/technical-audit.md. -->
+    <!-- No canonical here on purpose. This file is the template every route
+         is prerendered from (scripts/prerender.mjs), which removes this
+         comment and the title, description, og:title/description/type/url
+         and twitter:title/description above, and writes each route's own
+         set, canonical, robots and JSON-LD in their place. Unprerendered, as
+         in `vite dev` and dist/spa.html, the Seo component sets them once
+         React renders. A static canonical here would call every URL a
+         duplicate of the home page. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
