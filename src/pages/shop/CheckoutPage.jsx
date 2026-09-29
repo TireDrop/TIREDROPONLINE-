@@ -48,7 +48,15 @@ function toISODate(date) {
   return `${y}-${m}-${d}`;
 }
 
-const todayISO = () => toISODate(new Date());
+// Tires have to arrive before anything can be fitted, so the earliest day a
+// shopper can ask for is three days out. It is still only a preference: the
+// shop calls to set the time once the order has landed.
+const LEAD_DAYS = 3;
+function earliestPreferredISO() {
+  const d = new Date();
+  d.setDate(d.getDate() + LEAD_DAYS);
+  return toISODate(d);
+}
 
 /** Parses at midday so a date-only string never slides a day on DST edges. */
 function parseISO(iso) {
@@ -232,13 +240,13 @@ function validateInstall(f, { hasShopInstall = false } = {}) {
   const needsDate = f.fulfillment === "pickup";
   if (needsDate) {
     if (!f.date) {
-      e.date = "Pick a preferred date.";
-    } else if (f.date < todayISO()) {
-      e.date = "Pick today or a later date.";
+      e.date = "Pick a preferred day.";
+    } else if (f.date < earliestPreferredISO()) {
+      e.date = `Pick a day at least ${LEAD_DAYS} days out. Your tires have to arrive first.`;
     } else if (parseISO(f.date).getDay() === 0) {
       e.date = "We're closed Sundays. Choose Monday through Saturday.";
     }
-    if (!f.timeWindow) e.timeWindow = "Pick a time window.";
+    if (!f.timeWindow) e.timeWindow = "Pick a preferred time window.";
     else if (!windowsForDate(f.date).some((w) => w.value === f.timeWindow))
       e.timeWindow = "That window isn't available on the date you picked.";
   }
@@ -715,7 +723,7 @@ export default function CheckoutPage() {
       <>
         <Seo
           title={mobile ? "Booking Request Received" : "Order Request Received"}
-          description="Your TireDrop order request is in. It is not paid yet: we call to confirm fitment, delivery or your install window, and payment."
+          description="Your TireDrop order request is in. It is not paid yet: we call to confirm fitment, delivery and payment, and to set an install time once your tires arrive."
         />
         <Breadcrumbs
           trail={[
@@ -821,14 +829,12 @@ export default function CheckoutPage() {
                         ? "Your order ships out"
                         : mobile
                           ? "The van comes to you"
-                          : "We fit them at the shop",
+                          : "We call when your tires arrive",
                       copy: ship
                         ? `Your order ships to ${shipTo} once payment clears. Tracking follows by phone.`
                         : mobile
                           ? `We fit them at ${shipTo} at the time we agree on the call. ${MOBILE_INSTALL_FROM}`
-                          : `Your order ships free to ${BUSINESS.shop.full}. Meet us there on ${formatLongDate(
-                              f.date,
-                            )}, ${windowLabel(f.timeWindow)}.`,
+                          : `Your order ships free to ${BUSINESS.shop.full}. The shop will contact you when your tires arrive to set a time. Your preferred day is noted, but nothing is booked until then.`,
                     },
                   ].map((s, i) => (
                     <li key={s.title} className="flex gap-3">
@@ -849,7 +855,8 @@ export default function CheckoutPage() {
 
                 <div className="mt-6 border-t border-ink/10 pt-5">
                   <p className="text-sm leading-relaxed text-smoke">
-                    Need to change the address, the date or the sizes? Call{" "}
+                    Need to change the address, your preferred day or the sizes?
+                    Call{" "}
                     <a
                       href={BUSINESS.phoneHref}
                       className="font-display text-ink hover:text-drop"
@@ -1114,8 +1121,9 @@ export default function CheckoutPage() {
                         {BUSINESS.shop.full}
                       </p>
                       <p className="mt-2 text-xs leading-relaxed text-smoke">
-                        Shipping to the shop is free. We call when your order
-                        lands and confirm the install window below.
+                        Shipping to the shop is free. We call when your tires
+                        arrive to set a time. The day below is a preference, not
+                        a booking.
                       </p>
                       <ul className="mt-3 space-y-0.5 text-xs text-smoke">
                         {BUSINESS.hours.map((h) => (
@@ -1243,14 +1251,15 @@ export default function CheckoutPage() {
                 {form.fulfillment === "pickup" && (
                   <fieldset>
                     <legend className="label mb-2">
-                      Preferred install appointment
+                      Preferred install/pickup day (we confirm once your tires
+                      arrive)
                     </legend>
                     <div className="grid gap-5 sm:grid-cols-2">
                       <TextField
                         id="date"
-                        label="Date"
+                        label="Preferred day"
                         type="date"
-                        min={todayISO()}
+                        min={earliestPreferredISO()}
                         value={form.date}
                         onChange={(e) => {
                           set("date", e.target.value);
@@ -1261,11 +1270,11 @@ export default function CheckoutPage() {
                           if (!stillValid) set("timeWindow", "");
                         }}
                         error={errors.date}
-                        hint="Closed Sundays. Mon–Sat only."
+                        hint={`At least ${LEAD_DAYS} days out. Closed Sundays.`}
                       />
                       <SelectField
                         id="timeWindow"
-                        label="Time window"
+                        label="Preferred time window"
                         value={form.timeWindow}
                         onChange={onInput}
                         error={errors.timeWindow}
@@ -1279,8 +1288,9 @@ export default function CheckoutPage() {
                       </SelectField>
                     </div>
                     <p className="mt-3 text-xs leading-relaxed text-smoke">
-                      Windows are requests, not guarantees. We confirm the exact
-                      time on the call, once your order has landed.
+                      The day and window are preferences, not a booking. The
+                      shop contacts you when your tires arrive to set the actual
+                      time.
                     </p>
                   </fieldset>
                 )}
@@ -1411,12 +1421,16 @@ export default function CheckoutPage() {
                         "We book the van with you on the call",
                       ],
                       form.fulfillment === "pickup" && [
-                        "Date",
+                        "Preferred day",
                         formatLongDate(form.date),
                       ],
                       form.fulfillment === "pickup" && [
-                        "Window",
+                        "Preferred window",
                         windowLabel(form.timeWindow),
+                      ],
+                      form.fulfillment === "pickup" && [
+                        "Scheduling",
+                        "We call to set a time once your tires arrive",
                       ],
                     ].filter(Boolean)}
                   />
