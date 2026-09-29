@@ -5,11 +5,9 @@ import {
   CalendarClock,
   CheckCircle2,
   CreditCard,
-  FileText,
   Info,
   Phone,
   Store,
-  Truck,
   Wallet,
 } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
@@ -22,7 +20,6 @@ import {
 } from "../../data/forms.js";
 import {
   Accordion,
-  Badge,
   Breadcrumbs,
   FormTrap,
   Input,
@@ -32,94 +29,44 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
-// The live store takes cards at checkout. This page lists the ways to pay
-// without promising a program or a method that may not be running today.
+// How an order actually gets paid for. Online, that is our Shopify checkout;
+// Shop Pay Installments is Shop Pay's own option there, so this page names it
+// but never quotes its terms, rates or who stands behind it.
 const PAY_METHODS = [
   {
     icon: CreditCard,
     title: "Card",
-    copy: "Major credit and debit cards. If you would rather not pay online, call and we can take the order and the card over the phone.",
+    copy: "Major credit and debit cards at our Shopify checkout. If you would rather not pay online, call and we can take the order and the card over the phone.",
   },
   {
     icon: Wallet,
-    title: "Financing through a lender",
-    copy: "A third-party financing provider can spread the cost over time. They review the application, they approve or decline it, and they set the rate and the term. Call first — which programs are open changes, and we will not send you to an application that is not running.",
+    title: "Shop Pay",
+    copy: "If you already use Shop Pay, it is at the same checkout, with your saved details.",
+  },
+  {
+    icon: CalendarClock,
+    title: "Shop Pay Installments",
+    copy: "Split the payment with Shop Pay Installments at checkout, subject to eligibility. Shop Pay shows you the terms at checkout before you confirm. We do not set them.",
   },
   {
     icon: Store,
     title: "In person at the shop",
-    copy: `Paying for an install, an add-on service or a ship-to-store order at the counter in ${BUSINESS.shop.city}? Cards work there too, and so does cash.`,
+    copy: `Paying for an install, an add-on service or a ship-to-store order at the counter in ${BUSINESS.shop.city}? Cards work there too, and so does cash. Ask in the shop about ways to pay.`,
   },
-  {
-    icon: Truck,
-    title: "Fleet and commercial",
-    copy: "Running several vehicles? Call us about how billing can be arranged for a fleet account rather than paying order by order.",
-  },
-];
-
-const PLANS = [
-  {
-    name: "Short term",
-    tag: "Small orders",
-    highlight: false,
-    summary:
-      "Spread one or two tires, or a single install, over a few months of scheduled payments.",
-    points: [
-      "Best for a single tire, a pair, or an install appointment",
-      "Short payment schedule, decided at approval",
-      "The price of the tires does not change because you financed them",
-    ],
-    note: "Costs and any fees are set by the lender, not by us.",
-  },
-  {
-    name: "Promotional period",
-    tag: "Most common",
-    highlight: true,
-    summary:
-      "Some lender programs offer no interest if the balance is paid in full within a promotional window on purchases over a set amount.",
-    points: [
-      "Typically aimed at a full set of four, or tires plus install",
-      "Promotional terms apply only if you meet them exactly",
-      "Interest can be charged back if the balance is not cleared in time",
-    ],
-    note: "Promotional offers change. Ask what is available the day you apply.",
-  },
-  {
-    name: "Longer term",
-    tag: "Bigger orders",
-    highlight: false,
-    summary:
-      "Fixed monthly payments over a longer term for larger tickets — a wheel and tire package, or a set plus alignment and brakes.",
-    points: [
-      "Lower monthly payment, longer commitment",
-      "Interest usually applies for the whole term",
-      "You can normally pay it off early — confirm with the lender",
-    ],
-    note: "Rate and term depend entirely on the lender's decision.",
-  },
-];
-
-const REQUIREMENTS = [
-  "A valid, government-issued photo ID",
-  "A Social Security number or ITIN, if the lender asks for one",
-  "Proof of a steady income source",
-  "An active checking account or debit card for payments",
-  "A working phone number and email for the lender's verification step",
-  "To be at least 18 years old, with a billing address in the United States",
 ];
 
 const STEPS = [
   {
     title: "Build the order first",
-    copy: "Put the tires or wheels in the cart, or call us and we will price it with you — including the install, if you are having it fitted. You need a real number before financing means anything.",
+    copy: "Put the tires or wheels in the cart, or call us and we will price it with you, including the install if you are having it fitted.",
   },
   {
-    title: "Apply with the lender",
-    copy: "Financing is handled by a third-party provider, and we will point you at whichever program is open when you buy. The application is theirs, the decision is theirs, and the information you enter goes to them — not to us.",
+    title: "Choose how to pay at checkout",
+    copy: "Our checkout runs on Shopify. Pick card, Shop Pay, or Shop Pay Installments if it is offered for your order.",
   },
   {
-    title: "Read what you were actually offered",
-    copy: "If you are approved, check the amount, the term, the rate and any fees before you accept. Ask questions. Walking away at this point costs you nothing.",
+    title: "Read the terms Shop Pay shows you",
+    copy: "If you choose Shop Pay Installments, Shop Pay shows the payment schedule and terms before you confirm, and decides eligibility. Walking away at that point costs you nothing.",
   },
   {
     title: "The order goes through",
@@ -129,32 +76,28 @@ const STEPS = [
 
 const FAQ = [
   {
-    q: "Do you decide who gets approved?",
-    a: "No. We sell tires and wheels; we are not a lender. Applications go to a third-party financing company that makes its own decision using its own criteria. We find out the outcome at roughly the same time you do.",
+    q: "Do you decide who can pay in installments?",
+    a: "No. We sell tires and wheels; we are not a lender. Whether Shop Pay Installments is offered for your order is decided at checkout, not by us.",
   },
   {
-    q: "Will applying affect my credit?",
-    a: "That depends on the provider and the program. Some run a soft inquiry to pre-qualify and a hard inquiry only if you accept an offer. The lender has to disclose this during the application — read that part carefully before you submit.",
+    q: "Will choosing Shop Pay Installments affect my credit?",
+    a: "Shop Pay explains what its eligibility check involves at checkout, before you confirm. Read that part before you continue. The request form on this page does not touch your credit.",
   },
   {
-    q: "Can I finance an order that ships to my house?",
-    a: "Yes. Financing covers the purchase, not the destination. A set shipped to an address three states away and a set fitted in Sunrise are paid for the same way.",
+    q: "Can I pay over time on an order that ships to my house?",
+    a: "Yes. How you pay does not depend on where the order goes. A set shipped to another state and a set fitted in Sunrise go through the same checkout.",
   },
   {
-    q: "What if I am declined?",
-    a: "Nothing changes on our side and we do not treat you any differently. You can still pay by card, and we can often re-work the order — the safety-critical tires now, the rest later.",
+    q: "What if Shop Pay Installments is not offered for my order?",
+    a: "Nothing changes on our side. You can still pay by card or Shop Pay, call us to pay by phone, or ask in the shop.",
   },
   {
-    q: "Can I pay it off early?",
-    a: "Most plans allow it, and on a promotional no-interest offer paying early is usually the entire point. Confirm the details in your lender agreement, since early-payoff rules come from them.",
+    q: "What if I return part of an order I paid for in installments?",
+    a: "Refunds go back the way you paid, so a refund on an installment order is applied through Shop Pay. It can take a billing cycle to show up there. Our return terms are on the terms page.",
   },
   {
-    q: "What if I return part of a financed order?",
-    a: "Refunds go back through the way you paid, so a refund on a financed order is credited against your balance with the lender. That can take a billing cycle or two to show up on their side, and any interest already charged is between you and them. Our return terms are on the terms page.",
-  },
-  {
-    q: "What payment methods do you take if I skip financing?",
-    a: "Major credit and debit cards, and cards or cash in person at the shop. If you would rather pay over the phone, call and ask. If you are running a fleet, call and ask how billing can be arranged.",
+    q: "What payment methods do you take?",
+    a: "Online: major credit and debit cards, Shop Pay, and Shop Pay Installments where it is offered. In person at the shop: cards or cash. If you would rather pay over the phone, call and ask.",
   },
 ];
 
@@ -249,14 +192,13 @@ function ApplicationForm() {
           <p className="mt-3 text-sm leading-relaxed text-smoke">
             Thanks, {firstName}. Someone will call you at {values.phone} during
             the hours the shop is open, to confirm what you are buying, price it
-            properly, and point you to whichever financing program is running.
-            If you would rather not wait for the call, the number below reaches
-            the same people.
+            properly, and go through the ways to pay. If you would rather not
+            wait for the call, the number below reaches the same people.
           </p>
           <p className="mt-3 text-sm leading-relaxed text-smoke">
-            This is not an application and it is not an approval — it only
-            starts the conversation. Any credit decision is made by a
-            third-party lender under their own terms.
+            This is not an application and it is not an approval. It only
+            starts the conversation. If you pay with Shop Pay Installments,
+            eligibility and terms are shown by Shop Pay at checkout.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <a href={BUSINESS.phoneHref} className="btn-primary btn-sm">
@@ -294,8 +236,8 @@ function ApplicationForm() {
             {BUSINESS.phone}
           </a>{" "}
           during the hours the shop is open and whoever answers can price the
-          order properly and tell you which financing program is running that
-          day. What you filled in is below — read it out, or copy it across,
+          order properly and go through the ways to pay. What you filled in is
+          below — read it out, or copy it across,
           rather than typing it again.
           {CONTACT_EMAIL ? ` You can also send it to ${CONTACT_EMAIL}.` : ""}
         </p>
@@ -321,8 +263,8 @@ function ApplicationForm() {
 
         <p className="mt-5 text-sm leading-relaxed text-smoke">
           Either way, none of this was an application and none of it was an
-          approval. Any credit decision is made by a third-party lender under
-          their own terms.
+          approval. If you pay with Shop Pay Installments, eligibility and terms
+          are shown by Shop Pay at checkout.
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3">
@@ -345,11 +287,11 @@ function ApplicationForm() {
   return (
     <form noValidate onSubmit={handleSubmit} className="card p-6 md:p-8">
       <FormTrap id="financing-website" />
-      <h3 className="h3 mb-1">Start a financing conversation</h3>
+      <h3 className="h3 mb-1">Ask us about paying for an order</h3>
       <p className="mb-6 text-sm text-smoke">
         {wired
           ? "This goes to us, not to a lender."
-          : "Nothing here goes to a lender, and this form is not connected to an inbox yet — it lays out what to tell us on the phone."}{" "}
+          : "This form is not connected to an inbox yet, so it lays out what to tell us on the phone."}{" "}
         No credit check happens here. All fields are required.
       </p>
 
@@ -463,13 +405,13 @@ export default function FinancingPage() {
     <>
       <Seo
         title="Financing & Payment Options"
-        description={`How to pay for tires and wheels at ${BUSINESS.name} — cards at checkout, in person at the ${BUSINESS.shop.city} shop, or financing through a third-party lender who sets the terms.`}
+        description={`How to pay for tires and wheels at ${BUSINESS.name}: card, Shop Pay or Shop Pay Installments at our Shopify checkout, or in person at the ${BUSINESS.shop.city} shop.`}
       />
 
       <PageHero
         eyebrow="Financing"
         title="Tires now. Pay over time."
-        lede="Nobody plans for a blown tire in the middle of the month. Here is every way you can pay for an order — including financing, where the terms are set by a third-party lender, not by us."
+        lede="Nobody plans for a blown tire in the middle of the month. Here is every way you can pay for an order, including Shop Pay Installments at checkout, subject to eligibility."
       >
         <div className="flex flex-wrap gap-3">
           <a href="#apply" className="btn-primary">
@@ -489,7 +431,7 @@ export default function FinancingPage() {
         <SectionHead
           eyebrow="Ways To Pay"
           title="Four ways an order gets paid for"
-          lede="Most customers use the first one. The rest exist because not every order is a card swipe."
+          lede="The first three happen at our Shopify checkout. If your order comes to us as a request instead, we take payment on the phone or at the shop."
         />
 
         <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -505,7 +447,7 @@ export default function FinancingPage() {
         <p className="mt-6 text-sm leading-relaxed text-smoke">
           We would rather under-promise here than list a payment method that
           turns out not to work at checkout. If you want to know exactly what is
-          accepted and which financing program is running today, call{" "}
+          accepted before you order, call{" "}
           <a href={BUSINESS.phoneHref} className="underline hover:text-drop">
             {BUSINESS.phone}
           </a>{" "}
@@ -513,115 +455,33 @@ export default function FinancingPage() {
         </p>
       </Section>
 
-      {/* ---------- Plans ---------- */}
+      {/* ---------- How it works ---------- */}
       <Section className="bg-fog">
-        <SectionHead
-          eyebrow="Plan Options"
-          title="Three shapes a plan usually takes"
-          lede="These are the kinds of programs financing providers commonly offer for tire and wheel purchases. What you are actually offered depends on the lender and on your application."
-        />
-
-        <ul className="grid gap-5 lg:grid-cols-3">
-          {PLANS.map((plan) => (
-            <li
-              key={plan.name}
-              className={`card flex flex-col p-6 ${
-                plan.highlight ? "border-drop ring-1 ring-drop" : ""
-              }`}
-            >
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <h3 className="h3">{plan.name}</h3>
-                <Badge tone={plan.highlight ? "drop" : "soft"}>
-                  {plan.tag}
-                </Badge>
+        <SectionHead eyebrow="How It Works" title="Four steps, start to finish" />
+        <ol className="grid gap-4 md:grid-cols-2">
+          {STEPS.map((step, i) => (
+            <li key={step.title} className="card flex gap-4 p-6">
+              <span
+                aria-hidden
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-ink font-display text-xl text-amber"
+              >
+                {i + 1}
+              </span>
+              <div>
+                <h3 className="h3">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-smoke">
+                  {step.copy}
+                </p>
               </div>
-
-              <p className="text-sm leading-relaxed text-smoke">
-                {plan.summary}
-              </p>
-
-              <ul className="mt-5 flex-1 space-y-2.5 text-sm text-ink">
-                {plan.points.map((point) => (
-                  <li key={point} className="flex items-start gap-2">
-                    <CheckCircle2
-                      size={16}
-                      aria-hidden
-                      className="mt-0.5 shrink-0 text-drop"
-                    />
-                    {point}
-                  </li>
-                ))}
-              </ul>
-
-              <p className="mt-5 border-t border-ink/10 pt-4 text-xs leading-relaxed text-smoke">
-                {plan.note}
-              </p>
             </li>
           ))}
-        </ul>
-
+        </ol>
         <p className="mt-6 flex items-start gap-2 text-sm leading-relaxed text-smoke">
           <Info size={16} aria-hidden className="mt-0.5 shrink-0 text-drop" />
-          We do not quote rates, approval odds or monthly payments on this page,
-          because we do not set them. Ask us what programs are running the day
-          you buy, and read the lender's offer before you accept it.
+          We do not quote payment plans, approval odds or monthly payments on
+          this page, because we do not set them. Shop Pay shows you the terms at
+          checkout before you confirm.
         </p>
-      </Section>
-
-      {/* ---------- Requirements + steps ---------- */}
-      <Section className="bg-bone">
-        <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-14">
-          <div>
-            <SectionHead
-              eyebrow="Before You Apply"
-              title="What you will likely need"
-            />
-            <div className="card p-6">
-              <FileText size={26} aria-hidden className="mb-4 text-drop" />
-              <ul className="space-y-3 text-sm text-ink">
-                {REQUIREMENTS.map((item) => (
-                  <li key={item} className="flex items-start gap-2.5">
-                    <span
-                      aria-hidden
-                      className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-drop"
-                    />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-5 border-t border-ink/10 pt-4 text-xs leading-relaxed text-smoke">
-                Requirements come from the financing provider and can differ by
-                program. This list is a general guide, not a checklist we
-                control.
-              </p>
-            </div>
-          </div>
-
-          <div>
-            <SectionHead
-              eyebrow="How It Works"
-              title="Four steps, start to finish"
-            />
-            <ol className="space-y-4">
-              {STEPS.map((step, i) => (
-                <li key={step.title} className="card flex gap-4 p-6">
-                  <span
-                    aria-hidden
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-ink font-display text-xl text-amber"
-                  >
-                    {i + 1}
-                  </span>
-                  <div>
-                    <h3 className="h3">{step.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-smoke">
-                      {step.copy}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
       </Section>
 
       {/* ---------- Disclosure ---------- */}
@@ -636,41 +496,29 @@ export default function FinancingPage() {
                 <span className="text-bone">
                   We are not a bank and we are not a lender.
                 </span>{" "}
-                Financing is provided by a third-party company. They review the
-                application, they decide, and they set the rate, the term and
-                any fees. Nothing on this page is an offer of credit or a
-                promise that you will be approved.
+                Shop Pay Installments is offered by Shop Pay at our Shopify
+                checkout, subject to eligibility. Shop Pay decides whether it is
+                offered and shows the terms before you confirm. Nothing on this
+                page is an offer of credit.
               </p>
               <p>
-                <span className="text-bone">Rates and APR vary.</span> The
-                annual percentage rate you are offered depends on the provider's
-                program and on their review of your application. Some
-                promotional plans advertise no interest if the full balance is
-                paid within the promotional period — if it is not, interest may
-                be charged on the original amount from the date of purchase.
-                That is the detail people miss most often.
-              </p>
-              <p>
-                <span className="text-bone">Read the agreement.</span> Your
-                actual terms — payment amount, due dates, late fees, payoff
-                rules — live in the agreement the lender gives you, not here.
+                <span className="text-bone">Read what you are shown.</span> The
+                payment schedule and everything else about an installment plan
+                are on the screen Shop Pay shows you at checkout, not here.
                 Those terms control if anything on this page reads differently.
               </p>
               <p>
                 <span className="text-bone">Prices are separate.</span> What you
-                pay us for tires, wheels and labor does not change
-                based on how you pay. Financing costs, if any, are between you
-                and the lender.
+                pay us for tires, wheels and labor does not change based on how
+                you pay.
               </p>
               <p>
                 <span className="text-bone">
                   Availability is not guaranteed.
                 </span>{" "}
-                Which financing programs we can point you at depends on the
-                providers we are set up with at the time. This page describes
-                how financing works when it is available; it is not a statement
-                that a particular program is open today. Ask on the phone before
-                you count on it.
+                Whether Shop Pay Installments appears depends on your order and
+                on eligibility. If it does not, pay by card or Shop Pay, or ask
+                in the shop.
               </p>
               <p>
                 <span className="text-bone">Questions are free.</span> If any of
@@ -678,8 +526,8 @@ export default function FinancingPage() {
                 <a href={BUSINESS.phoneHref} className="text-volt underline">
                   {BUSINESS.phone}
                 </a>{" "}
-                before you sign anything. We would rather explain it twice than
-                have you stuck in a plan you did not understand.
+                before you pay. We would rather explain it twice than have you
+                pay in a way you did not mean to.
               </p>
             </div>
           </div>
@@ -695,8 +543,8 @@ export default function FinancingPage() {
               title="Tell us what you need covered"
               lede={
                 wired
-                  ? "Send this over and we will call you with a real price for the order and whatever financing options are running that week."
-                  : "Fill this in, then call it through — whoever answers can give you a real price for the order and whatever financing options are running that week."
+                  ? "Send this over and we will call you with a real price for the order and go through the ways to pay."
+                  : "Fill this in, then call it through. Whoever answers can give you a real price for the order and go through the ways to pay."
               }
             />
 
@@ -731,8 +579,8 @@ export default function FinancingPage() {
                   className="shrink-0 text-drop"
                 />
                 <p className="text-sm leading-relaxed text-smoke">
-                  <span className="text-ink">Cards work too.</span> Financing is
-                  an option, never a requirement.
+                  <span className="text-ink">Cards work too.</span> Paying over
+                  time is an option, never a requirement.
                 </p>
               </li>
             </ul>
