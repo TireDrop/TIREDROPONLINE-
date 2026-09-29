@@ -1021,3 +1021,56 @@ publish/duplicate themes.
 REPORT BACK: each PART Y/N, the fonts actually chosen, and a description or
 screenshots of checkout (desktop + mobile) and the test email.
 ```
+
+---
+
+## 21. Order webhooks: send paid and cancelled orders to the site at once
+
+**Why:** with these two webhooks a paid order is placed with ATD within
+seconds instead of waiting for the cron, and a cancellation is flagged
+(`atd-cancel-needed` / `cancelled-before-atd`). Nothing is sent to ATD
+while `ATD_ORDERING_ENABLED` is off. Background and troubleshooting:
+`docs/integrations/webhooks.md` (this prompt is the same as the one there).
+
+```
+In the Shopify admin for the TireDrop store (the xxx.myshopify.com store behind shop.tiredroponline.com):
+
+1. Go to Settings (bottom left) → Notifications.
+2. Scroll to the bottom and click "Webhooks".
+3. Click "Create webhook" and set:
+     Event:  Order payment
+     Format: JSON
+     URL:    https://tiredroponline.com/api/webhooks/shopify
+     Webhook API version: the newest one in the list (2026-07 or later)
+   Click Save.
+4. Click "Create webhook" again and set:
+     Event:  Order cancellation
+     Format: JSON
+     URL:    https://tiredroponline.com/api/webhooks/shopify
+     Webhook API version: the same newest version
+   Click Save.
+5. On the Webhooks section, find the line "Your webhooks will be signed with"
+   followed by a long key. Copy that key exactly. Do not paste it anywhere
+   except the Vercel field in step 6.
+
+In Vercel (the TireDrop project):
+
+6. Settings → Environment Variables → Add:
+     Key:   SHOPIFY_WEBHOOK_SECRET
+     Value: the key copied in step 5
+     Environments: Production (and Preview only if previews should accept webhooks)
+   Save.
+7. Deployments → the latest Production deployment → "..." → Redeploy.
+   Wait until it shows Ready.
+8. Open https://tiredroponline.com/api/status and check it shows
+   "webhooks": "configured".
+
+Back in Shopify:
+
+9. Settings → Notifications → Webhooks. Next to the "Order payment" webhook,
+   click "Send test notification". Do the same for "Order cancellation".
+10. In Vercel → the project → Logs, filter on "/api/webhooks/shopify".
+    Each test should show a 200 and a line starting "[webhook] orders/paid"
+    (or orders/cancelled). A 401 means the key in step 6 does not match:
+    copy it again, save, redeploy.
+```
