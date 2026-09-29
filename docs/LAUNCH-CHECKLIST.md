@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-09-29 (rule fixes live)_
+_Last updated: 2026-09-29 (prerendering built on blog-p0)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -53,7 +53,7 @@ _Last updated: 2026-09-29 (rule fixes live)_
 ## Quick wins (Claude)
 - [ ] Phone bottom bar changes by page
 - [ ] Pop-up off shop pages
-- [ ] Google search-result data: breadcrumbs, FAQ, map coordinates
+- [ ] Google search-result data: FAQ, map coordinates (breadcrumbs done, `af615c0`; the code has no shop coordinates, so they need to come from Justin)
 - [ ] Accessibility fixes + skip link
 - [ ] Security headers: CSP, HSTS, Permissions-Policy
 - [ ] NHTSA lookup timeout
@@ -62,7 +62,7 @@ _Last updated: 2026-09-29 (rule fixes live)_
 - [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search)
 
 ## Big upgrades (Claude)
-- [ ] Prerender pages for Google (covered by Blog + Learn Phase 0)
+- [x] ~~Prerender pages for Google (covered by Blog + Learn Phase 0)~~ (`e2c12c4`)
 - [ ] Hero finder goes straight to results
 - [ ] Installed-price toggle
 - [ ] Book an install time at checkout
@@ -71,7 +71,8 @@ _Last updated: 2026-09-29 (rule fixes live)_
 - [ ] Real review collection (no stars until real reviews exist)
 
 ## Content & SEO: Blog + Learn (Claude; plan in docs/prompts/blog-learn-build.md)
-- [ ] Phase 0: prerender all pages + article schema + sitemap lastmod
+- [x] ~~Phase 0: prerender all pages + breadcrumbs + sitemap lastmod~~ (`e2c12c4`, `805151e`)
+- [ ] Phase 0: Article, FAQPage and HowTo schema
 - [ ] Phase 1: keyword map, 90–100 titles, demo list → Justin approves
 - [ ] Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves
 - [ ] Phase 3: publish in batches of 10 (~10/week)
