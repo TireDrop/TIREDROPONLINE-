@@ -97,11 +97,10 @@ collects leads: its forms and its newsletter pop-up. Do every item here
 The domain currently serves the previous site. Nothing here is urgent until
 you cut over, but do these in order:
 
-1. **Flip indexing.** `public/robots.txt` is generated with `Disallow: /` on
-   purpose — an unlaunched store must not be indexed under this brand. Set
-   `ALLOW_INDEXING = true` in `scripts/generate-seo-files.mjs`, rebuild,
-   commit, and confirm `https://tiredroponline.com/robots.txt` before
-   submitting the sitemap.
+1. **Flip indexing.** _Done 2026-09-29:_ `ALLOW_INDEXING = true` in
+   `scripts/generate-seo-files.mjs`, so `public/robots.txt` allows crawling
+   (except `/cart`, `/checkout`, `/api/`). Confirm
+   `https://tiredroponline.com/robots.txt` before submitting the sitemap.
 2. Add the domain in Vercel and follow its DNS instructions. Point the apex
    and `www` at Vercel; it issues the certificate automatically.
 3. Submit `https://tiredroponline.com/sitemap.xml` in Google Search Console.
@@ -303,8 +302,8 @@ Shopify serving the domain until the Vercel site is verified.
    the old Shopify `A`/`CNAME` records for those names; leave MX and other
    email records alone. Wait for Vercel to show the domain as valid and the
    certificate as issued.
-5. **Flip indexing.** Set `ALLOW_INDEXING = true` in
-   `scripts/generate-seo-files.mjs`, rebuild, commit, deploy, and confirm
+5. **Flip indexing.** _Done 2026-09-29:_ `ALLOW_INDEXING = true` in
+   `scripts/generate-seo-files.mjs`; after the deploy, confirm
    `https://tiredroponline.com/robots.txt` no longer says `Disallow: /`.
    Then submit `https://tiredroponline.com/sitemap.xml` in Search Console.
 6. **Check the 301s** from the old Shopify URLs (they live in `vercel.json`

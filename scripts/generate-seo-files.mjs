@@ -26,32 +26,21 @@ const ORIGIN = "https://tiredroponline.com";
 /* ------------------------------------------------------------------ *
  * THE ONE SWITCH THAT MATTERS
  *
- * TireDrop has not launched. tiredroponline.com still resolves to the old
- * NetDriven site, so the only thing a crawler can reach today is a Vercel
- * deployment of a storefront that is still being finished: the catalog is
- * representative rather than live distributor inventory, the legal pages are
- * drafts awaiting counsel, and checkout takes an order rather than a payment.
+ * true since 2026-09-29: tiredroponline.com moved to Vercel on 2026-09-28
+ * (docs/ops/domain-migration-2026-09-28.md) and is the live store, so
+ * robots.txt allows crawling and points at the sitemap.
  *
- * Letting that be indexed costs something real and buys nothing:
+ * Before launch this was false, and robots.txt said `Disallow: /`: the only
+ * reachable deployment was a *.vercel.app preview of a storefront still being
+ * finished, and every page canonicalised to a domain that served someone
+ * else's site. Set it back to false only to take the whole site out of
+ * search.
  *
- *  - It would be indexed under the *.vercel.app host, not the brand domain.
- *    That is a duplicate of the eventual site on a URL nobody wants ranking,
- *    and it has to be removed later rather than simply never created.
- *  - Every page canonicalises to tiredroponline.com, which currently serves a
- *    different company's site. A canonical pointing at unrelated content is a
- *    contradictory signal at exactly the moment first impressions are formed.
- *  - "TireDrop" would first enter the index as a half-finished storefront with
- *    draft terms and prices nobody has committed to. Thin and placeholder
- *    content in the index at launch is a hole you climb out of, slowly.
- *
- * Against that, the only cost of waiting is a few weeks of crawl history on a
- * domain that is not live yet. So: disallow everything until launch.
- *
- * AT LAUNCH: flip this to true, re-run the build, commit the regenerated
- * public/robots.txt, and confirm https://tiredroponline.com/robots.txt serves
- * the allowing version before submitting the sitemap in Search Console.
+ * *.vercel.app deployments serve this same robots.txt, but vercel.json sends
+ * `X-Robots-Tag: noindex, nofollow` on those hosts, so previews and the
+ * project's own vercel.app URL stay out of the index regardless.
  * ------------------------------------------------------------------ */
-const ALLOW_INDEXING = false;
+const ALLOW_INDEXING = true;
 
 /* ---------------------------- route sources ---------------------------- */
 
@@ -84,10 +73,9 @@ function staticRoutesFromRouter() {
  * Routes that exist but should not be in the sitemap.
  *
  * /cart and /checkout are transactional: empty for every crawler, nothing to
- * rank, and submitting them invites "thin content" flags. They are not
- * disallowed in robots.txt either — a blocked URL can still be indexed by
- * reference, and there is no crawl budget problem on a 73-page site. Leaving
- * them crawlable and simply unsubmitted is the quieter option.
+ * rank, and submitting them invites "thin content" flags. robots.txt also
+ * disallows them (and /api/), and the Seo component marks them noindex
+ * (NOINDEX_ROUTES in src/components/ui/index.jsx).
  */
 const EXCLUDE = new Set(["/cart", "/checkout"]);
 
@@ -158,6 +146,9 @@ function robotsTxt() {
     "# Transactional pages. Nothing to rank and nothing a crawler can see.",
     "Disallow: /checkout",
     "Disallow: /cart",
+    "",
+    "# The site's own JSON API (Vercel functions), not pages.",
+    "Disallow: /api/",
     "",
     "# Filter and view states of pages that are already listed on their own.",
     "Disallow: /*?search=",

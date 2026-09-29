@@ -222,19 +222,18 @@ that.
 
 ## Crawling, metadata and the bundle
 
-**Crawling is switched off, deliberately.** `public/robots.txt` currently says
-`Disallow: /` because the site has not launched and tiredroponline.com still
-resolves to the previous NetDriven site. The only reachable deployment is a
-Vercel preview, and getting a half-finished storefront with draft legal pages
-indexed under this brand — on a `*.vercel.app` hostname nobody wants ranking —
-is a hole you climb out of slowly. `vercel.json` also sends
-`X-Robots-Tag: noindex` on `*.vercel.app` hosts only, so that half lifts by
-itself when a custom domain is attached.
+**Crawling is on.** tiredroponline.com moved to Vercel on 2026-09-28, and
+since 2026-09-29 `ALLOW_INDEXING` in `scripts/generate-seo-files.mjs` is
+`true`: `public/robots.txt` allows crawling except `/cart`, `/checkout`,
+`/api/` and the `?search=` / `?view=` filter states, and points at
+`https://tiredroponline.com/sitemap.xml`. `vercel.json` still sends
+`X-Robots-Tag: noindex, nofollow` on `*.vercel.app` hosts, so previews stay out
+of the index. (Before launch the switch was `false` and robots.txt said
+`Disallow: /`, so a half-finished storefront was never indexed under the
+brand.)
 
-> **Launch step.** Set `ALLOW_INDEXING = true` at the top of
-> `scripts/generate-seo-files.mjs`, rebuild, commit the regenerated
-> `public/robots.txt`, and check `https://tiredroponline.com/robots.txt` before
-> submitting the sitemap in Search Console.
+> **By hand, once:** submit `https://tiredroponline.com/sitemap.xml` in
+> Google Search Console, if it has not been submitted yet.
 
 **robots.txt and sitemap.xml are generated, never hand-written.** The route list
 comes out of `src/App.jsx` and is expanded from `products.js` and `services.js`,
@@ -297,7 +296,7 @@ All of these need the client or a supplier:
     `info@tiredroponline.com`, confirmed by the owner as the single address for
     forms, business enquiries and contact; the Shopify Flow lead alert sends
     to it (`docs/integrations/website-leads.md`).
-11. **Crawling is disabled.** `ALLOW_INDEXING` in
-    `scripts/generate-seo-files.mjs` is `false` and `robots.txt` says
-    `Disallow: /`. Flip it on launch day — see _Crawling, metadata and the
-    bundle_ above. Nothing will rank until you do.
+11. **Crawling was enabled on 2026-09-29.** `ALLOW_INDEXING` in
+    `scripts/generate-seo-files.mjs` is `true`; submit the sitemap in Search
+    Console if that has not been done — see _Crawling, metadata and the
+    bundle_ above.

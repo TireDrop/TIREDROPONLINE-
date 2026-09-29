@@ -61,6 +61,11 @@ it cannot trust, so an absent one is worth more than a fabricated one.
 
 ### The judgement call: robots.txt currently disallows everything
 
+_(Superseded 2026-09-29: the domain moved to Vercel on 2026-09-28 and
+`ALLOW_INDEXING` is now `true`. robots.txt allows crawling except `/cart`,
+`/checkout`, `/api/` and the filter states, and names the sitemap. The
+reasoning below is kept as the pre-launch record.)_
+
 `public/robots.txt` says `User-agent: * / Disallow: /`.
 
 The site has not launched. `tiredroponline.com` still resolves to the previous
@@ -420,7 +425,8 @@ security headers are untouched.
 Ordered by how much it matters.
 
 1. **Flip `ALLOW_INDEXING` on launch day.** `scripts/generate-seo-files.mjs`.
-   Nothing ranks until this happens. (README go-live item 11.)
+   Nothing ranks until this happens. (README go-live item 11.) _Done
+   2026-09-29._
 2. **Self-host Archivo at wdth 108, or drop the width axis.** 53.9 kB, measured.
    Owner: whoever owns `index.css` and the type system.
 3. **Re-encode `tiredrop-full.webp` to ~160×162.** ~50 kB, estimated. Owner:
