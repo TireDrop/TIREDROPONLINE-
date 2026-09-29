@@ -16,15 +16,18 @@
 //
 // TWO RULES FOR EDITING THIS FILE:
 //   1. The privacy policy must describe what the code actually does, not what
-//      a tire site usually does. As built, this site sets no cookies, runs no
-//      analytics, loads no tracking pixels and captures no email addresses.
+//      a tire site usually does. As built, the only cookies are Google
+//      Analytics' first-party measurement cookies (tag in index.html, Google
+//      signals and ad personalization off). It loads no advertising or social
+//      tracking pixels and captures no email addresses.
 //      The only server code is the site's own API (`api/`), which asks ATD
 //      for tire data and, for paid orders, creates the order in the shop's
 //      Shopify store. The only browser storage is localStorage for the cart
 //      and the comparison tray. Section 3 says exactly that. Card payments
 //      are taken on Shopify's hosted checkout page, so the policy names that
-//      without claiming the site takes no payment. If analytics or an email platform is ever added,
-//      that section has to change in the same commit.
+//      without claiming the site takes no payment. If the analytics setup changes,
+//      or an email platform or any other third-party script is added, sections
+//      3, 4 and 6 have to change in the same commit.
 //   2. Nothing here may point at a document that does not exist. Section 9
 //      used to say the return window was "stated at checkout" — it was not
 //      stated anywhere. Do not reintroduce a forward reference until the
@@ -41,7 +44,7 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
-const LAST_UPDATED = "September 24, 2026";
+const LAST_UPDATED = "September 29, 2026";
 
 // The four questions a customer — or anyone reviewing this site — comes to the
 // terms looking for. They are sections of this document rather than separate
@@ -247,7 +250,7 @@ const DOCS = {
         id: "how-we-use-it",
         heading: "2. How we use it",
         paragraphs: [
-          "To answer your question, price an order, place it with the distributor, get it shipped to the right address, take payment, book an install, and handle any return, claim or warranty question afterward. That is the whole list. We do not profile you, score you, or build an audience out of you.",
+          "To answer your question, price an order, place it with the distributor, get it shipped to the right address, take payment, book an install, and handle any return, claim or warranty question afterward. We also look at aggregate website statistics — which pages get visited, roughly where visitors come from, what device they use — to understand what is working and fix what is not. That is the whole list. We do not profile you, score you, or build an audience out of you.",
           "If you ask us to, we may send occasional service reminders — a rotation coming due, for example. You can tell us to stop at any time and we will.",
         ],
       },
@@ -255,8 +258,9 @@ const DOCS = {
         id: "cookies",
         heading: "3. Cookies, tracking and browser storage",
         paragraphs: [
-          "This website sets no cookies at all. It runs no analytics, loads no advertising or social tracking pixels, and does not share your browsing with anyone. That is not a promise about the future — it is a description of the code running on this page today, and you are welcome to check it in your browser's developer tools.",
-          "What the site does use is local storage in your own browser, for two things and nothing else:",
+          "This website uses Google Analytics to measure how the site is used — pages viewed, how visitors arrived, general location at the city or region level, device and browser type. Google Analytics sets its own first-party cookies (named _ga and _ga_ followed by an ID) to tell one visit from the next. We have switched off Google signals and ad personalization, so this measurement is not used to build advertising profiles or to show you ads. We see the results only as aggregate reports, not as a record of what any named person did.",
+          "The site loads no advertising or social tracking pixels. You are welcome to check both statements in your browser's developer tools.",
+          "Separately, the site uses local storage in your own browser for two things:",
         ],
         list: [
           "Your cart — so the tires you picked are still there if you close the tab and come back",
@@ -264,7 +268,7 @@ const DOCS = {
         ],
         after: [
           "Both stay on your device. They are not sent to us, they contain no name, address or payment detail, and nobody else can read them. Clearing your browsing data deletes them; the only thing you lose is your cart.",
-          "If we ever add analytics or any other third-party script, this section gets rewritten before that ships, not after.",
+          "You can block or delete the Google Analytics cookies in your browser settings, or install Google's opt-out add-on at tools.google.com/dlpage/gaoptout; the site works the same either way. If we add any other third-party script, this section gets rewritten before that ships, not after.",
         ],
       },
       {
@@ -278,10 +282,11 @@ const DOCS = {
           "Financing providers, if you choose to apply; your application goes to them under their own privacy policy, not ours",
           "Manufacturers, when a warranty claim requires it",
           "The company that hosts this website, which keeps ordinary server logs of requests made to it",
+          "Google, which provides Google Analytics and receives information about how the site is used (see section 3), processed under Google's own privacy policy",
           "Law enforcement or regulators, where we are legally required to respond",
         ],
         after: [
-          "That is the complete list. No advertising network, no data broker, no analytics company. We do not sell your personal information, and we do not share it for cross-context behavioral advertising — and because the site carries no trackers, there is nothing running here that could.",
+          "That is the complete list. No advertising network and no data broker. We do not sell your personal information, and we do not share it for cross-context behavioral advertising — Google Analytics is set up with Google signals and ad personalization switched off, so the site's measurement data is not used for advertising.",
         ],
       },
       {
@@ -303,7 +308,7 @@ const DOCS = {
           "Ask us to delete it. Call and request deletion. We will remove what we are not required to keep for warranty, accounting or legal reasons, and we will tell you plainly what we had to retain and why.",
           "Opt out of reminders. Say the word on the phone, or reply to any message asking to stop, and we will take you off the reminder list.",
           "Clear what the site stored on your device. Your cart and comparison tray live in your own browser. Clearing your browsing data removes them; nothing of yours is left behind on our side.",
-          "We set no cookies, run no analytics and do not sell personal information or share it for cross-context behavioral advertising, so there is nothing for you to opt out of on that front.",
+          "Opt out of analytics. Block or clear the Google Analytics cookies in your browser, or use Google's opt-out add-on (tools.google.com/dlpage/gaoptout). We do not sell personal information or share it for cross-context behavioral advertising.",
         ],
         after: [
           `To use any of these, call ${BUSINESS.phone} during business hours, email ${BUSINESS.email}, or send a message through our contact form. We may need to confirm a couple of details — an order number, say — to be sure we are talking to the right person before we change or delete a record.`,
