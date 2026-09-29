@@ -1,9 +1,15 @@
 // The ATD forwarder: places paid Shopify orders with ATD, and brings ATD's
 // tracking back to Shopify.
 //
-// It is a SWEEP, run every 5 minutes by Vercel Cron (api/cron/atd-sweep.js),
-// not a webhook: a sweep needs no public webhook endpoint or HMAC secret, it
-// catches up by itself after an outage, and all of its state lives on the
+// Two ways in, one code path per order:
+//   * the Shopify orders/paid webhook (api/webhooks/shopify.js) calls
+//     forwardOrder() for that one order as soon as it is paid, and
+//     orders/cancelled calls handleOrderCancelled();
+//   * a SWEEP run by Vercel Cron (api/cron/atd-sweep.js) is the backup: it
+//     catches anything a webhook missed (a pending risk check, an outage, a
+//     dropped delivery) and syncs tracking.
+// Both place an order through the same placeOne(), so the claim, the single
+// ATD call and the order of writes are identical. All state lives on the
 // Shopify order where Justin already looks (tags, metafields, the note).
 //
 // One sweep does three passes:
@@ -46,6 +52,7 @@
 import {
   AtdError,
   AtdNotConfirmedError,
+  cancelAtdOrder,
   ENDPOINTS as ATD_ENDPOINTS,
   getAtdOrderStatus,
   placeAtdOrder,
@@ -67,6 +74,12 @@ export const TAGS = Object.freeze({
   // Ship-to-store order whose tracking has been recorded; the shop fulfils
   // it in Shopify at install time.
   inboundToStore: "atd-inbound-to-store",
+  // Set by the orders/cancelled webhook (api/webhooks/shopify.js).
+  // ATD has (or may have) the order: cancel it at ATD. Flow workflow 4 or a
+  // person acts on it.
+  cancelNeeded: "atd-cancel-needed",
+  // Cancelled in Shopify before anything went to ATD. Nothing to undo.
+  cancelledBeforeAtd: "cancelled-before-atd",
 });
 
 export const METAFIELD_NAMESPACE = "tiredrop";
@@ -96,10 +109,9 @@ export const UNKNOWN_OUTCOME = "unknown outcome — check ATD before retrying";
 // lineItems(first: 20): a tire order has a handful of lines, and keeping the
 // connection small keeps 25 orders well under Shopify's 1,000-point query
 // cost limit. An order with more lines fails loudly instead of being cut.
-export const ORDERS_QUERY = `query forwarderOrders($query: String!, $first: Int!) {
-  orders(first: $first, query: $query, sortKey: CREATED_AT) {
-    pageInfo { hasNextPage }
-    nodes {
+// The fields every order read by the forwarder carries, shared by the sweep's
+// search (ORDERS_QUERY) and the webhook's single-order read (ORDER_QUERY).
+const ORDER_FIELDS = `
       id
       name
       createdAt
@@ -119,8 +131,20 @@ export const ORDERS_QUERY = `query forwarderOrders($query: String!, $first: Int!
         nodes { id sku name quantity currentQuantity }
       }
       atdPo: metafield(namespace: "tiredrop", key: "atd_po") { value }
-      sendingLock: metafield(namespace: "tiredrop", key: "atd_sending_at") { value compareDigest }
+      atdError: metafield(namespace: "tiredrop", key: "atd_error") { value }
+      sendingLock: metafield(namespace: "tiredrop", key: "atd_sending_at") { value compareDigest }`;
+
+export const ORDERS_QUERY = `query forwarderOrders($query: String!, $first: Int!) {
+  orders(first: $first, query: $query, sortKey: CREATED_AT) {
+    pageInfo { hasNextPage }
+    nodes {${ORDER_FIELDS}
     }
+  }
+}`;
+
+/** One order by id: the webhook path (api/webhooks/shopify.js). */
+export const ORDER_QUERY = `query forwarderOrder($id: ID!) {
+  order(id: $id) {${ORDER_FIELDS}
   }
 }`;
 
@@ -409,7 +433,7 @@ function shopifyWriter(cfg, deps) {
   };
 }
 
-// ---- The sweep ----------------------------------------------------------------
+// ---- One order: shared by the sweep and the webhook ---------------------------
 
 function newSummary() {
   return {
@@ -434,24 +458,16 @@ const bump = (summary, reason) => {
 };
 
 /**
- * One sweep. `cfg` is getConfig()'s result; `deps`:
- *   shopify  deps for shopifyGraphQL (fetchImpl, retryDelayMs, ...)
- *   atd      deps for the ATD calls (fetchImpl, endpoints, ...)
- *   now      () => epoch ms
- *   log      console-like
- *   budgetMs time after which no new ATD call is started
- * Returns the summary; never throws for a single order's problem.
+ * The Shopify writer plus the helpers that record an ATD outcome on an
+ * order, bound to one run (a sweep, or one webhook delivery) and its
+ * summary. Both paths place orders through `placeOne`, so the claim, the
+ * single ATD call and the order of writes are the same code.
  */
-export async function sweep(cfg, deps = {}) {
+function forwarderRun(cfg, deps, summary) {
   const now = deps.now ?? Date.now;
   const log = deps.log ?? console;
-  const budgetMs = deps.budgetMs ?? SWEEP_BUDGET_MS;
   const atdDeps = deps.atd ?? {};
-  const endpoints = atdDeps.endpoints ?? ATD_ENDPOINTS;
   const shop = shopifyWriter(cfg, deps);
-  const started = now();
-  const overBudget = () => now() - started > budgetMs;
-  const summary = newSummary();
 
   const stamp = (text) => `ATD forwarder ${new Date(now()).toISOString()}: ${text}`;
 
@@ -474,7 +490,7 @@ export async function sweep(cfg, deps = {}) {
   }
 
   // Marks an order atd-submitted. The PO goes in the metafield FIRST: if the
-  // sweep dies after that, the STUCK pass finds the PO and knows ATD has the
+  // run dies after that, the STUCK pass finds the PO and knows ATD has the
   // order. atd-submitted is added BEFORE atd-sending is removed, so the
   // order is never without a tag that keeps it out of the SUBMIT query.
   async function markSubmitted(order, po) {
@@ -487,6 +503,92 @@ export async function sweep(cfg, deps = {}) {
     }
     await shop.removeTags(order.id, [TAGS.sending]);
   }
+
+  /**
+   * Places one order that skipReason() has already cleared: build the ATD
+   * order, claim, send exactly once, record. Returns "submitted", "failed"
+   * or "claimed-elsewhere" (another run holds the claim: left alone), and
+   * throws only when a Shopify write fails before ATD was called.
+   */
+  async function placeOne(order) {
+    // Problems with the order itself fail it without touching ATD.
+    let atdOrder;
+    try {
+      atdOrder = toAtdOrder(order);
+    } catch (err) {
+      if (!(err instanceof ForwarderOrderError)) throw err;
+      await markFailed(order, err.message, { claimed: false });
+      return "failed";
+    }
+
+    // CLAIM. Compare-and-set on atd_sending_at against the digest read a
+    // moment ago (null = must not exist yet). If another run got there
+    // first, Shopify refuses and this run leaves the order.
+    try {
+      await shop.setMetafields(order.id, [{
+        key: METAFIELD_KEYS.sendingAt,
+        value: new Date(now()).toISOString(),
+        compareDigest: order.sendingLock?.compareDigest ?? null,
+      }]);
+    } catch (err) {
+      bump(summary, "claimed-elsewhere");
+      log.warn(`[atd-forwarder] ${order.name}: claim refused, leaving it (${err.message})`);
+      return "claimed-elsewhere";
+    }
+    await shop.addTags(order.id, [TAGS.sending]);
+
+    // SEND. Exactly once.
+    let po;
+    try {
+      ({ po } = await placeAtdOrder(atdOrder, cfg.atd, atdDeps));
+    } catch (err) {
+      const outcome = classifyAtdOrderError(err);
+      await markFailed(
+        order,
+        outcome === "unknown"
+          ? `${UNKNOWN_OUTCOME}. ${err.message}`
+          : `ATD rejected the order. ${err.message}`,
+      );
+      return "failed";
+    }
+
+    try {
+      await markSubmitted(order, po);
+    } catch (err) {
+      // ATD HAS the order. Say so loudly with the PO; the STUCK pass
+      // finishes the tags (or, if even the PO did not save, turns it into an
+      // unknown-outcome failure — never a resend).
+      summary.errors.push(`${order.name}: placed with ATD as PO ${po}, but Shopify was not fully updated (${err.message})`);
+      log.error(`[atd-forwarder] ${order.name} placed with ATD as PO ${po}; Shopify update failed:`, err.message);
+    }
+    summary.submitted += 1;
+    return "submitted";
+  }
+
+  return { shop, stamp, log, now, atdDeps, markFailed, markSubmitted, placeOne };
+}
+
+// ---- The sweep ----------------------------------------------------------------
+
+/**
+ * One sweep. `cfg` is getConfig()'s result; `deps`:
+ *   shopify  deps for shopifyGraphQL (fetchImpl, retryDelayMs, ...)
+ *   atd      deps for the ATD calls (fetchImpl, endpoints, ...)
+ *   now      () => epoch ms
+ *   log      console-like
+ *   budgetMs time after which no new ATD call is started
+ * Returns the summary; never throws for a single order's problem.
+ */
+export async function sweep(cfg, deps = {}) {
+  const now = deps.now ?? Date.now;
+  const log = deps.log ?? console;
+  const budgetMs = deps.budgetMs ?? SWEEP_BUDGET_MS;
+  const atdDeps = deps.atd ?? {};
+  const endpoints = atdDeps.endpoints ?? ATD_ENDPOINTS;
+  const summary = newSummary();
+  const { shop, stamp, markFailed, placeOne } = forwarderRun(cfg, deps, summary);
+  const started = now();
+  const overBudget = () => now() - started > budgetMs;
 
   // ---- 1. STUCK -------------------------------------------------------------
   try {
@@ -547,59 +649,8 @@ export async function sweep(cfg, deps = {}) {
         summary.more = true;
         continue;
       }
-
       try {
-        // Problems with the order itself fail it without touching ATD.
-        let atdOrder;
-        try {
-          atdOrder = toAtdOrder(order);
-        } catch (err) {
-          if (!(err instanceof ForwarderOrderError)) throw err;
-          await markFailed(order, err.message, { claimed: false });
-          continue;
-        }
-
-        // CLAIM. Compare-and-set on atd_sending_at against the digest read
-        // a moment ago (null = must not exist yet). If another sweep got
-        // there first, Shopify refuses and this sweep leaves the order.
-        try {
-          await shop.setMetafields(order.id, [{
-            key: METAFIELD_KEYS.sendingAt,
-            value: new Date(now()).toISOString(),
-            compareDigest: order.sendingLock?.compareDigest ?? null,
-          }]);
-        } catch (err) {
-          bump(summary, "claimed-elsewhere");
-          log.warn(`[atd-forwarder] ${order.name}: claim refused, leaving it (${err.message})`);
-          continue;
-        }
-        await shop.addTags(order.id, [TAGS.sending]);
-
-        // SEND. Exactly once.
-        let po;
-        try {
-          ({ po } = await placeAtdOrder(atdOrder, cfg.atd, atdDeps));
-        } catch (err) {
-          const outcome = classifyAtdOrderError(err);
-          await markFailed(
-            order,
-            outcome === "unknown"
-              ? `${UNKNOWN_OUTCOME}. ${err.message}`
-              : `ATD rejected the order. ${err.message}`,
-          );
-          continue;
-        }
-
-        try {
-          await markSubmitted(order, po);
-        } catch (err) {
-          // ATD HAS the order. Say so loudly with the PO; the STUCK pass
-          // finishes the tags (or, if even the PO did not save, turns it
-          // into an unknown-outcome failure — never a resend).
-          summary.errors.push(`${order.name}: placed with ATD as PO ${po}, but Shopify was not fully updated (${err.message})`);
-          log.error(`[atd-forwarder] ${order.name} placed with ATD as PO ${po}; Shopify update failed:`, err.message);
-        }
-        summary.submitted += 1;
+        await placeOne(order);
       } catch (err) {
         // A Shopify write failed before ATD was called (the claim tag, or
         // recording a pre-ATD failure). Nothing was sent; if the claim is
@@ -687,4 +738,117 @@ export async function sweep(cfg, deps = {}) {
     }
   }
   return summary;
+}
+
+// ---- The webhook path (api/webhooks/shopify.js) ----------------------------------
+
+async function readOrder(shop, orderId) {
+  const data = await shop.query(ORDER_QUERY, { id: orderId });
+  return data?.order ?? null;
+}
+
+/**
+ * orders/paid: the SUBMIT pass for ONE order, right away instead of at the
+ * next sweep. Same rules: only vercel-live orders, the same skipReason()
+ * (paid, risk ACCEPT with nothing PENDING, not fraud-review, no atd-* tag,
+ * unfulfilled, not a test order), the same claim and the single ATD call.
+ * A skipped order is left untouched, so the sweep looks at it again (a
+ * risk assessment still pending is the usual case).
+ *
+ * The caller checks the kill switch and that ATD is live. Resolves
+ * `{ result: "submitted" | "failed" | "skipped", reason?, order?, summary }`;
+ * throws only when Shopify cannot be read or written before ATD is called.
+ */
+export async function forwardOrder(cfg, orderId, deps = {}) {
+  const summary = newSummary();
+  const endpoints = (deps.atd ?? {}).endpoints ?? ATD_ENDPOINTS;
+  if (!endpoints.placeOrder) {
+    return { result: "skipped", reason: "place-order-not-configured", summary };
+  }
+  const run = forwarderRun(cfg, deps, summary);
+  const order = await readOrder(run.shop, orderId);
+  if (!order) return { result: "skipped", reason: "not-found", summary };
+  summary.checked = 1;
+  if (!hasTag(order, TAGS.live)) {
+    return { result: "skipped", reason: "not-vercel-live", order: order.name, summary };
+  }
+  const reason = skipReason(order, { forwardTestOrders: cfg.forwarder?.forwardTestOrders });
+  if (reason) return { result: "skipped", reason, order: order.name, summary };
+  const result = await run.placeOne(order);
+  return result === "claimed-elsewhere"
+    ? { result: "skipped", reason: result, order: order.name, summary }
+    : { result, order: order.name, summary };
+}
+
+/**
+ * Whether ATD has, or may have, this order: submitted, mid-send, a PO on
+ * file, or failed with an unknown outcome.
+ */
+export function atdMayHaveOrder(order) {
+  return (
+    hasTag(order, TAGS.submitted) ||
+    hasTag(order, TAGS.sending) ||
+    Boolean(order.atdPo?.value) ||
+    (hasTag(order, TAGS.failed) && String(order.atdError?.value ?? "").startsWith(UNKNOWN_OUTCOME))
+  );
+}
+
+/**
+ * orders/cancelled. When ATD has (or may have) the order, ask ATD to cancel
+ * it — only when ATD is live and ENDPOINTS.cancelOrder is confirmed; one
+ * attempt — and tag it atd-cancel-needed either way, with a note saying
+ * what was tried, so Flow workflow 4 or a person confirms it at ATD. When
+ * nothing went to ATD, tag it cancelled-before-atd. A repeat delivery finds
+ * the tag and does nothing.
+ *
+ * Resolves `{ result, order?, atdCancel? }`; `result` is "cancel-needed",
+ * "cancelled-before-atd" or "skipped" (with `reason`).
+ */
+export async function handleOrderCancelled(cfg, orderId, deps = {}) {
+  const summary = newSummary();
+  const endpoints = (deps.atd ?? {}).endpoints ?? ATD_ENDPOINTS;
+  const run = forwarderRun(cfg, deps, summary);
+  const order = await readOrder(run.shop, orderId);
+  if (!order) return { result: "skipped", reason: "not-found" };
+  if (!hasTag(order, TAGS.live)) return { result: "skipped", reason: "not-vercel-live", order: order.name };
+  if (hasTag(order, TAGS.cancelNeeded) || hasTag(order, TAGS.cancelledBeforeAtd)) {
+    return { result: "skipped", reason: "already-handled", order: order.name };
+  }
+
+  if (!atdMayHaveOrder(order)) {
+    await run.shop.addTags(order.id, [TAGS.cancelledBeforeAtd]);
+    return { result: "cancelled-before-atd", order: order.name };
+  }
+
+  const po = order.atdPo?.value ?? null;
+  let atdCancel;
+  let line;
+  if (!(cfg.atd?.mode === "live" && cfg.atd.ok)) {
+    atdCancel = "atd-not-live";
+    line = "order cancelled in Shopify; ATD is not live here, so nothing was sent. Cancel it at ATD by hand.";
+  } else if (!endpoints.cancelOrder) {
+    atdCancel = "not-configured";
+    line = `order cancelled in Shopify; cancel ${po ? `ATD PO ${po}` : "it"} at ATD by hand (the ATD cancel endpoint is not configured).`;
+  } else if (!po) {
+    atdCancel = "no-po";
+    line = "order cancelled in Shopify, but no ATD PO is on file (outcome unknown). Check ATD and cancel it there by hand.";
+  } else {
+    try {
+      await cancelAtdOrder(po, cfg.atd, run.atdDeps);
+      atdCancel = "requested";
+      line = `order cancelled in Shopify; asked ATD to cancel PO ${po}. Confirm at ATD.`;
+    } catch (err) {
+      atdCancel = "failed";
+      line = `order cancelled in Shopify; ATD did not take the cancellation of PO ${po} (${oneLine(err.message, 120)}). Cancel it at ATD by hand.`;
+    }
+  }
+  // The tag first: it is what Flow and a person act on.
+  await run.shop.addTags(order.id, [TAGS.cancelNeeded]);
+  try {
+    await run.shop.appendNote(order, run.stamp(line));
+  } catch (err) {
+    run.log.error(`[atd-forwarder] ${order.name}: could not add the cancellation to the note (${err.message})`);
+  }
+  run.log.warn(`[atd-forwarder] ${order.name} -> ${TAGS.cancelNeeded} (${atdCancel})`);
+  return { result: "cancel-needed", order: order.name, atdCancel };
 }

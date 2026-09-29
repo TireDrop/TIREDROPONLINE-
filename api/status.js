@@ -11,6 +11,10 @@
 //
 // `forms` is "on" when POST /api/forms can record leads in Shopify (Shopify
 // fully configured). The site's forms only claim delivery when it is "on".
+//
+// `webhooks` is "configured" when POST /api/webhooks/shopify can verify a
+// delivery (SHOPIFY_WEBHOOK_SECRET or SHOPIFY_CLIENT_SECRET is set), "off"
+// otherwise (docs/integrations/webhooks.md).
 
 import { getConfig } from "./_lib/config.js";
 import { methodNotAllowed, send } from "./_lib/http.js";
@@ -39,6 +43,7 @@ export function statusBody(config, endpoints = ATD_ENDPOINTS) {
     forwarder: config.forwarder.mode,
     newsletter: config.newsletter.mode,
     forms: config.forms.mode,
+    webhooks: config.webhooks.mode,
     version: config.version,
   };
   if (issues.length) body.issues = issues;

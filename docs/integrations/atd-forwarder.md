@@ -48,9 +48,15 @@ Code: `api/_lib/forwarder.js` (the sweep), `api/_lib/atd.js`
                                                     (the shop fulfils it in Shopify at install)
 ```
 
-Why a sweep rather than a Shopify `orders/paid` webhook: no public webhook
-endpoint or HMAC secret to manage, it catches up on its own after an outage
-at ATD, Shopify or Vercel, and every piece of state lives on the order itself.
+**Webhook first, sweep as the backup.** Once `SHOPIFY_WEBHOOK_SECRET` is
+set, Shopify's `orders/paid` webhook (`POST /api/webhooks/shopify`) runs the
+SUBMIT step for that one order as soon as it is paid (`forwardOrder`, the
+same `placeOne` code as the sweep, the same gates), and `orders/cancelled`
+tags `atd-cancel-needed` or `cancelled-before-atd`. The sweep still runs: it
+catches up after an outage at ATD, Shopify or Vercel, picks up orders whose
+risk check was still pending when the webhook arrived, and syncs tracking.
+Every piece of state lives on the order itself. See
+`docs/integrations/webhooks.md`.
 
 ## Tags
 
@@ -63,6 +69,8 @@ at ATD, Shopify or Vercel, and every piece of state lives on the order itself.
 | `atd-failed` | forwarder | Not placed, or outcome unknown. The reason is in `tiredrop.atd_error` and in the note. **Needs a person.** |
 | `atd-inbound-to-store` | forwarder | Ship-to-store order whose ATD tracking has been recorded. |
 | `fraud-review` | you (or a Flow) | Keep the forwarder away from this order. |
+| `atd-cancel-needed` | `orders/cancelled` webhook | Cancelled in Shopify after ATD had (or may have had) it. Cancel it at ATD; the note says whether a cancellation was already requested. |
+| `cancelled-before-atd` | `orders/cancelled` webhook | Cancelled before anything went to ATD. Nothing to undo. |
 
 Metafields (namespace `tiredrop`, all `single_line_text_field`):
 

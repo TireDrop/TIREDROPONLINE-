@@ -115,7 +115,8 @@ that do the server-side work:
 | -------------------- | -------------------------------------------------------- |
 | `GET /api/status`    | Which integrations are on: `atd` live/sample, `shopify`   |
 |                      | live/off, `checkout` shopify/request, `forwarder` on/off, |
-|                      | `newsletter` on/off, `forms` on/off.                      |
+|                      | `newsletter` on/off, `forms` on/off, `webhooks`           |
+|                      | configured/off.                                           |
 | `POST /api/forms`    | The site's forms (contact, financing, fleet quote,        |
 |                      | booking). Finds or creates the Shopify customer (no       |
 |                      | marketing consent), stores the lead in the note and the   |
@@ -152,6 +153,12 @@ that do the server-side work:
 |                      | Needs `Authorization: Bearer $CRON_SECRET`; off unless    |
 |                      | `ATD_ORDERING_ENABLED=true`. See                          |
 |                      | `docs/integrations/atd-forwarder.md`.                     |
+| `POST /api/webhooks/shopify` | Shopify order webhooks, HMAC-verified over the raw |
+|                      | body. `orders/paid` places that order with ATD at once    |
+|                      | (same gates as the cron; the cron stays as the backup);   |
+|                      | `orders/cancelled` tags `atd-cancel-needed` or            |
+|                      | `cancelled-before-atd`. Needs `SHOPIFY_WEBHOOK_SECRET`.   |
+|                      | Setup: `docs/integrations/webhooks.md`.                   |
 
 Payment runs on **Shopify's hosted checkout** (Shopify Payments / Shop Pay),
 and the paid order lives in Shopify, so Flow, the order emails and Order
@@ -210,6 +217,13 @@ word on each one.
 |                         | 401 without it.                                     |
 | `ATD_FORWARD_TEST_ORDERS` | Optional, ATD sandbox only: `true` also forwards  |
 |                         | Shopify test orders. Never set in production.       |
+| `SHOPIFY_WEBHOOK_SECRET` | The signing key Shopify shows under Settings →     |
+|                         | Notifications → Webhooks. `/api/webhooks/shopify`   |
+|                         | verifies every delivery with it (and with           |
+|                         | `SHOPIFY_CLIENT_SECRET`, for app-registered ones);  |
+|                         | without either it answers 503 and `/api/status`     |
+|                         | shows `webhooks: "off"`. Steps:                     |
+|                         | `docs/integrations/webhooks.md`.                    |
 
 How the groups switch on:
 
@@ -247,6 +261,12 @@ How the groups switch on:
   `issues`. **The 5-minute cron needs Vercel Pro**: Hobby allows one run a
   day and rejects a deploy with a sub-daily schedule. Details and the
   sandbox test plan: `docs/integrations/atd-forwarder.md`.
+- **Order webhooks** (`/api/webhooks/shopify`) verify deliveries once
+  `SHOPIFY_WEBHOOK_SECRET` is set (`webhooks: "configured"`). An
+  `orders/paid` delivery places the order with ATD only under the
+  forwarder's own gates (`ATD_ORDERING_ENABLED=true`, Shopify and ATD live;
+  `CRON_SECRET` is not needed for it). The daily cron remains the backup.
+  Justin's setup steps: `docs/integrations/webhooks.md`.
 - `TIREGURU_*` variables are ignored; `/api/status` lists any that are still
   set under `issues`, so they can be removed.
 

@@ -285,6 +285,30 @@ export function getConfig(env = process.env) {
   // newsletter, and on under the same condition: Shopify fully configured.
   const forms = { mode: newsletter.mode };
 
+  // ---- Shopify webhooks (POST /api/webhooks/shopify) -----------------------
+  // Deliveries are verified with an HMAC over the raw body. A webhook made in
+  // Shopify admin (Settings -> Notifications -> Webhooks) is signed with the
+  // key shown on that page: SHOPIFY_WEBHOOK_SECRET. One registered by the app
+  // itself is signed with the app's client secret. Both are tried, so either
+  // kind verifies; with neither set the endpoint answers 503 and status says
+  // "off". What a verified delivery may DO is decided per topic (orders/paid
+  // still needs the forwarder's kill switch and ATD live).
+  const webhookSecrets = [clean(env.SHOPIFY_WEBHOOK_SECRET), shClientSecret].filter(
+    (v, i, all) => v !== "" && all.indexOf(v) === i,
+  );
+  const webhooks = {
+    mode: webhookSecrets.length ? "configured" : "off",
+    secrets: webhookSecrets,
+    // Placing an order from orders/paid: the forwarder's gates minus
+    // CRON_SECRET, which only guards the cron endpoint.
+    forwarding:
+      orderingEnabled &&
+      shopify.mode === "live" &&
+      shopify.ok &&
+      atd.mode === "live" &&
+      atd.ok,
+  };
+
   const sha = clean(env.VERCEL_GIT_COMMIT_SHA);
   return {
     atd,
@@ -292,6 +316,7 @@ export function getConfig(env = process.env) {
     forwarder,
     newsletter,
     forms,
+    webhooks,
     checkout: paymentsReady ? "shopify" : "request",
     issues,
     version: sha ? `${API_VERSION}+${sha.slice(0, 7)}` : API_VERSION,

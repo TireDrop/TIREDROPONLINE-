@@ -2,7 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }],
   "crons": [{ "path": "/api/cron/atd-sweep", "schedule": "0 12 * * *" }],
-  "functions": { "api/cron/atd-sweep.js": { "maxDuration": 60 } },
+  "functions": {
+    "api/cron/atd-sweep.js": { "maxDuration": 60 },
+    "api/webhooks/shopify.js": { "maxDuration": 60 }
+  },
   "headers": [
     {
       "source": "/(.*)",
