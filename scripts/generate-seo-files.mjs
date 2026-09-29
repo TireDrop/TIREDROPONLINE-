@@ -197,17 +197,20 @@ export async function allRoutes({ extra = [] } = {}) {
   const productFiles = [files.get("ProductPage"), "src/data/products.js"];
   const serviceFiles = [files.get("ServiceDetailPage"), "src/data/services.js"];
 
+  // Content routes first: where a path is also a router route (/learn,
+  // /blog), the first entry wins, and its lastmod should be the content's
+  // (the newest article), not the index page component's git date.
   const routes = [
-    ...staticRoutesFromRouter(),
-    ...TIRES.map((t) => ({ path: `/tires/${t.slug}`, sources: productFiles })),
-    ...WHEELS.map((w) => ({ path: `/wheels/${w.slug}`, sources: productFiles })),
-    ...SERVICES.map((s) => ({ path: `/services/${s.slug}`, sources: serviceFiles })),
     ...extra.map((r) => ({ path: r.path, sources: [], lastmod: r.lastmod ?? null })),
     ...contentRoutesChecked().map((path) => ({
       path,
       sources: [],
       lastmod: contentLastmod(path),
     })),
+    ...staticRoutesFromRouter(),
+    ...TIRES.map((t) => ({ path: `/tires/${t.slug}`, sources: productFiles })),
+    ...WHEELS.map((w) => ({ path: `/wheels/${w.slug}`, sources: productFiles })),
+    ...SERVICES.map((s) => ({ path: `/services/${s.slug}`, sources: serviceFiles })),
   ];
 
   const redirected = redirectedPaths();
