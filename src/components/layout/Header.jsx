@@ -307,14 +307,14 @@ function MobileDrawer({ open, onClose }) {
           <Link
             to="/track"
             onClick={onClose}
-            className="flex min-h-[44px] items-center gap-2 rounded-sm px-2 font-display text-[14px] font-bold uppercase tracking-[0.015em] text-ink transition-colors hover:bg-fog hover:text-drop"
+            className="flex min-h-[44px] items-center gap-1.5 whitespace-nowrap rounded-sm px-1.5 font-display text-[13px] font-bold uppercase tracking-[0.015em] text-ink transition-colors hover:bg-fog hover:text-drop"
           >
             <Package size={18} aria-hidden className="shrink-0 text-drop" />
             Track Order
           </Link>
           <a
             href={BUSINESS.accountUrl}
-            className="flex min-h-[44px] items-center gap-2 rounded-sm px-2 font-display text-[14px] font-bold uppercase tracking-[0.015em] text-ink transition-colors hover:bg-fog hover:text-drop"
+            className="flex min-h-[44px] items-center gap-1.5 whitespace-nowrap rounded-sm px-1.5 font-display text-[13px] font-bold uppercase tracking-[0.015em] text-ink transition-colors hover:bg-fog hover:text-drop"
           >
             <UserRound size={18} aria-hidden className="shrink-0 text-drop" />
             Account

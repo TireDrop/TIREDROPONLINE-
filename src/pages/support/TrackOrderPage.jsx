@@ -264,7 +264,7 @@ function OrderResult({ order }) {
 
 function RequestResult({ request }) {
   const date = placed(request.createdAt);
-  let title = "Request received";
+  let title = "We have your request";
   let text =
     "Request received: we'll confirm price and availability, then email you a secure payment link.";
   if (request.status === "invoice_sent") {
