@@ -1,4 +1,10 @@
-import React, { useEffect } from "react";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
@@ -748,3 +754,161 @@ export function FormTrap({ id }) {
     </div>
   );
 }
+
+/* ------------------------------------------------------------------ *
+ * Form fields that keep what is in them
+ * ------------------------------------------------------------------ */
+
+/*
+ * <Input>, <Textarea> and <Select> take the usual controlled props — `value`
+ * (`checked` for a checkbox or radio) and `onChange` — so a page keeps its
+ * form state exactly as before. What changes is when the DOM gets written.
+ *
+ * A plain controlled field has React write its `value` back into the DOM on
+ * every render. A value that arrived without an `input` event — browser
+ * automation setting `.value`, some password managers, some mobile autofill —
+ * never reached state, so the next render of the form (the forms-on status
+ * landing, a keystroke in another field) wrote "" over it and the visitor's
+ * text vanished.
+ *
+ * These render uncontrolled (`defaultValue` / `defaultChecked`) and write the
+ * DOM themselves, only when:
+ *   - the `value` prop differs from the previous render's — a genuine
+ *     programmatic change: a reset, a prefill, formatting, a cleared option;
+ *   - or this field's own change event just ran, so the field shows what the
+ *     handler put in state, as a controlled field would (a handler that
+ *     rejects a keystroke still rejects it).
+ * A render where the prop did not change leaves the DOM alone.
+ *
+ * Because state can now trail the DOM, a form reads its values back from the
+ * DOM before validating (readFormValues in src/data/forms.js), and a reset
+ * that sets state to what it already holds calls `form.reset()` as well.
+ */
+
+const asText = (value) => (value == null ? "" : String(value));
+
+function writeField(node, value, isCheck) {
+  if (isCheck) {
+    const on = Boolean(value);
+    if (node.checked !== on) node.checked = on;
+    return;
+  }
+  const text = asText(value);
+  if (node.value === text) return;
+  node.value = text;
+  // A <select> given a value none of its options carry shows its first
+  // option, as React does for a controlled select.
+  if (node.tagName === "SELECT" && node.selectedIndex === -1) {
+    const first = [...node.options].findIndex((o) => !o.disabled);
+    if (first !== -1) node.selectedIndex = first;
+  }
+}
+
+/**
+ * The shared behaviour. `prop` is the managed value (`value`, or `checked`
+ * for a checkbox or radio); `undefined` means the caller did not manage it,
+ * and the field is left entirely to the browser.
+ */
+function useKeptField(prop, isCheck, onChange, forwardedRef) {
+  const node = useRef(null);
+  const previous = useRef(prop);
+  const latest = useRef(prop);
+  const fromEvent = useRef(false);
+
+  useLayoutEffect(() => {
+    const el = node.current;
+    const changed = !Object.is(previous.current, prop);
+    if (el && prop !== undefined && (changed || fromEvent.current)) {
+      writeField(el, prop, isCheck);
+    }
+    previous.current = prop;
+    latest.current = prop;
+    fromEvent.current = false;
+  });
+
+  // A ref passed to the field still gets the DOM node.
+  useImperativeHandle(forwardedRef, () => node.current, []);
+
+  const handleChange = (event) => {
+    fromEvent.current = true;
+    onChange?.(event);
+    // React renders a change synchronously, and that render's layout effect
+    // clears the flag. Still set means nothing re-rendered — the handler kept
+    // the old value — so put it back, as a controlled field would.
+    queueMicrotask(() => {
+      if (!fromEvent.current) return;
+      fromEvent.current = false;
+      if (node.current && latest.current !== undefined) {
+        writeField(node.current, latest.current, isCheck);
+      }
+    });
+  };
+
+  return { node, handleChange };
+}
+
+/** `<input>` that keeps a value typed or filled in without an input event. */
+export const Input = forwardRef(function Input(
+  { value, checked, defaultValue, defaultChecked, onChange, type, ...rest },
+  ref,
+) {
+  const isCheck = type === "checkbox" || type === "radio";
+  const prop = isCheck ? checked : value;
+  const { node, handleChange } = useKeptField(prop, isCheck, onChange, ref);
+
+  if (isCheck) {
+    return (
+      <input
+        ref={node}
+        type={type}
+        value={value}
+        defaultChecked={checked === undefined ? defaultChecked : Boolean(checked)}
+        onChange={handleChange}
+        {...rest}
+      />
+    );
+  }
+  return (
+    <input
+      ref={node}
+      type={type}
+      defaultValue={value === undefined ? defaultValue : asText(value)}
+      onChange={handleChange}
+      {...rest}
+    />
+  );
+});
+
+/** `<textarea>` that keeps a value typed or filled in without an input event. */
+export const Textarea = forwardRef(function Textarea(
+  { value, defaultValue, onChange, ...rest },
+  ref,
+) {
+  const { node, handleChange } = useKeptField(value, false, onChange, ref);
+  return (
+    <textarea
+      ref={node}
+      defaultValue={value === undefined ? defaultValue : asText(value)}
+      onChange={handleChange}
+      {...rest}
+    />
+  );
+});
+
+/** `<select>` that keeps a choice made without a change event. */
+export const Select = forwardRef(function Select(
+  { value, defaultValue, onChange, children, ...rest },
+  ref,
+) {
+  const { node, handleChange } = useKeptField(value, false, onChange, ref);
+  return (
+    <select
+      ref={node}
+      defaultValue={value === undefined ? defaultValue : asText(value)}
+      onChange={handleChange}
+      {...rest}
+    >
+      {children}
+    </select>
+  );
+});

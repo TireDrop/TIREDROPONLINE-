@@ -13,12 +13,19 @@ import {
   Wallet,
 } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
-import { CONTACT_EMAIL, submitForm, useFormsWired } from "../../data/forms.js";
+import {
+  CONTACT_EMAIL,
+  hasChanges,
+  readFormValues,
+  submitForm,
+  useFormsWired,
+} from "../../data/forms.js";
 import {
   Accordion,
   Badge,
   Breadcrumbs,
   FormTrap,
+  Input,
   PageHero,
   Section,
   SectionHead,
@@ -215,12 +222,17 @@ function ApplicationForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (sending) return; // a second click must not fire a second send
-    const found = validate(values);
+    const formElement = event.currentTarget;
+    // What is in the fields, including anything filled in without an input
+    // event, which state never saw.
+    const { values: current, changed } = readFormValues(formElement, values);
+    if (hasChanges(changed)) setValues((prev) => ({ ...prev, ...changed }));
+    const found = validate(current);
     setErrors(found);
     if (Object.keys(found).length > 0) return;
 
     setSending(true);
-    const outcome = await submitForm("financing", values, event.currentTarget);
+    const outcome = await submitForm("financing", current, formElement);
     setSending(false);
     setResult(outcome);
   };
@@ -346,8 +358,9 @@ function ApplicationForm() {
           <label className="label" htmlFor="fin-name">
             Full name
           </label>
-          <input
+          <Input
             id="fin-name"
+            name="name"
             type="text"
             autoComplete="name"
             className="field"
@@ -366,8 +379,9 @@ function ApplicationForm() {
           <label className="label" htmlFor="fin-phone">
             Phone
           </label>
-          <input
+          <Input
             id="fin-phone"
+            name="phone"
             type="tel"
             inputMode="tel"
             autoComplete="tel"
@@ -387,8 +401,9 @@ function ApplicationForm() {
           <label className="label" htmlFor="fin-email">
             Email
           </label>
-          <input
+          <Input
             id="fin-email"
+            name="email"
             type="email"
             autoComplete="email"
             className="field"
@@ -407,8 +422,9 @@ function ApplicationForm() {
           <label className="label" htmlFor="fin-amount">
             Amount needed (USD)
           </label>
-          <input
+          <Input
             id="fin-amount"
+            name="amount"
             type="text"
             inputMode="decimal"
             className="field"

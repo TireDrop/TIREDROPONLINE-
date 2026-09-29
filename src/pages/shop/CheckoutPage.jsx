@@ -21,6 +21,8 @@ import {
   Breadcrumbs,
   EmptyState,
   Badge,
+  Input,
+  Select,
 } from "../../components/ui/index.jsx";
 import { useCart, money } from "../../context/CartContext.jsx";
 import {
@@ -32,6 +34,7 @@ import {
 import { getService } from "../../data/services.js";
 import { ApiError, submitCheckout } from "../../data/api.js";
 import { useApiStatus } from "../../data/useApi.js";
+import { hasChanges, readFormValues } from "../../data/forms.js";
 import { summarize } from "./CartPage.jsx";
 
 /* ------------------------------------------------------------------ */
@@ -297,7 +300,7 @@ function TextField({ id, label, error, hint, className = "", ...rest }) {
       <label htmlFor={id} className="label">
         {label}
       </label>
-      <input
+      <Input
         id={id}
         name={id}
         aria-invalid={error ? "true" : undefined}
@@ -328,7 +331,7 @@ function SelectField({ id, label, error, children, className = "", ...rest }) {
       <label htmlFor={id} className="label">
         {label}
       </label>
-      <select
+      <Select
         id={id}
         name={id}
         aria-invalid={error ? "true" : undefined}
@@ -337,7 +340,7 @@ function SelectField({ id, label, error, children, className = "", ...rest }) {
         {...rest}
       >
         {children}
-      </select>
+      </Select>
       {error && (
         <p id={errId} role="alert" className="mt-1 text-xs text-drop">
           {error}
@@ -475,6 +478,7 @@ export default function CheckoutPage() {
   // other than "request".
   const payOnline = Boolean(status) && status.checkout !== "request";
   const headingRef = useRef(null);
+  const formRef = useRef(null);
   // Once the shopper picks a delivery option it is theirs; until then the
   // cart decides the default.
   const fulfillmentTouched = useRef(false);
@@ -507,8 +511,22 @@ export default function CheckoutPage() {
   };
   const onInput = (e) => set(e.target.name, e.target.value);
 
+  /**
+   * The form as the shopper sees it: state, plus anything on this step that
+   * was filled in without an input event (automation, some autofill), which
+   * state never saw. Put back into state before the step unmounts with it.
+   */
+  function readForm() {
+    const { values, changed } = readFormValues(formRef.current, form);
+    if (!hasChanges(changed)) return form;
+    if ("fulfillment" in changed) fulfillmentTouched.current = true;
+    setForm((f) => ({ ...f, ...changed }));
+    return values;
+  }
+
   function goNext() {
-    const found = STEPS[stepIndex].validate(form, stepContext);
+    const current = readForm();
+    const found = STEPS[stepIndex].validate(current, stepContext);
     const clean = Object.fromEntries(
       Object.entries(found).filter(([, v]) => v),
     );
@@ -524,7 +542,7 @@ export default function CheckoutPage() {
         STEPS[stepIndex + 1].id === "install" &&
         !fulfillmentTouched.current &&
         stepContext.hasShopInstall &&
-        form.fulfillment === "ship"
+        current.fulfillment === "ship"
       ) {
         setForm((f) => ({ ...f, fulfillment: "pickup" }));
       }
@@ -534,17 +552,17 @@ export default function CheckoutPage() {
 
     // Placing the order re-checks every step, in case an edit round-trip broke one.
     const broken = STEPS.findIndex((s) =>
-      Object.values(s.validate(form, stepContext)).some(Boolean),
+      Object.values(s.validate(current, stepContext)).some(Boolean),
     );
     if (broken !== -1) {
-      setErrors(STEPS[broken].validate(form, stepContext));
+      setErrors(STEPS[broken].validate(current, stepContext));
       setStepIndex(broken);
       return;
     }
-    placeOrder();
+    placeOrder(current);
   }
 
-  async function placeOrder() {
+  async function placeOrder(form) {
     if (sending) return; // a second click must not place a second order
     setServerError("");
     setSending(true);
@@ -949,6 +967,7 @@ export default function CheckoutPage() {
 
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12">
           <form
+            ref={formRef}
             noValidate
             onSubmit={(e) => {
               e.preventDefault();
@@ -1031,7 +1050,7 @@ export default function CheckoutPage() {
                             : "border-ink/15 bg-bone hover:border-ink/35"
                         }`}
                       >
-                        <input
+                        <Input
                           id={`fulfillment-${value}`}
                           type="radio"
                           name="fulfillment"
@@ -1341,7 +1360,10 @@ export default function CheckoutPage() {
                 <div className="divide-y divide-ink/10 border-y border-ink/10">
                   <ReviewBlock
                     title="Contact"
-                    onEdit={() => setStepIndex(0)}
+                    onEdit={() => {
+                      readForm();
+                      setStepIndex(0);
+                    }}
                     rows={[
                       ["Name", `${form.firstName} ${form.lastName}`],
                       ["Email", form.email],
@@ -1350,7 +1372,10 @@ export default function CheckoutPage() {
                   />
                   <ReviewBlock
                     title="Delivery"
-                    onEdit={() => setStepIndex(1)}
+                    onEdit={() => {
+                      readForm();
+                      setStepIndex(1);
+                    }}
                     rows={[
                       [
                         "Option",
@@ -1388,7 +1413,10 @@ export default function CheckoutPage() {
                   />
                   <ReviewBlock
                     title="Vehicle"
-                    onEdit={() => setStepIndex(2)}
+                    onEdit={() => {
+                      readForm();
+                      setStepIndex(2);
+                    }}
                     rows={[
                       ["Vehicle", `${form.year} ${form.make} ${form.model}`],
                       form.trim.trim() && ["Trim", form.trim.trim()],
@@ -1442,7 +1470,7 @@ export default function CheckoutPage() {
                   </div>
 
                   <div className="mt-5 flex items-start gap-2.5 border-t border-ink/10 pt-4">
-                    <input
+                    <Input
                       id="agree"
                       name="agree"
                       type="checkbox"
@@ -1494,6 +1522,7 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => {
+                    readForm();
                     setErrors({});
                     setStepIndex((i) => i - 1);
                   }}

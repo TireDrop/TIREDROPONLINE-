@@ -11,14 +11,22 @@ import {
   Phone,
 } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
-import { CONTACT_EMAIL, submitForm, useFormsWired } from "../../data/forms.js";
+import {
+  CONTACT_EMAIL,
+  hasChanges,
+  readFormValues,
+  submitForm,
+  useFormsWired,
+} from "../../data/forms.js";
 import {
   Breadcrumbs,
   FormTrap,
+  Input,
   PageHero,
   Section,
   SectionHead,
   Seo,
+  Textarea,
 } from "../../components/ui/index.jsx";
 
 const SUBJECTS = [
@@ -102,12 +110,17 @@ function ContactForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (sending) return; // a second click must not fire a second send
-    const found = validate(values);
+    const formElement = event.currentTarget;
+    // What is in the fields, including anything filled in without an input
+    // event, which state never saw.
+    const { values: current, changed } = readFormValues(formElement, values);
+    if (hasChanges(changed)) setValues((prev) => ({ ...prev, ...changed }));
+    const found = validate(current);
     setErrors(found);
     if (Object.keys(found).length > 0) return;
 
     setSending(true);
-    const outcome = await submitForm("contact", values, event.currentTarget);
+    const outcome = await submitForm("contact", current, formElement);
     setSending(false);
     setResult(outcome);
   };
@@ -246,7 +259,7 @@ function ContactForm() {
           <label className="label" htmlFor="contact-name">
             Full name *
           </label>
-          <input
+          <Input
             id="contact-name"
             name="name"
             type="text"
@@ -267,7 +280,7 @@ function ContactForm() {
           <label className="label" htmlFor="contact-phone">
             Phone *
           </label>
-          <input
+          <Input
             id="contact-phone"
             name="phone"
             type="tel"
@@ -289,7 +302,7 @@ function ContactForm() {
           <label className="label" htmlFor="contact-email">
             Email *
           </label>
-          <input
+          <Input
             id="contact-email"
             name="email"
             type="email"
@@ -318,7 +331,7 @@ function ContactForm() {
               const id = `subject-${subject.replace(/[^a-z]/gi, "").toLowerCase()}`;
               return (
                 <div key={subject} className="flex items-center gap-2.5">
-                  <input
+                  <Input
                     id={id}
                     type="radio"
                     name="subject"
@@ -344,7 +357,7 @@ function ContactForm() {
           <label className="label" htmlFor="contact-message">
             Message *
           </label>
-          <textarea
+          <Textarea
             id="contact-message"
             name="message"
             rows={6}

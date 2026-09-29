@@ -17,11 +17,20 @@ import {
   Section,
   SectionHead,
   FormTrap,
+  Input,
+  Select,
+  Textarea,
 } from "../../components/ui/index.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
 import { TIRES } from "../../data/products.js";
 import { BUSINESS } from "../../data/business.js";
-import { CONTACT_EMAIL, submitForm, useFormsWired } from "../../data/forms.js";
+import {
+  CONTACT_EMAIL,
+  hasChanges,
+  readFormValues,
+  submitForm,
+  useFormsWired,
+} from "../../data/forms.js";
 
 const FLEET_TIRES = TIRES.filter((t) => t.category === "Commercial");
 
@@ -134,12 +143,17 @@ export default function CommercialTiresPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (sending) return;
-    const found = validate(form);
+    const formElement = e.currentTarget;
+    // What is in the fields, including anything filled in without an input
+    // event, which state never saw.
+    const { values: current, changed } = readFormValues(formElement, form);
+    if (hasChanges(changed)) setForm((f) => ({ ...f, ...changed }));
+    const found = validate(current);
     setErrors(found);
     if (Object.keys(found).length > 0) return;
 
     setSending(true);
-    setResult(await submitForm("fleet-quote", form, e.currentTarget));
+    setResult(await submitForm("fleet-quote", current, formElement));
     setSending(false);
   };
 
@@ -337,7 +351,7 @@ export default function CommercialTiresPage() {
                     <label htmlFor="company" className="label">
                       Company name
                     </label>
-                    <input
+                    <Input
                       id="company"
                       name="company"
                       type="text"
@@ -355,7 +369,7 @@ export default function CommercialTiresPage() {
                     <label htmlFor="contact" className="label">
                       Contact name
                     </label>
-                    <input
+                    <Input
                       id="contact"
                       name="contact"
                       type="text"
@@ -373,7 +387,7 @@ export default function CommercialTiresPage() {
                     <label htmlFor="phone" className="label">
                       Phone
                     </label>
-                    <input
+                    <Input
                       id="phone"
                       name="phone"
                       type="tel"
@@ -392,7 +406,7 @@ export default function CommercialTiresPage() {
                     <label htmlFor="email" className="label">
                       Email
                     </label>
-                    <input
+                    <Input
                       id="email"
                       name="email"
                       type="email"
@@ -410,7 +424,7 @@ export default function CommercialTiresPage() {
                     <label htmlFor="fleetSize" className="label">
                       Fleet size
                     </label>
-                    <select
+                    <Select
                       id="fleetSize"
                       name="fleetSize"
                       className="field"
@@ -425,7 +439,7 @@ export default function CommercialTiresPage() {
                           {s}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                     <FieldError
                       id="fleetSize-error"
                       message={errors.fleetSize}
@@ -436,7 +450,7 @@ export default function CommercialTiresPage() {
                     <label htmlFor="sizes" className="label">
                       Tire sizes needed
                     </label>
-                    <input
+                    <Input
                       id="sizes"
                       name="sizes"
                       type="text"
@@ -454,7 +468,7 @@ export default function CommercialTiresPage() {
                     <label htmlFor="message" className="label">
                       Anything else (optional)
                     </label>
-                    <textarea
+                    <Textarea
                       id="message"
                       name="message"
                       rows="4"

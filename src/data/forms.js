@@ -74,6 +74,58 @@ function trapValue(formElement) {
 }
 
 /**
+ * Reads a form's fields back from the DOM and merges them over the state it
+ * was rendered from, so a submit sends what the visitor can see.
+ *
+ * The fields (Input, Textarea, Select in components/ui) keep a value that
+ * arrived without an input event — browser automation, some password
+ * managers, some mobile autofill — but that value never reached state. Call
+ * this before validating: where a named field's DOM value differs from
+ * `stateValues[name]`, the DOM wins.
+ *
+ * Only keys already in `stateValues` are read, so the honeypot (`website`,
+ * read separately by submitForm) never joins the values. A key with no
+ * enabled field in the form — a step not on screen, a disabled input — keeps
+ * its state value. Booleans are read from a checkbox's `checked`.
+ *
+ * Returns `{ values, changed }`: the merged values, and just the keys the DOM
+ * supplied (empty when state was already up to date), for the caller to put
+ * back into state.
+ */
+export function readFormValues(formElement, stateValues) {
+  const values = { ...stateValues };
+  const changed = {};
+  if (!formElement || typeof FormData === "undefined") {
+    return { values, changed };
+  }
+
+  const data = new FormData(formElement);
+  for (const [key, current] of Object.entries(stateValues)) {
+    if (key === "website") continue;
+    let fromDom;
+    if (typeof current === "boolean") {
+      const field = formElement.elements.namedItem(key);
+      if (!field || field.type !== "checkbox" || field.disabled) continue;
+      fromDom = field.checked;
+    } else if (typeof current === "string") {
+      if (!data.has(key)) continue;
+      fromDom = data.get(key);
+      if (typeof fromDom !== "string") continue; // a file, not text
+    } else {
+      continue;
+    }
+    if (fromDom !== current) {
+      values[key] = fromDom;
+      changed[key] = fromDom;
+    }
+  }
+  return { values, changed };
+}
+
+/** True when readFormValues found anything state did not have. */
+export const hasChanges = (changed) => Object.keys(changed).length > 0;
+
+/**
  * Posts one form's values to /api/forms. `formElement` is the submitted
  * <form>, read only for its honeypot.
  *

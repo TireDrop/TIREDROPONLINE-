@@ -20,6 +20,7 @@ import {
   Seo,
   PageHero,
   Breadcrumbs,
+  Input,
   Section,
 } from "../../components/ui/index.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
@@ -1265,6 +1266,11 @@ export default function FindMyTiresPage() {
   const submitStep = (event) => {
     event.preventDefault();
     if (step === 1) {
+      // The size as the visitor sees it: one filled in without an input
+      // event (automation, some autofill) never reached state.
+      const shownSize = sizeRef.current?.value ?? sizeText;
+      if (shownSize !== sizeText) setSizeText(shownSize);
+      const readSize = shownSize.trim() ? parseSize(shownSize.trim()) : null;
       if (mode === "vehicle") {
         if (!year || !make || !model) {
           setStepError(
@@ -1273,7 +1279,7 @@ export default function FindMyTiresPage() {
           return;
         }
       }
-      if (!sizeText.trim()) {
+      if (!shownSize.trim()) {
         setStepError(
           mode === "vehicle"
             ? `We do not have the factory size for a ${year} ${make} ${model} on file. Type the size off your sidewall (or the sticker in your driver's door jamb) instead.`
@@ -1281,9 +1287,9 @@ export default function FindMyTiresPage() {
         );
         return;
       }
-      if (!typedSize) {
+      if (!readSize) {
         setStepError(
-          `"${sizeText.trim()}" is not a tire size we can read. It looks like 225/50R17, LT265/70R17 or 31x10.50R15.`,
+          `"${shownSize.trim()}" is not a tire size we can read. It looks like 225/50R17, LT265/70R17 or 31x10.50R15.`,
         );
         return;
       }
@@ -1293,7 +1299,7 @@ export default function FindMyTiresPage() {
           vy: mode === "vehicle" ? year : "",
           vmk: mode === "vehicle" ? make : "",
           vmd: mode === "vehicle" ? model : "",
-          size: typedSize.normalized,
+          size: readSize.normalized,
           q: 2,
           relax: "",
         },
@@ -1831,7 +1837,7 @@ export default function FindMyTiresPage() {
                   <label htmlFor="quiz-size" className="label">
                     Tire size
                   </label>
-                  <input
+                  <Input
                     id="quiz-size"
                     ref={sizeRef}
                     type="text"

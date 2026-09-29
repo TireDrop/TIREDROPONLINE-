@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { ApiError, subscribeNewsletter } from "../../data/api.js";
+import { hasChanges, readFormValues } from "../../data/forms.js";
+import { Input } from "../ui/index.jsx";
 import "./NewsletterPopup.css";
 
 /**
@@ -113,7 +115,6 @@ function NewsletterPopup() {
 
   const [done, setDone] = useState(false);
   const [email, setEmail] = useState("");
-  const [trap, setTrap] = useState("");
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
@@ -309,7 +310,14 @@ function NewsletterPopup() {
   const onSubmit = async (e) => {
     e.preventDefault();
     if (busy) return;
-    const value = email.trim();
+    const form = e.currentTarget;
+    // The field as the visitor sees it, including an email filled in without
+    // an input event (autofill, automation), which state never saw.
+    const { values, changed } = readFormValues(form, { email });
+    if (hasChanges(changed)) setEmail(values.email);
+    // The honeypot is read straight from the DOM, however it was filled.
+    const trap = form.elements.namedItem("website")?.value || "";
+    const value = values.email.trim();
     if (!EMAIL.test(value)) {
       setError("Enter a valid email address.");
       emailRef.current?.focus();
@@ -402,7 +410,7 @@ function NewsletterPopup() {
                   {COPY.emailLabel}
                 </label>
                 <div className="td-nl__row">
-                  <input
+                  <Input
                     ref={emailRef}
                     className="td-nl__input"
                     id="td-nl-email"
@@ -438,8 +446,7 @@ function NewsletterPopup() {
                     name="website"
                     tabIndex={-1}
                     autoComplete="off"
-                    value={trap}
-                    onChange={(e) => setTrap(e.target.value)}
+                    defaultValue=""
                   />
                 </div>
                 {error && (

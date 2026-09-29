@@ -15,9 +15,23 @@ import {
   Warehouse,
 } from "lucide-react";
 
-import { Badge, FormTrap, PageHero, Section, Seo } from "../../components/ui/index.jsx";
+import {
+  Badge,
+  FormTrap,
+  Input,
+  PageHero,
+  Section,
+  Seo,
+  Textarea,
+} from "../../components/ui/index.jsx";
 import { BUSINESS } from "../../data/business.js";
-import { CONTACT_EMAIL, submitForm, useFormsWired } from "../../data/forms.js";
+import {
+  CONTACT_EMAIL,
+  hasChanges,
+  readFormValues,
+  submitForm,
+  useFormsWired,
+} from "../../data/forms.js";
 import { SERVICES, getService } from "../../data/services.js";
 
 const STEP_LABELS = ["Service", "Vehicle", "Location", "Time", "Contact"];
@@ -200,7 +214,7 @@ function TextField({ id, label, value, onChange, error, optional, ...rest }) {
           <span className="ml-1 normal-case tracking-normal">(optional)</span>
         )}
       </label>
-      <input
+      <Input
         id={id}
         name={id}
         value={value}
@@ -354,6 +368,7 @@ export default function SchedulePage() {
   const [submission, setSubmission] = useState(null);
 
   const headingRef = useRef(null);
+  const formRef = useRef(null);
   const mounted = useRef(false);
 
   // Move focus to the step heading so keyboard and screen reader users land in
@@ -396,8 +411,27 @@ export default function SchedulePage() {
     setErrors((prev) => ({ ...prev, service: undefined }));
   }
 
+  /**
+   * The form as the visitor sees it: state, plus anything on this step that
+   * was filled in without an input event (automation, some autofill), which
+   * state never saw. Put back into state before the step unmounts with it.
+   */
+  function readForm() {
+    const { values, changed } = readFormValues(formRef.current, form);
+    if (!hasChanges(changed)) return form;
+    const picked = getService(values.service);
+    // Same rule as pickService: an in-shop service cannot be done in a driveway.
+    if (changed.service && picked && !picked.mobile) {
+      values.locationType = "shop";
+      changed.locationType = "shop";
+    }
+    setForm((prev) => ({ ...prev, ...changed }));
+    return values;
+  }
+
   function goNext() {
-    const found = validateStep(step, form);
+    const current = readForm();
+    const found = validateStep(step, current);
     setErrors(found);
     const firstKey = Object.keys(found)[0];
     if (firstKey) {
@@ -408,6 +442,7 @@ export default function SchedulePage() {
   }
 
   function goBack() {
+    readForm();
     setErrors({});
     setStep((s) => Math.max(s - 1, 1));
   }
@@ -417,16 +452,17 @@ export default function SchedulePage() {
     // Enter on any field of the last step submits, so without this guard a
     // second press while the first is in flight books the job twice.
     if (submitting) return;
+    const current = readForm();
     // Re-check every step so nothing slips through via keyboard navigation.
     const all = [1, 2, 3, 4, 5].reduce(
-      (acc, n) => ({ ...acc, ...validateStep(n, form) }),
+      (acc, n) => ({ ...acc, ...validateStep(n, current) }),
       {},
     );
     const keys = Object.keys(all).filter((k) => all[k]);
     if (keys.length) {
       setErrors(all);
       const firstStep = [1, 2, 3, 4, 5].find(
-        (n) => Object.keys(validateStep(n, form)).length > 0,
+        (n) => Object.keys(validateStep(n, current)).length > 0,
       );
       setStep(firstStep || 1);
       return;
@@ -438,7 +474,7 @@ export default function SchedulePage() {
     const reference = makeReference();
     const outcome = await submitForm(
       "booking",
-      { ...form, reference },
+      { ...current, reference },
       event.currentTarget,
     );
     setSubmitting(false);
@@ -664,6 +700,7 @@ export default function SchedulePage() {
           <ProgressBar step={step} />
 
           <form
+            ref={formRef}
             onSubmit={handleSubmit}
             noValidate
             className="card mt-8 p-6 md:p-8"
@@ -714,7 +751,7 @@ export default function SchedulePage() {
                               : "border-ink/15 hover:border-ink/40"
                           }`}
                         >
-                          <input
+                          <Input
                             type="radio"
                             id={`service-${item.slug}`}
                             name="service"
@@ -857,7 +894,7 @@ export default function SchedulePage() {
                           : "border-ink/15 hover:border-ink/40"
                       } ${lockedToShop ? "cursor-not-allowed opacity-50" : ""}`}
                     >
-                      <input
+                      <Input
                         type="radio"
                         id="location-mobile"
                         name="locationType"
@@ -887,7 +924,7 @@ export default function SchedulePage() {
                           : "border-ink/15 hover:border-ink/40"
                       }`}
                     >
-                      <input
+                      <Input
                         type="radio"
                         id="location-shop"
                         name="locationType"
@@ -957,7 +994,7 @@ export default function SchedulePage() {
                           (optional)
                         </span>
                       </label>
-                      <textarea
+                      <Textarea
                         id="parkingNotes"
                         name="parkingNotes"
                         rows={3}
@@ -1035,7 +1072,7 @@ export default function SchedulePage() {
                   <label htmlFor="date" className="label">
                     Preferred date
                   </label>
-                  <input
+                  <Input
                     type="date"
                     id="date"
                     name="date"
@@ -1078,7 +1115,7 @@ export default function SchedulePage() {
                               : "border-ink/15 hover:border-ink/40"
                           } ${unavailable ? "cursor-not-allowed opacity-50" : ""}`}
                         >
-                          <input
+                          <Input
                             type="radio"
                             id={`window-${slot.value}`}
                             name="window"
@@ -1168,7 +1205,7 @@ export default function SchedulePage() {
                         (optional)
                       </span>
                     </label>
-                    <textarea
+                    <Textarea
                       id="notes"
                       name="notes"
                       rows={3}
@@ -1210,8 +1247,11 @@ export default function SchedulePage() {
                 <span className="hidden sm:block" />
               )}
 
+              {/* Distinct keys, so step 4's Next is not reused as step 5's
+                  submit button mid-click — that submitted the booking. */}
               {step < LAST_STEP ? (
                 <button
+                  key="next"
                   type="button"
                   onClick={goNext}
                   className="btn-primary btn-sm"
@@ -1221,6 +1261,7 @@ export default function SchedulePage() {
                 </button>
               ) : (
                 <button
+                  key="submit"
                   type="submit"
                   disabled={submitting}
                   aria-busy={submitting || undefined}
