@@ -1,6 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }],
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [{ "source": "/tires/p/:sku", "destination": "/spa" }],
   "crons": [{ "path": "/api/cron/atd-sweep", "schedule": "0 12 * * *" }],
   "functions": {
     "api/cron/atd-sweep.js": { "maxDuration": 60 },
@@ -52,6 +54,9 @@
     }
   ],
   "redirects": [
+    { "source": "/coupons", "destination": "/tires", "statusCode": 301 },
+    { "source": "/deals", "destination": "/tires", "statusCode": 301 },
+    { "source": "/track-order", "destination": "/track", "statusCode": 301 },
     { "source": "/collections/tires", "destination": "/tires", "statusCode": 301 },
     { "source": "/collections/wheels", "destination": "/wheels", "statusCode": 301 },
     { "source": "/collections/tires/:path+", "destination": "/tires", "statusCode": 301 },

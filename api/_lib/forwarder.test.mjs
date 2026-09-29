@@ -678,17 +678,19 @@ test("forwarder config: switches never flip ATD to live; status reports forwarde
   assert.equal(statusBody(on, CONFIRMED).issues, undefined);
 });
 
-test("vercel.json: the cron is scheduled and the SPA rewrite does not swallow it", () => {
+test("vercel.json: the cron is scheduled and no rewrite swallows it", () => {
   const vercel = JSON.parse(readFileSync(new URL("../../vercel.json", import.meta.url), "utf8"));
   // Once a day while the project is on Hobby (the only schedule Hobby
   // deploys accept); switch to "*/5 * * * *" on Pro. See atd-forwarder.md.
   assert.equal(vercel.crons.length, 1);
   assert.equal(vercel.crons[0].path, "/api/cron/atd-sweep");
   assert.ok(["0 12 * * *", "*/5 * * * *"].includes(vercel.crons[0].schedule), vercel.crons[0].schedule);
-  for (const { source } of vercel.rewrites) {
-    const re = new RegExp(`^${source}$`);
-    assert.equal(re.test("/api/cron/atd-sweep"), false, source);
-    assert.equal(re.test("/tires"), true, "the SPA rewrite still works");
-  }
+  // Pages are prerendered files (scripts/prerender.mjs); the only rewrite
+  // left sends the live-sku product route to the app shell.
+  const matchers = vercel.rewrites.map(
+    ({ source }) => new RegExp(`^${source.replace(/:\w+/g, "[^/]+")}$`),
+  );
+  for (const re of matchers) assert.equal(re.test("/api/cron/atd-sweep"), false, String(re));
+  assert.ok(matchers.some((re) => re.test("/tires/p/ABC123")), "the sku route reaches the app");
   assert.ok(vercel.functions["api/cron/atd-sweep.js"].maxDuration >= 60);
 });

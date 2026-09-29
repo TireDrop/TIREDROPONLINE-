@@ -11,13 +11,19 @@ import {
 } from "lucide-react";
 import { BUSINESS, FOOTER_COLUMNS, SOCIAL } from "../../data/business.js";
 import Logo from "./Logo.jsx";
+import { useHydrated } from "../../lib/useHydrated.js";
 
 // Whether any social account is confirmed. With none, the heading would sit
 // over an empty row.
 const hasSocial = Object.values(SOCIAL).some(Boolean);
 
 export default function Footer() {
-  const year = new Date().getFullYear();
+  // The prerendered HTML carries the build's year; the visitor's clock takes
+  // over after hydration, so the two never disagree mid-hydrate.
+  const hydrated = useHydrated();
+  const year = hydrated
+    ? new Date().getFullYear()
+    : Number(import.meta.env.VITE_BUILD_YEAR);
 
   return (
     <footer className="mt-auto bg-ink bg-ink-wash text-bone">

@@ -8,13 +8,14 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.mjs",
     "build:preview": "vite build --mode preview",
     "preview": "vite preview",
     "lint": "eslint .",
     "audit:mobile": "node scripts/mobile-audit.mjs",
     "check:popup": "node scripts/newsletter-popup-check.mjs",
     "check:forms": "node scripts/forms-keep-values-check.mjs",
+    "check:prerender": "node scripts/prerender-check.mjs",
     "test:api": "node --test \"api/_lib/*.test.mjs\""
   },
   "dependencies": {

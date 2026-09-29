@@ -24,6 +24,7 @@ import {
   Seo,
   Textarea,
 } from "../../components/ui/index.jsx";
+import { useHydrated } from "../../lib/useHydrated.js";
 import { BUSINESS } from "../../data/business.js";
 import {
   CONTACT_EMAIL,
@@ -383,7 +384,9 @@ export default function SchedulePage() {
 
   const service = getService(form.service);
   const lockedToShop = Boolean(service && !service.mobile);
-  const today = toIsoDate(new Date());
+  // Today on the visitor's clock, not the build's (see useHydrated).
+  const hydrated = useHydrated();
+  const today = hydrated ? toIsoDate(new Date()) : undefined;
   const pickedDate = form.date ? parseLocalDate(form.date) : null;
   const isSaturday = pickedDate?.getDay() === 6;
 
