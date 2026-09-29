@@ -62,13 +62,20 @@ _Last updated: 2026-09-29 (rule fixes live)_
 - [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search)
 
 ## Big upgrades (Claude)
-- [ ] Prerender pages for Google
+- [ ] Prerender pages for Google (covered by Blog + Learn Phase 0)
 - [ ] Hero finder goes straight to results
 - [ ] Installed-price toggle
 - [ ] Book an install time at checkout
 - [ ] Fitment by trim + staggered, and a "Fits your vehicle" badge
 - [ ] Local city pages: Sunrise, Fort Lauderdale, Plantation, Davie…
 - [ ] Real review collection (no stars until real reviews exist)
+
+## Content & SEO: Blog + Learn (Claude; plan in docs/prompts/blog-learn-build.md)
+- [ ] Phase 0: prerender all pages + article schema + sitemap lastmod
+- [ ] Phase 1: keyword map, 90–100 titles, demo list → Justin approves
+- [ ] Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves
+- [ ] Phase 3: publish in batches of 10 (~10/week)
+- [ ] Phase 4: internal links, Search Console submit, monthly refresh
 
 ## ATD and business (Justin)
 - [ ] Submit the ATD connectivity form
