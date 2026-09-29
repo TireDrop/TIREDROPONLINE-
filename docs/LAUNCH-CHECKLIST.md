@@ -1,0 +1,83 @@
+# TireDrop Launch Checklist
+
+Justin's master to-do list. **Update this file every time a task finishes.**
+Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
+Open items stay `- [ ]`. Add new items to the right section; don't delete
+done items. Show Justin the updated list, in this style, whenever it changes.
+
+_Last updated: 2026-09-29_
+
+## Site fixes (Claude)
+- [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
+- [x] ~~Privacy policy: newsletter, form storage in Shopify, GA disclosed~~ (`a6a5b0c`)
+- [x] ~~Docs: "no cookies / no analytics" claims fixed~~ (`cef543a`)
+- [x] ~~GA4: correct page titles on route changes~~ (`08df057`)
+- [x] ~~robots.txt: Google allowed to crawl~~ (`9719552`)
+- [x] ~~Site audit saved~~ (`f2d786e`, docs/audit/2026-09-29-site-audit.md)
+- [ ] Rule fixes: APR/"no interest", volume pricing, fake 7% tax, firm pickup date, Reviews/Gallery (building)
+- [ ] Instant order alerts: Shopify → Vercel webhooks (building)
+- [ ] Track My Order page `/track` (building)
+- [ ] Track Order / Account links in header, menu and footer (building)
+
+## Admin (Justin)
+- [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
+- [x] ~~Search Console: domain verified, sitemap submitted, robots.txt re-fetched~~ (2026-09-29)
+- [x] ~~Business Profile: tiredroponline.com added as a booking link (main site kept)~~
+- [x] ~~Shopify Payments: payouts daily, test mode OFF, statement "SP TireDrop"~~
+- [x] ~~Apps: Inbox and Appointo not installed~~
+- [x] ~~Sender email info@tiredroponline.com authenticated~~
+- [x] ~~Shopify app + Vercel keys + "Website lead alert" Flow~~
+- [x] ~~Newsletter pop-up test passed~~
+- [ ] Go-live tests, Parts E–H: contact form, order-request draft, email/SPF check, $1 order #D1
+- [ ] Google: retry "Request indexing" (robots.txt delay)
+- [ ] 2-step login for all Shopify staff (Melissa keeps full access)
+- [ ] Someone can sign into Outlook as info@tiredroponline.com
+- [ ] SPF/DMARC: fix only if the Gmail test fails (never add a 2nd DMARC record)
+
+## Next phase (Chrome prompt after the builds land)
+- [ ] Webhooks: 2 in Shopify, signing key into Vercel, redeploy, test
+- [ ] `/track` tested with the $1 order
+- [ ] Header links checked on desktop and phone
+- [ ] Checkout branding (prompt 20)
+- [ ] Publish EDIT HERE, then test the shop. → main-site redirect
+
+## Before real paid orders (Claude)
+- [ ] Bill installation on the invoice
+- [ ] Ship-to-store flow: address, emails, alerts
+- [ ] Fitment hold before orders go to ATD
+- [ ] "Tires arrived at the shop" notice
+- [ ] Checkout spam guard, and no writing into other customers' notes
+- [ ] No Add button on won't-fit tires; Compare crowns same-size tires only
+- [ ] Year-aware fitment on /tires
+
+## Quick wins (Claude)
+- [ ] Phone bottom bar changes by page
+- [ ] Pop-up off shop pages
+- [ ] Google search-result data: breadcrumbs, FAQ, map coordinates
+- [ ] Accessibility fixes + skip link
+- [ ] Security headers: CSP, HSTS, Permissions-Policy
+- [ ] NHTSA lookup timeout
+- [ ] Returns window + warranty/road-hazard links
+
+## Big upgrades (Claude)
+- [ ] Prerender pages for Google
+- [ ] Hero finder goes straight to results
+- [ ] Installed-price toggle
+- [ ] Book an install time at checkout
+- [ ] Fitment by trim + staggered, and a "Fits your vehicle" badge
+- [ ] Local city pages: Sunrise, Fort Lauderdale, Plantation, Davie…
+- [ ] Real review collection (no stars until real reviews exist)
+
+## ATD and business (Justin)
+- [ ] Submit the ATD connectivity form
+- [ ] ATD call: API access, brands, sandbox, fees
+- [ ] Second distributor: TireHub / US AutoForce / Wheel Pros
+- [ ] Accountant: FL $1/tire fee + out-of-state sales tax
+- [ ] Brand pricing rules: minimum advertised prices, online-sale limits
+- [ ] Decide: direct API vs Spark / Slingshot / our own sync
+
+## Later
+- [ ] Vercel Pro ($20/mo)
+- [ ] etwheelz.com: keep or remove
+- [ ] Old Cannavibe repo: delete the `tiredrop/` folder? (needs Justin's yes)
+- [ ] After ATD: live API → sandbox test → auto-ordering on → full sizes, richer specs, Google Shopping
