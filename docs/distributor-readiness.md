@@ -197,6 +197,16 @@ The only browser storage is `localStorage` for the cart, an applied promo code
 and the comparison tray. _(Superseded: promo codes have since been removed, so
 storage is now the cart and the comparison tray only.)_
 
+_(Superseded, 2026-09-29 — none of the paragraph above describes the site any
+more: Google Analytics 4 now runs (tag `G-2MCPDH5WF9` in `index.html`, Google
+signals and ad personalization off, first-party `_ga` cookies); the newsletter
+pop-up collects email addresses and remembers a close or sign-up in
+`localStorage` under `td-nl-popup`; sign-ups become Shopify customers with
+email marketing consent, and every website form and checkout order request is
+stored on a Shopify customer (plus a draft order for order requests); and
+online payment runs through Shopify's hosted checkout. The privacy policy
+describes all of it — see "Standing requirement" below.)_
+
 The policy nevertheless claimed: a payment processor holding card data; cookies
 including optional analytics cookies; aggregate traffic measurement; and
 "Payment processors" as a category of third party receiving customer data.
@@ -206,10 +216,15 @@ actual implementation — including a §3 that states outright that the site set
 no cookies and runs no analytics, names the three `localStorage` keys, and
 invites the reader to check in developer tools. This is now a _stronger_ privacy
 story than the boilerplate it replaced, and it is true.
+_(Superseded: §3 now names the Google Analytics cookies and the three
+`localStorage` keys in use — cart, comparison tray and the newsletter pop-up's
+`td-nl-popup` — and §§1, 2, 4, 5 and 6 cover the email sign-up and the form
+messages stored in Shopify.)_
 
-**Standing requirement:** if analytics, a payment processor or an email platform
-is ever added, §3 has to change in the same commit. That rule is written into
-the file header.
+**Standing requirement:** if the analytics setup changes, or a payment
+processor, an email platform or any other third-party script is added, §§3, 4
+and 6 have to change in the same commit. That rule is written into the file
+header.
 
 ---
 
@@ -232,6 +247,13 @@ panel now says the form is not monitored around the clock.
 forms need a destination — a mailbox, a form service, anything. A form that
 silently discards a message while confirming receipt is a consumer-facing
 defect independent of what any distributor thinks.
+
+_(Superseded: the forms now have a destination. Contact, financing, fleet
+quote and booking forms post to `/api/forms`, which saves each message on a
+Shopify customer — note and `tiredrop.last_lead` metafield, tags `lead` and
+`lead-<form>` — and the Shopify Flow "Website lead alert" emails it to info@
+(`api/_lib/leads.js`, `docs/integrations/website-leads.md`). The forms only
+claim delivery when `/api/status` reports `forms: "on"`.)_
 
 ---
 
@@ -316,9 +338,12 @@ Files touched (the only files this audit owned):
 
 **`src/pages/support/LegalPage.jsx`**
 
-- Privacy §§1, 2, 3, 4, 6, 7 rewritten to match the implementation: no cookies,
-  no analytics, no tracking, no card data on this site, `localStorage` named
-  and explained.
+- Privacy §§1, 2, 3, 4, 6, 7 rewritten to match the implementation at the
+  time: no cookies, no analytics, no tracking, no card data on this site,
+  `localStorage` named and explained. _(Superseded: GA4 has since been added
+  with Google signals and ad personalization off, the newsletter pop-up
+  collects emails into Shopify and uses `localStorage`, and the forms store
+  messages in Shopify; the policy was updated in the same commits.)_
 - Terms §9 no longer cross-references a return window "stated at checkout".
 - Terms §10 no longer cross-references a reporting period on an order
   confirmation; it asks for a same-day call and says we will state the deadline.
