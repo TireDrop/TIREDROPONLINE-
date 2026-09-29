@@ -357,11 +357,28 @@ function graphFor(pathname, url, fullTitle, description) {
  * will see all of it; the social-card scrapers (Facebook, X, LinkedIn, Slack,
  * iMessage) do not, and they read the static tags in index.html instead. See
  * docs/technical-audit.md.
+ *
+ * `crumbs` is the BreadcrumbList trail between Home and this page, as
+ * `[{ name, path }]` (a Learn guide passes Learn and its hub). Same shape as
+ * the prerender branch's Seo, which emits the list itself.
+ * `type` overrides og:type (the Learn and Blog articles pass "article").
+ * `schema` is extra JSON-LD nodes for this page (Article, FAQPage), appended
+ * to the site-wide graph. Both arrays are compared by value, so they can be
+ * written inline.
  */
-export function Seo({ title, description, noindex = false }) {
+export function Seo({
+  title,
+  description,
+  noindex = false,
+  crumbs,
+  type,
+  schema,
+}) {
   const { pathname } = useLocation();
+  const extraKey = JSON.stringify({ crumbs: crumbs ?? null, schema: schema ?? null });
 
   useEffect(() => {
+    const extra = JSON.parse(extraKey);
     const fullTitle = `${title} | ${BUSINESS.name}`;
     const url = `${ORIGIN}${pathname === "/" ? "/" : pathname.replace(/\/+$/, "")}`;
 
@@ -381,7 +398,9 @@ export function Seo({ title, description, noindex = false }) {
     upsertMeta('meta[property="og:url"]', { property: "og:url", content: url });
     upsertMeta('meta[property="og:type"]', {
       property: "og:type",
-      content: /^\/(tires|wheels)\/.+/.test(pathname) ? "product" : "website",
+      content:
+        type ??
+        (/^\/(tires|wheels)\/.+/.test(pathname) ? "product" : "website"),
     });
     upsertMeta('meta[name="twitter:title"]', {
       name: "twitter:title",
@@ -399,14 +418,31 @@ export function Seo({ title, description, noindex = false }) {
     }
 
     const { graph, missing } = graphFor(pathname, url, fullTitle, description);
-    setJsonLd(graph);
-
     const hide = noindex || missing || NOINDEX_ROUTES.includes(pathname);
+    if (extra.crumbs && !hide) {
+      const trail = [
+        { name: "Home", url: `${ORIGIN}/` },
+        ...extra.crumbs.map((c) => ({ name: c.name, url: `${ORIGIN}${c.path}` })),
+        { name: title, url },
+      ];
+      graph.push({
+        "@type": "BreadcrumbList",
+        "@id": `${url}#breadcrumb`,
+        itemListElement: trail.map((c, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: c.name,
+          item: c.url,
+        })),
+      });
+    }
+    setJsonLd(extra.schema ? [...graph, ...extra.schema] : graph);
+
     upsertMeta('meta[name="robots"]', {
       name: "robots",
       content: hide ? "noindex, follow" : "index, follow",
     });
-  }, [title, description, noindex, pathname]);
+  }, [title, description, noindex, pathname, type, extraKey]);
 
   return null;
 }
