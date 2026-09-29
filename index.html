@@ -9,6 +9,22 @@
       content="Shop tires and wheels from Continental, Michelin, Bridgestone, Pirelli and more. Shipped anywhere in the continental US, or delivered free to our Sunrise, FL shop and installed for you."
     />
     <meta name="theme-color" content="#070E1A" />
+    <!-- Google Analytics 4 (property "Tire Drop", stream G-2MCPDH5WF9).
+         Route changes are counted by GA4 enhanced measurement ("page changes
+         based on browser history events"), so no router code is needed.
+         Google signals and ad personalization are switched off here, which is
+         what lets the privacy policy say the data is not used for advertising.
+         Privacy §§3, 4 and 6 describe this tag — change them if it changes. -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2MCPDH5WF9"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag("js", new Date());
+      gtag("config", "G-2MCPDH5WF9", {
+        allow_google_signals: false,
+        allow_ad_personalization_signals: false,
+      });
+    </script>
     <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg" />
     <!-- Safari on iOS ignores the SVG favicon, and an SVG cannot be used as a
          home-screen icon at all, so this is a flat 180x180 PNG on brand ink. -->
