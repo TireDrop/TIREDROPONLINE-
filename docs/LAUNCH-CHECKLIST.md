@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-09-29 (rule fixes live)_
+_Last updated: 2026-09-29 (webhooks, /track and account links live; Blog + Learn Phases 0–1 started)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -15,9 +15,9 @@ _Last updated: 2026-09-29 (rule fixes live)_
 - [x] ~~robots.txt: Google allowed to crawl~~ (`9719552`)
 - [x] ~~Site audit saved~~ (`f2d786e`, docs/audit/2026-09-29-site-audit.md)
 - [x] ~~Rule fixes: APR/"no interest" removed, volume pricing removed, tax "calculated at checkout", preferred pickup day (no firm date), honest Reviews + "Example" Gallery~~ (`aefaed6`…`006010f`)
-- [ ] Instant order alerts: Shopify → Vercel webhooks (building)
-- [ ] Track My Order page `/track` (building)
-- [ ] Track Order / Account links in header, menu and footer (building)
+- [x] ~~Instant order alerts: Shopify → Vercel webhooks~~ (`0fa9a6e`)
+- [x] ~~Track My Order page `/track`~~ (`3f07766`, `ccdf679`)
+- [x] ~~Track Order / Account links in header, menu and footer~~ (`74d5811`, `b4f456b`)
 
 ## Admin (Justin)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
@@ -35,7 +35,7 @@ _Last updated: 2026-09-29 (rule fixes live)_
 - [ ] SPF/DMARC: fix only if the Gmail test fails (never add a 2nd DMARC record)
 
 ## Next phase (Chrome prompt after the builds land)
-- [ ] Webhooks: 2 in Shopify, signing key into Vercel, redeploy, test
+- [ ] Webhooks: 2 in Shopify, signing key into Vercel, redeploy, test (prompt 21)
 - [ ] `/track` tested with the $1 order
 - [ ] Header links checked on desktop and phone
 - [ ] Checkout branding (prompt 20)
@@ -71,8 +71,8 @@ _Last updated: 2026-09-29 (rule fixes live)_
 - [ ] Real review collection (no stars until real reviews exist)
 
 ## Content & SEO: Blog + Learn (Claude; plan in docs/prompts/blog-learn-build.md)
-- [ ] Phase 0: prerender all pages + article schema + sitemap lastmod
-- [ ] Phase 1: keyword map, 90–100 titles, demo list → Justin approves
+- [ ] Phase 0: prerender all pages + article schema + sitemap lastmod (in progress)
+- [ ] Phase 1: keyword map, 90–100 titles, demo list → Justin approves (research in progress)
 - [ ] Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves
 - [ ] Phase 3: publish in batches of 10 (~10/week)
 - [ ] Phase 4: internal links, Search Console submit, monthly refresh
