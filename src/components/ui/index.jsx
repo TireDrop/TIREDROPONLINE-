@@ -1,5 +1,7 @@
 import React, {
+  createContext,
   forwardRef,
+  useContext,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
@@ -42,7 +44,7 @@ function upsertLink(rel, href) {
   tag.setAttribute("href", href);
 }
 
-function setJsonLd(graph) {
+function setJsonLd(data) {
   let tag = document.head.querySelector('script[data-seo="ld"]');
   if (!tag) {
     tag = document.createElement("script");
@@ -50,10 +52,7 @@ function setJsonLd(graph) {
     tag.setAttribute("data-seo", "ld");
     document.head.appendChild(tag);
   }
-  tag.textContent = JSON.stringify({
-    "@context": "https://schema.org",
-    "@graph": graph,
-  });
+  tag.textContent = JSON.stringify(data);
 }
 
 /* --------------------------- structured data --------------------------- */
@@ -286,12 +285,54 @@ function serviceNode(service, url) {
 }
 
 /**
+ * Where an inner page sits, for BreadcrumbList. Top-level pages are
+ * Home > Page; these few have a real parent page in between, matching the
+ * visible breadcrumbs on /install and the service pages.
+ */
+const CRUMB_PARENTS = [
+  [/^\/tires\/.+/, { name: "Shop Tires", path: "/tires" }],
+  [/^\/wheels\/.+/, { name: "Shop Wheels", path: "/wheels" }],
+  [/^\/services\/.+/, { name: "Auto Service", path: "/auto-service" }],
+  [/^\/install$/, { name: "How Shipping Works", path: "/shipping" }],
+];
+
+function breadcrumbNode(pathname, url, name, parents) {
+  const fixed = CRUMB_PARENTS.find(([re]) => re.test(pathname))?.[1];
+  const between = parents ?? (fixed ? [fixed] : []);
+  const trail = [
+    { name: "Home", url: `${ORIGIN}/` },
+    ...between.map((p) => ({ name: p.name, url: `${ORIGIN}${p.path}` })),
+    { name, url },
+  ];
+  return {
+    "@type": "BreadcrumbList",
+    "@id": `${url}#breadcrumb`,
+    itemListElement: trail.map((crumb, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: crumb.name,
+      item: crumb.url,
+    })),
+  };
+}
+
+/**
  * Builds the JSON-LD graph for a route, plus whether the route should be
  * noindexed. A product or service URL whose slug matches nothing is a 404
  * rendered at 200 — it must not be indexed, and the component can tell on its
  * own by looking the slug up, without the page passing anything.
  */
-function graphFor(pathname, url, fullTitle, description) {
+function graphFor(pathname, url, title, fullTitle, description, noindex, crumbs) {
+  const webPage = {
+    "@type": "WebPage",
+    "@id": `${url}#webpage`,
+    url,
+    name: fullTitle,
+    ...(description ? { description } : {}),
+    inLanguage: "en-US",
+    isPartOf: { "@id": `${ORIGIN}/#website` },
+    about: { "@id": `${ORIGIN}/#organization` },
+  };
   const graph = [
     organizationNode(),
     {
@@ -302,19 +343,11 @@ function graphFor(pathname, url, fullTitle, description) {
       inLanguage: "en-US",
       publisher: { "@id": `${ORIGIN}/#organization` },
     },
-    {
-      "@type": "WebPage",
-      "@id": `${url}#webpage`,
-      url,
-      name: fullTitle,
-      ...(description ? { description } : {}),
-      inLanguage: "en-US",
-      isPartOf: { "@id": `${ORIGIN}/#website` },
-      about: { "@id": `${ORIGIN}/#organization` },
-    },
+    webPage,
   ];
 
   let missing = false;
+  let crumbName = title;
 
   if (SHOP_ROUTES.includes(pathname)) graph.push(shopNode());
 
@@ -324,21 +357,116 @@ function graphFor(pathname, url, fullTitle, description) {
       product[1] === "tires" ? "tire" : "wheel",
       product[2],
     );
-    if (found) graph.push(productNode(found, url));
-    else missing = true;
+    if (found) {
+      const node = productNode(found, url);
+      graph.push(node);
+      crumbName = node.name;
+    } else missing = true;
   }
 
   const service = /^\/services\/(.+)$/.exec(pathname);
   if (service) {
     const found = getService(service[1]);
-    if (found) graph.push(serviceNode(found, url));
-    else missing = true;
+    if (found) {
+      graph.push(serviceNode(found, url));
+      crumbName = found.name;
+    } else missing = true;
   }
 
-  return { graph, missing };
+  const hide = noindex || missing || NOINDEX_ROUTES.includes(pathname);
+
+  // Inner pages that are meant to be indexed get a breadcrumb trail.
+  if (pathname !== "/" && !hide) {
+    graph.push(breadcrumbNode(pathname, url, crumbName, crumbs));
+    webPage.breadcrumb = { "@id": `${url}#breadcrumb` };
+  }
+
+  return { graph, hide };
 }
 
 /* --------------------------------- Seo --------------------------------- */
+
+/**
+ * Everything the head should say for one route, as plain data. The browser
+ * applies it with applyHead(); the prerenderer (src/entry-server.jsx) turns
+ * the same object into static tags, so the served HTML and the hydrated page
+ * cannot disagree.
+ */
+export function headFor({
+  title,
+  description,
+  noindex = false,
+  crumbs,
+  pathname,
+}) {
+  const fullTitle = `${title} | ${BUSINESS.name}`;
+  const url = `${ORIGIN}${pathname === "/" ? "/" : pathname.replace(/\/+$/, "")}`;
+  const { graph, hide } = graphFor(
+    pathname,
+    url,
+    title,
+    fullTitle,
+    description,
+    noindex,
+    crumbs,
+  );
+  return {
+    title: fullTitle,
+    description: description || null,
+    url,
+    ogType: /^\/(tires|wheels)\/.+/.test(pathname) ? "product" : "website",
+    robots: hide ? "noindex, follow" : "index, follow",
+    jsonLd: { "@context": "https://schema.org", "@graph": graph },
+  };
+}
+
+function applyHead(head) {
+  document.title = head.title;
+  if (head.description)
+    upsertMeta('meta[name="description"]', {
+      name: "description",
+      content: head.description,
+    });
+
+  upsertLink("canonical", head.url);
+
+  upsertMeta('meta[property="og:title"]', {
+    property: "og:title",
+    content: head.title,
+  });
+  upsertMeta('meta[property="og:url"]', {
+    property: "og:url",
+    content: head.url,
+  });
+  upsertMeta('meta[property="og:type"]', {
+    property: "og:type",
+    content: head.ogType,
+  });
+  upsertMeta('meta[name="twitter:title"]', {
+    name: "twitter:title",
+    content: head.title,
+  });
+  if (head.description) {
+    upsertMeta('meta[property="og:description"]', {
+      property: "og:description",
+      content: head.description,
+    });
+    upsertMeta('meta[name="twitter:description"]', {
+      name: "twitter:description",
+      content: head.description,
+    });
+  }
+
+  setJsonLd(head.jsonLd);
+
+  upsertMeta('meta[name="robots"]', { name: "robots", content: head.robots });
+}
+
+/**
+ * Set only while prerendering. The Seo component hands its head to the
+ * collector during render, because effects never run on the server.
+ */
+export const HeadCollectorContext = createContext(null);
 
 /**
  * Per-page head: title, description, canonical, Open Graph, Twitter card and
@@ -353,60 +481,35 @@ function graphFor(pathname, url, fullTitle, description) {
  * carts, checkouts and hand-rolled 404s. Product and service pages set it
  * themselves when the slug matches nothing.
  *
- * One honest limit: this runs in the browser. Google renders JavaScript and
- * will see all of it; the social-card scrapers (Facebook, X, LinkedIn, Slack,
- * iMessage) do not, and they read the static tags in index.html instead. See
- * docs/technical-audit.md.
+ * `crumbs` sets the BreadcrumbList pages between Home and this one, as
+ * `[{ name, path }]` — e.g. a Learn article passes its hub. Without it, the
+ * trail comes from CRUMB_PARENTS, or is just Home > this page.
+ *
+ * In the browser this runs as an effect, on every client-side navigation. At
+ * build time scripts/prerender.mjs renders each route on the server, where the
+ * same head is collected during render and written into that route's static
+ * HTML — which is what link-preview scrapers and non-JS crawlers read.
  */
-export function Seo({ title, description, noindex = false }) {
+export function Seo({ title, description, noindex = false, crumbs }) {
   const { pathname } = useLocation();
+  const collector = useContext(HeadCollectorContext);
+  if (collector)
+    collector.set(headFor({ title, description, noindex, crumbs, pathname }));
 
+  // Compared by value, so a crumbs array written inline does not re-run this
+  // on every render.
+  const crumbsKey = JSON.stringify(crumbs ?? null);
   useEffect(() => {
-    const fullTitle = `${title} | ${BUSINESS.name}`;
-    const url = `${ORIGIN}${pathname === "/" ? "/" : pathname.replace(/\/+$/, "")}`;
-
-    document.title = fullTitle;
-    if (description)
-      upsertMeta('meta[name="description"]', {
-        name: "description",
-        content: description,
-      });
-
-    upsertLink("canonical", url);
-
-    upsertMeta('meta[property="og:title"]', {
-      property: "og:title",
-      content: fullTitle,
-    });
-    upsertMeta('meta[property="og:url"]', { property: "og:url", content: url });
-    upsertMeta('meta[property="og:type"]', {
-      property: "og:type",
-      content: /^\/(tires|wheels)\/.+/.test(pathname) ? "product" : "website",
-    });
-    upsertMeta('meta[name="twitter:title"]', {
-      name: "twitter:title",
-      content: fullTitle,
-    });
-    if (description) {
-      upsertMeta('meta[property="og:description"]', {
-        property: "og:description",
-        content: description,
-      });
-      upsertMeta('meta[name="twitter:description"]', {
-        name: "twitter:description",
-        content: description,
-      });
-    }
-
-    const { graph, missing } = graphFor(pathname, url, fullTitle, description);
-    setJsonLd(graph);
-
-    const hide = noindex || missing || NOINDEX_ROUTES.includes(pathname);
-    upsertMeta('meta[name="robots"]', {
-      name: "robots",
-      content: hide ? "noindex, follow" : "index, follow",
-    });
-  }, [title, description, noindex, pathname]);
+    applyHead(
+      headFor({
+        title,
+        description,
+        noindex,
+        crumbs: JSON.parse(crumbsKey) ?? undefined,
+        pathname,
+      }),
+    );
+  }, [title, description, noindex, crumbsKey, pathname]);
 
   return null;
 }
@@ -418,8 +521,16 @@ export function ScrollToTop({ pathname }) {
   // long legal page instead of the clause they asked for, so an in-page
   // target wins when the route change carries one.
   const { hash } = useLocation();
+  const landed = useRef(false);
 
   useEffect(() => {
+    // The page a visitor lands on is prerendered HTML they may already have
+    // scrolled by the time the app hydrates. Leave the first load's scroll
+    // position to the browser; only in-app navigations reset it.
+    const first = !landed.current;
+    landed.current = true;
+    if (first && !hash) return undefined;
+
     let id = "";
     if (hash) {
       try {
