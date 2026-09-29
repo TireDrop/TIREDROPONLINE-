@@ -35,7 +35,7 @@ import { getService } from "../../data/services.js";
 import { ApiError, submitCheckout } from "../../data/api.js";
 import { useApiStatus } from "../../data/useApi.js";
 import { hasChanges, readFormValues } from "../../data/forms.js";
-import { summarize } from "./CartPage.jsx";
+import { TAX_NOTE, summarize } from "./CartPage.jsx";
 
 /* ------------------------------------------------------------------ */
 /*  Scheduling helpers — the shop is closed Sundays per BUSINESS.hours */
@@ -374,7 +374,7 @@ function SummaryRow({ term, value }) {
 }
 
 /** Money rail rendered on the review step and again on the confirmation. */
-function OrderSummary({ lines, totals, mobile = false }) {
+function OrderSummary({ lines, totals, mobile = false, taxNote = TAX_NOTE }) {
   return (
     <div className="card p-6">
       <h3 className="h3">Order Summary</h3>
@@ -411,10 +411,18 @@ function OrderSummary({ lines, totals, mobile = false }) {
           <SummaryRow term="Mobile install" value="Quoted on the call" />
         )}
         <SummaryRow term="Shipping" value="Free" />
-        <SummaryRow term="Sales tax (7%)" value={money(totals.tax)} />
+        <SummaryRow
+          term="Sales tax"
+          value={<span className="font-sans text-sm text-ink">{taxNote}</span>}
+        />
       </dl>
       <div className="mt-4 flex items-baseline justify-between gap-4 border-t border-ink/10 pt-4">
-        <span className="font-display text-lg font-bold">Total</span>
+        <span className="font-display text-lg font-bold leading-tight">
+          Estimated total{" "}
+          <span className="block text-xs font-normal text-smoke">
+            (before tax)
+          </span>
+        </span>
         <span className="tnum font-display text-3xl leading-none tracking-tight">
           {money(totals.total)}
         </span>
@@ -862,6 +870,7 @@ export default function CheckoutPage() {
                   lines={placed.lines}
                   totals={placed.totals}
                   mobile={mobile}
+                  taxNote="Added when you pay"
                 />
                 {serverTotalDiffers && (
                   <p className="mt-4 text-xs leading-relaxed text-smoke">

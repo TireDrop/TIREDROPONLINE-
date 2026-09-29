@@ -27,21 +27,21 @@ import { productHref } from "../../data/products.js";
 /*  Shared with CheckoutPage (order review).                           */
 /* ------------------------------------------------------------------ */
 
-const TAX_RATE = 0.07;
 const round2 = (n) => Math.round(n * 100) / 100;
 
+/** What the tax row says: the site never estimates it. */
+export const TAX_NOTE = "Calculated at checkout";
+
 /**
- * The money rail: parts + installation + tax. Shipping is free to any
- * continental-US address, so it adds nothing.
+ * The money rail: parts + installation, before tax. Shipping is free to any
+ * continental-US address, so it adds nothing. Sales tax depends on the
+ * address and Shopify works it out at checkout, so no figure is shown here.
  */
 export function summarize({ subtotal, installTotal }) {
-  const taxable = Math.max(0, round2(subtotal + installTotal));
-  const tax = round2(taxable * TAX_RATE);
   return {
     subtotal,
     installTotal,
-    tax,
-    total: round2(taxable + tax),
+    total: Math.max(0, round2(subtotal + installTotal)),
   };
 }
 
@@ -336,15 +336,18 @@ export default function CartPage() {
                   </div>
 
                   <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-smoke">Sales tax (7%)</dt>
-                    <dd className="font-display text-base">
-                      {money(totals.tax)}
-                    </dd>
+                    <dt className="text-smoke">Sales tax</dt>
+                    <dd className="text-right text-sm text-ink">{TAX_NOTE}</dd>
                   </div>
                 </dl>
 
                 <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-ink/10 pt-5">
-                  <span className="font-display text-lg font-bold">Total</span>
+                  <span className="font-display text-lg font-bold leading-tight">
+                    Estimated total{" "}
+                    <span className="block text-xs font-normal text-smoke">
+                      (before tax)
+                    </span>
+                  </span>
                   <span className="tnum font-display text-3xl leading-none tracking-tight">
                     {money(totals.total)}
                   </span>
