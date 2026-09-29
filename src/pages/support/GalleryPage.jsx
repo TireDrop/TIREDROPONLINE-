@@ -137,7 +137,7 @@ const TIPS = [
     title: "The monthly five-minute tire check",
     excerpt:
       "Cold tires, a real gauge, the door placard and a walk around the car. It catches most problems before they cost you a tire.",
-    to: "/tire-care#tire-pressure",
+    to: "/learn/pressure",
   },
   {
     id: "t2",
@@ -145,7 +145,7 @@ const TIPS = [
     title: "Penny test, quarter test and wear bars",
     excerpt:
       "Three ways to answer the only question that matters in a downpour: is there still enough tread to move water?",
-    to: "/tire-care#tread-depth",
+    to: "/learn/tread",
   },
   {
     id: "t3",
@@ -153,7 +153,7 @@ const TIPS = [
     title: "Why front tires die first",
     excerpt:
       "Steering, braking and engine weight all land on the same two tires. Rotation is how you stop buying them in pairs.",
-    to: "/tire-care#tire-rotation",
+    to: "/learn/maintenance",
   },
   {
     id: "t4",
@@ -161,7 +161,7 @@ const TIPS = [
     title: "What one bad pothole really costs",
     excerpt:
       "A knocked-out alignment can shave a shoulder off a new set in a few thousand miles. Here is how to spot it early.",
-    to: "/tire-care#alignment",
+    to: "/learn/maintenance",
   },
   {
     id: "t5",
@@ -169,7 +169,7 @@ const TIPS = [
     title: "Your TPMS light is not always about pressure",
     excerpt:
       "Sensors have batteries, and batteries die. Steady light and flashing light mean two different things.",
-    to: "/tire-care#tpms",
+    to: "/learn/pressure",
   },
   {
     id: "t6",
@@ -177,7 +177,7 @@ const TIPS = [
     title: "Old tires with good tread are still old tires",
     excerpt:
       "How to read the DOT date code, and why heat and sun age rubber faster than mileage does.",
-    to: "/tire-care#tire-replacement",
+    to: "/learn/age",
   },
 ];
 
@@ -391,10 +391,9 @@ export default function GalleryPage() {
             <div className="card mt-8 flex flex-col gap-4 border-l-4 border-l-drop p-6 sm:flex-row sm:items-center sm:justify-between">
               <p className="max-w-xl text-sm leading-relaxed text-smoke">
                 <span className="text-ink">Want the short version now?</span>{" "}
-                Every topic above is written out in full in the tire care
-                guides.
+                Every topic above is covered in the Learn guides.
               </p>
-              <Link to="/tire-care" className="btn-outline btn-sm shrink-0">
+              <Link to="/learn" className="btn-outline btn-sm shrink-0">
                 Read the guides
                 <ArrowRight size={15} aria-hidden />
               </Link>
