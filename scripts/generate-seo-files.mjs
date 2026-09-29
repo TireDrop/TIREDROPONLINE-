@@ -76,8 +76,11 @@ function staticRoutesFromRouter() {
  * rank, and submitting them invites "thin content" flags. robots.txt also
  * disallows them (and /api/), and the Seo component marks them noindex
  * (NOINDEX_ROUTES in src/components/ui/index.jsx).
+ *
+ * /track (Track My Order) is a lookup form with nothing to rank, and it is
+ * noindex too.
  */
-const EXCLUDE = new Set(["/cart", "/checkout"]);
+const EXCLUDE = new Set(["/cart", "/checkout", "/track"]);
 
 /** Priority is advisory and Google ignores it; Bing still reads it. */
 function priorityFor(path) {

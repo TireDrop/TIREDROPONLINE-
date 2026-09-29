@@ -28,6 +28,8 @@ export const BUSINESS = {
 
   phone: "(954) 773-1896",
   phoneHref: "tel:+19547731896",
+  // Customer accounts and full order history stay on Shopify.
+  accountUrl: "https://shop.tiredroponline.com/account",
   // Confirmed by the owner as the single address for every form, business
   // enquiry and contact — including dealer paperwork from a distributor
   // reviewer. The footer, contact, locations and legal pages link to it, the

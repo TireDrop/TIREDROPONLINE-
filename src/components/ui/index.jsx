@@ -183,7 +183,7 @@ function shopNode() {
  * Product and service pages noindex themselves when the slug matches nothing
  * (see graphFor), so they are not listed here.
  */
-const NOINDEX_ROUTES = ["/cart", "/checkout"];
+const NOINDEX_ROUTES = ["/cart", "/checkout", "/track"];
 
 /** Routes where the physical shop, not the web store, is the subject. */
 const SHOP_ROUTES = [

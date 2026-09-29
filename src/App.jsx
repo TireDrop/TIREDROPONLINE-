@@ -62,6 +62,7 @@ const ReviewsPage = lazy(() => import("./pages/support/ReviewsPage.jsx"));
 const FinancingPage = lazy(() => import("./pages/support/FinancingPage.jsx"));
 const TireCarePage = lazy(() => import("./pages/support/TireCarePage.jsx"));
 const GalleryPage = lazy(() => import("./pages/support/GalleryPage.jsx"));
+const TrackOrderPage = lazy(() => import("./pages/support/TrackOrderPage.jsx"));
 const SitemapPage = lazy(() => import("./pages/support/SitemapPage.jsx"));
 const LegalPage = lazy(() => import("./pages/support/LegalPage.jsx"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage.jsx"));
@@ -140,6 +141,14 @@ export default function App() {
             <Route path="/tire-care" element={<TireCarePage />} />
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/sitemap" element={<SitemapPage />} />
+
+            {/* Order status. Full order history stays on Shopify
+                (shop.tiredroponline.com/account). */}
+            <Route path="/track" element={<TrackOrderPage />} />
+            <Route
+              path="/track-order"
+              element={<Navigate to="/track" replace />}
+            />
 
             {/* Legal — one component, three documents */}
             <Route path="/terms" element={<LegalPage doc="terms" />} />
