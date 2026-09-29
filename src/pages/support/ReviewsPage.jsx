@@ -1,16 +1,19 @@
-// Reviews page. TireDrop publishes no reviews, ratings or star counts of its
-// own: none have been collected yet, and a number typed into a page cannot be
-// verified by the reader. The page points at the shop's real Google and Yelp
-// profiles instead, both to read reviews and to leave one. For the same
+// Reviews page. TireDrop has no reviews to show yet, so this page says so and
+// shows none: no stars, no quotes, no counts. Reviews are collected from real
+// customers after their order, and only those will ever appear. For the same
 // reason no Review or AggregateRating markup is emitted anywhere on the site.
+//
+// The Google review button only renders once GOOGLE_PROFILE.reviewUrl holds
+// the shop's real review link (src/data/business.js). Until then there is no
+// Google link at all, rather than a search that may land somewhere else.
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { ExternalLink, Phone, Star, Truck } from "lucide-react";
+import { ExternalLink, MessageSquare, Phone, ShieldCheck } from "lucide-react";
 import {
   BUSINESS,
+  GOOGLE_PROFILE,
   YELP_PROFILE,
-  googleReviewHref,
 } from "../../data/business.js";
 import {
   Breadcrumbs,
@@ -20,9 +23,7 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
-// Resolves to the profile's direct review link once GOOGLE_PROFILE is filled
-// in (src/data/business.js); falls back to a Maps search until then.
-const GOOGLE_REVIEWS_HREF = googleReviewHref();
+const GOOGLE_REVIEW_URL = GOOGLE_PROFILE.reviewUrl || null;
 
 /** An external profile link, announced as opening in a new tab. */
 function ProfileLink({ href, className, children }) {
@@ -44,14 +45,14 @@ export default function ReviewsPage() {
   return (
     <>
       <Seo
-        title="Customer Reviews"
-        description={`Read and leave reviews of ${BUSINESS.parent}, the ${BUSINESS.shop.city}, FL shop behind ${BUSINESS.name}, on Google and Yelp.`}
+        title="Reviews"
+        description={`${BUSINESS.name} collects reviews from real customers after their order. None are published yet. Here is how to leave one.`}
       />
 
       <PageHero
         eyebrow="Reviews"
-        title="Shipped, fitted, and everything after"
-        lede="Reviews of the shop live on Google and Yelp, where we cannot edit them — the good ones, and the ones where we had to put something right. Read them there, or leave your own."
+        title="Reviews are coming"
+        lede={`We collect them from real customers after their order. ${BUSINESS.name} is new, so there are none to show yet, and we will not fill this page with ones we wrote ourselves.`}
       >
         <a href={BUSINESS.phoneHref} className="btn-ghost-light">
           <Phone size={18} aria-hidden />
@@ -61,121 +62,83 @@ export default function ReviewsPage() {
 
       <Breadcrumbs trail={[{ label: "Reviews" }]} />
 
-      {/* ---------- Read the real ones ---------- */}
       <Section className="bg-bone">
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:gap-10">
-          <div className="card flex flex-col p-6 md:p-8">
-            <h2 className="h3">Read our reviews on Google and Yelp</h2>
-            <p className="mt-3 text-sm leading-relaxed text-smoke">
-              {BUSINESS.name} is new, so its own reviews are still being
-              collected. The shop behind it is not: {BUSINESS.parent} fits
-              tires in {BUSINESS.shop.city}, and its customers have been
-              writing about it. Both profiles below are the shop&apos;s.
-            </p>
-
-            <div className="mt-6 flex flex-col gap-2.5">
-              <ProfileLink
-                href={GOOGLE_REVIEWS_HREF}
-                className="btn-dark btn-sm min-h-[44px] w-full"
-              >
-                {BUSINESS.parent} on Google
-              </ProfileLink>
-              <ProfileLink
-                href={YELP_PROFILE.url}
-                className="btn-outline btn-sm min-h-[44px] w-full"
-              >
-                {BUSINESS.parent} on Yelp
-              </ProfileLink>
-            </div>
-
-            <p className="mt-5 text-xs leading-relaxed text-smoke">
-              We do not reprint star counts here. They move, and a number typed
-              into a page is out of date the week after. Open either profile and
-              read what is actually there.
-            </p>
+          <div className="card p-6 md:p-8">
+            <ShieldCheck size={28} aria-hidden className="mb-4 text-drop" />
+            <h2 className="h3">How reviews will get here</h2>
+            <ul className="mt-4 space-y-3 text-sm leading-relaxed text-smoke">
+              <li>
+                <span className="text-ink">After your order.</span> Reviews
+                come from people who actually bought from us, once their order
+                is done.
+              </li>
+              <li>
+                <span className="text-ink">Nothing made up.</span> No sample
+                quotes, no star ratings or review counts we typed in ourselves.
+              </li>
+              <li>
+                <span className="text-ink">Good and bad.</span> When there are
+                reviews to show, they will not be picked to look good.
+              </li>
+            </ul>
           </div>
 
-          <div className="card p-6 md:p-8">
-            <h2 className="h3">We are not hiding the three-star ones</h2>
+          <div className="card flex flex-col p-6 md:p-8">
+            <MessageSquare size={28} aria-hidden className="mb-4 text-drop" />
+            <h2 className="h3">Ordered from us? Leave a review</h2>
             <p className="mt-3 text-sm leading-relaxed text-smoke">
-              If we dropped the ball, you should be able to read about it.
-              That is why this page sends you to the profiles themselves rather
-              than to a handful of quotes we picked.
+              Tell us how it went, what went right and what did not. The
+              quickest way is to reply to us directly: call{" "}
+              <a href={BUSINESS.phoneHref} className="text-drop underline">
+                {BUSINESS.phone}
+              </a>{" "}
+              or use the contact form.
+              {GOOGLE_REVIEW_URL || YELP_PROFILE.url
+                ? ` You can also post a public review of ${BUSINESS.parent}, the ${BUSINESS.shop.city} shop behind ${BUSINESS.name}.`
+                : ""}
             </p>
-            <p className="mt-6 flex items-start gap-2 text-xs leading-relaxed text-smoke">
-              <Truck
-                size={15}
-                aria-hidden
-                className="mt-px shrink-0 text-drop"
-              />
-              Reviews span both halves of the business: orders shipped out to
-              customers across {BUSINESS.shipping.area}, and tires fitted here
-              in {BUSINESS.shop.city} or at an address around Broward.
-            </p>
+
+            <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+              <Link to="/contact" className="btn-primary btn-sm min-h-[44px]">
+                Contact form
+              </Link>
+              {GOOGLE_REVIEW_URL && (
+                <ProfileLink
+                  href={GOOGLE_REVIEW_URL}
+                  className="btn-dark btn-sm min-h-[44px]"
+                >
+                  Review {BUSINESS.parent} on Google
+                </ProfileLink>
+              )}
+              {YELP_PROFILE.url && (
+                <ProfileLink
+                  href={YELP_PROFILE.url}
+                  className="btn-outline btn-sm min-h-[44px]"
+                >
+                  {BUSINESS.parent} on Yelp
+                </ProfileLink>
+              )}
+            </div>
           </div>
         </div>
       </Section>
 
-      {/* ---------- Leave a review ---------- */}
       <Section className="bg-fog">
-        <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-12">
-          <div>
-            <SectionHead
-              eyebrow="Your Turn"
-              title="Leave a review"
-              lede="Feedback is how a tire shop gets better, online or in the bay. Tell us what went right — and what did not, so we can fix it."
-            />
-            <div className="card p-6">
-              <h3 className="h3 mb-3">Something go wrong?</h3>
-              <p className="text-sm leading-relaxed text-smoke">
-                Call us before you post. Most complaints we hear are things we
-                can still put right — a wrong size, a damaged box, a re-torque,
-                a billing question. We would rather earn the stars back.
-              </p>
-              <div className="mt-5 flex flex-wrap gap-3">
-                <a href={BUSINESS.phoneHref} className="btn-primary btn-sm">
-                  <Phone size={16} aria-hidden />
-                  {BUSINESS.phone}
-                </a>
-                <Link to="/contact" className="btn-outline btn-sm">
-                  Contact form
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="card p-6 md:p-8">
-            <Star size={32} aria-hidden className="mb-4 text-amber" />
-            <h3 className="h3">Leave a review on Google or Yelp</h3>
-            <p className="mt-3 text-sm leading-relaxed text-smoke">
-              Bought tires from us, or had them fitted? Tell us how it went.
-              Google and Yelp are where a review counts for the shop, and where
-              the next person shopping for tires will actually read it — it is
-              a minute&apos;s work.
-            </p>
-            <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
-              <ProfileLink
-                href={GOOGLE_REVIEWS_HREF}
-                className="btn-dark btn-sm min-h-[44px]"
-              >
-                Post it on Google
-              </ProfileLink>
-              <ProfileLink
-                href={YELP_PROFILE.url}
-                className="btn-outline btn-sm min-h-[44px]"
-              >
-                Post it on Yelp
-              </ProfileLink>
-            </div>
-            <p className="mt-5 text-sm leading-relaxed text-smoke">
-              If something about your order or your install still needs fixing,
-              call{" "}
-              <a href={BUSINESS.phoneHref} className="text-drop underline">
-                {BUSINESS.phone}
-              </a>{" "}
-              and ask for customer care — we would rather put it right than have
-              you write about it.
-            </p>
+        <div className="mx-auto max-w-2xl">
+          <SectionHead
+            eyebrow="Something go wrong?"
+            title="Call us before you post"
+            lede="A wrong size, a damaged box, a billing question: most of what goes wrong with an order can still be put right."
+          />
+          <div className="flex flex-wrap gap-3">
+            <a href={BUSINESS.phoneHref} className="btn-primary btn-sm">
+              <Phone size={16} aria-hidden />
+              {BUSINESS.phone}
+            </a>
+            <Link to="/contact" className="btn-outline btn-sm">
+              Contact form
+            </Link>
           </div>
         </div>
       </Section>

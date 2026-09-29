@@ -11,92 +11,82 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
-// Illustrations only — no photography has been supplied yet. Each tile is a
-// CSS gradient plus an SVG tread motif, labelled "Illustration" so it is never
-// mistaken for a photo of a real job, and captioned with the kind of order or
-// job it stands for. Swap these for real photos as they come in.
+// Illustrations only: no photography has been supplied yet. Each tile is a
+// CSS gradient plus an SVG tread motif, labelled "Illustration", and its
+// caption names the kind of service it stands for as an example. Captions
+// must not read like a record of a real job (no customer, place, vehicle or
+// count). Swap these for real photos, with real captions, as they come in.
 const GALLERY = [
   {
     id: "g1",
-    caption: "Order out the door — 4x Continental, shipped to Georgia",
-    detail:
-      "Picked from the distributor closest to the customer, boxed and on its way without passing through a warehouse of ours.",
+    caption: "Example: tires shipped to your address",
+    detail: "Tires ship from a distributor warehouse to the address you give at checkout.",
     tone: ["#070E1A", "#22344C"],
   },
   {
     id: "g2",
-    caption: "Ship to store — set checked in at the Sunrise counter",
-    detail:
-      "Size, load index and speed rating read off every sidewall and matched to the order before anyone books the install.",
+    caption: "Example: ship-to-store check-in",
+    detail: "When an order reaches the Sunrise shop, size, load index and speed rating are checked against the order before we call you to set a time.",
     tone: ["#22344C", "#070E1A"],
   },
   {
     id: "g3",
-    caption: "Install bay — full set fitted after a ship-to-store order",
-    detail:
-      "Mounted, balanced, new valve service and every lug torqued to spec.",
+    caption: "Example: mount & balance",
+    detail: "Mount, balance, valve service and lugs torqued to spec.",
     tone: ["#0068E8", "#0053C4"],
   },
   {
     id: "g4",
-    caption: "Mobile install — driveway call, Plantation",
-    detail:
-      "Mat down, jack set, tire machine and balancer running off the van. The car never moved.",
+    caption: "Example: mobile install",
+    detail: "Inside the South Florida install area, the van brings the tire machine and balancer to where you park.",
     tone: ["#101C2E", "#070E1A"],
   },
   {
     id: "g5",
-    caption: "Wheel and tire package — staggered fitment, shipped",
-    detail:
-      "Offset and clearance confirmed with the customer first, then mounted and balanced as a package before it shipped.",
+    caption: "Example: wheel and tire package",
+    detail: "Offset and clearance are confirmed with you before the order ships.",
     tone: ["#22344C", "#101C2E"],
   },
   {
     id: "g6",
-    caption: "Alignment rack — Sunrise shop",
-    detail:
-      "Post-install alignment with a before-and-after printout for the customer.",
+    caption: "Example: wheel alignment",
+    detail: "Alignment at the Sunrise shop, often done after new tires go on.",
     tone: ["#F5A623", "#0053C4"],
   },
   {
     id: "g7",
-    caption: "Fleet order — six work vans, Tamarac yard",
-    detail:
-      "Ordered online, shipped to the shop, fitted on site. Tread depths recorded per vehicle, one invoice.",
+    caption: "Example: fleet order",
+    detail: "Send the list of vehicles and sizes and we quote each tire.",
     tone: ["#070E1A", "#101C2E"],
   },
   {
     id: "g8",
-    caption: "Packaging check — freight damage caught at the counter",
-    detail:
-      "A scuffed box gets opened and inspected before it is handed over. If the tire is wrong, it goes back, not on your car.",
+    caption: "Example: damaged-box check",
+    detail: "A damaged box is opened and the tire inspected before it is handed over or fitted.",
     tone: ["#101C2E", "#0068E8"],
   },
   {
     id: "g9",
-    caption: "Office-park flat repair — sedan, Fort Lauderdale",
-    detail:
-      "Screw through the tread. Dismounted, patch-plugged from the inside and rebalanced.",
+    caption: "Example: flat repair",
+    detail: "Punctures in the tread area can be patch-plugged from the inside. Sidewall damage cannot be repaired.",
     tone: ["#070E1A", "#22344C"],
   },
   {
     id: "g10",
-    caption: "TPMS sensor replacement — SUV, Lauderhill",
-    detail:
-      "Dead sensor battery after eight years. Replaced in a work parking lot, light out.",
+    caption: "Example: TPMS sensor replacement",
+    detail: "Sensor batteries wear out. A dead sensor is replaced and the system relearned.",
     tone: ["#22344C", "#070E1A"],
   },
   {
     id: "g11",
-    caption: "Fitment call — sizes read off a door placard over the phone",
-    detail:
-      "Half the job is making sure the right tire gets ordered in the first place. That part happens before anything ships.",
+    caption: "Example: fitment check",
+    detail: "Sizes are matched to your vehicle before anything ships.",
     tone: ["#101C2E", "#F5A623"],
   },
   {
     id: "g12",
-    caption: "Brake service — front rotors and pads, Sunrise shop",
-    detail: "Bay work, priced before the parts came out of the box.",
+    caption: "Example: brake service",
+    detail: "Pads and rotors at the Sunrise shop, priced before the work starts.",
     tone: ["#070E1A", "#101C2E"],
   },
 ];
@@ -269,13 +259,13 @@ export default function GalleryPage() {
     <>
       <Seo
         title="News & Gallery"
-        description={`Orders going out, sets being fitted at the ${BUSINESS.shop.city} shop and mobile installs around Broward — plus how-to videos and tire care tips from ${BUSINESS.name}.`}
+        description={`Illustrated examples of how ${BUSINESS.name} orders, ship-to-store and installs at the ${BUSINESS.shop.city} shop work, plus how-to videos and tire care tips.`}
       />
 
       <PageHero
         eyebrow="News & Gallery"
-        title="The work, up close"
-        lede={`Orders heading out across ${BUSINESS.shipping.area}, sets fitted in the ${BUSINESS.shop.city} bay, and vans working driveways around Broward. Plus the videos and tips we end up repeating every week.`}
+        title="How the work goes"
+        lede={`Illustrated examples of shipping, ship-to-store and install at the ${BUSINESS.shop.city} shop, until real photos are in. Plus the videos and tips we end up repeating every week.`}
       >
         <a href={BUSINESS.phoneHref} className="btn-ghost-light">
           <Phone size={18} aria-hidden />
@@ -332,8 +322,8 @@ export default function GalleryPage() {
             tabIndex={0}
           >
             <SectionHead
-              title="Orders out, tires on"
-              lede="Captions describe the order or the job each tile stands for. Photography is being collected now — these are illustrations until it lands."
+              title="Examples, not photos"
+              lede="Each tile is an illustration, and its caption names the kind of service it stands for. None of them show a real customer's order."
             />
 
             <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -451,7 +441,7 @@ export default function GalleryPage() {
         <div className="wrap grid gap-8 md:grid-cols-[1.2fr_1fr] md:items-center">
           <div>
             <p className="eyebrow-dark mb-2">{BUSINESS.tagline}</p>
-            <h2 className="h2">Your order could be the next one out</h2>
+            <h2 className="h2">Ready when you are</h2>
             <p className="lede mt-4 max-w-xl text-bone/70">
               Tires shipped anywhere in {BUSINESS.shipping.area}, free to the{" "}
               {BUSINESS.shop.city} shop if you want them fitted, and the van for
