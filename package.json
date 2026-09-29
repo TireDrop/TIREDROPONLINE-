@@ -15,10 +15,13 @@
     "audit:mobile": "node scripts/mobile-audit.mjs",
     "check:popup": "node scripts/newsletter-popup-check.mjs",
     "check:forms": "node scripts/forms-keep-values-check.mjs",
-    "test:api": "node --test \"api/_lib/*.test.mjs\""
+    "test:api": "node --test \"api/_lib/*.test.mjs\"",
+    "test:content": "node --test \"src/content/*.test.mjs\""
   },
   "dependencies": {
+    "js-yaml": "^4.3.2",
     "lucide-react": "^0.383.0",
+    "marked": "^18.0.14",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3"

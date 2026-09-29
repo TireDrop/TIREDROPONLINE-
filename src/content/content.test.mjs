@@ -1,0 +1,455 @@
+/**
+ * Content loader tests: node --test "src/content/*.test.mjs"
+ * (npm run test:content).
+ */
+import { test } from "node:test";
+import assert from "node:assert/strict";
+
+import {
+  AUTHOR,
+  buildContent,
+  canonicalSitePath,
+  locateFile,
+  normalizeCategory,
+  parseFrontmatter,
+  renderBody,
+  splitDemoMarkers,
+} from "./core.js";
+import { loadContent, readContentFiles, readHubs } from "./node.js";
+
+const HUBS = [
+  { slug: "tread", title: "Tread & Wear", description: "Tread.", order: 3 },
+  { slug: "basics", title: "Tire Basics", description: "Basics.", order: 1 },
+  { slug: "age", title: "Tire Age", description: "Age.", order: 10 },
+];
+
+function md(front, body = "Intro paragraph.\n\n## First\n\nText.\n") {
+  const lines = Object.entries(front).map(
+    ([k, v]) => `${k}: ${JSON.stringify(v)}`,
+  );
+  return `---\n${lines.join("\n")}\n---\n${body}`;
+}
+
+const base = (extra = {}) => ({
+  title: "A title",
+  description: "A description.",
+  date: "2026-10-01",
+  updated: "2026-10-03",
+  author: AUTHOR,
+  ...extra,
+});
+
+const FILES = {
+  "./learn/tread/tread-depth.md": md(
+    base({ hub: "tread", title: "Tread depth" }),
+  ),
+  "./learn/tread/penny-test.md": md(
+    base({ hub: "tread", date: "2026-10-05", updated: "2026-10-05" }),
+  ),
+  "./learn/basics/tire-types.md": md(base({ hub: "basics", draft: true })),
+  "./learn/age/_sample-age.md": md(base({ hub: "age" })),
+  "./blog/hurricane-check.md": md(
+    base({ category: "HUR", date: "2026-10-02", updated: "2026-10-09" }),
+  ),
+  "./blog/nitrogen-myth.md": md(
+    base({ category: "myths", date: "2026-10-04", updated: "2026-10-04" }),
+  ),
+  "./blog/_sample-post.md": md(base({ category: "WX", draft: true })),
+};
+
+/* ---------------------------- frontmatter ---------------------------- */
+
+test("parseFrontmatter reads YAML and keeps dates as strings", () => {
+  const { data, body } = parseFrontmatter(
+    "---\ntitle: Tread depth\ndate: 2026-09-29\ndraft: true\ndemo: null\nfaq:\n  - q: One?\n    a: Yes.\nsecondaryKeywords: [a, b]\n---\n\n## Hello\n",
+  );
+  assert.equal(data.title, "Tread depth");
+  assert.equal(data.date, "2026-09-29");
+  assert.equal(typeof data.date, "string");
+  assert.equal(data.draft, true);
+  assert.equal(data.demo, null);
+  assert.deepEqual(data.faq, [{ q: "One?", a: "Yes." }]);
+  assert.deepEqual(data.secondaryKeywords, ["a", "b"]);
+  assert.equal(body, "\n## Hello\n");
+});
+
+test("parseFrontmatter handles CRLF, a BOM, empty and missing frontmatter", () => {
+  assert.equal(
+    parseFrontmatter("\uFEFF---\r\ntitle: X\r\n---\r\nBody").data.title,
+    "X",
+  );
+  assert.equal(
+    parseFrontmatter("\uFEFF---\r\ntitle: X\r\n---\r\nBody").body,
+    "Body",
+  );
+  assert.deepEqual(parseFrontmatter("---\n---\nBody"), {
+    data: {},
+    body: "Body",
+  });
+  assert.deepEqual(parseFrontmatter("Just text"), {
+    data: {},
+    body: "Just text",
+  });
+});
+
+test("parseFrontmatter rejects YAML that is not a mapping or does not parse", () => {
+  assert.throws(() => parseFrontmatter("---\n- a\n- b\n---\nx"), /mapping/);
+  assert.throws(() => parseFrontmatter("---\ntitle: [unclosed\n---\nx"));
+});
+
+test("locateFile maps paths to sections, hubs and slugs", () => {
+  assert.deepEqual(locateFile("./learn/tread/tread-depth.md"), {
+    section: "learn",
+    hub: "tread",
+    slug: "tread-depth",
+    sample: false,
+  });
+  assert.deepEqual(locateFile("blog/_sample-post.md"), {
+    section: "blog",
+    hub: null,
+    slug: "sample-post",
+    sample: true,
+  });
+  assert.equal(locateFile("./learn/hubs.json"), null);
+  assert.equal(locateFile("./learn/tread/deeper/x.md"), null);
+});
+
+/* ------------------------- drafts and routes ------------------------- */
+
+test("production content leaves out drafts and _ samples", () => {
+  const store = buildContent({ files: FILES, hubs: HUBS });
+  assert.deepEqual(
+    store.getLearnArticles().map((a) => a.path),
+    ["/learn/tread/tread-depth", "/learn/tread/penny-test"],
+  );
+  assert.deepEqual(
+    store.getBlogPosts().map((a) => a.path),
+    ["/blog/nitrogen-myth", "/blog/hurricane-check"],
+  );
+  assert.equal(store.getArticle("learn", "basics", "tire-types"), null);
+  assert.equal(store.getArticle("learn", "age", "sample-age"), null);
+  assert.equal(store.getArticle("blog", null, "sample-post"), null);
+  assert.deepEqual(store.problems, []);
+});
+
+test("dev and preview show drafts and samples, marked as not public", () => {
+  const store = buildContent({ files: FILES, hubs: HUBS, includeDrafts: true });
+  const draft = store.getArticle("learn", "basics", "tire-types");
+  const sample = store.getArticle("learn", "age", "sample-age");
+  assert.equal(draft.public, false);
+  assert.equal(draft.draft, true);
+  assert.equal(sample.public, false);
+  assert.equal(sample.sample, true);
+  assert.equal(store.getBlogPosts().length, 3);
+  assert.equal(store.getHub("basics").count, 1);
+});
+
+test("contentRoutes lists only public paths, even when drafts show", () => {
+  const expected = [
+    "/learn",
+    "/learn/tread",
+    "/learn/tread/tread-depth",
+    "/learn/tread/penny-test",
+    "/blog",
+    "/blog/nitrogen-myth",
+    "/blog/hurricane-check",
+  ];
+  for (const includeDrafts of [false, true]) {
+    const store = buildContent({ files: FILES, hubs: HUBS, includeDrafts });
+    assert.deepEqual(store.contentRoutes(), expected);
+  }
+});
+
+test("contentLastmod uses updated dates, rolled up to hubs and indexes", () => {
+  const store = buildContent({ files: FILES, hubs: HUBS, includeDrafts: true });
+  assert.equal(store.contentLastmod("/learn/tread/tread-depth"), "2026-10-03");
+  assert.equal(store.contentLastmod("/learn/tread"), "2026-10-05");
+  assert.equal(store.contentLastmod("/learn"), "2026-10-05");
+  assert.equal(store.contentLastmod("/blog"), "2026-10-09");
+  // Drafts never contribute, and unknown paths have no date.
+  assert.equal(store.contentLastmod("/learn/basics"), null);
+  assert.equal(store.contentLastmod("/tires"), null);
+});
+
+test("an article that cannot be published is skipped and reported", () => {
+  const store = buildContent({
+    hubs: HUBS,
+    files: {
+      "./learn/tread/no-title.md": md(base({ title: "" })),
+      "./learn/nowhere/lost.md": md(base()),
+      "./blog/bad-date.md": md(base({ date: "2026-13-40" })),
+      "./blog/long.md": md(
+        base({
+          title: "x".repeat(61),
+          description: "y".repeat(156),
+          category: "WX",
+        }),
+      ),
+      "./blog/Bad_Slug.md": md(base()),
+    },
+  });
+  const errors = store.problems
+    .filter((p) => p.level === "error")
+    .map((p) => p.file);
+  assert.deepEqual(errors.sort(), [
+    "./blog/Bad_Slug.md",
+    "./blog/bad-date.md",
+    "./learn/nowhere/lost.md",
+    "./learn/tread/no-title.md",
+  ]);
+  // Over-long title and description warn but still publish.
+  assert.deepEqual(
+    store.getBlogPosts().map((a) => a.slug),
+    ["long"],
+  );
+  assert.equal(
+    store.problems.filter(
+      (p) => p.level === "warn" && p.file === "./blog/long.md",
+    ).length,
+    2,
+  );
+});
+
+test("a sample and a real file with the same URL do not both publish", () => {
+  const store = buildContent({
+    hubs: HUBS,
+    includeDrafts: true,
+    files: {
+      "./blog/_same.md": md(base({ category: "WX" })),
+      "./blog/same.md": md(base({ category: "WX" })),
+    },
+  });
+  assert.equal(store.getBlogPosts().length, 1);
+  assert.match(store.problems[0].message, /same URL/);
+});
+
+test("frontmatter is normalized: author, cta, related, category, faq, sources", () => {
+  const store = buildContent({
+    hubs: HUBS,
+    files: {
+      "./blog/post.md": md(
+        base({
+          author: "Someone Else",
+          category: "hur",
+          related: [
+            "/tools/tire-check",
+            "https://tiredroponline.com/install/",
+            "not-a-path",
+          ],
+          cta: { label: "Book", href: "/install" },
+          faq: [{ q: "Q?", a: "A." }, { q: "No answer" }],
+          sources: [
+            {
+              title: "NHTSA",
+              publisher: "NHTSA",
+              url: "https://www.nhtsa.gov/",
+            },
+            { title: "Bad", url: "ftp://x" },
+          ],
+          demo: "Tread-Gauge",
+        }),
+      ),
+    },
+  });
+  const post = store.getArticle("blog", null, "post");
+  assert.equal(post.author, AUTHOR);
+  assert.deepEqual(post.category, {
+    slug: "hurricane",
+    label: "Hurricanes & Flooding",
+  });
+  assert.deepEqual(post.related, ["/tire-check", "/install"]);
+  assert.deepEqual(post.cta, { label: "Book", href: "/install" });
+  assert.deepEqual(post.faq, [{ q: "Q?", a: "A." }]);
+  assert.equal(post.sources.length, 1);
+  assert.equal(post.demo, "tread-gauge");
+  assert.ok(post.readingMinutes >= 1);
+});
+
+test("normalizeCategory accepts codes, slugs and labels", () => {
+  assert.equal(normalizeCategory("WX").slug, "weather");
+  assert.equal(normalizeCategory("weather").slug, "weather");
+  assert.equal(normalizeCategory("Myth-Busting").slug, "myths");
+  assert.deepEqual(normalizeCategory("Something New"), {
+    slug: "something-new",
+    label: "Something New",
+  });
+  assert.equal(normalizeCategory(""), null);
+});
+
+test("canonicalSitePath maps plan paths to real routes", () => {
+  assert.equal(
+    canonicalSitePath("/tools/tire-size?size=225/65R17"),
+    "/tire-size?size=225/65R17",
+  );
+  assert.equal(canonicalSitePath("/tire-care"), "/learn");
+  assert.equal(canonicalSitePath("/learn/tread/"), "/learn/tread");
+  assert.equal(canonicalSitePath("https://example.com/x"), null);
+  assert.equal(canonicalSitePath("//evil.example"), null);
+});
+
+/* ---------------------------- demo markers ---------------------------- */
+
+test("splitDemoMarkers splits on lines that are exactly a marker", () => {
+  const body = [
+    "Intro.",
+    "",
+    "[[demo:tread-gauge]]",
+    "",
+    "## Next",
+    "  [[demo:DOT-Date-Reader]]  ",
+    "Inline [[demo:size-decoder]] mention stays text.",
+    "[[demo:tpms-light]] trailing text stays text too.",
+  ].join("\n");
+  const segments = splitDemoMarkers(body);
+  assert.deepEqual(
+    segments.map((s) => (s.type === "demo" ? `demo:${s.id}` : "md")),
+    ["md", "demo:tread-gauge", "md", "demo:dot-date-reader", "md"],
+  );
+  assert.match(
+    segments.at(-1).text,
+    /Inline \[\[demo:size-decoder\]\] mention/,
+  );
+});
+
+test("splitDemoMarkers ignores markers inside fenced code", () => {
+  const body = "```md\n[[demo:tread-gauge]]\n```\n\n[[demo:utqg-explainer]]";
+  const segments = splitDemoMarkers(body);
+  assert.deepEqual(
+    segments.map((s) => s.type),
+    ["markdown", "demo"],
+  );
+  assert.match(segments[0].text, /\[\[demo:tread-gauge\]\]/);
+  assert.equal(segments[1].id, "utqg-explainer");
+});
+
+test("splitDemoMarkers with no markers returns one Markdown segment", () => {
+  assert.deepEqual(splitDemoMarkers("## A\n\nText"), [
+    { type: "markdown", text: "## A\n\nText" },
+  ]);
+  assert.deepEqual(splitDemoMarkers("[[demo:x]]"), [{ type: "demo", id: "x" }]);
+});
+
+/* ------------------------------ rendering ------------------------------ */
+
+test("renderBody builds a table of contents with unique ids across demos", () => {
+  const out = renderBody(
+    "Intro\n\n## Tread depth\n\n[[demo:tread-gauge]]\n\n## Tread depth\n\n### Detail\n\n# Stray H1\n",
+  );
+  assert.deepEqual(out.toc, [
+    { id: "tread-depth", text: "Tread depth" },
+    { id: "tread-depth-2", text: "Tread depth" },
+    { id: "stray-h1", text: "Stray H1" },
+  ]);
+  assert.deepEqual(out.demos, ["tread-gauge"]);
+  const html = out.segments
+    .filter((s) => s.type === "html")
+    .map((s) => s.html)
+    .join("");
+  assert.match(html, /<h3 id="detail">Detail<\/h3>/);
+  assert.doesNotMatch(html, /<h1/);
+});
+
+test("renderBody marks internal links and opens external ones safely", () => {
+  const { segments } = renderBody(
+    "See [the check](/tools/tire-check), [NHTSA](https://www.nhtsa.gov/) and [us](https://tiredroponline.com/install).\n\n| a | b |\n|---|---|\n| 1 | 2 |",
+  );
+  const html = segments[0].html;
+  assert.match(html, /<a href="\/tire-check" data-internal="">the check<\/a>/);
+  assert.match(
+    html,
+    /<a href="https:\/\/www.nhtsa.gov\/" target="_blank" rel="noopener">NHTSA/,
+  );
+  assert.match(html, /<a href="\/install" data-internal="">us<\/a>/);
+  assert.match(html, /<div class="table-scroll"><table>/);
+});
+
+test("links to unpublished Learn/Blog pages render as text and warn", () => {
+  const body =
+    "See [depth](/learn/tread/tread-depth), [planned](/learn/tread/not-written#x), " +
+    "[empty topic](/learn/age), [a draft](/learn/basics/tire-types), [blog](/blog) " +
+    "and [shop](/tires).";
+  const files = {
+    ...FILES,
+    "./blog/linker.md": md(
+      base({
+        category: "WX",
+        related: ["/learn/tread/not-written", "/learn/age", "/tires"],
+      }),
+      body,
+    ),
+  };
+  const store = buildContent({ files, hubs: HUBS, checkLinks: true });
+  const post = store.getArticle("blog", null, "linker");
+  const { segments, deadLinks } = store.renderArticle(post);
+  const html = segments[0].html;
+  assert.match(
+    html,
+    /<a href="\/learn\/tread\/tread-depth" data-internal="">depth<\/a>/,
+  );
+  assert.match(html, /, planned, empty topic, a draft, <a href="\/blog"/);
+  assert.match(html, /<a href="\/tires" data-internal="">shop<\/a>/);
+  assert.deepEqual(deadLinks, [
+    "/learn/tread/not-written#x",
+    "/learn/age",
+    "/learn/basics/tire-types",
+  ]);
+  const warnings = store.problems
+    .filter((p) => p.file === "./blog/linker.md")
+    .map((p) => p.message);
+  assert.equal(
+    warnings.filter((m) => /not published; shown as plain text/.test(m)).length,
+    3,
+  );
+  assert.equal(
+    warnings.filter((m) => /not published; hidden/.test(m)).length,
+    2,
+  );
+  assert.equal(store.isLive("/learn/tread"), true);
+  assert.equal(store.isLive("/learn/age"), false);
+  assert.equal(store.isLive("/tires"), true);
+
+  // In dev the draft is visible, so its link works there.
+  const dev = buildContent({ files, hubs: HUBS, includeDrafts: true });
+  assert.ok(
+    !dev
+      .renderArticle(dev.getArticle("blog", null, "linker"))
+      .deadLinks.includes("/learn/basics/tire-types"),
+  );
+});
+
+/* ------------------------- the real content dir ------------------------- */
+
+test("the real content directory loads through the Node loader", () => {
+  const files = readContentFiles();
+  const keys = Object.keys(files);
+  assert.ok(keys.every((k) => /^\.\/(learn\/[^/]+|blog)\/[^/]+\.md$/.test(k)));
+  const hubs = readHubs();
+  assert.equal(hubs.length, 10);
+  for (const hub of hubs) {
+    assert.ok(
+      hub.slug && hub.title && hub.description && Number.isFinite(hub.order),
+    );
+  }
+
+  const prod = loadContent();
+  const errors = prod.problems.filter((p) => p.level === "error");
+  assert.deepEqual(errors, [], "every content file must be publishable");
+  for (const path of prod.contentRoutes()) {
+    assert.doesNotMatch(
+      path,
+      /\/sample-/,
+      `sample leaked into routes: ${path}`,
+    );
+  }
+
+  const dev = loadContent({ includeDrafts: true });
+  assert.ok(
+    dev.getArticle("learn", "tread", "sample-tread-depth"),
+    "learn sample visible in dev",
+  );
+  assert.ok(
+    dev.getArticle("blog", null, "sample-hurricane-check"),
+    "blog sample visible in dev",
+  );
+  assert.equal(prod.getArticle("learn", "tread", "sample-tread-depth"), null);
+});

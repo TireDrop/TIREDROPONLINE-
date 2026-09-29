@@ -37,6 +37,15 @@ export default [
     },
   },
   {
+    // The content loader's Node half and its tests run in Node, not the page.
+    files: ["src/content/node.js", "src/**/*.test.mjs"],
+    languageOptions: {
+      ecmaVersion: 2023,
+      sourceType: "module",
+      globals: { ...globals.node },
+    },
+  },
+  {
     files: ["scripts/**/*.mjs", "*.js", "api/**/*.{js,mjs}"],
     languageOptions: {
       ecmaVersion: 2023,
