@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import Header from "./components/layout/Header.jsx";
@@ -7,6 +7,7 @@ import MobileCallBar from "./components/layout/MobileCallBar.jsx";
 import NewsletterGate from "./components/layout/NewsletterGate.jsx";
 import CompareTray from "./components/shop/CompareTray.jsx";
 import { InPageAnchors, ScrollToTop } from "./components/ui/index.jsx";
+import { trackPageView } from "./lib/analytics.js";
 
 // Every route except the home page is loaded on demand.
 //
@@ -64,6 +65,20 @@ const GalleryPage = lazy(() => import("./pages/support/GalleryPage.jsx"));
 const SitemapPage = lazy(() => import("./pages/support/SitemapPage.jsx"));
 const LegalPage = lazy(() => import("./pages/support/LegalPage.jsx"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage.jsx"));
+
+/**
+ * Sends the GA4 page_view for each route change (src/lib/analytics.js).
+ * Rendered inside the routes' Suspense boundary, after <Routes>, so its
+ * effect runs only once the new page is on screen and its Seo component has
+ * set document.title.
+ */
+function PageViewTracker() {
+  const { pathname, search } = useLocation();
+  useEffect(() => {
+    trackPageView(pathname + search, pathname);
+  }, [pathname, search]);
+  return null;
+}
 
 export default function App() {
   const { pathname } = useLocation();
@@ -136,6 +151,7 @@ export default function App() {
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
+          <PageViewTracker />
         </Suspense>
       </main>
 

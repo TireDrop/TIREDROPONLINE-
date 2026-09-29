@@ -18,8 +18,9 @@
 //   1. The privacy policy must describe what the code actually does, not what
 //      a tire site usually does. As built, the only cookies are Google
 //      Analytics' first-party measurement cookies (tag in index.html, Google
-//      signals and ad personalization off). It loads no advertising or social
-//      tracking pixels.
+//      signals and ad personalization off; route-change page views, with page
+//      title, URL and path only, sent from src/lib/analytics.js). It loads no
+//      advertising or social tracking pixels.
 //      Email addresses are captured in two places, both stored in Shopify
 //      (sections 1, 2, 4, 5 and 6 say so):
 //        - the newsletter pop-up (components/layout/NewsletterPopup.jsx →
