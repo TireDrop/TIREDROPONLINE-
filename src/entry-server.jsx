@@ -65,9 +65,17 @@ export function contentRoutes() {
   });
 }
 
-/** Loads every page chunk once, so no render has to wait on one. */
-export function preloadAll() {
-  return preloadPages(allPageKeys());
+/**
+ * Loads every page chunk once, so no render has to wait on one. Repeats until
+ * nothing new registers: pages register lazy components of their own (the
+ * article demos) only once they are loaded.
+ */
+export async function preloadAll() {
+  let seen = -1;
+  while (allPageKeys().length !== seen) {
+    seen = allPageKeys().length;
+    await preloadPages(allPageKeys());
+  }
 }
 
 /**

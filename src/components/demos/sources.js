@@ -1,0 +1,90 @@
+// The sources the Learn demos cite, keyed by the IDs in
+// docs/content/learn-plan.md §6. Only sources the plan lists for a demo are
+// here; a demo that needs a new one gets it added to the plan first.
+//
+// S-IDs are primary (government, industry association, tire maker, consumer
+// testing). C-IDs are retailer or trade pages, cited only where the plan's
+// demo table names them.
+
+export const SOURCES = {
+  S1: {
+    label: "NHTSA TireWise",
+    url: "https://www.nhtsa.gov/vehicle-safety/tires",
+  },
+  S3: {
+    label: "NHTSA, Tire Safety: Everything Rides On It",
+    url: "https://www.nhtsa.gov/document/tire-safety",
+  },
+  S5: {
+    label: "NHTSA Recalls",
+    url: "https://www.nhtsa.gov/recalls",
+  },
+  S7: {
+    label: "NHTSA, Evaluation of the Effectiveness of TPMS",
+    url: "https://crashstats.nhtsa.dot.gov/Api/Public/ViewPublication/811681",
+  },
+  S8: {
+    label: "FMVSS No. 138 (TPMS)",
+    url: "https://www.nhtsa.gov/sites/nhtsa.dot.gov/files/fmvss/tirepressure-fmvss-138.pdf",
+  },
+  S9: {
+    label: "49 CFR § 575.104 (UTQG)",
+    url: "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-575/subpart-B/section-575.104",
+  },
+  S13: {
+    label: "USTMA Tire Care Essentials",
+    url: "https://www.ustires.org/tire-care-safety/tire-care-essentials",
+  },
+  S16: {
+    label: "USTMA Tire Recall Lookup",
+    url: "https://recallinfo.ustires.org/TireRecallSearch/Tin",
+  },
+  S31: {
+    label: "Consumer Reports, worn-tire performance",
+    url: "https://www.consumerreports.org/cars/tires/what-happens-to-performance-when-tires-are-worn-a8910439854/",
+  },
+  S35: {
+    label: "Michelin, Load Rating & Speed Rating",
+    url: "https://www.michelinman.com/auto/auto-tips-and-advice/tires-101/tire-load-rating-speed-rating",
+  },
+  S36: {
+    label: "Michelin, Tire Markings Explained",
+    url: "https://www.michelinman.com/auto/auto-tips-and-advice/tires-101/tire-markings-explained",
+  },
+  S46: {
+    label: "Bridgestone, Replacement Guidance",
+    url: "https://www.bridgestoneamericas.com/en/company/safety/choosing-tires/replacement-guidance",
+  },
+  S47: {
+    label: "Bridgestone, Tire Inspection",
+    url: "https://www.bridgestoneamericas.com/en/company/safety/maintaining-tires/tire-inspection",
+  },
+  S52: {
+    label: "Goodyear, Tire Date Code",
+    url: "https://www.goodyear.com/en-us/learn/tire-date-code",
+  },
+  S54: {
+    label: "Goodyear, Tire Load Index",
+    url: "https://www.goodyear.com/en_US/learn/tire-basics/tire-load-index.html",
+  },
+  S55: {
+    label: "Goodyear, UTQG",
+    url: "https://www.goodyear.com/en_US/learn/tire-basics/utqg-rating.html",
+  },
+  S63: {
+    label: "Yokohama, UTQG",
+    url: "https://www.yokohamatire.com/tires-101/how-to-read-a-sidewall-1/utqg",
+  },
+  C3: {
+    label: "Tire Rack, How Much Tread Depth Is Enough",
+    url: "https://www.tirerack.com/upgrade-garage/how-much-tread-depth-is-enough",
+  },
+  C11: {
+    label: "Tire Rack, Tread Depth of a Tire",
+    url: "https://www.tirerack.com/upgrade-garage/what-is-the-tread-depth-of-a-tire",
+  },
+  C27: {
+    label: "Tire Review, Quarter Test",
+    url: "https://www.tirereview.com/quarter-tire-test-tread-depth/",
+  },
+};

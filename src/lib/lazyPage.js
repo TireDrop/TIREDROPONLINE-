@@ -65,9 +65,19 @@ export function lazyPage(key, load) {
   return Page;
 }
 
-/** Loads the named pages (unknown keys are ignored). */
-export function preloadPages(keys) {
-  return Promise.all(keys.map((k) => registry.get(k)?.()).filter(Boolean));
+/**
+ * Loads the named pages (unknown keys are ignored). Runs in rounds: loading a
+ * page can register lazy components of its own (an article's demos), so keys
+ * unknown in one round are tried again once that round's modules are in.
+ */
+export async function preloadPages(keys) {
+  const done = new Set();
+  for (;;) {
+    const next = keys.filter((k) => !done.has(k) && registry.has(k));
+    if (!next.length) return;
+    next.forEach((k) => done.add(k));
+    await Promise.all(next.map((k) => registry.get(k)()));
+  }
 }
 
 /** Every registered page key. The prerenderer preloads all of them once. */
