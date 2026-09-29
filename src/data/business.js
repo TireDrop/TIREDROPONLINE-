@@ -223,7 +223,9 @@ export const FOOTER_COLUMNS = [
       { label: "Ship to Store", to: "/install" },
       { label: "Mobile Installation", to: "/mobile-service" },
       { label: "Book an Install", to: "/schedule" },
-      { label: "Track an Order", to: "/contact" },
+      { label: "Track Order", to: "/track" },
+      // External (same tab): customer accounts live on Shopify.
+      { label: "Account", href: BUSINESS.accountUrl },
       { label: "Returns & Refunds", to: "/terms#returns" },
       { label: "Shipping Policy", to: "/terms#shipping" },
     ],

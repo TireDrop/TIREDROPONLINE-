@@ -32,12 +32,22 @@ export default function Footer() {
             <ul className="space-y-2">
               {col.links.map((link) => (
                 <li key={link.label}>
-                  <Link
-                    to={link.to}
-                    className="text-[15px] text-bone/65 transition-colors hover:text-bone md:text-sm"
-                  >
-                    {link.label}
-                  </Link>
+                  {link.href ? (
+                    // Off-site (the Shopify account pages), same tab.
+                    <a
+                      href={link.href}
+                      className="text-[15px] text-bone/65 transition-colors hover:text-bone md:text-sm"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      to={link.to}
+                      className="text-[15px] text-bone/65 transition-colors hover:text-bone md:text-sm"
+                    >
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

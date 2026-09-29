@@ -4,10 +4,12 @@ import {
   ChevronDown,
   MapPin,
   Menu,
+  Package,
   Phone,
   Search,
   ShoppingCart,
   Truck,
+  UserRound,
   X,
 } from "lucide-react";
 import { BUSINESS, NAV } from "../../data/business.js";
@@ -299,6 +301,26 @@ function MobileDrawer({ open, onClose }) {
           </ul>
         </nav>
 
+        {/* Order status and the Shopify account, apart from the catalog
+            links so they read as "my order" rather than more pages. */}
+        <div className="grid grid-cols-2 gap-2 border-t border-ink/10 px-5 py-3">
+          <Link
+            to="/track"
+            onClick={onClose}
+            className="flex min-h-[44px] items-center gap-2 rounded-sm px-2 font-display text-[14px] font-bold uppercase tracking-[0.015em] text-ink transition-colors hover:bg-fog hover:text-drop"
+          >
+            <Package size={18} aria-hidden className="shrink-0 text-drop" />
+            Track Order
+          </Link>
+          <a
+            href={BUSINESS.accountUrl}
+            className="flex min-h-[44px] items-center gap-2 rounded-sm px-2 font-display text-[14px] font-bold uppercase tracking-[0.015em] text-ink transition-colors hover:bg-fog hover:text-drop"
+          >
+            <UserRound size={18} aria-hidden className="shrink-0 text-drop" />
+            Account
+          </a>
+        </div>
+
         <div className="border-t border-ink/10 p-5">
           <Link to="/tires" onClick={onClose} className="btn-primary w-full">
             Shop Tires
@@ -355,6 +377,26 @@ export default function Header() {
           <HeaderSearch className="hidden min-w-0 flex-1 lg:block" />
 
           <div className="ml-auto flex items-center gap-1.5 lg:ml-0">
+            {/* Desktop only: on a phone these live in the menu, so the
+                masthead keeps just the cart and the menu button. */}
+            <NavLink
+              to="/track"
+              className={({ isActive }) =>
+                `hidden items-center gap-1.5 whitespace-nowrap rounded-sm px-2.5 py-2 text-[13px] font-semibold transition-colors hover:bg-fog hover:text-drop lg:flex ${
+                  isActive ? "text-drop" : "text-ink"
+                }`
+              }
+            >
+              <Package size={18} aria-hidden />
+              Track Order
+            </NavLink>
+            <a
+              href={BUSINESS.accountUrl}
+              className="hidden items-center gap-1.5 whitespace-nowrap rounded-sm px-2.5 py-2 text-[13px] font-semibold text-ink transition-colors hover:bg-fog hover:text-drop lg:flex"
+            >
+              <UserRound size={18} aria-hidden />
+              Account
+            </a>
             <Link
               to="/cart"
               className="relative rounded-sm p-2.5 text-ink transition-colors hover:bg-fog hover:text-drop"
