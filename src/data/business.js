@@ -190,12 +190,15 @@ export const NAV = [
       { label: "Do I Need Tires Yet?", to: "/tire-check" },
     ],
   },
+  // Tire guides by topic, and the blog. Plain links, no dropdowns: the
+  // topics live on /learn, and ten of them would bury the phone menu.
+  { label: "Learn", to: "/learn" },
+  { label: "Blog", to: "/blog" },
   {
     label: "About",
     to: "/about",
     children: [
       { label: "About TireDrop", to: "/about" },
-      { label: "Tire Care Guides", to: "/tire-care" },
       { label: "Reviews", to: "/reviews" },
       { label: "Financing", to: "/financing" },
       { label: "Locations", to: "/locations" },
@@ -231,17 +234,18 @@ export const FOOTER_COLUMNS = [
     ],
   },
   {
-    title: "Free Tools",
+    title: "Tools & Guides",
     links: [
       { label: "Find My Tires", to: "/find-my-tires" },
       { label: "Tire Size Decoder", to: "/tire-size" },
       { label: "Compare Two Sizes", to: "/tire-size?compare=1" },
       { label: "Do I Need Tires Yet?", to: "/tire-check" },
-      { label: "Tire Care Guides", to: "/tire-care" },
+      { label: "Learn: Tire Guides", to: "/learn" },
+      { label: "Blog", to: "/blog" },
     ],
   },
   {
-    title: "Learn",
+    title: "Company",
     links: [
       { label: "About TireDrop", to: "/about" },
       { label: "Reviews", to: "/reviews" },

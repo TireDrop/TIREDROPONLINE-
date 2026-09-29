@@ -9,9 +9,10 @@
  * 404s is worse than no sitemap at all.
  *
  * Runs automatically on every `vite build` (wired in vite.config.js), and
- * again from scripts/prerender.mjs once the content routes (/learn, /blog)
- * are known, which rewrites the sitemap with them included. It can also be
- * run on its own (without content routes):
+ * again from scripts/prerender.mjs once every page has rendered. Content
+ * routes (/learn, /blog) come from src/content/node.js, which parses the same
+ * Markdown with the same code as the app, so they are listed either way. It
+ * can also be run on its own:
  *
  *   node scripts/generate-seo-files.mjs
  *
@@ -22,6 +23,11 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import {
+  contentLastmod,
+  contentProblems,
+  contentRoutes,
+} from "../src/content/node.js";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ORIGIN = "https://tiredroponline.com";
@@ -112,6 +118,34 @@ export function navigateRoutes() {
  */
 export const EXCLUDE = new Set(["/cart", "/checkout", "/track"]);
 
+/**
+ * Learn guides and blog posts, from the Markdown in src/content, parsed by the
+ * same code the app uses (src/content/core.js). Drafts and `_` sample files
+ * are never listed. A content file that cannot be published (no title, a bad
+ * date, an unknown hub...) fails the build here rather than silently going
+ * missing from the site; limit overruns (a 70-character title) only warn.
+ */
+function contentRoutesChecked() {
+  const problems = contentProblems().filter(
+    (p) => !/(^|\/)_[^/]*\.md$/.test(p.file),
+  );
+  for (const p of problems.filter((p) => p.level === "warn")) {
+    console.warn(`content: ${p.file}: ${p.message}`);
+  }
+  const errors = problems.filter((p) => p.level === "error");
+  if (errors.length) {
+    throw new Error(
+      `Content files that cannot be published:\n` +
+        errors
+          .map(
+            (p) => `  src/content/${p.file.replace(/^\.\//, "")}: ${p.message}`,
+          )
+          .join("\n"),
+    );
+  }
+  return contentRoutes();
+}
+
 /** Priority is advisory and Google ignores it; Bing still reads it. */
 function priorityFor(path) {
   if (path === "/") return "1.0";
@@ -119,6 +153,7 @@ function priorityFor(path) {
     return "0.9";
   if (path.startsWith("/tires/") || path.startsWith("/wheels/")) return "0.7";
   if (path.startsWith("/services/")) return "0.6";
+  if (/^\/(learn|blog)\/.+/.test(path)) return "0.6";
   if (["/terms", "/privacy", "/accessibility", "/sitemap"].includes(path))
     return "0.3";
   return "0.8";
@@ -149,9 +184,11 @@ function redirectedPaths() {
  *
  * `extra` adds routes this script cannot find on its own, as `{ path,
  * lastmod }`. scripts/prerender.mjs passes the content routes (/learn,
- * /blog) here: they come from src/content/index.js, which uses Vite's
- * import.meta.glob and so can only be read from the built server bundle,
- * not imported into plain Node (see src/entry-server.jsx).
+ * /blog) as the built app sees them (src/content/index.js, read from the
+ * server bundle; see src/entry-server.jsx). The same routes are also read
+ * here in plain Node through src/content/node.js, which checks every
+ * content file and fails on one that cannot be published; the two lists
+ * come from the same parser, so they agree.
  */
 export async function allRoutes({ extra = [] } = {}) {
   const { TIRES, WHEELS } = await import(resolve(ROOT, "src/data/products.js"));
@@ -166,6 +203,11 @@ export async function allRoutes({ extra = [] } = {}) {
     ...WHEELS.map((w) => ({ path: `/wheels/${w.slug}`, sources: productFiles })),
     ...SERVICES.map((s) => ({ path: `/services/${s.slug}`, sources: serviceFiles })),
     ...extra.map((r) => ({ path: r.path, sources: [], lastmod: r.lastmod ?? null })),
+    ...contentRoutesChecked().map((path) => ({
+      path,
+      sources: [],
+      lastmod: contentLastmod(path),
+    })),
   ];
 
   const redirected = redirectedPaths();

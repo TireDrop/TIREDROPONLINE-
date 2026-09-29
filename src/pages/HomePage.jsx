@@ -49,7 +49,7 @@ const TOOLS_LIST = [
   {
     to: "/tire-check",
     label: "Do I need tires yet?",
-    copy: "Check the tread with a coin you already have, and the age with the code on the sidewall. If they are fine, it says so.",
+    copy: "Check the tread with a coin you already have, and the age with the code on the sidewall. If nothing says replace yet, it says so.",
     Icon: Gauge,
   },
 ];

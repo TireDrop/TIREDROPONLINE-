@@ -184,6 +184,99 @@
            focus:ring-drop/15;
   }
 
+  /* ---------- Article body (Learn guides and blog posts) ---------- */
+  /* Rendered Markdown. Reading measure, rhythm and link treatment are set
+     here once rather than per article; headings reuse the site's display
+     face at a step down from the page H1. */
+  .prose-article {
+    @apply text-[1.0625rem] leading-[1.75] text-ink/90;
+  }
+
+  .prose-article > * + * {
+    @apply mt-5;
+  }
+
+  .prose-article h2 {
+    @apply mt-12 scroll-mt-28 font-display text-[1.55rem] leading-[1.12] text-ink md:text-[1.9rem];
+  }
+
+  .prose-article h3 {
+    @apply mt-9 scroll-mt-28 font-display text-[1.2rem] leading-[1.2] text-ink md:text-[1.35rem];
+  }
+
+  .prose-article h4 {
+    @apply mt-7 scroll-mt-28 font-display text-[1.05rem] text-ink;
+  }
+
+  .prose-article h2 + *,
+  .prose-article h3 + *,
+  .prose-article h4 + * {
+    @apply mt-3;
+  }
+
+  .prose-article a {
+    @apply font-semibold text-drop underline decoration-drop/35 underline-offset-2 transition-colors hover:text-dive hover:decoration-dive;
+  }
+
+  .prose-article strong {
+    @apply font-semibold text-ink;
+  }
+
+  .prose-article ul {
+    @apply list-disc space-y-2 pl-6 marker:text-drop;
+  }
+
+  .prose-article ol {
+    @apply list-decimal space-y-2 pl-6 marker:font-display marker:font-bold marker:text-drop;
+  }
+
+  .prose-article li > ul,
+  .prose-article li > ol {
+    @apply mt-2;
+  }
+
+  .prose-article blockquote {
+    @apply border-l-4 border-drop/40 bg-sky/60 px-5 py-3 text-ink;
+  }
+
+  .prose-article code {
+    @apply rounded-sm bg-ink/[0.06] px-1.5 py-0.5 text-[0.9em];
+  }
+
+  .prose-article pre {
+    @apply overflow-x-auto rounded-card bg-ink p-4 text-sm text-bone;
+  }
+
+  .prose-article pre code {
+    @apply bg-transparent p-0;
+  }
+
+  .prose-article hr {
+    @apply my-10 border-ink/10;
+  }
+
+  .prose-article img {
+    @apply h-auto max-w-full rounded-card;
+  }
+
+  /* Tables scroll inside their own box on a phone instead of pushing the
+     page sideways. */
+  .prose-article .table-scroll {
+    @apply overflow-x-auto rounded-card border border-ink/10;
+  }
+
+  .prose-article table {
+    @apply w-full border-collapse text-left text-[15px];
+  }
+
+  .prose-article th {
+    @apply whitespace-nowrap bg-fog px-4 py-2.5 font-display text-[13px] font-bold uppercase tracking-[0.04em] text-smoke;
+  }
+
+  .prose-article td {
+    @apply border-t border-ink/10 px-4 py-2.5 align-top;
+  }
+
   /* Diagonal hazard stripe used on the shipping callout on the tires page. */
   .hazard {
     background-image: repeating-linear-gradient(

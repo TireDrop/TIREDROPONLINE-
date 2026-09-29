@@ -490,7 +490,7 @@ function SidewallDiagram() {
  * ------------------------------------------------------------------ */
 
 const TONES = {
-  fine: {
+  monitor: {
     badge: "drop",
     bar: "bg-drop",
     border: "border-l-drop",
@@ -567,7 +567,7 @@ const FAQ = [
     a: "Worn down the centre with the shoulders still full means over-inflation — the tire is crowned and riding on its middle. Worn on both shoulders with the centre full means the opposite: chronic under-inflation. Worn on one shoulder only is alignment, usually camber or toe, and no new tire will survive it until the alignment is fixed. Patchy or scalloped wear that you can feel with your palm points at worn shocks, struts or a wheel that is out of balance.",
   },
   {
-    q: "The tread is fine. Does age really matter?",
+    q: "There is plenty of tread. Does age really matter?",
     a: "It does, and this is the part the tread check cannot see. Rubber cures and hardens over time whether the tire is driven or parked, which is why a barely-used spare or a low-mileage car on original tires can be past it with most of the tread still there. Six years is the usual point at which manufacturers ask for a yearly inspection, and ten years is the usual hard stop — but both are manufacturer guidance, not law. Heat and sunlight, which South Florida has in quantity, move it along faster.",
   },
   {
@@ -576,7 +576,7 @@ const FAQ = [
   },
   {
     q: "Do I have to replace all four?",
-    a: "Not always. On a front- or rear-wheel-drive car, two is fine if the other two still have real tread — and the new pair goes on the rear axle regardless of which end drives, because a car that loses grip at the back first is much harder to catch. All-wheel drive is stricter: many manufacturers require all four within a small difference in circumference, so a single replacement on a worn set can cook a differential. Check the owner's manual before buying one tire.",
+    a: "Not always. On a front- or rear-wheel-drive car, two can be enough if the other two still have real tread — and the new pair goes on the rear axle regardless of which end drives, because a car that loses grip at the back first is much harder to catch. All-wheel drive is stricter: many manufacturers require all four within a small difference in circumference, so a single replacement on a worn set can cook a differential. Check the owner's manual before buying one tire.",
   },
 ];
 
@@ -657,7 +657,8 @@ export default function TireCheckPage() {
       : `/tires?search=size&w=${size.width}&a=${size.aspect}&d=${size.rimDiameter}`
     : "/tires";
 
-  // The verdict. Both halves have to be clean before this page says "fine".
+  // The verdict. Both halves have to be clean before this page says "keep
+  // checking" — and it never says a tire is fine or safe (house rule).
   const verdict = useMemo(() => {
     const problems = [];
     if (tread?.status === "replace")
@@ -686,7 +687,7 @@ export default function TireCheckPage() {
     if (!checked) return { state: "empty", problems };
     if (problems.length === 0)
       return {
-        state: "fine",
+        state: "monitor",
         problems,
         partial: !tread || !dot,
       };
@@ -695,7 +696,7 @@ export default function TireCheckPage() {
     return { state: urgent ? "replace" : "soon", problems };
   }, [tread, dot, dotLegacy, ageStatus]);
 
-  const tone = TONES[tread?.status ?? "fine"];
+  const tone = TONES[tread?.status ?? "monitor"];
 
   return (
     <>
@@ -705,7 +706,7 @@ export default function TireCheckPage() {
       />
       <Breadcrumbs
         trail={[
-          { label: "Tire Care", to: "/tire-care" },
+          { label: "Learn", to: "/learn" },
           { label: "Do I need new tires?" },
         ]}
       />
@@ -721,8 +722,8 @@ export default function TireCheckPage() {
             aria-hidden
             className="mt-0.5 shrink-0 text-volt"
           />
-          Nothing here is stored, and if your tires are fine the page says so
-          and stops. No countdown, no pitch.
+          Nothing here is stored, and if nothing says replace yet the page says
+          so and stops. No countdown, no pitch.
         </p>
       </PageHero>
 
@@ -959,13 +960,7 @@ export default function TireCheckPage() {
               <>
                 <div className="mb-4 flex items-center gap-2.5">
                   <tone.Icon size={20} aria-hidden className={tone.text} />
-                  <Badge tone={tone.badge}>
-                    {tread.status === "fine"
-                      ? "Plenty left"
-                      : tread.status === "soon"
-                        ? "Getting low"
-                        : "Replace now"}
-                  </Badge>
+                  <Badge tone={tone.badge}>{tread.label}</Badge>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
@@ -1000,8 +995,8 @@ export default function TireCheckPage() {
                 </div>
 
                 <p className="mt-4 text-sm leading-relaxed text-smoke">
-                  {tread.status === "fine" &&
-                    `That is healthy tread. Nothing here says replace, and nothing here says buy. Check again in a few months, or sooner if you are about to drive a long way in the wet.`}
+                  {tread.status === "monitor" &&
+                    `Nothing here says replace yet, and nothing here says buy. Keep checking monthly, and again before a long drive in the wet.`}
                   {tread.status === "soon" &&
                     `Still legal, but this is the band where rain starts to matter: below ${TREAD.wetRisk}/32" the grooves cannot clear enough water and wet stopping distances climb sharply. Hydroplaning starts here too. Worth planning the replacement rather than waiting.`}
                   {tread.status === "replace" &&
@@ -1177,7 +1172,7 @@ export default function TireCheckPage() {
                     size={20}
                     aria-hidden
                     className={
-                      dot.status === "fine"
+                      dot.status === "monitor"
                         ? "text-drop"
                         : dot.status === "inspect"
                           ? "text-amberInk"
@@ -1186,18 +1181,14 @@ export default function TireCheckPage() {
                   />
                   <Badge
                     tone={
-                      dot.status === "fine"
+                      dot.status === "monitor"
                         ? "drop"
                         : dot.status === "inspect"
                           ? "amber"
                           : "ink"
                     }
                   >
-                    {dot.status === "fine"
-                      ? "Age is fine"
-                      : dot.status === "inspect"
-                        ? "Worth inspecting"
-                        : "Past the guidance"}
+                    {dot.label}
                   </Badge>
                 </div>
 
@@ -1217,8 +1208,8 @@ export default function TireCheckPage() {
                 </div>
 
                 <p className="mt-4 text-sm leading-relaxed text-smoke">
-                  {dot.status === "fine" &&
-                    "Comfortably inside the window every manufacturer works to. Age is not your problem on this tire."}
+                  {dot.status === "monitor" &&
+                    "Inside the age window manufacturers work to. Keep checking it monthly along with the tread, and look for cracks in the sidewall as it gets older."}
                   {dot.status === "inspect" &&
                     "Past six years, most manufacturers ask for a professional inspection once a year — for cracking between the tread blocks, in the grooves and around the sidewall. That is an inspection, not a sentence."}
                   {dot.status === "replace" &&
@@ -1254,19 +1245,19 @@ export default function TireCheckPage() {
             </div>
           )}
 
-          {verdict.state === "fine" && (
+          {verdict.state === "monitor" && (
             <div className="card border-l-4 border-l-drop bg-sky/60 p-6 md:p-8">
               <div className="mb-4 flex items-center gap-2.5">
                 <CheckCircle2 size={22} aria-hidden className="text-drop" />
-                <Badge tone="drop">No action needed</Badge>
+                <Badge tone="drop">Keep checking monthly</Badge>
               </div>
               <h3 className="h2 text-[1.6rem] md:text-[2.1rem]">
-                Your tires are fine. Come back in six months.
+                Nothing here says replace yet. Keep checking monthly.
               </h3>
               <p className="mt-4 max-w-2xl text-[1.0625rem] leading-relaxed text-smoke">
                 {verdict.partial
-                  ? "Everything you gave us checks out. The other half of the check takes a minute and is worth doing — a tire can be fine on tread and finished on age, or the other way round."
-                  : "Tread is healthy and the rubber is well inside its window. Nothing to buy today. Keep an eye on pressures, rotate every 5,000 to 7,500 miles, and check again in six months or before a long trip."}
+                  ? "Nothing you gave us says replace. The other half of the check takes a minute and is worth doing — a tire can have plenty of tread and be finished on age, or the other way round."
+                  : "Neither the tread nor the age says replace yet. Nothing to buy today. Keep checking tread and pressure monthly, rotate on the schedule in your owner's manual, and check again before a long trip."}
               </p>
               <p className="mt-4 max-w-2xl text-sm leading-relaxed text-smoke">
                 That is the whole answer. There is no offer under this
@@ -1285,7 +1276,7 @@ export default function TireCheckPage() {
                 and nothing else. It has not seen a bulge or a cut in your
                 sidewall, an old repair, a belt starting to separate, or wear
                 running unevenly across the tread — any of which can finish a
-                tire that still measures fine here. If something looks wrong, or
+                tire that still measures well here. If something looks wrong, or
                 the car pulls, shakes or sits oddly, have someone look at it
                 properly.
               </p>

@@ -1,0 +1,62 @@
+[
+  {
+    "slug": "basics",
+    "title": "Tire Basics",
+    "description": "What a tire is made of, the main tire types, and how all-season, all-terrain, touring and performance tires differ.",
+    "order": 1
+  },
+  {
+    "slug": "sidewall",
+    "title": "Reading Your Tire",
+    "description": "Every marking on the sidewall: size, DOT date code, load index, speed rating, UTQG grades, XL, M+S and max pressure.",
+    "order": 2
+  },
+  {
+    "slug": "tread",
+    "title": "Tread & Wear",
+    "description": "Tread depth in 32nds and millimeters, the penny and quarter tests, uneven wear patterns, and how many miles tires last.",
+    "order": 3
+  },
+  {
+    "slug": "pressure",
+    "title": "Pressure & TPMS",
+    "description": "Finding your PSI on the door placard, checking pressure cold, heat and pressure, the TPMS light, sensors and nitrogen.",
+    "order": 4
+  },
+  {
+    "slug": "damage",
+    "title": "Damage, Flats & Repair",
+    "description": "Sidewall bubbles, nails and flats, plug vs patch, pothole and curb impacts, and the spare tire in your trunk.",
+    "order": 5
+  },
+  {
+    "slug": "florida",
+    "title": "Florida Driving & Weather",
+    "description": "Rain and hydroplaning, heat and tire aging, hurricane-season prep, Florida tire rules and choosing tires for a no-snow climate.",
+    "order": 6
+  },
+  {
+    "slug": "buying",
+    "title": "Buying Guides",
+    "description": "When to replace tires, two or four, LT vs P-metric, EV and run-flat tires, trailer tires and buying tires online.",
+    "order": 7
+  },
+  {
+    "slug": "fitment",
+    "title": "Wheels & Fitment",
+    "description": "Plus sizing, using a different tire size, staggered setups, wheel offset, bolt pattern and center bore.",
+    "order": 8
+  },
+  {
+    "slug": "maintenance",
+    "title": "Maintenance & Service",
+    "description": "Rotation patterns, balancing vs alignment, a monthly-to-yearly checklist, the week after new tires, and noise or vibration.",
+    "order": 9
+  },
+  {
+    "slug": "age",
+    "title": "Tire Age, Storage & Records",
+    "description": "How old is too old, dry rot and sidewall cracks, storing tires in the heat, recalls and tire registration.",
+    "order": 10
+  }
+]

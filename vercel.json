@@ -66,10 +66,18 @@
     { "source": "/products", "destination": "/tires", "statusCode": 301 },
     { "source": "/products/:path*", "destination": "/tires", "statusCode": 301 },
     {
-      "source": "/pages/:page(about|shipping|install|mobile-service|auto-service|commercial-tires|locations|contact|reviews|gallery|financing|tire-care|terms|privacy|accessibility|find-my-tires|tire-size|tire-check)",
+      "source": "/pages/:page(about|shipping|install|mobile-service|auto-service|commercial-tires|locations|contact|reviews|gallery|financing|terms|privacy|accessibility|find-my-tires|tire-size|tire-check)",
       "destination": "/:page",
       "statusCode": 301
     },
+    { "source": "/pages/tire-care", "destination": "/learn", "statusCode": 301 },
+    { "source": "/tire-care", "destination": "/learn", "statusCode": 301 },
+    {
+      "source": "/tools/:tool(tire-size|tire-check|find-my-tires)",
+      "destination": "/:tool",
+      "statusCode": 301
+    },
+    { "source": "/tools/tread-gauge", "destination": "/tire-check", "statusCode": 301 },
     { "source": "/pages", "destination": "/", "statusCode": 301 },
     { "source": "/pages/:path*", "destination": "/", "statusCode": 301 },
     {
@@ -88,8 +96,8 @@
     { "source": "/policies/terms-of-service", "destination": "/terms", "statusCode": 301 },
     { "source": "/policies/contact-information", "destination": "/contact", "statusCode": 301 },
     { "source": "/policies/:path*", "destination": "/terms", "statusCode": 301 },
-    { "source": "/blogs", "destination": "/tire-care", "statusCode": 301 },
-    { "source": "/blogs/:path*", "destination": "/tire-care", "statusCode": 301 },
+    { "source": "/blogs", "destination": "/blog", "statusCode": 301 },
+    { "source": "/blogs/:path*", "destination": "/blog", "statusCode": 301 },
     { "source": "/search", "destination": "/tires", "statusCode": 301 },
     {
       "source": "/account",

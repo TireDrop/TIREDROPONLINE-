@@ -159,6 +159,19 @@ export function compareSizes(fromInput, toInput) {
 }
 
 /**
+ * The one status vocabulary for tread and age checks, keyed by the `status`
+ * that treadStatus() and decodeDot() return. House rule: nothing here ever
+ * calls a tire "safe", "OK" or "fine". The best a check can say is that
+ * nothing says replace yet, so keep checking.
+ */
+export const STATUS_LABELS = {
+  monitor: "Keep checking monthly",
+  soon: "Consider replacing",
+  inspect: "Have it inspected",
+  replace: "Replace",
+};
+
+/**
  * Decodes the DOT date code — the last four digits of the DOT serial stamped
  * on the sidewall — into the week and year the tire was built.
  *
@@ -193,6 +206,9 @@ export function decodeDot(input, now = new Date()) {
   const built = new Date(year, 0, 1 + (week - 1) * 7);
   const ageYears = (now - built) / (365.25 * 24 * 3600 * 1000);
 
+  const ageStatus =
+    ageYears >= 10 ? "replace" : ageYears >= 6 ? "inspect" : "monitor";
+
   return {
     legacy: false,
     week,
@@ -203,14 +219,17 @@ export function decodeDot(input, now = new Date()) {
     // inspected yearly past five or six years and replace it by ten
     // regardless of how much tread is left, because the rubber ages whether
     // the tire is driven or not.
-    status: ageYears >= 10 ? "replace" : ageYears >= 6 ? "inspect" : "fine",
+    status: ageStatus,
+    label: STATUS_LABELS[ageStatus],
   };
 }
 
 /** Tread depth thresholds, in 32nds of an inch. */
 export const TREAD = {
   new: 10, // a typical new passenger tire; truck and winter tires start deeper
-  wetRisk: 4, // stopping distances in rain climb sharply below this
+  // Wet stopping distances grow as tread wears toward this line, per
+  // Consumer Reports' worn-tire testing; cite that wherever it is shown.
+  wetRisk: 4,
   legal: 2, // the bald line in most US states, and the penny test
 };
 
@@ -225,16 +244,18 @@ export function treadStatus(thirtySeconds, newDepth = TREAD.new) {
 
   const usable = Math.max(0, newDepth - TREAD.legal);
   const left = Math.max(0, depth - TREAD.legal);
+  const status =
+    depth <= TREAD.legal
+      ? "replace"
+      : depth <= TREAD.wetRisk
+        ? "soon"
+        : "monitor";
 
   return {
     depth,
     lifeLeftPct: usable > 0 ? Math.min(100, (left / usable) * 100) : 0,
-    status:
-      depth <= TREAD.legal
-        ? "replace"
-        : depth <= TREAD.wetRisk
-          ? "soon"
-          : "fine",
+    status,
+    label: STATUS_LABELS[status],
     // The two coins everyone already has in the car.
     pennyTest: depth <= TREAD.legal, // Lincoln's head showing = at or under 2/32"
     quarterTest: depth <= TREAD.wetRisk, // Washington's head showing = at or under 4/32"

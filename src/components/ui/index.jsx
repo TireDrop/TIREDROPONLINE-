@@ -397,6 +397,8 @@ export function headFor({
   description,
   noindex = false,
   crumbs,
+  type,
+  schema,
   pathname,
 }) {
   const fullTitle = `${title} | ${BUSINESS.name}`;
@@ -414,9 +416,21 @@ export function headFor({
     title: fullTitle,
     description: description || null,
     url,
-    ogType: /^\/(tires|wheels)\/.+/.test(pathname) ? "product" : "website",
+    ogType:
+      type ?? (/^\/(tires|wheels)\/.+/.test(pathname) ? "product" : "website"),
     robots: hide ? "noindex, follow" : "index, follow",
-    jsonLd: { "@context": "https://schema.org", "@graph": graph },
+    jsonLd: {
+      "@context": "https://schema.org",
+      // Page-specific nodes (Article, FAQPage) after the site-wide graph.
+      // Any BreadcrumbList among them is dropped: graphFor already emits the
+      // one trail, from `crumbs`.
+      "@graph": [
+        ...graph,
+        ...(schema ?? []).filter(
+          (node) => node && node["@type"] !== "BreadcrumbList",
+        ),
+      ],
+    },
   };
 }
 
@@ -482,34 +496,56 @@ export const HeadCollectorContext = createContext(null);
  * themselves when the slug matches nothing.
  *
  * `crumbs` sets the BreadcrumbList pages between Home and this one, as
- * `[{ name, path }]` — e.g. a Learn article passes its hub. Without it, the
- * trail comes from CRUMB_PARENTS, or is just Home > this page.
+ * `[{ name, path }]` — e.g. a Learn article passes Learn and its hub. Without
+ * it, the trail comes from CRUMB_PARENTS, or is just Home > this page.
+ *
+ * `type` overrides og:type (the Learn and Blog articles pass "article").
+ *
+ * `schema` is extra JSON-LD nodes for this page (Article, FAQPage), appended
+ * to the site-wide graph. Never a BreadcrumbList: that comes from `crumbs`.
+ *
+ * Arrays are compared by value, so they can be written inline.
  *
  * In the browser this runs as an effect, on every client-side navigation. At
  * build time scripts/prerender.mjs renders each route on the server, where the
  * same head is collected during render and written into that route's static
  * HTML — which is what link-preview scrapers and non-JS crawlers read.
  */
-export function Seo({ title, description, noindex = false, crumbs }) {
+export function Seo({
+  title,
+  description,
+  noindex = false,
+  crumbs,
+  type,
+  schema,
+}) {
   const { pathname } = useLocation();
   const collector = useContext(HeadCollectorContext);
   if (collector)
-    collector.set(headFor({ title, description, noindex, crumbs, pathname }));
+    collector.set(
+      headFor({ title, description, noindex, crumbs, type, schema, pathname }),
+    );
 
-  // Compared by value, so a crumbs array written inline does not re-run this
-  // on every render.
-  const crumbsKey = JSON.stringify(crumbs ?? null);
+  // Compared by value, so arrays written inline do not re-run this on every
+  // render.
+  const extraKey = JSON.stringify({
+    crumbs: crumbs ?? null,
+    schema: schema ?? null,
+  });
   useEffect(() => {
+    const extra = JSON.parse(extraKey);
     applyHead(
       headFor({
         title,
         description,
         noindex,
-        crumbs: JSON.parse(crumbsKey) ?? undefined,
+        crumbs: extra.crumbs ?? undefined,
+        type,
+        schema: extra.schema ?? undefined,
         pathname,
       }),
     );
-  }, [title, description, noindex, crumbsKey, pathname]);
+  }, [title, description, noindex, type, extraKey, pathname]);
 
   return null;
 }

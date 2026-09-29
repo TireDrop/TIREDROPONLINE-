@@ -1,8 +1,21 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Mail, MapPin, Phone, Truck, Wrench } from "lucide-react";
+import {
+  BookOpen,
+  Mail,
+  MapPin,
+  Newspaper,
+  Phone,
+  Truck,
+  Wrench,
+} from "lucide-react";
 import { BUSINESS, FOOTER_COLUMNS, NAV } from "../../data/business.js";
 import { SERVICES } from "../../data/services.js";
+import {
+  getBlogPosts,
+  getLearnArticles,
+  getLearnHubs,
+} from "../../content/index.js";
 import {
   Breadcrumbs,
   PageHero,
@@ -36,7 +49,8 @@ const CORE_ROUTES = [
   { label: "Mobile Installation", to: "/mobile-service" },
   { label: "Tires", to: "/tires" },
   { label: "Wheels", to: "/wheels" },
-  { label: "Tire Care Guides", to: "/tire-care" },
+  { label: "Learn: Tire Guides", to: "/learn" },
+  { label: "Blog", to: "/blog" },
   { label: `About ${BUSINESS.name}`, to: "/about" },
   { label: "Contact", to: "/contact" },
 ];
@@ -102,6 +116,22 @@ export default function SitemapPage() {
 
   const missing = CORE_ROUTES.filter((route) => !listed.has(route.to));
 
+  // Every Learn guide under its topic, and every blog post. Topics with no
+  // guide yet are left out rather than listed as empty headings.
+  const guideGroups = getLearnHubs()
+    .filter((hub) => hub.count > 0)
+    .map((hub) => ({
+      title: hub.title,
+      links: [
+        { label: `All ${hub.title} guides`, to: hub.path },
+        ...getLearnArticles({ hub: hub.slug }).map((a) => ({
+          label: a.title,
+          to: a.path,
+        })),
+      ],
+    }));
+  const posts = getBlogPosts().map((p) => ({ label: p.title, to: p.path }));
+
   return (
     <>
       <Seo
@@ -160,8 +190,40 @@ export default function SitemapPage() {
         </div>
       </Section>
 
-      {/* ---------- Footer groups + utility + legal ---------- */}
+      {/* ---------- Learn guides + blog ---------- */}
       <Section className="bg-bone">
+        <SectionHead
+          eyebrow="Learn & Blog"
+          title="Guides and articles"
+          lede="Every tire guide by topic, and every blog post."
+        />
+
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+          {guideGroups.map((group) => (
+            <LinkColumn
+              key={group.title}
+              title={group.title}
+              links={group.links}
+              icon={BookOpen}
+            />
+          ))}
+          <LinkColumn
+            title="Blog"
+            icon={Newspaper}
+            links={[{ label: "All blog posts", to: "/blog" }, ...posts]}
+          />
+          {guideGroups.length === 0 && (
+            <LinkColumn
+              title="Learn"
+              icon={BookOpen}
+              links={[{ label: "All tire guides", to: "/learn" }]}
+            />
+          )}
+        </div>
+      </Section>
+
+      {/* ---------- Footer groups + utility + legal ---------- */}
+      <Section className="bg-fog">
         <SectionHead
           eyebrow="Everything Else"
           title="Footer, ordering and legal pages"

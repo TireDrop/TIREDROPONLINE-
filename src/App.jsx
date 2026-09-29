@@ -1,5 +1,11 @@
 import React, { Suspense, useEffect } from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useParams,
+} from "react-router-dom";
 
 import Header from "./components/layout/Header.jsx";
 import Footer from "./components/layout/Footer.jsx";
@@ -97,9 +103,6 @@ const ReviewsPage = lazyPage("pages/support/ReviewsPage.jsx", () =>
 const FinancingPage = lazyPage("pages/support/FinancingPage.jsx", () =>
   import("./pages/support/FinancingPage.jsx"),
 );
-const TireCarePage = lazyPage("pages/support/TireCarePage.jsx", () =>
-  import("./pages/support/TireCarePage.jsx"),
-);
 const GalleryPage = lazyPage("pages/support/GalleryPage.jsx", () =>
   import("./pages/support/GalleryPage.jsx"),
 );
@@ -115,6 +118,43 @@ const LegalPage = lazyPage("pages/support/LegalPage.jsx", () =>
 const NotFoundPage = lazyPage("pages/NotFoundPage.jsx", () =>
   import("./pages/NotFoundPage.jsx"),
 );
+
+// Learn guides and the blog, both built from Markdown in src/content
+// (see src/content/index.js). One article template serves both.
+const LearnIndexPage = lazyPage(
+  "pages/learn/LearnIndexPage.jsx",
+  () => import("./pages/learn/LearnIndexPage.jsx"),
+);
+const LearnHubPage = lazyPage(
+  "pages/learn/LearnHubPage.jsx",
+  () => import("./pages/learn/LearnHubPage.jsx"),
+);
+const ArticlePage = lazyPage(
+  "pages/learn/ArticlePage.jsx",
+  () => import("./pages/learn/ArticlePage.jsx"),
+);
+const BlogIndexPage = lazyPage(
+  "pages/blog/BlogIndexPage.jsx",
+  () => import("./pages/blog/BlogIndexPage.jsx"),
+);
+
+/**
+ * /tools/<tool> is how the content plans link the free tools, which live at
+ * the root. vercel.json 301s these on the server; this covers in-app links.
+ */
+const TOOL_PATHS = {
+  "tire-size": "/tire-size",
+  "tire-check": "/tire-check",
+  "tread-gauge": "/tire-check",
+  "find-my-tires": "/find-my-tires",
+};
+
+function ToolRedirect() {
+  const { tool } = useParams();
+  const { search } = useLocation();
+  const to = TOOL_PATHS[tool];
+  return to ? <Navigate to={to + search} replace /> : <NotFoundPage />;
+}
 
 /**
  * Sends the GA4 page_view for each route change (src/lib/analytics.js).
@@ -166,6 +206,7 @@ export default function App() {
             <Route path="/tire-size" element={<TireSizePage />} />
             <Route path="/find-my-tires" element={<FindMyTiresPage />} />
             <Route path="/tire-check" element={<TireCheckPage />} />
+            <Route path="/tools/:tool" element={<ToolRedirect />} />
             <Route path="/commercial-tires" element={<CommercialTiresPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
@@ -187,9 +228,26 @@ export default function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/reviews" element={<ReviewsPage />} />
             <Route path="/financing" element={<FinancingPage />} />
-            <Route path="/tire-care" element={<TireCarePage />} />
+            {/* The old tire care page became the Learn hub (301 in vercel.json). */}
+            <Route
+              path="/tire-care"
+              element={<Navigate to="/learn" replace />}
+            />
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/sitemap" element={<SitemapPage />} />
+
+            {/* Learn guides and blog */}
+            <Route path="/learn" element={<LearnIndexPage />} />
+            <Route path="/learn/:hub" element={<LearnHubPage />} />
+            <Route
+              path="/learn/:hub/:slug"
+              element={<ArticlePage section="learn" />}
+            />
+            <Route path="/blog" element={<BlogIndexPage />} />
+            <Route
+              path="/blog/:slug"
+              element={<ArticlePage section="blog" />}
+            />
 
             {/* Order status. Full order history stays on Shopify
                 (shop.tiredroponline.com/account). */}
