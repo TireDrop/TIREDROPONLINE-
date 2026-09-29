@@ -269,6 +269,17 @@ correct canonical in the served HTML, JSON-LD visible to non-rendering crawlers,
 and faster first paint. It is roughly a day of work plus a build-time cost, and
 it is worth doing before launch, not before the distributor review.
 
+> **Done 2026-09-29 (Blog + Learn phase 0).** Every route is now prerendered
+> at build time: `npm run build` runs `scripts/prerender.mjs`, which renders
+> the real app with React's server renderer (not a headless browser, so it
+> runs the same on Vercel's build image) into `dist/<route>.html`, each with
+> its own title, description, canonical, robots, Open Graph/Twitter tags,
+> JSON-LD (now with `BreadcrumbList` on inner pages) and body. `src/main.jsx`
+> hydrates it. The build fails, naming the route, if a page renders empty,
+> without an `<h1>`, as the 404 page, or with a duplicate title. Unknown paths
+> now get `dist/404.html` with a real 404 status; see section 6.
+> `npm run check:prerender` verifies it in Chromium.
+
 ---
 
 ## 5. Performance — the bundle warning is gone
@@ -396,6 +407,17 @@ actually re-encoded.
 ---
 
 ## 6. Hosting config
+
+> **Changed 2026-09-29 with prerendering.** The catch-all rewrite is gone.
+> `cleanUrls: true` serves `dist/tires.html` at `/tires`, `trailingSlash:
+> false` 308s `/tires/` to `/tires`, and a path with no file gets
+> `dist/404.html` **with status 404** (Vercel's error route; confirmed in the
+> routing table `vercel build` generates). The only rewrite left is
+> `/tires/p/:sku` → `/spa`, the unrendered app shell, because those tires come
+> from the live distributor API and cannot be listed at build time. The old
+> `<Navigate>` routes (/coupons, /deals, /track-order) are real 301s in
+> vercel.json now, and the prerender fails the build if a new one is added
+> without a redirect. What follows describes the setup before that.
 
 **The SPA rewrite is correct.** `"/(.*)"` → `/index.html`. Vercel serves static
 files from the output directory before applying rewrites, so hashed assets,
