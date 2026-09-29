@@ -191,7 +191,7 @@ export const NAV = [
     ],
   },
   {
-    label: "More",
+    label: "About",
     to: "/about",
     children: [
       { label: "About TireDrop", to: "/about" },
