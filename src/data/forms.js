@@ -129,7 +129,9 @@ export const hasChanges = (changed) => Object.keys(changed).length > 0;
  * Posts one form's values to /api/forms. `formElement` is the submitted
  * <form>, read only for its honeypot.
  *
- * Resolves `{ delivered: boolean, error: string | null }` and never throws:
+ * Resolves `{ delivered: boolean, error: string | null, data? }` and never
+ * throws (`data` is the server's answer when delivered, e.g. a paid order's
+ * install booking):
  * a form that has already validated its input should show its confirmation
  * either way, because the visitor's next step — calling the shop — is the
  * same whether or not the POST landed. `delivered` decides which confirmation
@@ -142,8 +144,8 @@ export async function submitForm(formName, values, formElement = null) {
   if (!(await formsOn())) return { delivered: false, error: null };
 
   try {
-    await sendForm({ ...values, form: formName, website });
-    return { delivered: true, error: null };
+    const data = await sendForm({ ...values, form: formName, website });
+    return { delivered: true, error: null, data };
   } catch (err) {
     if (err instanceof ApiError) return { delivered: false, error: err.message };
     // Offline, blocked, or the server could not store it. The visitor still

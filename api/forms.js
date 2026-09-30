@@ -2,8 +2,13 @@
 //   { form: "contact" | "financing" | "fleet-quote" | "booking",
 //     name, email, phone, ...the form's own fields, website? }
 //   A "booking" may carry `order` (TD-260929-ABC234 or 1001, from
-//   /schedule?order=): it leads the lead text and adds the customer tags
-//   install-booking and order-<ref> (docs/integrations/install-scheduling.md).
+//   /schedule?order=). When that paid install order verifies with the
+//   form's email, the booking is made ON THE ORDER, the same as /track's
+//   panel (api/_lib/installBooking.js: note line, metafield, lead to info@,
+//   tag install-booked, untag needs-scheduling) and the answer carries
+//   `booking`. Otherwise it is a lead as before, led by "Paid order" with
+//   the customer tags install-booking and order-<ref>
+//   (docs/integrations/install-scheduling.md).
 //
 // The site's own form backend. Each submission becomes a lead on the Shopify
 // customer (found by email, else phone, or created without any marketing
@@ -14,6 +19,8 @@
 // Responses (all JSON, never cached):
 //   200 { ok: true }                   recorded (or a bot filled the honeypot:
 //                                      same answer, nothing stored)
+//   200 { ok: true, booking }          a paid order's install booked (or
+//                                      already booked: booking.alreadyBooked)
 //   400 { error }                      bad input; `error` is shown as-is
 //   429 { error }                      too many submissions from this client
 //   503 { configured: false, error }   Shopify is not configured
@@ -27,6 +34,7 @@ import { HttpError, methodNotAllowed, readJsonBody, send } from "./_lib/http.js"
 import { validateLead } from "./_lib/validate.js";
 import { ShopifyCheckoutError } from "./_lib/shopify.js";
 import { recordLead } from "./_lib/leads.js";
+import { bookFromLead } from "./_lib/installBooking.js";
 import { clientIp, createRateLimiter } from "./_lib/ratelimit.js";
 
 const NO_STORE = { "Cache-Control": "no-store" };
@@ -73,6 +81,15 @@ export function createFormsHandler({ env, shopify = {}, now = Date.now } = {}) {
       if (!checked.ok) return send(res, 400, { error: checked.error }, NO_STORE);
       // Honeypot filled: answer like a success, store nothing.
       if (checked.bot) return send(res, 200, { ok: true }, NO_STORE);
+
+      // A booking for a paid order, whose order verifies with the email on
+      // the form, is booked on the order itself, like /track's panel
+      // (tags install-booked, note line, lead to info@). Otherwise the lead
+      // is recorded as before.
+      if (checked.value.order) {
+        const booked = await bookFromLead(checked.value, config, { ...shopify, now });
+        if (booked) return send(res, booked.status, booked.body, NO_STORE);
+      }
 
       await recordLead(checked.value, config.shopify, {
         ...shopify,

@@ -16,9 +16,11 @@
  * (request mode, ship-to-store pickup), the footer newsletter sign-up, and the Find
  * My Tires size prefill. Also the install booking for a paid order:
  * /schedule?order= (the order read-only and sent, nothing personal taken
- * from the URL), and /track's "Schedule your install" button, both to
- * /schedule with the verified order's details and to an INSTALL_BOOKING_URL
- * link. The Year / Make / Model dropdowns (VehicleSelect)
+ * from the URL), and /track's "Schedule your install" panel: the day,
+ * window and notes typed into it (three modes, a late /api/status, a slow
+ * /api/book-install answer, a failed one) stay on screen and are the ones
+ * sent; a booked order shows its booking instead of the form; with an
+ * INSTALL_BOOKING_URL only that link is shown. The Year / Make / Model dropdowns (VehicleSelect)
  * are picked from, including "Other / not listed", a silent pick taken in on
  * the next render, the NHTSA-down fallback, and the finder's vehicle
  * prefilling the booking form. vPIC is mocked in its own JSON shape
@@ -1219,6 +1221,33 @@ for (const width of [390, 1440]) {
     await h.context.close();
   });
 
+  await check(`${width} /schedule?order=: an order that already has an install request says so and shows it`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    await page.route("**/api/forms", async (route) => {
+      h.sent.forms.push(JSON.parse(route.request().postData() || "{}"));
+      await route.fulfill({
+        json: {
+          ok: true,
+          booking: { day: "2026-10-06", window: "2-4pm", dayLabel: "Tuesday, October 6, 2026", windowLabel: "2:00 – 4:00 PM", notes: "", alreadyBooked: true },
+        },
+      });
+    });
+    await page.goto(`${BASE}/schedule?order=1002`);
+    await page.waitForSelector("#booking-order");
+    const flow = await bookThroughToContact(page, nextWeekday());
+    await fillVehicle(page, "typing", { year: "2020", make: "Toyota", model: "Camry" }, [["#tireSize", "215/55"], ["#tireSize", "R17"]]);
+    await flow.toContact();
+    await fill(page, "typing", [["#name", "Sam Buyer"], ["#phone", "9545550134"], ["#email", "buyer@example.com"]]);
+    await page.getByRole("button", { name: "Request appointment" }).click();
+    const existing = page.locator('[data-testid="booking-existing"]');
+    await existing.waitFor();
+    assert.match((await existing.innerText()).replace(/\s+/g, " "), /already has an install request in: Tuesday, October 6, 2026, 2:00 – 4:00 PM/);
+    assert.equal(h.sent.forms[0].order, "#1002");
+    noErrors(h.errors);
+    await h.context.close();
+  });
+
   await check(`${width} /schedule?order=: a malformed order is ignored and never sent`, async () => {
     const h = await open(width, { delay: 0 });
     const { page } = h;
@@ -1229,59 +1258,156 @@ for (const width of [390, 1440]) {
     await h.context.close();
   });
 
-  await check(`${width} /track → Schedule your install (no booking link): /schedule?order= with the verified vehicle and contact`, async () => {
-    const h = await open(width, { delay: 0 });
-    const { page } = h;
-    const asked = await mockTrack(page, {
-      found: true,
-      kind: "order",
-      order: {
-        ...PAID_STORE_ORDER,
-        booking: {
-          mode: "internal",
-          ref: "TD-260920-ABCDEF",
-          path: "/schedule?order=TD-260920-ABCDEF",
-          install: "shop",
-          prefill: { name: "Buyer Person", email: "buyer@example.com", phone: "+19545550199", vehicle: "2020 Toyota Camry" },
+  const INTERNAL_BOOKING = {
+    mode: "internal",
+    ref: "TD-260920-ABCDEF",
+    path: "/schedule?order=TD-260920-ABCDEF",
+    install: "shop",
+    prefill: { name: "Buyer Person", email: "buyer@example.com", phone: "+19545550199", vehicle: "2020 Toyota Camry" },
+  };
+
+  /** Answers /api/book-install with `answer` after `delay` (and records what was sent). */
+  async function mockBookInstall(page, { delay = 0, status = 200, answer = null } = {}) {
+    const sent = [];
+    await page.route("**/api/book-install", async (route) => {
+      const body = JSON.parse(route.request().postData() || "{}");
+      sent.push(body);
+      await sleep(delay);
+      await route.fulfill({
+        status,
+        json: answer ?? {
+          ok: true,
+          alreadyBooked: false,
+          booking: { day: body.day, window: body.window, dayLabel: "Friday, October 9, 2026", windowLabel: "10:00 AM – 12:00 PM", notes: body.notes },
         },
-      },
+      });
     });
-    // The confirmation email links to /track?order=%231002: the number is filled in, the email is not.
+    return sent;
+  }
+
+  /** /track, looked up, with the paid order's booking panel on screen. */
+  async function openPanel(h, booking = INTERNAL_BOOKING) {
+    const { page } = h;
+    const asked = await mockTrack(page, { found: true, kind: "order", order: { ...PAID_STORE_ORDER, booking } });
     await page.goto(`${BASE}/track?order=%231002`);
     await page.waitForSelector("#track-order");
-    await expectDom(page, [["#track-order", "#1002"], ["#track-email", ""]], "(order from the link)");
     await fill(page, "typing", [["#track-email", "buyer@example.com"]]);
     await page.getByRole("button", { name: "Track Order" }).click();
-    const cta = page.getByRole("link", { name: "Schedule your install" });
-    await cta.waitFor();
+    await page.locator('[data-testid="schedule-install"], [data-testid="install-requested"]').first().waitFor();
     assert.deepEqual(asked, [{ order: "#1002", email: "buyer@example.com", website: "" }]);
-    assert.equal(await cta.getAttribute("target"), null, "stays on the site");
-    await cta.click();
-    await page.waitForURL(/\/schedule\?order=TD-260920-ABCDEF$/);
-    await page.waitForSelector("#booking-order");
-    assert.equal(await page.inputValue("#booking-order"), "TD-260920-ABCDEF");
-    // Nothing personal is in the URL.
-    assert.ok(!/Buyer|example|555|Camry/.test(page.url()), page.url());
+    return asked;
+  }
 
-    const flow = await bookThroughToContact(page, nextWeekday());
-    await modelsLoaded(page);
-    await expectDom(page, [["#year", "2020"], ["#make", "Toyota"], ["#model", "Camry"]], "(vehicle from the order)");
-    await flow.toContact();
-    await expectDom(page, [["#name", "Buyer Person"], ["#phone", "+19545550199"], ["#email", "buyer@example.com"]], "(contact from the order)");
-    await page.getByRole("button", { name: "Request appointment" }).click();
-    await waitFor(() => h.sent.forms.length === 1, "/api/forms");
-    assertIncludes(h.sent.forms[0], {
-      form: "booking",
-      order: "TD-260920-ABCDEF",
-      service: "tire-installation",
-      locationType: "shop",
-      year: "2020",
-      make: "Toyota",
-      model: "Camry",
-      name: "Buyer Person",
-      phone: "+19545550199",
-      email: "buyer@example.com",
-    }, "booking from /track");
+  for (const mode of MODES) {
+    await check(`${width} /track booking panel: ${mode} day, window and notes survive a late status and a slow answer, and are sent`, async () => {
+      const h = await open(width);
+      const { page } = h;
+      const booked = await mockBookInstall(page, { delay: 1200 });
+      await openPanel(h);
+      assert.equal(await page.locator("#install-day").count(), 1, "the inline form, not a link away");
+      assert.equal(await page.getByRole("link", { name: "Schedule your install" }).count(), 0);
+      const day = nextWeekday();
+      const when = [
+        ["#install-day", day],
+        ["#install-window-10-12pm", true],
+      ];
+      await fill(page, mode, when);
+      await h.afterStatus();
+      // Real keystrokes in the notes: more renders over the filled values.
+      await page.locator("#install-notes").pressSequentially("Locking lugs");
+      await expectDom(page, [...when, ["#install-notes", "Locking lugs"]], `(${mode} panel)`);
+
+      await page.getByRole("button", { name: "Request this day and window" }).click();
+      await page.getByRole("button", { name: "Sending…" }).waitFor();
+      await expectDom(page, [...when, ["#install-notes", "Locking lugs"]], "(while sending)");
+      await waitFor(() => booked.length === 1, "/api/book-install");
+      assert.deepEqual(booked[0], {
+        order: "#1002",
+        email: "buyer@example.com",
+        day,
+        window: "10-12pm",
+        notes: "Locking lugs",
+        website: "",
+      });
+      const done = page.locator('[data-testid="install-requested"]');
+      await done.waitFor();
+      const text = (await done.innerText()).replace(/\s+/g, " ");
+      assert.match(
+        text,
+        /Your install request is in: Friday, October 9, 2026, 10:00 AM – 12:00 PM\. Extreme Tires, 7712 West Oakland Park Blvd, Sunrise, FL 33351 · \(954\) 773-1896\. We confirm the exact time with you before then\./,
+      );
+      assert.doesNotMatch(text, /\b(safe|OK|fine|guarantee|discount)\b/i);
+      assert.equal(await page.locator("#install-day").count(), 0, "the form is gone");
+      noErrors(h.errors);
+      await h.context.close();
+    });
+  }
+
+  await check(`${width} /track booking panel: a failed booking keeps what was typed and says it is not in`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    const booked = await mockBookInstall(page, { status: 502, answer: { error: "We couldn't save your install request just now, so it is not in yet." } });
+    await openPanel(h);
+    const day = nextWeekday();
+    const typed = [
+      ["#install-day", day],
+      ["#install-window-2-4pm", true],
+      ["#install-notes", "Call before noon"],
+    ];
+    await fill(page, "typing", typed);
+    await page.getByRole("button", { name: "Request this day and window" }).click();
+    await waitFor(() => booked.length === 1, "/api/book-install");
+    await page.getByText(/not in yet/).waitFor();
+    assert.equal(await page.locator('[data-testid="install-requested"]').count(), 0, "no confirmation");
+    await expectDom(page, typed, "(after the failure)");
+    // A day refused by the server (400 naming the field) shows on that field; the rest stays.
+    await page.unroute("**/api/book-install");
+    await mockBookInstall(page, { status: 400, answer: { error: "We are closed Sunday. Pick Monday through Saturday.", field: "day" } });
+    await page.getByRole("button", { name: "Request this day and window" }).click();
+    await page.locator("#install-day-error").waitFor();
+    await expectDom(page, typed, "(after a 400)");
+    noErrors(h.errors.filter((e) => !/status of (400|502)/.test(e)));
+    await h.context.close();
+  });
+
+  await check(`${width} /track booking panel: the day and window are checked on the page first (Sunday, Saturday 4 – 6 PM, missing)`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    const booked = await mockBookInstall(page);
+    await openPanel(h);
+    await page.getByRole("button", { name: "Request this day and window" }).click();
+    await page.locator("#install-day-error").waitFor();
+    assert.match(await page.locator("#install-day-error").innerText(), /Pick the day/);
+    // A Sunday a week or more out.
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    while (d.getDay() !== 0) d.setDate(d.getDate() + 1);
+    await fill(page, "typing", [["#install-day", isoLocal(d)], ["#install-window-8-10am", true]]);
+    await page.getByRole("button", { name: "Request this day and window" }).click();
+    await page.getByText("We are closed Sunday. Pick Monday through Saturday.").waitFor();
+    // The Saturday after it: 4 – 6 PM is not offered.
+    d.setDate(d.getDate() + 6);
+    await fill(page, "typing", [["#install-day", isoLocal(d)]]);
+    assert.equal(await page.locator("#install-window-4-6pm").isDisabled(), true);
+    assert.equal(booked.length, 0, "nothing sent");
+    noErrors(h.errors);
+    await h.context.close();
+  });
+
+  await check(`${width} /track: a booked order shows the requested day and window, not the form`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    await openPanel(h, {
+      mode: "booked",
+      ref: "TD-260920-ABCDEF",
+      install: "shop",
+      booking: { day: "2026-10-06", window: "2-4pm", dayLabel: "Tuesday, October 6, 2026", windowLabel: "2:00 – 4:00 PM", notes: "" },
+    });
+    const text = (await page.locator('[data-testid="install-requested"]').innerText()).replace(/\s+/g, " ");
+    assert.match(text, /Your install request is in: Tuesday, October 6, 2026, 2:00 – 4:00 PM\./);
+    assert.match(text, /We confirm the exact time with you before then\./);
+    assert.equal(await page.locator("#install-day").count(), 0);
+    assert.equal(await page.locator('[data-testid="schedule-install"]').count(), 0);
     noErrors(h.errors);
     await h.context.close();
   });
@@ -1299,6 +1425,7 @@ for (const width of [390, 1440]) {
     assert.equal(await cta.getAttribute("href"), url);
     assert.equal(await cta.getAttribute("target"), "_blank");
     assert.match(await cta.getAttribute("rel"), /noopener/);
+    assert.equal(await page.locator("#install-day").count(), 0, "only the external link, no inline form");
     noErrors(h.errors);
     await h.context.close();
   });
