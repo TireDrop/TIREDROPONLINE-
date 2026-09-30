@@ -848,6 +848,27 @@ for (const width of [390, 1440]) {
     });
   }
 
+  await check(`${width} /track?order=%231001 (email link): email typed before the app starts is kept beside the filled-in number`, async () => {
+    const h = await open(width, { jsDelay: 8000, delay: 2500 });
+    const { page } = h;
+    await page.goto(`${BASE}/track?order=%231001`, { waitUntil: "commit" });
+    await page.waitForSelector("#track-email");
+    await typeBeforeApp(page, [["#track-email", "driver@example.com"]]);
+    h.releaseJs();
+    await appStarted(page, "#track-order");
+    await h.afterStatus();
+    await expectDom(page, TRACK_FIELDS, "(after the app started)");
+    await page.getByRole("button", { name: "Track Order" }).click();
+    await waitFor(() => h.sent.track.length === 1, "/api/track");
+    assert.deepEqual(h.sent.track[0], {
+      order: "#1001",
+      email: "driver@example.com",
+      website: "",
+    });
+    noErrors(trackErrors(h.errors));
+    await h.context.close();
+  });
+
   await check(`${width} /contact, /schedule: typed before the app starts survives hydration`, async () => {
     for (const [path, fields, ready] of [
       [
