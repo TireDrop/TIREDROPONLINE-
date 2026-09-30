@@ -101,7 +101,7 @@ export function assessDamage(zoneId, damageId) {
       outcome: "replace",
       status: STATUS.replace,
       headline: "Replace this tire",
-      body: "A bulge or bubble means the tire's inner structure is damaged and air has reached the body of the tire. Michelin advises replacing a tire with a bulge, and it isn't repairable under USTMA and TIA practice. A shallow inward dent is different: small indents where the body plies overlap can be a normal part of how a radial tire is built, and a technician can tell which one you have.",
+      body: "A bulge or bubble means the tire's inner structure is damaged and air has reached the body of the tire. Michelin advises replacing a tire with a bulge, and it isn't repairable under USTMA and TIA practice.",
       sources: ["S37", "S39", "S14"],
     };
   }

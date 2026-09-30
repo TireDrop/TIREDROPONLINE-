@@ -119,6 +119,8 @@ for (const zone of ZONES) {
         assert.equal(r.status.label, "Replace");
         assert.equal(r.headline, "Replace this tire");
         assert.match(r.body, /bulge/i);
+        // No unsourced "an inward dent can be normal" aside on a bulge.
+        assert.doesNotMatch(r.body, /dent|indent|normal/i);
         assert.equal(r.standard, null);
       } else if (want === I) {
         assert.equal(r.outcome, "inspect");

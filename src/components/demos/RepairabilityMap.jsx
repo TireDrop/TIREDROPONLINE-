@@ -194,7 +194,7 @@ export default function RepairabilityMap() {
 
   return (
     <DemoShell
-      demoId="repairability-map"
+      demoId="damage-map"
       title="Can this tire be repaired?"
       intro="Pick where the damage is and what it looks like. See what industry repair practice says, then book an inspection."
       sources={SOURCES_USED}

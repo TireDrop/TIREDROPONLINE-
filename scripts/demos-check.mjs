@@ -54,6 +54,12 @@ const FILES = {
   "size-decoder": "SizeDecoder.jsx",
   "tpms-light": "TpmsLight.jsx",
   "utqg-explainer": "UtqgExplainer.jsx",
+  "load-speed-check": "LoadSpeedCheck.jsx",
+  "plus-size-speedo": "PlusSizeSpeedo.jsx",
+  "pressure-temp": "PressureTemp.jsx",
+  "damage-map": "RepairabilityMap.jsx",
+  "noise-vibration": "NoiseVibration.jsx",
+  "rotation-pattern": "RotationPattern.jsx",
 };
 
 const vite = await createServer({
@@ -136,6 +142,67 @@ const STATES = {
       await expectText(page, "3 times as long");
     },
     initial: "5 times as long",
+  },
+  "load-speed-check": {
+    async drive(page) {
+      const demo = page.locator('[data-demo="load-speed-check"]');
+      await demo.getByRole("textbox", { name: "Type it from the sidewall" }).nth(1).fill("97W");
+      await expectText(page, "Meets or exceeds your current tire on load index and speed rating");
+      const speed = demo.getByRole("combobox", { name: "Speed rating" }).nth(1);
+      await speed.focus();
+      await speed.selectOption("T");
+      await expectText(page, "T is tested to 118 mph");
+    },
+    initial: "Below your current tire on load index and speed rating",
+  },
+  "plus-size-speedo": {
+    async drive(page) {
+      const demo = page.locator('[data-demo="plus-size-speedo"]');
+      await demo.getByRole("textbox", { name: "New size" }).fill("255/55R18");
+      await expectText(page, "Outside the common 3% guideline");
+      await demo.getByRole("button", { name: /^Plus two/ }).click();
+      await expectText(page, "205/55R16 → 225/40R18");
+    },
+    initial: "Within the common 3% guideline",
+  },
+  "pressure-temp": {
+    async drive(page) {
+      await page.getByRole("button", { name: "Cold-front morning" }).click();
+      await expectText(page, "31.9 PSI by the gas law");
+      const slider = page.getByRole("slider", { name: "Temperature now" });
+      await slider.focus();
+      for (let i = 0; i < 2; i += 1) await slider.press("ArrowRight");
+      assert.equal(await slider.inputValue(), "50");
+    },
+    initial: "about 36.6 PSI by the gas law",
+  },
+  "damage-map": {
+    async drive(page) {
+      await page.getByRole("combobox", { name: "Where is it?" }).selectOption("sidewall");
+      await expectText(page, "Not repairable under industry practice");
+      await page.getByRole("combobox", { name: "What is it?" }).selectOption("bulge");
+      await expectText(page, "Replace this tire");
+    },
+    initial: "May be repairable, only after an inside inspection",
+  },
+  "noise-vibration": {
+    async drive(page) {
+      const braking = page.getByRole("radio", { name: "When braking" });
+      await braking.focus();
+      await braking.check();
+      await page.getByRole("radio", { name: "Brake pedal" }).check();
+      await expectText(page, "felt in the brake pedal (+3)");
+    },
+    initial: "Wheel out of balance",
+  },
+  "rotation-pattern": {
+    async drive(page) {
+      await page.getByRole("radio", { name: /Rear-wheel drive/ }).check();
+      await expectText(page, "Rears go straight forward");
+      await page.getByRole("button", { name: "Show the move" }).click();
+      await expectText(page, "where each tire ends up");
+    },
+    initial: "Fronts go straight back",
   },
 };
 
@@ -252,7 +319,7 @@ await check("gallery: all demos and reserved ids render together", async () => {
   const { context, page, errors } = await open(1440, "");
   try {
     for (const id of Object.keys(FILES)) await page.locator(`[data-demo="${id}"]`).waitFor();
-    assert.equal(await page.locator("[data-gallery-reserved]").count(), 9);
+    assert.equal(await page.locator("[data-gallery-reserved]").count(), 3);
     assert.deepEqual(errors, []);
   } finally {
     await context.close();
