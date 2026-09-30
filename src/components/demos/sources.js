@@ -87,4 +87,36 @@ export const SOURCES = {
     label: "Tire Review, Quarter Test",
     url: "https://www.tirereview.com/quarter-tire-test-tread-depth/",
   },
+
+  // D4 Pressure vs temperature
+  S2: {
+    label: "NHTSA, Tires in the Garage",
+    url: "https://www.nhtsa.gov/sites/nhtsa.gov/files/2021-11/Tires_InTheGarage_Infographic_102621_v1_-eng-tag.pdf",
+  },
+  S4: {
+    label: "NHTSA Summer Driving Tips",
+    url: "https://www.nhtsa.gov/summer-driving-tips",
+  },
+  C2: {
+    label: "Tire Rack, Temperature and Tire Pressure",
+    url: "https://www.tirerack.com/upgrade-garage/how-does-temperature-change-affect-tire-air-pressure",
+  },
+
+  // D13 Can this tire be repaired?
+  S14: {
+    label: "USTMA Tire Repair Basics",
+    url: "https://www.ustires.org/tire-care-safety/tire-repair-basics",
+  },
+  S19: {
+    label: "Tire Industry Association, Tire Repair",
+    url: "https://www.tireindustry.org/resources/consumer-education/consumer-safety-overview/tire-repair/",
+  },
+  S37: {
+    label: "Michelin, Sidewall Bulge or Bubble",
+    url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-damage/sidewall-problems/symptom-bulge-or-bubble",
+  },
+  S39: {
+    label: "Michelin, Tire Damage Guide",
+    url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-damage",
+  },
 };
