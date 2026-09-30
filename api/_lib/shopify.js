@@ -447,3 +447,45 @@ export async function createDraftCheckout(order, cfg, deps = {}) {
   const data = await shopifyGraphQL(cfg, DRAFT_ORDER_CREATE, { input }, deps);
   return extractInvoiceUrl(data);
 }
+
+// ---- Access scopes ----------------------------------------------------------
+
+/** The scopes this app was granted on the store (validated, Admin 2026-07). */
+export const APP_SCOPES_QUERY = `query appAccessScopes {
+  currentAppInstallation { accessScopes { handle } }
+}`;
+
+export const APP_SCOPES_TTL_MS = 10 * 60 * 1000;
+
+// Per warm function instance, like the token: scopes only change when the
+// app is re-installed with a new scope list.
+let cachedScopes = null;
+
+/** Test hook. */
+export function clearAppScopeCache() {
+  cachedScopes = null;
+}
+
+/**
+ * Whether the app has the access scope `handle` (e.g. "write_orders").
+ * Resolves true or false; throws ShopifyCheckoutError when Shopify cannot be
+ * asked, so the caller decides whether to try anyway. The answer is cached
+ * for APP_SCOPES_TTL_MS.
+ */
+export async function appHasScope(cfg, handle, deps = {}) {
+  const now = (deps.now ?? Date.now)();
+  const key = `${cfg?.domain}|${cfg?.clientId || "token"}`;
+  if (!cachedScopes || cachedScopes.key !== key || cachedScopes.expiresAt <= now) {
+    const data = await shopifyGraphQL(cfg, APP_SCOPES_QUERY, {}, deps);
+    const scopes = data?.currentAppInstallation?.accessScopes;
+    if (!Array.isArray(scopes)) {
+      throw new ShopifyCheckoutError("Shopify did not list the app's access scopes.");
+    }
+    cachedScopes = {
+      key,
+      handles: new Set(scopes.map((s) => s?.handle).filter(Boolean)),
+      expiresAt: now + APP_SCOPES_TTL_MS,
+    };
+  }
+  return cachedScopes.handles.has(handle);
+}

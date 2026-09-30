@@ -5,7 +5,10 @@
 // `website` is a honeypot the page hides from people.
 //
 // Responses (all JSON, never cached):
-//   200 { found: true, kind: "order", order }       a Shopify order
+//   200 { found: true, kind: "order", order }       a Shopify order; a paid
+//                                                   install order also has
+//                                                   order.booking (see
+//                                                   api/_lib/booking.js)
 //   200 { found: true, kind: "request", request }   a TD- order request (draft)
 //   404 { found: false, error }                     no match: the same answer
 //                                                   for a wrong number, a wrong
@@ -19,6 +22,7 @@ import { getConfig } from "./_lib/config.js";
 import { HttpError, methodNotAllowed, readJsonBody, send } from "./_lib/http.js";
 import { ShopifyCheckoutError } from "./_lib/shopify.js";
 import { lookupOrder, validateTrack } from "./_lib/track.js";
+import { bookingForOrder } from "./_lib/booking.js";
 import { clientIp, createRateLimiter } from "./_lib/ratelimit.js";
 
 const NO_STORE = { "Cache-Control": "no-store" };
@@ -68,7 +72,10 @@ export function createTrackHandler({ env, shopify = {}, now = Date.now } = {}) {
       // Honeypot filled: the same answer as a miss, and Shopify is not asked.
       if (checked.bot) return send(res, 404, { found: false, error: NOT_FOUND }, NO_STORE);
 
-      const found = await lookupOrder(checked.value, config.shopify, shopify);
+      const found = await lookupOrder(checked.value, config.shopify, shopify, {
+        booking: (node) =>
+          bookingForOrder(node, config, shopify, { email: checked.value.email }),
+      });
       if (!found) return send(res, 404, { found: false, error: NOT_FOUND }, NO_STORE);
       return send(res, 200, { found: true, ...found }, NO_STORE);
     } catch (err) {

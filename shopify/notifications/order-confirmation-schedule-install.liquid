@@ -1,0 +1,44 @@
+{%- comment -%}
+  TireDrop: "Schedule your install" button for the Shopify "Order confirmation" email.
+  Paste into Settings → Notifications → Customer notifications → Order confirmation →
+  Edit code, on a new line directly AFTER the local-vs-ship block
+  (order-confirmation-local-block.liquid), or after the element that contains
+  {{ email_body }} if that block is not there.
+
+  Shows only when the order is PAID and involves installation:
+    - the shipping line title contains "Pickup" (Pickup at Extreme Tires), or
+    - the cart attribute Delivery is ship-to-store or mobile install, or
+    - a line item is an install (its title contains "Install"), or checkout
+      wrote an "Install at the shop:" line into the order note.
+  The button opens Track My Order with the order number filled in
+  (tiredroponline.com/track?order=%231001). The customer types their email
+  there; it is never put in the link. Once the order is verified, /track
+  shows "Schedule your install", which opens the shop's booking link
+  (INSTALL_BOOKING_URL in Vercel) or the site's /schedule form.
+  docs/integrations/install-scheduling.md.
+{%- endcomment -%}
+{%- assign td_install = false -%}
+{%- assign td_ship_title = shipping_method.title | default: "" -%}
+{%- if td_ship_title contains "Pickup" or td_ship_title contains "pickup" -%}
+  {%- assign td_install = true -%}
+{%- endif -%}
+{%- assign td_delivery = attributes.Delivery | default: "" -%}
+{%- if td_delivery contains "Ship to store" or td_delivery contains "Mobile install" -%}
+  {%- assign td_install = true -%}
+{%- endif -%}
+{%- for td_line in line_items -%}
+  {%- if td_line.title contains "Install" or td_line.title contains "install" -%}
+    {%- assign td_install = true -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- if note contains "Install at the shop:" -%}
+  {%- assign td_install = true -%}
+{%- endif -%}
+{%- if td_install and financial_status == "paid" -%}
+<div style="margin: 20px 0; padding: 16px 18px; border: 1px solid #0068E8; border-radius: 8px; background: #FFFFFF; font-family: Arial, sans-serif; font-size: 15px; line-height: 1.5; color: #111;">
+  <strong style="font-size: 16px;">Schedule your install</strong><br>
+  Your order is paid. Pick the day and time you would like for the install; we confirm it with you before then.<br>
+  <a href="https://tiredroponline.com/track?order={{ order_name | url_encode }}" style="display: inline-block; margin-top: 12px; padding: 11px 20px; background: #0068E8; color: #FFFFFF; text-decoration: none; border-radius: 6px; font-weight: bold;">Schedule your install</a><br>
+  <span style="color: #444; font-size: 13px;">Enter this email address on the page to open your order. Rather call? <a href="tel:+19547731896" style="color: #0068E8;">(954) 773-1896</a>, and mention {{ order_name }}.</span>
+</div>
+{%- endif -%}

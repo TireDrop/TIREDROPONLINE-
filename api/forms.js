@@ -1,6 +1,9 @@
 // POST /api/forms
 //   { form: "contact" | "financing" | "fleet-quote" | "booking",
 //     name, email, phone, ...the form's own fields, website? }
+//   A "booking" may carry `order` (TD-260929-ABC234 or 1001, from
+//   /schedule?order=): it leads the lead text and adds the customer tags
+//   install-booking and order-<ref> (docs/integrations/install-scheduling.md).
 //
 // The site's own form backend. Each submission becomes a lead on the Shopify
 // customer (found by email, else phone, or created without any marketing

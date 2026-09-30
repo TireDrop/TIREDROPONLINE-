@@ -14,7 +14,11 @@
  *
  * Covers /contact, /financing, /commercial-tires, /schedule, /checkout
  * (request mode, ship-to-store pickup), the footer newsletter sign-up, and the Find
- * My Tires size prefill. The Year / Make / Model dropdowns (VehicleSelect)
+ * My Tires size prefill. Also the install booking for a paid order:
+ * /schedule?order= (the order read-only and sent, nothing personal taken
+ * from the URL), and /track's "Schedule your install" button, both to
+ * /schedule with the verified order's details and to an INSTALL_BOOKING_URL
+ * link. The Year / Make / Model dropdowns (VehicleSelect)
  * are picked from, including "Other / not listed", a silent pick taken in on
  * the next render, the NHTSA-down fallback, and the finder's vehicle
  * prefilling the booking form. vPIC is mocked in its own JSON shape
@@ -923,6 +927,201 @@ for (const width of [390, 1440]) {
     // Only the vPIC outage itself may log.
     noErrors(h.errors.filter((e) => !/Failed to load resource/.test(e)));
     await h.context.close();
+  });
+
+  /* ------------- Install booking for a paid order (/schedule?order=) ------------- */
+
+  /** Answers /api/track with `body` (and records what was asked). */
+  async function mockTrack(page, body) {
+    const asked = [];
+    await page.route("**/api/track", async (route) => {
+      asked.push(JSON.parse(route.request().postData() || "{}"));
+      await route.fulfill({ json: body });
+    });
+    return asked;
+  }
+
+  const PAID_STORE_ORDER = {
+    name: "#1002",
+    createdAt: "2026-09-20T15:04:00Z",
+    cancelled: false,
+    financialStatus: "paid",
+    fulfillmentStatus: "unfulfilled",
+    delivery: "ship-to-store",
+    lines: [{ title: "Michelin Defender2 215/55R17", quantity: 4 }],
+    tracking: [],
+    supplier: null,
+  };
+
+  /** Steps 1 to 5 of a booking whose service and place are already set. */
+  async function bookThroughToContact(page, date) {
+    const next = () => page.getByRole("button", { name: /^Next:/ }).click();
+    await next();
+    await page.waitForSelector("#year");
+    return {
+      next,
+      async toContact() {
+        await next();
+        // Installed at the shop: step 3 has no address to fill.
+        await page.waitForSelector("#locationType");
+        assert.equal(await page.locator("#address").count(), 0, "a paid store order books an in-shop install");
+        await next();
+        await page.waitForSelector("#date");
+        await fill(page, "typing", [["#date", date], ["#window-10-12pm", true]]);
+        await next();
+        await page.waitForSelector("#name");
+      },
+    };
+  }
+
+  await check(`${width} /schedule?order=: a bare link shows the order read-only, fills in nobody's details, and sends the order`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    // Personal details in the query string must be ignored.
+    await page.goto(
+      `${BASE}/schedule?order=TD-260929-ABC234&name=Mallory&email=evil%40example.com&phone=9545550000&year=1999&make=Evil&model=Car`,
+    );
+    await page.waitForSelector("#booking-order");
+    assert.equal(await page.inputValue("#booking-order"), "TD-260929-ABC234");
+    assert.equal(await page.locator("#booking-order").evaluate((el) => el.readOnly), true, "read-only");
+    await expectDom(page, [["#service-tire-installation", true]], "(install preselected)");
+    await h.afterStatus();
+
+    const flow = await bookThroughToContact(page, nextWeekday());
+    await expectDom(page, [["#year", ""], ["#make", ""]], "(no vehicle from the URL)");
+    const vehicle = await fillVehicle(page, "typing", { year: "2020", make: "Toyota", model: "Camry" }, [
+      ["#tireSize", "215/55"],
+      ["#tireSize", "R17"],
+    ]);
+    await expectDom(page, vehicle, "(typed vehicle)");
+    await flow.toContact();
+    await expectDom(page, [["#name", ""], ["#phone", ""], ["#email", ""]], "(no contact from the URL)");
+    await fill(page, "typing", [["#name", "Sam Buyer"], ["#phone", "9545550134"], ["#email", "sam@example.com"]]);
+    await page.getByText("Paid order", { exact: true }).first().waitFor();
+    await page.getByRole("button", { name: "Request appointment" }).click();
+    await waitFor(() => h.sent.forms.length === 1, "/api/forms");
+    assertIncludes(h.sent.forms[0], {
+      form: "booking",
+      order: "TD-260929-ABC234",
+      service: "tire-installation",
+      locationType: "shop",
+      name: "Sam Buyer",
+      email: "sam@example.com",
+      phone: "9545550134",
+      year: "2020",
+      make: "Toyota",
+      model: "Camry",
+    }, "booking with order");
+    assert.ok(!JSON.stringify(h.sent.forms[0]).includes("Mallory"), "nothing from the query string but the order");
+    await page.getByText("TD-260929-ABC234").first().waitFor();
+    noErrors(h.errors);
+    await h.context.close();
+  });
+
+  await check(`${width} /schedule?order=: a malformed order is ignored and never sent`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    await page.goto(`${BASE}/schedule?order=%3Cscript%3E1%3C%2Fscript%3E`);
+    await page.waitForSelector("#service-tire-installation");
+    assert.equal(await page.locator("#booking-order").count(), 0);
+    noErrors(h.errors);
+    await h.context.close();
+  });
+
+  await check(`${width} /track → Schedule your install (no booking link): /schedule?order= with the verified vehicle and contact`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    const asked = await mockTrack(page, {
+      found: true,
+      kind: "order",
+      order: {
+        ...PAID_STORE_ORDER,
+        booking: {
+          mode: "internal",
+          ref: "TD-260920-ABCDEF",
+          path: "/schedule?order=TD-260920-ABCDEF",
+          install: "shop",
+          prefill: { name: "Buyer Person", email: "buyer@example.com", phone: "+19545550199", vehicle: "2020 Toyota Camry" },
+        },
+      },
+    });
+    // The confirmation email links to /track?order=%231002: the number is filled in, the email is not.
+    await page.goto(`${BASE}/track?order=%231002`);
+    await page.waitForSelector("#track-order");
+    await expectDom(page, [["#track-order", "#1002"], ["#track-email", ""]], "(order from the link)");
+    await fill(page, "typing", [["#track-email", "buyer@example.com"]]);
+    await page.getByRole("button", { name: "Track Order" }).click();
+    const cta = page.getByRole("link", { name: "Schedule your install" });
+    await cta.waitFor();
+    assert.deepEqual(asked, [{ order: "#1002", email: "buyer@example.com", website: "" }]);
+    assert.equal(await cta.getAttribute("target"), null, "stays on the site");
+    await cta.click();
+    await page.waitForURL(/\/schedule\?order=TD-260920-ABCDEF$/);
+    await page.waitForSelector("#booking-order");
+    assert.equal(await page.inputValue("#booking-order"), "TD-260920-ABCDEF");
+    // Nothing personal is in the URL.
+    assert.ok(!/Buyer|example|555|Camry/.test(page.url()), page.url());
+
+    const flow = await bookThroughToContact(page, nextWeekday());
+    await modelsLoaded(page);
+    await expectDom(page, [["#year", "2020"], ["#make", "Toyota"], ["#model", "Camry"]], "(vehicle from the order)");
+    await flow.toContact();
+    await expectDom(page, [["#name", "Buyer Person"], ["#phone", "+19545550199"], ["#email", "buyer@example.com"]], "(contact from the order)");
+    await page.getByRole("button", { name: "Request appointment" }).click();
+    await waitFor(() => h.sent.forms.length === 1, "/api/forms");
+    assertIncludes(h.sent.forms[0], {
+      form: "booking",
+      order: "TD-260920-ABCDEF",
+      service: "tire-installation",
+      locationType: "shop",
+      year: "2020",
+      make: "Toyota",
+      model: "Camry",
+      name: "Buyer Person",
+      phone: "+19545550199",
+      email: "buyer@example.com",
+    }, "booking from /track");
+    noErrors(h.errors);
+    await h.context.close();
+  });
+
+  await check(`${width} /track → Schedule your install with INSTALL_BOOKING_URL opens the shop's own link`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    const url = "https://book.example.com/td?ref=TD-260920-ABCDEF&n=Buyer%20Person";
+    await mockTrack(page, { found: true, kind: "order", order: { ...PAID_STORE_ORDER, booking: { mode: "external", url } } });
+    await page.goto(`${BASE}/track`);
+    await fill(page, "typing", [["#track-order", "1002"], ["#track-email", "buyer@example.com"]]);
+    await page.getByRole("button", { name: "Track Order" }).click();
+    const cta = page.getByRole("link", { name: "Schedule your install" });
+    await cta.waitFor();
+    assert.equal(await cta.getAttribute("href"), url);
+    assert.equal(await cta.getAttribute("target"), "_blank");
+    assert.match(await cta.getAttribute("rel"), /noopener/);
+    noErrors(h.errors);
+    await h.context.close();
+  });
+
+  await check(`${width} /track: no Schedule your install for an unpaid request or a shipped order`, async () => {
+    for (const body of [
+      {
+        found: true,
+        kind: "request",
+        request: { ref: "TD-260929-HJK234", createdAt: "2026-09-29T13:00:00Z", status: "open", orderName: null, delivery: "ship-to-store", lines: [] },
+      },
+      { found: true, kind: "order", order: { ...PAID_STORE_ORDER, delivery: "ship" } },
+    ]) {
+      const h = await open(width, { delay: 0 });
+      const { page } = h;
+      await mockTrack(page, body);
+      await page.goto(`${BASE}/track`);
+      await fill(page, "typing", [["#track-order", body.kind === "request" ? "TD-260929-HJK234" : "1002"], ["#track-email", "buyer@example.com"]]);
+      await page.getByRole("button", { name: "Track Order" }).click();
+      await page.locator('[role="status"]').first().waitFor();
+      assert.equal(await page.locator('[data-testid="schedule-install"]').count(), 0, body.kind);
+      noErrors(h.errors);
+      await h.context.close();
+    }
   });
 }
 

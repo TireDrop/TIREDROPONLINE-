@@ -15,6 +15,12 @@
 // `webhooks` is "configured" when POST /api/webhooks/shopify can verify a
 // delivery (SHOPIFY_WEBHOOK_SECRET or SHOPIFY_CLIENT_SECRET is set), "off"
 // otherwise (docs/integrations/webhooks.md).
+//
+// `booking` is "external" when INSTALL_BOOKING_URL is a usable https link
+// template (the /track "Schedule your install" button opens it, filled for
+// the verified order), "internal" otherwise (the button opens
+// /schedule?order=<ref>). The link itself is never in this body
+// (docs/integrations/install-scheduling.md).
 
 import { getConfig } from "./_lib/config.js";
 import { methodNotAllowed, send } from "./_lib/http.js";
@@ -44,6 +50,7 @@ export function statusBody(config, endpoints = ATD_ENDPOINTS) {
     newsletter: config.newsletter.mode,
     forms: config.forms.mode,
     webhooks: config.webhooks.mode,
+    booking: config.booking.mode,
     version: config.version,
   };
   if (issues.length) body.issues = issues;

@@ -48,7 +48,50 @@ export const ATD_FORWARDER_SWITCHES = [
   "ATD_FORWARD_TEST_ORDERS",
 ];
 
+/**
+ * Placeholders INSTALL_BOOKING_URL may carry. Each is filled URL-encoded
+ * from a verified order (api/_lib/booking.js fillBookingUrl).
+ */
+export const BOOKING_PLACEHOLDERS = Object.freeze(["orderRef", "name", "email", "phone", "vehicle"]);
+
 const clean = (v) => (typeof v === "string" ? v.trim() : "");
+
+/**
+ * INSTALL_BOOKING_URL, checked: `{ mode: "external", template }` for a usable
+ * https link template, else `{ mode: "internal", template: null }` (the
+ * booking goes through /schedule), with an issue when a value was set but
+ * refused. Placeholders are only allowed after the host, so a filled value
+ * can never change where the link points.
+ */
+export function readBookingTemplate(raw) {
+  const value = clean(raw);
+  const internal = (issue) => ({ mode: "internal", template: null, issues: issue ? [issue] : [] });
+  if (!value) return internal(null);
+  const fallback = "Install booking uses /schedule until it is fixed.";
+  // scheme://host[:port], then a path, query, fragment or the end. No
+  // user:password@, no placeholder or brace in the host.
+  const head = /^https:\/\/([^/?#]*)(?:[/?#]|$)/i.exec(value);
+  if (!head || !isHttpsUrl(value.replace(/\{\w+\}/g, "x"))) {
+    return internal(`INSTALL_BOOKING_URL must be an https:// URL. ${fallback}`);
+  }
+  if (/[{}@\s]/.test(head[1]) || !head[1]) {
+    return internal(
+      `INSTALL_BOOKING_URL must have a plain host (no placeholders or user@ in it). ${fallback}`,
+    );
+  }
+  if (/\s/.test(value)) {
+    return internal(`INSTALL_BOOKING_URL must not contain spaces. ${fallback}`);
+  }
+  const unknown = [...value.matchAll(/\{([^{}]*)\}/g)]
+    .map((m) => m[1])
+    .filter((name) => !BOOKING_PLACEHOLDERS.includes(name));
+  if (unknown.length || /[{}]/.test(value.replace(/\{\w+\}/g, ""))) {
+    return internal(
+      `INSTALL_BOOKING_URL has an unknown placeholder${unknown.length ? ` (${unknown.map((n) => `{${n}}`).join(", ")})` : ""}; use only ${BOOKING_PLACEHOLDERS.map((n) => `{${n}}`).join(" ")}. ${fallback}`,
+    );
+  }
+  return { mode: "external", template: value, issues: [] };
+}
 
 function isHttpsUrl(value) {
   try {
@@ -309,6 +352,23 @@ export function getConfig(env = process.env) {
       atd.ok,
   };
 
+  // ---- Install booking after payment (docs/integrations/install-scheduling.md)
+  // INSTALL_BOOKING_URL: optional. Set (https, known placeholders only), the
+  // "Schedule your install" button on /track opens that link (Tire Guru's
+  // online booking, once the shop has one), filled from the verified order.
+  // Unset or refused, the button opens /schedule?order=<ref>. Only the mode
+  // ever reaches a browser through /api/status; the link itself is built on
+  // the server for an order /track has already matched by number and email.
+  // Deliberately NOT a TIREGURU_* name: those are the retired payment
+  // variables above, ignored and flagged.
+  const bookingRead = readBookingTemplate(env.INSTALL_BOOKING_URL);
+  issues.push(...bookingRead.issues);
+  const booking = {
+    mode: bookingRead.mode,
+    template: bookingRead.template,
+    issues: bookingRead.issues,
+  };
+
   const sha = clean(env.VERCEL_GIT_COMMIT_SHA);
   return {
     atd,
@@ -317,6 +377,7 @@ export function getConfig(env = process.env) {
     newsletter,
     forms,
     webhooks,
+    booking,
     checkout: paymentsReady ? "shopify" : "request",
     issues,
     version: sha ? `${API_VERSION}+${sha.slice(0, 7)}` : API_VERSION,

@@ -37,7 +37,9 @@ export const LEAD_METAFIELD = Object.freeze({
 
 /** The tag Flow listens for; removed by Flow once the email is sent. */
 export const ALERT_TAG = "new-lead";
-export const leadTags = (form) => [ALERT_TAG, "lead", `lead-${form}`];
+export const leadTags = (form, extra = []) => [
+  ...new Set([ALERT_TAG, "lead", `lead-${form}`, ...extra]),
+];
 
 /** The first words of each lead, naming the form it came from. */
 export const FORM_TITLES = Object.freeze({
@@ -240,11 +242,12 @@ export async function findOrCreateLeadCustomer({ name, email, phoneE164 }, cfg, 
 
 /**
  * Writes `text` to the customer (note on top, metafield) and fires the
- * alert tags: remove "new-lead", then add it back with "lead" and
- * "lead-<form>". The note and metafield are written first, so Flow always
- * reads the new lead when the tag lands.
+ * alert tags: remove "new-lead", then add it back with "lead",
+ * "lead-<form>" and any `extraTags` (a booking for a paid order adds
+ * "install-booking" and "order-<ref>"). The note and metafield are written
+ * first, so Flow always reads the new lead when the tag lands.
  */
-export async function saveLead(customer, form, text, cfg, deps = {}) {
+export async function saveLead(customer, form, text, cfg, deps = {}, extraTags = []) {
   await shopifyGraphQL(
     cfg,
     LEAD_NOTE_UPDATE,
@@ -258,7 +261,7 @@ export async function saveLead(customer, form, text, cfg, deps = {}) {
     deps,
   );
   await shopifyGraphQL(cfg, LEAD_TAGS_REMOVE, { id: customer.id, tags: [ALERT_TAG] }, deps);
-  await shopifyGraphQL(cfg, LEAD_TAGS_ADD, { id: customer.id, tags: leadTags(form) }, deps);
+  await shopifyGraphQL(cfg, LEAD_TAGS_ADD, { id: customer.id, tags: leadTags(form, extraTags) }, deps);
 }
 
 /**
@@ -270,6 +273,6 @@ export async function recordLead(lead, cfg, deps = {}) {
   const { now = () => new Date() } = deps;
   const text = formatLead(lead, now());
   const customer = await findOrCreateLeadCustomer(lead, cfg, deps);
-  await saveLead(customer, lead.form, text, cfg, deps);
+  await saveLead(customer, lead.form, text, cfg, deps, lead.tags ?? []);
   return { customerId: customer.id, created: customer.created };
 }

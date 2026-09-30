@@ -5,6 +5,11 @@
 import { parseSize } from "../../src/data/tireMath.js";
 import { BUSINESS } from "../../src/data/business.js";
 import { MOBILE_AREA_ERROR, isInServiceArea } from "../../src/data/serviceArea.js";
+import {
+  INSTALL_BOOKING_TAG,
+  bookingRefTag,
+  parseBookingRef,
+} from "../../src/data/booking.js";
 
 // ---- Tire sizes ------------------------------------------------------------
 
@@ -483,8 +488,9 @@ function usPhoneDigits(raw) {
  * Returns `{ ok: true, bot: true }` when the `website` honeypot is filled
  * (answered like a success, nothing stored), `{ ok: false, error }`, or
  * `{ ok: true, bot: false, value: { form, name, email, phone, phoneE164,
- * fields } }`, where `fields` is the form's own [label, value] pairs in
- * order, empty ones left out.
+ * fields, tags } }`, where `fields` is the form's own [label, value] pairs in
+ * order, empty ones left out, and `tags` the extra customer tags (a booking
+ * with `order`: "install-booking" and "order-<ref>"; otherwise none).
  *
  * A lead needs a way to reply: a valid email or a valid 10-digit US phone.
  * A phone that is not a US number is kept as text on the lead but not used
@@ -518,7 +524,21 @@ export function validateLead(body) {
     };
   }
 
+  // A booking made from a paid order (the /track "Schedule your install"
+  // button opens /schedule?order=<ref>) names that order: first in the lead,
+  // so Flow's email to info@ shows it at the top, and as two extra customer
+  // tags. Only a well-formed reference is accepted; it is an identifier,
+  // nothing is looked up or trusted from it.
   const fields = [];
+  const tags = [];
+  if (form === "booking" && cleanText(body.order)) {
+    const ref = parseBookingRef(cleanText(body.order));
+    if (!ref) {
+      return { ok: false, error: "That order number does not look right. Open the booking again from Track My Order, or call the shop." };
+    }
+    fields.push(["Paid order", `${ref} (install booking for a paid order: schedule it in Tire Guru)`]);
+    tags.push(INSTALL_BOOKING_TAG, bookingRefTag(ref));
+  }
   for (const [key, label, max, multiline] of spec) {
     const value = cleanText(body[key], { multiline });
     if (!value) continue;
@@ -541,6 +561,7 @@ export function validateLead(body) {
       phone: phone || null,
       phoneE164: digits ? `+1${digits}` : null,
       fields,
+      tags,
     },
   };
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import {
   AlertCircle,
   ArrowLeft,
@@ -38,7 +38,8 @@ import {
   useFormsWired,
 } from "../../data/forms.js";
 import { SERVICES, getService } from "../../data/services.js";
-import { recallVehicle } from "../../data/vehicles.js";
+import { recallVehicle, splitVehicle } from "../../data/vehicles.js";
+import { parseBookingRef } from "../../data/booking.js";
 import VehicleSelect, {
   vehicleErrors,
 } from "../../components/shop/VehicleSelect.jsx";
@@ -291,11 +292,16 @@ function SummaryRow({ term, children }) {
  * was sent, this recap is a script the visitor reads down the phone, and the
  * day and window are what the person on the other end needs first.
  */
-function BookingSummary({ form, callOrder = false }) {
+function BookingSummary({ form, orderRef = null, callOrder = false }) {
   const service = getService(form.service);
   const windowLabel = TIME_WINDOWS.find((w) => w.value === form.window)?.label;
 
   const rows = {
+    order: orderRef ? (
+      <SummaryRow key="order" term="Paid order">
+        {orderRef}
+      </SummaryRow>
+    ) : null,
     when: (
       <SummaryRow key="when" term="When">
         {formatLongDate(form.date)}
@@ -348,25 +354,70 @@ function BookingSummary({ form, callOrder = false }) {
   };
 
   const order = callOrder
-    ? ["when", "service", "vehicle", "where", "contact", "notes"]
-    : ["service", "vehicle", "where", "when", "contact", "notes"];
+    ? ["order", "when", "service", "vehicle", "where", "contact", "notes"]
+    : ["order", "service", "vehicle", "where", "when", "contact", "notes"];
 
   return <dl>{order.map((key) => rows[key])}</dl>;
+}
+
+/**
+ * What /track handed over for a booking from a paid order: router state set
+ * by its "Schedule your install" button, from an order the server matched by
+ * number AND email. Used only when it is for the same order as ?order=.
+ * Nothing personal is ever read from the query string: a bare
+ * /schedule?order=… link fills in the order and nothing else.
+ */
+function handedPrefill(state, orderRef) {
+  const p = state?.bookingPrefill;
+  if (!orderRef || !p || typeof p !== "object" || p.ref !== orderRef) return null;
+  const text = (v, max) => (typeof v === "string" ? v.trim().slice(0, max) : "");
+  return {
+    name: text(p.name, 100),
+    email: text(p.email, 254),
+    phone: text(p.phone, 30),
+    vehicle: splitVehicle(text(p.vehicle, 120)),
+    install: p.install === "mobile" ? "mobile" : "shop",
+  };
 }
 
 export default function SchedulePage() {
   const wired = useFormsWired();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
+
+  // /schedule?order=TD-260929-ABC234 (or ?order=1001): a booking for a paid
+  // order, from the /track "Schedule your install" button. Shown read-only
+  // and sent with the booking; a reference that does not parse is ignored.
+  const [orderRef] = useState(() => parseBookingRef(searchParams.get("order") ?? ""));
 
   const [form, setForm] = useState(() => {
     const requested = searchParams.get("service");
-    const preset = getService(requested);
-    return {
+    const handed = handedPrefill(location.state, orderRef);
+    // A paid order's booking is the install of the tires it bought.
+    const preset = getService(orderRef ? "tire-installation" : requested);
+    const base = {
       ...EMPTY_FORM,
       service: preset ? preset.slug : "",
       locationType: preset && !preset.mobile ? "shop" : "mobile",
     };
+    if (!orderRef) return base;
+    return {
+      ...base,
+      // Ship-to-store and pickup orders are installed at the shop.
+      locationType: handed?.install === "mobile" ? "mobile" : "shop",
+      ...(handed
+        ? {
+            year: handed.vehicle.year,
+            make: handed.vehicle.make,
+            model: handed.vehicle.model,
+            name: handed.name,
+            phone: handed.phone,
+            email: handed.email,
+          }
+        : {}),
+    };
   });
+  const prefilled = Boolean(handedPrefill(location.state, orderRef));
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -499,7 +550,7 @@ export default function SchedulePage() {
     const reference = makeReference();
     const outcome = await submitForm(
       "booking",
-      { ...current, reference },
+      { ...current, reference, ...(orderRef ? { order: orderRef } : {}) },
       event.currentTarget,
     );
     setSubmitting(false);
@@ -547,7 +598,7 @@ export default function SchedulePage() {
 
               <div className="mt-7">
                 <h3 className="h3 mb-2">What you booked</h3>
-                <BookingSummary form={form} />
+                <BookingSummary form={form} orderRef={orderRef} />
               </div>
 
               <div className="mt-7 border-t border-ink/10 pt-6">
@@ -658,7 +709,7 @@ export default function SchedulePage() {
                   loud. None of it is saved anywhere, so keep this screen open
                   until the call is done.
                 </p>
-                <BookingSummary form={form} callOrder />
+                <BookingSummary form={form} orderRef={orderRef} callOrder />
               </div>
 
               <div className="mt-7 border-t border-ink/10 pt-6">
@@ -731,6 +782,27 @@ export default function SchedulePage() {
             className="card mt-8 p-6 md:p-8"
           >
             <FormTrap id="booking-website" />
+            {orderRef && (
+              <div className="mb-6 rounded-sm border border-drop/30 bg-drop/5 p-4">
+                <label className="label" htmlFor="booking-order">
+                  Paid order
+                </label>
+                <input
+                  id="booking-order"
+                  type="text"
+                  readOnly
+                  value={orderRef}
+                  className="field min-h-[44px] bg-bone font-display"
+                  aria-describedby="booking-order-hint"
+                />
+                <p id="booking-order-hint" className="mt-1.5 text-xs text-smoke">
+                  This booking is for the install of that order.
+                  {prefilled
+                    ? " Your vehicle and contact details are filled in from it; check them as you go."
+                    : ""}
+                </p>
+              </div>
+            )}
             <p className="eyebrow mb-1">
               Step {step} of {LAST_STEP}
             </p>
@@ -1233,7 +1305,7 @@ export default function SchedulePage() {
                       : " nothing is booked until you call it through."}
                   </p>
                   <div className="mt-4">
-                    <BookingSummary form={form} />
+                    <BookingSummary form={form} orderRef={orderRef} />
                   </div>
                 </div>
               </>

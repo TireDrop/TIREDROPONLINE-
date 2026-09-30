@@ -228,3 +228,150 @@ test("track: helpers", () => {
   assert.equal(publicOrder({ ...ORDER, tags: ["atd-submitted", "atd-inbound-to-store"] }).supplier, "inbound-to-store");
   assert.equal(publicOrder({ ...ORDER, tags: [], customAttributes: [], shippingLine: { title: "Local pickup" } }).delivery, "pickup");
 });
+
+// ---- "Schedule your install" (api/_lib/booking.js) -----------------------------------
+
+const STORE_ORDER = Object.freeze({
+  ...ORDER,
+  id: "gid://shopify/Order/7001",
+  name: "#1002",
+  displayFulfillmentStatus: "UNFULFILLED",
+  tags: ["vercel-live", "ship-to-store"],
+  note: "TireDrop live order TD-260920-ABCDEF\nCustomer: Buyer Person, (954) 555-0100\nDelivery: Ship to store for install (Extreme Tires, Sunrise)\nCustomer notes: Vehicle: 2020 Toyota Camry LE",
+  customAttributes: [
+    { key: "Delivery", value: "Ship to store for install (Extreme Tires, Sunrise)" },
+    { key: "Order ref", value: "TD-260920-ABCDEF" },
+  ],
+  shippingLine: { title: "Pickup at Extreme Tires (Sunrise, FL)" },
+  fulfillments: [],
+});
+
+const CONTACT = Object.freeze({
+  phone: "+19545550199",
+  shippingAddress: null,
+  billingAddress: { name: "Billing Name", phone: "+19545550111" },
+  customer: { displayName: "Customer Display" },
+});
+
+/** The track mock plus the booking contact read. */
+function bookingShop({ orders = [STORE_ORDER], contact = CONTACT, contactFails = false } = {}) {
+  const base = mockShopify({ orders });
+  const fetchImpl = async (url, init) => {
+    const body = JSON.parse(init.body);
+    const op = body.query.match(/^query (\w+)/)[1];
+    if (op === "bookingContact") {
+      base.calls.push({ op, variables: body.variables });
+      if (contactFails) {
+        return Response.json({ errors: [{ message: "Access denied for phone field." }] });
+      }
+      return Response.json({ data: { order: body.variables.id === STORE_ORDER.id ? structuredClone(contact) : null } });
+    }
+    return base.fetchImpl(url, init);
+  };
+  return { calls: base.calls, fetchImpl };
+}
+
+const quiet = async (fn) => {
+  const saved = console.warn;
+  const savedErr = console.error;
+  const lines = [];
+  console.warn = (...a) => lines.push(a.join(" "));
+  console.error = (...a) => lines.push(a.join(" "));
+  try {
+    return { result: await fn(), lines };
+  } finally {
+    console.warn = saved;
+    console.error = savedErr;
+  }
+};
+
+test("track booking: a paid ship-to-store order gets /schedule?order= with its own contact and vehicle", async () => {
+  const shop = bookingShop();
+  const res = await post(handlerWith(shop), { order: "#1002", email: "buyer@example.com" });
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body.order.booking, {
+    mode: "internal",
+    ref: "TD-260920-ABCDEF",
+    path: "/schedule?order=TD-260920-ABCDEF",
+    install: "shop",
+    prefill: {
+      // Checkout's own note line wins for the name; the order's phone field wins for the phone.
+      name: "Buyer Person",
+      email: "buyer@example.com",
+      phone: "+19545550199",
+      vehicle: "2020 Toyota Camry LE",
+    },
+  });
+  assert.deepEqual(shop.calls.map((c) => c.op), ["trackOrder", "bookingContact"]);
+  assert.deepEqual(shop.calls[1].variables, { id: STORE_ORDER.id });
+  // The rest of the public order is unchanged.
+  assert.equal(res.body.order.delivery, "ship-to-store");
+  assert.equal(res.body.order.financialStatus, "paid");
+});
+
+test("track booking: a storefront order (no TD- ref, no checkout note) uses its number and the order's contact", async () => {
+  const theme = {
+    ...STORE_ORDER,
+    tags: [],
+    note: "",
+    customAttributes: [{ key: "Delivery", value: "Ship to store for install (Extreme Tires, Sunrise)" }],
+  };
+  const shop = bookingShop({ orders: [theme] });
+  const res = await post(handlerWith(shop), { order: "1002", email: "buyer@example.com" });
+  assert.deepEqual(res.body.order.booking, {
+    mode: "internal",
+    ref: "#1002",
+    path: "/schedule?order=1002",
+    install: "shop",
+    prefill: { name: "Billing Name", email: "buyer@example.com", phone: "+19545550199", vehicle: "" },
+  });
+});
+
+test("track booking: with INSTALL_BOOKING_URL the button is that link, filled and encoded on the server", async () => {
+  const shop = bookingShop();
+  const env = { ...ENV, INSTALL_BOOKING_URL: "https://book.example.com/td?ref={orderRef}&n={name}&e={email}&p={phone}&v={vehicle}" };
+  const res = await post(handlerWith(shop, env), { order: "#1002", email: "Buyer@Example.com" });
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body.order.booking, {
+    mode: "external",
+    url: "https://book.example.com/td?ref=TD-260920-ABCDEF&n=Buyer%20Person&e=buyer%40example.com&p=%2B19545550199&v=2020%20Toyota%20Camry%20LE",
+  });
+  assert.equal(Object.keys(res.body.order.booking).includes("prefill"), false);
+});
+
+test("track booking: a contact read Shopify refuses still gives a booking, from the checkout note", async () => {
+  const shop = bookingShop({ contactFails: true });
+  const { result: res, lines } = await quiet(() => post(handlerWith(shop), { order: "#1002", email: "buyer@example.com" }));
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body.order.booking.prefill, {
+    name: "Buyer Person",
+    email: "buyer@example.com",
+    phone: "(954) 555-0100",
+    vehicle: "2020 Toyota Camry LE",
+  });
+  assert.ok(lines.some((l) => l.includes("booking contact")), "logged");
+});
+
+test("track booking: none for unpaid, cancelled, fulfilled or shipped orders, none for requests, none on a miss", async () => {
+  for (const over of [
+    { displayFinancialStatus: "PENDING" },
+    { displayFinancialStatus: "REFUNDED" },
+    { cancelledAt: "2026-09-21T00:00:00Z" },
+    { displayFulfillmentStatus: "FULFILLED" },
+    { tags: ["vercel-live", "ship-to-home"], customAttributes: [{ key: "Delivery", value: "Ship to my address" }], shippingLine: { title: "Free Shipping" }, note: "" },
+  ]) {
+    const shop = bookingShop({ orders: [{ ...STORE_ORDER, ...over }] });
+    const res = await post(handlerWith(shop), { order: "#1002", email: "buyer@example.com" });
+    assert.equal(res.statusCode, 200, JSON.stringify(over));
+    assert.equal("booking" in res.body.order, false, JSON.stringify(over));
+    assert.deepEqual(shop.calls.map((c) => c.op), ["trackOrder"], "no contact read");
+  }
+  // Wrong email: the same not-found, and the contact is never read.
+  const shop = bookingShop();
+  const miss = await post(handlerWith(shop), { order: "#1002", email: "someone@else.com" });
+  assert.equal(miss.statusCode, 404);
+  assert.deepEqual(shop.calls.map((c) => c.op), ["trackOrder"]);
+  // An unpaid order request (TD- draft) keeps today's answer.
+  const req = await post(handlerWith(mockShopify()), { order: "TD-260929-HJK234", email: "buyer@example.com" });
+  assert.equal("booking" in req.body.request, false);
+});
