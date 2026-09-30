@@ -1,9 +1,11 @@
 import React, {
   createContext,
+  startTransition,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -40,12 +42,24 @@ export function CompareProvider({ children }) {
   // Comparison outlives a page load, the same way the cart does. Without this
   // a refresh — or opening /compare in a new tab — silently empties the table
   // the shopper just built.
+  //
+  // Loaded as a transition, like the cart (see CartContext.jsx): an urgent
+  // update while the route's Suspense boundary is still hydrating would make
+  // React re-render that boundary from scratch. Nothing is written back until
+  // the saved picks are applied, so the empty first render cannot erase them.
+  const pending = useRef(null);
   useEffect(() => {
     const saved = readStorage();
-    if (saved?.length) setSlugs(saved);
+    if (!saved?.length) return;
+    pending.current = saved;
+    startTransition(() => setSlugs(saved));
   }, []);
 
   useEffect(() => {
+    if (pending.current) {
+      if (slugs !== pending.current) return;
+      pending.current = null;
+    }
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(slugs));
     } catch {

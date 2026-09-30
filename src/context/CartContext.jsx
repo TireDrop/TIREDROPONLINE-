@@ -1,9 +1,11 @@
 import React, {
   createContext,
+  startTransition,
   useContext,
   useEffect,
   useMemo,
   useReducer,
+  useRef,
 } from "react";
 
 const CartContext = createContext(null);
@@ -70,13 +72,30 @@ function readStorage() {
 export function CartProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Hydrate once on mount so the server-free build still renders instantly.
+  // The saved cart, read on mount and not yet applied. Until it is, nothing
+  // is written back, so the empty first render cannot overwrite it.
+  const pending = useRef(null);
+
+  // Load the saved cart once on mount, so the prerendered page (which has no
+  // cart) hydrates first. The load is a transition: an urgent context update
+  // that lands while the route's Suspense boundary is still hydrating makes
+  // React throw that boundary's server HTML away and render it again on the
+  // client (React error 421), which wipes anything typed into the page's
+  // form meanwhile. As a transition, React finishes hydrating first. An
+  // empty saved cart, which every earlier visit leaves behind, changes
+  // nothing and is not applied at all.
   useEffect(() => {
     const saved = readStorage();
-    if (saved) dispatch({ type: "hydrate", state: saved });
+    if (!saved || !Array.isArray(saved.lines) || saved.lines.length === 0) return;
+    pending.current = saved;
+    startTransition(() => dispatch({ type: "hydrate", state: saved }));
   }, []);
 
   useEffect(() => {
+    if (pending.current) {
+      if (state !== pending.current) return;
+      pending.current = null;
+    }
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {

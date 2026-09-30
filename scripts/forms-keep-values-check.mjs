@@ -21,12 +21,21 @@
  * (scripts/vpic-mock.mjs). Also: start over clears, validation errors clear as
  * you type, the honeypot still reaches the server, no console errors.
  *
+ * /track (order lookup): the three modes with a late /api/status, a late
+ * (slow) /api/track answer, and the values still on screen after it. And
+ * before the app starts: the page's JavaScript is held back while the
+ * prerendered form is typed into, then released. The values must survive
+ * the start — a hydration on /track and /track?utm_source=…, a fresh render
+ * (which replaces the markup) on /track?ref=… — and be the ones submitted.
+ * /contact and /schedule get the same before-the-app check.
+ *
  * Every /api request is answered by a mock; nothing reaches Shopify.
  *
  *   npm run build && npm run check:forms
  *
  * It starts `vite preview` itself on FORMS_PORT (default 4181), or tests
- * FORMS_BASE when that is set to an already running server.
+ * FORMS_BASE when that is set to an already running server. FORMS_ONLY=<regex>
+ * runs only the checks whose name matches, e.g. FORMS_ONLY=/track.
  */
 import { chromium } from "playwright";
 import { spawn } from "node:child_process";
@@ -96,7 +105,10 @@ const browser = await chromium.launch({
 
 let failures = 0;
 let passes = 0;
+// FORMS_ONLY=<regex> runs just the checks whose name matches.
+const ONLY = process.env.FORMS_ONLY ? new RegExp(process.env.FORMS_ONLY) : null;
 async function check(name, fn) {
+  if (ONLY && !ONLY.test(name)) return;
   try {
     await fn();
     passes += 1;
@@ -115,7 +127,14 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
  */
 async function open(
   width,
-  { status = STATUS, delay = STATUS_DELAY_MS, cart = null, vpicDown = false } = {},
+  {
+    status = STATUS,
+    delay = STATUS_DELAY_MS,
+    cart = null,
+    vpicDown = false,
+    jsDelay = 0,
+    trackDelay = 0,
+  } = {},
 ) {
   const context = await browser.newContext({
     viewport: { width, height: width < 768 ? 844 : 900 },
@@ -140,7 +159,7 @@ async function open(
   });
   page.on("pageerror", (err) => errors.push(`pageerror: ${err.message}`));
 
-  const sent = { forms: [], checkout: [], newsletter: [] };
+  const sent = { forms: [], checkout: [], newsletter: [], track: [] };
   let servedAt = null;
   let markServed;
   const served = new Promise((r) => (markServed = r));
@@ -172,6 +191,25 @@ async function open(
     sent.newsletter.push(JSON.parse(route.request().postData() || "{}"));
     await route.fulfill({ json: { ok: true } });
   });
+  // Order lookup: always "not found", after `trackDelay`.
+  await page.route("**/api/track", async (route) => {
+    sent.track.push(JSON.parse(route.request().postData() || "{}"));
+    await sleep(trackDelay);
+    await route.fulfill({ status: 404, json: { error: "Order not found." } });
+  });
+  // Holds the app's JavaScript back, so the prerendered HTML can be typed
+  // into before React starts.
+  let releaseJs = () => {};
+  if (jsDelay) {
+    const gate = new Promise((r) => {
+      releaseJs = r;
+      setTimeout(r, jsDelay);
+    });
+    await page.route("**/assets/*.js", async (route) => {
+      await gate;
+      await route.continue();
+    });
+  }
   // Third-party hosts (Google Fonts, Google Analytics) are answered empty,
   // so a slow or blocked host cannot stall a load or log an error; the
   // checks are about fields. vPIC is mocked below.
@@ -188,6 +226,7 @@ async function open(
     page,
     sent,
     errors,
+    releaseJs: () => releaseJs(),
     /** Resolves once the delayed status has been served and rendered. */
     async afterStatus() {
       await served;
@@ -273,6 +312,41 @@ async function waitFor(fn, label, timeout = 5000) {
 
 function noErrors(errors) {
   assert.deepEqual(errors, [], "console errors");
+}
+
+/** The 404 the /track mock answers with is logged by the browser; that one is expected. */
+const trackErrors = (errors) =>
+  errors.filter((e) => !/status of 404/.test(e));
+
+/** Resolves once React owns `sel` (hydrated or freshly rendered). */
+async function appStarted(page, sel) {
+  await page.waitForFunction(
+    (sel) => {
+      const el = document.querySelector(sel);
+      return !!el && Object.keys(el).some((k) => k.startsWith("__reactFiber"));
+    },
+    sel,
+    { timeout: 15000 },
+  );
+  await sleep(300);
+}
+
+/** Types into the prerendered form while the app's JavaScript is held back. */
+async function typeBeforeApp(page, fields) {
+  for (const [sel, value] of fields) {
+    const el = page.locator(sel);
+    if (typeof value === "boolean") await el.setChecked(value);
+    else {
+      await el.click();
+      await page.keyboard.type(value, { delay: 10 });
+    }
+  }
+  const started = await page.evaluate(() =>
+    Object.keys(document.getElementById("root").firstElementChild ?? {}).some((k) =>
+      k.startsWith("__reactFiber"),
+    ),
+  );
+  assert.equal(started, false, "the app must not have started while typing");
 }
 
 /**
@@ -700,6 +774,112 @@ for (const width of [390, 1440]) {
       await h.context.close();
     });
   }
+
+  /* ---------------- Track Order ---------------- */
+  const TRACK_FIELDS = [
+    ["#track-order", "#1001"],
+    ["#track-email", "driver@example.com"],
+  ];
+  for (const mode of MODES) {
+    await check(`${width} /track: ${mode} values survive late status and a slow lookup, and are sent`, async () => {
+      const h = await open(width, { trackDelay: 1200 });
+      const { page } = h;
+      await page.goto(`${BASE}/track`);
+      await page.waitForSelector("#track-order");
+      const setAt = await fill(page, mode, TRACK_FIELDS);
+      const servedAt = await h.afterStatus();
+      if (mode !== "typing") assert.ok(setAt < servedAt, "values must go in before /api/status answers");
+      await expectDom(page, TRACK_FIELDS, `(${mode}, after status)`);
+      await page.getByRole("button", { name: "Track Order" }).click();
+      await waitFor(() => h.sent.track.length === 1, "/api/track");
+      assert.deepEqual(h.sent.track[0], {
+        order: "#1001",
+        email: "driver@example.com",
+        website: "",
+      });
+      // While the lookup is out, and after the answer lands.
+      await expectDom(page, TRACK_FIELDS, `(${mode}, lookup in flight)`);
+      await page.getByText("We couldn't find that order").waitFor();
+      await sleep(300);
+      await expectDom(page, TRACK_FIELDS, `(${mode}, after the answer)`);
+      // A second lookup sends the same values again.
+      await page.getByRole("button", { name: "Track Order" }).click();
+      await waitFor(() => h.sent.track.length === 2, "second /api/track");
+      assert.deepEqual(h.sent.track[1], h.sent.track[0]);
+      noErrors(trackErrors(h.errors));
+      await h.context.close();
+    });
+  }
+
+  for (const [path, how] of [
+    ["/track", "hydrates"],
+    ["/track?utm_source=email&utm_medium=order", "hydrates"],
+    ["/track?ref=confirmation", "renders fresh"],
+  ]) {
+    await check(`${width} ${path}: typed before the app starts (${how}); kept and sent`, async () => {
+      const h = await open(width, { jsDelay: 8000, delay: 2500 });
+      const { page } = h;
+      await page.goto(`${BASE}${path}`, { waitUntil: "commit" });
+      await page.waitForSelector("#track-order");
+      // The first field typed is the one still focused when the app starts.
+      await typeBeforeApp(page, [...TRACK_FIELDS].reverse());
+      h.releaseJs();
+      await appStarted(page, "#track-order");
+      await expectDom(page, TRACK_FIELDS, "(after the app started)");
+      const focused = await page.evaluate(() => document.activeElement?.id);
+      assert.equal(focused, "track-order", "focus stays in the field");
+      await h.afterStatus();
+      await expectDom(page, TRACK_FIELDS, "(after status)");
+      await page.getByRole("button", { name: "Track Order" }).click();
+      await waitFor(() => h.sent.track.length === 1, "/api/track");
+      assert.deepEqual(h.sent.track[0], {
+        order: "#1001",
+        email: "driver@example.com",
+        website: "",
+      });
+      await page.getByText("We couldn't find that order").waitFor();
+      await expectDom(page, TRACK_FIELDS, "(after the answer)");
+      noErrors(trackErrors(h.errors));
+      await h.context.close();
+    });
+  }
+
+  await check(`${width} /contact, /schedule: typed before the app starts survives hydration`, async () => {
+    for (const [path, fields, ready] of [
+      [
+        "/contact",
+        [
+          ["#contact-name", "Early Bird"],
+          ["#contact-email", "early@example.com"],
+          ["#subject-orderquestion", true],
+          ["#contact-message", "Typed before the page finished loading."],
+        ],
+        "#contact-name",
+      ],
+      ["/schedule", [["#service-tire-rotation", true]], "#service-tire-rotation"],
+      // A page query renders fresh: the markup is replaced, the values carried over.
+      [
+        "/contact?from=footer",
+        [
+          ["#contact-name", "Fresh Render"],
+          ["#contact-message", "Still here after the swap."],
+        ],
+        "#contact-name",
+      ],
+    ]) {
+      const h = await open(width, { jsDelay: 8000, delay: 2000 });
+      const { page } = h;
+      await page.goto(`${BASE}${path}`, { waitUntil: "commit" });
+      await page.waitForSelector(ready);
+      await typeBeforeApp(page, fields);
+      h.releaseJs();
+      await appStarted(page, ready);
+      await h.afterStatus();
+      await expectDom(page, fields, `(${path}, after the app started)`);
+      noErrors(h.errors);
+      await h.context.close();
+    }
+  });
 
   /* ---------------- Newsletter sign-up (footer) ---------------- */
   for (const mode of MODES) {

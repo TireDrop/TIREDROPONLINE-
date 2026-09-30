@@ -228,16 +228,30 @@ const routes = [
       JSON.stringify(["michelin-agilis-crossclimate-245-75r17"]),
     );
   });
-  await page.goto(BASE + "/tires", { waitUntil: "load" });
-  await page.waitForFunction(isMounted);
-  await page.waitForLoadState("networkidle");
-  const state = await page.evaluate(() => ({
-    kept: window.__servedH1 === document.querySelector("h1"),
-    cart: document.querySelector('a[aria-label^="Cart,"]')?.getAttribute("aria-label"),
-  }));
-  (state.kept && errors.length === 0 ? ok : bad)(
-    `hydrated /tires with a saved cart (${state.cart}) ${errors.join(" | ")}`,
-  );
+  // Each route three times: whether the saved cart lands before or after the
+  // route's Suspense boundary hydrates is a race, and an urgent update in
+  // that window used to replace the page (React error 421, see
+  // CartContext.jsx). The cart and compare list load as transitions now.
+  for (const route of ["/tires", "/track", "/contact", "/learn/sidewall/dot-date-code"]) {
+    for (let run = 1; run <= 3; run += 1) {
+      errors.length = 0;
+      await page.goto(BASE + route, { waitUntil: "load" });
+      await page.waitForFunction(isMounted);
+      await page.waitForLoadState("networkidle");
+      const state = await page.evaluate(() => ({
+        kept: window.__servedH1 === document.querySelector("h1"),
+        cart: document
+          .querySelector('a[aria-label^="Cart,"]')
+          ?.getAttribute("aria-label"),
+        compare: JSON.parse(localStorage.getItem("tiredrop.compare.v1") || "[]").length,
+      }));
+      (state.kept && state.cart === "Cart, 4 items" && state.compare === 1 && errors.length === 0
+        ? ok
+        : bad)(
+        `hydrated ${route} with a saved cart (${state.cart}, compare ${state.compare}), run ${run} ${errors.join(" | ")}`,
+      );
+    }
+  }
   await context.close();
 }
 
