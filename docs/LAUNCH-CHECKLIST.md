@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-09-30 (EDIT HERE published; Blog + Learn pilot on preview; Batch 1 writing)_
+_Last updated: 2026-09-30 (newsletter pop-up replaced by a footer sign-up; EDIT HERE published; Blog + Learn pilot on preview; Batch 1 writing)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -18,6 +18,7 @@ _Last updated: 2026-09-30 (EDIT HERE published; Blog + Learn pilot on preview; B
 - [x] ~~Instant order alerts: Shopify → Vercel webhooks~~ (`0fa9a6e`)
 - [x] ~~Track My Order page `/track`~~ (`3f07766`, `ccdf679`)
 - [x] ~~Track Order / Account links in header, menu and footer~~ (`74d5811`, `b4f456b`)
+- [x] ~~Newsletter: pop-up removed; calm "TireDrop emails" sign-up in the footer; privacy policy updated~~ (2026-09-30)
 
 ## Admin (Justin)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
@@ -28,6 +29,7 @@ _Last updated: 2026-09-30 (EDIT HERE published; Blog + Learn pilot on preview; B
 - [x] ~~Sender email info@tiredroponline.com authenticated~~
 - [x] ~~Shopify app + Vercel keys + "Website lead alert" Flow~~
 - [x] ~~Newsletter pop-up test passed~~
+- [ ] Footer sign-up test: sign up once with a test address; the Shopify customer is tagged `newsletter`, `footer`, `vercel` (was `popup`; update any Shopify segment that filters on `popup`)
 - [ ] Go-live tests, Parts E–H: contact form, order-request draft, email/SPF check, $1 order #D1
 - [ ] Google: retry "Request indexing" (robots.txt delay)
 - [ ] 2-step login for all Shopify staff (Melissa keeps full access)
@@ -53,7 +55,7 @@ _Last updated: 2026-09-30 (EDIT HERE published; Blog + Learn pilot on preview; B
 
 ## Quick wins (Claude)
 - [ ] Phone bottom bar changes by page
-- [ ] Pop-up off shop pages
+- [x] ~~Pop-up off shop pages~~ (2026-09-30: superseded, the pop-up is gone)
 - [ ] Google search-result data: breadcrumbs, FAQ, map coordinates
 - [ ] Accessibility fixes + skip link
 - [ ] Security headers: CSP, HSTS, Permissions-Policy

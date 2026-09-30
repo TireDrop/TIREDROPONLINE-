@@ -13,7 +13,7 @@
  *              autofill does.
  *
  * Covers /contact, /financing, /commercial-tires, /schedule, /checkout
- * (request mode, ship-to-store pickup), the newsletter pop-up, and the Find
+ * (request mode, ship-to-store pickup), the footer newsletter sign-up, and the Find
  * My Tires size prefill. Also: start over clears, validation errors clear as
  * you type, the honeypot still reaches the server, no console errors.
  *
@@ -665,36 +665,36 @@ for (const width of [390, 1440]) {
     });
   }
 
-  /* ---------------- Newsletter pop-up ---------------- */
+  /* ---------------- Newsletter sign-up (footer) ---------------- */
   for (const mode of MODES) {
-    await check(`${width} newsletter pop-up: ${mode} email is kept and sent`, async () => {
-      const h = await open(width, { status: { ...STATUS, newsletter: "on" }, delay: 0 });
+    await check(`${width} footer newsletter sign-up: ${mode} email is kept and sent`, async () => {
+      // Status answers late, so the form mounts (and re-renders) after load.
+      const h = await open(width, { status: { ...STATUS, newsletter: "on" } });
       const { page } = h;
       await page.goto(`${BASE}/`);
-      await page.waitForLoadState("networkidle");
-      const dialog = page.locator("dialog.td-nl");
-      await dialog.waitFor({ state: "attached" });
-      await page.evaluate(() => {
-        const el = document.scrollingElement;
-        el.scrollTo(0, (el.scrollHeight - el.clientHeight) * 0.6);
-      });
-      await dialog.waitFor({ state: "visible", timeout: 3000 });
+      const form = page.locator('footer [data-testid="newsletter-signup"]');
+      await form.waitFor({ state: "attached", timeout: 5000 });
+      await form.scrollIntoViewIfNeeded();
+      const email = form.locator('input[name="email"]');
+      // The field's id comes from useId, so it is found by name instead.
+      const sel = 'footer [data-testid="newsletter-signup"] input[name="email"]';
+      const button = form.getByRole("button", { name: "Sign up" });
       // A render first: a bad address typed for real shows an error.
-      await page.locator("#td-nl-email").fill("bad");
-      await page.getByRole("button", { name: "Sign me up" }).click();
-      await page.getByText("Enter a valid email address.").waitFor();
-      const fields = [["#td-nl-email", "driver@example.com"]];
-      if (mode === "typing") await page.locator("#td-nl-email").fill("driver@example.com");
+      await email.fill("bad");
+      await button.click();
+      await form.getByText("Enter a valid email address.").waitFor();
+      const fields = [[sel, "driver@example.com"]];
+      if (mode === "typing") await email.fill("driver@example.com");
       else await fill(page, mode, fields);
       await expectDom(page, fields, `(${mode})`);
-      await page.getByRole("button", { name: "Sign me up" }).click();
+      await button.click();
       await waitFor(() => h.sent.newsletter.length === 1, "/api/newsletter");
       assert.deepEqual(h.sent.newsletter[0], {
         email: "driver@example.com",
-        source: "popup",
+        source: "footer",
         website: "",
       });
-      await page.getByText("You're on the list. Watch your inbox.").waitFor();
+      await form.getByText("You're on the list. Watch your inbox.").waitFor();
       noErrors(h.errors);
       await h.context.close();
     });

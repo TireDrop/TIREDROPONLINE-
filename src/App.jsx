@@ -4,7 +4,6 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import Header from "./components/layout/Header.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import MobileCallBar from "./components/layout/MobileCallBar.jsx";
-import NewsletterGate from "./components/layout/NewsletterGate.jsx";
 import CompareTray from "./components/shop/CompareTray.jsx";
 import { InPageAnchors, ScrollToTop } from "./components/ui/index.jsx";
 import { trackPageView } from "./lib/analytics.js";
@@ -176,8 +175,6 @@ export default function App() {
       />
       <CompareTray />
       <MobileCallBar />
-      {/* Newsletter sign-up, only when /api/status says it can be delivered. */}
-      <NewsletterGate />
     </div>
   );
 }

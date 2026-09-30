@@ -23,12 +23,14 @@
 //      advertising or social tracking pixels.
 //      Email addresses are captured in two places, both stored in Shopify
 //      (sections 1, 2, 4, 5 and 6 say so):
-//        - the newsletter pop-up (components/layout/NewsletterPopup.jsx →
-//          api/newsletter.js → api/_lib/newsletter.js), shown only when
-//          /api/status says newsletter "on": the email becomes a Shopify
+//        - the newsletter sign-up form in the site footer
+//          (components/layout/NewsletterSignup.jsx → api/newsletter.js →
+//          api/_lib/newsletter.js), an ordinary inline form that renders only
+//          when /api/status says newsletter "on": the email becomes a Shopify
 //          customer with email marketing consent SUBSCRIBED (single opt-in),
-//          tagged newsletter, popup and vercel. No discount or offer exists,
-//          so the policy promises none;
+//          tagged newsletter, footer and vercel. There is no pop-up (removed
+//          2026-09-30). No discount or offer exists, so the policy promises
+//          none;
 //        - the contact, financing, fleet quote and booking forms and checkout
 //          order requests (api/forms.js, api/checkout.js → api/_lib/leads.js,
 //          api/_lib/orders.js): a Shopify customer (found by email or phone,
@@ -39,9 +41,9 @@
 //      The only server code is the site's own API (`api/`), which asks ATD
 //      for tire data, creates paid orders in the shop's Shopify store and
 //      records the sign-ups and form messages above. The only browser storage
-//      is localStorage for the cart, the comparison tray and the pop-up's
-//      closed/signed-up state (key "td-nl-popup", no email in it). Section 3
-//      says exactly that. Card payments are taken on Shopify's hosted
+//      is localStorage for the cart and the comparison tray. The sign-up form
+//      stores nothing; it deletes the old pop-up's "td-nl-popup" entry if a
+//      browser still has one. Section 3 says exactly that. Card payments are taken on Shopify's hosted
 //      checkout page, so the policy names that without claiming the site
 //      takes no payment. If the analytics setup changes, or an email
 //      platform or any other third-party script is added, sections 3, 4 and
@@ -62,7 +64,7 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
-const LAST_UPDATED = "September 29, 2026";
+const LAST_UPDATED = "September 30, 2026";
 
 // The four questions a customer — or anyone reviewing this site — comes to the
 // terms looking for. They are sections of this document rather than separate
@@ -259,11 +261,11 @@ const DOCS = {
           "Order history: what you bought, what it cost, what we quoted and what we did",
           "What you type into the site's forms: the contact form, the financing form, the fleet quote form, the install booking form, and an order request sent from checkout",
           `Messages you send to ${BUSINESS.email} or leave on the phone`,
-          "Your email address, if you sign up for TireDrop emails in the sign-up box that pops up on the site. It asks for nothing else.",
+          "Your email address, if you sign up for TireDrop emails using the sign-up form in the site footer. It asks for nothing else.",
         ],
         after: [
           "We do not store card numbers. Card payments are taken on Shopify's checkout page: Shopify receives the card details directly and handles them under its own security obligations, and we see only that a payment went through.",
-          "We do not ask for information we have no use for. You do not need an account to browse the site, and signing up for emails is optional — closing the sign-up box changes nothing else about the site.",
+          "We do not ask for information we have no use for. You do not need an account to browse the site, and signing up for emails is optional — leaving the sign-up form in the site footer empty changes nothing else about the site.",
         ],
       },
       {
@@ -271,7 +273,7 @@ const DOCS = {
         heading: "2. How we use it",
         paragraphs: [
           "To answer your question, price an order, place it with the distributor, get it shipped to the right address, take payment, book an install, and handle any return, claim or warranty question afterward. We also look at aggregate website statistics — which pages get visited, roughly where visitors come from, what device they use — to understand what is working and fix what is not.",
-          "If you sign up in the email box, we use that address to send you TireDrop emails: the tire tips, fitment help and news about new sizes and brands the sign-up box describes. We do not use it for anything else. Sending a form or an order request does not sign you up for these emails; only the sign-up box does.",
+          "If you sign up using the sign-up form in the site footer, we use that address to send you TireDrop emails: the tire tips, fitment help and news about new sizes and brands the form describes. We do not use it for anything else. Sending a form or an order request does not sign you up for these emails; only the sign-up form in the site footer does.",
           "If you ask us to, we may send occasional service reminders — a rotation coming due, for example. You can tell us to stop at any time and we will.",
           "That is the whole list. We do not profile you, score you, or build an audience out of you.",
         ],
@@ -282,15 +284,15 @@ const DOCS = {
         paragraphs: [
           "This website uses Google Analytics to measure how the site is used — pages viewed, how visitors arrived, general location at the city or region level, device and browser type. Google Analytics sets its own first-party cookies (named _ga and _ga_ followed by an ID) to tell one visit from the next. We have switched off Google signals and ad personalization, so this measurement is not used to build advertising profiles or to show you ads. We see the results only as aggregate reports, not as a record of what any named person did.",
           "The site loads no advertising or social tracking pixels. You are welcome to check both statements in your browser's developer tools.",
-          "Separately, the site uses local storage in your own browser for three things:",
+          "Separately, the site uses local storage in your own browser for two things:",
         ],
         list: [
           "Your cart — so the tires you picked are still there if you close the tab and come back",
           "The comparison tray — which products you lined up side by side",
-          "The email sign-up box — whether you closed it or signed up, and when, saved under the name td-nl-popup. After a close it stays away for 14 days; after a sign-up it does not come back. Your email address is not saved there.",
         ],
         after: [
-          "All three stay on your device. They are not sent to us, they contain no name, email address, street address or payment detail, and nobody else can read them. Clearing your browsing data deletes them; you lose your cart, and the sign-up box may appear again.",
+          "Both stay on your device. They are not sent to us, they contain no name, email address, street address or payment detail, and nobody else can read them. Clearing your browsing data deletes them, and you lose your cart.",
+          "The email sign-up form in the site footer saves nothing in your browser. An earlier version of the site had a sign-up pop-up that remembered whether you had closed it, under the name td-nl-popup. The pop-up is gone, and the site now deletes that entry if your browser still has it.",
           "You can block or delete the Google Analytics cookies in your browser settings, or install Google's opt-out add-on at tools.google.com/dlpage/gaoptout; the site works the same either way. If we add any other third-party script, this section gets rewritten before that ships, not after.",
         ],
       },
@@ -300,7 +302,7 @@ const DOCS = {
         paragraphs: ["A short list, and only where there is a reason:"],
         list: [
           "Shopify, the platform the shop's orders and online payments run through, which receives your order, contact details and address so the shop can process it, and processes card payments on its checkout page — it receives the card details, not us",
-          "Shopify also stores what you send us through the site. An email sign-up is saved as a customer record in the shop's Shopify account, marked as agreeing to marketing email. A form message or an order request is saved on your customer record there — found by your email or phone number, or created with your name, email and phone — and Shopify emails a copy to our own inbox so someone can reply. An order request is also saved as a draft order, which is not charged until we confirm it with you",
+          "Shopify also stores what you send us through the site. An email sign-up from the sign-up form in the site footer is saved as a customer record in the shop's Shopify account, marked as agreeing to marketing email. A form message or an order request is saved on your customer record there — found by your email or phone number, or created with your name, email and phone — and Shopify emails a copy to our own inbox so someone can reply. An order request is also saved as a draft order, which is not charged until we confirm it with you",
           "ATD (American Tire Distributors), our distributor, which receives the shipping address and order details because it packs and dispatches your tires",
           "Shipping carriers, for delivery and tracking",
           "Financing providers, if you choose to apply; your application goes to them under their own privacy policy, not ours",
@@ -333,7 +335,7 @@ const DOCS = {
           "Ask us to delete it. Call and request deletion. We will remove what we are not required to keep for warranty, accounting or legal reasons — including an email sign-up and any form messages on your Shopify customer record — and we will tell you plainly what we had to retain and why.",
           `Unsubscribe from TireDrop emails. Use the unsubscribe link in any of those emails, or email ${BUSINESS.email} and ask, and we will unsubscribe you.`,
           "Opt out of reminders. Say the word on the phone, or reply to any message asking to stop, and we will take you off the reminder list.",
-          "Clear what the site stored on your device. Your cart, comparison tray and the email sign-up box's closed or signed-up setting live in your own browser. Clearing your browsing data removes them. It does not remove anything you sent us — for that, ask us to delete it.",
+          "Clear what the site stored on your device. Your cart and comparison tray live in your own browser; the sign-up form in the site footer stores nothing there. Clearing your browsing data removes them. It does not remove anything you sent us — for that, ask us to delete it.",
           "Opt out of analytics. Block or clear the Google Analytics cookies in your browser, or use Google's opt-out add-on (tools.google.com/dlpage/gaoptout). We do not sell personal information or share it for cross-context behavioral advertising.",
         ],
         after: [

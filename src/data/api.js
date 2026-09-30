@@ -149,7 +149,7 @@ export function getStatus() {
         atd: s.atd === "live" ? "live" : "sample",
         shopify: s.shopify === "live" ? "live" : "off",
         checkout: s.checkout === "shopify" ? "shopify" : "request",
-        // Only an explicit "on" lets the sign-up pop-up collect an email.
+        // Only an explicit "on" lets the footer sign-up form collect an email.
         newsletter: s.newsletter === "on" ? "on" : "off",
         // Only an explicit "on" lets a form say its message was delivered.
         forms: s.forms === "on" ? "on" : "off",
@@ -504,7 +504,7 @@ export async function submitCheckout(order) {
  * not configured) throws a plain Error for the caller's generic message.
  * `website` is the honeypot's value, normally empty.
  */
-export async function subscribeNewsletter({ email, source = "popup", website = "" }) {
+export async function subscribeNewsletter({ email, source = "footer", website = "" }) {
   const data = await request("/newsletter", {
     method: "POST",
     body: { email, source, website },
