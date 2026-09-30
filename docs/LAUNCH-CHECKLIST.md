@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-09-30 (Tire Guru called, awaiting answer; Cannavibe repo being deleted, backup sent; repo organized; Blog + Learn live)_
+_Last updated: 2026-09-30 (install booking tags the order install-booked; prompt 22 done; Tire Guru called, awaiting answer; Cannavibe repo being deleted, backup sent; repo organized; Blog + Learn live)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -22,6 +22,7 @@ _Last updated: 2026-09-30 (Tire Guru called, awaiting answer; Cannavibe repo bei
 - [x] ~~Year/Make/Model dropdowns in checkout + /schedule forms~~ (e6109d4, 2026-09-30)
 - [x] ~~/track: typed order number + email no longer cleared when the app starts over a prerendered page~~ (2026-09-30)
 - [x] ~~Post-payment install scheduling handoff~~ (f705e25, 2026-09-30)
+- [x] ~~Install booking tags the order install-booked~~ (f774c41)
 - [x] ~~Mobile/install area: Miami-Dade, Broward, Palm Beach~~ (f8a053c)
 - [ ] Exclude non-Palm-Beach 334 ZIPs (33440, 33455, 33471, 33475) + server-side ZIP check for bookings
 - [x] ~~Arrival wording: "We confirm an arrival window when we book"~~ (be6a2a2)
@@ -49,7 +50,10 @@ _Last updated: 2026-09-30 (Tire Guru called, awaiting answer; Cannavibe repo bei
 
 ## Next phase (Chrome prompt after the builds land)
 - [x] ~~Webhooks: 2 in Shopify, signing key into Vercel, redeploy, test (prompt 21)~~ (2026-09-30: 2 webhooks configured, test notifications 200)
-- [ ] Justin: run prompt 22 ("Schedule your install" email button + "High-risk order review" and "Needs scheduling alert" Flows; you click every Save)
+- [x] ~~Prompt 22: email button + High-risk order review (tag, hold, email) + Needs scheduling alert (order paid → 24h → not install-booked)~~ (Justin, 2026-09-30)
+- [ ] Re-run prompt 15 (local vs ship block was never saved; paste it right above the new install button)
+- [ ] $1 install test: book it → tags flip + no [SCHEDULE] after 24h; a second unbooked order → [SCHEDULE] arrives after 24h (this proves Flow re-reads tags after the wait)
+- [ ] Confirm info@tiredroponline.com receives Shopify mail (test emails go to the logged-in staff account)
 - [ ] Justin: INSTALL_BOOKING_URL after the Tire Guru call (booking link → set it in Vercel and redeploy; API → tell Claude, it's a follow-up build; see docs/integrations/install-scheduling.md)
 - [ ] `/track` tested with the $1 order
 - [ ] Header links checked on desktop and phone
