@@ -19,6 +19,8 @@ _Last updated: 2026-09-30 (newsletter pop-up replaced by a footer sign-up; EDIT 
 - [x] ~~Track My Order page `/track`~~ (`3f07766`, `ccdf679`)
 - [x] ~~Track Order / Account links in header, menu and footer~~ (`74d5811`, `b4f456b`)
 - [x] ~~Newsletter: pop-up removed; calm "TireDrop emails" sign-up in the footer; privacy policy updated~~ (2026-09-30)
+- [x] ~~Year/Make/Model dropdowns in checkout + /schedule forms~~ (e6109d4, 2026-09-30)
+- [x] ~~/track: typed order number + email no longer cleared when the app starts over a prerendered page~~ (2026-09-30)
 
 ## Admin (Justin)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
