@@ -83,6 +83,8 @@ That's why a gauge reading taken after a drive, or in the afternoon sun, can loo
 
 And one rule for hot days: **don't let air out of warm tires.** NHTSA's guidance is that pressure rises as tires heat up, so bleeding them down to the placard number leaves them low once they cool. Recheck when they're cold instead.
 
+[[demo:pressure-temp]]
+
 The numbers behind all of this, including what a cool front does to a tire set on a hot afternoon, are in our guide to [tire pressure and temperature](/learn/pressure/tire-pressure-temperature).
 
 ## Load: the number on your door

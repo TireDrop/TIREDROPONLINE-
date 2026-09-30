@@ -131,6 +131,8 @@ The two characters after the size are easy to skip and important not to.
 
 A speed rating is a lab rating under set conditions, not a target for the Sawgrass Expressway. It matters when you buy: USTMA's guidance is to match the speed rating the vehicle maker recommends.
 
+[[demo:load-speed-check]]
+
 ## Flotation sizes: 31x10.50R15 and friends
 
 Trucks and off-road builds sometimes use **flotation** sizes, which look nothing like metric ones. According to Discount Tire, a flotation size reads in inches from left to right:

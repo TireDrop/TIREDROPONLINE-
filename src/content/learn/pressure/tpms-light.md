@@ -104,6 +104,8 @@ NHTSA's explanation is simple: **as the outside temperature drops, so does tire 
 
 The light going out doesn't mean the problem went away. The tire was low enough to trigger a warning, so set all four to the placard pressure, cold, before the afternoon heat hides it again. Our guide to [tire pressure and temperature](/learn/pressure/tire-pressure-temperature) shows how much a front can move the reading.
 
+[[demo:pressure-temp]]
+
 ## Came on after new tires or a rotation?
 
 A light that shows up right after tire work can point to the sensors rather than the air. Depending on the vehicle, sensors may need to be reset or relearned after they move positions or are replaced. Your owner's manual lists the procedure for your car.
