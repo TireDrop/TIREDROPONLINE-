@@ -266,3 +266,45 @@ export function useVehicleModels(make, year) {
   if (state.key !== key) return { models: [], loading: true, source: "none" };
   return { models: state.models, loading: false, source: state.source };
 }
+
+/* ------------------------------------------------------------------ *
+ * The last vehicle picked in a finder, so a form can start from it
+ * ------------------------------------------------------------------ */
+
+const LAST_VEHICLE_KEY = "tiredrop.vehicle.v1";
+
+/**
+ * Remembers the vehicle picked in the hero finder or Find My Tires, so the
+ * checkout and booking forms can offer it back. "Other / not listed" is not
+ * a model, so it is kept as a blank. Storage can be off or full; then the
+ * forms simply start empty.
+ */
+export function rememberVehicle({ year = "", make = "", model = "" } = {}) {
+  if (!year || !make) return;
+  try {
+    window.localStorage.setItem(
+      LAST_VEHICLE_KEY,
+      JSON.stringify({
+        year: String(year),
+        make: String(make),
+        model: model === OTHER ? "" : String(model || ""),
+      }),
+    );
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+/** `{ year, make, model }` last remembered, or null. Call it in an effect. */
+export function recallVehicle() {
+  try {
+    const raw = window.localStorage.getItem(LAST_VEHICLE_KEY);
+    if (!raw) return null;
+    const v = JSON.parse(raw);
+    const text = (x) => (typeof x === "string" ? x.trim().slice(0, 60) : "");
+    const out = { year: text(v?.year), make: text(v?.make), model: text(v?.model) };
+    return out.year && out.make ? out : null;
+  } catch {
+    return null;
+  }
+}

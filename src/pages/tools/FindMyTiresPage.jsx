@@ -31,6 +31,7 @@ import {
   OTHER_LABEL,
   YEARS,
   makesFor,
+  rememberVehicle,
   useVehicleModels,
 } from "../../data/vehicles.js";
 import { useTireSearch } from "../../data/useApi.js";
@@ -1293,6 +1294,8 @@ export default function FindMyTiresPage() {
         );
         return;
       }
+      // So checkout and the booking form can start from this vehicle.
+      if (mode === "vehicle") rememberVehicle({ year, make, model });
       patch(
         {
           mode,

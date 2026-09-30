@@ -35,6 +35,12 @@ import { getService } from "../../data/services.js";
 import { ApiError, submitCheckout } from "../../data/api.js";
 import { useApiStatus } from "../../data/useApi.js";
 import { hasChanges, readFormValues } from "../../data/forms.js";
+import { recallVehicle } from "../../data/vehicles.js";
+import VehicleSelect, {
+  MAX_VEHICLE_YEAR,
+  MIN_VEHICLE_YEAR,
+  vehicleErrors,
+} from "../../components/shop/VehicleSelect.jsx";
 import { TAX_NOTE, summarize } from "./CartPage.jsx";
 
 /* ------------------------------------------------------------------ */
@@ -254,18 +260,12 @@ function validateInstall(f, { hasShopInstall = false } = {}) {
 }
 
 function validateVehicle(f) {
-  const e = {};
-  const maxYear = new Date().getFullYear() + 2;
-  if (!f.year.trim()) e.year = "Enter the vehicle year.";
-  else if (
-    !/^\d{4}$/.test(f.year.trim()) ||
-    Number(f.year) < 1960 ||
-    Number(f.year) > maxYear
-  )
-    e.year = `Enter a 4-digit year between 1960 and ${maxYear}.`;
-  if (!f.make.trim()) e.make = "Enter the make, like Toyota or Ford.";
-  if (!f.model.trim()) e.model = "Enter the model, like Camry or F-150.";
-  return e;
+  return vehicleErrors(f, {
+    year: "Choose the vehicle year.",
+    yearRange: `Enter a 4-digit year between ${MIN_VEHICLE_YEAR} and ${MAX_VEHICLE_YEAR}.`,
+    make: "Choose the make, like Toyota or Ford.",
+    model: "Choose the model, like Camry or F-150.",
+  });
 }
 
 function validateReview(f, { payOnline = false } = {}) {
@@ -561,6 +561,19 @@ export default function CheckoutPage() {
         current.fulfillment === "ship"
       ) {
         setForm((f) => ({ ...f, fulfillment: "pickup" }));
+      }
+      // The vehicle step starts from the vehicle last picked in the finder
+      // (the hero or Find My Tires), unless the shopper already chose one.
+      if (STEPS[stepIndex + 1].id === "vehicle") {
+        const last = recallVehicle();
+        if (last && !current.year && !current.make && !current.model) {
+          setForm((f) => ({
+            ...f,
+            year: last.year,
+            make: last.make,
+            model: last.model,
+          }));
+        }
       }
       setStepIndex((i) => i + 1);
       return;
@@ -1290,43 +1303,17 @@ export default function CheckoutPage() {
                 <StepHeading
                   step={3}
                   title="What are we working on?"
-                  lede="Fitment gets confirmed against your vehicle before anything ships — no surprises when the box arrives."
+                  lede="Fitment gets confirmed against your vehicle before anything ships."
                   headingRef={headingRef}
                 />
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <TextField
-                    id="year"
-                    label="Year"
-                    inputMode="numeric"
-                    placeholder="2019"
-                    value={form.year}
-                    onChange={onInput}
-                    error={errors.year}
-                  />
-                  <TextField
-                    id="make"
-                    label="Make"
-                    placeholder="Toyota"
-                    value={form.make}
-                    onChange={onInput}
-                    error={errors.make}
-                  />
-                  <TextField
-                    id="model"
-                    label="Model"
-                    placeholder="Tacoma"
-                    value={form.model}
-                    onChange={onInput}
-                    error={errors.model}
-                  />
-                  <TextField
-                    id="trim"
-                    label="Trim or drivetrain (optional)"
-                    placeholder="TRD Off-Road 4WD"
-                    value={form.trim}
-                    onChange={onInput}
-                  />
-                </div>
+                <VehicleSelect
+                  value={form}
+                  onChange={(patch) =>
+                    Object.entries(patch).forEach(([k, v]) => set(k, v))
+                  }
+                  errors={errors}
+                  showTrim
+                />
 
                 <div className="card mt-7 flex items-start gap-3 p-5">
                   <Car
@@ -1340,8 +1327,10 @@ export default function CheckoutPage() {
                     </span>{" "}
                     A tech matches your sizes, load rating and TPMS setup to
                     this vehicle. If anything on your order doesn't fit, we call
-                    you with options before the order is released — you are
-                    never charged for the wrong tire.
+                    you with options before the order is released
+                    {/* Paying online charges the card before that call, so
+                        only a request (paid on the call) can say this. */}
+                    {payNow ? "." : " — you are never charged for the wrong tire."}
                   </p>
                 </div>
               </section>

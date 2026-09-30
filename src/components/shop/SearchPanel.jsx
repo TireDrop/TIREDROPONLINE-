@@ -16,6 +16,7 @@ import {
   OTHER_LABEL,
   YEARS as ALL_YEARS,
   makesFor,
+  rememberVehicle,
   useVehicleModels,
 } from "../../data/vehicles.js";
 
@@ -154,6 +155,8 @@ export default function SearchPanel({
       return;
     }
     setError("");
+    // So checkout and the booking form can start from this vehicle.
+    rememberVehicle({ year, make: makeValue, model: modelValue });
     onSearch({ type: "vehicle", year, make: makeValue, model: modelValue });
   };
 
