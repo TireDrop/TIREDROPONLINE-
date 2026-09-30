@@ -22,7 +22,7 @@ import {
 
 // ---- helpers ----------------------------------------------------------------
 
-const INTEGRATION_VARS = /^(ATD_|TIREGURU_|SHOPIFY_|ORDER_WEBHOOK_URL$|PRICE_MARKUP_PCT$|FREIGHT_PER_TIRE$|CRON_SECRET$)/;
+const INTEGRATION_VARS = /^(ATD_|TIREGURU_|SHOPIFY_|ORDER_WEBHOOK_URL$|PRICE_MARKUP_PCT$|FREIGHT_PER_TIRE$|CRON_SECRET$|INSTALL_BOOKING_URL$)/;
 let savedEnv;
 let savedWarn;
 let warnings;
@@ -214,8 +214,22 @@ test("with no env: status is sample/off/request", async () => {
   assert.equal("tireguru" in res.body, false, "Tire Guru is retired");
   assert.equal(res.body.checkout, "request");
   assert.equal(res.body.forwarder, "off");
+  assert.equal(res.body.booking, "internal", "no INSTALL_BOOKING_URL: installs are booked on /schedule");
   assert.equal(res.body.issues, undefined);
   assert.ok(res.body.version);
+});
+
+test("INSTALL_BOOKING_URL: https only; status shows external/internal, never the link", async () => {
+  process.env.INSTALL_BOOKING_URL = "https://book.example.com/private-shop-9/{orderRef}";
+  const on = await call(statusHandler, { method: "GET" });
+  assert.equal(on.body.booking, "external");
+  assert.equal(on.body.issues, undefined);
+  assert.ok(!JSON.stringify(on.body).includes("private-shop-9"));
+  process.env.INSTALL_BOOKING_URL = "http://book.example.com/{orderRef}";
+  const bad = await call(statusHandler, { method: "GET" });
+  assert.equal(bad.body.booking, "internal");
+  assert.ok(bad.body.issues.some((i) => i.startsWith("INSTALL_BOOKING_URL must be an https:// URL")));
+  delete process.env.INSTALL_BOOKING_URL;
 });
 
 test("with no env: checkout is an undelivered, unpaid order request", async () => {

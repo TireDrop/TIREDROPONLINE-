@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-09-30 (newsletter pop-up replaced by a footer sign-up; EDIT HERE published; Blog + Learn pilot on preview; Batch 1 writing)_
+_Last updated: 2026-09-30 (post-payment install scheduling hand-off; newsletter pop-up replaced by a footer sign-up; EDIT HERE published; Blog + Learn pilot on preview; Batch 1 writing)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -21,6 +21,7 @@ _Last updated: 2026-09-30 (newsletter pop-up replaced by a footer sign-up; EDIT 
 - [x] ~~Newsletter: pop-up removed; calm "TireDrop emails" sign-up in the footer; privacy policy updated~~ (2026-09-30)
 - [x] ~~Year/Make/Model dropdowns in checkout + /schedule forms~~ (e6109d4, 2026-09-30)
 - [x] ~~/track: typed order number + email no longer cleared when the app starts over a prerendered page~~ (2026-09-30)
+- [x] ~~Post-payment install scheduling handoff~~ (f705e25, 2026-09-30)
 
 ## Admin (Justin)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
@@ -40,6 +41,8 @@ _Last updated: 2026-09-30 (newsletter pop-up replaced by a footer sign-up; EDIT 
 
 ## Next phase (Chrome prompt after the builds land)
 - [ ] Webhooks: 2 in Shopify, signing key into Vercel, redeploy, test (prompt 21)
+- [ ] Justin: run prompt 22 ("Schedule your install" email button + "High-risk order review" and "Needs scheduling alert" Flows; you click every Save)
+- [ ] Justin: INSTALL_BOOKING_URL after the Tire Guru call (booking link → set it in Vercel and redeploy; API → tell Claude, it's a follow-up build; see docs/integrations/install-scheduling.md)
 - [ ] `/track` tested with the $1 order
 - [ ] Header links checked on desktop and phone
 - [ ] Checkout branding (prompt 20)

@@ -1,7 +1,8 @@
 import React, { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   AlertCircle,
+  CalendarDays,
   CheckCircle2,
   ClipboardList,
   ExternalLink,
@@ -103,6 +104,66 @@ const nice = (map, key) =>
   (key && map[key]) ||
   (key ? key.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()) : "—");
 
+/**
+ * "Schedule your install" for a paid order that involves installation. The
+ * server decides whether there is one (`order.booking`, api/_lib/booking.js)
+ * and what it opens: the shop's own booking link, already filled in for this
+ * order, or /schedule?order=<ref> with the vehicle and contact from the order
+ * handed over in router state (never in the URL).
+ */
+function ScheduleInstall({ booking, orderName }) {
+  const mobile = booking.install === "mobile";
+  const text = mobile
+    ? "Your order is paid. Pick a day and arrival window for the mobile install; a dispatcher confirms it by phone."
+    : `Your order is paid. Pick the day and time you would like for the install at our ${BUSINESS.shop.city} shop; we confirm it with you before then.`;
+  return (
+    <div
+      className="mt-6 rounded-sm border border-drop/30 bg-drop/5 p-5"
+      data-testid="schedule-install"
+    >
+      <h4 className="flex items-center gap-2 font-display text-lg font-bold text-ink">
+        <CalendarDays size={20} aria-hidden className="shrink-0 text-drop" />
+        Schedule your install
+      </h4>
+      <p className="mt-1.5 text-sm leading-relaxed text-smoke">{text}</p>
+      {booking.mode === "external" ? (
+        <a
+          href={booking.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-primary btn-sm mt-4"
+        >
+          <CalendarDays size={16} aria-hidden />
+          Schedule your install
+          <ExternalLink size={14} aria-hidden />
+        </a>
+      ) : (
+        <Link
+          to={booking.path}
+          state={{
+            bookingPrefill: {
+              ...booking.prefill,
+              ref: booking.ref,
+              install: booking.install,
+            },
+          }}
+          className="btn-primary btn-sm mt-4"
+        >
+          <CalendarDays size={16} aria-hidden />
+          Schedule your install
+        </Link>
+      )}
+      <p className="mt-3 text-xs text-smoke">
+        Rather book by phone? Call{" "}
+        <a href={BUSINESS.phoneHref} className="text-drop underline">
+          {BUSINESS.phone}
+        </a>{" "}
+        and mention order {orderName}.
+      </p>
+    </div>
+  );
+}
+
 /** One line saying where the order stands, most advanced state first. */
 function headline(order) {
   if (order.cancelled) {
@@ -191,6 +252,10 @@ function OrderResult({ order }) {
         {h.title}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-smoke">{h.text}</p>
+
+      {order.booking && (
+        <ScheduleInstall booking={order.booking} orderName={order.name} />
+      )}
 
       <dl className="mt-6 grid gap-4 border-t border-ink/10 pt-5 text-sm sm:grid-cols-2">
         <div>
@@ -343,7 +408,16 @@ function Miss({ result }) {
 }
 
 function TrackForm() {
-  const [values, setValues] = useState(EMPTY);
+  // /track?order=%231001 (the order confirmation email links here): the
+  // order number is filled in. Only the number: the email is typed, never
+  // taken from a link.
+  const [searchParams] = useSearchParams();
+  const [values, setValues] = useState(() => {
+    const linked = (searchParams.get("order") ?? "").trim().slice(0, 30);
+    return ORDER_RE.test(linked) || REF_RE.test(linked)
+      ? { ...EMPTY, order: linked }
+      : EMPTY;
+  });
   const [errors, setErrors] = useState({});
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState(null);

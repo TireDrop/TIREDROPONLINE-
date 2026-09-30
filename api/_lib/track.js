@@ -11,7 +11,11 @@
 // fulfilment status, how it is delivered, line titles and quantities,
 // tracking numbers with a carrier link, and where the tires are with our
 // supplier (from the forwarder's atd-* tags). No prices, no address, no
-// phone, no delivery dates.
+// phone, no delivery dates. The one exception: a PAID order that involves
+// installation also carries `booking`, the "Schedule your install" call to
+// action (api/_lib/booking.js), which hands the customer's own name, phone
+// and vehicle back to them for the booking form, or a booking link already
+// filled with them.
 //
 // Queries validated against the Admin GraphQL schema (2026-07). Scopes:
 // read_orders (+ read_merchant_managed_fulfillment_orders, which the
@@ -24,9 +28,11 @@ import { DELIVERY_ATTRIBUTE, MOBILE_DELIVERY_ATTRIBUTE, REQUEST_TAG, shopifyGrap
 export const TRACK_ORDER_QUERY = `query trackOrder($query: String!) {
   orders(first: 5, query: $query) {
     nodes {
+      id
       name
       createdAt
       email
+      note
       cancelledAt
       displayFinancialStatus
       displayFulfillmentStatus
@@ -229,15 +235,25 @@ export function publicRequest(node, ref) {
 /**
  * `{ kind: "order", order }`, `{ kind: "request", request }` or null (not
  * found, including a wrong email). `cfg` is the Shopify config.
+ *
+ * `booking`, when given, is called with the matched order's raw node (only
+ * after the name AND email matched) and may resolve a call to action to
+ * book the install (api/_lib/booking.js bookingForOrder); it is added to the
+ * public order as `booking` when not null. Order requests (unpaid) never
+ * get one.
  */
-export async function lookupOrder({ lookup, email }, cfg, deps = {}) {
+export async function lookupOrder({ lookup, email }, cfg, deps = {}, { booking = null } = {}) {
   if (lookup.kind === "order") {
     const data = await shopifyGraphQL(cfg, TRACK_ORDER_QUERY, { query: orderSearch(lookup.name, email) }, deps);
     // The search narrows; this decides. Name AND email must both match.
     const node = (data?.orders?.nodes ?? []).find(
       (o) => String(o?.name ?? "").toUpperCase() === lookup.name && sameEmail(o.email, email),
     );
-    return node ? { kind: "order", order: publicOrder(node) } : null;
+    if (!node) return null;
+    const order = publicOrder(node);
+    const cta = booking ? await booking(node) : null;
+    if (cta) order.booking = cta;
+    return { kind: "order", order };
   }
   const data = await shopifyGraphQL(cfg, TRACK_REQUEST_QUERY, { query: requestSearch(lookup.date) }, deps);
   const node = (data?.draftOrders?.nodes ?? []).find(

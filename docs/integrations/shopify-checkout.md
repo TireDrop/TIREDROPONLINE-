@@ -119,7 +119,7 @@ app and the store are in the same Shopify organization.
 | `read_draft_orders` | checkout: the schema check listed it; add it if Shopify refuses the call without it. Track My Order (`POST /api/track`): finds a `TD-` order request's draft |
 | `read_orders` | the ATD forwarder: finds paid orders. Track My Order (`POST /api/track`): reads the order by number and email |
 | `read_all_orders` | optional: Track My Order for orders older than 60 days (without it they read as not found) |
-| `write_orders` | the ATD forwarder: order tags, note and metafields |
+| `write_orders` | the ATD forwarder: order tags, note and metafields. The orders/paid webhook: the `needs-scheduling` tag on install orders (`docs/integrations/install-scheduling.md`) |
 | `read_merchant_managed_fulfillment_orders` | the ATD forwarder: reads the order's fulfillment orders |
 | `write_merchant_managed_fulfillment_orders` | the ATD forwarder: creates the fulfillment with ATD's tracking |
 | `read_customers` | the newsletter (`POST /api/newsletter`), the website forms (`POST /api/forms`) and order requests: find an existing customer by email or phone |

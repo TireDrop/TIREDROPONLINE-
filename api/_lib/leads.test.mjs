@@ -576,3 +576,65 @@ test("ORDER_WEBHOOK_URL is retired: ignored, flagged, and never posted to", asyn
   assert.equal(res.statusCode, 200);
   assert.ok(shop.calls.every((c) => !c.url.includes("formspree")));
 });
+
+// ---- install booking for a paid order (/schedule?order=) --------------------------
+
+const BOOKING = Object.freeze({
+  form: "booking",
+  name: "Sam Ortiz",
+  email: "sam@example.com",
+  phone: "954-555-0134",
+  reference: "TD-260930-AB2C",
+  service: "tire-installation",
+  year: "2020",
+  make: "Toyota",
+  model: "Camry",
+  locationType: "shop",
+  date: "2026-10-05",
+  window: "10-12pm",
+  website: "",
+});
+
+test("forms: a booking for a paid order leads with the order and adds install-booking + order-<ref> tags", async () => {
+  const shop = fakeShopify();
+  const res = await post(formsHandler(shop), { ...BOOKING, order: "td-260929-abc234" });
+  assert.equal(res.statusCode, 200);
+  const c = shop.store[0];
+  const lead = c.metafields["tiredrop.last_lead"].value;
+  assert.match(
+    lead,
+    /^TireDrop install booking request — [^\n]+\nName: Sam Ortiz\nEmail: sam@example\.com\nPhone: 954-555-0134\nPaid order: TD-260929-ABC234 \(install booking for a paid order: schedule it in Tire Guru\)\nReference: TD-260930-AB2C\nService: tire-installation\n/,
+  );
+  // The same text tops the customer note, so Flow's email to info@ shows it.
+  assert.ok(c.note.startsWith(lead));
+  assert.deepEqual(c.tags, ["new-lead", "lead", "lead-booking", "install-booking", "order-TD-260929-ABC234"]);
+  const add = shop.calls.find((x) => x.op === "leadTagsAdd");
+  assert.deepEqual(add.variables.tags, ["new-lead", "lead", "lead-booking", "install-booking", "order-TD-260929-ABC234"]);
+});
+
+test("forms: an order number works too; a booking without an order is unchanged", async () => {
+  const shop = fakeShopify();
+  await post(formsHandler(shop), { ...BOOKING, order: "1001" });
+  assert.match(shop.store[0].metafields["tiredrop.last_lead"].value, /\nPaid order: #1001 \(/);
+  assert.deepEqual(shop.store[0].tags.slice(-2), ["install-booking", "order-1001"]);
+
+  const plain = fakeShopify();
+  await post(formsHandler(plain), { ...BOOKING, order: "" }, { "x-forwarded-for": "198.51.100.7" });
+  assert.doesNotMatch(plain.store[0].metafields["tiredrop.last_lead"].value, /Paid order/);
+  assert.deepEqual(plain.store[0].tags, ["new-lead", "lead", "lead-booking"]);
+
+  // Only the booking form carries an order.
+  const v = validateLead({ ...CONTACT, order: "1001" });
+  assert.deepEqual(v.value.tags, []);
+  assert.equal(v.value.fields.some(([label]) => label === "Paid order"), false);
+});
+
+test("forms: a malformed order reference is a 400 and reaches nothing", async () => {
+  const shop = fakeShopify();
+  for (const [i, order] of ["TD-2609-XYZ", "1001 OR tag:vip", "<b>1</b>", "TD-261340-ABC234"].entries()) {
+    const res = await post(formsHandler(shop), { ...BOOKING, order }, { "x-forwarded-for": `198.51.100.${20 + i}` });
+    assert.equal(res.statusCode, 400, order);
+    assert.match(res.body.error, /order number does not look right/);
+  }
+  assert.equal(shop.calls.length, 0);
+});

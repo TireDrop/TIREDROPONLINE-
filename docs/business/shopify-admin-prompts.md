@@ -1074,3 +1074,140 @@ Back in Shopify:
     (or orders/cancelled). A 401 means the key in step 6 does not match:
     copy it again, save, redeploy.
 ```
+
+## 22. "Schedule your install": order-confirmation button + two Flows
+
+**Why:** after a customer pays for an install order (ship-to-store, pickup or
+mobile), they get asked to book the install. The order confirmation email
+gets a "Schedule your install" button that goes to Track My Order. The paid
+order gets tagged `needs-scheduling` by the site, and Flow emails info@ with
+the order and the customer's phone. High-risk orders get tagged
+`fraud-review`. Background: `docs/integrations/install-scheduling.md`. The
+email snippet is saved at
+`shopify/notifications/order-confirmation-schedule-install.liquid`.
+
+This prompt fills everything in and then **stops for you to click each
+Save** (and each "Turn on").
+
+```
+TASK: Add TireDrop's "Schedule your install" button to the Order confirmation
+email and build two Shopify Flow workflows. I'm logged into Shopify admin.
+
+HARD RULES, for the whole task:
+- NEVER click Save, "Turn on" or "Activate" yourself. When a step says
+  "STOP FOR SAVE", stop, tell me exactly what is ready, and wait for me to
+  click it and say "saved". Then continue.
+- Never enter card or payment details. Never press Pay, Refund, Capture,
+  Publish, Delete, Remove or Revert to default. Never create, edit or
+  cancel an order. Do not touch any theme, domain or DNS setting.
+- Don't change any other notification, workflow or setting.
+
+PART A: the email button
+
+1. Settings → Notifications → Customer notifications → Order confirmation
+   → Edit code.
+2. Copy the ENTIRE current template code into a note first, as a backup, and
+   keep it in your report.
+3. Find the TireDrop block that starts with the comment
+   "TireDrop: local vs non-local block" (added by prompt 15) and the </div>
+   that closes it. Put the cursor right after that </div> and press Enter.
+   If that block is not there, put the cursor right after the closing tag
+   of the element that contains {{ email_body }} instead.
+4. Paste the block below EXACTLY, from the first {%- to the last -%}:
+
+{%- assign td_install = false -%}
+{%- assign td_ship_title = shipping_method.title | default: "" -%}
+{%- if td_ship_title contains "Pickup" or td_ship_title contains "pickup" -%}
+  {%- assign td_install = true -%}
+{%- endif -%}
+{%- assign td_delivery = attributes.Delivery | default: "" -%}
+{%- if td_delivery contains "Ship to store" or td_delivery contains "Mobile install" -%}
+  {%- assign td_install = true -%}
+{%- endif -%}
+{%- for td_line in line_items -%}
+  {%- if td_line.title contains "Install" or td_line.title contains "install" -%}
+    {%- assign td_install = true -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- if note contains "Install at the shop:" -%}
+  {%- assign td_install = true -%}
+{%- endif -%}
+{%- if td_install and financial_status == "paid" -%}
+<div style="margin: 20px 0; padding: 16px 18px; border: 1px solid #0068E8; border-radius: 8px; background: #FFFFFF; font-family: Arial, sans-serif; font-size: 15px; line-height: 1.5; color: #111;">
+  <strong style="font-size: 16px;">Schedule your install</strong><br>
+  Your order is paid. Pick the day and time you would like for the install; we confirm it with you before then.<br>
+  <a href="https://tiredroponline.com/track?order={{ order_name | url_encode }}" style="display: inline-block; margin-top: 12px; padding: 11px 20px; background: #0068E8; color: #FFFFFF; text-decoration: none; border-radius: 6px; font-weight: bold;">Schedule your install</a><br>
+  <span style="color: #444; font-size: 13px;">Enter this email address on the page to open your order. Rather call? <a href="tel:+19547731896" style="color: #0068E8;">(954) 773-1896</a>, and mention {{ order_name }}.</span>
+</div>
+{%- endif -%}
+
+5. Click Preview. The preview order is usually shipped (not pickup), so the
+   new button is normally NOT shown. That is correct. Report what you see,
+   and any Liquid error message word for word.
+6. STOP FOR SAVE: tell me the code is pasted and ready. Wait for "saved".
+7. After I've saved: click "Send test email" to info@tiredroponline.com.
+
+PART B: Flow. Apps → Flow.
+
+8. Look at the workflow list first. If "High-risk order review" already
+   exists (prompt 13 made it), OPEN it and check it against workflow 1
+   below. Only fix what differs. Do not create a second copy. Otherwise
+   create it.
+
+   1) "High-risk order review"
+      Trigger: Order risk analyzed
+      Condition: Order / Risk level is equal to HIGH
+        (if that field isn't offered: Order / Risk / Assessments, at least
+        one with Risk level equal to HIGH)
+      Then:
+        a) Add order tags: fraud-review
+        b) ONLY IF the action list has a hold action (e.g. "Hold
+           fulfillment orders"): add it. If there is none, skip it and say
+           so in the report.
+        c) Send internal email
+           To: info@tiredroponline.com
+           Subject: HIGH RISK order {{order.name}}: review before anything ships
+           Message: Shopify flagged {{order.name}} ({{order.email}}) as high
+           risk. It is tagged fraud-review, so nothing goes to the supplier.
+           Review it in Orders before anything ships or is installed.
+      STOP FOR SAVE (and for "Turn on" if it is off). Wait for "saved".
+
+9. Create workflow → name it exactly "Needs scheduling alert".
+   2) "Needs scheduling alert"
+      Trigger: Order tags added
+      Condition: the added tags include "needs-scheduling"
+        (if the trigger has no "added tags" field: Order / Tags includes
+        "needs-scheduling")
+      Then: Send internal email
+        To: info@tiredroponline.com
+        Subject: [SCHEDULE] {{order.name}}: book the install
+        Message:
+          {{order.name}} is paid and needs an install booked.
+          Customer: {{order.customer.displayName}}
+          Phone: {{order.phone}} {{order.shippingAddress.phone}} {{order.billingAddress.phone}} {{order.customer.phone}}
+          Email: {{order.email}}
+          They were sent a "Schedule your install" link. If no booking arrives
+          from them (a website lead tagged install-booking), call them and book
+          it in Tire Guru. Remove the needs-scheduling tag once it is booked.
+      If Flow rejects one of the Liquid variables, remove only that one
+      variable and note it in the report.
+      STOP FOR SAVE, then for "Turn on". Wait for "saved" and "on".
+
+REPORT BACK:
+- Part A: the backup of the original template (step 2), where you pasted
+  the block, the preview result, saved Y/N, whether the test email arrived.
+- Part B: for each workflow: existed already or new, what you changed,
+  whether a hold-fulfillment action existed and was added, saved Y/N, ON/OFF,
+  and any field or variable that didn't exist and what you used instead.
+Don't create test orders.
+```
+
+**Undo:** Part A: paste the step-2 backup back in (you click Save). Part B:
+turn a workflow off in Flow (you click it).
+
+**After this:** the next paid install order (the $1 go-live test order works
+if it is ship-to-store) should show the button in its confirmation email, get
+the `needs-scheduling` tag and send the `[SCHEDULE]` email. The tag needs the
+Shopify app's `write_orders` scope. If the tag never appears, Vercel's logs
+will say `lacks the write_orders scope`
+(`docs/integrations/install-scheduling.md`, "Scopes").

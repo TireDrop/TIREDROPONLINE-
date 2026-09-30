@@ -13,7 +13,7 @@ Endpoint: `POST https://tiredroponline.com/api/webhooks/shopify`
 
 | Shopify event (topic) | What the site does |
 | --- | --- |
-| **Order payment** (`orders/paid`) | Runs the ATD forwarder for **that one order** right away (`forwardOrder` in `api/_lib/forwarder.js`), with exactly the cron's rules: `ATD_ORDERING_ENABLED=true`, Shopify and ATD live, a `vercel-live` order, risk `ACCEPT` with no assessment `PENDING`, no `fraud-review` tag, no `atd-*` tag, unfulfilled, not a test order. If risk is still pending it does nothing and the daily cron picks the order up later. |
+| **Order payment** (`orders/paid`) | Runs the ATD forwarder for **that one order** right away (`forwardOrder` in `api/_lib/forwarder.js`), with exactly the cron's rules: `ATD_ORDERING_ENABLED=true`, Shopify and ATD live, a `vercel-live` order, risk `ACCEPT` with no assessment `PENDING`, no `fraud-review` tag, no `atd-*` tag, unfulfilled, not a test order. If risk is still pending it does nothing and the daily cron picks the order up later. Separately, and even with the forwarder off: an order that involves installation is tagged **`needs-scheduling`** (Flow emails info@; `docs/integrations/install-scheduling.md`). |
 | **Order cancellation** (`orders/cancelled`) | If ATD has (or may have) the order (`atd-submitted`, `atd-sending`, a PO on file, or `atd-failed` with an unknown outcome): asks ATD to cancel it (skipped while ATD's cancel endpoint is unconfirmed) and tags **`atd-cancel-needed`** with a note saying what was tried, so Flow workflow 4 or a person confirms it at ATD. If nothing went to ATD: tags **`cancelled-before-atd`**. |
 | Order fulfillment (`orders/fulfilled`), Fulfillment creation (`fulfillments/create`) | Logged only, for now. |
 | anything else | Answered 200 and ignored. |
@@ -130,6 +130,12 @@ and is ignored.
 The single-order read and the tag / note / metafield writes use the scopes
 the forwarder already has: `read_orders`, `write_orders`. A cancellation at
 ATD needs nothing from Shopify beyond those.
+
+orders/paid also tags an order that involves installation (ship-to-store,
+pickup, mobile, or an install line) `needs-scheduling`, whether or not the
+forwarder is on. That also needs `write_orders`; without it the webhook
+logs the missing scope and carries on
+(`docs/integrations/install-scheduling.md`).
 
 ## Code and tests
 

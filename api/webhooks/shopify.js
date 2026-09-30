@@ -7,6 +7,13 @@
 //                       and ATD live, risk ACCEPT with nothing PENDING (a
 //                       pending order is left for the cron), no fraud-review
 //                       and no atd-* tag.
+//                       Also, whatever the forwarder does: an order that
+//                       involves installation (ship-to-store / pickup,
+//                       mobile, or an install line) is tagged
+//                       needs-scheduling (api/_lib/booking.js; tagsAdd,
+//                       idempotent, needs write_orders). A missing scope or
+//                       a failed tag is logged and never fails the delivery.
+//                       docs/integrations/install-scheduling.md.
 //   orders/cancelled    ATD has (or may have) the order: try cancelAtdOrder
 //                       (skipped while its endpoint is unconfirmed) and tag
 //                       atd-cancel-needed. Not sent yet: tag
@@ -53,6 +60,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { Buffer } from "node:buffer";
 import { getConfig } from "../_lib/config.js";
 import { forwardOrder, handleOrderCancelled } from "../_lib/forwarder.js";
+import { installKind, markNeedsScheduling, restPayloadToNode } from "../_lib/booking.js";
 
 export const WEBHOOK_MAX_BYTES = 1024 * 1024;
 export const DEDUPE_MAX_ENTRIES = 2000;
@@ -207,12 +215,33 @@ export function createShopifyWebhookHandler({ env, deps = {}, waitUntil } = {}) 
       return json(200, { ok: true, ignored: "shopify-not-configured" });
     }
     if (topic === TOPICS.paid) {
-      if (!config.webhooks.forwarding) {
+      // Install scheduling (api/_lib/booking.js) is separate from the ATD
+      // forwarder and does not wait for it: an install order is tagged
+      // needs-scheduling whether or not anything goes to ATD. It never
+      // throws, so it cannot fail the delivery.
+      const scheduling = installKind(restPayloadToNode(payload)) !== null;
+      if (!config.webhooks.forwarding && !scheduling) {
         log.log(`[webhook] orders/paid ${payload?.name ?? id}: forwarder off (${config.forwarder.reason}); nothing sent to ATD`);
         for (const k of keys) seen.add(k);
         return json(200, { ok: true, ignored: "forwarder-off" });
       }
-      work = () => forwardOrder(config, id, deps);
+      work = async () => {
+        const booked = scheduling
+          ? await markNeedsScheduling(config.shopify, id, payload, {
+              ...(deps.shopify ?? {}),
+              log,
+              ...(deps.now ? { now: deps.now } : {}),
+            })
+          : null;
+        let outcome;
+        if (config.webhooks.forwarding) {
+          outcome = await forwardOrder(config, id, deps);
+        } else {
+          log.log(`[webhook] orders/paid ${payload?.name ?? id}: forwarder off (${config.forwarder.reason}); nothing sent to ATD`);
+          outcome = { result: "skipped", reason: "forwarder-off" };
+        }
+        return booked ? { ...outcome, scheduling: booked.result } : outcome;
+      };
     } else {
       work = () => handleOrderCancelled(config, id, deps);
     }
@@ -232,7 +261,12 @@ export function createShopifyWebhookHandler({ env, deps = {}, waitUntil } = {}) 
     }
     try {
       const outcome = await run();
-      return json(200, { ok: true, result: outcome.result, reason: outcome.reason ?? null });
+      return json(200, {
+        ok: true,
+        result: outcome.result,
+        reason: outcome.reason ?? null,
+        ...(outcome.scheduling ? { scheduling: outcome.scheduling } : {}),
+      });
     } catch (err) {
       // Forget the delivery so Shopify's retry is processed.
       for (const k of keys) seen.delete(k);

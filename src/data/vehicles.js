@@ -308,3 +308,31 @@ export function recallVehicle() {
     return null;
   }
 }
+
+/**
+ * `{ year, make, model }` from a vehicle written as one line, the way
+ * checkout stores it on an order ("Vehicle: 2020 Land Rover Range Rover
+ * Sport"): the four-digit year, then the longest make this list knows for
+ * that year (so two-word makes stay whole), and the rest as the model (trim
+ * included). A make the list does not know is the first word. Blanks when
+ * there is no leading year. Used to prefill the booking form from an order
+ * /track verified; the dropdowns show anything unlisted as "Other".
+ */
+export function splitVehicle(text) {
+  const clean = String(text ?? "").replace(/\s+/g, " ").trim().slice(0, 120);
+  const m = /^(\d{4}) (.+)$/.exec(clean);
+  if (!m) return { year: "", make: "", model: "" };
+  const [, year, rest] = m;
+  const lower = rest.toLowerCase();
+  const known = [...new Set([...makesFor(year), ...makesFor("")])]
+    .filter((make) => {
+      const l = make.toLowerCase();
+      return lower === l || lower.startsWith(`${l} `);
+    })
+    .sort((a, b) => b.length - a.length)[0];
+  if (known) {
+    return { year, make: known, model: rest.slice(known.length).trim() };
+  }
+  const [first, ...others] = rest.split(" ");
+  return { year, make: first, model: others.join(" ") };
+}

@@ -18,6 +18,7 @@ import {
 import { getConfig } from "./config.js";
 import { statusBody } from "../status.js";
 import { ORDER_QUERY } from "./forwarder.js";
+import { clearAppScopeCache } from "./shopify.js";
 
 const SECRET = "whsec_admin_signing_key";
 const CLIENT_SECRET = "shpss_app_client_secret";
@@ -73,8 +74,12 @@ function order(over = {}) {
   };
 }
 
-/** In-memory Shopify for the operations the webhook path uses. */
-function mockShopify(orders) {
+/**
+ * In-memory Shopify for the operations the webhook path uses. `scopes` is
+ * what the app was granted (install scheduling checks for write_orders);
+ * `tagFails` makes the needs-scheduling tagsAdd answer 503.
+ */
+function mockShopify(orders, { scopes = ["read_orders", "write_orders"], tagFails = false } = {}) {
   const calls = [];
   const byId = new Map(orders.map((o) => [o.id, o]));
   let digest = 0;
@@ -120,6 +125,14 @@ function mockShopify(orders) {
       case "forwarderOrderNote":
         byId.get(v.input.id).note = v.input.note;
         return ok({ orderUpdate: { order: { id: v.input.id }, userErrors: [] } });
+      case "appAccessScopes":
+        return ok({ currentAppInstallation: { accessScopes: scopes.map((handle) => ({ handle })) } });
+      case "bookingTagsAdd": {
+        if (tagFails) return new Response("down", { status: 503 });
+        const o = byId.get(v.id);
+        if (o) for (const t of v.tags) if (!o.tags.includes(t)) o.tags.push(t);
+        return ok({ tagsAdd: { node: { id: v.id }, userErrors: [] } });
+      }
       default:
         throw new Error(`unexpected Shopify operation ${op}`);
     }
@@ -143,8 +156,8 @@ const quietLog = () => {
   return { lines, log: { log: push, warn: push, error: push, info: push } };
 };
 
-function setup(orders, { env = ENV, endpoints = PLACE, atdReply, waitUntil = null } = {}) {
-  const shop = mockShopify(orders);
+function setup(orders, { env = ENV, endpoints = PLACE, atdReply, waitUntil = null, shopify = {} } = {}) {
+  const shop = mockShopify(orders, shopify);
   const atd = mockAtd(atdReply);
   const { log, lines } = quietLog();
   const handler = createShopifyWebhookHandler({
@@ -194,7 +207,10 @@ async function call(handler, request) {
   return { status: res.status, body: await res.json() };
 }
 
-beforeEach(() => resetWebhookDedupe());
+beforeEach(() => {
+  resetWebhookDedupe();
+  clearAppScopeCache();
+});
 
 // ---- signature --------------------------------------------------------------
 
@@ -446,4 +462,132 @@ test("webhook: helpers, the single-order query and vercel.json", () => {
   for (const { source } of vercel.rewrites) {
     assert.equal(new RegExp(`^${source}$`).test("/api/webhooks/shopify"), false, "the SPA rewrite leaves the webhook alone");
   }
+});
+
+// ---- install scheduling: the needs-scheduling tag ---------------------------------
+
+const KILL_SWITCH_OFF = Object.freeze({ ...ENV, ATD_ORDERING_ENABLED: "false" });
+const STORE_DELIVERY = "Ship to store for install (Extreme Tires, Sunrise)";
+
+/** An orders/paid body with the install signals a real delivery carries. */
+const installPayload = (o, over = {}) => ({
+  ...payloadFor(o),
+  tags: o.tags.join(", "),
+  note_attributes: o.customAttributes.map((a) => ({ name: a.key, value: a.value })),
+  shipping_lines: [{ title: "Pickup at Extreme Tires (Sunrise, FL)" }],
+  line_items: [{ title: "Tire", quantity: 4 }],
+  note: o.note,
+  ...over,
+});
+
+const storeOrder = (over = {}) =>
+  order({
+    tags: ["vercel-live", "ship-to-store"],
+    customAttributes: [{ key: "Delivery", value: STORE_DELIVERY }],
+    ...over,
+  });
+
+test("webhook: orders/paid for an install order tags needs-scheduling, even with the forwarder off", async () => {
+  const o = storeOrder();
+  const r = setup([o], { env: KILL_SWITCH_OFF });
+  const res = await call(r.handler, delivery("orders/paid", installPayload(o)));
+  assert.deepEqual(res, {
+    status: 200,
+    body: { ok: true, result: "skipped", reason: "forwarder-off", scheduling: "tagged" },
+  });
+  assert.deepEqual(r.shop.calls.map((c) => c.op), ["appAccessScopes", "bookingTagsAdd"]);
+  assert.deepEqual(r.shop.calls[1].variables, { id: o.id, tags: ["needs-scheduling"] });
+  assert.deepEqual(o.tags, ["vercel-live", "ship-to-store", "needs-scheduling"]);
+  assert.equal(r.atd.calls.length, 0, "nothing goes to ATD");
+  assert.ok(r.lines.some((l) => l.includes("tagged needs-scheduling")));
+});
+
+test("webhook: mobile, pickup and install-line orders are install orders; a shipped order is not", async () => {
+  const mobile = order({ tags: ["mobile-install"], customAttributes: [{ key: "Delivery", value: "Mobile install at my address" }] });
+  const pickup = order({ tags: [], customAttributes: [] });
+  const line = order({ tags: [], customAttributes: [] });
+  const shipped = order();
+  const cases = [
+    [mobile, installPayload(mobile, { shipping_lines: [] }), "tagged"],
+    [pickup, installPayload(pickup, { shipping_lines: [{ title: "Pickup at Extreme Tires (Sunrise, FL)" }] }), "tagged"],
+    [line, installPayload(line, { shipping_lines: [{ title: "Free Shipping" }], line_items: [{ title: "Tire" }, { title: "Tire installation" }] }), "tagged"],
+  ];
+  for (const [o, body, want] of cases) {
+    const r = setup([o], { env: KILL_SWITCH_OFF });
+    const res = await call(r.handler, delivery("orders/paid", body));
+    assert.equal(res.body.scheduling, want, o.name);
+    assert.ok(o.tags.includes("needs-scheduling"), o.name);
+  }
+  const r = setup([shipped], { env: KILL_SWITCH_OFF });
+  const res = await call(r.handler, delivery("orders/paid", installPayload(shipped, { shipping_lines: [{ title: "Free Shipping" }] })));
+  assert.deepEqual(res.body, { ok: true, ignored: "forwarder-off" }, "unchanged for a shipped order");
+  assert.equal(r.shop.calls.length, 0);
+});
+
+test("webhook: needs-scheduling is idempotent: a tagged order or a repeat delivery writes nothing", async () => {
+  const o = storeOrder({ tags: ["vercel-live", "ship-to-store", "needs-scheduling"] });
+  const r = setup([o], { env: KILL_SWITCH_OFF });
+  const res = await call(r.handler, delivery("orders/paid", installPayload(o)));
+  assert.equal(res.body.scheduling, "already-tagged");
+  assert.equal(r.shop.calls.length, 0);
+
+  const fresh = storeOrder();
+  const r2 = setup([fresh], { env: KILL_SWITCH_OFF });
+  const first = await call(r2.handler, delivery("orders/paid", installPayload(fresh), { webhookId: "same", eventId: "e-same" }));
+  assert.equal(first.body.scheduling, "tagged");
+  const again = await call(r2.handler, delivery("orders/paid", installPayload(fresh), { webhookId: "same", eventId: "e-same" }));
+  assert.deepEqual(again.body, { ok: true, duplicate: true });
+  // Another instance (dedupe gone) with the stale payload: tagsAdd adds nothing new.
+  resetWebhookDedupe();
+  await call(r2.handler, delivery("orders/paid", installPayload(fresh)));
+  assert.deepEqual(fresh.tags.filter((t) => t === "needs-scheduling"), ["needs-scheduling"]);
+});
+
+test("webhook: without write_orders the tag is skipped and logged; the delivery still answers 200", async () => {
+  const o = storeOrder();
+  const r = setup([o], { env: KILL_SWITCH_OFF, shopify: { scopes: ["read_orders"] } });
+  const res = await call(r.handler, delivery("orders/paid", installPayload(o)));
+  assert.equal(res.status, 200);
+  assert.equal(res.body.scheduling, "missing-scope");
+  assert.deepEqual(r.shop.calls.map((c) => c.op), ["appAccessScopes"], "no write attempted");
+  assert.ok(r.lines.some((l) => /lacks the write_orders scope/.test(l) && l.includes("install-scheduling.md")));
+  assert.deepEqual(o.tags, ["vercel-live", "ship-to-store"]);
+});
+
+test("webhook: a failed tag is logged and never blocks the ATD forwarder", async () => {
+  const o = storeOrder();
+  const r = setup([o], { shopify: { tagFails: true } });
+  const res = await call(r.handler, delivery("orders/paid", installPayload(o)));
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.body, { ok: true, result: "submitted", reason: null, scheduling: "failed" });
+  assert.equal(r.atd.calls.length, 1, "the forwarder ran as before");
+  assert.ok(r.lines.some((l) => l.includes("could not tag needs-scheduling")));
+});
+
+test("webhook: with the forwarder on, an install order is tagged first and then forwarded exactly as before", async () => {
+  const o = storeOrder();
+  const r = setup([o]);
+  const res = await call(r.handler, delivery("orders/paid", installPayload(o)));
+  assert.deepEqual(res.body, { ok: true, result: "submitted", reason: null, scheduling: "tagged" });
+  assert.deepEqual(
+    r.shop.calls.map((c) => c.op),
+    ["appAccessScopes", "bookingTagsAdd", "forwarderOrder", "forwarderMetafieldsSet", "forwarderTagsAdd", "forwarderMetafieldsSet", "forwarderTagsAdd", "forwarderOrderNote", "forwarderTagsRemove"],
+  );
+  assert.ok(o.tags.includes("atd-submitted"));
+  assert.ok(o.tags.includes("needs-scheduling"));
+  // Risk not ACCEPT: still tagged for scheduling, still not sent to ATD.
+  const risky = storeOrder({ risk: { recommendation: "INVESTIGATE", assessments: [{ riskLevel: "HIGH" }] } });
+  const rr = setup([risky]);
+  const res2 = await call(rr.handler, delivery("orders/paid", installPayload(risky)));
+  assert.deepEqual(res2.body, { ok: true, result: "skipped", reason: "risk-investigate", scheduling: "tagged" });
+  assert.equal(rr.atd.calls.length, 0);
+});
+
+test("webhook: the scope answer is cached per instance", async () => {
+  const a = storeOrder();
+  const b = storeOrder();
+  const r = setup([a, b], { env: KILL_SWITCH_OFF });
+  await call(r.handler, delivery("orders/paid", installPayload(a)));
+  await call(r.handler, delivery("orders/paid", installPayload(b)));
+  assert.deepEqual(r.shop.calls.map((c) => c.op), ["appAccessScopes", "bookingTagsAdd", "bookingTagsAdd"]);
 });
