@@ -14,7 +14,11 @@
  *
  * Covers /contact, /financing, /commercial-tires, /schedule, /checkout
  * (request mode, ship-to-store pickup), the footer newsletter sign-up, and the Find
- * My Tires size prefill. Also: start over clears, validation errors clear as
+ * My Tires size prefill. The Year / Make / Model dropdowns (VehicleSelect)
+ * are picked from, including "Other / not listed", a silent pick taken in on
+ * the next render, the NHTSA-down fallback, and the finder's vehicle
+ * prefilling the booking form. vPIC is mocked in its own JSON shape
+ * (scripts/vpic-mock.mjs). Also: start over clears, validation errors clear as
  * you type, the honeypot still reaches the server, no console errors.
  *
  * Every /api request is answered by a mock; nothing reaches Shopify.
@@ -28,6 +32,8 @@ import { chromium } from "playwright";
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import assert from "node:assert/strict";
+
+import { mockVpic } from "./vpic-mock.mjs";
 
 const CHROME =
   process.env.AUDIT_CHROME ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
@@ -107,7 +113,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
  * A fresh context with the API mocked. /api/status answers after `delay`,
  * so a form can be filled before the forms-on flip re-renders it.
  */
-async function open(width, { status = STATUS, delay = STATUS_DELAY_MS, cart = null } = {}) {
+async function open(
+  width,
+  { status = STATUS, delay = STATUS_DELAY_MS, cart = null, vpicDown = false } = {},
+) {
   const context = await browser.newContext({
     viewport: { width, height: width < 768 ? 844 : 900 },
     hasTouch: width < 768,
@@ -172,12 +181,7 @@ async function open(width, { status = STATUS, delay = STATUS_DELAY_MS, cart = nu
     (route) => route.fulfill({ status: 200, body: "" }),
   );
   await page.route("**/api/tires**", (route) => route.fulfill({ status: 404, body: "" }));
-  await page.route("https://vpic.nhtsa.dot.gov/**", (route) =>
-    route.fulfill({
-      json: { Results: [{ Model_Name: "Camry" }, { Model_Name: "Corolla" }] },
-      headers: { "access-control-allow-origin": "*" },
-    }),
-  );
+  await mockVpic(page, { down: vpicDown });
 
   return {
     context,
@@ -286,6 +290,34 @@ async function fillAndRerender(h, mode, fields, typed) {
   await sleep(150);
   await expectDom(h.page, fields, `(${mode})`);
 }
+
+/**
+ * Year / Make / Model from the dropdowns. The model list loads for the year
+ * and make, so they go in first, then a real keystroke elsewhere (`pokes[0]`)
+ * re-renders the form: a silent pick is taken into state there and the
+ * models load. Then the model, and another keystroke (`pokes[1]`).
+ */
+async function fillVehicle(page, mode, { year, make, model }, pokes) {
+  const top = [
+    ["#year", year],
+    ["#make", make],
+  ];
+  await fill(page, mode, top);
+  await page.locator(pokes[0][0]).pressSequentially(pokes[0][1]);
+  await sleep(100);
+  await expectDom(page, top, `(${mode} year and make)`);
+  await page.locator(`#model option[value="${model}"]`).waitFor({ state: "attached" });
+  const all = [...top, ["#model", model]];
+  await fill(page, mode, [["#model", model]]);
+  await page.locator(pokes[1][0]).pressSequentially(pokes[1][1]);
+  await sleep(150);
+  await expectDom(page, all, `(${mode} vehicle)`);
+  return all;
+}
+
+/** Waits for the model list to finish loading (the select is enabled). */
+const modelsLoaded = (page) =>
+  page.waitForSelector("#model:not([disabled])", { state: "attached" });
 
 const MODES = ["typing", "automation", "autofill"];
 
@@ -487,16 +519,18 @@ for (const width of [390, 1440]) {
       await expectDom(page, [["#service-tire-installation", true]], "(step 1)");
       await next();
 
-      // Step 2: vehicle; tire size typed for real (another render).
+      // Step 2: vehicle from the dropdowns; tire size typed for real in
+      // two goes (the re-renders).
       await page.waitForSelector("#year");
-      const vehicle = [
-        ["#year", "2020"],
-        ["#make", "Toyota"],
-        ["#model", "Camry"],
-      ];
-      await fill(page, mode, vehicle);
-      await page.locator("#tireSize").pressSequentially("215/55R17");
-      await expectDom(page, vehicle, "(step 2)");
+      await fillVehicle(
+        page,
+        mode,
+        { year: "2020", make: "Toyota", model: "Camry" },
+        [
+          ["#tireSize", "215/55"],
+          ["#tireSize", "R17"],
+        ],
+      );
       await next();
 
       // Step 3: mobile address; parking notes typed for real.
@@ -623,14 +657,15 @@ for (const width of [390, 1440]) {
       await cont();
 
       await page.waitForSelector("#year");
-      const vehicle = [
-        ["#year", "2020"],
-        ["#make", "Toyota"],
-        ["#model", "Camry"],
-      ];
-      await fill(page, mode, vehicle);
-      await page.locator("#trim").pressSequentially("SE");
-      await expectDom(page, vehicle, "(vehicle)");
+      const vehicle = await fillVehicle(
+        page,
+        mode,
+        { year: "2020", make: "Toyota", model: "Camry" },
+        [
+          ["#trim", "S"],
+          ["#trim", "E"],
+        ],
+      );
       await cont();
 
       // Review: the fields read back from the DOM show up in the summary.
@@ -642,7 +677,8 @@ for (const width of [390, 1440]) {
       // Edit round trip: back to contact and forward keeps everything.
       await page.getByRole("button", { name: "Back" }).click();
       await page.waitForSelector("#year");
-      await expectDom(page, vehicle, "(back to vehicle)");
+      await modelsLoaded(page);
+      await expectDom(page, [...vehicle, ["#trim", "SE"]], "(back to vehicle)");
       await cont();
       await page.waitForSelector("#agree");
 
@@ -726,6 +762,166 @@ for (const width of [390, 1440]) {
     await page.waitForURL(/q=2/);
     assert.match(page.url(), /size=225%2F50R17/);
     noErrors(h.errors);
+    await h.context.close();
+  });
+
+  /* ---------------- Vehicle dropdowns: Other, silent picks, fallback ---------------- */
+
+  /** Contact and ship-to-store pickup typed in, landing on the vehicle step. */
+  async function checkoutToVehicle(h) {
+    const { page } = h;
+    await page.goto(`${BASE}/checkout`);
+    await page.waitForSelector("#firstName");
+    await fill(page, "typing", [
+      ["#firstName", "Robin"],
+      ["#lastName", "Other"],
+      ["#email", "robin@example.com"],
+      ["#phone", "9545550177"],
+    ]);
+    await h.afterStatus();
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.waitForSelector("#fulfillment-pickup");
+    await page.locator("#fulfillment-pickup").check();
+    await page.waitForSelector("#date");
+    await fill(page, "typing", [
+      ["#date", nextWeekday()],
+      ["#timeWindow", "10-12"],
+    ]);
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.waitForSelector("#year");
+  }
+
+  async function placeCheckout(h) {
+    const { page } = h;
+    await page.waitForSelector("#agree");
+    await page.locator("#agree").check();
+    await page.getByRole("button", { name: "Place Order Request" }).click();
+    await waitFor(() => h.sent.checkout.length === 1, "/api/checkout");
+    return h.sent.checkout[0];
+  }
+
+  await check(`${width} /checkout vehicle: select errors, "Other / not listed" model opens a text box and is sent`, async () => {
+    const h = await open(width, { cart: CART, delay: 0 });
+    const { page } = h;
+    await checkoutToVehicle(h);
+    const cont = () => page.getByRole("button", { name: "Continue" }).click();
+
+    // Nothing picked: the select-worded errors, tied to their selects.
+    await cont();
+    await page.getByText("Choose the vehicle year.").waitFor();
+    await page.getByText("Choose the make, like Toyota or Ford.").waitFor();
+    await page.getByText("Choose the model, like Camry or F-150.").waitFor();
+    assert.equal(await page.locator("#year").getAttribute("aria-describedby"), "year-error");
+    assert.equal(await page.locator("#year").getAttribute("aria-invalid"), "true");
+    // The model waits for a year and make.
+    assert.equal(await page.locator("#model").isDisabled(), true, "model waits");
+
+    await page.selectOption("#year", "2019");
+    await page.selectOption("#make", "Toyota");
+    await page.locator('#model option[value="Tacoma"]').waitFor({ state: "attached" });
+    const listed = await page.locator("#model option").allTextContents();
+    assert.ok(listed.includes("Tundra") && listed.includes("RAV4"), "NHTSA models listed");
+    assert.ok(!listed.includes("Scion xB"), "Scion lives under its own make");
+    assert.equal(listed.at(-1), "Other / not listed", "Other is last");
+
+    await page.selectOption("#model", "Other");
+    await page.waitForSelector("#model-other");
+    await cont();
+    await page.getByText("Type the vehicle model.").waitFor();
+    assert.equal(await page.locator("#model-other").getAttribute("aria-describedby"), "model-other-error");
+    await page.locator("#model-other").fill("Land Cruiser 70");
+    await cont();
+
+    await page.waitForSelector("#agree");
+    const review = await page.locator("form", { has: page.locator("#agree") }).innerText();
+    assert.ok(review.includes("2019 Toyota Land Cruiser 70"), "review shows the typed model");
+    // Back: a model not in the list comes back as Other with its text.
+    await page.getByRole("button", { name: "Back" }).click();
+    await page.waitForSelector("#model-other");
+    await expectDom(page, [
+      ["#year", "2019"],
+      ["#make", "Toyota"],
+      ["#model", "Other"],
+      ["#model-other", "Land Cruiser 70"],
+    ], "(back to vehicle)");
+    await cont();
+    const order = await placeCheckout(h);
+    assert.match(order.notes, /^Vehicle: 2019 Toyota Land Cruiser 70$/m);
+    noErrors(h.errors);
+    await h.context.close();
+  });
+
+  await check(`${width} /checkout vehicle: silent picks of "Other" (year and make) and silent text are kept and sent`, async () => {
+    const h = await open(width, { cart: CART, delay: 0 });
+    const { page } = h;
+    await checkoutToVehicle(h);
+
+    // select.value set with no events, then a real keystroke re-renders.
+    await fill(page, "automation", [
+      ["#year", "Other"],
+      ["#make", "Other"],
+    ]);
+    await page.locator("#trim").pressSequentially("Reg");
+    await page.waitForSelector("#year-other");
+    await page.waitForSelector("#make-other");
+    // An "Other" make has no model list: the model is a text box.
+    assert.equal(await page.locator("#model").evaluate((n) => n.tagName), "INPUT");
+    await fill(page, "automation", [
+      ["#year-other", "1978"],
+      ["#make-other", "Studebaker"],
+      ["#model", "Lark"],
+    ]);
+    await page.locator("#trim").pressSequentially("al");
+    await sleep(150);
+    await expectDom(page, [
+      ["#year", "Other"],
+      ["#year-other", "1978"],
+      ["#make", "Other"],
+      ["#make-other", "Studebaker"],
+      ["#model", "Lark"],
+      ["#trim", "Regal"],
+    ], "(silent Other)");
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.waitForSelector("#agree");
+    const order = await placeCheckout(h);
+    assert.match(order.notes, /^Vehicle: 1978 Studebaker Lark Regal$/m);
+    noErrors(h.errors);
+    await h.context.close();
+  });
+
+  await check(`${width} vehicle: NHTSA down falls back to the size table; the hero's vehicle prefills /schedule`, async () => {
+    const h = await open(width, { delay: 0, vpicDown: true });
+    const { page } = h;
+    await page.goto(`${BASE}/`);
+    await page.waitForSelector("#finder-year");
+    await page.selectOption("#finder-year", "2019");
+    await page.selectOption("#finder-make", "Toyota");
+    await page.locator('#finder-model option[value="Tacoma"]').waitFor({ state: "attached" });
+    await page.selectOption("#finder-model", "Tacoma");
+    await page.getByRole("button", { name: "Find Tires" }).click();
+    await page.waitForURL(/find-my-tires/);
+
+    await page.goto(`${BASE}/schedule?service=tire-installation`);
+    await page.getByRole("button", { name: /^Next:/ }).click();
+    await page.waitForSelector("#year");
+    await modelsLoaded(page);
+    await expectDom(page, [
+      ["#year", "2019"],
+      ["#make", "Toyota"],
+      ["#model", "Tacoma"],
+    ], "(prefilled from the hero)");
+    const listed = await page.locator("#model option").allTextContents();
+    assert.deepEqual(
+      listed,
+      ["Select model", "4Runner", "Camry", "Corolla", "Highlander", "RAV4", "Tacoma", "Other / not listed"],
+      "size-table models plus Other",
+    );
+    await page.getByText("We couldn’t load the full model list.").waitFor();
+    // The prefilled vehicle passes the step.
+    await page.getByRole("button", { name: /^Next:/ }).click();
+    await page.waitForSelector("#address, #date");
+    // Only the vPIC outage itself may log.
+    noErrors(h.errors.filter((e) => !/Failed to load resource/.test(e)));
     await h.context.close();
   });
 }

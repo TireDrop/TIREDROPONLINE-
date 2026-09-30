@@ -39,6 +39,10 @@ import {
   useFormsWired,
 } from "../../data/forms.js";
 import { SERVICES, getService } from "../../data/services.js";
+import { recallVehicle } from "../../data/vehicles.js";
+import VehicleSelect, {
+  vehicleErrors,
+} from "../../components/shop/VehicleSelect.jsx";
 
 const STEP_LABELS = ["Service", "Vehicle", "Location", "Time", "Contact"];
 const LAST_STEP = STEP_LABELS.length;
@@ -125,19 +129,15 @@ function validateStep(step, form) {
   }
 
   if (step === 2) {
-    const year = Number(form.year);
-    if (!form.year.trim()) {
-      errors.year = "Enter your vehicle's model year.";
-    } else if (
-      !/^\d{4}$/.test(form.year.trim()) ||
-      year < 1960 ||
-      year > MAX_MODEL_YEAR
-    ) {
-      errors.year = `Enter a four-digit year between 1960 and ${MAX_MODEL_YEAR}.`;
-    }
-    if (!form.make.trim()) errors.make = "Enter the make, for example Toyota.";
-    if (!form.model.trim())
-      errors.model = "Enter the model, for example Camry.";
+    Object.assign(
+      errors,
+      vehicleErrors(form, {
+        year: "Choose your vehicle's model year.",
+        yearRange: `Enter a four-digit year between 1960 and ${MAX_MODEL_YEAR}.`,
+        make: "Choose the make, for example Toyota.",
+        model: "Choose the model, for example Camry.",
+      }),
+    );
   }
 
   if (step === 3 && form.locationType === "mobile") {
@@ -446,8 +446,25 @@ export default function SchedulePage() {
     setErrors(found);
     const firstKey = Object.keys(found)[0];
     if (firstKey) {
-      document.getElementById(firstKey)?.focus();
+      // A vehicle typed under "Other / not listed" has its own text box.
+      (
+        document.getElementById(`${firstKey}-other`) ??
+        document.getElementById(firstKey)
+      )?.focus();
       return;
+    }
+    // The vehicle step starts from the vehicle last picked in the finder
+    // (the hero or Find My Tires), unless one is already filled in.
+    if (step === 1) {
+      const last = recallVehicle();
+      if (last && !current.year && !current.make && !current.model) {
+        setForm((prev) => ({
+          ...prev,
+          year: last.year,
+          make: last.make,
+          model: last.model,
+        }));
+      }
     }
     setStep((s) => Math.min(s + 1, LAST_STEP));
   }
@@ -811,33 +828,14 @@ export default function SchedulePage() {
                   specs before the van rolls out.
                 </p>
 
-                <div className="mt-6 grid gap-5 sm:grid-cols-2">
-                  <TextField
-                    id="year"
-                    label="Year"
-                    inputMode="numeric"
-                    autoComplete="off"
-                    placeholder="2019"
-                    value={form.year}
-                    onChange={update("year")}
-                    error={errors.year}
-                  />
-                  <TextField
-                    id="make"
-                    label="Make"
-                    placeholder="Toyota"
-                    value={form.make}
-                    onChange={update("make")}
-                    error={errors.make}
-                  />
-                  <TextField
-                    id="model"
-                    label="Model"
-                    placeholder="Tacoma"
-                    value={form.model}
-                    onChange={update("model")}
-                    error={errors.model}
-                  />
+                <VehicleSelect
+                  className="mt-6 grid gap-5 sm:grid-cols-2"
+                  value={form}
+                  onChange={(patch) =>
+                    setForm((prev) => ({ ...prev, ...patch }))
+                  }
+                  errors={errors}
+                >
                   <TextField
                     id="tireSize"
                     label="Tire size"
@@ -847,7 +845,7 @@ export default function SchedulePage() {
                     onChange={update("tireSize")}
                     error={errors.tireSize}
                   />
-                </div>
+                </VehicleSelect>
 
                 <p className="mt-5 text-xs leading-relaxed text-smoke">
                   Tire size is printed on the sidewall and on the sticker inside
