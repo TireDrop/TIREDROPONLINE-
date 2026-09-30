@@ -109,7 +109,7 @@ Cooper Tire gives the speed bands behind each grade:
 
 Per the federal standard, grade **C** is the minimum level all passenger car tires must meet. So a C isn't a failing grade. It's the baseline every legal passenger tire clears.
 
-Heat is worth caring about in Miami in August, but the temperature grade is a lab measurement under set load and pressure. Correct inflation matters just as much in real life. Keep pressure at the placard number, checked cold.
+Heat is worth caring about in Miami in August, but the temperature grade is a lab measurement under set load and pressure. Correct inflation matters just as much in real life. Keep pressure at the placard number, checked cold. Our guide to [Florida heat and tires](/learn/florida/florida-heat-tires) covers the rest of the heat picture.
 
 ## Two made-up grade lines, read side by side
 

@@ -42,6 +42,7 @@ sources:
 related:
   - /install
   - /mobile-service
+  - /blog/buy-tires-online-vs-local-shop
   - /learn/sidewall/dot-date-code
   - /learn/age/tire-recalls-registration
   - /tires
@@ -83,7 +84,7 @@ You can send the order free to the Sunrise shop and have the van bring it to you
 - a driveway, a flat stretch of street, an office lot or a jobsite area
 - at a condo or apartment complex, the complex name and any gate code or call-up instructions when you book
 
-Mobile work covers installation, balancing, puncture repair, rotation and TPMS service. See the [mobile service page](/mobile-service) for how booking works.
+Mobile work covers installation, balancing, puncture repair, rotation and TPMS service. See the [mobile service page](/mobile-service) for how booking works, and our post on [mobile installation at a condo or office](/blog/mobile-tire-install-condo-office) for gate codes and garage rules.
 
 ## Route 3: Ship home and take them to a fitter
 

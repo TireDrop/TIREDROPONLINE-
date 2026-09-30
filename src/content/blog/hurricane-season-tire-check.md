@@ -47,6 +47,8 @@ related:
   - /learn/pressure/tpms-light
   - /learn/damage/spare-tire-types
   - /blog/king-tide-salt-water-wheels
+  - /blog/flooded-car-tires-wheels
+  - /blog/storm-cleanup-nail-in-tire
   - /mobile-service
 cta:
   label: "Check your tires"
@@ -123,8 +125,8 @@ Extreme Tires in Sunrise installs tires in the shop and by mobile van across its
 The roads you drove last week may not be the same roads now. What to watch for:
 
 - **Floodwater.** Don't drive into it. The National Weather Service says **12 inches of rushing water can carry away most cars and 2 feet can carry away SUVs and trucks**, and the road underneath may be damaged. Turn around.
-- **Debris.** Roofing nails, screws and broken glass end up in the street during cleanup. After driving through debris, walk around the car and look at the tread. If you find a nail or screw, have the tire inspected.
-- **A car that sat in water.** NHTSA's guidance is not to drive a flooded vehicle until a technician has checked it, because damage may not be visible. For hybrids and EVs, NHTSA also says not to park a flood-damaged vehicle with a lithium-ion battery in a garage or within 50 feet of a home, another vehicle or anything combustible.
+- **Debris.** Roofing nails, screws and broken glass end up in the street during cleanup. After driving through debris, walk around the car and look at the tread. If you find a nail or screw, have the tire inspected. Our post on [storm cleanup nails](/blog/storm-cleanup-nail-in-tire) covers which punctures can be repaired.
+- **A car that sat in water.** NHTSA's guidance is not to drive a flooded vehicle until a technician has checked it, because damage may not be visible. For hybrids and EVs, NHTSA also says not to park a flood-damaged vehicle with a lithium-ion battery in a garage or within 50 feet of a home, another vehicle or anything combustible. More in our post on [a car that sat in floodwater](/blog/flooded-car-tires-wheels).
 - **Warning lights.** A TPMS light, a pull to one side or a new vibration after driving through storm damage are all reasons to have the tires and wheels looked at.
 
 ## The checklist, in one place

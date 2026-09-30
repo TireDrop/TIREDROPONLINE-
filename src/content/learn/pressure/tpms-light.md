@@ -44,6 +44,7 @@ sources:
     url: "https://www.nhtsa.gov/summer-driving-tips"
 related:
   - /learn/pressure/tpms-sensors
+  - /learn/pressure/tire-pressure-temperature
   - /learn/pressure/how-to-check-tire-pressure
   - /learn/tread/tread-depth
   - /mobile-service
@@ -101,7 +102,7 @@ South Florida doesn't get much cold, but a front does bring the occasional cool 
 
 NHTSA's explanation is simple: **as the outside temperature drops, so does tire inflation pressure.** A tire that was already running a little low can cross the 25 percent line overnight and trip the light at 7 a.m. Then the day warms up, the pressure rises and the light may go out on its own.
 
-The light going out doesn't mean the problem went away. The tire was low enough to trigger a warning, so set all four to the placard pressure, cold, before the afternoon heat hides it again.
+The light going out doesn't mean the problem went away. The tire was low enough to trigger a warning, so set all four to the placard pressure, cold, before the afternoon heat hides it again. Our guide to [tire pressure and temperature](/learn/pressure/tire-pressure-temperature) shows how much a front can move the reading.
 
 ## Came on after new tires or a rotation?
 
