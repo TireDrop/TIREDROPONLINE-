@@ -445,7 +445,7 @@ export default function GalleryPage() {
             <p className="lede mt-4 max-w-xl text-bone/70">
               Tires shipped anywhere in {BUSINESS.shipping.area}, free to the{" "}
               {BUSINESS.shop.city} shop if you want them fitted, and the van for
-              driveways around Broward.
+              driveways from Miami-Dade to Palm Beach.
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row md:flex-col">

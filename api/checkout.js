@@ -6,8 +6,9 @@
 // The server prices every line itself; any client price is ignored.
 // Shipping is free to the 48 contiguous states + DC, "pickup" is free
 // ship-to-store at Extreme Tires in Sunrise, and "mobile" is van install at
-// the customer's address inside the South Florida install area
-// (BUSINESS.installArea). Mobile needs an FL address in one of those cities.
+// the customer's address inside Miami-Dade, Broward or Palm Beach county.
+// Mobile needs an FL address whose ZIP passes isInServiceArea()
+// (src/data/serviceArea.js).
 //
 // Responses:
 //   { mode: "redirect", url, orderRef, total }   Shopify-hosted checkout

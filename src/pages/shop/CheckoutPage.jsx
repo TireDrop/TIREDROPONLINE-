@@ -25,12 +25,12 @@ import {
   Select,
 } from "../../components/ui/index.jsx";
 import { useCart, money } from "../../context/CartContext.jsx";
+import { BUSINESS } from "../../data/business.js";
 import {
-  BUSINESS,
-  INSTALL_AREA_LIST,
   MOBILE_AREA_ERROR,
-  installAreaCity,
-} from "../../data/business.js";
+  SERVICE_AREA_LABEL,
+  isInServiceArea,
+} from "../../data/serviceArea.js";
 import { getService } from "../../data/services.js";
 import { ApiError, submitCheckout } from "../../data/api.js";
 import { useApiStatus } from "../../data/useApi.js";
@@ -171,7 +171,7 @@ const FULFILLMENT = [
     value: "mobile",
     icon: Truck,
     title: "Mobile install at my address (South Florida)",
-    copy: `Our van brings the tires and fits them where you park. Covers ${INSTALL_AREA_LIST}.`,
+    copy: `Our van brings the tires and fits them where you park. Covers ${SERVICE_AREA_LABEL}.`,
   },
 ];
 
@@ -220,13 +220,12 @@ function validateInstall(f, { hasShopInstall = false } = {}) {
       "Your cart has a set booked for installation at the shop, which is included in the total below. Choose \u201cFree ship-to-store\u201d above, or turn shop installation off in your cart to book mobile install instead.";
 
   // Shipping and mobile install need an address; ship-to-store goes to the
-  // shop. Mobile is Florida only, inside the install area, and the server
-  // checks both again.
+  // shop. Mobile is Florida only, with a ZIP in Miami-Dade, Broward or Palm
+  // Beach (src/data/serviceArea.js), and the server checks both again.
   const mobile = f.fulfillment === "mobile";
   if (f.fulfillment === "ship" || mobile) {
     if (!f.street.trim()) e.street = "Enter the street address.";
     if (!f.city.trim()) e.city = "Enter the city.";
-    else if (mobile && !installAreaCity(f.city)) e.city = MOBILE_AREA_ERROR;
     if (!mobile) {
       if (!f.state) e.state = "Choose the state.";
       else if (!SHIP_STATES.some(([code]) => code === f.state))
@@ -235,6 +234,7 @@ function validateInstall(f, { hasShopInstall = false } = {}) {
     if (!f.zip.trim()) e.zip = "Enter a ZIP code.";
     else if (!ZIP_RE.test(f.zip.trim()))
       e.zip = "Enter a 5-digit ZIP code, like 33351.";
+    else if (mobile && !isInServiceArea(f.zip)) e.zip = MOBILE_AREA_ERROR;
   }
 
   const needsDate = f.fulfillment === "pickup";
@@ -621,11 +621,7 @@ export default function CheckoutPage() {
               address: {
                 line1: form.street.trim(),
                 line2: form.line2.trim(),
-                // The install area's own spelling, so "coral springs" reads
-                // cleanly on the order.
-                city: mobile
-                  ? (installAreaCity(form.city) ?? form.city.trim())
-                  : form.city.trim(),
+                city: form.city.trim(),
                 state: mobile ? "FL" : form.state,
                 zip: form.zip.trim(),
               },
@@ -708,7 +704,7 @@ export default function CheckoutPage() {
     const shipTo = [
       f.street,
       f.line2,
-      `${mobile ? (installAreaCity(f.city) ?? f.city) : f.city}, ${mobile ? "FL" : f.state} ${f.zip}`.trim(),
+      `${f.city}, ${mobile ? "FL" : f.state} ${f.zip}`.trim(),
     ]
       .filter(Boolean)
       .join(", ");
@@ -1156,7 +1152,7 @@ export default function CheckoutPage() {
                         />
                         <p className="min-w-0 text-sm leading-relaxed text-smoke">
                           <span className="font-display font-bold text-ink">
-                            The van covers {INSTALL_AREA_LIST}.
+                            The van covers {SERVICE_AREA_LABEL}.
                           </span>{" "}
                           We call to confirm fitment, schedule the van and take
                           payment. {MOBILE_INSTALL_FROM}
@@ -1188,21 +1184,7 @@ export default function CheckoutPage() {
                       value={form.city}
                       onChange={onInput}
                       error={errors.city}
-                      list={mobile ? "install-area-cities" : undefined}
-                      placeholder={mobile ? "Sunrise" : undefined}
-                      hint={
-                        mobile
-                          ? "Pick one of the towns the van covers."
-                          : undefined
-                      }
                     />
-                    {mobile && (
-                      <datalist id="install-area-cities">
-                        {BUSINESS.installArea.map((c) => (
-                          <option key={c} value={c} />
-                        ))}
-                      </datalist>
-                    )}
                     {mobile ? (
                       <TextField
                         id="state-fixed"
@@ -1238,6 +1220,11 @@ export default function CheckoutPage() {
                       value={form.zip}
                       onChange={onInput}
                       error={errors.zip}
+                      hint={
+                        mobile
+                          ? "The van goes by ZIP: Miami-Dade, Broward or Palm Beach."
+                          : undefined
+                      }
                     />
                     {!mobile && (
                       <p className="-mt-2 text-xs leading-relaxed text-smoke sm:col-span-2">
@@ -1409,7 +1396,7 @@ export default function CheckoutPage() {
                               form.street,
                               form.line2.trim(),
                               mobile
-                                ? `${installAreaCity(form.city) ?? form.city}, FL ${form.zip}`
+                                ? `${form.city}, FL ${form.zip}`
                                 : `${form.city}, ${form.state} ${form.zip}`,
                             ]
                               .filter(Boolean)

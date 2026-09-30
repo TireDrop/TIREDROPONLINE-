@@ -324,10 +324,10 @@ const mobileOrder = (address = {}) =>
   });
 
 const AREA_ERROR =
-  "Mobile install covers Sunrise, Plantation, Fort Lauderdale, Davie, Weston, Coral Springs, Tamarac, Lauderhill, Pembroke Pines and Miramar. Choose ship-to-store or call (954) 773-1896.";
+  "Mobile install covers Miami-Dade, Broward and Palm Beach counties. Choose ship-to-home or ship-to-store instead.";
 
-test("mobile install accepts an in-area city, case-insensitive and trimmed", async () => {
-  const res = await call(checkoutHandler, { method: "POST", body: mobileOrder({ city: "  fort LAUDERDALE " }) });
+test("mobile install accepts an in-area ZIP and keeps the city as typed", async () => {
+  const res = await call(checkoutHandler, { method: "POST", body: mobileOrder({ city: "Fort Lauderdale", zip: "33301" }) });
   assert.equal(res.statusCode, 200);
   assert.equal(res.body.mode, "request");
   assert.equal(res.body.delivery, "mobile");
@@ -338,10 +338,38 @@ test("mobile install accepts an in-area city, case-insensitive and trimmed", asy
   assert.equal(res.body.serviceAddress.state, "FL");
 });
 
-test("mobile install turns away a city outside the install area with a 400", async () => {
-  const res = await call(checkoutHandler, { method: "POST", body: mobileOrder({ city: "Boca Raton", zip: "33431" }) });
-  assert.equal(res.statusCode, 400);
-  assert.equal(res.body.error, AREA_ERROR);
+test("mobile install covers all three counties by ZIP, whatever the city says", async () => {
+  for (const [city, zip] of [
+    ["Sunrise", "33351"],
+    ["Miami Beach", "33139"],
+    ["West Palm Beach", "33401"],
+    ["Boca Raton", "33431"],
+    ["Sunrise", "33351-1234"],
+  ]) {
+    const res = await call(checkoutHandler, { method: "POST", body: mobileOrder({ city, zip }) });
+    assert.equal(res.statusCode, 200, `${city} ${zip}`);
+    assert.equal(res.body.delivery, "mobile");
+  }
+});
+
+test("mobile install turns away a ZIP outside the three counties with a 400", async () => {
+  for (const [city, zip] of [
+    ["Key West", "33040"],
+    ["Stuart", "34997"],
+    ["Sunrise", "34997"],
+  ]) {
+    const res = await call(checkoutHandler, { method: "POST", body: mobileOrder({ city, zip }) });
+    assert.equal(res.statusCode, 400, `${city} ${zip}`);
+    assert.equal(res.body.error, AREA_ERROR);
+  }
+});
+
+test("ship orders are not held to the mobile ZIP rule", async () => {
+  const res = await call(checkoutHandler, {
+    method: "POST",
+    body: validOrder({ delivery: "ship", address: { line1: "1 Main St", city: "New York", state: "NY", zip: "10001" } }),
+  });
+  assert.equal(res.statusCode, 200);
 });
 
 test("mobile install rejects a non-FL state with a 400", async () => {

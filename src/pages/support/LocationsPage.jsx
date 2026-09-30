@@ -13,6 +13,8 @@ import {
   Wrench,
 } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
+import { SERVICE_AREA_LABEL } from "../../data/serviceArea.js";
+import ServiceAreaCounties from "../../components/ui/ServiceAreaCounties.jsx";
 import { MOBILE_SERVICES, SHOP_SERVICES } from "../../data/services.js";
 import {
   Badge,
@@ -85,7 +87,7 @@ const FITTING_OPTIONS = [
   {
     icon: Truck,
     title: "Let the van come to you",
-    copy: "In Broward County the van can fit them in your driveway, your office lot or a jobsite. Same equipment, no waiting room.",
+    copy: "In Miami-Dade, Broward and Palm Beach counties the van can fit them in your driveway, your office lot or a jobsite. Same equipment, no waiting room.",
     to: "/mobile-service",
     cta: "Mobile installation",
   },
@@ -99,7 +101,7 @@ export default function LocationsPage() {
     <>
       <Seo
         title="The Shop & Install Area"
-        description={`${BUSINESS.name} ships nationwide, and ${BUSINESS.parent} at ${BUSINESS.shop.full} fits what we sell. Hours, directions, ship-to-store pickup and the Broward towns the mobile vans cover.`}
+        description={`${BUSINESS.name} ships nationwide, and ${BUSINESS.parent} at ${BUSINESS.shop.full} fits what we sell. Hours, directions, ship-to-store pickup and the mobile install area: ${SERVICE_AREA_LABEL}.`}
       />
 
       <PageHero
@@ -257,7 +259,8 @@ export default function LocationsPage() {
                 <div>
                   <dt className="label">Installs in</dt>
                   <dd className="text-ink">
-                    Broward County, Florida — at the shop or by mobile van.
+                    At the {BUSINESS.shop.city} shop, or by mobile van in{" "}
+                    {SERVICE_AREA_LABEL}, Florida.
                   </dd>
                 </div>
               </dl>
@@ -390,7 +393,7 @@ export default function LocationsPage() {
         <SectionHead
           eyebrow="Mobile Install Area"
           title="Where the vans run"
-          lede="Mobile installation is Broward County only — a South Florida bonus on top of the national store. We keep the map tight on purpose, because that is how the van actually arrives when we said it would."
+          lede={`Mobile installation covers ${SERVICE_AREA_LABEL} — a South Florida bonus on top of the national store. Whether the van can come is decided by the ZIP code of the address.`}
           action={
             <Link to="/schedule" className="btn-primary">
               Check My Address
@@ -398,17 +401,7 @@ export default function LocationsPage() {
           }
         />
 
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {BUSINESS.installArea.map((city) => (
-            <li
-              key={city}
-              className="card flex items-center gap-2 px-4 py-3 text-sm text-ink"
-            >
-              <MapPin size={15} aria-hidden className="shrink-0 text-drop" />
-              {city}
-            </li>
-          ))}
-        </ul>
+        <ServiceAreaCounties />
 
         <div className="card mt-8 p-6">
           <div className="mb-4 flex items-center gap-3">
@@ -438,7 +431,7 @@ export default function LocationsPage() {
 
         <div className="card mt-6 flex flex-col gap-4 border-l-4 border-l-amber p-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <Badge tone="amber">Outside Broward?</Badge>
+            <Badge tone="amber">Outside the three counties?</Badge>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-smoke">
               Then the van is not coming — but the tires still are. Order them
               shipped to your address and have your own installer fit them, or

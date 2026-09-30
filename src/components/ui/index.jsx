@@ -8,6 +8,7 @@ import React, {
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
+import { SERVICE_AREA_SCHEMA } from "../../data/serviceArea.js";
 import { getProduct } from "../../data/products.js";
 import { getService } from "../../data/services.js";
 
@@ -164,10 +165,8 @@ function shopNode() {
       addressCountry: "US",
     },
     openingHoursSpecification: openingHours(),
-    areaServed: BUSINESS.installArea.map((city) => ({
-      "@type": "City",
-      name: `${city}, FL`,
-    })),
+    // Miami-Dade, Broward and Palm Beach counties (src/data/serviceArea.js).
+    areaServed: SERVICE_AREA_SCHEMA.map((area) => ({ ...area })),
     // No aggregateRating, no review and no foundingDate. This site publishes
     // no reviews of its own — it links to the shop's Google and Yelp profiles
     // instead — and marking up reviews or ratings it does not hold breaches
@@ -278,10 +277,8 @@ function serviceNode(service, url) {
     description: service.blurb,
     serviceType: service.name,
     provider: { "@id": `${ORIGIN}/#shop` },
-    areaServed: BUSINESS.installArea.map((city) => ({
-      "@type": "City",
-      name: `${city}, FL`,
-    })),
+    // Miami-Dade, Broward and Palm Beach counties (src/data/serviceArea.js).
+    areaServed: SERVICE_AREA_SCHEMA.map((area) => ({ ...area })),
   };
 }
 
