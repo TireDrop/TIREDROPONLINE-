@@ -11,9 +11,17 @@ export const SOURCES = {
     label: "NHTSA TireWise",
     url: "https://www.nhtsa.gov/vehicle-safety/tires",
   },
+  S2: {
+    label: "NHTSA, Tires in the Garage",
+    url: "https://www.nhtsa.gov/sites/nhtsa.gov/files/2021-11/Tires_InTheGarage_Infographic_102621_v1_-eng-tag.pdf",
+  },
   S3: {
     label: "NHTSA, Tire Safety: Everything Rides On It",
     url: "https://www.nhtsa.gov/document/tire-safety",
+  },
+  S4: {
+    label: "NHTSA Summer Driving Tips",
+    url: "https://www.nhtsa.gov/summer-driving-tips",
   },
   S5: {
     label: "NHTSA Recalls",
@@ -35,9 +43,17 @@ export const SOURCES = {
     label: "USTMA Tire Care Essentials",
     url: "https://www.ustires.org/tire-care-safety/tire-care-essentials",
   },
+  S14: {
+    label: "USTMA Tire Repair Basics",
+    url: "https://www.ustires.org/tire-care-safety/tire-repair-basics",
+  },
   S16: {
     label: "USTMA Tire Recall Lookup",
     url: "https://recallinfo.ustires.org/TireRecallSearch/Tin",
+  },
+  S19: {
+    label: "Tire Industry Association, Tire Repair",
+    url: "https://www.tireindustry.org/resources/consumer-education/consumer-safety-overview/tire-repair/",
   },
   S31: {
     label: "Consumer Reports, worn-tire performance",
@@ -50,6 +66,18 @@ export const SOURCES = {
   S36: {
     label: "Michelin, Tire Markings Explained",
     url: "https://www.michelinman.com/auto/auto-tips-and-advice/tires-101/tire-markings-explained",
+  },
+  S37: {
+    label: "Michelin, Sidewall Bulge or Bubble",
+    url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-damage/sidewall-problems/symptom-bulge-or-bubble",
+  },
+  S39: {
+    label: "Michelin, Tire Damage Guide",
+    url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-damage",
+  },
+  S42: {
+    label: "Michelin, Changing Tire Sizes",
+    url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-buying-guide/change-size-spec",
   },
   S46: {
     label: "Bridgestone, Replacement Guidance",
@@ -75,6 +103,10 @@ export const SOURCES = {
     label: "Yokohama, UTQG",
     url: "https://www.yokohamatire.com/tires-101/how-to-read-a-sidewall-1/utqg",
   },
+  C2: {
+    label: "Tire Rack, Temperature and Tire Pressure",
+    url: "https://www.tirerack.com/upgrade-garage/how-does-temperature-change-affect-tire-air-pressure",
+  },
   C3: {
     label: "Tire Rack, How Much Tread Depth Is Enough",
     url: "https://www.tirerack.com/upgrade-garage/how-much-tread-depth-is-enough",
@@ -83,17 +115,12 @@ export const SOURCES = {
     label: "Tire Rack, Tread Depth of a Tire",
     url: "https://www.tirerack.com/upgrade-garage/what-is-the-tread-depth-of-a-tire",
   },
-  C27: {
-    label: "Tire Review, Quarter Test",
-    url: "https://www.tirereview.com/quarter-tire-test-tread-depth/",
-  },
-  // D6 Plus-size & speedometer (S35 and S54 above also serve D5).
-  S42: {
-    label: "Michelin, Changing Tire Sizes",
-    url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-buying-guide/change-size-spec",
-  },
   C14: {
     label: "Discount Tire, Speedometer Accuracy",
     url: "https://www.discounttire.com/learn/speedometer-accuracy",
+  },
+  C27: {
+    label: "Tire Review, Quarter Test",
+    url: "https://www.tirereview.com/quarter-tire-test-tread-depth/",
   },
 };
