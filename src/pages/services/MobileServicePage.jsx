@@ -48,8 +48,8 @@ const STEPS = [
   },
   {
     icon: Phone,
-    title: "We confirm a 2-hour window",
-    body: "A dispatcher confirms the appointment and locks in a two-hour arrival window, so you are not burning a whole day waiting on a van.",
+    title: "We confirm an arrival window",
+    body: "We confirm an arrival window when we book. A dispatcher calls to set the appointment, so you are not burning a whole day waiting on a van.",
   },
   {
     icon: Zap,
@@ -115,7 +115,7 @@ const COMPARISON = [
     them: "Drive over and hope the bay is open",
   },
   {
-    us: "A two-hour window you actually pick",
+    us: "We confirm an arrival window when we book",
     them: '"Should be a couple hours" with no promise',
   },
   {
@@ -218,7 +218,7 @@ export default function MobileServicePage() {
           </span>
           <span className="flex items-center gap-1.5">
             <Check size={14} aria-hidden className="text-amber" />
-            Two-hour arrival windows
+            We confirm an arrival window when we book
           </span>
           <span className="flex items-center gap-1.5">
             <Check size={14} aria-hidden className="text-amber" />
@@ -463,8 +463,9 @@ export default function MobileServicePage() {
             <p className="eyebrow-dark mb-2">{BUSINESS.tagline}</p>
             <h2 className="h2">Stop planning your day around a tire shop</h2>
             <p className="lede mt-3 text-bone/70">
-              Tell us the vehicle and the address. We will bring the tires, the
-              tools and the two-hour window — and leave with your old set.
+              Tell us the vehicle and the address. We will bring the tires and the
+              tools, and leave with your old set. We confirm an arrival window
+              when we book.
             </p>
           </div>
           <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">

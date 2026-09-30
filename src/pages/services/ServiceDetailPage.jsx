@@ -239,7 +239,7 @@ export default function ServiceDetailPage() {
             <h3 className="h3">Ready to book?</h3>
             <p className="mt-2 text-sm leading-relaxed text-smoke">
               {service.mobile
-                ? "Pick a two-hour window and the van rolls to your address."
+                ? "Book online and the van comes to your address. We confirm an arrival window when we book."
                 : `Pick a window and there will be a bay open in ${BUSINESS.shop.city} when you arrive.`}
             </p>
             <div className="mt-5 flex flex-col gap-3">

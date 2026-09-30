@@ -53,7 +53,7 @@ does not promise a match the page will not perform.
 | Financing   | `src/pages/support/FinancingPage.jsx` (~line 219)    | "Request received… Someone will call you at {phone}"                                     |
 | Fleet quote | `src/pages/shop/CommercialTiresPage.jsx` (~line 199) | "we have your details… A fleet specialist will follow up… usually the same business day" |
 | Review      | `src/pages/support/ReviewsPage.jsx` (~line 195)      | "Thank you… We read every one of these"                                                  |
-| Booking     | `src/pages/services/SchedulePage.jsx` (~line 416)    | "We have your request. A dispatcher confirms your two-hour window by phone"              |
+| Booking     | `src/pages/services/SchedulePage.jsx` (~line 416)    | "We have your request. We confirm an arrival window when we book, by phone."              |
 
 Nothing is sent. `ReviewsPage` says so in its own comment: _"Client-side review
 composer — nothing is submitted anywhere."_

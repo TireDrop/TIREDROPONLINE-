@@ -523,7 +523,7 @@ export default function SchedulePage() {
         <PageHero
           eyebrow="You're on the schedule"
           title="Appointment requested"
-          lede="We have your request. A dispatcher confirms your two-hour window by phone."
+          lede="We have your request. We confirm an arrival window when we book, by phone."
         />
         <Section className="bg-fog">
           <div className="mx-auto max-w-2xl">
@@ -713,7 +713,7 @@ export default function SchedulePage() {
         title="Book your appointment"
         lede={`Five quick steps. Pick the service, tell us about the vehicle, and choose where and when. Booking the fitting for tires you ordered on ${BUSINESS.name}? Choose Tire Installation. ${
           wired
-            ? "A dispatcher confirms your two-hour window by phone."
+            ? "We confirm an arrival window when we book, by phone."
             : "At the end this lays out what to read down the phone — the window is confirmed on that call."
         }`}
       >
@@ -1073,9 +1073,9 @@ export default function SchedulePage() {
                   Pick your day and window
                 </h2>
                 <p className="mt-2 text-sm text-smoke">
-                  We run Monday through Saturday and are closed Sunday. Your
-                  two-hour arrival window gets confirmed by phone before the day
-                  of service.
+                  We run Monday through Saturday and are closed Sunday. Pick the
+                  window that suits you; we confirm an arrival window when we
+                  book, by phone, before the day of service.
                 </p>
 
                 <div className="mt-6 max-w-xs">
