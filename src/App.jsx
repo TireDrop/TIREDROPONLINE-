@@ -21,7 +21,7 @@ import { lazyPage } from "./lib/lazyPage.js";
 // the three tool pages alone are ~1,400-1,900 lines each and are not on the
 // path to a first paint. Splitting took the cold home-page load from 412 kB to
 // 290 kB over the wire, and the JS from 209 kB to 91 kB, with no extra requests
-// on the home page. Measurements and method are in docs/technical-audit.md.
+// on the home page. Measurements and method are in docs/audits/2026-09-24-technical-audit.md.
 //
 // HomePage stays a static import on purpose: it is the first paint for most
 // visitors, and making it wait on a second round trip would trade the win away

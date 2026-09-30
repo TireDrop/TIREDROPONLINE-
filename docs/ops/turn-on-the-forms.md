@@ -14,7 +14,7 @@ the one thing on this site that makes a promise nothing keeps.
 ## What turns it on
 
 1. **The TireDrop Shopify app is connected.** The same `SHOPIFY_*` variables
-   in Vercel that checkout and the newsletter use (`DEPLOY.md`). The app
+   in Vercel that checkout and the newsletter use (`docs/ops/deploy.md`). The app
    needs `read_customers` and `write_customers` (and the draft-order scopes
    for order requests). Once Shopify is configured, `/api/status` shows
    `forms: "on"` and every form starts sending. Nothing is rebuilt: the

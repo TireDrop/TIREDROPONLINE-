@@ -232,7 +232,7 @@ export function getConfig(env = process.env) {
   };
   issues.push(...shIssues);
 
-  // Tire Guru payments are retired (see docs/integrations/tireguru.md). Left-
+  // Tire Guru payments are retired (see docs/archive/tireguru-payments.md). Left-
   // over variables are ignored, and said so, rather than silently obeyed.
   const tgLeftover = Object.keys(env).filter(
     (k) => k.startsWith("TIREGURU_") && clean(env[k]) !== "",

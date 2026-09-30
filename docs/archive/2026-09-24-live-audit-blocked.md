@@ -1,3 +1,5 @@
+> **Why retired:** this audit never ran, because the sandbox proxy blocked tiredroponline.com, so it holds no findings. The audits that did run are in [../audits/](../audits/), most recently [2026-09-29-site-audit.md](../audits/2026-09-29-site-audit.md).
+
 # Live-site visual audit — tiredroponline.com
 
 **Date:** 2026-09-24

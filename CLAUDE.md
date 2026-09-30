@@ -4,6 +4,10 @@
 - **Launch checklist:** `docs/LAUNCH-CHECKLIST.md` is Justin's master to-do list.
   - Whenever a task is finished, tick it AND strike it through (`- [x] ~~item~~ (commit or date)`), add new tasks to the right section, and bump "Last updated".
   - Show Justin the updated checklist in that same style whenever it changes.
+- **Docs map:** `docs/README.md` lists every doc. New docs go in the matching
+  folder (business, integrations, ops, content, prompts, audits with a date
+  prefix, archive with a "Why retired" line); add them to the map and run
+  `npm run check:docs`.
 - **Chrome prompts:** anything Claude can't do directly (Shopify admin, GoDaddy, Vercel dashboard, Google tools) becomes a copy-paste Chrome prompt for Justin. Saved prompts live in `docs/business/shopify-admin-prompts.md`.
 - **House rules for site copy:**
   - no discounts, coupons, rebates or deals

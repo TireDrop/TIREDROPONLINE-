@@ -712,45 +712,15 @@ until these are set **and** ATD is live, so no one pays against sample prices.
 
 ## 17. (OBSOLETE: replaced by the custom forms in prompt 19) Form delivery via Formspree
 
-The React site's forms (contact, financing, fleet quote, booking) and its
-order requests post JSON to one endpoint. Formspree turns each submission into
-an email to info@tiredroponline.com, with spam filtering, and needs no code.
-Its free plan has a monthly submission cap. Check the current limit and move
-to a paid plan if leads outgrow it.
-
-```
-TASK: Set up Formspree so TireDrop's website forms email
-info@tiredroponline.com.
-
-1. Go to formspree.io → sign up (or log in) with info@tiredroponline.com
-   and verify that email address when Formspree asks.
-2. Create a new form named "TireDrop website", recipient
-   info@tiredroponline.com.
-3. In the form's settings: keep Formspree's built-in spam filtering ON,
-   but leave reCAPTCHA OFF and "Restrict to domain" / allowed domains OFF.
-   (The site posts JSON, and order requests are sent from Vercel's
-   server, which a domain restriction would block.)
-4. Copy the form endpoint URL (looks like https://formspree.io/f/xxxxxxx).
-   It's not secret, so paste it in your report.
-5. Choose the FREE plan. If it asks for payment, stop and tell me.
-
-REPORT BACK: account verified Y/N, the endpoint URL, the plan and its
-monthly limit.
-```
-
-**Then in Vercel:** Project → Settings → Environment Variables (Production):
-- `VITE_FORM_ENDPOINT` = the Formspree URL
-- `ORDER_WEBHOOK_URL` = the same URL
-
-Redeploy (VITE_ variables are read at build time). Test one of each form
-(contact, financing, fleet quote, booking) on the .vercel.app site, then
-check the info@ inbox for subjects like "TireDrop contact form".
+Retired 2026-09-28; do not run it. The original prompt is archived in
+`docs/archive/formspree-form-delivery.md`.
 
 ## 18. Move tiredroponline.com from Shopify to Vercel (Shopify keeps checkout)
 
 **Do this only after ALL of these are true:**
 - The Vercel site is deployed from `TireDrop/TIREDROPONLINE-` and checked.
-- Prompt 17 is done and a test form reached info@.
+- Prompt 17 is done and a test form reached info@. (Prompt 17 is
+  archived; prompt 19's custom forms replaced it.)
 - Vercel is on Pro (Hobby doesn't allow commercial use).
 - The newsletter pop-up on the React site is deployed (it needs the prompt
   16 app with the customers scopes).

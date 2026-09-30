@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-09-30 (post-payment install scheduling hand-off; newsletter pop-up replaced by a footer sign-up; EDIT HERE published; Blog + Learn pilot on preview; Batch 1 writing)_
+_Last updated: 2026-09-30 (webhooks and go-live tests done; Blog + Learn live with 20 articles; install area now Miami-Dade, Broward, Palm Beach; tipping removed)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -22,6 +22,9 @@ _Last updated: 2026-09-30 (post-payment install scheduling hand-off; newsletter 
 - [x] ~~Year/Make/Model dropdowns in checkout + /schedule forms~~ (e6109d4, 2026-09-30)
 - [x] ~~/track: typed order number + email no longer cleared when the app starts over a prerendered page~~ (2026-09-30)
 - [x] ~~Post-payment install scheduling handoff~~ (f705e25, 2026-09-30)
+- [x] ~~Mobile/install area: Miami-Dade, Broward, Palm Beach~~ (f8a053c)
+- [ ] Exclude non-Palm-Beach 334 ZIPs (33440, 33455, 33471, 33475) + server-side ZIP check for bookings
+- [x] ~~Arrival wording: "We confirm an arrival window when we book"~~ (be6a2a2)
 
 ## Admin (Justin)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
@@ -32,15 +35,19 @@ _Last updated: 2026-09-30 (post-payment install scheduling hand-off; newsletter 
 - [x] ~~Sender email info@tiredroponline.com authenticated~~
 - [x] ~~Shopify app + Vercel keys + "Website lead alert" Flow~~
 - [x] ~~Newsletter pop-up test passed~~
+- [x] ~~Tipping removed from checkout~~ (Justin, 2026-09-30)
 - [ ] Footer sign-up test: sign up once with a test address; the Shopify customer is tagged `newsletter`, `footer`, `vercel` (was `popup`; update any Shopify segment that filters on `popup`)
-- [ ] Go-live tests, Parts E–H: contact form, order-request draft, email/SPF check, $1 order #D1
+- [x] ~~Go-live test: contact form (lead + Flow)~~ (2026-09-30)
+- [x] ~~Go-live test: order-request draft #D2 + /track shows it~~ (2026-09-30)
+- [ ] Go-live test: $1 order #D1: pay → confirm order, then refund
+- [ ] Go-live test: email folders + SPF/DKIM/DMARC (blocked: Outlook needs info@ sign-in)
 - [ ] Google: retry "Request indexing" (robots.txt delay)
 - [ ] 2-step login for all Shopify staff (Melissa keeps full access)
 - [ ] Someone can sign into Outlook as info@tiredroponline.com
 - [ ] SPF/DMARC: fix only if the Gmail test fails (never add a 2nd DMARC record)
 
 ## Next phase (Chrome prompt after the builds land)
-- [ ] Webhooks: 2 in Shopify, signing key into Vercel, redeploy, test (prompt 21)
+- [x] ~~Webhooks: 2 in Shopify, signing key into Vercel, redeploy, test (prompt 21)~~ (2026-09-30: 2 webhooks configured, test notifications 200)
 - [ ] Justin: run prompt 22 ("Schedule your install" email button + "High-risk order review" and "Needs scheduling alert" Flows; you click every Save)
 - [ ] Justin: INSTALL_BOOKING_URL after the Tire Guru call (booking link → set it in Vercel and redeploy; API → tell Claude, it's a follow-up build; see docs/integrations/install-scheduling.md)
 - [ ] `/track` tested with the $1 order
@@ -70,7 +77,7 @@ _Last updated: 2026-09-30 (post-payment install scheduling hand-off; newsletter 
 - [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search)
 
 ## Big upgrades (Claude)
-- [ ] Prerender pages for Google (covered by Blog + Learn Phase 0)
+- [x] ~~Prerender pages for Google (covered by Blog + Learn Phase 0)~~ (be6a2a2)
 - [ ] Hero finder goes straight to results
 - [ ] Installed-price toggle
 - [ ] Book an install time at checkout
@@ -79,10 +86,11 @@ _Last updated: 2026-09-30 (post-payment install scheduling hand-off; newsletter 
 - [ ] Real review collection (no stars until real reviews exist)
 
 ## Content & SEO: Blog + Learn (Claude; plan in docs/prompts/blog-learn-build.md)
-- [ ] Phase 0: prerender all pages + article schema + sitemap lastmod (in progress)
-- [ ] Phase 1: keyword map, 90–100 titles, demo list → Justin approves (research in progress)
-- [ ] Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves
-- [ ] Phase 3: publish in batches of 10 (~10/week)
+- [x] ~~Phase 0: prerender all pages + article schema + sitemap lastmod~~ (be6a2a2)
+- [x] ~~Phase 1: keyword map, 90–100 titles, demo list → Justin approves~~ (b813381, plans approved)
+- [x] ~~Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves~~ (800247b, pilot approved + 5 demos)
+- [x] ~~Blog + Learn live: 20 articles, 5 demos, 98 prerendered routes~~ (be6a2a2)
+- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); Batches 2–9 + 9 demos to go
 - [ ] Phase 4: internal links, Search Console submit, monthly refresh
 
 ## ATD and business (Justin)
@@ -92,6 +100,7 @@ _Last updated: 2026-09-30 (post-payment install scheduling hand-off; newsletter 
 - [ ] Accountant: FL $1/tire fee + out-of-state sales tax
 - [ ] Brand pricing rules: minimum advertised prices, online-sale limits
 - [ ] Decide: direct API vs Spark / Slingshot / our own sync
+- [ ] Tire Guru call: online booking link / API / prefill (call sheet in chat 2026-09-30)
 
 ## Later
 - [ ] Vercel Pro ($20/mo)

@@ -1,9 +1,11 @@
+> **Why retired:** online payment moved to Shopify's hosted checkout (draft orders) on 2026-09-28, so Tire Guru is no longer the payment path. Kept as the historical record. Tire Guru's current role, install scheduling, is in [../integrations/install-scheduling.md](../integrations/install-scheduling.md).
+
 # Tire Guru integration (payments and orders)
 
 > **RETIRED FOR PAYMENTS (2026-09-28).** Tire Guru is no longer the payment
 > path and checkout does not call it. Online payment is Shopify's hosted
 > checkout through a draft order: see
-> [shopify-checkout.md](shopify-checkout.md). `api/_lib/config.js` ignores
+> [shopify-checkout.md](../integrations/shopify-checkout.md). `api/_lib/config.js` ignores
 > any `TIREGURU_*` variables and lists them under `issues` in `/api/status`
 > so they can be removed. `api/_lib/tireguru.js` is kept for reference only.
 > Everything below is the historical record of the Tire Guru plan.

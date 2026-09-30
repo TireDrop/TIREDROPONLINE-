@@ -221,7 +221,7 @@ place them by hand.
 4. Before DNS moves to Vercel, change Shopify's primary domain away from
    tiredroponline.com: Shopify builds `invoiceUrl` on the store's primary
    domain, so check where a test link points (see the cutover checklist in
-   `DEPLOY.md`).
+   `docs/ops/deploy.md`).
 5. When Shopify retires `2026-07`, bump `SHOPIFY_DEFAULT_API_VERSION` and
    `SHOPIFY_MIN_API_VERSION` in `api/_lib/config.js` after re-checking
    `DraftOrderInput`.

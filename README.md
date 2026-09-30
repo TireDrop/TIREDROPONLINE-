@@ -1,302 +1,158 @@
-# TireDrop — tiredroponline.com
+# TireDrop: how this site works
 
-National tire and wheel store. Tires are drop-shipped from distributors to
-anywhere in the continental US, or delivered free to the Extreme Tires shop in
-Sunrise, FL and installed there.
+**tiredroponline.com** is the online tire and wheel store of **Extreme Tires**,
+a tire shop in Sunrise, FL. Shipping is free to the 48 contiguous states + DC;
+installation (at the shop or by van) is South Florida only.
 
-**Powered by Extreme Tires** — the parent business, a tire shop in Sunrise, FL.
-TireDrop is its online storefront.
-
-> Repository: `TireDrop/TIREDROPONLINE-` (app at the repo root, production
-> branch `main`). The Shopify theme sections live in `shopify/`.
+This page is the one-page map of the code. Every other document is listed in
+**[docs/README.md](docs/README.md)**; Justin's to-do list is
+[docs/LAUNCH-CHECKLIST.md](docs/LAUNCH-CHECKLIST.md).
 
 ---
 
-## Quick start
+## The stack
+
+```
+ Browser ──► tiredroponline.com (Vercel)
+               ├── dist/*.html   every route prerendered at build time, then
+               │                 hydrated by React (Vite 5 + React 18)
+               └── /api/*        Vercel serverless functions (Node 22)
+                                    │
+             ┌──────────────────────┼─────────────────────────┐
+             ▼                      ▼                         ▼
+   Shopify (shop.tiredroponline.com)   ATD (distributor)     Tire Guru (shop POS)
+   checkout via draft orders,          GATED OFF: sample     payments retired;
+   customers, leads, newsletter,       catalog until ATD_*   install bookings only
+   order webhooks; Shopify Flow        is set, and no        (INSTALL_BOOKING_URL,
+   emails every alert to info@         ordering until        otherwise by hand)
+                                       ATD_ORDERING_ENABLED
+```
+
+- **Front end.** Vite 5, React 18, react-router-dom 6 (real URLs), Tailwind
+  CSS 3. `npm run build` runs `vite build`, then `scripts/prerender.mjs`
+  renders every route with React's server renderer into its own HTML file
+  (title, canonical, Open Graph, JSON-LD and the page itself). `src/main.jsx`
+  hydrates it. `/tires/p/:sku` is the one route that is not prerendered:
+  `vercel.json` rewrites it to `dist/spa.html`.
+- **Learn and Blog.** Markdown files in `src/content/` (front matter parsed
+  with js-yaml, bodies with marked), prerendered like any other page and
+  listed in the sitemap automatically.
+- **API.** Vercel functions in `api/`, with shared code in `api/_lib/`. They
+  read server-only environment variables that never reach the browser.
+- **Shopify is the back office, not the storefront.** It takes the payment on
+  its hosted checkout (the site creates a draft order and sends the shopper to
+  its `invoiceUrl`) and keeps the orders, customers, leads and newsletter
+  sign-ups. **Shopify Flow** workflows send every alert to
+  **info@tiredroponline.com** (website leads, newsletter sign-ups, and the
+  high-risk order and needs-scheduling alerts from prompt 22). The Shopify theme only redirects shop. storefront pages to the
+  main site.
+- **ATD is gated off.** With no `ATD_*` variables the site runs on the sample
+  catalog in `src/data/products.js` and checkout sends an order request
+  (nothing charged). Payment is only taken once Shopify **and** ATD are live.
+  The ATD forwarder, which places paid orders with ATD, also needs
+  `ATD_ORDERING_ENABLED=true` and an ATD order endpoint that has not been
+  confirmed yet.
+- **`GET /api/status`** says which of these are on: `atd`, `shopify`,
+  `checkout`, `forwarder`, `newsletter`, `forms`, `webhooks`, `booking`, plus
+  an `issues` list.
+
+## Where things live
+
+```
+api/                  Vercel functions: checkout, forms, newsletter, status,
+│                     tires, track, cron/atd-sweep, webhooks/shopify
+└── _lib/             Shared server code + unit tests (*.test.mjs)
+src/
+├── App.jsx           Every route, in one place
+├── main.jsx          Browser entry (hydrates the prerendered HTML)
+├── entry-server.jsx  Server entry used by the prerender
+├── data/             Single source of truth: business facts, catalog,
+│                     pricing (sets of four), fitment, forms, booking
+├── content/          Learn + Blog Markdown and its loader (+ tests)
+├── components/       layout/, ui/ (Seo lives here), shop/, content/, demos/
+├── pages/            One file per page, grouped by area
+├── context/          Cart and Compare state
+└── lib/              Analytics (GA4), form helpers, hydration helpers
+public/               Static files; robots.txt and sitemap.xml are GENERATED
+scripts/              Build, check and dev scripts: see scripts/README.md
+shopify/              Mirror of the Shopify theme source (see shopify/README.md;
+                      never edit or publish the live theme from here)
+docs/                 Every document: see docs/README.md
+vercel.json           Redirects, headers, the /tires/p/:sku rewrite, the cron
+.env.example          Every environment variable, with what it does
+```
+
+The design tokens are in `tailwind.config.js` and the component classes in
+`src/index.css`.
+
+## npm scripts and gates
+
+| Script | What it does |
+| --- | --- |
+| `npm run dev` | Vite dev server (site only; `/api` falls back to sample mode) |
+| `npm run build` | Production build + prerender into `dist/`. **Gate.** |
+| `npm run build:preview` | Build for a static host with no rewrites (hash routing) |
+| `npm run preview` | Serve the built `dist/` |
+| `npm run lint` | ESLint; **0 errors** required. **Gate.** |
+| `npm run test:api` | Unit tests for `api/_lib/` (mocked Shopify and ATD). **Gate.** |
+| `npm run test:content` | Tests for the Learn/Blog content loader. **Gate.** |
+| `npm run check:prerender` | Chromium: prerendered pages, hydration, navigation. **Gate** (after build). |
+| `npm run check:forms` | Chromium: every form keeps and sends what was typed. **Gate** (after build). |
+| `npm run check:newsletter` | Chromium: footer sign-up only, no pop-up. **Gate** (after build). |
+| `npm run check:docs` | Every relative link and `docs/` path in the docs resolves. **Gate.** |
+| `npm run audit:mobile` | Phone-width audit of every route (needs a preview server) |
+
+Run the gates before every push to `main`:
 
 ```bash
-cd tiredrop
-npm install
-npm run dev            # local dev server
-npm run build          # production build to dist/
-npm run build:preview  # build for a static host with no SPA rewrite
-npm run preview        # serve the built app
-npm run lint           # catches imports that a build cannot
-npm run audit:mobile   # phone-width audit across every route
+npm ci
+npm run test:api && npm run test:content && npm run lint && npm run check:docs
+npm run build && npm run check:prerender && npm run check:forms && npm run check:newsletter
 ```
 
-## Stack
+The Chromium checks mock every `/api` call, so nothing reaches Shopify.
+Scripts that are run by hand (the Learn demos check, the theme redirect
+check, the Shopify asset build) are described in
+[scripts/README.md](scripts/README.md).
 
-| Concern    | Choice                                         |
-| ---------- | ---------------------------------------------- |
-| Build      | Vite 5                                         |
-| UI         | React 18                                       |
-| Routing    | react-router-dom 6 (real URLs, not state)      |
-| Styling    | Tailwind CSS 3 + a small component layer       |
-| Icons      | lucide-react                                   |
-| Cart state | React context + `localStorage`                 |
-| Hosting    | Vercel (`vercel.json` carries the SPA rewrite) |
-| Lint       | ESLint 9, scoped to `no-undef` and hook rules  |
+## Environment variables
 
----
+Names only. Values live in Vercel (Settings → Environment Variables) and in
+a local, gitignored `.env`. Never commit a value. `.env.example` explains each
+one.
 
-## The model
+- **Build time (browser):** `VITE_CONTACT_EMAIL`, `VITE_API_BASE`,
+  `VITE_HASH_ROUTER` (only for `build:preview`, from `.env.preview`; never on
+  Vercel). `VITE_BUILD_YEAR` is set by `vite.config.js`.
+- **ATD:** `ATD_API_BASE`, `ATD_API_KEY`, `ATD_API_SECRET`,
+  `ATD_ACCOUNT_NUMBER`, `ATD_SHIP_TO`, `PRICE_MARKUP_PCT`, `FREIGHT_PER_TIRE`.
+- **ATD forwarder:** `ATD_ORDERING_ENABLED`, `CRON_SECRET`,
+  `ATD_FORWARD_TEST_ORDERS` (sandbox only).
+- **Shopify:** `SHOPIFY_STORE_DOMAIN`, then either `SHOPIFY_ADMIN_TOKEN` or
+  `SHOPIFY_CLIENT_ID` + `SHOPIFY_CLIENT_SECRET`; `SHOPIFY_API_VERSION`
+  (optional); `SHOPIFY_WEBHOOK_SECRET`.
+- **Install booking:** `INSTALL_BOOKING_URL` (optional).
+- **Set by Vercel:** `VERCEL_GIT_COMMIT_SHA`.
+- **Retired, delete if still set:** `ORDER_WEBHOOK_URL` and `TIREGURU_*`
+  (both listed under `issues` in `/api/status`), `VITE_FORM_ENDPOINT`.
 
-```
-Customer buys on TireDrop
-        ↓
-   payment taken
-        ↓
- ┌──────┴───────┐
- ↓              ↓
-order to     order to
-distributor  Tire Guru (the shop's register)
- ↓
-ships to the customer  ── or ──  ships free to the Sunrise shop → installed
-```
+## Deploying
 
-Two fulfillment choices at checkout:
+1. Work on a branch; run the gates above.
+2. Push to **`main`** of `TireDrop/TIREDROPONLINE-`. Vercel builds it with
+   `npm run build` (Node 22, output `dist/`, `api/` picked up as functions)
+   and serves it on tiredroponline.com. Other branches get preview URLs, which
+   send `noindex`.
+3. Server environment variables apply to new deployments only: redeploy
+   after changing one.
+4. Shopify theme changes are separate: edit only the draft theme, and
+   publishing is Justin's click (see `CLAUDE.md`).
 
-1. **Ship to my address** — anywhere in the continental US.
-2. **Ship free to the store** — delivered to Sunrise, then fitted. South
-   Florida only, and the reason a local customer picks TireDrop over a
-   national-only competitor.
+Full project settings, every endpoint, the cutover history and local `/api`
+testing with `vercel dev`: [docs/ops/deploy.md](docs/ops/deploy.md).
 
-Mobile van installation is a further option for customers inside
-`BUSINESS.installArea`.
+## House rules
 
-Tires are priced and sold **in sets of four**, which is how every large tire
-retailer prices them and how a shopper compares one site against another.
-Up to four models can be queued for side-by-side comparison; the picks live in
-`CompareContext` and persist through `localStorage`, so a refresh does not
-empty the table.
-
----
-
-## Project structure
-
-```
-tiredrop/
-├── public/brand/            Logo artwork (WebP + PNG fallback) and favicon
-├── public/robots.txt        Generated — do not hand-edit
-├── public/sitemap.xml       Generated — do not hand-edit
-├── docs/                    Meeting brief and project documents
-├── scripts/mobile-audit.mjs Phone-width audit across every route
-├── scripts/generate-seo-files.mjs
-│                            Writes robots.txt + sitemap.xml from the router
-├── src/
-│   ├── main.jsx             Entry — router + cart provider
-│   ├── App.jsx              All routes in one place
-│   ├── index.css            Design system (tokens → component classes)
-│   │
-│   ├── data/                Single source of truth. No page invents facts.
-│   │   ├── business.js      Brand, phone, shop, hours, nav, footer, areas
-│   │   ├── services.js      Service catalog (mobile vs in-shop)
-│   │   ├── products.js      Tire + wheel catalog, vehicle fitment data
-│   │   ├── pricing.js       Set-of-four maths, delivery estimates
-│   │   └── tireRatings.js   Performance scores derived from published specs
-│   │
-│   ├── context/
-│   │   ├── CartContext.jsx
-│   │   └── CompareContext.jsx
-│   │
-│   ├── components/
-│   │   ├── layout/          Header, Footer, Logo, MobileCallBar
-│   │   ├── ui/              Seo, Section, PageHero, Breadcrumbs, Badge,
-│   │   │                    Accordion, EmptyState
-│   │   └── shop/            ProductArt, ProductCard, Filters, SearchPanel
-│   │
-│   └── pages/
-│       ├── HomePage.jsx · ShippingPage.jsx · InstallPage.jsx
-│       ├── NotFoundPage.jsx
-│       ├── shop/            Tires, Wheels, Product, Commercial, Cart,
-│       │                    Checkout, Compare
-│       ├── services/        MobileService, AutoService, ServiceDetail, Schedule
-│       └── support/         About, Locations, Contact, Reviews, Financing,
-│                            TireCare, Gallery, Sitemap, Legal
-```
-
-### Why this shape
-
-- **`src/data/` is authoritative.** The phone number, the shop address and the
-  hours live in exactly one file, so they cannot drift between the header, the
-  footer and the contact page.
-- **Navigation is generated.** `NAV` and `FOOTER_COLUMNS` drive the header, the
-  mobile drawer, the footer and the HTML sitemap page.
-- **The design system lives in `index.css`**, composed from tokens defined in
-  `tailwind.config.js`.
-- **Tires are priced in fours.** `data/pricing.js` owns that arithmetic, so the
-  card, the product page, the compare table and the cart cannot disagree about
-  what a set costs.
-- **Performance scores are derived, never invented.** `data/tireRatings.js`
-  computes them from specs the tire already publishes — the UTQG grades, the
-  speed rating, the tread depth, the load range, the 3PMSF certification and
-  the mileage warranty. Where a spec genuinely does not exist — winter tires
-  carry no UTQG treadwear grade, commercial LT tires are graded on another
-  scale — the axis returns `null` and the UI prints "Not rated" instead of a
-  number. Nothing here claims we road-tested anything. Only the Find My Tires
-  tool uses them; product cards, product pages and the compare table show no
-  scores.
-
----
-
-## Design system
-
-| Token         | Hex       | Use                               |
-| ------------- | --------- | --------------------------------- |
-| `ink`         | `#0A1628` | Deep navy, primary dark surface   |
-| `steel`       | `#122135` | Raised dark surface               |
-| `graphite`    | `#24354C` | Borders on dark                   |
-| `smoke`       | `#667085` | Muted body copy                   |
-| `fog`         | `#F3F6FB` | Light page background             |
-| `bone`        | `#FFFFFF` | Cards, light surfaces             |
-| `drop`        | `#0B5FFF` | **Primary action / brand accent** |
-| `dive`        | `#0A4FD8` | Accent hover                      |
-| `sky`         | `#E6EFFF` | Tinted surface, highlights        |
-| `extremeRed`  | `#D40C10` | Parent-brand references only      |
-| `extremeDeep` | `#A40104` | Parent-brand references only      |
-| `amber`       | `#F5A623` | Ratings, savings badges           |
-
-Blue reads calmer and more trustworthy than red for a national online store,
-which is why the brand moved to it. `drop` clears WCAG AA against white text at
-5.13:1. Extreme Tires' red is kept **only** for the "Powered by Extreme Tires"
-lockup — it is not a UI accent here.
-
-Type: **Barlow Condensed** (`font-display`) for headings, uppercase.
-**Inter** (`font-sans`) for body copy.
-
----
-
-## Routes
-
-| Path                                            | Page                                |
-| ----------------------------------------------- | ----------------------------------- |
-| `/`                                             | Home                                |
-| `/tires`, `/tires/:slug`                        | Tire catalog + product detail       |
-| `/tires/p/:sku`                                 | Product page for an API tire by sku |
-| `/wheels`, `/wheels/:slug`                      | Wheel catalog + product detail      |
-| `/commercial-tires`                             | Fleet tires + quote request         |
-| `/compare`                                      | Side-by-side tire comparison        |
-| `/cart`, `/checkout`                            | Cart and checkout                   |
-| `/coupons`, `/deals`                            | Redirects to `/tires` (no deals)    |
-| `/shipping`                                     | How shipping works                  |
-| `/install`                                      | Ship to store & install             |
-| `/mobile-service`                               | Mobile installation (South Florida) |
-| `/auto-service`                                 | Shop services                       |
-| `/services/:slug`                               | Individual service                  |
-| `/schedule`                                     | Booking form                        |
-| `/about` `/locations` `/contact`                | About & support                     |
-| `/reviews` `/financing` `/tire-care` `/gallery` | Support                             |
-| `/sitemap`                                      | HTML sitemap (generated from nav)   |
-| `/terms` `/privacy` `/accessibility`            | Legal documents                     |
-| `*`                                             | 404                                 |
-
----
-
-## Mobile
-
-`npm run audit:mobile` drives Chromium over every route at phone width and
-reports horizontal overflow, tap targets under the WCAG 2.5.8 minimum of 24px,
-text below 11px, and console errors. Screenshots land in `/tmp/mobile-audit`.
-
-```bash
-npm run build:preview
-npx vite preview --port 4173 &
-AUDIT_WIDTH=390 npm run audit:mobile
-```
-
-`AUDIT_WIDTH` accepts any width (360, 390 and 414 are the useful ones);
-`AUDIT_BASE` points it at a different server. Run one audit at a time — two
-against the same preview server contend for it and the loser reports a route
-as broken when the site is fine, so the script takes a lock and refuses to
-start alongside another.
-
-Currently **29/29 routes clean at 360, 390 and 414px.**
-
-`npm run lint` is the other gate, and it exists for one reason: a Vite build
-cannot see an identifier that is used but never imported, so it compiles
-happily and the page throws on mount and renders blank. `no-undef` catches
-that.
-
----
-
-## Crawling, metadata and the bundle
-
-**Crawling is on.** tiredroponline.com moved to Vercel on 2026-09-28, and
-since 2026-09-29 `ALLOW_INDEXING` in `scripts/generate-seo-files.mjs` is
-`true`: `public/robots.txt` allows crawling except `/cart`, `/checkout`,
-`/api/` and the `?search=` / `?view=` filter states, and points at
-`https://tiredroponline.com/sitemap.xml`. `vercel.json` still sends
-`X-Robots-Tag: noindex, nofollow` on `*.vercel.app` hosts, so previews stay out
-of the index. (Before launch the switch was `false` and robots.txt said
-`Disallow: /`, so a half-finished storefront was never indexed under the
-brand.)
-
-> **By hand, once:** submit `https://tiredroponline.com/sitemap.xml` in
-> Google Search Console, if it has not been submitted yet.
-
-**robots.txt and sitemap.xml are generated, never hand-written.** The route list
-comes out of `src/App.jsx` and is expanded from `products.js` and `services.js`,
-so adding a `<Route>` grows the sitemap and deleting one removes the URL. It
-runs on every `vite build` via a plugin in `vite.config.js`, or on its own:
-
-```bash
-node scripts/generate-seo-files.mjs   # 69 URLs at the last run
-```
-
-**Per-page head tags come from one component.** `Seo` in `components/ui/` owns
-the title, the meta description, the canonical, Open Graph, the Twitter card,
-`robots`, and the JSON-LD graph (`Organization`, `WebSite`, `WebPage`, plus
-`AutoPartsStore`/`AutoRepair` on shop pages, `Product` on product pages and
-`Service` on service pages). Two things it will never emit: review or rating
-markup while `GOOGLE_PROFILE.reviewsAreReal` is false, and `Offer` price and
-availability while the catalog is representative rather than live distributor
-inventory. Both gates are commented in the file.
-
-**Route-level code splitting.** Every page except the home page is a
-`React.lazy` import in `App.jsx`. Cold home-page load measured at 290 kB over
-the wire, 91 kB of it JavaScript — down from 412 kB and 209 kB when everything
-shipped in one bundle.
-
-Full findings, measurements and what is still open:
-[`docs/technical-audit.md`](docs/technical-audit.md).
-
----
-
-## Before go-live
-
-All of these need the client or a supplier:
-
-1. **Distributor integration.** ATD requires a functional, approved site before
-   issuing API credentials. U.S. AutoForce is the second source and carries the
-   brands ATD lost in 2025. Until both are wired, `data/products.js` is a
-   representative catalog, not real inventory.
-2. **No manufacturer rebates.** The business runs none, so the rebate data and
-   UI were removed. Shipping is free to any continental-US address, with no
-   minimum.
-3. **Delivery dates are estimated,** not quoted. `data/pricing.js` models a 2pm
-   distributor cutoff and 2–4 business days in transit. Replace it with the
-   distributor's committed date once the API is live.
-4. **No product photography.** Tires and wheels render as generated SVG art in
-   `components/shop/ProductArt.jsx`.
-5. **No payment processing.** Checkout collects the order and says a team member
-   will call to confirm. Wire a real processor before taking money.
-6. **Forms send to the site's own backend.** Contact, fleet quote, booking
-   and financing forms post to `/api/forms`, which stores each message on the
-   customer in Shopify; Shopify Flow emails it to info@. Until Shopify is
-   configured they say plainly that nothing was sent. See
-   `docs/business/turn-on-the-forms.md`.
-7. **No reviews are published on the site.** `/reviews` and the homepage link
-   to the shop's real Google and Yelp profiles instead, and review or rating
-   markup is deliberately off.
-8. **Legal pages are drafts** and need the client's counsel — the business is
-   now a national retailer, which changes the terms materially.
-9. **Social links are placeholders** in the footer.
-10. **Business email is published.** `BUSINESS.email` is
-    `info@tiredroponline.com`, confirmed by the owner as the single address for
-    forms, business enquiries and contact; the Shopify Flow lead alert sends
-    to it (`docs/integrations/website-leads.md`).
-11. **Crawling was enabled on 2026-09-29.** `ALLOW_INDEXING` in
-    `scripts/generate-seo-files.mjs` is `true`; submit the sitemap in Search
-    Console if that has not been done — see _Crawling, metadata and the
-    bundle_ above.
+Site copy follows the rules in [CLAUDE.md](CLAUDE.md): no discounts or deals,
+no invented reviews, never "safe to drive", no delivery dates, no APR or
+lender names.

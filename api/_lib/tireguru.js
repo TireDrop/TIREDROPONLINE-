@@ -26,7 +26,7 @@
 //
 // Neither path marks anything as paid. Payment status can only come back from
 // Tire Guru itself (a webhook or a lookup), which is still an open question —
-// see docs/integrations/tireguru.md.
+// see docs/archive/tireguru-payments.md.
 
 export const TIREGURU_TIMEOUT_MS = 8000;
 
@@ -50,7 +50,7 @@ export class TireGuruError extends Error {
 export class TireGuruNotConfirmedError extends TireGuruError {
   constructor(endpointName) {
     super(
-      `Tire Guru API mode is on, but the "${endpointName}" endpoint has not been confirmed from Tire Guru's documentation yet. Fill in ENDPOINTS.${endpointName} in api/_lib/tireguru.js, or use TIREGURU_CHECKOUT_URL (see docs/integrations/tireguru.md).`,
+      `Tire Guru API mode is on, but the "${endpointName}" endpoint has not been confirmed from Tire Guru's documentation yet. Fill in ENDPOINTS.${endpointName} in api/_lib/tireguru.js, or use TIREGURU_CHECKOUT_URL (see docs/archive/tireguru-payments.md).`,
       { status: 501 },
     );
     this.name = "TireGuruNotConfirmedError";

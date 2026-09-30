@@ -95,3 +95,6 @@ in this repo.
      should match on host `shop.tiredroponline.com` only.
 6. **Links in the Chrome prompts** that used https://tiredroponline.com/pages/contact
    now reach the Vercel site's /contact, which uses Formspree (prompt 17).
+   _(Superseded the same day: /contact posts to the site's own `/api/forms`,
+   see `docs/integrations/website-leads.md`; prompt 17 is archived in
+   `docs/archive/formspree-form-delivery.md`.)_

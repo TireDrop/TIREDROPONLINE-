@@ -59,7 +59,7 @@ collects leads: its forms and its newsletter pop-up. Do every item here
       shows `forms: "on"`; submit the contact form with your own details;
       an email "New website lead: …" reaches info@ and the customer in
       Shopify has tags `lead`, `lead-contact`. Details:
-      `docs/business/turn-on-the-forms.md`. Delete `VITE_FORM_ENDPOINT` and
+      `docs/ops/turn-on-the-forms.md`. Delete `VITE_FORM_ENDPOINT` and
       `ORDER_WEBHOOK_URL` from Vercel if they are still set.
 - [ ] **The Shopify app has the customer scopes.** Besides the checkout and
       forwarder scopes, the newsletter and the website forms need
@@ -293,7 +293,7 @@ went down. To run the functions too:
 
 ```bash
 npm i -g vercel
-cd tiredrop
+cd TIREDROPONLINE-   # the repo root is the app
 vercel link          # once, pick the TireDrop project
 vercel env pull      # copies the project's env vars into .env.local
 vercel dev           # site + /api on http://localhost:3000
@@ -339,8 +339,8 @@ Shopify serving the domain until the Vercel site is verified.
    - `/collections/tires` → `/tires`, `/collections/wheels` → `/wheels`
    - `/pages/<x>` → `/<x>` for about, shipping, install, mobile-service,
      auto-service, commercial-tires, locations, contact, reviews, gallery,
-     financing, tire-care, terms, privacy, accessibility, find-my-tires,
-     tire-size and tire-check
+     financing, terms, privacy, accessibility, find-my-tires, tire-size and
+     tire-check; `/pages/tire-care` and `/tire-care` → `/learn`
    - `/cart` is the same path on both sites, so it needs no redirect;
      Shopify's `/cart/...` sub-paths go to `/cart`
    - `/collections/tires/*` → `/tires`, `/collections/wheels/*` → `/wheels`,
@@ -354,7 +354,7 @@ Shopify serving the domain until the Vercel site is verified.
      `/terms#returns`, `shipping-policy` → `/terms#shipping`,
      `terms-of-service` → `/terms`, `contact-information` → `/contact`;
      any other `/policies/*` → `/terms`
-   - `/blogs` and `/blogs/*` → `/tire-care`; `/search` → `/tires`
+   - `/blogs` and `/blogs/*` → `/blog`; `/search` → `/tires`
    - `/account` and `/account/*` → `shop.tiredroponline.com/account/*`
      (customer accounts stay on Shopify)
    - `/checkouts/*` and `/<shop id>/invoices|orders|checkouts/*` →

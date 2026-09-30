@@ -16,6 +16,7 @@
     "check:newsletter": "node scripts/newsletter-signup-check.mjs",
     "check:forms": "node scripts/forms-keep-values-check.mjs",
     "check:prerender": "node scripts/prerender-check.mjs",
+    "check:docs": "node scripts/docs-links-check.mjs",
     "test:api": "node --test \"api/_lib/*.test.mjs\"",
     "test:content": "node --test \"src/content/*.test.mjs\""
   },
