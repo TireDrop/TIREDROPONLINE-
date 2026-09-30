@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-09-29 (webhooks, /track and account links live; Blog + Learn Phases 0–1 started)_
+_Last updated: 2026-09-30 (EDIT HERE published; Blog + Learn pilot on preview; Batch 1 writing)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -39,7 +39,8 @@ _Last updated: 2026-09-29 (webhooks, /track and account links live; Blog + Learn
 - [ ] `/track` tested with the $1 order
 - [ ] Header links checked on desktop and phone
 - [ ] Checkout branding (prompt 20)
-- [ ] Publish EDIT HERE, then test the shop. → main-site redirect
+- [x] ~~Publish EDIT HERE (shop. storefront → main-site redirect is live)~~ (2026-09-30, theme 166982615192)
+- [ ] Test the redirect: shop.tiredroponline.com pages go to tiredroponline.com, while checkout, /account and invoices stay on Shopify
 
 ## Before real paid orders (Claude)
 - [ ] Bill installation on the invoice

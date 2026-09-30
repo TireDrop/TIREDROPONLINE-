@@ -14,5 +14,9 @@
   - free shipping covers the 48 contiguous states + DC; installation is South Florida only
 - **Shopify themes:**
   - never publish a Shopify theme; publishing is Justin's click
-  - edit only the draft theme "EDIT HERE " (166982615192), never the live theme
+  - edit only the draft theme "EDIT HERE " (**188753510552**), never the live theme
+  - Theme history: on 2026-09-30 Justin published the old draft (166982615192,
+    now named "LIVE", role MAIN, with the shop. → main-site redirect). The
+    previous live theme (166982254744) is unpublished and kept as a backup.
+    Always check a theme's role is UNPUBLISHED before writing to it.
 - **Commits** end with the Co-Authored-By trailer used in this repo's history.
