@@ -51,6 +51,10 @@ export const SOURCES = {
     label: "USTMA Tire Recall Lookup",
     url: "https://recallinfo.ustires.org/TireRecallSearch/Tin",
   },
+  S18: {
+    label: "Tire Industry Association, Tire Rotation",
+    url: "https://www.tireindustry.org/resources/consumer-education/consumer-safety-overview/tire-rotation/",
+  },
   S19: {
     label: "Tire Industry Association, Tire Repair",
     url: "https://www.tireindustry.org/resources/consumer-education/consumer-safety-overview/tire-repair/",
@@ -71,6 +75,10 @@ export const SOURCES = {
     label: "Michelin, Sidewall Bulge or Bubble",
     url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-damage/sidewall-problems/symptom-bulge-or-bubble",
   },
+  S38: {
+    label: "Michelin, Tread Problems",
+    url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-damage/tread-problems",
+  },
   S39: {
     label: "Michelin, Tire Damage Guide",
     url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-damage",
@@ -78,6 +86,10 @@ export const SOURCES = {
   S42: {
     label: "Michelin, Changing Tire Sizes",
     url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-buying-guide/change-size-spec",
+  },
+  S45: {
+    label: "Michelin, Car Handling Problems",
+    url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-damage/car-handling-problems",
   },
   S46: {
     label: "Bridgestone, Replacement Guidance",
@@ -110,6 +122,10 @@ export const SOURCES = {
   C3: {
     label: "Tire Rack, How Much Tread Depth Is Enough",
     url: "https://www.tirerack.com/upgrade-garage/how-much-tread-depth-is-enough",
+  },
+  C5: {
+    label: "Tire Rack, Best Way to Rotate Tires",
+    url: "https://www.tirerack.com/upgrade-garage/what-is-the-best-way-to-rotate-tires",
   },
   C11: {
     label: "Tire Rack, Tread Depth of a Tire",
