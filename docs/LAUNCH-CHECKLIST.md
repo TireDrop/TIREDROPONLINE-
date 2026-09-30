@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-09-30 (webhooks and go-live tests done; Blog + Learn live with 20 articles; install area now Miami-Dade, Broward, Palm Beach; tipping removed)_
+_Last updated: 2026-09-30 (repo organized; webhooks and go-live tests done; Blog + Learn live with 20 articles; install area now Miami-Dade, Broward, Palm Beach; tipping removed)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -25,6 +25,7 @@ _Last updated: 2026-09-30 (webhooks and go-live tests done; Blog + Learn live wi
 - [x] ~~Mobile/install area: Miami-Dade, Broward, Palm Beach~~ (f8a053c)
 - [ ] Exclude non-Palm-Beach 334 ZIPs (33440, 33455, 33471, 33475) + server-side ZIP check for bookings
 - [x] ~~Arrival wording: "We confirm an arrival window when we book"~~ (be6a2a2)
+- [x] ~~Repo organized: docs map, audits/archive, README guide~~ (c5846e7, 2026-09-30)
 
 ## Admin (Justin)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
@@ -105,5 +106,5 @@ _Last updated: 2026-09-30 (webhooks and go-live tests done; Blog + Learn live wi
 ## Later
 - [ ] Vercel Pro ($20/mo)
 - [x] ~~etwheelz.com: keep as-is (it forwards to TireDrop)~~ (Justin, 2026-09-30)
-- [ ] Old Cannavibe repo: delete the `tiredrop/` folder? (needs Justin's yes)
+- [ ] Old Cannavibe repo: delete the `tiredrop/` folder (Justin said yes 2026-09-30). Safety check clear: no Vercel project deploys from it. Removal committed locally (d3e92e4 on `claude/website-build-e3tpte`) but NOT pushed: GitHub answers 404 for jja8991/cannavibe (renamed, deleted, or GitHub access lost). Blocker: reconnect GitHub access to that repo (or confirm its new name), then push.
 - [ ] After ATD: live API → sandbox test → auto-ordering on → full sizes, richer specs, Google Shopping
