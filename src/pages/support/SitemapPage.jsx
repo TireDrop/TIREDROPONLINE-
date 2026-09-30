@@ -175,7 +175,7 @@ export default function SitemapPage() {
         <SectionHead
           eyebrow="Service Pages"
           title="Every service we list"
-          lede={`Installation and repair happen in South Florida: the van travels to you around Broward, and the rest happens at the ${BUSINESS.shop.city} shop. Tires and wheels themselves ship anywhere in ${BUSINESS.shipping.area}.`}
+          lede={`Installation and repair happen in South Florida: the van travels to you across Miami-Dade, Broward and Palm Beach, and the rest happens at the ${BUSINESS.shop.city} shop. Tires and wheels themselves ship anywhere in ${BUSINESS.shipping.area}.`}
         />
 
         <div className="grid gap-10 sm:grid-cols-2">

@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-09-29 (webhooks, /track and account links live; Blog + Learn Phases 0–1 started)_
+_Last updated: 2026-09-30 (newsletter pop-up replaced by a footer sign-up; EDIT HERE published; Blog + Learn pilot on preview; Batch 1 writing)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -18,6 +18,7 @@ _Last updated: 2026-09-29 (webhooks, /track and account links live; Blog + Learn
 - [x] ~~Instant order alerts: Shopify → Vercel webhooks~~ (`0fa9a6e`)
 - [x] ~~Track My Order page `/track`~~ (`3f07766`, `ccdf679`)
 - [x] ~~Track Order / Account links in header, menu and footer~~ (`74d5811`, `b4f456b`)
+- [x] ~~Newsletter: pop-up removed; calm "TireDrop emails" sign-up in the footer; privacy policy updated~~ (2026-09-30)
 
 ## Admin (Justin)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
@@ -28,6 +29,7 @@ _Last updated: 2026-09-29 (webhooks, /track and account links live; Blog + Learn
 - [x] ~~Sender email info@tiredroponline.com authenticated~~
 - [x] ~~Shopify app + Vercel keys + "Website lead alert" Flow~~
 - [x] ~~Newsletter pop-up test passed~~
+- [ ] Footer sign-up test: sign up once with a test address; the Shopify customer is tagged `newsletter`, `footer`, `vercel` (was `popup`; update any Shopify segment that filters on `popup`)
 - [ ] Go-live tests, Parts E–H: contact form, order-request draft, email/SPF check, $1 order #D1
 - [ ] Google: retry "Request indexing" (robots.txt delay)
 - [ ] 2-step login for all Shopify staff (Melissa keeps full access)
@@ -39,7 +41,8 @@ _Last updated: 2026-09-29 (webhooks, /track and account links live; Blog + Learn
 - [ ] `/track` tested with the $1 order
 - [ ] Header links checked on desktop and phone
 - [ ] Checkout branding (prompt 20)
-- [ ] Publish EDIT HERE, then test the shop. → main-site redirect
+- [x] ~~Publish EDIT HERE (shop. storefront → main-site redirect is live)~~ (2026-09-30, theme 166982615192)
+- [x] ~~Redirect test: shop. pages → tiredroponline.com; checkout, /account and invoices stay on Shopify~~ (2026-09-30)
 
 ## Before real paid orders (Claude)
 - [ ] Bill installation on the invoice
@@ -52,7 +55,7 @@ _Last updated: 2026-09-29 (webhooks, /track and account links live; Blog + Learn
 
 ## Quick wins (Claude)
 - [ ] Phone bottom bar changes by page
-- [ ] Pop-up off shop pages
+- [x] ~~Pop-up off shop pages~~ (2026-09-30: superseded, the pop-up is gone)
 - [ ] Google search-result data: breadcrumbs, FAQ, map coordinates
 - [ ] Accessibility fixes + skip link
 - [ ] Security headers: CSP, HSTS, Permissions-Policy
@@ -87,6 +90,6 @@ _Last updated: 2026-09-29 (webhooks, /track and account links live; Blog + Learn
 
 ## Later
 - [ ] Vercel Pro ($20/mo)
-- [ ] etwheelz.com: keep or remove
+- [x] ~~etwheelz.com: keep as-is (it forwards to TireDrop)~~ (Justin, 2026-09-30)
 - [ ] Old Cannavibe repo: delete the `tiredrop/` folder? (needs Justin's yes)
 - [ ] After ATD: live API → sandbox test → auto-ordering on → full sizes, richer specs, Google Shopping

@@ -32,6 +32,7 @@ import ProductArt from "../../components/shop/ProductArt.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
 import { getProduct, TIRES, WHEELS } from "../../data/products.js";
 import { BUSINESS } from "../../data/business.js";
+import { SERVICE_AREA_LABEL } from "../../data/serviceArea.js";
 import { useCart, money } from "../../context/CartContext.jsx";
 import { useCompare } from "../../context/CompareContext.jsx";
 import {
@@ -470,8 +471,8 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                       {isTire
                         ? "Mounting, balancing, new valve stems and disposal of your old tires."
                         : "Mounting, balancing, hub-centric rings and TPMS transfer."}{" "}
-                      South Florida only —{" "}
-                      {BUSINESS.installArea.slice(0, 4).join(", ")} and nearby.
+                      South Florida only: the {BUSINESS.shop.city} shop serves{" "}
+                      {SERVICE_AREA_LABEL}.
                     </span>
                   </span>
                 </label>

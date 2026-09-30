@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 
 import { BUSINESS, YELP_PROFILE, googleReviewHref } from "../data/business.js";
+import { SERVICE_AREA_LABEL, SERVICE_COUNTIES } from "../data/serviceArea.js";
+import ServiceAreaCounties from "../components/ui/ServiceAreaCounties.jsx";
 import { MOBILE_SERVICES, SHOP_SERVICES } from "../data/services.js";
 import { TIRES, TIRE_CATEGORIES } from "../data/products.js";
 import ProductCard from "../components/shop/ProductCard.jsx";
@@ -524,7 +526,7 @@ function LocalAdvantage() {
         <div className="card p-7">
           <div className="mb-5 flex items-center gap-2">
             <Truck size={20} aria-hidden className="text-drop" />
-            <h3 className="h3">Mobile — Broward County</h3>
+            <h3 className="h3">Mobile — Miami-Dade to Palm Beach</h3>
           </div>
           <ul className="space-y-2.5">
             {MOBILE_SERVICES.map((s) => (
@@ -548,18 +550,9 @@ function LocalAdvantage() {
       </div>
 
       <p className="mt-10 text-center font-display text-xs font-bold uppercase tracking-[0.09em] text-smoke">
-        Install towns we cover
+        Mobile install covers {SERVICE_AREA_LABEL}
       </p>
-      <ul className="mx-auto mt-4 flex max-w-3xl flex-wrap justify-center gap-2">
-        {BUSINESS.installArea.map((city) => (
-          <li
-            key={city}
-            className="rounded-sm border border-ink/10 bg-fog px-3.5 py-1.5 font-display text-sm font-semibold text-ink"
-          >
-            {city}
-          </li>
-        ))}
-      </ul>
+      <ServiceAreaCounties className="mx-auto mt-4 max-w-4xl" />
 
       <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
         <a href={BUSINESS.phoneHref} className="btn-primary">
@@ -625,7 +618,7 @@ function Proof() {
       v: `${MOBILE_SERVICES.length + SHOP_SERVICES.length}`,
       l: "Services at the shop",
     },
-    { v: `${BUSINESS.installArea.length}`, l: "Install towns we cover" },
+    { v: `${SERVICE_COUNTIES.length}`, l: "Counties we install in" },
   ];
 
   return (

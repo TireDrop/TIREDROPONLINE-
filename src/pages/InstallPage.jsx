@@ -25,7 +25,9 @@ import {
   SectionHead,
   Seo,
 } from "../components/ui/index.jsx";
+import ServiceAreaCounties from "../components/ui/ServiceAreaCounties.jsx";
 import { BUSINESS } from "../data/business.js";
+import { SERVICE_AREA_LABEL } from "../data/serviceArea.js";
 import { getService } from "../data/services.js";
 
 const install = getService("tire-installation");
@@ -139,8 +141,8 @@ const FAQ = [
     q: "Can the van install them at my house instead?",
     a:
       "If you are in the local install area, yes. The mobile van covers " +
-      BUSINESS.installArea.slice(0, 4).join(", ") +
-      " and the rest of the Broward cities listed on this page. Mobile fitting is a local bonus, not a national service.",
+      SERVICE_AREA_LABEL +
+      ", decided by the ZIP code of the address. Mobile fitting is a local bonus, not a national service.",
   },
   {
     q: "Can you install tires I did not buy from TireDrop?",
@@ -336,20 +338,10 @@ export default function InstallPage() {
         <SectionHead
           eyebrow="Install area"
           title="Where installing is on the table"
-          lede={`Ship-to-store means the ${BUSINESS.shop.city} shop, and the mobile vans work the Broward cities below. Shipping reaches the whole continental US — installing does not, and we would rather say so plainly.`}
+          lede={`Ship-to-store means the ${BUSINESS.shop.city} shop, and the mobile vans work ${SERVICE_AREA_LABEL}. Shipping reaches the whole continental US — installing does not, and we would rather say so plainly.`}
         />
 
-        <ul className="flex flex-wrap gap-2.5">
-          {BUSINESS.installArea.map((city) => (
-            <li
-              key={city}
-              className="flex items-center gap-1.5 rounded-sm border border-ink/10 bg-fog px-3.5 py-2 font-display text-sm font-semibold text-ink"
-            >
-              <MapPin size={14} aria-hidden className="text-drop" />
-              {city}
-            </li>
-          ))}
-        </ul>
+        <ServiceAreaCounties />
 
         <div className="card mt-8 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-relaxed text-smoke">

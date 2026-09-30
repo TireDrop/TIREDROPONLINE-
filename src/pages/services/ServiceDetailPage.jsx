@@ -76,7 +76,11 @@ export default function ServiceDetailPage() {
   return (
     <>
       <Seo
-        title={`${service.name} in ${BUSINESS.shop.city} & Broward County`}
+        title={
+          service.mobile
+            ? `${service.name} in Miami-Dade, Broward & Palm Beach`
+            : `${service.name} in ${BUSINESS.shop.city}, FL`
+        }
         description={`${service.blurb} From $${service.priceFrom} ${service.priceUnit}. ${
           service.mobile
             ? `Performed at your home, office or jobsite across South Florida by ${BUSINESS.parent}.`

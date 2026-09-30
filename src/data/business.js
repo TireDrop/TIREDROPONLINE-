@@ -63,40 +63,9 @@ export const BUSINESS = {
     storePickup: true,
   },
 
-  // Mobile install and ship-to-store are South Florida only.
-  installArea: [
-    "Sunrise",
-    "Plantation",
-    "Fort Lauderdale",
-    "Davie",
-    "Weston",
-    "Coral Springs",
-    "Tamarac",
-    "Lauderhill",
-    "Pembroke Pines",
-    "Miramar",
-  ],
+  // Mobile install covers Miami-Dade, Broward and Palm Beach counties, decided
+  // by ZIP code: see src/data/serviceArea.js. Ship-to-store is the Sunrise shop.
 };
-
-/**
- * The install-area city matching `city` (trimmed, case-insensitive), or null.
- * Shared by the checkout page and POST /api/checkout so both draw the mobile
- * install boundary in exactly the same place.
- */
-export function installAreaCity(city) {
-  const wanted = String(city ?? "")
-    .trim()
-    .replace(/\s+/g, " ")
-    .toLowerCase();
-  if (!wanted) return null;
-  return BUSINESS.installArea.find((c) => c.toLowerCase() === wanted) ?? null;
-}
-
-/** "Sunrise, Plantation, … Pembroke Pines and Miramar". */
-export const INSTALL_AREA_LIST = `${BUSINESS.installArea.slice(0, -1).join(", ")} and ${BUSINESS.installArea.at(-1)}`;
-
-/** The one sentence both the server and the page use to turn a city away. */
-export const MOBILE_AREA_ERROR = `Mobile install covers ${INSTALL_AREA_LIST}. Choose ship-to-store or call ${BUSINESS.phone}.`;
 
 // Social profiles. Null means "no account confirmed yet" — the footer skips
 // those rather than rendering a link that goes nowhere, which is what three

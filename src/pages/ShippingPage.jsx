@@ -449,8 +449,8 @@ export default function ShippingPage() {
             <h2 className="h2">Find your size, pick your delivery</h2>
             <p className="lede mt-3 text-bone/70">
               Shop by vehicle or by tire size, and choose at checkout whether it
-              comes to you or to the shop. Local to Broward? Ship-to-store is
-              free and we will fit them.
+              comes to you or to the shop. In Miami-Dade, Broward or Palm Beach?
+              Ship-to-store is free and we will fit them.
             </p>
             <p className="mt-4 flex items-center gap-2 text-xs text-bone/60">
               <MapPin size={14} aria-hidden />

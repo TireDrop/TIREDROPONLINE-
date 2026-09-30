@@ -11,6 +11,7 @@ import {
   Truck,
 } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
+import { SERVICE_AREA_LABEL, SERVICE_COUNTIES } from "../../data/serviceArea.js";
 // The catalog is the source of truth for which brands this page may name, so
 // it can never list a brand nobody can buy.
 import { TIRE_BRAND_NAMES } from "../../data/products.js";
@@ -37,7 +38,7 @@ const DIFFERENTIATORS = [
   {
     icon: Truck,
     title: "Mobile install, South Florida",
-    copy: "In Broward County the van can come to the driveway, the office lot or the jobsite instead. It is a local bonus, not the whole business — but it is a good one.",
+    copy: "In Miami-Dade, Broward and Palm Beach counties the van can come to the driveway, the office lot or the jobsite instead. It is a local bonus, not the whole business — but it is a good one.",
   },
   {
     icon: ShieldCheck,
@@ -62,8 +63,8 @@ const STATS = [
   { value: "48", label: "States in the shipping area" },
   { value: "$0", label: "Shipping, with no order minimum" },
   {
-    value: `${BUSINESS.installArea.length}`,
-    label: "Broward towns the vans cover",
+    value: `${SERVICE_COUNTIES.length}`,
+    label: "South Florida counties the vans cover",
   },
 ];
 
@@ -83,7 +84,7 @@ const FACTS = [
   {
     label: "Mobile install",
     title: "The van comes to you",
-    copy: `In ${BUSINESS.installArea.join(", ")}, the install vans can fit your tires at the driveway, the office lot or the jobsite.`,
+    copy: `In ${SERVICE_AREA_LABEL}, the install vans can fit your tires at the driveway, the office lot or the jobsite.`,
   },
   {
     label: "At the shop",
@@ -208,8 +209,9 @@ export default function AboutPage() {
             ))}
           </dl>
           <p className="mt-8 text-xs text-bone/60">
-            The state count is the continental-US shipping area and the town
-            list is the mobile install area. None of these are marketing
+            The state count is the continental-US shipping area and the county
+            count is the mobile install area: Miami-Dade, Broward and Palm
+            Beach. None of these are marketing
             round-ups.
           </p>
         </div>
@@ -258,7 +260,7 @@ export default function AboutPage() {
             <p className="lede mt-4 max-w-xl text-bone/70">
               Shipping anywhere in {BUSINESS.shipping.area}, free to the{" "}
               {BUSINESS.shop.city} shop if you would rather we fit them, and the
-              van for driveways around Broward.
+              van for driveways across Miami-Dade, Broward and Palm Beach.
             </p>
           </div>
 

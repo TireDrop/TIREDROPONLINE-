@@ -128,7 +128,7 @@ app and the store are in the same Shopify organization.
 No product scopes are needed. Checkout alone needs only the draft-order
 scopes; the four order and fulfillment scopes are for the ATD forwarder
 (`docs/integrations/atd-forwarder.md`), and the two customer scopes are for
-the newsletter sign-up that replaces the Shopify theme's pop-up (see
+the newsletter sign-up form in the site footer (see
 "Newsletter sign-up" below) and for website leads
 (`docs/integrations/website-leads.md`). Changing an app's scopes needs the
 app to be re-approved (a new token for an admin-created custom app, or a
@@ -149,12 +149,16 @@ and order requests recorded in Shopify; on whenever Shopify is configured).
 ## Newsletter sign-up
 
 `POST /api/newsletter` (`api/newsletter.js`, `api/_lib/newsletter.js`) does
-what the theme's pop-up form did, through the same app. Validated against
-the Admin schema; never run against a real store from this repository.
+what the Shopify theme's pop-up form did, through the same app. On the React
+site it is fed by the inline "TireDrop emails" form in the footer
+(`src/components/layout/NewsletterSignup.jsx`, `source: "footer"`); there is
+no pop-up. Validated against the Admin schema; never run against a real
+store from this repository.
 
 1. `customerCreate(input: { email, emailMarketingConsent: { marketingState:
    SUBSCRIBED, marketingOptInLevel: SINGLE_OPT_IN }, tags: ["newsletter",
-   "popup", "vercel"] })`.
+   <source>, "vercel"] })`, where `<source>` is `footer` for the footer form
+   (the API also still accepts `popup`).
 2. If Shopify answers the userError "Email has already been taken":
    `customerByIdentifier(identifier: { emailAddress })` finds the customer,
    `customerEmailMarketingConsentUpdate` sets SUBSCRIBED / SINGLE_OPT_IN
@@ -164,8 +168,8 @@ the Admin schema; never run against a real store from this repository.
 
 The shopper gets the same `{ ok: true }` either way, so the endpoint cannot
 be used to learn whether an email has an account. `/api/status` reports
-`newsletter: "on"` whenever Shopify is configured, and the React pop-up
-renders only then. No discount or coupon is attached to a sign-up.
+`newsletter: "on"` whenever Shopify is configured, and the footer sign-up
+form renders only then. No discount or coupon is attached to a sign-up.
 
 ## Failure behaviour
 

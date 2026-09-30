@@ -28,7 +28,9 @@ import {
   SectionHead,
   Seo,
 } from "../../components/ui/index.jsx";
+import ServiceAreaCounties from "../../components/ui/ServiceAreaCounties.jsx";
 import { BUSINESS } from "../../data/business.js";
+import { SERVICE_AREA_LABEL } from "../../data/serviceArea.js";
 import { MOBILE_SERVICES, getService } from "../../data/services.js";
 
 const install = getService("tire-installation");
@@ -144,7 +146,9 @@ const FAQ = [
       BUSINESS.shipping.area +
       ", but the vans are a South Florida service run out of the " +
       BUSINESS.shop.city +
-      " shop. If you are outside the Broward cities listed on this page, your order ships to you and you take it to a fitter you trust.",
+      " shop, covering " +
+      SERVICE_AREA_LABEL +
+      ". If you are outside those three counties, your order ships to you and you take it to a fitter you trust.",
   },
   {
     q: "I bought my tires here. Can the van bring them to me?",
@@ -189,7 +193,7 @@ export default function MobileServicePage() {
     <>
       <Seo
         title="Mobile Tire Installation in South Florida"
-        description={`Bought tires on ${BUSINESS.name}? ${BUSINESS.parent} brings a fully equipped van to your home, office or jobsite across Broward County to fit them — plus balancing, repair, rotation, oil changes and TPMS.`}
+        description={`Bought tires on ${BUSINESS.name}? ${BUSINESS.parent} brings a fully equipped van to your home, office or jobsite across ${SERVICE_AREA_LABEL} to fit them — plus balancing, repair, rotation, oil changes and TPMS.`}
       />
 
       <PageHero
@@ -229,7 +233,7 @@ export default function MobileServicePage() {
           <MapPin size={18} aria-hidden className="text-drop" />
           <p className="text-smoke">
             <span className="font-display font-bold text-ink">
-              Broward County only.
+              Miami-Dade, Broward and Palm Beach only.
             </span>{" "}
             We ship tires to {BUSINESS.shipping.area}, but the vans work South
             Florida. Outside the area?{" "}
@@ -340,20 +344,10 @@ export default function MobileServicePage() {
         <SectionHead
           eyebrow="Install area"
           title="Where the van rolls"
-          lede={`The fleet works out of ${BUSINESS.shop.city} and covers these Broward cities daily. If yours is on this list, we come to you.`}
+          lede={`The fleet works out of ${BUSINESS.shop.city} and covers ${SERVICE_AREA_LABEL}. If your ZIP code is in one of them, we come to you.`}
         />
 
-        <ul className="flex flex-wrap gap-2.5">
-          {BUSINESS.installArea.map((city) => (
-            <li
-              key={city}
-              className="flex items-center gap-1.5 rounded-sm border border-ink/10 bg-fog px-3.5 py-2 font-display text-sm font-bold text-ink"
-            >
-              <MapPin size={14} aria-hidden className="text-drop" />
-              {city}
-            </li>
-          ))}
-        </ul>
+        <ServiceAreaCounties />
 
         <div className="card mt-8 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-relaxed text-smoke">

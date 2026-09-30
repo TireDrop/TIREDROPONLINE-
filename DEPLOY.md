@@ -66,12 +66,13 @@ collects leads: its forms and its newsletter pop-up. Do every item here
       **`read_customers`** and **`write_customers`** (table in
       `docs/integrations/shopify-checkout.md`). Re-approve the app after
       adding them. Then `/api/status` shows `newsletter: "on"` and
-      `forms: "on"`, and the sign-up pop-up appears on the Vercel site; sign
-      up once with a test address and confirm a customer appears in
-      Shopify, subscribed to email marketing and tagged `newsletter`,
-      `popup`, `vercel`. With Shopify not configured the pop-up simply does
-      not render and the forms say plainly that nothing was sent, so no
-      email is collected into nowhere.
+      `forms: "on"`, and the "TireDrop emails" sign-up form appears in the
+      footer of the Vercel site (there is no pop-up); sign up once with a
+      test address and confirm a customer appears in Shopify, subscribed to
+      email marketing and tagged `newsletter`, `footer`, `vercel`. With
+      Shopify not configured the footer form simply does not render and the
+      forms say plainly that nothing was sent, so no email is collected
+      into nowhere.
 - [ ] **Vercel Pro.** Hobby is for non-commercial use only, and the ATD
       forwarder's 5-minute cron needs Pro (`docs/integrations/atd-forwarder.md`).
       Upgrade the TireDrop team before the store takes real traffic.
@@ -124,9 +125,9 @@ that do the server-side work:
 |                      | `new-lead` so Shopify Flow emails info@. Honeypot and     |
 |                      | per-IP rate limit; 503 `{ configured: false }` without    |
 |                      | Shopify. `docs/integrations/website-leads.md`.            |
-| `POST /api/newsletter` | `{ email }`: newsletter sign-up from the pop-up. Makes  |
-|                      | the email a Shopify customer subscribed to email          |
-|                      | marketing, tagged `newsletter`, `popup`, `vercel` (an     |
+| `POST /api/newsletter` | `{ email }`: newsletter sign-up from the footer form.   |
+|                      | Makes the email a Shopify customer subscribed to email    |
+|                      | marketing, tagged `newsletter`, `footer`, `vercel` (an    |
 |                      | existing customer is subscribed and tagged). Honeypot and |
 |                      | per-IP rate limit; 503 `{ configured: false }` without    |
 |                      | Shopify. On whenever Shopify is configured.               |
@@ -252,7 +253,7 @@ How the groups switch on:
 - Mobile install is always an order request, whatever the checkout mode.
 - **Newsletter** is on whenever Shopify is configured (it does not wait for
   ATD). The app needs `read_customers` and `write_customers` for it; without
-  them sign-ups fail with a 502 and the pop-up shows "try again", so add the
+  them sign-ups fail with a 502 and the footer form shows "try again", so add the
   scopes before setting the `SHOPIFY_*` variables.
 - **Website forms and order requests** are recorded in Shopify whenever
   Shopify is configured (`forms: "on"`; it does not wait for ATD). Without

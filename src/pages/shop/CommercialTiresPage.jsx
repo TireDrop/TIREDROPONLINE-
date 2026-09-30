@@ -24,6 +24,7 @@ import {
 import ProductCard from "../../components/shop/ProductCard.jsx";
 import { TIRES } from "../../data/products.js";
 import { BUSINESS } from "../../data/business.js";
+import { SERVICE_AREA_LABEL } from "../../data/serviceArea.js";
 import {
   CONTACT_EMAIL,
   hasChanges,
@@ -537,7 +538,8 @@ export default function CommercialTiresPage() {
 
             <h3 className="label mt-6">On-site install</h3>
             <p className="text-sm leading-relaxed text-smoke">
-              {BUSINESS.installArea.join(", ")} and the rest of Broward County.
+              Anywhere in {SERVICE_AREA_LABEL}: Miami, Fort Lauderdale, Boca
+              Raton, West Palm Beach and everywhere between.
             </p>
           </aside>
         </div>

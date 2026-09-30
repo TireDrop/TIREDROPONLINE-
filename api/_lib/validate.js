@@ -3,11 +3,8 @@
 // shopper can read, because the frontend shows it as-is.
 
 import { parseSize } from "../../src/data/tireMath.js";
-import {
-  BUSINESS,
-  MOBILE_AREA_ERROR,
-  installAreaCity,
-} from "../../src/data/business.js";
+import { BUSINESS } from "../../src/data/business.js";
+import { MOBILE_AREA_ERROR, isInServiceArea } from "../../src/data/serviceArea.js";
 
 // ---- Tire sizes ------------------------------------------------------------
 
@@ -277,7 +274,7 @@ export function validateCheckout(body) {
   }
 
   // Delivery. "mobile" is van installation at the customer's address, inside
-  // the South Florida install area only.
+  // Miami-Dade, Broward or Palm Beach only (by ZIP: src/data/serviceArea.js).
   const delivery = body.delivery;
   if (!DELIVERY_MODES.includes(delivery)) {
     return { ok: false, error: 'delivery must be "ship", "pickup" or "mobile".' };
@@ -329,14 +326,15 @@ export function validateCheckout(body) {
     if (!ZIP.test(zip.value)) {
       return { ok: false, error: "Enter a 5-digit ZIP code." };
     }
-    // The van only runs inside the install area. The city is stored in the
-    // area list's own spelling, so "fort lauderdale " reads cleanly.
-    const areaCity = mobile ? installAreaCity(city.value) : null;
-    if (mobile && !areaCity) return { ok: false, error: MOBILE_AREA_ERROR };
+    // The van only runs inside Miami-Dade, Broward and Palm Beach, decided by
+    // ZIP with the same rule as the checkout page and Shopify Flow.
+    if (mobile && !isInServiceArea(zip.value)) {
+      return { ok: false, error: MOBILE_AREA_ERROR };
+    }
     address = {
       line1: line1.value,
       line2: line2.value || null,
-      city: areaCity ?? city.value,
+      city: city.value,
       state: state.value,
       zip: zip.value,
     };

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { BUSINESS, FOOTER_COLUMNS, SOCIAL } from "../../data/business.js";
 import Logo from "./Logo.jsx";
+import NewsletterSignup from "./NewsletterSignup.jsx";
 import { useHydrated } from "../../lib/useHydrated.js";
 
 // Whether any social account is confirmed. With none, the heading would sit
@@ -27,6 +28,14 @@ export default function Footer() {
 
   return (
     <footer className="mt-auto bg-ink bg-ink-wash text-bone">
+      {/* Newsletter sign-up, above the link columns. Renders nothing (no band,
+          no rule) unless /api/status reports newsletter "on". */}
+      <div className="has-[section]:border-b has-[section]:border-graphite">
+        <div className="wrap">
+          <NewsletterSignup className="py-10 md:py-12" />
+        </div>
+      </div>
+
       {/* Two link columns on a phone rather than one long stack; the shop
           column spans both. */}
       <div className="wrap grid grid-cols-2 gap-x-5 gap-y-8 py-14 md:gap-10 lg:grid-cols-4">

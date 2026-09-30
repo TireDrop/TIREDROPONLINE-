@@ -27,6 +27,11 @@ import {
 import { useHydrated } from "../../lib/useHydrated.js";
 import { BUSINESS } from "../../data/business.js";
 import {
+  MOBILE_AREA_ERROR,
+  SERVICE_AREA_LABEL,
+  isInServiceArea,
+} from "../../data/serviceArea.js";
+import {
   CONTACT_EMAIL,
   hasChanges,
   readFormValues,
@@ -139,8 +144,11 @@ function validateStep(step, form) {
     if (!form.address.trim())
       errors.address = "We need a street address to route the van.";
     if (!form.city.trim()) errors.city = "Enter the city.";
-    if (!/^\d{5}$/.test(form.zip.trim()))
+    // The van covers Miami-Dade, Broward and Palm Beach, decided by ZIP with
+    // the same rule as checkout and the api (src/data/serviceArea.js).
+    if (!/^\d{5}(-\d{4})?$/.test(form.zip.trim()))
       errors.zip = "Enter a five-digit ZIP code.";
+    else if (!isInServiceArea(form.zip)) errors.zip = MOBILE_AREA_ERROR;
   }
 
   if (step === 4) {
@@ -913,8 +921,8 @@ export default function SchedulePage() {
                           We come to you
                         </span>
                         <span className="mt-1 block text-xs text-smoke">
-                          Home, office or jobsite anywhere in our South Florida
-                          install area.
+                          Home, office or jobsite anywhere in Miami-Dade,
+                          Broward or Palm Beach.
                         </span>
                       </span>
                     </label>
@@ -975,7 +983,7 @@ export default function SchedulePage() {
                       id="city"
                       label="City"
                       autoComplete="address-level2"
-                      placeholder={BUSINESS.installArea[0]}
+                      placeholder="Your city"
                       value={form.city}
                       onChange={update("city")}
                       error={errors.city}
@@ -985,7 +993,7 @@ export default function SchedulePage() {
                       label="ZIP code"
                       inputMode="numeric"
                       autoComplete="postal-code"
-                      placeholder={BUSINESS.shop.zip}
+                      placeholder="5-digit ZIP, e.g. 33021"
                       value={form.zip}
                       onChange={update("zip")}
                       error={errors.zip}
@@ -1016,9 +1024,10 @@ export default function SchedulePage() {
                       <span className="font-display font-bold text-ink">
                         Mobile install area:
                       </span>{" "}
-                      {BUSINESS.installArea.join(", ")}. Outside these cities?
-                      Book anyway and call {BUSINESS.phone} — we will tell you
-                      straight whether we can reach you.
+                      {SERVICE_AREA_LABEL}, checked by ZIP code. Outside those
+                      three counties? Choose the shop instead, or call{" "}
+                      {BUSINESS.phone} and we will tell you straight what we
+                      can do.
                     </div>
                   </div>
                 ) : (
