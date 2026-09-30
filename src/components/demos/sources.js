@@ -87,4 +87,13 @@ export const SOURCES = {
     label: "Tire Review, Quarter Test",
     url: "https://www.tirereview.com/quarter-tire-test-tread-depth/",
   },
+  // D6 Plus-size & speedometer (S35 and S54 above also serve D5).
+  S42: {
+    label: "Michelin, Changing Tire Sizes",
+    url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-buying-guide/change-size-spec",
+  },
+  C14: {
+    label: "Discount Tire, Speedometer Accuracy",
+    url: "https://www.discounttire.com/learn/speedometer-accuracy",
+  },
 };
