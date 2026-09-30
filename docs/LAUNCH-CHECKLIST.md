@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-09-30 (Tire Guru called, awaiting answer; Cannavibe repo being deleted, backup sent; repo organized; Blog + Learn live)_
+_Last updated: 2026-09-30 (6 new tools + tool pages on the preview/tools branch for Justin's review; Tire Guru called, awaiting answer; Cannavibe repo being deleted, backup sent; repo organized; Blog + Learn live)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -91,7 +91,8 @@ _Last updated: 2026-09-30 (Tire Guru called, awaiting answer; Cannavibe repo bei
 - [x] ~~Phase 1: keyword map, 90–100 titles, demo list → Justin approves~~ (b813381, plans approved)
 - [x] ~~Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves~~ (800247b, pilot approved + 5 demos)
 - [x] ~~Blog + Learn live: 20 articles, 5 demos, 98 prerendered routes~~ (be6a2a2)
-- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); Batches 2–9 + 9 demos to go
+- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); Batches 2–9 + 3 demos to go (wear pattern, hydroplaning, spare types)
+- [ ] Review the preview/tools branch (6 new demos with their own tool pages, embedded in 8 articles) and merge it to main (Justin)
 - [ ] Phase 4: internal links, Search Console submit, monthly refresh
 
 ## ATD and business (Justin)

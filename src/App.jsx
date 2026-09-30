@@ -14,6 +14,7 @@ import CompareTray from "./components/shop/CompareTray.jsx";
 import { InPageAnchors, ScrollToTop } from "./components/ui/index.jsx";
 import { trackPageView } from "./lib/analytics.js";
 import { lazyPage } from "./lib/lazyPage.js";
+import { TOOL_PAGE_ALIASES } from "./components/demos/toolPages.js";
 
 // Every route except the home page is loaded on demand.
 //
@@ -70,6 +71,11 @@ const FindMyTiresPage = lazyPage("pages/tools/FindMyTiresPage.jsx", () =>
 );
 const TireCheckPage = lazyPage("pages/tools/TireCheckPage.jsx", () =>
   import("./pages/tools/TireCheckPage.jsx"),
+);
+// The Learn demos that also stand alone as tools: one template, one route
+// each (copy in src/components/demos/toolPages.js).
+const DemoToolPage = lazyPage("pages/tools/DemoToolPage.jsx", () =>
+  import("./pages/tools/DemoToolPage.jsx"),
 );
 
 // Services
@@ -146,6 +152,8 @@ const TOOL_PATHS = {
   "tire-check": "/tire-check",
   "tread-gauge": "/tire-check",
   "find-my-tires": "/find-my-tires",
+  // load-speed-check, pressure-temp, damage-map... and the planned aliases.
+  ...TOOL_PAGE_ALIASES,
 };
 
 function ToolRedirect() {
@@ -205,6 +213,30 @@ export default function App() {
             <Route path="/tire-size" element={<TireSizePage />} />
             <Route path="/find-my-tires" element={<FindMyTiresPage />} />
             <Route path="/tire-check" element={<TireCheckPage />} />
+            <Route
+              path="/load-speed-check"
+              element={<DemoToolPage tool="load-speed-check" />}
+            />
+            <Route
+              path="/plus-size-calculator"
+              element={<DemoToolPage tool="plus-size-speedo" />}
+            />
+            <Route
+              path="/tire-pressure-temperature"
+              element={<DemoToolPage tool="pressure-temp" />}
+            />
+            <Route
+              path="/can-my-tire-be-repaired"
+              element={<DemoToolPage tool="damage-map" />}
+            />
+            <Route
+              path="/car-shaking-checker"
+              element={<DemoToolPage tool="noise-vibration" />}
+            />
+            <Route
+              path="/tire-rotation-pattern"
+              element={<DemoToolPage tool="rotation-pattern" />}
+            />
             <Route path="/tools/:tool" element={<ToolRedirect />} />
             <Route path="/commercial-tires" element={<CommercialTiresPage />} />
             <Route path="/cart" element={<CartPage />} />
