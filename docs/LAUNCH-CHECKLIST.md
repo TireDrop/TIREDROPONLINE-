@@ -40,7 +40,7 @@ _Last updated: 2026-09-30 (EDIT HERE published; Blog + Learn pilot on preview; B
 - [ ] Header links checked on desktop and phone
 - [ ] Checkout branding (prompt 20)
 - [x] ~~Publish EDIT HERE (shop. storefront → main-site redirect is live)~~ (2026-09-30, theme 166982615192)
-- [ ] Test the redirect: shop.tiredroponline.com pages go to tiredroponline.com, while checkout, /account and invoices stay on Shopify
+- [x] ~~Redirect test: shop. pages → tiredroponline.com; checkout, /account and invoices stay on Shopify~~ (2026-09-30)
 
 ## Before real paid orders (Claude)
 - [ ] Bill installation on the invoice
@@ -88,6 +88,6 @@ _Last updated: 2026-09-30 (EDIT HERE published; Blog + Learn pilot on preview; B
 
 ## Later
 - [ ] Vercel Pro ($20/mo)
-- [ ] etwheelz.com: keep or remove
+- [x] ~~etwheelz.com: keep as-is (it forwards to TireDrop)~~ (Justin, 2026-09-30)
 - [ ] Old Cannavibe repo: delete the `tiredrop/` folder? (needs Justin's yes)
 - [ ] After ATD: live API → sandbox test → auto-ordering on → full sizes, richer specs, Google Shopping
