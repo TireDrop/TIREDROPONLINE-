@@ -87,4 +87,22 @@ export const SOURCES = {
     label: "Tire Review, Quarter Test",
     url: "https://www.tirereview.com/quarter-tire-test-tread-depth/",
   },
+
+  // D8 rotation pattern and D14 noise and vibration.
+  S18: {
+    label: "Tire Industry Association, Tire Rotation",
+    url: "https://www.tireindustry.org/resources/consumer-education/consumer-safety-overview/tire-rotation/",
+  },
+  S38: {
+    label: "Michelin, Tread Problems",
+    url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-damage/tread-problems",
+  },
+  S45: {
+    label: "Michelin, Car Handling Problems",
+    url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-damage/car-handling-problems",
+  },
+  C5: {
+    label: "Tire Rack, Best Way to Rotate Tires",
+    url: "https://www.tirerack.com/upgrade-garage/what-is-the-best-way-to-rotate-tires",
+  },
 };
