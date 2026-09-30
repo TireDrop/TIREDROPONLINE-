@@ -52,7 +52,7 @@ export default function NotFoundPage() {
           </p>
 
           <h1 className="h1 mt-4 max-w-3xl">
-            This one is flat. The rest of the site is fine.
+            This one is flat. The rest of the site is rolling.
           </h1>
 
           <p className="lede mt-5 max-w-xl text-bone/70">
