@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-09-30 (repo organized; webhooks and go-live tests done; Blog + Learn live with 20 articles; install area now Miami-Dade, Broward, Palm Beach; tipping removed)_
+_Last updated: 2026-09-30 (Tire Guru called, awaiting answer; Cannavibe repo being deleted, backup sent; repo organized; Blog + Learn live)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -101,10 +101,11 @@ _Last updated: 2026-09-30 (repo organized; webhooks and go-live tests done; Blog
 - [ ] Accountant: FL $1/tire fee + out-of-state sales tax
 - [ ] Brand pricing rules: minimum advertised prices, online-sale limits
 - [ ] Decide: direct API vs Spark / Slingshot / our own sync
-- [ ] Tire Guru call: online booking link / API / prefill (call sheet in chat 2026-09-30)
+- [x] ~~Tire Guru call made~~ (Justin, 2026-09-30)
+- [ ] Tire Guru answer: booking link → INSTALL_BOOKING_URL in Vercel; API → Claude builds it; neither → /schedule stays
 
 ## Later
 - [ ] Vercel Pro ($20/mo)
 - [x] ~~etwheelz.com: keep as-is (it forwards to TireDrop)~~ (Justin, 2026-09-30)
-- [ ] Old Cannavibe repo: delete the `tiredrop/` folder (Justin said yes 2026-09-30). Safety check clear: no Vercel project deploys from it. Removal committed locally (d3e92e4 on `claude/website-build-e3tpte`) but NOT pushed: GitHub answers 404 for jja8991/cannavibe (renamed, deleted, or GitHub access lost). Blocker: reconnect GitHub access to that repo (or confirm its new name), then push.
+- [x] ~~Old Cannavibe repo: not needed. Justin is deleting the whole repo; code backup zip sent; TireDrop repo kept as-is~~ (2026-09-30)
 - [ ] After ATD: live API → sandbox test → auto-ordering on → full sizes, richer specs, Google Shopping
