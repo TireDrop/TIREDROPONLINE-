@@ -490,7 +490,9 @@ function usPhoneDigits(raw) {
  * `{ ok: true, bot: false, value: { form, name, email, phone, phoneE164,
  * fields, tags } }`, where `fields` is the form's own [label, value] pairs in
  * order, empty ones left out, and `tags` the extra customer tags (a booking
- * with `order`: "install-booking" and "order-<ref>"; otherwise none).
+ * with `order`: "install-booking" and "order-<ref>"; otherwise none). A
+ * booking with `order` also carries `order`, the parsed reference, which
+ * /api/forms tries to book on the paid order (api/_lib/installBooking.js).
  *
  * A lead needs a way to reply: a valid email or a valid 10-digit US phone.
  * A phone that is not a US number is kept as text on the lead but not used
@@ -531,6 +533,7 @@ export function validateLead(body) {
   // nothing is looked up or trusted from it.
   const fields = [];
   const tags = [];
+  let order = null;
   if (form === "booking" && cleanText(body.order)) {
     const ref = parseBookingRef(cleanText(body.order));
     if (!ref) {
@@ -538,6 +541,7 @@ export function validateLead(body) {
     }
     fields.push(["Paid order", `${ref} (install booking for a paid order: schedule it in Tire Guru)`]);
     tags.push(INSTALL_BOOKING_TAG, bookingRefTag(ref));
+    order = ref;
   }
   for (const [key, label, max, multiline] of spec) {
     const value = cleanText(body[key], { multiline });
@@ -562,6 +566,7 @@ export function validateLead(body) {
       phoneE164: digits ? `+1${digits}` : null,
       fields,
       tags,
+      ...(order ? { order } : {}),
     },
   };
 }

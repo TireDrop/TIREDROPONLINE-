@@ -1047,6 +1047,12 @@ Back in Shopify:
 
 ## 22. "Schedule your install": order-confirmation button + two Flows
 
+> **Done 2026-09-30.** "Needs scheduling alert" was built as **Order paid →
+> wait 24 hours → tags include `needs-scheduling` and NOT `install-booked` →
+> email info@**, not the "Order tags added" version below. That built version
+> is the one to keep: the site tags the order `install-booked` when the
+> customer books (`docs/integrations/install-scheduling.md`, section (c)).
+
 **Why:** after a customer pays for an install order (ship-to-store, pickup or
 mobile), they get asked to book the install. The order confirmation email
 gets a "Schedule your install" button that goes to Track My Order. The paid

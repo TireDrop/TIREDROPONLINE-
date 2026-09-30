@@ -27,14 +27,16 @@ const BASE = String(import.meta.env?.VITE_API_BASE || "/api").replace(
   "",
 );
 
-const TIMEOUT_MS = { status: 5000, search: 9000, checkout: 25000, newsletter: 15000, forms: 20000, track: 20000 };
+const TIMEOUT_MS = { status: 5000, search: 9000, checkout: 25000, newsletter: 15000, forms: 20000, track: 20000, bookInstall: 25000 };
 
 /** A real rejection from the API. `message` is safe to show a shopper. */
 export class ApiError extends Error {
-  constructor(message, status) {
+  constructor(message, status, field = null) {
     super(message);
     this.name = "ApiError";
     this.status = status;
+    // The input the server named, when it named one (e.g. "day").
+    this.field = field;
   }
 }
 
@@ -112,7 +114,11 @@ async function request(path, { method = "GET", body, timeout } = {}) {
     typeof data.error === "string" &&
     data.error.trim()
   ) {
-    throw new ApiError(data.error.trim(), res.status);
+    throw new ApiError(
+      data.error.trim(),
+      res.status,
+      typeof data.field === "string" ? data.field : null,
+    );
   }
   throw new Unreachable(`HTTP ${res.status}`, {
     absent: !data && (res.status === 404 || res.status === 405),
@@ -553,5 +559,27 @@ export async function trackOrder({ order, email, website = "" }) {
     timeout: TIMEOUT_MS.track,
   });
   if (data?.found !== true) throw new Error("unexpected answer");
+  return data;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Install booking for a paid order (/track's panel)                 */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Books the customer's requested install day and window on a paid order
+ * (POST /api/book-install). Resolves `{ ok: true, alreadyBooked, booking }`
+ * with booking `{ day, window, dayLabel, windowLabel, notes }`. Throws
+ * ApiError for the server's own answers (400 with `field`, 404 no bookable
+ * order, 429); anything else (unreachable, Shopify down, a write that failed)
+ * throws a plain Error, and nothing was booked.
+ */
+export async function bookInstall({ order, email, day, window, notes = "", website = "" }) {
+  const data = await request("/book-install", {
+    method: "POST",
+    body: { order, email, day, window, notes, website },
+    timeout: TIMEOUT_MS.bookInstall,
+  });
+  if (data?.ok !== true || !data.booking) throw new Error("unexpected answer");
   return data;
 }

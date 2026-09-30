@@ -137,7 +137,9 @@ export function formatLead({ form, name, email, phone, fields = [] }, now = new 
   ].join("\n");
 }
 
-const LEAD_HEADING = /^TireDrop .+ — \d{4}-\d{2}-\d{2} \d{2}:\d{2} ET/;
+// A website lead's first line; a booked install (api/_lib/installBooking.js)
+// puts "[BOOKED] #1001: …" on the line above it.
+const LEAD_HEADING = /^(?:\[BOOKED\][^\n]*\n)?TireDrop .+ — \d{4}-\d{2}-\d{2} \d{2}:\d{2} ET/;
 
 /**
  * The customer note with `entry` on top. Older entries follow, newest first.

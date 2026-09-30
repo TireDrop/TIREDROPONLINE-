@@ -8,7 +8,9 @@
 //   200 { found: true, kind: "order", order }       a Shopify order; a paid
 //                                                   install order also has
 //                                                   order.booking (see
-//                                                   api/_lib/booking.js)
+//                                                   api/_lib/booking.js):
+//                                                   the booking panel, or
+//                                                   the booked day and window
 //   200 { found: true, kind: "request", request }   a TD- order request (draft)
 //   404 { found: false, error }                     no match: the same answer
 //                                                   for a wrong number, a wrong
@@ -21,18 +23,25 @@
 import { getConfig } from "./_lib/config.js";
 import { HttpError, methodNotAllowed, readJsonBody, send } from "./_lib/http.js";
 import { ShopifyCheckoutError } from "./_lib/shopify.js";
-import { lookupOrder, validateTrack } from "./_lib/track.js";
+import {
+  lookupOrder,
+  orderLookupLimiter,
+  TRACK_RATE_LIMIT,
+  TRACK_RATE_WINDOW_MS,
+  validateTrack,
+} from "./_lib/track.js";
 import { bookingForOrder } from "./_lib/booking.js";
-import { clientIp, createRateLimiter } from "./_lib/ratelimit.js";
+import { readInstallBooking } from "./_lib/installBooking.js";
+import { clientIp } from "./_lib/ratelimit.js";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 const FAILED = "We couldn't look that up just now. Please try again, or call the shop.";
 export const NOT_FOUND =
   "We couldn't find an order with that number and email. Check both against your confirmation email, or call the shop.";
 
-export const TRACK_RATE_LIMIT = 10;
-export const TRACK_RATE_WINDOW_MS = 10 * 60 * 1000;
-const limiter = createRateLimiter({ limit: TRACK_RATE_LIMIT, windowMs: TRACK_RATE_WINDOW_MS });
+// Shared with /api/book-install (api/_lib/track.js orderLookupLimiter).
+export { TRACK_RATE_LIMIT, TRACK_RATE_WINDOW_MS };
+const limiter = orderLookupLimiter;
 
 /** Test hook. */
 export function resetTrackRateLimit() {
@@ -74,7 +83,10 @@ export function createTrackHandler({ env, shopify = {}, now = Date.now } = {}) {
 
       const found = await lookupOrder(checked.value, config.shopify, shopify, {
         booking: (node) =>
-          bookingForOrder(node, config, shopify, { email: checked.value.email }),
+          bookingForOrder(node, config, shopify, {
+            email: checked.value.email,
+            readBooking: readInstallBooking,
+          }),
       });
       if (!found) return send(res, 404, { found: false, error: NOT_FOUND }, NO_STORE);
       return send(res, 200, { found: true, ...found }, NO_STORE);

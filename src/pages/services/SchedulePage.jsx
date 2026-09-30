@@ -40,7 +40,16 @@ import {
 } from "../../data/forms.js";
 import { SERVICES, getService } from "../../data/services.js";
 import { recallVehicle, splitVehicle } from "../../data/vehicles.js";
-import { parseBookingRef } from "../../data/booking.js";
+import {
+  INSTALL_WINDOWS,
+  PAID_BOOKING_MAX_DAYS,
+  PAID_BOOKING_MIN_DAYS,
+  addDays,
+  formatInstallDay,
+  installSlotErrors,
+  parseBookingRef,
+  shopToday,
+} from "../../data/booking.js";
 import VehicleSelect, {
   vehicleErrors,
 } from "../../components/shop/VehicleSelect.jsx";
@@ -54,15 +63,10 @@ const LAST_STEP = STEP_LABELS.length;
 // computes it this way, so the two pages agreed on nothing but the number.
 const MAX_MODEL_YEAR = new Date().getFullYear() + 2;
 
-// Arrival windows. The 4–6 PM slot only exists Mon–Fri; the shop closes at 4 on
-// Saturday and is closed Sunday, per BUSINESS.hours.
-const TIME_WINDOWS = [
-  { value: "8-10am", label: "8:00 – 10:00 AM" },
-  { value: "10-12pm", label: "10:00 AM – 12:00 PM" },
-  { value: "12-2pm", label: "12:00 – 2:00 PM" },
-  { value: "2-4pm", label: "2:00 – 4:00 PM" },
-  { value: "4-6pm", label: "4:00 – 6:00 PM", weekdayOnly: true },
-];
+// Arrival windows (src/data/booking.js, shared with /track and the API). The
+// 4–6 PM slot only exists Mon–Fri; the shop closes at 4 on Saturday and is
+// closed Sunday, per BUSINESS.hours.
+const TIME_WINDOWS = INSTALL_WINDOWS;
 
 const EMPTY_FORM = {
   service: "",
@@ -95,16 +99,8 @@ function parseLocalDate(value) {
   return new Date(y, m - 1, d);
 }
 
-function formatLongDate(value) {
-  const date = parseLocalDate(value);
-  if (!date) return "";
-  return date.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-}
+/** "Thursday, October 1, 2026" (src/data/booking.js, the API's own wording). */
+const formatLongDate = formatInstallDay;
 
 function makeReference(date = new Date()) {
   const stamp = toIsoDate(date).replace(/-/g, "").slice(2);
@@ -120,7 +116,7 @@ function digitsOnly(value) {
   return value.replace(/\D/g, "");
 }
 
-function validateStep(step, form) {
+function validateStep(step, form, { paidOrder = false } = {}) {
   const errors = {};
   const service = getService(form.service);
 
@@ -153,28 +149,22 @@ function validateStep(step, form) {
   }
 
   if (step === 4) {
-    if (!form.date) {
-      errors.date = "Pick the day you want us.";
-    } else {
-      const picked = parseLocalDate(form.date);
-      const today = parseLocalDate(toIsoDate(new Date()));
-      if (!picked) {
-        errors.date = "Enter a valid date.";
-      } else if (picked < today) {
-        errors.date = "That date has already passed. Pick today or later.";
-      } else if (picked.getDay() === 0) {
-        errors.date = "We are closed Sunday. Pick Monday through Saturday.";
-      }
-    }
-    if (!form.window) {
-      errors.window = "Choose an arrival window.";
-    } else {
-      const picked = form.date ? parseLocalDate(form.date) : null;
-      const chosen = TIME_WINDOWS.find((w) => w.value === form.window);
-      if (picked && chosen?.weekdayOnly && picked.getDay() === 6) {
-        errors.window = "Saturday closes at 4:00 PM. Choose an earlier window.";
-      }
-    }
+    // The same rules as the API (src/data/booking.js). A booking for a paid
+    // order is booked on that order, so it follows the API's range: tomorrow
+    // to 60 days out, Florida time.
+    Object.assign(
+      errors,
+      installSlotErrors(
+        form,
+        paidOrder
+          ? {
+              today: shopToday(),
+              minDays: PAID_BOOKING_MIN_DAYS,
+              maxDays: PAID_BOOKING_MAX_DAYS,
+            }
+          : { today: toIsoDate(new Date()) },
+      ),
+    );
   }
 
   if (step === 5) {
@@ -445,7 +435,15 @@ export default function SchedulePage() {
   const lockedToShop = Boolean(service && !service.mobile);
   // Today on the visitor's clock, not the build's (see useHydrated).
   const hydrated = useHydrated();
-  const today = hydrated ? toIsoDate(new Date()) : undefined;
+  // A paid order's booking runs tomorrow to 60 days out, Florida time (the
+  // API's range); anything else starts today.
+  const today = hydrated
+    ? orderRef
+      ? addDays(shopToday(), PAID_BOOKING_MIN_DAYS)
+      : toIsoDate(new Date())
+    : undefined;
+  const lastDay =
+    hydrated && orderRef ? addDays(shopToday(), PAID_BOOKING_MAX_DAYS) : undefined;
   const pickedDate = form.date ? parseLocalDate(form.date) : null;
   const isSaturday = pickedDate?.getDay() === 6;
 
@@ -493,7 +491,7 @@ export default function SchedulePage() {
 
   function goNext() {
     const current = readForm();
-    const found = validateStep(step, current);
+    const found = validateStep(step, current, { paidOrder: Boolean(orderRef) });
     setErrors(found);
     const firstKey = Object.keys(found)[0];
     if (firstKey) {
@@ -534,14 +532,20 @@ export default function SchedulePage() {
     const current = readForm();
     // Re-check every step so nothing slips through via keyboard navigation.
     const all = [1, 2, 3, 4, 5].reduce(
-      (acc, n) => ({ ...acc, ...validateStep(n, current) }),
+      (acc, n) => ({
+        ...acc,
+        ...validateStep(n, current, { paidOrder: Boolean(orderRef) }),
+      }),
       {},
     );
     const keys = Object.keys(all).filter((k) => all[k]);
     if (keys.length) {
       setErrors(all);
       const firstStep = [1, 2, 3, 4, 5].find(
-        (n) => Object.keys(validateStep(n, current)).length > 0,
+        (n) =>
+          Object.keys(
+            validateStep(n, current, { paidOrder: Boolean(orderRef) }),
+          ).length > 0,
       );
       setStep(firstStep || 1);
       return;
@@ -560,6 +564,10 @@ export default function SchedulePage() {
     setSubmission({
       ...outcome,
       reference: outcome.delivered ? reference : null,
+      // A booking for a verified paid order is booked on the order itself
+      // (api/_lib/installBooking.js); the server hands the booking back.
+      // An order that already had one keeps it and says so.
+      existing: outcome.data?.booking?.alreadyBooked ? outcome.data.booking : null,
     });
   }
 
@@ -572,7 +580,7 @@ export default function SchedulePage() {
           description={`Your ${BUSINESS.parent} appointment request is in. Here is your reference number and what happens next.`}
         />
         <PageHero
-          eyebrow="You're on the schedule"
+          eyebrow="Request received"
           title="Appointment requested"
           lede="We have your request. We confirm an arrival window when we book, by phone."
         />
@@ -599,8 +607,22 @@ export default function SchedulePage() {
                 </p>
               </div>
 
+              {submission.existing && (
+                <p
+                  className="mt-5 rounded-sm border border-amber/40 bg-amber/10 p-4 text-sm leading-relaxed text-ink"
+                  data-testid="booking-existing"
+                >
+                  Order {orderRef} already has an install request in:{" "}
+                  <strong>
+                    {submission.existing.dayLabel},{" "}
+                    {submission.existing.windowLabel}
+                  </strong>
+                  . We kept that one. To change it, call {BUSINESS.phone}.
+                </p>
+              )}
+
               <div className="mt-7">
-                <h3 className="h3 mb-2">What you booked</h3>
+                <h3 className="h3 mb-2">What you asked for</h3>
                 <BookingSummary form={form} orderRef={orderRef} />
               </div>
 
@@ -1159,6 +1181,7 @@ export default function SchedulePage() {
                     id="date"
                     name="date"
                     min={today}
+                    max={lastDay}
                     value={form.date}
                     onChange={(e) => pickDate(e.target.value)}
                     className="field"

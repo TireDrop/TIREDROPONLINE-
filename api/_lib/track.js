@@ -24,11 +24,27 @@
 // not found. Nothing here has been run against the real store.
 
 import { DELIVERY_ATTRIBUTE, MOBILE_DELIVERY_ATTRIBUTE, REQUEST_TAG, shopifyGraphQL } from "./shopify.js";
+import { createRateLimiter } from "./ratelimit.js";
 
-export const TRACK_ORDER_QUERY = `query trackOrder($query: String!) {
-  orders(first: 5, query: $query) {
-    nodes {
-      id
+/**
+ * One limiter for every endpoint that checks an order number against an
+ * email: /api/track and /api/book-install count against the same budget
+ * (per warm instance, per client IP), so the booking endpoint is not a
+ * second way to guess.
+ */
+export const TRACK_RATE_LIMIT = 10;
+export const TRACK_RATE_WINDOW_MS = 10 * 60 * 1000;
+export const orderLookupLimiter = createRateLimiter({
+  limit: TRACK_RATE_LIMIT,
+  windowMs: TRACK_RATE_WINDOW_MS,
+});
+
+/**
+ * What /track and the install booking read of an order. `installBooking` is
+ * the order metafield tiredrop.install_booking (api/_lib/installBooking.js),
+ * set once the customer books the install.
+ */
+export const ORDER_FIELDS = `id
       name
       createdAt
       email
@@ -41,6 +57,12 @@ export const TRACK_ORDER_QUERY = `query trackOrder($query: String!) {
       shippingLine { title }
       lineItems(first: 20) { nodes { title quantity currentQuantity } }
       fulfillments(first: 10) { trackingInfo(first: 10) { company number url } }
+      installBooking: metafield(namespace: "tiredrop", key: "install_booking") { value }`;
+
+export const TRACK_ORDER_QUERY = `query trackOrder($query: String!) {
+  orders(first: 5, query: $query) {
+    nodes {
+      ${ORDER_FIELDS}
     }
   }
 }`;
@@ -129,7 +151,7 @@ export function requestSearch(date) {
 
 const hasTag = (node, tag) => (node.tags ?? []).some((t) => String(t).toLowerCase() === tag);
 const attribute = (node, key) => (node.customAttributes ?? []).find((a) => a?.key === key)?.value ?? null;
-const sameEmail = (a, b) => typeof a === "string" && a.trim().toLowerCase() === b;
+export const sameEmail = (a, b) => typeof a === "string" && a.trim().toLowerCase() === b;
 
 /** "ship" | "ship-to-store" | "mobile" | "pickup" | null. */
 export function deliveryType(node) {

@@ -591,3 +591,13 @@ test("webhook: the scope answer is cached per instance", async () => {
   await call(r.handler, delivery("orders/paid", installPayload(b)));
   assert.deepEqual(r.shop.calls.map((c) => c.op), ["appAccessScopes", "bookingTagsAdd", "bookingTagsAdd"]);
 });
+
+test("webhook: a late orders/paid for an order the customer already booked (install-booked) is not re-tagged needs-scheduling", async () => {
+  const o = storeOrder({ tags: ["vercel-live", "ship-to-store", "install-booked"] });
+  const r = setup([o], { env: KILL_SWITCH_OFF });
+  const res = await call(r.handler, delivery("orders/paid", installPayload(o)));
+  assert.equal(res.status, 200);
+  assert.equal(res.body.scheduling, "already-booked");
+  assert.equal(r.shop.calls.length, 0, "no scope read, no write");
+  assert.deepEqual(o.tags, ["vercel-live", "ship-to-store", "install-booked"]);
+});

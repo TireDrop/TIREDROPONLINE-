@@ -5,6 +5,7 @@ import {
   CalendarDays,
   CheckCircle2,
   ClipboardList,
+  Clock,
   ExternalLink,
   Package,
   Phone,
@@ -15,7 +16,16 @@ import {
   XCircle,
 } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
-import { ApiError, trackOrder } from "../../data/api.js";
+import { ApiError, bookInstall, trackOrder } from "../../data/api.js";
+import {
+  INSTALL_WINDOWS,
+  PAID_BOOKING_MAX_DAYS,
+  PAID_BOOKING_MIN_DAYS,
+  addDays,
+  installSlotErrors,
+  shopToday,
+  weekdayOf,
+} from "../../data/booking.js";
 import { hasChanges, readFormValues } from "../../data/forms.js";
 import {
   Breadcrumbs,
@@ -25,6 +35,7 @@ import {
   Section,
   SectionHead,
   Seo,
+  Textarea,
 } from "../../components/ui/index.jsx";
 
 const EMPTY = { order: "", email: "" };
@@ -105,17 +116,133 @@ const nice = (map, key) =>
   (key ? key.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()) : "—");
 
 /**
- * "Schedule your install" for a paid order that involves installation. The
- * server decides whether there is one (`order.booking`, api/_lib/booking.js)
- * and what it opens: the shop's own booking link, already filled in for this
- * order, or /schedule?order=<ref> with the vehicle and contact from the order
- * handed over in router state (never in the URL).
+ * The customer's request, once it is in: the day and window they asked for
+ * (not an appointment; the shop confirms the time), where, and the phone.
  */
-function ScheduleInstall({ booking, orderName }) {
-  const mobile = booking.install === "mobile";
-  const text = mobile
-    ? "Your order is paid. Pick a day and arrival window for the mobile install; a dispatcher confirms it by phone."
-    : `Your order is paid. Pick the day and time you would like for the install at our ${BUSINESS.shop.city} shop; we confirm it with you before then.`;
+function InstallRequested({ booking, install, already = false }) {
+  const where =
+    install === "mobile"
+      ? `Mobile install at the address on your order · ${BUSINESS.phone}`
+      : `${BUSINESS.parent}, ${BUSINESS.shop.full} · ${BUSINESS.phone}`;
+  return (
+    <div
+      className="mt-6 rounded-sm border border-drop/30 bg-drop/5 p-5"
+      data-testid="install-requested"
+      role="status"
+    >
+      <h4 className="flex items-center gap-2 font-display text-lg font-bold text-ink">
+        <CheckCircle2 size={20} aria-hidden className="shrink-0 text-drop" />
+        {already ? "Install already requested" : "Install requested"}
+      </h4>
+      <p className="mt-1.5 text-sm leading-relaxed text-ink">
+        {booking?.dayLabel ? (
+          <>
+            Your install request is in:{" "}
+            <strong data-testid="install-requested-when">
+              {booking.dayLabel}, {booking.windowLabel}
+            </strong>
+            .
+          </>
+        ) : (
+          "Your install request is in."
+        )}{" "}
+        {where}. We confirm the exact time with you before then.
+      </p>
+      {booking?.notes && (
+        <p className="mt-2 text-xs text-smoke">Your notes: {booking.notes}</p>
+      )}
+      <p className="mt-3 text-xs text-smoke">
+        Need a different day? Call{" "}
+        <a href={BUSINESS.phoneHref} className="text-drop underline">
+          {BUSINESS.phone}
+        </a>
+        .
+      </p>
+    </div>
+  );
+}
+
+const EMPTY_SLOT = { day: "", window: "", notes: "" };
+
+/**
+ * The inline booking: pick a day and window, add a note, send. POST
+ * /api/book-install books it ON the order (tag install-booked, note line,
+ * lead to info@), checked again on the server against the order number and
+ * the email /track just matched. The same day and window rules as /schedule
+ * (src/data/booking.js): tomorrow to 60 days out, Florida time, no Sunday,
+ * 4 – 6 PM weekdays only.
+ */
+function InstallBookingForm({ orderName, email, install, onBooked }) {
+  const [values, setValues] = useState(EMPTY_SLOT);
+  const [errors, setErrors] = useState({});
+  const [sending, setSending] = useState(false);
+  const [failure, setFailure] = useState(null);
+  const today = shopToday();
+  const first = addDays(today, PAID_BOOKING_MIN_DAYS);
+  const last = addDays(today, PAID_BOOKING_MAX_DAYS);
+  const saturday = weekdayOf(values.day) === 6;
+
+  const set = (key, value) => {
+    setValues((prev) => {
+      const next = { ...prev, [key]: value };
+      // Saturday closes at 4:00 PM: drop a late window already picked.
+      if (key === "day" && weekdayOf(value) === 6) {
+        const w = INSTALL_WINDOWS.find((x) => x.value === prev.window);
+        if (w?.weekdayOnly) next.window = "";
+      }
+      return next;
+    });
+    setErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (sending) return;
+    const formElement = event.currentTarget;
+    const { values: current, changed } = readFormValues(formElement, values);
+    if (hasChanges(changed)) setValues((prev) => ({ ...prev, ...changed }));
+    const found = installSlotErrors(
+      { date: current.day, window: current.window },
+      { today, minDays: PAID_BOOKING_MIN_DAYS, maxDays: PAID_BOOKING_MAX_DAYS },
+    );
+    const next = { day: found.date, window: found.window };
+    setErrors(next);
+    if (next.day || next.window) {
+      document.getElementById(next.day ? "install-day" : "install-window")?.focus();
+      return;
+    }
+    const website = formElement.elements.namedItem("website")?.value ?? "";
+    setSending(true);
+    setFailure(null);
+    try {
+      const data = await bookInstall({
+        order: orderName,
+        email,
+        day: current.day,
+        window: current.window,
+        notes: current.notes.trim(),
+        website,
+      });
+      onBooked({ booking: data.booking, already: data.alreadyBooked === true });
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 400 && (err.field === "day" || err.field === "window")) {
+        setErrors({ [err.field]: err.message });
+      } else if (err instanceof ApiError) {
+        setFailure(err.message);
+      } else {
+        setFailure(
+          `We couldn't save your install request just now, so it is not in yet. Try again in a minute, or call ${BUSINESS.phone}.`,
+        );
+      }
+    }
+    setSending(false);
+  };
+
+  const hint =
+    install === "mobile"
+      ? "Pick the day and arrival window you would like for the mobile install."
+      : `Pick the day and time you would like for the install at our ${BUSINESS.shop.city} shop.`;
+
   return (
     <div
       className="mt-6 rounded-sm border border-drop/30 bg-drop/5 p-5"
@@ -125,8 +252,162 @@ function ScheduleInstall({ booking, orderName }) {
         <CalendarDays size={20} aria-hidden className="shrink-0 text-drop" />
         Schedule your install
       </h4>
-      <p className="mt-1.5 text-sm leading-relaxed text-smoke">{text}</p>
-      {booking.mode === "external" ? (
+      <p className="mt-1.5 text-sm leading-relaxed text-smoke">
+        Your order is paid. {hint} This is a request: we confirm the exact time
+        with you before then.
+      </p>
+      <form noValidate onSubmit={handleSubmit} className="relative mt-4 grid gap-5">
+        <FormTrap id="install-website" />
+        <div className="max-w-xs">
+          <label className="label" htmlFor="install-day">
+            Preferred day
+          </label>
+          <Input
+            id="install-day"
+            name="day"
+            type="date"
+            min={first}
+            max={last}
+            className="field"
+            value={values.day}
+            onChange={(e) => set("day", e.target.value)}
+            aria-invalid={errors.day ? "true" : undefined}
+            aria-describedby={errors.day ? "install-day-error" : "install-day-hint"}
+          />
+          {errors.day ? (
+            <FieldError id="install-day-error">{errors.day}</FieldError>
+          ) : (
+            <p id="install-day-hint" className="mt-1.5 text-xs text-smoke">
+              Monday – Saturday, from tomorrow. Closed Sunday.
+            </p>
+          )}
+        </div>
+
+        <fieldset>
+          <legend className="label">Time window</legend>
+          <div
+            id="install-window"
+            tabIndex={-1}
+            className="grid gap-2 sm:grid-cols-2"
+            aria-describedby={errors.window ? "install-window-error" : undefined}
+          >
+            {INSTALL_WINDOWS.map((slot) => {
+              const unavailable = slot.weekdayOnly && saturday;
+              const selected = values.window === slot.value;
+              return (
+                <label
+                  key={slot.value}
+                  htmlFor={`install-window-${slot.value}`}
+                  className={`flex cursor-pointer items-center gap-2.5 rounded-sm border bg-bone px-3 py-2.5 text-sm ${
+                    selected ? "border-drop" : "border-ink/15 hover:border-ink/40"
+                  } ${unavailable ? "cursor-not-allowed opacity-50" : ""}`}
+                >
+                  <Input
+                    type="radio"
+                    id={`install-window-${slot.value}`}
+                    name="window"
+                    value={slot.value}
+                    checked={selected}
+                    disabled={unavailable}
+                    onChange={() => set("window", slot.value)}
+                    className="shrink-0 accent-drop"
+                  />
+                  <Clock size={14} aria-hidden className="shrink-0 text-drop" />
+                  <span className="text-ink">{slot.label}</span>
+                  {unavailable && (
+                    <span className="sr-only">Not available Saturday</span>
+                  )}
+                </label>
+              );
+            })}
+          </div>
+          {errors.window && (
+            <FieldError id="install-window-error">{errors.window}</FieldError>
+          )}
+        </fieldset>
+
+        <div>
+          <label className="label" htmlFor="install-notes">
+            Notes{" "}
+            <span className="normal-case tracking-normal">(optional)</span>
+          </label>
+          <Textarea
+            id="install-notes"
+            name="notes"
+            rows={2}
+            maxLength={500}
+            className="field"
+            placeholder="Locking lug nuts, a second day that also works, anything we should know"
+            value={values.notes}
+            onChange={(e) => set("notes", e.target.value)}
+          />
+        </div>
+
+        {failure && (
+          <p role="alert" className="flex items-start gap-1.5 text-sm text-drop">
+            <AlertCircle size={16} aria-hidden className="mt-0.5 shrink-0" />
+            {failure}
+          </p>
+        )}
+
+        <div>
+          <button
+            type="submit"
+            className="btn-primary btn-sm"
+            disabled={sending}
+            aria-busy={sending || undefined}
+          >
+            <CalendarDays size={16} aria-hidden />
+            {sending ? "Sending…" : "Request this day and window"}
+          </button>
+        </div>
+      </form>
+      <p className="mt-4 text-xs text-smoke">
+        Rather book by phone? Call{" "}
+        <a href={BUSINESS.phoneHref} className="text-drop underline">
+          {BUSINESS.phone}
+        </a>{" "}
+        and mention order {orderName}.
+      </p>
+    </div>
+  );
+}
+
+/**
+ * "Schedule your install" for a paid order that involves installation. The
+ * server decides whether there is one (`order.booking`, api/_lib/booking.js)
+ * and which:
+ *   booked    the day and window the customer already requested;
+ *   external  INSTALL_BOOKING_URL (Tire Guru), already filled in for this
+ *             order: the only thing shown;
+ *   internal  the inline booking form (POST /api/book-install).
+ */
+function ScheduleInstall({ booking, orderName, email }) {
+  const [done, setDone] = useState(null);
+  if (booking.mode === "booked") {
+    return <InstallRequested booking={booking.booking} install={booking.install} />;
+  }
+  if (done) {
+    return (
+      <InstallRequested booking={done.booking} install={booking.install} already={done.already} />
+    );
+  }
+  if (booking.mode === "external") {
+    const mobile = booking.install === "mobile";
+    return (
+      <div
+        className="mt-6 rounded-sm border border-drop/30 bg-drop/5 p-5"
+        data-testid="schedule-install"
+      >
+        <h4 className="flex items-center gap-2 font-display text-lg font-bold text-ink">
+          <CalendarDays size={20} aria-hidden className="shrink-0 text-drop" />
+          Schedule your install
+        </h4>
+        <p className="mt-1.5 text-sm leading-relaxed text-smoke">
+          {mobile
+            ? "Your order is paid. Pick a day and arrival window for the mobile install; we confirm the time with you by phone."
+            : `Your order is paid. Pick the day and time you would like for the install at our ${BUSINESS.shop.city} shop; we confirm it with you before then.`}
+        </p>
         <a
           href={booking.url}
           target="_blank"
@@ -137,30 +418,23 @@ function ScheduleInstall({ booking, orderName }) {
           Schedule your install
           <ExternalLink size={14} aria-hidden />
         </a>
-      ) : (
-        <Link
-          to={booking.path}
-          state={{
-            bookingPrefill: {
-              ...booking.prefill,
-              ref: booking.ref,
-              install: booking.install,
-            },
-          }}
-          className="btn-primary btn-sm mt-4"
-        >
-          <CalendarDays size={16} aria-hidden />
-          Schedule your install
-        </Link>
-      )}
-      <p className="mt-3 text-xs text-smoke">
-        Rather book by phone? Call{" "}
-        <a href={BUSINESS.phoneHref} className="text-drop underline">
-          {BUSINESS.phone}
-        </a>{" "}
-        and mention order {orderName}.
-      </p>
-    </div>
+        <p className="mt-3 text-xs text-smoke">
+          Rather book by phone? Call{" "}
+          <a href={BUSINESS.phoneHref} className="text-drop underline">
+            {BUSINESS.phone}
+          </a>{" "}
+          and mention order {orderName}.
+        </p>
+      </div>
+    );
+  }
+  return (
+    <InstallBookingForm
+      orderName={orderName}
+      email={email}
+      install={booking.install}
+      onBooked={setDone}
+    />
   );
 }
 
@@ -235,7 +509,7 @@ function headline(order) {
   };
 }
 
-function OrderResult({ order }) {
+function OrderResult({ order, email }) {
   const h = headline(order);
   const date = placed(order.createdAt);
   return (
@@ -254,7 +528,12 @@ function OrderResult({ order }) {
       <p className="mt-2 text-sm leading-relaxed text-smoke">{h.text}</p>
 
       {order.booking && (
-        <ScheduleInstall booking={order.booking} orderName={order.name} />
+        <ScheduleInstall
+          key={`${order.name}|${email}`}
+          booking={order.booking}
+          orderName={order.name}
+          email={email}
+        />
       )}
 
       <dl className="mt-6 grid gap-4 border-t border-ink/10 pt-5 text-sm sm:grid-cols-2">
@@ -453,7 +732,7 @@ function TrackForm() {
       });
       next = data.kind === "request"
         ? { kind: "request", request: data.request }
-        : { kind: "order", order: data.order };
+        : { kind: "order", order: data.order, email: current.email.trim() };
     } catch (err) {
       if (err instanceof ApiError && err.status === 404) {
         next = { kind: "not-found" };
@@ -546,7 +825,9 @@ function TrackForm() {
       </form>
 
       <div ref={resultRef} tabIndex={-1} className="outline-none" aria-live="polite">
-        {result?.kind === "order" && <OrderResult order={result.order} />}
+        {result?.kind === "order" && (
+          <OrderResult order={result.order} email={result.email} />
+        )}
         {result?.kind === "request" && <RequestResult request={result.request} />}
         {(result?.kind === "not-found" || result?.kind === "error") && (
           <Miss result={result} />

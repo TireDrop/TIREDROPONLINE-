@@ -7,10 +7,12 @@
 //     info@. Idempotent, and never fails the webhook.
 //   * /track: a paid, unfulfilled install order gets a "Schedule your
 //     install" call to action (bookingForOrder):
+//       - already booked (tag install-booked): the requested day and window;
 //       - INSTALL_BOOKING_URL set: that link, filled on the SERVER with the
-//         verified order's details (fillBookingUrl);
-//       - not set: /schedule?order=<ref>, with vehicle and contact from the
-//         verified order handed to the page (never through the URL).
+//         verified order's details (fillBookingUrl), and nothing else;
+//       - not set: the inline booking panel (POST /api/book-install,
+//         api/_lib/installBooking.js), which tags the order install-booked.
+//         /schedule?order=<ref> keeps working and books the same way.
 //
 // "Involves installation" (installKind): ship-to-store / pickup at the shop
 // (install at the shop), mobile install, or an install line on the order.
@@ -25,6 +27,12 @@ import { deliveryType } from "./track.js";
 import { parseBookingRef, schedulePath } from "../../src/data/booking.js";
 
 export const NEEDS_SCHEDULING_TAG = "needs-scheduling";
+/**
+ * Put on the ORDER once the customer has booked (api/_lib/installBooking.js).
+ * The Flow "Needs scheduling alert" (order paid, wait 24 hours) only emails
+ * info@ when the order has needs-scheduling and NOT install-booked.
+ */
+export const INSTALL_BOOKED_TAG = "install-booked";
 export const WRITE_ORDERS = "write_orders";
 
 export const BOOKING_TAGS_ADD = `mutation bookingTagsAdd($id: ID!, $tags: [String!]!) {
@@ -52,7 +60,7 @@ export const BOOKING_CONTACT_QUERY = `query bookingContact($id: ID!) {
 
 // ---- Order facts (pure, tested) ------------------------------------------------
 
-const hasTag = (node, tag) =>
+export const hasTag = (node, tag) =>
   (node?.tags ?? []).some((t) => String(t).trim().toLowerCase() === tag);
 const attribute = (node, key) =>
   (node?.customAttributes ?? []).find((a) => a?.key === key)?.value ?? null;
@@ -178,23 +186,18 @@ export function fillBookingUrl(template, values = {}) {
 }
 
 /**
- * The call to action for a verified order, or null when it needs none.
- *   { mode: "external", url }                         INSTALL_BOOKING_URL
- *   { mode: "internal", ref, path, install, prefill } /schedule?order=<ref>
- * `email` is the address /track just matched. The contact read is best
- * effort: if Shopify refuses it (for example the app may not read customer
- * names and phones), the booking still goes out, just without them.
+ * The customer's name and phone for a verified order: checkout's own note
+ * line first for the name, the order's phone fields first for the phone,
+ * then the addresses and the customer. Best effort: if Shopify refuses the
+ * read (for example the app may not read customer names and phones), what
+ * the note has is used. Resolves `{ name, phone }`.
  */
-export async function bookingForOrder(node, config, deps = {}, { email = "" } = {}) {
-  if (!needsBooking(node)) return null;
+export async function readOrderContact(node, config, deps = {}, { tag = "[track]" } = {}) {
   const log = deps.log ?? console;
-  const ref = bookingRefFor(node);
-  if (!ref) return null;
-
   const noted = contactFromNote(node);
   let name = noted.name;
   let phone = noted.phone;
-  if (node.id) {
+  if (node?.id) {
     try {
       const data = await shopifyGraphQL(config.shopify, BOOKING_CONTACT_QUERY, { id: node.id }, deps);
       const o = data?.order ?? {};
@@ -203,11 +206,38 @@ export async function bookingForOrder(node, config, deps = {}, { email = "" } = 
       phone = text(o.phone ?? "", 30) || text(o.shippingAddress?.phone ?? "", 30) ||
         text(o.billingAddress?.phone ?? "", 30) || phone;
     } catch (err) {
-      log.warn(`[track] booking contact for ${node.name ?? ref} not read (${err?.message}); the booking starts without it.`);
+      log.warn(`${tag} booking contact for ${node.name ?? "an order"} not read (${err?.message}); the booking starts without it.`);
     }
   }
-  const vehicle = vehicleFor(node);
+  return { name, phone };
+}
+
+/**
+ * The call to action for a verified order, or null when it needs none.
+ *   { mode: "booked", ref, install, booking }         already booked: the
+ *                                                     requested day and window
+ *   { mode: "external", url }                         INSTALL_BOOKING_URL
+ *   { mode: "internal", ref, path, install, prefill } the inline booking on
+ *                                                     /track (POST
+ *                                                     /api/book-install), or
+ *                                                     /schedule?order=<ref>
+ * `email` is the address /track just matched. `readBooking` (from
+ * api/_lib/installBooking.js) reads the stored booking off a booked order.
+ */
+export async function bookingForOrder(node, config, deps = {}, { email = "", readBooking = null } = {}) {
+  if (!needsBooking(node)) return null;
+  const log = deps.log ?? console;
+  const ref = bookingRefFor(node);
+  if (!ref) return null;
   const install = installKind(node);
+
+  if (hasTag(node, INSTALL_BOOKED_TAG)) {
+    const booking = readBooking ? readBooking(node) : null;
+    return { mode: "booked", ref, install, booking };
+  }
+
+  const { name, phone } = await readOrderContact(node, config, deps);
+  const vehicle = vehicleFor(node);
 
   if (config.booking?.mode === "external") {
     const url = fillBookingUrl(config.booking.template, {
@@ -237,6 +267,7 @@ export async function bookingForOrder(node, config, deps = {}, { email = "" } = 
  * forwarder do not depend on it. Resolves `{ result, reason? }`:
  *   "not-install"     nothing to schedule
  *   "already-tagged"  the delivery already carried the tag
+ *   "already-booked"  the order is tagged install-booked: nothing to chase
  *   "tagged"
  *   "missing-scope"   the app lacks write_orders: logged, see the doc
  *   "failed"          Shopify refused or did not answer: logged
@@ -249,6 +280,8 @@ export async function markNeedsScheduling(shopifyCfg, orderId, payload, deps = {
   const label = payload?.name ?? orderId;
   if (!installKind(node)) return { result: "not-install" };
   if (hasTag(node, NEEDS_SCHEDULING_TAG)) return { result: "already-tagged" };
+  // A late or repeated delivery for an order the customer has already booked.
+  if (hasTag(node, INSTALL_BOOKED_TAG)) return { result: "already-booked" };
 
   const missingScope = () => {
     log.error(
