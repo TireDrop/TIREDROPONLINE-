@@ -8,8 +8,8 @@ secondaryKeywords:
   - "tire manufacture date"
   - "3-digit date code"
 hub: sidewall
-date: 2026-10-05
-updated: 2026-10-05
+date: 2026-09-30
+updated: 2026-09-30
 demo: dot-date-reader
 takeaways:
   - "The last four digits of the DOT number are the build week and year: 3219 means week 32 of 2019."

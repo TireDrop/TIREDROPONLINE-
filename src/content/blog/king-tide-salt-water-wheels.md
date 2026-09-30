@@ -9,8 +9,8 @@ secondaryKeywords:
   - "rinse car after salt water"
   - "sunny day flooding"
 category: hurricane
-date: 2026-10-05
-updated: 2026-10-05
+date: 2026-09-30
+updated: 2026-09-30
 demo: null
 takeaways:
   - "A king tide is a popular name for an exceptionally high tide. NOAA's term for the street flooding it causes is high tide flooding."

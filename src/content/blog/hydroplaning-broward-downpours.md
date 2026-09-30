@@ -8,8 +8,8 @@ secondaryKeywords:
   - "driving in rain South Florida"
   - "standing water I-595"
 category: weather
-date: 2026-10-05
-updated: 2026-10-05
+date: 2026-09-30
+updated: 2026-09-30
 demo: null
 takeaways:
   - "NWS Miami puts South Florida's rainy season at May 15 to October 15, with showers and thunderstorms nearly every day."

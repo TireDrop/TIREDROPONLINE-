@@ -8,8 +8,8 @@ secondaryKeywords:
   - "tpms light solid vs flashing"
   - "tire pressure light cold morning"
 hub: pressure
-date: 2026-10-05
-updated: 2026-10-05
+date: 2026-09-30
+updated: 2026-09-30
 demo: tpms-light
 takeaways:
   - "Under the federal standard, the low-pressure warning comes on when a tire is 25% or more below the placard pressure."

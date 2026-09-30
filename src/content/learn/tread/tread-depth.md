@@ -9,8 +9,8 @@ secondaryKeywords:
   - "tread depth in mm"
   - "tread depth chart"
 hub: tread
-date: 2026-10-05
-updated: 2026-10-05
+date: 2026-09-30
+updated: 2026-09-30
 demo: tread-gauge
 takeaways:
   - "US tread depth is measured in 32nds of an inch. 2/32 is about 1.6 mm and 4/32 is about 3.2 mm."

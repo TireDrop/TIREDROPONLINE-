@@ -8,8 +8,8 @@ secondaryKeywords:
   - "Model Y tire rotation"
   - "Tesla T0 T1 tires"
 category: vehicles
-date: 2026-10-05
-updated: 2026-10-05
+date: 2026-09-30
+updated: 2026-09-30
 demo: size-decoder
 takeaways:
   - "Start from the size, load index and speed rating on your door placard. Model Y wheel packages differ, and some use different front and rear sizes."

@@ -9,8 +9,8 @@ secondaryKeywords:
   - "what does R mean on a tire"
   - "flotation tire size"
 hub: sidewall
-date: 2026-10-05
-updated: 2026-10-05
+date: 2026-09-30
+updated: 2026-09-30
 demo: size-decoder
 takeaways:
   - "Start from the size on your door placard, not the size on the tires the last owner put on."

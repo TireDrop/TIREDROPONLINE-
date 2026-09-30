@@ -8,8 +8,8 @@ secondaryKeywords:
   - "spare tire hurricane"
   - "hurricane prep Broward"
 category: hurricane
-date: 2026-10-05
-updated: 2026-10-05
+date: 2026-09-30
+updated: 2026-09-30
 demo: tread-gauge
 takeaways:
   - "Atlantic hurricane season runs June 1 to November 30. Do the tire check while the sky is clear, not when the cone is on the news."

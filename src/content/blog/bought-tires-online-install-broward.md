@@ -8,8 +8,8 @@ secondaryKeywords:
   - "install tires bought online near me"
   - "mobile tire installation Broward"
 category: local
-date: 2026-10-05
-updated: 2026-10-05
+date: 2026-09-30
+updated: 2026-09-30
 demo: dot-date-reader
 takeaways:
   - "In South Florida you have three routes: ship to the Sunrise shop, have a mobile van fit them where you park, or ship home and take them to a fitter."

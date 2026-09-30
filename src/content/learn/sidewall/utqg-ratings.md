@@ -8,8 +8,8 @@ secondaryKeywords:
   - "temperature A"
   - "what does 500 AA A mean"
 hub: sidewall
-date: 2026-10-05
-updated: 2026-10-05
+date: 2026-09-30
+updated: 2026-09-30
 demo: utqg-explainer
 takeaways:
   - "UTQG has three grades: treadwear (a number), traction (AA, A, B or C) and temperature (A, B or C)."
