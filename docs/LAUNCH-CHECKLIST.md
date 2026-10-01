@@ -77,7 +77,7 @@ _Last updated: 2026-10-01 (SHIPPED: search-result data, breadcrumbs + schema che
 ## Quick wins (Claude)
 - [ ] Phone bottom bar changes by page
 - [x] ~~Pop-up off shop pages~~ (2026-09-30: superseded, the pop-up is gone)
-- [x] ~~Google search-result data: breadcrumbs (one per page, matching the visible trail), FAQ (kept where it was), article author, `npm run check:schema` gate~~ (2026-10-01)
+- [x] ~~Google search-result data: breadcrumbs (one per page, matching the visible trail), FAQ (kept where it was), article author, `npm run check:schema` gate~~ (27d477c)
 - [ ] Google search-result data: map coordinates. Waiting on Justin's Google Maps pin; paste it into `geo` in `src/data/business.js`
 - [ ] Accessibility fixes + skip link
 - [ ] Security headers: CSP, HSTS, Permissions-Policy
