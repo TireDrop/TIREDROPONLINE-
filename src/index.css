@@ -171,6 +171,22 @@
     @apply text-[1.0625rem] leading-[1.6] text-smoke md:text-[1.1875rem];
   }
 
+  /* Two range inputs laid over one track (the /tires price filter). The
+     inputs ignore the pointer so the track below shows through; only their
+     thumbs take it, which is what lets either handle be grabbed. */
+  .dual-range input[type="range"] {
+    @apply pointer-events-none absolute inset-0 h-full w-full appearance-none bg-transparent;
+  }
+  .dual-range input[type="range"]::-webkit-slider-thumb {
+    @apply pointer-events-auto h-6 w-6 cursor-pointer appearance-none rounded-full border-2 border-bone bg-drop shadow-card;
+  }
+  .dual-range input[type="range"]::-moz-range-thumb {
+    @apply pointer-events-auto h-6 w-6 cursor-pointer rounded-full border-2 border-bone bg-drop shadow-card;
+  }
+  .dual-range input[type="range"]:focus-visible::-webkit-slider-thumb {
+    @apply ring-2 ring-drop ring-offset-2;
+  }
+
   /* ---------- Forms ---------- */
   .label {
     @apply mb-1.5 block font-display text-[11px] font-bold uppercase
@@ -289,11 +305,28 @@
       theme("colors.ink") 14px 28px
     );
   }
+
+  /* The Tire Size Finder's "reading" line, sweeping the photo frame. */
+  .scan-line {
+    top: 12%;
+    animation: scan-sweep 1.4s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes scan-sweep {
+  to {
+    top: 86%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .scan-line {
+    top: 50%;
+    animation: none;
   }
 
   *,

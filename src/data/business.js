@@ -165,6 +165,7 @@ export const NAV = [
     label: "Tools",
     to: "/tire-size",
     children: [
+      { label: "Tire Size Finder", to: "/tire-size-finder" },
       { label: "Find My Tires", to: "/find-my-tires" },
       { label: "Tire Size Decoder", to: "/tire-size" },
       { label: "Compare Two Sizes", to: "/tire-size?compare=1" },
@@ -224,6 +225,7 @@ export const FOOTER_COLUMNS = [
   {
     title: "Tools & Guides",
     links: [
+      { label: "Tire Size Finder", to: "/tire-size-finder" },
       { label: "Find My Tires", to: "/find-my-tires" },
       { label: "Tire Size Decoder", to: "/tire-size" },
       { label: "Compare Two Sizes", to: "/tire-size?compare=1" },

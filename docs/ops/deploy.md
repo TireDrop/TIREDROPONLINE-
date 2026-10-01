@@ -87,7 +87,7 @@ collects leads: its forms and its newsletter pop-up. Do every item here
 - [ ] **Old Shopify URLs redirect.** `vercel.json` carries 301s for every
       common Shopify path (listed in step 6 of the cutover checklist):
       `/pages/*`, `/collections/*`, `/products/*`, `/cart/*`, `/policies/*`,
-      `/blogs/*`, `/search`, and `/account`, `/checkouts/*` and the
+      `/blogs/*`, and `/account`, `/checkouts/*` and the
       `/<shop id>/invoices|orders|checkouts/...` links, which go on to
       `shop.tiredroponline.com` so account logins, abandoned-checkout emails
       and invoices sent before the move keep working. `/cart` itself is the
@@ -138,6 +138,15 @@ that do the server-side work:
 |                      | Live ATD data when configured, the sample catalog if not. |
 |                      | `?sku=<sku>` alone returns one tire, `{ source, item }`,  |
 |                      | or 404 `{ error }`; it feeds the `/tires/p/:sku` pages.   |
+| `GET /api/vehicles`  | The vehicle finders' lists. `kind=makes[&year=]`: the     |
+|                      | makes sold that year. `kind=models&make=&year=`: NHTSA    |
+|                      | vPIC's cars, trucks and SUVs/vans for that make and year, |
+|                      | merged with the size table. 4 s timeout per vPIC request, |
+|                      | one retry; edge-cached a day (`s-maxage=86400`) then      |
+|                      | served stale for a week; 502 `{ upstream: true }` (never  |
+|                      | cached) when vPIC is down. The build also writes          |
+|                      | `dist/data/vpic-models.json` (every make's models, all    |
+|                      | years) as the browser's fallback when it can reach vPIC.  |
 | `POST /api/checkout` | Creates the order. With Shopify checkout on, it prices    |
 |                      | every line, creates a Shopify draft order of custom line  |
 |                      | items and returns its `invoiceUrl`; the shopper pays on   |
@@ -363,7 +372,9 @@ Shopify serving the domain until the Vercel site is verified.
      `/terms#returns`, `shipping-policy` → `/terms#shipping`,
      `terms-of-service` → `/terms`, `contact-information` → `/contact`;
      any other `/policies/*` → `/terms`
-   - `/blogs` and `/blogs/*` → `/blog`; `/search` → `/tires`
+   - `/blogs` and `/blogs/*` → `/blog`. `/search` is no longer redirected:
+     it is the store's own results page now, so an old Shopify
+     `/search?q=…` link lands on results for the same words
    - `/account` and `/account/*` → `shop.tiredroponline.com/account/*`
      (customer accounts stay on Shopify)
    - `/checkouts/*` and `/<shop id>/invoices|orders|checkouts/*` →

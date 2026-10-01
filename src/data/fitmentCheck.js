@@ -6,11 +6,18 @@
  *
  *   fits    the tire's size is the factory size on file for the vehicle (or
  *           the size the shopper is shopping for). An alternate counts only
- *           when the data lists it; a plus size is never inferred.
- *   no-fit  the size does not match. The Add buttons go away.
+ *           when the data lists it; a plus size is never inferred. Against
+ *           a model's typical size the title says so ("Matches the typical
+ *           factory size for a ..."), never "Fits your ...".
+ *   no-fit  the size does not match a size the shopper CONFIRMED: size-only
+ *           mode, a size they gave for their vehicle (the door-jamb sticker,
+ *           front and rear), or the trim they picked. The Add buttons go
+ *           away. A model-level guess never blocks: models come in several
+ *           sizes by trim and wheel package, plus staggered setups.
  *   check   nothing chosen yet, no size on file for that vehicle or year, a
- *           size that depends on the trim, or the same dimensions on a
- *           different casing (P-metric vs LT). Never blocks a purchase.
+ *           size that differs from the typical (unconfirmed) one, a size
+ *           that depends on the trim, or the same dimensions on a different
+ *           casing (P-metric vs LT). Never blocks a purchase.
  *
  * Pure functions, no React and no storage, so the same code runs in the
  * prerender, the browser and the tests (fitmentCheck.test.mjs). The tables
@@ -203,27 +210,40 @@ export function factorySizes(vehicle, tables = SHIPPED_TABLES) {
 const optionId = (o) =>
   `${readSize(o.front)?.key ?? o.front}|${o.rear ? (readSize(o.rear)?.key ?? o.rear) : ""}`;
 
+/** A rear size worth keeping: readable and not the front size again. */
+function rearOf(selection, front) {
+  const rear = readSize(selection?.rear);
+  return rear && rear.key !== front.key ? rear : null;
+}
+
 /**
  * What the shopper is shopping for, worked out against the tables.
  *
  * `selection` is what the store keeps (src/context/VehicleContext.jsx):
  *   null
- *   { type: "size", size }
- *   { type: "vehicle", year, make, model, pick?, size? }
+ *   { type: "size", size, rear? }
+ *   { type: "vehicle", year, make, model, pick?, size?, rear? }
  *     pick  the option the shopper chose when the trims differ (optionId)
- *     size  a size the shopper gave for this vehicle (off the sidewall)
+ *     size  a size the shopper gave for this vehicle (door-jamb sticker or
+ *           sidewall): a confirmed exact size, the front one when staggered
+ *     rear  the rear size of a staggered setup, only alongside `size`
  *
- * Returns { kind: "none" } | { kind: "size", size } |
- *   { kind: "vehicle", label, vehicle, status, basis, options, chosen }
+ * Returns { kind: "none" } | { kind: "size", size, rear, confirmed } |
+ *   { kind: "vehicle", label, vehicle, status, basis, options, chosen,
+ *     confirmed }
  * where `chosen` is the one option every answer is measured against, or
- * null while the trims differ and nothing is picked.
+ * null while the trims differ and nothing is picked, and `confirmed` says
+ * whether that size is one the shopper confirmed (only then can a tire be
+ * called "Doesn't fit").
  */
 export function resolveSelection(selection, tables = SHIPPED_TABLES) {
   if (!selection || typeof selection !== "object") return { kind: "none" };
 
   if (selection.type === "size") {
     const size = readSize(selection.size);
-    return size ? { kind: "size", size } : { kind: "none" };
+    return size
+      ? { kind: "size", size, rear: rearOf(selection, size), confirmed: true }
+      : { kind: "none" };
   }
 
   if (selection.type !== "vehicle") return { kind: "none" };
@@ -240,7 +260,7 @@ export function resolveSelection(selection, tables = SHIPPED_TABLES) {
     const option = {
       trim: null,
       front: own.display,
-      rear: null,
+      rear: rearOf(selection, own)?.display ?? null,
       alternates: [],
     };
     return {
@@ -251,6 +271,7 @@ export function resolveSelection(selection, tables = SHIPPED_TABLES) {
       basis: "entered",
       options: [option],
       chosen: option,
+      confirmed: true,
     };
   }
 
@@ -266,6 +287,7 @@ export function resolveSelection(selection, tables = SHIPPED_TABLES) {
       basis: null,
       options: [],
       chosen: null,
+      confirmed: false,
     };
   }
 
@@ -287,6 +309,9 @@ export function resolveSelection(selection, tables = SHIPPED_TABLES) {
     options: found.options,
     choices: distinct,
     chosen,
+    // A trim the shopper picked is an exact size; the typical size on file
+    // for a model (or one the data chose for them) is not.
+    confirmed: Boolean(picked) && found.basis === "trim",
   };
 }
 
@@ -294,7 +319,8 @@ export { optionId };
 
 /** The sizes a resolved vehicle takes, front then rear, without repeats. */
 export function sizesOf(resolved) {
-  if (resolved?.kind === "size") return [resolved.size.display];
+  if (resolved?.kind === "size")
+    return [resolved.size, resolved.rear].filter(Boolean).map((s) => s.display);
   if (resolved?.kind !== "vehicle") return [];
   const list = resolved.chosen ? [resolved.chosen] : resolved.options;
   const out = [];
@@ -313,7 +339,10 @@ export function describeOption(o) {
 
 /** What the "Shopping for" bar prints after the vehicle, without brackets. */
 export function selectionSizeText(resolved) {
-  if (resolved?.kind === "size") return resolved.size.display;
+  if (resolved?.kind === "size")
+    return resolved.rear
+      ? `front ${resolved.size.display}, rear ${resolved.rear.display}`
+      : resolved.size.display;
   if (resolved?.kind !== "vehicle") return "";
   if (resolved.status !== "sized") return "factory size not on file";
   if (resolved.chosen) return describeOption(resolved.chosen);
@@ -398,18 +427,23 @@ export function checkFit(tireSize, resolved) {
 
   if (kind === "size") {
     const want = resolved.size;
-    if (want.key !== tire.key) {
+    const rear = resolved.rear ?? null;
+    const wanted = selectionSizeText(resolved);
+    const hit =
+      want.key === tire.key ? want : rear && rear.key === tire.key ? rear : null;
+    if (!hit) {
       return {
         status: "no-fit",
         code: "mismatch",
-        title: `Not your size (${want.display})`,
-        detail: `This tire is ${tire.display}. You're shopping for ${want.display}.`,
+        title: `Not your size (${wanted})`,
+        detail: `This tire is ${tire.display}. You're shopping for ${wanted}.`,
         axle: null,
         sizes,
       };
     }
-    const clash = casingClash(tire, want);
-    if (clash) return casingAnswer(clash, tire, want, `your size`, sizes);
+    const clash = casingClash(tire, hit);
+    if (clash) return casingAnswer(clash, tire, hit, `your size`, sizes);
+    if (rear) return axleAnswer(hit === want ? "front" : "rear", hit, wanted, null, sizes);
     return {
       status: "fits",
       code: "match",
@@ -450,6 +484,22 @@ export function checkFit(tireSize, resolved) {
 
   if (hits.length === 0) {
     const onFile = options.map(describeOption).join(" or ");
+    // Only a size the shopper confirmed can rule a tire out. Against the
+    // model's typical size (or trims they have not picked between) the tire
+    // may well be right for their trim or wheels: say so, keep Add.
+    if (!resolved.confirmed) {
+      return {
+        status: CHECK,
+        code: "unconfirmed",
+        title: "Check fitment",
+        detail:
+          resolved.basis === "typical"
+            ? `This tire is ${tire.display}. Your ${label} may use a different size by trim or wheel. Typical: ${onFile}. Check the sticker on your driver's door jamb.`
+            : `This tire is ${tire.display}. The factory sizes on file for a ${label} are ${onFile}, and yours may differ by trim or wheel. Check the sticker on your driver's door jamb.`,
+        axle: null,
+        sizes,
+      };
+    }
     const whose =
       resolved.basis === "entered"
         ? `The size you gave us for your ${label} is ${onFile}.`
@@ -504,6 +554,12 @@ export function checkFit(tireSize, resolved) {
           : `Matches the factory size for every ${label} trim on file (${hit.oe.display}).`
         : `Matches the typical factory size on file for a ${label} (${hit.oe.display}). Trims and options vary, so check the size on your door-jamb sticker.`;
 
+  if (
+    (hit.axle === "front" || hit.axle === "rear") &&
+    resolved.basis === "entered"
+  ) {
+    return axleAnswer(hit.axle, hit.oe, describeOption(option), label, sizes);
+  }
   if (hit.axle === "front" || hit.axle === "rear") {
     const other = hit.axle === "front" ? option.rear : option.front;
     const otherAxle = hit.axle === "front" ? "rear" : "front";
@@ -528,13 +584,33 @@ export function checkFit(tireSize, resolved) {
   }
   return {
     status: "fits",
-    code: "match",
+    code: resolved.basis === "typical" ? "match-typical" : "match",
     title:
       resolved.basis === "entered"
         ? `Matches your size (${hit.oe.display})`
-        : `Fits your ${who}`,
+        : resolved.basis === "typical"
+          ? `Matches the typical factory size for a ${label}`
+          : `Fits your ${who}`,
     detail: basis,
     axle: "both",
+    sizes,
+  };
+}
+
+/** The note every staggered answer carries: the cart still adds a set of 4. */
+export const STAGGERED_NOTE = "Staggered: you'll need 2 front + 2 rear.";
+
+/**
+ * A tire matching one axle of a staggered setup the shopper gave us (front
+ * and rear sizes off the door-jamb sticker), with or without a vehicle.
+ */
+function axleAnswer(axle, oe, setup, label, sizes) {
+  return {
+    status: "fits",
+    code: `match-${axle}`,
+    title: `Fits your ${axle} axle (${oe.display})`,
+    detail: `Matches the ${axle} size you gave us${label ? ` for your ${label}` : ""} (${oe.display}). Your setup is staggered: ${setup}. ${STAGGERED_NOTE}`,
+    axle,
     sizes,
   };
 }

@@ -37,6 +37,10 @@ export const BODY_LIMITS = Object.freeze({
   checkout: 16 * 1024,
   newsletter: 2 * 1024,
   "book-install": 4 * 1024,
+  // One photo, base64 (3 MB decoded is about 4 MB encoded), plus the mode:
+  // under Vercel's own 4.5 MB request limit. The Tire Size Finder downscales
+  // on the phone to a ~1600 px JPEG of well under 1 MB.
+  "scan-tire-size": Math.ceil((3 * 1024 * 1024 * 4) / 3) + 1024,
 });
 
 /** The minimum fill time for this environment (see "Test mode" above). */

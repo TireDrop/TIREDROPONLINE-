@@ -91,6 +91,7 @@ const ROUTES = [
   firstIn("tires-shipped"),
   firstIn(`learn/${learnHub}`),
   "/tire-size",
+  "/tire-size-finder",
   "/contact",
 ];
 

@@ -83,6 +83,10 @@ const FindMyTiresPage = lazyPage("pages/tools/FindMyTiresPage.jsx", () =>
 const TireCheckPage = lazyPage("pages/tools/TireCheckPage.jsx", () =>
   import("./pages/tools/TireCheckPage.jsx"),
 );
+// Photo of the door sticker, sidewall or VIN -> the exact size (api/scan-tire-size.js).
+const TireSizeFinderPage = lazyPage("pages/tools/TireSizeFinderPage.jsx", () =>
+  import("./pages/tools/TireSizeFinderPage.jsx"),
+);
 // The Learn demos that also stand alone as tools: one template, one route
 // each (copy in src/components/demos/toolPages.js).
 const DemoToolPage = lazyPage("pages/tools/DemoToolPage.jsx", () =>
@@ -135,6 +139,10 @@ const SitemapPage = lazyPage("pages/support/SitemapPage.jsx", () =>
 const LegalPage = lazyPage("pages/support/LegalPage.jsx", () =>
   import("./pages/support/LegalPage.jsx"),
 );
+// Store-wide search results: the header search's "See all results".
+const SearchPage = lazyPage("pages/SearchPage.jsx", () =>
+  import("./pages/SearchPage.jsx"),
+);
 const NotFoundPage = lazyPage("pages/NotFoundPage.jsx", () =>
   import("./pages/NotFoundPage.jsx"),
 );
@@ -167,6 +175,7 @@ const TOOL_PATHS = {
   "tire-check": "/tire-check",
   "tread-gauge": "/tire-check",
   "find-my-tires": "/find-my-tires",
+  "tire-size-finder": "/tire-size-finder",
   // load-speed-check, pressure-temp, damage-map... and the planned aliases.
   ...TOOL_PAGE_ALIASES,
 };
@@ -259,6 +268,10 @@ export default function App() {
             <Route path="/find-my-tires" element={<FindMyTiresPage />} />
             <Route path="/tire-check" element={<TireCheckPage />} />
             <Route
+              path="/tire-size-finder"
+              element={<TireSizeFinderPage />}
+            />
+            <Route
               path="/load-speed-check"
               element={<DemoToolPage tool="load-speed-check" />}
             />
@@ -315,6 +328,8 @@ export default function App() {
             />
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/sitemap" element={<SitemapPage />} />
+            {/* Search results (noindex, not in the sitemap). */}
+            <Route path="/search" element={<SearchPage />} />
 
             {/* Learn guides and blog */}
             <Route path="/learn" element={<LearnIndexPage />} />

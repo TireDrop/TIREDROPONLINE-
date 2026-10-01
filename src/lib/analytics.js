@@ -95,9 +95,9 @@ export function trackPageView(key, path = key) {
 /*  Conversion events                                                  */
 /* ------------------------------------------------------------------ */
 //
-// GA4's recommended ecommerce and lead events, plus three custom ones
-// (order_request, install_booking, tool_use). Every event goes through
-// trackEvent(), which keeps only the parameter names listed below and drops
+// GA4's recommended ecommerce and lead events, plus four custom ones
+// (order_request, install_booking, tool_use, search_suggestion). Every event
+// goes through trackEvent(), which keeps only the parameter names listed below and drops
 // any value that looks like an email address or a phone number, so nothing
 // a visitor typed about themselves (name, email, phone, address, notes,
 // order email) can reach Google. Callers pass only product, delivery-choice,
@@ -113,6 +113,11 @@ export function trackPageView(key, path = key) {
 //   generate_lead      a form delivered          form_name
 //   install_booking    /track booking panel      install_type, method
 //   search             tire/wheel finder         search_term (size or Y/M/M), search_type
+//                      header search submit,     search_term (as typed), search_type "site"
+//                      "See all results"
+//   search_suggestion  a header search           search_term, suggestion_type (sizes,
+//                      suggestion picked         vehicles, brands, products, pages),
+//                                                suggestion_path
 //   tool_use           first touch of a demo     tool_id (once per page view)
 //
 // `purchase` is NOT sent. Checkout is request-only today: no money changes
@@ -136,6 +141,8 @@ const EVENT_KEYS = new Set([
   "form_name",
   "search_term",
   "search_type",
+  "suggestion_type",
+  "suggestion_path",
   "tool_id",
   "install_type",
   "method",

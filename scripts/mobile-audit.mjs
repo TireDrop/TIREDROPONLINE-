@@ -70,6 +70,7 @@ const ROUTES = [
   "/compare",
   "/tire-size",
   "/find-my-tires",
+  "/tire-size-finder",
   "/tire-check",
   "/load-speed-check",
   "/plus-size-calculator",

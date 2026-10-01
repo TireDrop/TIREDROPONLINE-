@@ -44,7 +44,11 @@
 //          request also becomes a Shopify draft order (no invoice sent).
 //      The only server code is the site's own API (`api/`), which asks ATD
 //      for tire data, creates paid orders in the shop's Shopify store and
-//      records the sign-ups and form messages above. The only browser storage
+//      records the sign-ups and form messages above. The optional Tire Size
+//      Finder (/tire-size-finder → api/scan-tire-size.js) sends a photo the
+//      visitor picks to Anthropic's API once to read the size or VIN, and a
+//      VIN to NHTSA vPIC to decode it; neither is stored or logged
+//      (sections 1 and 4 say so). The only browser storage
 //      is localStorage for the cart and the comparison tray. The sign-up form
 //      stores nothing; it deletes the old pop-up's "td-nl-popup" entry if a
 //      browser still has one. Section 3 says exactly that. Card payments are taken on Shopify's hosted
@@ -266,6 +270,7 @@ const DOCS = {
           "What you type into the site's forms: the contact form, the financing form, the fleet quote form, the install booking form, and an order request sent from checkout",
           `Messages you send to ${BUSINESS.email} or leave on the phone`,
           "Your email address, if you sign up for TireDrop emails using the sign-up form in the site footer. It asks for nothing else.",
+          "A photo or a VIN, only if you use the optional Tire Size Finder. A photo of your door sticker, tire or VIN is sent to our server and to Anthropic's API to read the tire size or VIN off it; we do not store the photo. A VIN, typed or read from a photo, is looked up in NHTSA's public vehicle database to find the year, make and model; we do not store it unless you include it with an order.",
         ],
         after: [
           "We do not store card numbers. Card payments are taken on Shopify's checkout page: Shopify receives the card details directly and handles them under its own security obligations, and we see only that a payment went through.",
@@ -288,14 +293,15 @@ const DOCS = {
         paragraphs: [
           "This website uses Google Analytics to measure how the site is used — pages viewed, how visitors arrived, general location at the city or region level, device and browser type, and steps in the shop such as a tire viewed, added to the cart or searched for by size or vehicle, a delivery option chosen, a tool used, or the fact that a form was sent (its name, never what you typed into it). Google Analytics sets its own first-party cookies (named _ga and _ga_ followed by an ID) to tell one visit from the next. We have switched off Google signals and ad personalization, so this measurement is not used to build advertising profiles or to show you ads. We see the results only as aggregate reports, not as a record of what any named person did.",
           "The site loads no advertising or social tracking pixels. You are welcome to check both statements in your browser's developer tools.",
-          "Separately, the site uses local storage in your own browser for two things:",
+          "Separately, the site uses local storage in your own browser for three things:",
         ],
         list: [
           "Your cart — so the tires you picked are still there if you close the tab and come back",
           "The comparison tray — which products you lined up side by side",
+          "The vehicle or tire size you choose to shop for — so Shop Tires takes you straight to tires for it next time. It is never sent to us except to look up tires for it and with an order or a form you send, and clearing your site data removes it",
         ],
         after: [
-          "Both stay on your device. They are not sent to us, they contain no name, email address, street address or payment detail, and nobody else can read them. Clearing your browsing data deletes them, and you lose your cart.",
+          "All three stay on your device. The cart and comparison tray are not sent to us; none of the three contains a name, email address, street address or payment detail, and nobody else can read them. Clearing your browsing data deletes them, and you lose your cart.",
           "The email sign-up form in the site footer saves nothing in your browser. An earlier version of the site had a sign-up pop-up that remembered whether you had closed it, under the name td-nl-popup. The pop-up is gone, and the site now deletes that entry if your browser still has it.",
           "Translating a page is optional. Nothing from Google Translate loads until you open the Language button at the top of the page. Once you do, the site loads Google Translate (or, if that is unavailable, opens the page through translate.google.com), and Google processes the page's text to translate it and may set its own cookies, such as googtrans, which remembers the language you picked. The site keeps your pick in your browser's session storage until you close the tab, and \"English (original)\" switches translation off.",
           "You can block or delete the Google Analytics cookies in your browser settings, or install Google's opt-out add-on at tools.google.com/dlpage/gaoptout; the site works the same either way. If we add any other third-party script, this section gets rewritten before that ships, not after.",
@@ -314,6 +320,8 @@ const DOCS = {
           "Manufacturers, when a warranty claim requires it",
           "The company that hosts this website, which keeps ordinary server logs of requests made to it — and, if an order request cannot be saved in Shopify, a copy of that request in the same logs, so it is not lost",
           "Google, which provides Google Analytics and receives information about how the site is used (see section 3), processed under Google's own privacy policy",
+          "Anthropic, whose API reads a photo you choose to scan in the Tire Size Finder to find the tire size or VIN printed on it. Only the photo is sent, once, with no name or contact details, and we do not keep a copy",
+          "NHTSA, the US Department of Transportation agency whose public vehicle database decodes a VIN you enter or scan in the Tire Size Finder. Only the VIN is sent",
           "Law enforcement or regulators, where we are legally required to respond",
         ],
         after: [
@@ -340,7 +348,7 @@ const DOCS = {
           "Ask us to delete it. Call and request deletion. We will remove what we are not required to keep for warranty, accounting or legal reasons — including an email sign-up and any form messages on your Shopify customer record — and we will tell you plainly what we had to retain and why.",
           `Unsubscribe from TireDrop emails. Use the unsubscribe link in any of those emails, or email ${BUSINESS.email} and ask, and we will unsubscribe you.`,
           "Opt out of reminders. Say the word on the phone, or reply to any message asking to stop, and we will take you off the reminder list.",
-          "Clear what the site stored on your device. Your cart and comparison tray live in your own browser; the sign-up form in the site footer stores nothing there. Clearing your browsing data removes them. It does not remove anything you sent us — for that, ask us to delete it.",
+          "Clear what the site stored on your device. Your cart, comparison tray and the vehicle or tire size you shop for live in your own browser; the sign-up form in the site footer stores nothing there. Clearing your browsing data removes them. It does not remove anything you sent us — for that, ask us to delete it.",
           "Opt out of analytics. Block or clear the Google Analytics cookies in your browser, or use Google's opt-out add-on (tools.google.com/dlpage/gaoptout). We do not sell personal information or share it for cross-context behavioral advertising.",
         ],
         after: [

@@ -132,6 +132,9 @@ one.
   `SHOPIFY_CLIENT_ID` + `SHOPIFY_CLIENT_SECRET`; `SHOPIFY_API_VERSION`
   (optional); `SHOPIFY_WEBHOOK_SECRET`.
 - **Install booking:** `INSTALL_BOOKING_URL` (optional).
+- **Tire Size Finder photo scan:** `ANTHROPIC_API_KEY` (optional; unset,
+  `/tire-size-finder` says "Photo scan coming soon". See
+  `docs/integrations/tire-size-finder.md`).
 - **Set by Vercel:** `VERCEL_GIT_COMMIT_SHA`.
 - **Retired, delete if still set:** `ORDER_WEBHOOK_URL` and `TIREGURU_*`
   (both listed under `issues` in `/api/status`), `VITE_FORM_ENDPOINT`.

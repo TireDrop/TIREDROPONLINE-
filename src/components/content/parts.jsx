@@ -277,6 +277,7 @@ const SITE_PAGES = {
   "/tire-check": "Do I need tires yet? (free check)",
   "/tire-size": "Tire size decoder",
   "/find-my-tires": "Find tires for your vehicle",
+  "/tire-size-finder": "Find your exact tire size (scan your door sticker)",
   ...Object.fromEntries(TOOL_PAGES.map((t) => [t.path, t.label])),
   "/learn": "All Learn guides",
   "/blog": "The TireDrop blog",

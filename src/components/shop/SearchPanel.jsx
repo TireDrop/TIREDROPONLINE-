@@ -1,10 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Car, Ruler, Search } from "lucide-react";
 
 import {
-  VEHICLE_DATA,
-  VEHICLE_MAKES,
   TIRE_WIDTHS,
   TIRE_ASPECTS,
   TIRE_DIAMETERS,
@@ -12,30 +10,58 @@ import {
   WHEEL_DIAMETERS,
 } from "../../data/products.js";
 import {
-  OTHER,
-  OTHER_LABEL,
   YEARS as ALL_YEARS,
   makesFor,
   useVehicleModels,
 } from "../../data/vehicles.js";
 import { useVehicle } from "../../context/VehicleContext.jsx";
 import { trackEvent } from "../../lib/analytics.js";
+import ModelCombobox, { listedModel } from "./ModelCombobox.jsx";
 
 // The storefront's primary finder. Tab one narrows by vehicle, tab two by the
 // numbers stamped on the sidewall (or, on the wheel catalog, by rim size).
 // `?search=vehicle` / `?search=size` from the nav pre-selects a tab.
 //
-// `vehicles="all"` (the home page hero) offers every make and model year
-// 1981-2027, with models loaded live from NHTSA and an "Other / not listed"
-// choice, like the theme's hero finder. The default keeps the catalog's own
-// make/model table, which every listing page can size.
+// The vehicle tab offers every model year 1981-2027, every make sold that
+// year, and that year's models from NHTSA (src/data/vehicles.js: our cached
+// /api/vehicles first), the same lists as every other vehicle picker on the
+// site. The Model box filters as you type (ModelCombobox.jsx), and a model
+// the list does not carry can be typed: it is searched as typed, its tires
+// say "Check fitment", and the door-jamb size settles it. When the list
+// cannot be loaded the panel says so and offers exactly that.
+//
+// `onEnterSize` is what "enter your door-jamb size" does; by default it
+// switches to the size tab (/tires opens the Shopping-for bar's door-jamb
+// form instead).
 //
 // Only the visible panel is mounted, so `aria-controls` is set on the selected
 // tab alone: pointing it at an id that is not in the document is a dangling
 // ARIA reference rather than a useful one.
+//
+// `initial` prefills it ({ tab, year, make, model, width, aspect, diameter }),
+// for /tires reopening it on "Change"; a prefilled value the lists do not
+// carry is added to its list so it still shows. `onCancel` adds a Cancel
+// button beside the search one.
+
+/** `options`, plus `value` when it is set and not already one of them. */
+const withValue = (options, value, order) => {
+  if (!value || options.some((o) => String(o) === String(value))) return options;
+  const out = [value, ...options];
+  return order ? out.sort(order) : out;
+};
+const up = (a, b) => Number(a) - Number(b);
+const down = (a, b) => Number(b) - Number(a);
 
 const SELECT = "field appearance-none bg-bone pr-8";
 const TAB_ICON = "h-4 w-4 shrink-0 md:h-[18px] md:w-[18px]";
+
+/** A typed model as it can go in a URL (src/lib/tiresUrl.js). */
+const cleanModel = (s) =>
+  String(s ?? "")
+    .replace(/[^a-z0-9 .&'+/-]/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 60);
 
 function Field({
   id,
@@ -45,7 +71,6 @@ function Field({
   options,
   placeholder,
   disabled,
-  extra,
 }) {
   return (
     <div>
@@ -65,7 +90,6 @@ function Field({
             {o}
           </option>
         ))}
-        {extra}
       </select>
     </div>
   );
@@ -73,22 +97,26 @@ function Field({
 
 export default function SearchPanel({
   kind = "tire",
-  vehicles = "catalog",
   onSearch,
+  initial,
+  onCancel,
+  onEnterSize,
 }) {
   const [params] = useSearchParams();
   const requested = params.get("search");
-  const [tab, setTab] = useState(requested === "size" ? "size" : "vehicle");
+  const [tab, setTab] = useState(
+    initial?.tab ?? (requested === "size" ? "size" : "vehicle"),
+  );
   const [error, setError] = useState("");
 
   const { selectVehicle } = useVehicle();
-  const [year, setYear] = useState("");
-  const [make, setMake] = useState("");
-  const [model, setModel] = useState("");
+  const [year, setYear] = useState(initial?.year ?? "");
+  const [make, setMake] = useState(initial?.make ?? "");
+  const [model, setModel] = useState(initial?.model ?? "");
 
-  const [width, setWidth] = useState("");
-  const [aspect, setAspect] = useState("");
-  const [diameter, setDiameter] = useState("");
+  const [width, setWidth] = useState(String(initial?.width ?? ""));
+  const [aspect, setAspect] = useState(String(initial?.aspect ?? ""));
+  const [diameter, setDiameter] = useState(String(initial?.diameter ?? ""));
 
   // Keep the visible tab in step with the nav links that deep-link into it.
   useEffect(() => {
@@ -98,45 +126,28 @@ export default function SearchPanel({
     }
   }, [requested]);
 
-  const allVehicles = vehicles === "all";
-
-  const catalogYears = useMemo(() => {
-    const set = new Set();
-    Object.values(VEHICLE_DATA).forEach((models) =>
-      Object.values(models).forEach((list) => list.forEach((y) => set.add(y))),
-    );
-    return [...set].sort((a, b) => b - a);
-  }, []);
-  const catalogModels = useMemo(
-    () => (make ? Object.keys(VEHICLE_DATA[make] || {}) : []),
-    [make],
+  // Every make sold in the chosen year, and that year's models.
+  const yearMakes = useMemo(() => makesFor(year), [year]);
+  const years = withValue(ALL_YEARS, year, down);
+  // A prefilled make stays listed while its year is unchanged.
+  const makes = withValue(
+    yearMakes,
+    initial?.make && year === initial.year ? initial.make : "",
   );
-
-  // Every make sold in the chosen year, and that year's models from NHTSA.
-  const liveMakes = useMemo(() => makesFor(year), [year]);
-  const years = allVehicles ? ALL_YEARS : catalogYears;
-  const makes = allVehicles ? liveMakes : VEHICLE_MAKES;
   // A pick survives a year change only while the new year still lists it.
-  const makeValue = !allVehicles || makes.includes(make) ? make : "";
-  const live = useVehicleModels(
-    allVehicles ? makeValue : "",
-    allVehicles ? year : "",
-  );
-  const models = allVehicles ? live.models : catalogModels;
-  const modelValue =
-    !allVehicles || (makeValue && (model === OTHER || models.includes(model)))
-      ? model
-      : "";
-  const modelReady = allVehicles
-    ? Boolean(year && makeValue && !live.loading)
-    : Boolean(make);
-  const modelPlaceholder = allVehicles
-    ? live.loading
+  const makeValue = makes.includes(make) ? make : "";
+  const live = useVehicleModels(makeValue, year);
+  const models = live.models;
+  const modelText = makeValue ? model : "";
+  const modelReady = Boolean(year && makeValue && !live.loading);
+  const modelPlaceholder = !year || !makeValue
+    ? "Pick a year and make first"
+    : live.loading
       ? "Loading models…"
-      : "Select model"
-    : make
-      ? "Select model"
-      : "Select a make first";
+      : models.length
+        ? "Type or pick a model"
+        : "Type your model";
+  const modelRef = useRef(null);
 
   const isWheel = kind === "wheel";
   const boltPatterns = useMemo(
@@ -152,11 +163,17 @@ export default function SearchPanel({
 
   const submitVehicle = (e) => {
     e.preventDefault();
-    if (!year || !makeValue || !modelValue) {
+    // What the box shows, even if it got there without an input event
+    // (browser automation, some autofill).
+    const typed = cleanModel(modelRef.current?.value ?? modelText);
+    if (!year || !makeValue || !typed || !modelReady) {
       setError("Choose a year, make and model to see what fits.");
       return;
     }
     setError("");
+    // The list's spelling when it carries the model ("4 series" -> "4 Series").
+    const modelValue = listedModel(models, typed) ?? typed;
+    setModel(modelValue);
     // The vehicle being shopped for from here on (every tire shows whether
     // it fits), remembered so checkout and the booking form start from it.
     selectVehicle({ year, make: makeValue, model: modelValue });
@@ -166,6 +183,39 @@ export default function SearchPanel({
     });
     onSearch({ type: "vehicle", year, make: makeValue, model: modelValue });
   };
+
+  const enterSize = () => {
+    setError("");
+    if (onEnterSize) onEnterSize();
+    else setTab("size");
+  };
+
+  // Said under the fields when the full list could not be loaded.
+  let modelNote = null;
+  if (modelReady && live.source === "fallback") {
+    modelNote = isWheel ? (
+      <>Couldn&rsquo;t load models. Type your model.</>
+    ) : (
+      <>
+        Couldn&rsquo;t load models. Type your model or{" "}
+        <button
+          type="button"
+          onClick={enterSize}
+          className="font-semibold text-ink underline underline-offset-4 hover:text-drop"
+        >
+          enter your door-jamb size
+        </button>
+        .
+      </>
+    );
+  } else if (modelReady && live.source === "snapshot") {
+    modelNote = (
+      <>
+        Couldn&rsquo;t load this year&rsquo;s models, so this is every{" "}
+        {makeValue} model on file. Pick yours or type it.
+      </>
+    );
+  }
 
   const submitSize = (e) => {
     e.preventDefault();
@@ -199,9 +249,25 @@ export default function SearchPanel({
         : "border-transparent bg-steel text-bone/70 hover:bg-graphite hover:text-bone"
     }`;
 
+  const cancel = onCancel ? (
+    <button
+      type="button"
+      onClick={onCancel}
+      className="btn-outline min-h-[48px] w-full whitespace-nowrap sm:w-auto"
+    >
+      Cancel
+    </button>
+  ) : null;
+
   return (
-    <div className="overflow-hidden rounded-card border border-ink/10 bg-bone shadow-lift">
-      <div role="tablist" aria-label="Product finder" className="flex">
+    // The tabs clip to the card's top corners themselves, so the Model list
+    // can hang below the card's edge instead of being cut off by it.
+    <div className="rounded-card border border-ink/10 bg-bone shadow-lift">
+      <div
+        role="tablist"
+        aria-label="Product finder"
+        className="flex overflow-hidden rounded-t-[11px]"
+      >
         <button
           type="button"
           role="tab"
@@ -243,7 +309,7 @@ export default function SearchPanel({
         id={`finder-panel-${tab}`}
         role="tabpanel"
         aria-labelledby={`finder-tab-${tab}`}
-        className="bg-bone p-5 md:p-6"
+        className="rounded-b-[11px] bg-bone p-5 md:p-6"
       >
         {tab === "vehicle" ? (
           <form onSubmit={submitVehicle}>
@@ -267,28 +333,54 @@ export default function SearchPanel({
                 options={makes}
                 placeholder="Select make"
               />
-              <Field
-                id="finder-model"
-                label="Model"
-                value={modelReady ? modelValue : ""}
-                onChange={setModel}
-                options={modelReady ? models : []}
-                placeholder={modelPlaceholder}
-                disabled={!modelReady}
-                extra={
-                  allVehicles && modelReady ? (
-                    <option value={OTHER}>{OTHER_LABEL}</option>
-                  ) : null
-                }
-              />
+              <div>
+                <label
+                  id="finder-model-label"
+                  htmlFor="finder-model"
+                  className="label"
+                >
+                  Model
+                </label>
+                <ModelCombobox
+                  ref={modelRef}
+                  id="finder-model"
+                  labelId="finder-model-label"
+                  value={modelText}
+                  onChange={(v) => {
+                    setModel(v);
+                    setError("");
+                  }}
+                  options={modelReady ? models : []}
+                  placeholder={modelPlaceholder}
+                  disabled={!modelReady}
+                  busy={Boolean(year && makeValue && live.loading)}
+                  describedBy={modelNote ? "finder-model-note" : undefined}
+                  className="bg-bone"
+                />
+              </div>
             </div>
-            <button
-              type="submit"
-              className="btn-primary mt-4 min-h-[48px] w-full whitespace-nowrap sm:w-auto"
+            <p
+              id="finder-model-note"
+              aria-live="polite"
+              data-testid="finder-model-note"
+              className={
+                modelNote
+                  ? "mt-3 text-sm leading-relaxed text-ink"
+                  : "sr-only"
+              }
             >
-              <Search size={18} aria-hidden />
-              Find {isWheel ? "Wheels" : "Tires"}
-            </button>
+              {modelNote}
+            </p>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <button
+                type="submit"
+                className="btn-primary min-h-[48px] w-full whitespace-nowrap sm:w-auto"
+              >
+                <Search size={18} aria-hidden />
+                Find {isWheel ? "Wheels" : "Tires"}
+              </button>
+              {cancel}
+            </div>
             <p className="mt-3 text-xs leading-relaxed text-smoke">
               We match your vehicle to the sizes that fit. Not sure? Call us and
               read the sidewall to us.
@@ -302,7 +394,7 @@ export default function SearchPanel({
                 label={isWheel ? "Wheel Width" : "Width"}
                 value={width}
                 onChange={setWidth}
-                options={isWheel ? wheelWidths : TIRE_WIDTHS}
+                options={withValue(isWheel ? wheelWidths : TIRE_WIDTHS, width, up)}
                 placeholder={isWheel ? "Any width" : "Any width"}
               />
               <Field
@@ -310,7 +402,7 @@ export default function SearchPanel({
                 label={isWheel ? "Bolt Pattern" : "Aspect Ratio"}
                 value={aspect}
                 onChange={setAspect}
-                options={isWheel ? boltPatterns : TIRE_ASPECTS}
+                options={withValue(isWheel ? boltPatterns : TIRE_ASPECTS, aspect, up)}
                 placeholder={isWheel ? "Any pattern" : "Any ratio"}
               />
               <Field
@@ -318,17 +410,24 @@ export default function SearchPanel({
                 label={isWheel ? "Diameter" : "Rim Diameter"}
                 value={diameter}
                 onChange={setDiameter}
-                options={isWheel ? WHEEL_DIAMETERS : TIRE_DIAMETERS}
+                options={withValue(
+                  isWheel ? WHEEL_DIAMETERS : TIRE_DIAMETERS,
+                  diameter,
+                  up,
+                )}
                 placeholder="Any diameter"
               />
             </div>
-            <button
-              type="submit"
-              className="btn-primary mt-4 min-h-[48px] w-full whitespace-nowrap sm:w-auto"
-            >
-              <Search size={18} aria-hidden />
-              Search Sizes
-            </button>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <button
+                type="submit"
+                className="btn-primary min-h-[48px] w-full whitespace-nowrap sm:w-auto"
+              >
+                <Search size={18} aria-hidden />
+                Search Sizes
+              </button>
+              {cancel}
+            </div>
             <p className="mt-3 text-xs leading-relaxed text-smoke">
               {isWheel
                 ? "Wheel sizes read diameter by width, e.g. 18x8.5. Bolt pattern is stamped on the back of your current wheel."

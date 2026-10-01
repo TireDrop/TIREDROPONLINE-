@@ -136,6 +136,7 @@ export const OFFLINE_STATUS = Object.freeze({
   checkout: "request",
   newsletter: "off",
   forms: "off",
+  scanner: "off",
   version: null,
   offline: true,
 });
@@ -147,7 +148,7 @@ let statusPromise = null;
 /** False only when this host definitely has no API. */
 const apiPresent = () => getStatus().then((s) => !s.absent);
 
-/** `{ atd, shopify, checkout, newsletter, forms, version }`. Never throws; cached per page load. */
+/** `{ atd, shopify, checkout, newsletter, forms, scanner, version }`. Never throws; cached per page load. */
 export function getStatus() {
   if (!statusPromise) {
     statusPromise = request("/status", { timeout: TIMEOUT_MS.status })
@@ -159,6 +160,8 @@ export function getStatus() {
         newsletter: s.newsletter === "on" ? "on" : "off",
         // Only an explicit "on" lets a form say its message was delivered.
         forms: s.forms === "on" ? "on" : "off",
+        // Only an explicit "on" offers photo scans in the Tire Size Finder.
+        scanner: s.scanner === "on" ? "on" : "off",
         version: s.version ?? null,
         offline: false,
       }))

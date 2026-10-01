@@ -69,7 +69,7 @@ export function VehicleProvider({ children }) {
   }, []);
 
   const selectVehicle = useCallback(
-    ({ year, make, model, size } = {}) => {
+    ({ year, make, model, size, rear } = {}) => {
       const v = {
         type: "vehicle",
         year: clean(year),
@@ -77,14 +77,24 @@ export function VehicleProvider({ children }) {
         // "Other / not listed" is not a model.
         model: clean(model) === OTHER ? "" : clean(model),
       };
-      if (clean(size)) v.size = clean(size);
+      // A size the shopper confirmed (door-jamb sticker), and the rear one
+      // when the setup is staggered.
+      if (clean(size)) {
+        v.size = clean(size);
+        if (clean(rear)) v.rear = clean(rear);
+      }
       commit(v);
     },
     [commit],
   );
 
   const selectSize = useCallback(
-    (size) => commit({ type: "size", size: clean(size) }),
+    (size, rear) =>
+      commit(
+        clean(rear)
+          ? { type: "size", size: clean(size), rear: clean(rear) }
+          : { type: "size", size: clean(size) },
+      ),
     [commit],
   );
 
@@ -93,7 +103,7 @@ export function VehicleProvider({ children }) {
   const pickOption = useCallback(
     (pick) => {
       if (current?.type !== "vehicle") return;
-      const { size: _entered, ...vehicle } = current;
+      const { size: _entered, rear: _rear, ...vehicle } = current;
       setState({ ready: true, selection: saveSelection({ ...vehicle, pick }) });
     },
     [current],

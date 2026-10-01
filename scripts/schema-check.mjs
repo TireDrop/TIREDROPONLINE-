@@ -381,7 +381,7 @@ const ROUTE_TYPES = [
   [
     "tool pages",
     (r) =>
-      /^\/(find-my-tires|tire-size|tire-check|load-speed-check|plus-size-calculator|tire-pressure-temperature|can-my-tire-be-repaired|car-shaking-checker|tire-rotation-pattern)$/.test(
+      /^\/(find-my-tires|tire-size-finder|tire-size|tire-check|load-speed-check|plus-size-calculator|tire-pressure-temperature|can-my-tire-be-repaired|car-shaking-checker|tire-rotation-pattern)$/.test(
         r,
       ),
   ],

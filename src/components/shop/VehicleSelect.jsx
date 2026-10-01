@@ -12,9 +12,10 @@ import {
 /**
  * Year / Make / Model dropdowns for the site's forms, on the same data as the
  * home page vehicle finder (data/vehicles.js): years 2027-1981, the makes sold
- * in the chosen year, and that make's models for the year from NHTSA vPIC,
- * merged with the size table. When vPIC cannot be reached the list falls back
- * to the size-table models.
+ * in the chosen year, and that make's models for the year from NHTSA vPIC
+ * (through our cached /api/vehicles), merged with the size table. When none
+ * of that can be reached the list falls back to the build's vPIC snapshot,
+ * then to the size-table models, and a hint says so.
  *
  * Every list ends in "Other / not listed", which opens a small text box, so a
  * vehicle the lists do not carry never blocks anyone. A picked "Other" make
@@ -247,7 +248,8 @@ export default function VehicleSelect({
   const modelErr = errorFor("model", modelOther || modelMode === "text", modelText);
 
   const modelHintId =
-    modelMode === "list" && live.source === "fallback"
+    modelMode === "list" &&
+    (live.source === "fallback" || live.source === "snapshot")
       ? id("model-hint")
       : undefined;
   const modelPlaceholder =
@@ -392,8 +394,18 @@ export default function VehicleSelect({
             </Select>
             {modelHintId && (
               <Message id={modelHintId} tone="hint">
-                We couldn&rsquo;t load the full model list. Pick from the common
-                models, or choose {OTHER_LABEL} and type it.
+                {live.source === "snapshot" ? (
+                  <>
+                    We couldn&rsquo;t load this year&rsquo;s model list, so
+                    this is every {make} model on file. Pick yours, or choose{" "}
+                    {OTHER_LABEL} and type it.
+                  </>
+                ) : (
+                  <>
+                    We couldn&rsquo;t load the full model list. Pick from the
+                    common models, or choose {OTHER_LABEL} and type it.
+                  </>
+                )}
               </Message>
             )}
             {modelOther ? (
