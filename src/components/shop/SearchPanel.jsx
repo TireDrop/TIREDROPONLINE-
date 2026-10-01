@@ -187,9 +187,13 @@ export default function SearchPanel({
     onSearch({ type: "size", width, aspect, diameter });
   };
 
-  // Below md each label stays on one line: tighter padding and a 16px icon.
+  // Below md: tighter padding and a 16px icon. A label too long for its half
+  // (English at 320px, a translated page at 390px: "Comprar por tamaño de
+  // neumático") wraps inside it instead of being cut off by the card.
+  // min-w-0 keeps the two halves equal; break-words splits a single word too
+  // long for its half. md and up are unchanged.
   const tabClass = (id) =>
-    `flex min-h-[48px] flex-1 items-center justify-center gap-[.4rem] whitespace-nowrap border-t-[3px] px-2 py-[.8rem] font-display text-[14px] font-bold leading-tight tracking-[-0.008em] transition-colors md:gap-2 md:whitespace-normal md:px-4 md:py-3.5 md:text-[15px] ${
+    `flex min-h-[48px] min-w-0 flex-1 items-center justify-center gap-[.4rem] break-words border-t-[3px] px-2 py-[.8rem] text-center font-display text-[14px] font-bold leading-tight tracking-[-0.008em] transition-colors md:gap-2 md:px-4 md:py-3.5 md:text-[15px] ${
       tab === id
         ? "border-drop bg-bone text-ink"
         : "border-transparent bg-steel text-bone/70 hover:bg-graphite hover:text-bone"

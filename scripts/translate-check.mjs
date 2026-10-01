@@ -298,7 +298,13 @@ async function openDesktopControl(page) {
   return button;
 }
 
-/** Waits for the stand-in to have translated the page and the site to say so. */
+/**
+ * Waits for the stand-in to have translated the page and the site to say so.
+ * The site only saves the choice for the tab (and flips the notice from
+ * "loading" to "on") on its next look after Google marks <html> translated,
+ * up to 100ms later, so <html>'s class alone is not "done": a reload in that
+ * window starts the new page with nothing saved.
+ */
 async function waitTranslated(page, code = "es") {
   if (process.env.TRANSLATE_DEBUG)
     setTimeout(async () => {
@@ -316,7 +322,7 @@ async function waitTranslated(page, code = "es") {
     (c) =>
       document.documentElement.classList.contains("translated-ltr") &&
       document.documentElement.lang === c &&
-      document.querySelector("[data-translate-notice]") &&
+      document.querySelector("[data-translate-notice='on']") &&
       document.querySelector("font[data-mock]"),
     code,
   );
@@ -628,8 +634,12 @@ try {
     await waitTranslated(h.page, "fr");
     const badge = await languageButton(h.page).textContent();
     assert(/Français/.test(badge), `button does not show the language: ${badge}`);
-    await h.page.locator("[data-translate-notice] button").click();
-    await h.page.waitForLoadState("load");
+    // Wait for the reload itself: waitForLoadState("load") alone is already
+    // true for the page being left, so it would not wait at all.
+    await Promise.all([
+      h.page.waitForEvent("load"),
+      h.page.locator("[data-translate-notice] button").click(),
+    ]);
     await hydrated(h.page);
     await sleep(800);
     const after = await h.page.evaluate(() => ({

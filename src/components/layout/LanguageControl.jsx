@@ -665,7 +665,9 @@ export function TranslationNotice() {
     <div
       role="status"
       className="border-b border-amber/40 bg-amber/15 text-ink"
-      data-translate-notice
+      // "loading" until the translation is confirmed and the choice saved for
+      // this tab; "on" after. check:translate waits for "on" before reloading.
+      data-translate-notice={s.status}
     >
       <div className="wrap flex flex-wrap items-center gap-x-3 text-[13px] leading-snug">
         <p className="py-2">

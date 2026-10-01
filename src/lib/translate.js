@@ -24,6 +24,24 @@ export const ELEMENT_SRC = "https://translate.google.com/translate_a/element.js"
 export const SOURCE_LANG = "en";
 export const STORAGE_KEY = "td-translate";
 
+/**
+ * Where Google's element loads from once it is opened, by CSP directive. The
+ * Content-Security-Policy in vercel.json must list each of these
+ * (api/_lib/cspReport.test.mjs checks it). element.js comes from
+ * translate.google.com and pulls its code and the language list from
+ * translate.googleapis.com, its CSS and code from www.gstatic.com, sends text
+ * to translate-pa.googleapis.com (or translate.googleapis.com) and pings
+ * translate.google.com; its tooltip frames come from either Translate host.
+ * Images (icons, cleardot.gif on www.google.com) are covered by img-src https:.
+ * The URL fallback is a navigation, which the CSP does not govern.
+ */
+export const GOOGLE_TRANSLATE_CSP = {
+  "script-src": [new URL(ELEMENT_SRC).host, "translate.googleapis.com", "translate-pa.googleapis.com", "www.gstatic.com"],
+  "style-src": ["translate.googleapis.com", "www.gstatic.com"],
+  "connect-src": ["translate.google.com", "translate.googleapis.com", "translate-pa.googleapis.com"],
+  "frame-src": ["translate.google.com", "translate.googleapis.com"],
+};
+
 /* ---------------------------------------------------------------------------
  * Languages
  *
