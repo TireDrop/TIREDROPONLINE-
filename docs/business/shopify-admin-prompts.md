@@ -484,9 +484,10 @@ after saving (except #5, leave it OFF), and don't change any other settings.
         Method type equal to PICK_UP (if that field isn't offered, use:
         Order / Shipping line / Title contains "Pickup")
      b) Order / Shipping address / Zip starts with 330, 331, 332, 333 or 334
-        AND Zip does NOT start with any of these Florida Keys ZIPs:
+        AND Zip does NOT start with any of these ZIPs (Florida Keys, then
+        the 334 ZIPs outside Palm Beach County):
         33001, 33036, 33037, 33040, 33041, 33042, 33043, 33045, 33050,
-        33051, 33052, 33070
+        33051, 33052, 33070, 33440, 33455, 33471, 33475
    Then (LOCAL): Add order tags "local"
      (+ also "pickup-sunrise" if (a) was true: use a nested condition)
      + Add customer tags "local-customer"
@@ -631,7 +632,8 @@ The other three:
 
 The block is saved at `shopify/notifications/order-confirmation-local-block.liquid`.
 It uses the same ZIP rules as Flow workflow 2: prefixes 330–334, minus the
-Florida Keys. It passed 8 local test cases (pickup, Sunrise, ZIP+4, Palm Beach,
+Florida Keys and the 334 ZIPs outside Palm Beach County (prompt 23 updates a
+store set up before that list grew). It passed 8 local test cases (pickup, Sunrise, ZIP+4, Palm Beach,
 Key West, Treasure Coast, out-of-state, no address). Shopify has no API for
 notification templates, so this has to be done in the browser.
 
@@ -1187,3 +1189,64 @@ the `needs-scheduling` tag and send the `[SCHEDULE]` email. The tag needs the
 Shopify app's `write_orders` scope. If the tag never appears, Vercel's logs
 will say `lacks the write_orders scope`
 (`docs/integrations/install-scheduling.md`, "Scopes").
+
+## 23. Keep Hendry, Martin and Glades ZIPs out of "local" (Flow + order email)
+
+**Why:** the local area is ZIPs 330–334 minus the Florida Keys, but four 334
+ZIPs are not in Palm Beach County: 33440 (Clewiston, Hendry), 33455 (Hobe
+Sound, Martin), 33471 (Moore Haven, Glades) and 33475 (Hobe Sound PO boxes,
+Martin). The site and its api already turn them away
+(`src/data/serviceArea.js`). The Flow workflow "Order routing: local vs
+ship" (prompt 13) and the order-confirmation block (prompt 15,
+`shopify/notifications/order-confirmation-local-block.liquid`) each carry
+their own copy of the list, so both need the four ZIPs added. Nothing else
+changes. If prompt 15 has not been saved yet, skip Part B: re-running prompt
+15 pastes the block from the repo, which already has the four ZIPs.
+
+```
+TASK: Add four ZIP codes to TireDrop's "not local" list in one Shopify Flow
+workflow and in the Order confirmation email. I'm logged into Shopify admin.
+
+HARD RULES, for the whole task:
+- NEVER click Save or "Turn on" yourself. When a step says "STOP FOR SAVE",
+  stop, tell me exactly what is ready, and wait for me to click it and say
+  "saved". Then continue.
+- Change ONLY the ZIP lists named below. Don't touch any other workflow,
+  notification, theme, order or setting. Don't create test orders.
+
+PART A: the Flow workflow
+1. Apps → Flow → open the workflow "Order routing: local vs ship".
+2. Find the condition that checks Order / Shipping address / Zip against the
+   Florida Keys ZIPs (33001, 33036, 33037, 33040, 33041, 33042, 33043,
+   33045, 33050, 33051, 33052, 33070). Write down exactly how it is built
+   (each rule, AND/OR) for the report.
+3. Add four more rules to that same "does NOT start with" group, built the
+   same way as the Keys rules: 33440, 33455, 33471, 33475.
+   If the condition is built differently from that (for example a single
+   "is not one of" list), add the four ZIPs to that list instead.
+4. STOP FOR SAVE. Wait for "saved". Check the workflow is still ON.
+
+PART B: the Order confirmation email
+5. Settings → Notifications → Customer notifications → Order confirmation
+   → Edit code.
+6. Copy the ENTIRE current template code into a note first, as a backup, and
+   keep it in your report.
+7. Find this exact line (it is in the block that starts with the comment
+   "TireDrop: local vs non-local block"):
+   {%- assign td_excluded_zips = "33001,33036,33037,33040,33041,33042,33043,33045,33050,33051,33052,33070" | split: "," -%}
+   Replace ONLY that line with:
+   {%- assign td_excluded_zips = "33001,33036,33037,33040,33041,33042,33043,33045,33050,33051,33052,33070,33440,33455,33471,33475" | split: "," -%}
+   If the TireDrop block is not in the template at all, stop Part B here and
+   say so (prompt 15 adds it, already updated). If the block is there but
+   the line is not exactly that, change nothing and say what you found.
+8. Click Preview and report whether the blue box still shows.
+9. STOP FOR SAVE. Wait for "saved". Then "Send test email" to
+   info@tiredroponline.com.
+
+REPORT BACK: Part A: how the condition was built before, what you added,
+saved Y/N, still ON Y/N. Part B: the step-6 backup, whether the line was
+found, the preview result, saved Y/N, whether the test email arrived.
+```
+
+**Undo:** Part A: delete the four added rules (you click Save). Part B:
+paste the step-6 backup back in (you click Save).

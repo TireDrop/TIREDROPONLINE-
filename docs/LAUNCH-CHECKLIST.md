@@ -55,6 +55,7 @@ _Last updated: 2026-10-01 (SHIPPED: fitment confidence; 6 new tools + tool pages
 - [x] ~~Webhooks: 2 in Shopify, signing key into Vercel, redeploy, test (prompt 21)~~ (2026-09-30: 2 webhooks configured, test notifications 200)
 - [x] ~~Prompt 22: email button + High-risk order review (tag, hold, email) + Needs scheduling alert (order paid → 24h → not install-booked)~~ (Justin, 2026-09-30)
 - [ ] Re-run prompt 15 (local vs ship block was never saved; paste it right above the new install button)
+- [ ] Prompt 23: add 33440, 33455, 33471, 33475 to the "Order routing: local vs ship" Flow ZIP condition (and to the email block if prompt 15 is already saved)
 - [ ] $1 install test: pay #D3 and book it on /track → tags flip + [BOOKED] to info@ + no [SCHEDULE] after 24h; pay #D4 and don't book → [SCHEDULE] after 24h; then refund both (drafts created 2026-09-30)
 - [ ] Confirm info@tiredroponline.com receives Shopify mail (test emails go to the logged-in staff account)
 - [ ] Justin: INSTALL_BOOKING_URL after the Tire Guru call (booking link → set it in Vercel and redeploy; API → tell Claude, it's a follow-up build; see docs/integrations/install-scheduling.md)

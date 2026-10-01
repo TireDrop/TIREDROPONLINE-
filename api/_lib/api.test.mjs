@@ -338,7 +338,7 @@ const mobileOrder = (address = {}) =>
   });
 
 const AREA_ERROR =
-  "Mobile install covers Miami-Dade, Broward and Palm Beach counties. Choose ship-to-home or ship-to-store instead.";
+  "That ZIP is outside our mobile service area (Miami-Dade, Broward and Palm Beach). Ship to our Sunrise shop instead, or call (954) 773-1896.";
 
 test("mobile install accepts an in-area ZIP and keeps the city as typed", async () => {
   const res = await call(checkoutHandler, { method: "POST", body: mobileOrder({ city: "Fort Lauderdale", zip: "33301" }) });

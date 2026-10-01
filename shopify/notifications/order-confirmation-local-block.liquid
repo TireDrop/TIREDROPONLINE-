@@ -7,12 +7,15 @@
   "Delivery", set on the product page or the cart). If checkout still has a
   delivery address, they get a "want it switched?" note instead.
   LOCAL = local pickup, or a shipping ZIP in Miami-Dade / Broward / Palm Beach
-  (prefixes 330–334), excluding the Florida Keys (Monroe County ZIPs).
+  (prefixes 330–334), excluding the Florida Keys (Monroe County ZIPs) and the
+  334 ZIPs outside Palm Beach County (33440 Clewiston, 33455 and 33475 Hobe
+  Sound, 33471 Moore Haven).
   To change the area, edit the two lists below. The Flow workflow
-  "Order routing: local vs ship" uses the same lists.
+  "Order routing: local vs ship" and src/data/serviceArea.js (the site and
+  its api) use the same lists.
 {%- endcomment -%}
 {%- assign td_local_prefixes = "330,331,332,333,334" | split: "," -%}
-{%- assign td_excluded_zips = "33001,33036,33037,33040,33041,33042,33043,33045,33050,33051,33052,33070" | split: "," -%}
+{%- assign td_excluded_zips = "33001,33036,33037,33040,33041,33042,33043,33045,33050,33051,33052,33070,33440,33455,33471,33475" | split: "," -%}
 {%- assign td_zip = shipping_address.zip | default: "" | strip -%}
 {%- assign td_zip5 = td_zip | slice: 0, 5 -%}
 {%- assign td_zip3 = td_zip | slice: 0, 3 -%}
