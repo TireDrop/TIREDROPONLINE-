@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-09-30 (6 new tools + tool pages on the preview/tools branch for Justin's review, merged with main; install booking tags the order install-booked; prompt 22 done; Tire Guru called, awaiting answer; Cannavibe repo being deleted, backup sent; repo organized; Blog + Learn live)_
+_Last updated: 2026-10-01 (wave 1 mobile city pages + upgraded /mobile-service hub on the preview/cities branch for Justin's review, built on preview/tools; mobile claims confirmed by Justin; roadside flat help added. Before that: 6 new tools + tool pages on preview/tools; install booking tags the order install-booked; prompt 22 done)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -87,7 +87,7 @@ _Last updated: 2026-09-30 (6 new tools + tool pages on the preview/tools branch 
 - [ ] Installed-price toggle
 - [ ] Book an install time at checkout
 - [ ] Fitment by trim + staggered, and a "Fits your vehicle" badge
-- [ ] Local city pages: Sunrise, Fort Lauderdale, Plantation, Davie…
+- [ ] Local city pages: Sunrise, Fort Lauderdale, Plantation, Davie… (wave 1 of 7 on preview/cities, see Content & SEO)
 - [ ] Real review collection (no stars until real reviews exist)
 
 ## Content & SEO: Blog + Learn (Claude; plan in docs/prompts/blog-learn-build.md)
@@ -97,6 +97,11 @@ _Last updated: 2026-09-30 (6 new tools + tool pages on the preview/tools branch 
 - [x] ~~Blog + Learn live: 20 articles, 5 demos, 98 prerendered routes~~ (be6a2a2)
 - [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); Batches 2–9 + 3 demos to go (wear pattern, hydroplaning, spare types)
 - [ ] Review the preview/tools branch (6 new demos with their own tool pages, embedded in 8 articles) and merge it to main (Justin)
+- [ ] Wave 1 city pages + mobile hub (preview/cities bb42574) → Justin reviews → ship
+- [ ] Justin: Google Business Profile link + map pin (for geo schema)
+- [x] ~~Mobile claims confirmed by Justin: no trip fee, cross-county, roadside flat help (not highway shoulders)~~ (2026-10-01)
+- [ ] Justin: confirm the city facts the research left unverified, so they can go on the pages: Tamarac ZIPs, roads and neighbourhoods; Coral Springs, Davie and Weston roads; Coral Springs and Weston neighbourhoods; whether Plantation 33388 is a PO Box ZIP
+- [ ] Roadside flat tire help: give it a starting price → it joins the service catalog and online booking (phone only until then)
 - [ ] Phase 4: internal links, Search Console submit, monthly refresh
 
 ## ATD and business (Justin)
