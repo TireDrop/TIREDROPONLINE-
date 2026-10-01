@@ -8,6 +8,8 @@ import React, {
   useRef,
 } from "react";
 
+import { cartParams, oncePerPage, trackEvent } from "../lib/analytics.js";
+
 const CartContext = createContext(null);
 
 const STORAGE_KEY = "tiredrop.cart.v1";
@@ -123,14 +125,32 @@ export function CartProvider({ children }) {
       subtotal,
       installTotal,
       total,
-      addItem: (item, qty = 1) =>
+      // GA4 add_to_cart / remove_from_cart (src/lib/analytics.js). Pass
+      // { track: false } when a line is swapped rather than added or removed.
+      addItem: (item, qty = 1, { track = true } = {}) => {
+        if (track) trackEvent("add_to_cart", cartParams([{ ...item, qty }]));
         dispatch({
           type: "add",
           item: { ...item, key: `${item.id}:${item.install ? "i" : "n"}` },
           qty,
-        }),
-      setQty: (key, qty) => dispatch({ type: "setQty", key, qty }),
-      remove: (key) => dispatch({ type: "remove", key }),
+        });
+      },
+      setQty: (key, qty) => {
+        const line = lines.find((l) => l.key === key);
+        const delta = line ? qty - line.qty : 0;
+        if (delta !== 0) {
+          trackEvent(
+            delta > 0 ? "add_to_cart" : "remove_from_cart",
+            cartParams([{ ...line, qty: Math.abs(delta) }]),
+          );
+        }
+        dispatch({ type: "setQty", key, qty });
+      },
+      remove: (key, { track = true } = {}) => {
+        const line = lines.find((l) => l.key === key);
+        if (track && line) trackEvent("remove_from_cart", cartParams([line]));
+        dispatch({ type: "remove", key });
+      },
       clear: () => dispatch({ type: "clear" }),
     };
   }, [state]);
@@ -142,6 +162,18 @@ export function useCart() {
   const ctx = useContext(CartContext);
   if (!ctx) throw new Error("useCart must be used inside <CartProvider>");
   return ctx;
+}
+
+/**
+ * Sends a GA4 cart event (view_cart, begin_checkout) once per page view, as
+ * soon as the cart has lines: a page the visitor lands on directly only gets
+ * the saved cart after its first render.
+ */
+export function useCartEvent(name) {
+  const { lines } = useCart();
+  useEffect(() => {
+    if (lines.length > 0) oncePerPage(name, () => trackEvent(name, cartParams(lines)));
+  }, [name, lines]);
 }
 
 export const money = (n) =>

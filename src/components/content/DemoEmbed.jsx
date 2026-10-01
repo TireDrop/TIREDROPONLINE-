@@ -1,6 +1,7 @@
 import React, { Component, Suspense } from "react";
 import { MousePointerClick } from "lucide-react";
 import { DEMOS, DEMO_META } from "../demos/index.js";
+import { trackToolUse } from "../../lib/analytics.js";
 
 /**
  * A demo that throws must not take the article down with it. It falls back
@@ -66,7 +67,15 @@ export default function DemoEmbed({ id }) {
   }
 
   return (
-    <figure className="my-8" data-demo={id}>
+    // GA4 tool_use on the first touch, key or input inside the demo
+    // (once per page view; src/lib/analytics.js).
+    <figure
+      className="my-8"
+      data-demo={id}
+      onPointerDownCapture={() => trackToolUse(id)}
+      onKeyDownCapture={() => trackToolUse(id)}
+      onInputCapture={() => trackToolUse(id)}
+    >
       <DemoBoundary
         id={id}
         fallback={<DemoBox title={meta.title} alt={meta.alt} />}

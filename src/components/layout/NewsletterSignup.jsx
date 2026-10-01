@@ -6,6 +6,7 @@ import { hasChanges, readFormValues } from "../../data/forms.js";
 import { guardFields } from "../../data/formGuard.js";
 import { useApiStatus } from "../../data/useApi.js";
 import { FormTrap, Input } from "../ui/index.jsx";
+import { trackEvent } from "../../lib/analytics.js";
 
 /**
  * Newsletter sign-up, inline. It sits in the footer on every page (Footer.jsx)
@@ -137,6 +138,7 @@ export function NewsletterSignup({ tone = "dark", source = "footer", className =
     setError(null);
     try {
       await subscribeNewsletter({ email: value, source, ...guard });
+      trackEvent("generate_lead", { form_name: "newsletter" });
       setDone(true);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : COPY.failed);

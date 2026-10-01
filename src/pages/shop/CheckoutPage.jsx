@@ -25,7 +25,8 @@ import {
   Select,
   FormTrap,
 } from "../../components/ui/index.jsx";
-import { useCart, money } from "../../context/CartContext.jsx";
+import { useCart, useCartEvent, money } from "../../context/CartContext.jsx";
+import { SHIPPING_TIER, cartParams, trackEvent } from "../../lib/analytics.js";
 import { BUSINESS } from "../../data/business.js";
 import {
   MOBILE_AREA_ERROR,
@@ -485,6 +486,7 @@ function makeOrderRef() {
 export default function CheckoutPage() {
   const { lines, subtotal, installTotal, clear } = useCart();
   const safeLines = Array.isArray(lines) ? lines : [];
+  useCartEvent("begin_checkout");
 
   const [stepIndex, setStepIndex] = useState(0);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -588,6 +590,12 @@ export default function CheckoutPage() {
     if (Object.keys(clean).length > 0) return;
 
     if (stepIndex < STEPS.length - 1) {
+      if (STEPS[stepIndex].id === "install") {
+        trackEvent("add_shipping_info", {
+          ...cartParams(safeLines),
+          shipping_tier: SHIPPING_TIER[current.fulfillment],
+        });
+      }
       // A cart with a set booked for fitting at the shop opens the delivery
       // step on ship-to-store rather than on an option that contradicts it.
       // Done here rather than as an initial value because the cart only comes
@@ -712,6 +720,13 @@ export default function CheckoutPage() {
     }
 
     setSending(false);
+    // A request, not a sale: no payment was taken (see src/lib/analytics.js
+    // on why `purchase` is not sent from here).
+    trackEvent("order_request", {
+      ...cartParams(safeLines),
+      value: totals.total,
+      shipping_tier: SHIPPING_TIER[form.fulfillment],
+    });
     setPlaced({
       ref: outcome.orderRef || makeOrderRef(),
       lines: safeLines,

@@ -19,7 +19,9 @@
 //      a tire site usually does. As built, the only cookies are Google
 //      Analytics' first-party measurement cookies (tag in index.html, Google
 //      signals and ad personalization off; route-change page views, with page
-//      title, URL and path only, sent from src/lib/analytics.js). It loads no
+//      title, URL and path only, and shop/lead events with product, delivery
+//      choice, search, tool and form NAME only — never what was typed, see
+//      src/lib/analytics.js and docs/ops/deploy.md). It loads no
 //      advertising or social tracking pixels.
 //      Email addresses are captured in two places, both stored in Shopify
 //      (sections 1, 2, 4, 5 and 6 say so):
@@ -64,7 +66,7 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
-const LAST_UPDATED = "September 30, 2026";
+const LAST_UPDATED = "October 1, 2026";
 
 // The four questions a customer — or anyone reviewing this site — comes to the
 // terms looking for. They are sections of this document rather than separate
@@ -282,7 +284,7 @@ const DOCS = {
         id: "cookies",
         heading: "3. Cookies, tracking and browser storage",
         paragraphs: [
-          "This website uses Google Analytics to measure how the site is used — pages viewed, how visitors arrived, general location at the city or region level, device and browser type. Google Analytics sets its own first-party cookies (named _ga and _ga_ followed by an ID) to tell one visit from the next. We have switched off Google signals and ad personalization, so this measurement is not used to build advertising profiles or to show you ads. We see the results only as aggregate reports, not as a record of what any named person did.",
+          "This website uses Google Analytics to measure how the site is used — pages viewed, how visitors arrived, general location at the city or region level, device and browser type, and steps in the shop such as a tire viewed, added to the cart or searched for by size or vehicle, a delivery option chosen, a tool used, or the fact that a form was sent (its name, never what you typed into it). Google Analytics sets its own first-party cookies (named _ga and _ga_ followed by an ID) to tell one visit from the next. We have switched off Google signals and ad personalization, so this measurement is not used to build advertising profiles or to show you ads. We see the results only as aggregate reports, not as a record of what any named person did.",
           "The site loads no advertising or social tracking pixels. You are welcome to check both statements in your browser's developer tools.",
           "Separately, the site uses local storage in your own browser for two things:",
         ],

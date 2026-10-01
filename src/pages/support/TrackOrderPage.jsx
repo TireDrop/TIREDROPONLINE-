@@ -28,6 +28,7 @@ import {
 } from "../../data/booking.js";
 import { hasChanges, readFormValues } from "../../data/forms.js";
 import { guardFields } from "../../data/formGuard.js";
+import { trackEvent } from "../../lib/analytics.js";
 import {
   Breadcrumbs,
   FormTrap,
@@ -224,6 +225,9 @@ function InstallBookingForm({ orderName, email, install, onBooked }) {
         notes: current.notes.trim(),
         ...guard,
       });
+      if (data.alreadyBooked !== true) {
+        trackEvent("install_booking", { install_type: install, method: "inline" });
+      }
       onBooked({ booking: data.booking, already: data.alreadyBooked === true });
     } catch (err) {
       if (err instanceof ApiError && err.status === 400 && (err.field === "day" || err.field === "window")) {
@@ -413,6 +417,9 @@ function ScheduleInstall({ booking, orderName, email }) {
           href={booking.url}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() =>
+            trackEvent("install_booking", { install_type: booking.install, method: "external" })
+          }
           className="btn-primary btn-sm mt-4"
         >
           <CalendarDays size={16} aria-hidden />
