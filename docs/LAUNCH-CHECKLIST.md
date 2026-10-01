@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (REVIEW: one-camera Tire Size Finder on preview/scanner, real photos read on the preview (auto:door, high); SHIPPED: store-wide search with typeahead + /search results (1214d45, all 17 gates pass); remember vehicle + shareable /tires filters + full NHTSA year/make/model lists with a searchable Model box, cached /api/vehicles (preview/remember 519e321, all 16 gates pass); fitment no longer blocks on a model-level guess, door-jamb size entry front/rear (dee5157); Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
+_Last updated: 2026-10-01 (SHIPPED: one-camera Tire Size Finder scanner + hero Scan button (all 18 gates pass); store-wide search with typeahead + /search results (1214d45, all 17 gates pass); remember vehicle + shareable /tires filters + full NHTSA year/make/model lists with a searchable Model box, cached /api/vehicles (preview/remember 519e321, all 16 gates pass); fitment no longer blocks on a model-level guess, door-jamb size entry front/rear (dee5157); Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -110,13 +110,13 @@ _Last updated: 2026-10-01 (REVIEW: one-camera Tire Size Finder on preview/scanne
 - [ ] Installed-price toggle
 - [ ] Book an install time at checkout
 - [ ] Fitment by trim + staggered (logic + badge shipped in 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API)
-- [ ] Tire Size Finder scanner (door sticker / sidewall / VIN) on preview/scanner 8826c25 → Justin adds ANTHROPIC_API_KEY in Vercel + monthly cap → test with real photos → ship (steps: docs/integrations/tire-size-finder.md)
+- [x] ~~Tire Size Finder scanner (door sticker / sidewall / VIN), one camera, Scan button in the home hero and /tires~~ (preview/scanner, shipped to main 2026-10-01; steps: docs/integrations/tire-size-finder.md)
   - [x] ~~Justin: Anthropic key `tiredrop-vercel-scanner` in Vercel (Sensitive, Production + Preview), $25 monthly spend limit, auto-reload on~~ (2026-10-01)
   - [x] ~~Guardrails: key read only server-side; per-IP limit 5 scans / 10 min; photo ≤3 MB (under Vercel's 4.5 MB body limit) and JPEG/PNG/WebP checked by bytes; 401/403/429/529 logged with a hint, never the key; "busy" and "isn't working" messages for shoppers~~ (preview/scanner)
   - [x] ~~Phones: the camera opens on the first tap (Scan, Retake)~~ (preview/scanner eeca955)
   - [x] ~~One camera for all three: a single "Scan a photo" (door sticker, sidewall or VIN), the server works out which (`mode: "auto"`, no nullable schema fields); Scan button in the home hero and on /tires, photo handed to the finder~~ (preview/scanner)
   - [x] ~~Justin tested real photos on the preview: works; logs show `mode=auto:door outcome=read confidence=high` (3.9-8.2 s)~~ (2026-10-01)
-  - [ ] "ship scanner"
+  - [x] ~~"ship scanner": all 18 gates pass on the merge with search~~ (2026-10-01)
   - [ ] Rotate the key before it expires 2026-10-31 (calendar reminder Oct 24; steps in docs/integrations/tire-size-finder.md)
 - [ ] Local city pages: wave 1 (7 cities) live 2026-10-01; wave 2 next
 - [ ] Real review collection (no stars until real reviews exist)
