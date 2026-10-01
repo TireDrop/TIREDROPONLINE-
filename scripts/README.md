@@ -20,12 +20,13 @@ header comment, and `shopify/assets/td-tiremath.js` names
 | `prerender-check.mjs` | `check:prerender` | The built site in Chromium: per-page head tags with JavaScript off, hydration without mismatch, client-side navigation. |
 | `forms-keep-values-check.mjs` | `check:forms` | Every form keeps and sends a value however it was entered (typing, automation, autofill), at 390px and 1440px. |
 | `newsletter-signup-check.mjs` | `check:newsletter` | The newsletter is only the footer form: no pop-up, validation, success and failure messages. |
+| `translate-check.mjs` | `check:translate` | The header's Language control: nothing loads from Google until it is opened, keyboard and 320px use, translating in place with a stand-in for Google's element (routes, cart and a form throw nothing; prices and sizes stay as written), the translate.google.com fallback, and the site served from Google's translate.goog proxy. `TRANSLATE_SHOTS=<dir>` saves screenshots. |
 | `docs-links-check.mjs` | `check:docs` | Every relative Markdown link and every `docs/...` path in the docs resolves to a real file. |
 
-The three Chromium checks need `npm run build` first. They start
+The four Chromium checks need `npm run build` first. They start
 `vite preview` themselves and mock every `/api` call, so nothing reaches
-Shopify. `test:api` and `test:content` are `node --test` suites in
-`api/_lib/` and `src/content/`, not scripts here.
+Shopify. `test:api`, `test:content` and `test:lib` are `node --test` suites in
+`api/_lib/`, `src/content/` and `src/lib/`, not scripts here.
 
 ## Run by hand
 

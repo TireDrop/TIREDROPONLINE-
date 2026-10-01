@@ -12,12 +12,33 @@ import {
 import { productHref } from "../../data/products.js";
 import ProductArt from "./ProductArt.jsx";
 
-/** Short spec line under the product name — size for tires, fitment for wheels. */
+// Sizes, load/speed codes, prices and brand or model names are never put
+// through a page translator (see src/lib/translate.js): "Pilot Sport" is a
+// name, and "225/45R17" or "$1,234.56" must read the same in any language.
+const NO_TRANSLATE = { translate: "no", className: "notranslate" };
+
+/** Short spec line under the product name — size for tires, fitment for wheels.
+ *  The codes stay as written; the category and finish are words, so they can
+ *  be translated. */
 function specLine(product) {
   if (product.kind === "wheel") {
-    return `${product.diameter}x${product.wheelWidth} · ${product.boltPattern} · ${product.finish}`;
+    return (
+      <>
+        <span {...NO_TRANSLATE}>
+          {`${product.diameter}x${product.wheelWidth} · ${product.boltPattern}`}
+        </span>
+        {` · ${product.finish}`}
+      </>
+    );
   }
-  return `${product.size} · ${product.loadIndex}${product.speedRating} · ${product.category}`;
+  return (
+    <>
+      <span {...NO_TRANSLATE}>
+        {`${product.size} · ${product.loadIndex}${product.speedRating}`}
+      </span>
+      {` · ${product.category}`}
+    </>
+  );
 }
 
 export default function ProductCard({ product }) {
@@ -115,12 +136,17 @@ export default function ProductCard({ product }) {
       </div>
 
       <div className="flex flex-1 flex-col p-3 sm:p-4">
-        <p className="eyebrow text-[11px] tracking-[0.09em] text-smoke">
+        <p
+          className="notranslate eyebrow text-[11px] tracking-[0.09em] text-smoke"
+          translate="no"
+        >
           {product.brand}
         </p>
         {/* A card title is the second line of a card, not a page headline —
             it carries the display face and the weight, not the size. */}
-        <h3 className="h3 mt-1 text-[0.9375rem] leading-[1.2] sm:text-[1.0625rem] sm:leading-[1.15] md:text-[1.15rem]">
+        <h3
+          translate="no"
+          className="notranslate h3 mt-1 text-[0.9375rem] leading-[1.2] sm:text-[1.0625rem] sm:leading-[1.15] md:text-[1.15rem]">
           {href ? (
             <Link to={href} className="transition-colors hover:text-drop">
               {product.model}
@@ -137,7 +163,10 @@ export default function ProductCard({ product }) {
             every figure is tabular so the column of cards lines up. */}
         <div className="mt-auto border-t border-ink/[0.07] pt-3 sm:pt-3.5">
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-            <span className="tnum font-display text-[1.375rem] font-bold leading-none tracking-[-0.02em] text-ink sm:text-[1.75rem]">
+            <span
+              translate="no"
+              className="notranslate tnum font-display text-[1.375rem] font-bold leading-none tracking-[-0.02em] text-ink sm:text-[1.75rem]"
+            >
               {money(bd.price)}
             </span>
             <span className="text-[11px] uppercase tracking-[0.09em] text-smoke">
@@ -145,10 +174,12 @@ export default function ProductCard({ product }) {
             </span>
           </div>
           <p className="tnum mt-1.5 text-[11px] leading-snug text-smoke">
-            {money(product.price)} each
+            <span {...NO_TRANSLATE}>{money(product.price)}</span> each
             <span className="hidden sm:inline">
               {" "}
-              · install +{money(product.installPrice)}/tire
+              · install{" "}
+              <span {...NO_TRANSLATE}>+{money(product.installPrice)}</span>
+              /tire
             </span>
           </p>
 

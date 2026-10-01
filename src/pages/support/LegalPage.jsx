@@ -20,7 +20,9 @@
 //      Analytics' first-party measurement cookies (tag in index.html, Google
 //      signals and ad personalization off; route-change page views, with page
 //      title, URL and path only, sent from src/lib/analytics.js). It loads no
-//      advertising or social tracking pixels.
+//      advertising or social tracking pixels. Google Translate loads only
+//      once a visitor uses the header's Language button (section 3;
+//      components/layout/LanguageControl.jsx).
 //      Email addresses are captured in two places, both stored in Shopify
 //      (sections 1, 2, 4, 5 and 6 say so):
 //        - the newsletter sign-up form in the site footer
@@ -64,7 +66,7 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
-const LAST_UPDATED = "September 30, 2026";
+const LAST_UPDATED = "October 1, 2026";
 
 // The four questions a customer — or anyone reviewing this site — comes to the
 // terms looking for. They are sections of this document rather than separate
@@ -293,6 +295,7 @@ const DOCS = {
         after: [
           "Both stay on your device. They are not sent to us, they contain no name, email address, street address or payment detail, and nobody else can read them. Clearing your browsing data deletes them, and you lose your cart.",
           "The email sign-up form in the site footer saves nothing in your browser. An earlier version of the site had a sign-up pop-up that remembered whether you had closed it, under the name td-nl-popup. The pop-up is gone, and the site now deletes that entry if your browser still has it.",
+          "Translating a page is optional. Nothing from Google Translate loads until you open the Language button at the top of the page. Once you do, the site loads Google Translate (or, if that is unavailable, opens the page through translate.google.com), and Google processes the page's text to translate it and may set its own cookies, such as googtrans, which remembers the language you picked. The site keeps your pick in your browser's session storage until you close the tab, and \"English (original)\" switches translation off.",
           "You can block or delete the Google Analytics cookies in your browser settings, or install Google's opt-out add-on at tools.google.com/dlpage/gaoptout; the site works the same either way. If we add any other third-party script, this section gets rewritten before that ships, not after.",
         ],
       },
