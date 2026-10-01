@@ -15,6 +15,7 @@ import {
   selectionSizeText,
   sizeSearch,
   sizesOf,
+  STAGGERED_NOTE,
 } from "./fitmentCheck.js";
 import { FITMENT_TRIMS } from "./fitment.js";
 import { TIRES } from "./products.js";
@@ -149,11 +150,16 @@ test("no vehicle or size chosen: check fitment, never a block", () => {
 
 /* ------------------------- vehicle, exact match ------------------------- */
 
-test("exact OE match on the shipped table: fits, and says what it is based on", () => {
+test("exact match to the typical size: says typical, never claims a fit for the car", () => {
   // 2019 Tacoma: 245/75R16 (2005-2023 generation row).
   const a = fit("245/75R16", vehicle("2019", "Toyota", "Tacoma"));
   assert.equal(a.status, "fits");
-  assert.equal(a.title, "Fits your 2019 Toyota Tacoma");
+  assert.equal(a.code, "match-typical");
+  assert.equal(
+    a.title,
+    "Matches the typical factory size for a 2019 Toyota Tacoma",
+  );
+  assert.doesNotMatch(a.title, /^Fits/);
   assert.match(
     a.detail,
     /^Matches the typical factory size on file for a 2019 Toyota Tacoma \(245\/75R16\)/,
@@ -163,20 +169,41 @@ test("exact OE match on the shipped table: fits, and says what it is based on", 
   assertWording(a, "exact");
 });
 
-test("mismatch: doesn't fit, names both sizes", () => {
+test("vehicle only, a size other than the typical one: check fitment, never a block", () => {
   const a = fit("265/70R17", vehicle("2019", "Toyota", "Tacoma"));
-  assert.equal(a.status, "no-fit");
-  assert.equal(a.title, "Doesn't fit your 2019 Toyota Tacoma");
+  assert.equal(a.status, "check", "a model-level guess never blocks Add");
+  assert.equal(a.code, "unconfirmed");
+  assert.equal(a.title, "Check fitment");
   assert.equal(
     a.detail,
-    "This tire is 265/70R17. The typical factory size on file for a 2019 Toyota Tacoma is 245/75R16.",
+    "This tire is 265/70R17. Your 2019 Toyota Tacoma may use a different size by trim or wheel. Typical: 245/75R16. Check the sticker on your driver's door jamb.",
   );
-  assert.deepEqual(
-    a.sizes,
-    ["245/75R16"],
-    "See tires that fit goes to the right size",
-  );
-  assertWording(a, "mismatch");
+  assert.deepEqual(a.sizes, ["245/75R16"]);
+  assertWording(a, "unconfirmed");
+});
+
+test("the trims and wheel packages the typical size misses are never blocked", () => {
+  // Real owners shopping their real size (audit 2026-10-01): each is a
+  // "Check fitment", not a "Doesn't fit".
+  const cases = [
+    ["2019", "BMW", "3 Series", "225/40R19"], // M340i, staggered front
+    ["2019", "BMW", "3 Series", "255/35R19"], // M340i, staggered rear
+    ["2020", "Toyota", "Camry", "235/40R19"], // XSE
+    ["2022", "Ford", "F-150", "315/70R17"], // Raptor
+    ["2019", "Honda", "Civic", "235/40R18"], // Sport
+    ["2021", "Jeep", "Wrangler", "LT285/70R17"], // Rubicon
+    ["2022", "Mercedes-Benz", "C-Class", "245/35R19"], // AMG C43
+    ["2021", "Chevrolet", "Silverado", "LT275/65R18"], // Trail Boss
+  ];
+  for (const [year, make, model, size] of cases) {
+    const resolved = resolveSelection(vehicle(year, make, model));
+    assert.equal(resolved.status, "sized", `${year} ${make} ${model} is on file`);
+    assert.equal(resolved.confirmed, false);
+    const a = checkFit(size, resolved);
+    assert.notEqual(a.status, "no-fit", `${year} ${make} ${model} ${size}`);
+    assert.equal(a.status, "check", `${year} ${make} ${model} ${size}`);
+    assertWording(a, `${make} ${model}`);
+  }
 });
 
 test("make and model match without regard to case", () => {
@@ -195,8 +222,8 @@ test("year boundaries pick the generation's size", () => {
     "fits",
   );
   assert.equal(
-    fit("245/75R16", vehicle("2024", "Toyota", "Tacoma")).status,
-    "no-fit",
+    fit("245/75R16", vehicle("2024", "Toyota", "Tacoma")).code,
+    "unconfirmed",
   );
   assert.equal(
     fit("245/70R17", vehicle("2024", "Toyota", "Tacoma")).status,
@@ -212,8 +239,8 @@ test("year boundaries pick the generation's size", () => {
     "fits",
   );
   assert.equal(
-    fit("205/65R16", vehicle("2018", "Toyota", "Camry")).status,
-    "no-fit",
+    fit("205/65R16", vehicle("2018", "Toyota", "Camry")).code,
+    "unconfirmed",
   );
 });
 
@@ -260,8 +287,11 @@ test("multi-trim: sizes differ by trim, nothing picked → fits some trims, with
   assert.match(selectionSizeText(resolved), /by trim$/);
   assertWording(a, "some trims");
 
-  // A size no trim takes is still a plain no.
-  assert.equal(checkFit("205/55R16", resolved).status, "no-fit");
+  // A size no trim on file takes is still only a check: no trim picked.
+  const none = checkFit("205/55R16", resolved);
+  assert.equal(none.status, "check");
+  assert.equal(none.code, "unconfirmed");
+  assert.match(none.detail, /yours may differ by trim or wheel/);
 });
 
 test("multi-trim: picking the trim's size settles it, and names the trim", () => {
@@ -280,6 +310,7 @@ test("multi-trim: picking the trim's size settles it, and names the trim", () =>
     a.detail,
     "Matches the factory size for your 2022 Testco Roadster Base (235/40R18).",
   );
+  assert.equal(resolved.confirmed, true, "a picked trim is an exact size");
   assert.equal(checkFit("245/35R19", resolved).status, "no-fit");
 });
 
@@ -356,10 +387,10 @@ test("alternates count only when listed; plus sizes are never inferred", () => {
   assert.equal(a.status, "fits");
   assert.equal(a.code, "match-alternate");
   assert.match(a.detail, /alternate size listed/);
-  // A plus size of the 2019 Tacoma's 245/75R16 is still a no.
-  assert.equal(
+  // A plus size of the 2019 Tacoma's 245/75R16 is never called a fit.
+  assert.notEqual(
     fit("265/70R17", vehicle("2019", "Toyota", "Tacoma")).status,
-    "no-fit",
+    "fits",
   );
 });
 
@@ -393,8 +424,9 @@ test("size-only: match fits, anything else is not your size", () => {
   assertWording([yes, no], "size-only");
 });
 
-test("a size the shopper gave for their vehicle wins over the table", () => {
+test("a sticker size the shopper confirmed wins over the table, and a mismatch blocks", () => {
   const sel = vehicle("2019", "Toyota", "Tacoma", { size: "265/70R16" });
+  assert.equal(resolveSelection(sel).confirmed, true);
   const a = fit("265/70R16", sel);
   assert.equal(a.status, "fits");
   assert.equal(a.title, "Matches your size (265/70R16)");
@@ -403,7 +435,8 @@ test("a size the shopper gave for their vehicle wins over the table", () => {
     "Matches the size you gave us for your 2019 Toyota Tacoma (265/70R16).",
   );
   const b = fit("245/75R16", sel);
-  assert.equal(b.status, "no-fit");
+  assert.equal(b.status, "no-fit", "even the typical size: the sticker says otherwise");
+  assert.equal(b.title, "Doesn't fit your 2019 Toyota Tacoma");
   assert.match(
     b.detail,
     /The size you gave us for your 2019 Toyota Tacoma is 265\/70R16/,
@@ -494,4 +527,61 @@ test("a dual load index marks a catalog tire LT even when its size does not", ()
   const a = fit(fitSizeOf(vanTire), vehicle("2019", "Toyota", "Tacoma"));
   assert.equal(a.status, "check");
   assert.equal(a.code, "casing");
+});
+
+/* ------------------------- door-jamb, staggered ------------------------- */
+
+test("door-jamb sticker, staggered front and rear on a vehicle", () => {
+  const sel = vehicle("2019", "BMW", "3 Series", {
+    size: "225/40R19",
+    rear: "255/35R19",
+  });
+  const resolved = resolveSelection(sel);
+  assert.equal(resolved.basis, "entered");
+  assert.equal(resolved.confirmed, true);
+  assert.equal(resolved.label, "2019 BMW 3 Series", "the vehicle name stays");
+  assert.equal(selectionSizeText(resolved), "front 225/40R19, rear 255/35R19");
+  assert.deepEqual(sizesOf(resolved), ["225/40R19", "255/35R19"]);
+
+  const front = checkFit("225/40R19", resolved);
+  assert.equal(front.status, "fits");
+  assert.equal(front.axle, "front");
+  assert.equal(front.title, "Fits your front axle (225/40R19)");
+  assert.ok(front.detail.endsWith(STAGGERED_NOTE));
+  assert.equal(STAGGERED_NOTE, "Staggered: you'll need 2 front + 2 rear.");
+
+  const rear = checkFit("255/35ZR19 96Y", resolved);
+  assert.equal(rear.status, "fits");
+  assert.equal(rear.axle, "rear");
+  assert.equal(rear.title, "Fits your rear axle (255/35R19)");
+
+  // The typical 225/45R18 is not on this car: confirmed, so it blocks.
+  const typical = checkFit("225/45R18", resolved);
+  assert.equal(typical.status, "no-fit");
+  assert.match(typical.detail, /front 225\/40R19, rear 255\/35R19/);
+  [front, rear, typical].forEach((a) => assertWording(a, "door-jamb staggered"));
+});
+
+test("door-jamb sticker without a vehicle: size-only, front and rear", () => {
+  const sel = { type: "size", size: "225/40R19", rear: "255/35R19" };
+  const resolved = resolveSelection(sel);
+  assert.equal(resolved.kind, "size");
+  assert.equal(resolved.rear.display, "255/35R19");
+  assert.equal(selectionSizeText(resolved), "front 225/40R19, rear 255/35R19");
+  assert.equal(fit("225/40R19", sel).title, "Fits your front axle (225/40R19)");
+  assert.equal(fit("255/35R19", sel).title, "Fits your rear axle (255/35R19)");
+  const no = fit("245/40R19", sel);
+  assert.equal(no.status, "no-fit");
+  assert.equal(no.title, "Not your size (front 225/40R19, rear 255/35R19)");
+  assertWording([no], "size-only staggered");
+});
+
+test("a rear size equal to the front, or unreadable, is dropped", () => {
+  const same = resolveSelection(
+    vehicle("2019", "BMW", "3 Series", { size: "225/40R19", rear: "225/40ZR19" }),
+  );
+  assert.equal(same.chosen.rear, null);
+  assert.equal(checkFit("225/40R19", same).title, "Matches your size (225/40R19)");
+  const junk = resolveSelection({ type: "size", size: "225/40R19", rear: "big" });
+  assert.equal(junk.rear, null);
 });

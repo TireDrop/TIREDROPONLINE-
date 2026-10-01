@@ -27,7 +27,11 @@ import {
 import { ratingsFor } from "../../data/tireRatings.js";
 import { setPrice } from "../../data/pricing.js";
 import { BUSINESS } from "../../data/business.js";
-import { fitSizeOf, sizesOf } from "../../data/fitmentCheck.js";
+import {
+  fitSizeOf,
+  selectionSizeText,
+  sizesOf,
+} from "../../data/fitmentCheck.js";
 import { useVehicle } from "../../context/VehicleContext.jsx";
 import { useTireSearch } from "../../data/useApi.js";
 import { money } from "../../context/CartContext.jsx";
@@ -149,7 +153,8 @@ export default function TiresPage() {
     const [year, make, model, open] = handOff.split("|");
     if (!(year && make && model) && !open) return;
     if (year && make && model) selectVehicle({ year, make, model });
-    if (open) openChanger(open === "size" ? "size" : "vehicle");
+    if (open)
+      openChanger(open === "size" || open === "sticker" ? open : "vehicle");
     const next = new URLSearchParams(params);
     ["vy", "vmk", "vmd", "fit"].forEach((k) => next.delete(k));
     setParams(next, { replace: true });
@@ -166,10 +171,11 @@ export default function TiresPage() {
   // A size the shopper gave, or the trim they picked, is searched as a size;
   // otherwise the vehicle itself, so the distributor's own fitment answers
   // once it is wired.
+  // (A staggered size the shopper gave is searched by its front size.)
   const ownSize =
     chosen &&
-    !chosen.rear &&
-    (resolved.basis === "entered" || resolved.basis === "trim");
+    (resolved.basis === "entered" ||
+      (!chosen.rear && resolved.basis === "trim"));
   let query = null;
   if (fullSize) query = { size: fullSize };
   else if (!ready) query = null;
@@ -290,7 +296,7 @@ export default function TiresPage() {
   const others = showFit ? results.filter((t) => !inSize(t)) : results;
   const fitHeading =
     resolved.kind === "size"
-      ? `In your size, ${resolved.size.display}`
+      ? `In your size, ${selectionSizeText(resolved)}`
       : chosen
         ? `In the size for your ${resolved.label}`
         : `In the factory sizes for a ${resolved.label}`;

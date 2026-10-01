@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   AlertTriangle,
   CalendarClock,
+  Phone,
   Minus,
   Plus,
   ShieldCheck,
@@ -26,7 +27,11 @@ import {
   FitBadge,
   ShoppingForBar,
 } from "../../components/shop/Fitment.jsx";
-import { fitSizeOf, sizeSearch } from "../../data/fitmentCheck.js";
+import {
+  STAGGERED_NOTE,
+  fitSizeOf,
+  sizeSearch,
+} from "../../data/fitmentCheck.js";
 import { BUSINESS } from "../../data/business.js";
 import { productHref } from "../../data/products.js";
 
@@ -104,7 +109,29 @@ function QtyStepper({ line, setQty }) {
 }
 
 /**
- * A line that does not fit what the shopper is shopping for: said plainly,
+ * A line whose size differs from the typical size on file for the vehicle,
+ * with no exact size confirmed: no "Swap it" warning (the shopper's trim or
+ * wheels may well take it), just how fitment gets settled.
+ */
+export const PHONE_CONFIRM_NOTE =
+  "We'll confirm fitment by phone before your order ships.";
+
+export function FitSoftNote({ fit, className = "" }) {
+  if (!fit || fit.code !== "unconfirmed") return null;
+  return (
+    <p
+      data-testid="cart-fit-soft"
+      className={`flex items-start gap-2 text-xs leading-relaxed text-smoke sm:text-sm ${className}`}
+    >
+      <Phone size={14} aria-hidden className="mt-0.5 shrink-0 text-drop" />
+      <span className="min-w-0">{PHONE_CONFIRM_NOTE}</span>
+    </p>
+  );
+}
+
+/**
+ * A line that does not fit the exact size the shopper confirmed (size-only
+ * mode, their door-jamb sticker, or the trim they picked): said plainly,
  * with the way to swap it. Checkout is not blocked over it, because a tech
  * confirms fitment by phone before any order is released.
  */
@@ -202,6 +229,12 @@ function CartLine({ line, setQty, remove, addItem }) {
             )}
             {fit && fit.status !== "no-fit" && fit.code !== "no-selection" && (
               <FitBadge fit={fit} className="mt-2" />
+            )}
+            <FitSoftNote fit={fit} className="mt-1.5" />
+            {(fit?.axle === "front" || fit?.axle === "rear") && (
+              <p className="mt-1.5 text-xs font-semibold text-ink sm:text-sm">
+                {STAGGERED_NOTE}
+              </p>
             )}
           </div>
 
