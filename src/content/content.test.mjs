@@ -424,7 +424,7 @@ test("the real content directory loads through the Node loader", () => {
   const keys = Object.keys(files);
   assert.ok(keys.every((k) => /^\.\/(learn\/[^/]+|blog)\/[^/]+\.md$/.test(k)));
   const hubs = readHubs();
-  assert.equal(hubs.length, 10);
+  assert.equal(hubs.length, 11);
   for (const hub of hubs) {
     assert.ok(
       hub.slug && hub.title && hub.description && Number.isFinite(hub.order),
@@ -452,4 +452,105 @@ test("the real content directory loads through the Node loader", () => {
     "blog sample visible in dev",
   );
   assert.equal(prod.getArticle("learn", "tread", "sample-tread-depth"), null);
+});
+
+/* ------------------------- hub extras + Tesla hub ------------------------- */
+
+test("hubs carry an optional intro, note and in-site links", () => {
+  const store = buildContent({
+    files: FILES,
+    hubs: [
+      ...HUBS,
+      {
+        slug: "extra",
+        title: "Extra",
+        description: "Extra.",
+        order: 11,
+        intro: "Longer intro.",
+        note: "A note.",
+        links: [
+          { label: "A post", href: "/blog/nitrogen-myth/", text: "See" },
+          { label: "Off-site", href: "https://example.com/" },
+          { label: "", href: "/blog" },
+        ],
+      },
+    ],
+  });
+  const hub = store.getHub("extra");
+  assert.equal(hub.intro, "Longer intro.");
+  assert.equal(hub.note, "A note.");
+  assert.deepEqual(hub.links, [
+    { label: "A post", text: "See", href: "/blog/nitrogen-myth" },
+  ]);
+  const plain = store.getHub("tread");
+  assert.equal(plain.intro, null);
+  assert.equal(plain.note, null);
+  assert.deepEqual(plain.links, []);
+});
+
+test("the Tesla hub: six publishable guides that follow the copy rules", () => {
+  const hub = readHubs().find((h) => h.slug === "tesla");
+  assert.ok(hub, "tesla hub in hubs.json");
+  assert.equal(
+    hub.note,
+    "TireDrop and Extreme Tires are not affiliated with Tesla, Inc.",
+  );
+  assert.ok(
+    hub.links.some((l) => l.href === "/blog/tesla-model-y-tires-guide"),
+    "hub links the Model Y blog guide",
+  );
+
+  const store = loadContent({ checkLinks: true });
+  const guides = store.getLearnArticles({ hub: "tesla" });
+  assert.equal(guides.length, 6);
+  assert.ok(store.contentRoutes().includes("/learn/tesla"));
+
+  const BANNED = /\b(safe|safer|safely|fine|guaranteed?|OK)\b/i;
+  const hubText = [hub.title, hub.description, hub.intro, hub.note].join(" ");
+  assert.ok(!BANNED.test(hubText), `hub copy: ${hubText.match(BANNED)?.[0]}`);
+
+  for (const a of guides) {
+    const text = [
+      a.title,
+      a.description,
+      a.body,
+      ...a.takeaways,
+      ...a.faq.flatMap((f) => [f.q, f.a]),
+    ].join("\n");
+    assert.ok(!BANNED.test(text), `${a.path}: "${text.match(BANNED)?.[0]}"`);
+    // No discounts, prices or arrival times.
+    assert.doesNotMatch(text, /\$\d|discount|coupon|% off|\bdeal\b/i, a.path);
+    assert.doesNotMatch(text, /within \d+ (minutes|hours)|same[- ]day/i, a.path);
+    // Never implies a Tesla affiliation.
+    assert.doesNotMatch(
+      text,
+      /(authorized|certified|approved|official) (tesla )?(dealer|service|partner|installer)/i,
+      a.path,
+    );
+    assert.equal(a.date, "2026-10-01", a.path);
+    assert.ok(a.keyword, `${a.path}: keyword`);
+    assert.ok(a.takeaways.length >= 4, `${a.path}: takeaways`);
+    assert.ok(a.faq.length >= 3, `${a.path}: faq`);
+    assert.ok(a.sources.length >= 4, `${a.path}: sources`);
+    // CTAs: shop by vehicle, mobile install and scheduling.
+    for (const href of ["/tires", "/mobile-service", "/schedule"]) {
+      assert.ok(a.body.includes(`](${href})`), `${a.path}: links ${href}`);
+    }
+    // Related links reach the other Tesla guides and nothing unpublished.
+    const others = guides.filter((g) => g.path !== a.path).map((g) => g.path);
+    for (const p of others)
+      assert.ok(a.related.includes(p), `${a.path}: related ${p}`);
+    // The blog post owns "Tesla Model Y tires"; no guide targets it.
+    assert.doesNotMatch(a.keyword, /model y/i, a.path);
+    // 900 to 1,600 words of body text.
+    const words = a.body
+      .replace(/\[\[demo:[^\]]*\]\]/g, " ")
+      .split(/\s+/)
+      .filter((w) => /[a-z0-9]/i.test(w)).length;
+    assert.ok(words >= 900 && words <= 1600, `${a.path}: ${words} words`);
+  }
+  const problems = store.problems.filter((p) =>
+    p.file.includes("/learn/tesla/"),
+  );
+  assert.deepEqual(problems, [], "no content warnings for the Tesla guides");
 });

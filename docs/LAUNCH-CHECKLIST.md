@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (security headers, CSP report-only, + GA4 conversion events (abcf645); prompt 25 for GA4 key events)_
+_Last updated: 2026-10-01 (Tesla tires Learn hub on preview/tesla for review; earlier: security headers, CSP report-only, GA4 conversion events (abcf645))_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -114,6 +114,7 @@ _Last updated: 2026-10-01 (security headers, CSP report-only, + GA4 conversion e
 - [ ] Roadside flat tire help: give it a starting price → it joins the service catalog and online booking (phone only until then)
 - [ ] City pages wave 2: Pompano Beach, Miramar, Oakland Park, Pembroke Pines, Hollywood, Lauderhill (after wave 1 is indexed)
 - [ ] Phase 4: internal links, Search Console submit, monthly refresh
+- [ ] Tesla tires Learn hub (6 articles) on preview/tesla → Justin reviews → ship
 
 ## ATD and business (Justin)
 - [ ] Submit the ATD connectivity form

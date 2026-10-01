@@ -535,6 +535,17 @@ export function buildContent({
       title: asString(h.title),
       description: asString(h.description),
       order: Number(h.order) || 0,
+      // Optional, shown on the hub page only: a longer intro, a one-line
+      // note (e.g. a no-affiliation disclaimer) and in-site links.
+      intro: asString(h.intro) || null,
+      note: asString(h.note) || null,
+      links: (Array.isArray(h.links) ? h.links : [])
+        .map((l) => ({
+          label: asString(l?.label),
+          text: asString(l?.text) || null,
+          href: canonicalSitePath(asString(l?.href)),
+        }))
+        .filter((l) => l.label && l.href),
     }))
     .sort((a, b) => a.order - b.order);
   const hubSlugs = new Set(hubList.map((h) => h.slug));
