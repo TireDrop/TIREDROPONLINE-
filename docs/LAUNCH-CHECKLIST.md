@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (SHIPPED: nationwide hub + 7 pilot state pages, all 40 facts checked against their official sources (13 corrected); one-camera Tire Size Finder scanner + hero Scan button (all 18 gates pass); store-wide search with typeahead + /search results (1214d45, all 17 gates pass); remember vehicle + shareable /tires filters + full NHTSA year/make/model lists with a searchable Model box, cached /api/vehicles (preview/remember 519e321, all 16 gates pass); fitment no longer blocks on a model-level guess, door-jamb size entry front/rear (dee5157); Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
+_Last updated: 2026-10-01 (SHIPPED: orders carry vehicle, sizes, size source and a server-checked Fitment (attributes + tags; Flow = admin prompt 26); nationwide hub + 7 pilot state pages, all 40 facts checked against their official sources (13 corrected); one-camera Tire Size Finder scanner + hero Scan button (all 18 gates pass); store-wide search with typeahead + /search results (1214d45, all 17 gates pass); remember vehicle + shareable /tires filters + full NHTSA year/make/model lists with a searchable Model box, cached /api/vehicles (preview/remember 519e321, all 16 gates pass); fitment no longer blocks on a model-level guess, door-jamb size entry front/rear (dee5157); Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -117,7 +117,8 @@ _Last updated: 2026-10-01 (SHIPPED: nationwide hub + 7 pilot state pages, all 40
   - [x] ~~One camera for all three: a single "Scan a photo" (door sticker, sidewall or VIN), the server works out which (`mode: "auto"`, no nullable schema fields); Scan button in the home hero and on /tires, photo handed to the finder~~ (preview/scanner)
   - [x] ~~Justin tested real photos on the preview: works; logs show `mode=auto:door outcome=read confidence=high` (3.9-8.2 s)~~ (2026-10-01)
   - [x] ~~"ship scanner": all 18 gates pass on the merge with search~~ (2026-10-01)
-  - [ ] Orders carry the fitment: Vehicle / Size source / Front / Rear / Fitment attributes + fitment-check, staggered, size-scanned tags; ATD forwarder skips fitment-check (preview/fitment-attrs) → Justin reviews → ship → run Shopify admin prompt 26 (Flow: hold + email) → $1 staggered test
+  - [x] ~~Orders carry the fitment: Vehicle / Size source / Front / Rear / Fitment attributes + fitment-check, staggered, size-scanned tags; ATD forwarder skips fitment-check~~ (preview/fitment-attrs 8e9459b, shipped to main 2026-10-01)
+  - [ ] Justin: run Shopify admin prompt 26 (Flow "Fitment check + scanner tags": hold + email) → turn it on → $1 staggered test
   - [ ] Rotate the key before it expires 2026-10-31 (calendar reminder Oct 24; steps in docs/integrations/tire-size-finder.md)
 - [ ] Local city pages: wave 1 (7 cities) live 2026-10-01; wave 2 next
 - [x] ~~Nationwide hub + 7 pilot state pages (FL, GA, TX, CA, NY, NC, CO) live~~ (preview/states 62fbb42, shipped to main 2026-10-01)
