@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (SHIPPED: search-result data, breadcrumbs + schema check; 334 ZIPs outside Palm Beach excluded + server-side booking ZIP check; fitment confidence; 6 new tools + tool pages; mobile hub + 7 wave-1 city pages, roadside flat help; install booking live)_
+_Last updated: 2026-10-01 (spam guard on every form + checkout, existing customers' notes never written (7cc12f2); prompt 24 for the lead Flow)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -71,7 +71,7 @@ _Last updated: 2026-10-01 (SHIPPED: search-result data, breadcrumbs + schema che
 - [ ] Ship-to-store flow: address, emails, alerts
 - [ ] Fitment hold before orders go to ATD
 - [ ] "Tires arrived at the shop" notice
-- [ ] Checkout spam guard, and no writing into other customers' notes
+- [x] ~~Checkout spam guard, and no writing into other customers' notes~~ (7cc12f2)
 - [x] ~~No Add button on won't-fit tires; Compare crowns same-size tires only~~ (347c4e1)
 - [x] ~~Year-aware fitment on /tires~~ (347c4e1)
 
