@@ -2,11 +2,16 @@
 //
 // Two kinds of request, one endpoint:
 //
-//   Photo   { mode: "door" | "sidewall" | "vin", image }
+//   Photo   { mode: "auto" | "door" | "sidewall" | "vin", image }
 //           image: a JPEG, PNG or WebP photo as base64 or a data URL (at most
 //           3 MB decoded). Claude reads it (api/_lib/scanTireSize.js); a VIN
 //           read off the photo is then decoded by NHTSA vPIC. Needs
 //           ANTHROPIC_API_KEY; without it: 503 { error: "scanner_not_configured" }.
+//           "auto" (one camera; what the page uses): the photo may be any of
+//           the three, Claude says which, and the answer is that mode's
+//           answer with `mode` set to the detected "door" | "sidewall" |
+//           "vin" plus `requested: "auto"`. The specific modes are kept for
+//           compatibility.
 //   Typed   { mode: "vin", vin }
 //           A VIN typed by hand, decoded by NHTSA vPIC (api/_lib/vpic.js).
 //           Needs no key, so it works while photo scans are off.
@@ -21,10 +26,12 @@
 //
 // Privacy: the photo and the VIN are used for this one answer and never
 // stored. The log line is "[scan] mode=… outcome=… confidence=… ms=…" and
-// nothing more (no image, VIN, size or IP).
+// nothing more (no image, VIN, size or IP). An auto photo logs
+// mode=auto:door / auto:sidewall / auto:vin, or mode=auto when it was none.
 //
 // Responses (JSON, never cached):
 //   200 photo read    { ok, mode, status: "read", confidence, image_type, ... }
+//                     (auto: mode is the detected one, plus requested: "auto")
 //         door      front {size, load_index, speed_rating}, rear | null
 //                   (staggered only), spare | null, pressure_front_psi,
 //                   pressure_rear_psi (the pressures printed on the sticker)
@@ -35,7 +42,10 @@
 //                       image_type }  (reason: blurry, glare, too_dark,
 //                       cut_off, wrong_image, no_size_visible,
 //                       low_confidence, invalid_size, invalid_vin, refused,
-//                       no_result)
+//                       no_result). Auto: mode is the detected one, plus
+//                       requested: "auto"; a photo that is none of the three
+//                       is { ok, mode: "auto", requested: "auto",
+//                       status: "unreadable", reason: "wrong_image", ... }
 //   200 typed VIN     { ok, mode: "vin", source: "typed", vin, vehicle | null,
 //                       decode }
 //   400 { error: "bad_mode" | "missing_image" | "bad_image" | "bad_body" }
@@ -197,11 +207,14 @@ export function createScanTireSizeHandler({
       return send(res, 500, { error: "scanner_unavailable" }, NO_STORE);
     }
 
-    if (result.status === "read" && mode === "vin") {
+    // Keyed off the answer's mode, so an auto photo that turned out to be a
+    // VIN is decoded too.
+    if (result.status === "read" && result.mode === "vin") {
       Object.assign(result, await lookUp(result.vin, fetchImpl));
     }
     logScan(log, {
-      mode,
+      // auto:door / auto:sidewall / auto:vin, or plain auto when not detected.
+      mode: mode === "auto" && result.mode !== "auto" ? `auto:${result.mode}` : mode,
       outcome: result.status === "read" ? "read" : result.reason,
       confidence: result.confidence,
       ms: now() - started,

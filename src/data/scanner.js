@@ -35,6 +35,11 @@ export const MAX_UPLOAD_CHARS = Math.ceil((3 * 1024 * 1024 * 4) / 3);
 // A photo read takes a few seconds; a typed VIN is one vPIC call.
 const TIMEOUT_MS = { photo: 45000, vin: 15000 };
 
+/** A phone or tablet: its main pointer is a finger, so it has a camera to open. */
+export function isTouchDevice() {
+  return typeof window !== "undefined" && Boolean(window.matchMedia?.("(pointer: coarse)").matches);
+}
+
 /** True when /api/status says photo scans are on. */
 export async function scannerOn() {
   const status = await getStatus();

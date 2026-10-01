@@ -1,7 +1,9 @@
 /**
  * Tire Size Finder check (/tire-size-finder). Drives the built site in
  * Chromium at 390px and 1440px with every /api request mocked (no Claude call,
- * no vPIC call, no cost) and walks all four ways in:
+ * no vPIC call, no cost) and walks every way in. There is ONE camera: "Scan a
+ * photo" always sends mode "auto" and the (mocked) server answers with what
+ * it found (door, sidewall or vin):
  *
  *   - door sticker (staggered): the photo is shrunk on the device to a JPEG
  *     of at most 1600 px on its long edge before it is sent; the confirm step
@@ -17,8 +19,10 @@
  *   - "Couldn't read it clearly", and the scan errors;
  *   - photo scans off (/api/status scanner "off", or a 503 from the scan):
  *     "Photo scan coming soon", while typing a VIN or a size still works;
- *   - entry points: "Scan your tire size" on /tires and in the product page's
- *     Check fitment panel;
+ *   - entry points: the home hero's Scan button and "Scan your tire size" on
+ *     /tires (on a phone both open the camera on the tap and the finder reads
+ *     the photo handed to it; on a computer they open the finder's camera
+ *     step), and the product page's Check fitment panel;
  *   - no console errors, no sideways scroll at 390px, 44px targets.
  *
  *   npm run build && npm run check:scanner
@@ -205,9 +209,11 @@ async function check(name, fn) {
 
 /**
  * A fresh context with /api mocked. `scan(body)` answers POST
- * /api/scan-tire-size: `{ status?, json }`. Every request body is kept.
+ * /api/scan-tire-size: `{ status?, json }`; without it a typed VIN decodes and
+ * a photo ("auto") is read as `photo` (the staggered door sticker by default).
+ * Every request body is kept.
  */
-async function open(width, { status = STATUS, scan } = {}) {
+async function open(width, { status = STATUS, scan, photo = DOOR_STAGGERED } = {}) {
   const context = await browser.newContext({
     viewport: { width, height: width < 768 ? 844 : 900 },
     hasTouch: width < 768,
@@ -238,7 +244,9 @@ async function open(width, { status = STATUS, scan } = {}) {
       ? scan(body)
       : body.vin
         ? { json: { ok: true, mode: "vin", source: "typed", vin: body.vin, vehicle: BMW, decode: "ok" } }
-        : body.mode === "door"
+        : body.mode === "auto"
+          ? { json: photo }
+          : body.mode === "door"
           ? { json: DOOR_STAGGERED }
           : body.mode === "sidewall"
             ? { json: SIDEWALL }
@@ -294,15 +302,20 @@ const shoppingFor = (page) => page.locator('[data-testid="shopping-for-text"]').
 /* ------------------------------ checks ------------------------------ */
 
 async function runWidth(width) {
-  await check(`${width} tool home: heading, four ways in, no sideways scroll`, async () => {
+  await check(`${width} tool home: heading, one Scan button + VIN + type, no sideways scroll`, async () => {
     const { page, context, errors } = await open(width);
     await gotoFinder(page);
     assert.equal(await page.locator("h1").innerText(), "What size tires does my car have?");
-    for (const label of ["Scan door sticker", "Scan tire sidewall", "Enter or scan VIN", "Type my size"]) {
+    for (const label of ["Scan a photo", "Enter my VIN", "Type my size"]) {
       const b = finder(page).getByRole("button", { name: new RegExp(label) });
       assert.equal(await b.count(), 1, label);
       assert.equal(await b.isEnabled(), true, label);
     }
+    // One camera, not three.
+    for (const gone of ["Scan door sticker", "Scan tire sidewall"]) {
+      assert.equal(await finder(page).getByRole("button", { name: new RegExp(gone) }).count(), 0, gone);
+    }
+    assert.match(await finder(page).innerText(), /Door sticker, tire sidewall or VIN/);
     assert.match(await finder(page).innerText(), /Tire and Loading Information/);
     await noSideScroll(page);
     await targets(page);
@@ -314,9 +327,9 @@ async function runWidth(width) {
   await check(`${width} door sticker (staggered): shrunk to 1600px JPEG, confirm, Use these sizes -> /tires front + rear`, async () => {
     const { page, context, sent, errors } = await open(width);
     await gotoFinder(page);
-    await finder(page).getByRole("button", { name: /Scan door sticker/ }).click();
+    await finder(page).getByRole("button", { name: /Scan a photo/ }).click();
     await waitStep(page, "camera");
-    assert.match(await finder(page).locator("h2").innerText(), /door sticker/);
+    assert.match(await finder(page).locator("h2").innerText(), /door sticker, the tire size or your VIN/);
     assert.match(await finder(page).innerText(), /Photos are read once and never saved/);
     const input = page.locator('[data-testid="scan-camera"]');
     assert.equal(await input.getAttribute("accept"), "image/*");
@@ -326,7 +339,7 @@ async function runWidth(width) {
 
     // What was sent: one JPEG, long edge 1600.
     assert.equal(sent.length, 1);
-    assert.equal(sent[0].mode, "door");
+    assert.equal(sent[0].mode, "auto", "one camera: the server works out which photo it is");
     assert.match(sent[0].image, /^data:image\/jpeg;base64,/);
     const bytes = Buffer.from(sent[0].image.split(",")[1], "base64");
     const dims = jpegSize(bytes);
@@ -361,14 +374,14 @@ async function runWidth(width) {
   });
 
   await check(`${width} sidewall: one size, Use this size -> /tires`, async () => {
-    const { page, context, sent, errors } = await open(width);
+    const { page, context, sent, errors } = await open(width, { photo: SIDEWALL });
     await gotoFinder(page);
-    await finder(page).getByRole("button", { name: /Scan tire sidewall/ }).click();
+    await finder(page).getByRole("button", { name: /Scan a photo/ }).click();
     await waitStep(page, "camera");
-    assert.match(await finder(page).locator("h2").innerText(), /sidewall/);
+    assert.match(await finder(page).locator("h2").innerText(), /tire size/);
     await page.locator('[data-testid="scan-upload"]').setInputFiles(PHOTO);
     await waitStep(page, "result");
-    assert.equal(sent[0].mode, "sidewall");
+    assert.equal(sent[0].mode, "auto");
     const card = await finder(page).innerText();
     assert.match(card, /Here's what your tire says/);
     assert.match(card, /245\/75R16 111S/);
@@ -386,7 +399,7 @@ async function runWidth(width) {
   await check(`${width} VIN typed: typo caught on the page; decoded car, no invented size; sticker saved with the car`, async () => {
     const { page, context, sent, errors } = await open(width);
     await gotoFinder(page);
-    await finder(page).getByRole("button", { name: /Enter or scan VIN/ }).click();
+    await finder(page).getByRole("button", { name: /Enter my VIN/ }).click();
     await waitStep(page, "vin");
     const vinBox = page.getByLabel("VIN (17 characters)");
     await vinBox.fill("3MW5U9J04M8B12345");
@@ -429,16 +442,16 @@ async function runWidth(width) {
   });
 
   await check(`${width} VIN scanned: the photo's VIN is decoded and shown`, async () => {
-    const { page, context, sent, errors } = await open(width);
+    const { page, context, sent, errors } = await open(width, { photo: VIN_PHOTO });
     await gotoFinder(page);
-    await finder(page).getByRole("button", { name: /Enter or scan VIN/ }).click();
+    await finder(page).getByRole("button", { name: /Enter my VIN/ }).click();
     await waitStep(page, "vin");
     await finder(page).getByRole("button", { name: /Scan my VIN/ }).click();
     await waitStep(page, "camera");
     assert.match(await finder(page).locator("h2").innerText(), /VIN/);
     await page.locator('[data-testid="scan-camera"]').setInputFiles(PHOTO);
     await waitStep(page, "vin");
-    assert.equal(sent[0].mode, "vin");
+    assert.equal(sent[0].mode, "auto");
     assert.ok(sent[0].image);
     assert.equal(await page.getByLabel("VIN (17 characters)").inputValue(), VIN);
     assert.match(await page.locator('[data-testid="vin-vehicle"]').innerText(), /2021 BMW M340i xDrive/);
@@ -467,7 +480,7 @@ async function runWidth(width) {
   await check(`${width} couldn't read it clearly: no sizes, retake or type`, async () => {
     const { page, context, errors } = await open(width, { scan: () => ({ json: BLURRY }) });
     await gotoFinder(page);
-    await finder(page).getByRole("button", { name: /Scan door sticker/ }).click();
+    await finder(page).getByRole("button", { name: /Scan a photo/ }).click();
     await page.locator('[data-testid="scan-camera"]').setInputFiles(PHOTO);
     await waitStep(page, "unclear");
     const card = await finder(page).innerText();
@@ -488,7 +501,7 @@ async function runWidth(width) {
       await gotoFinder(page);
       const [chooser] = await Promise.all([
         page.waitForEvent("filechooser", { timeout: 5000 }),
-        finder(page).getByRole("button", { name: /Scan door sticker/ }).click(),
+        finder(page).getByRole("button", { name: /Scan a photo/ }).click(),
       ]);
       // The camera input, not the photo library one.
       assert.equal(await chooser.element().getAttribute("data-testid"), "scan-camera");
@@ -496,7 +509,7 @@ async function runWidth(width) {
       await chooser.setFiles(PHOTO);
       await waitStep(page, "result");
       assert.equal(sent.length, 1);
-      assert.equal(sent[0].mode, "door");
+      assert.equal(sent[0].mode, "auto");
       // Retake opens the camera straight away too.
       const [again] = await Promise.all([
         page.waitForEvent("filechooser", { timeout: 5000 }),
@@ -512,7 +525,7 @@ async function runWidth(width) {
       await gotoFinder(page);
       let opened = false;
       page.on("filechooser", () => (opened = true));
-      await finder(page).getByRole("button", { name: /Scan door sticker/ }).click();
+      await finder(page).getByRole("button", { name: /Scan a photo/ }).click();
       await waitStep(page, "camera");
       await page.waitForTimeout(300);
       assert.equal(opened, false, "no file picker without a tap on Take photo / Upload");
@@ -525,7 +538,7 @@ async function runWidth(width) {
     let answer = { status: 429, json: { error: "rate_limited" } };
     const { page, context, errors } = await open(width, { scan: () => answer });
     await gotoFinder(page);
-    await finder(page).getByRole("button", { name: /Scan door sticker/ }).click();
+    await finder(page).getByRole("button", { name: /Scan a photo/ }).click();
     await page.locator('[data-testid="scan-camera"]').setInputFiles(PHOTO);
     await finder(page).getByRole("alert").waitFor();
     assert.match(await finder(page).getByRole("alert").innerText(), /Wait about ten minutes/);
@@ -557,15 +570,13 @@ async function runWidth(width) {
   await check(`${width} photo scans off: "Photo scan coming soon", VIN and size typing still work`, async () => {
     const { page, context, sent, errors } = await open(width, { status: { ...STATUS, scanner: "off" } });
     await gotoFinder(page, { photo: "off" });
-    for (const label of ["Scan door sticker", "Scan tire sidewall"]) {
-      const b = finder(page).getByRole("button", { name: new RegExp(label) });
-      assert.equal(await b.isDisabled(), true, label);
-      assert.match(await b.innerText(), /Photo scan coming soon/);
-    }
+    const scanTile = finder(page).getByRole("button", { name: /Scan a photo/ });
+    assert.equal(await scanTile.isDisabled(), true);
+    assert.match(await scanTile.innerText(), /Photo scan coming soon/);
     await noSideScroll(page);
     await page.screenshot({ path: `${SHOTS}/${width}-coming-soon.png` });
 
-    await finder(page).getByRole("button", { name: /Enter or scan VIN/ }).click();
+    await finder(page).getByRole("button", { name: /Enter my VIN/ }).click();
     await waitStep(page, "vin");
     assert.equal(await finder(page).getByRole("button", { name: /Photo scan coming soon/ }).isDisabled(), true);
     await page.getByLabel("VIN (17 characters)").fill(VIN);
@@ -592,7 +603,7 @@ async function runWidth(width) {
       scan: () => ({ status: 503, json: { error: "scanner_not_configured" } }),
     });
     await gotoFinder(page);
-    await finder(page).getByRole("button", { name: /Scan door sticker/ }).click();
+    await finder(page).getByRole("button", { name: /Scan a photo/ }).click();
     await page.locator('[data-testid="scan-camera"]').setInputFiles(PHOTO);
     await page.waitForFunction(() => document.querySelector('[data-testid="finder"]')?.dataset.photo === "off");
     assert.match(await finder(page).innerText(), /Photo scan coming soon/);
@@ -604,11 +615,30 @@ async function runWidth(width) {
 
   await check(`${width} entry points: /tires and the product page's Check fitment panel`, async () => {
     const { page, context, errors } = await open(width);
-    await page.goto(`${BASE}/tires`);
-    const link = page.locator('[data-testid="scan-size-link"]');
-    assert.match(await link.innerText(), /Scan your tire size/);
-    await link.click();
-    await page.waitForURL(/\/tire-size-finder$/);
+    // The home hero's one-camera button, then the one on /tires.
+    for (const [path, id] of [["/", "hero-scan"], ["/tires", "scan-size-link"]]) {
+      await page.goto(`${BASE}${path}`);
+      const button = page.locator(`[data-testid="${id}"]`);
+      assert.match(await button.innerText(), /Scan/);
+      // Wait for /api/status, so the tap knows scans are on.
+      await page.waitForResponse("**/api/status").catch(() => {});
+      await page.waitForTimeout(200);
+      if (width < 768) {
+        // A phone: the camera opens on the tap; the finder reads the photo.
+        const [chooser] = await Promise.all([page.waitForEvent("filechooser"), button.click()]);
+        assert.equal(await chooser.element().getAttribute("capture"), "environment");
+        await chooser.setFiles(PHOTO);
+        await page.waitForURL(/\/tire-size-finder\?scan=1$/);
+        await waitStep(page, "result");
+        assert.match(await finder(page).innerText(), /225\/40R19/);
+      } else {
+        // A computer: the finder opens on its camera step (Upload a photo).
+        await button.click();
+        await page.waitForURL(/\/tire-size-finder\?scan=1$/);
+        await waitStep(page, "camera");
+        assert.equal(await finder(page).getByRole("button", { name: /Upload a photo/ }).count(), 1);
+      }
+    }
 
     const product = await page.evaluate(async () => {
       const res = await fetch("/sitemap.xml");

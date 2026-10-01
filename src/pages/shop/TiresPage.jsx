@@ -14,6 +14,7 @@ import TireFilters, {
   countTireFilters,
   tireFilterChips,
 } from "../../components/shop/TireFilters.jsx";
+import ScanTireButton from "../../components/shop/ScanTireButton.jsx";
 import SearchPanel from "../../components/shop/SearchPanel.jsx";
 import { ShoppingForBar } from "../../components/shop/Fitment.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
@@ -531,13 +532,11 @@ export default function TiresPage() {
               door sticker, the sidewall or the VIN, then comes back here
               with it confirmed (/tire-size-finder). */}
           <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-smoke">
-            <Link
-              to="/tire-size-finder"
-              data-testid="scan-size-link"
+            <ScanTireButton
+              testId="scan-size-link"
+              label="Scan your tire size"
               className="btn-outline btn-sm min-h-[44px] bg-bone"
-            >
-              <span aria-hidden>📷</span> Scan your tire size
-            </Link>
+            />
             <span>Door sticker, tire sidewall or VIN.</span>
           </p>
         </div>

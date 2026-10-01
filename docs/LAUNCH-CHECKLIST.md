@@ -113,6 +113,8 @@ _Last updated: 2026-10-01 (REVIEW: Tire Size Finder scanner on preview/scanner (
 - [ ] Tire Size Finder scanner (door sticker / sidewall / VIN) on preview/scanner 8826c25 → Justin adds ANTHROPIC_API_KEY in Vercel + monthly cap → test with real photos → ship (steps: docs/integrations/tire-size-finder.md)
   - [x] ~~Justin: Anthropic key `tiredrop-vercel-scanner` in Vercel (Sensitive, Production + Preview), $25 monthly spend limit, auto-reload on~~ (2026-10-01)
   - [x] ~~Guardrails: key read only server-side; per-IP limit 5 scans / 10 min; photo ≤3 MB (under Vercel's 4.5 MB body limit) and JPEG/PNG/WebP checked by bytes; 401/403/429/529 logged with a hint, never the key; "busy" and "isn't working" messages for shoppers~~ (preview/scanner)
+  - [x] ~~Phones: the camera opens on the first tap (Scan, Retake)~~ (preview/scanner eeca955)
+  - [x] ~~One camera for all three: a single "Scan a photo" (door sticker, sidewall or VIN), the server works out which (`mode: "auto"`, no nullable schema fields); Scan button in the home hero and on /tires, photo handed to the finder~~ (preview/scanner)
   - [ ] Justin tests real photos on the preview (door sticker, sidewall, VIN) → Claude checks the runtime logs → "ship scanner"
   - [ ] Rotate the key before it expires 2026-10-31 (calendar reminder Oct 24; steps in docs/integrations/tire-size-finder.md)
 - [ ] Local city pages: wave 1 (7 cities) live 2026-10-01; wave 2 next

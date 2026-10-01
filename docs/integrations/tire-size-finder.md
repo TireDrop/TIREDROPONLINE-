@@ -137,15 +137,36 @@ Confirm step ──► "Use these sizes" ──► confirmed size(s) in the vehi
 
 | Request | Answer |
 |---|---|
+| `{ mode: "auto", image }` (one camera; what the page uses) | the answer for whichever kind the photo is (door, sidewall or VIN row below, VIN photos vPIC-decoded too), with `mode` set to the detected `"door"` \| `"sidewall"` \| `"vin"` and `requested: "auto"`; a photo that is none of the three: `200 { ok, mode: "auto", requested: "auto", status: "unreadable", reason: "wrong_image", confidence, image_type }` |
 | `{ mode: "door", image }` | `200 { ok, mode, status: "read", confidence, image_type, front: {size, load_index, speed_rating}, rear \| null, spare \| null, pressure_front_psi, pressure_rear_psi }` |
 | `{ mode: "sidewall", image }` | `200 { ok, mode, status: "read", confidence, image_type, tire: {size, load_index, speed_rating, dot_week_year} }` |
 | `{ mode: "vin", image }` | `200 { ok, mode, status: "read", confidence, image_type, vin, vehicle: {year, make, model, series, trim, drive, body} \| null, decode: "ok" \| "not_found" \| "unavailable" }` |
 | `{ mode: "vin", vin }` (typed, no key needed) | `200 { ok, mode: "vin", source: "typed", vin, vehicle \| null, decode }`, or `400 { error: "invalid_vin", problem }` |
-| any photo not read | `200 { ok, mode, status: "unreadable", reason, confidence, image_type }`; reason: `blurry`, `glare`, `too_dark`, `cut_off`, `wrong_image`, `no_size_visible`, `low_confidence`, `invalid_size`, `invalid_vin`, `refused`, `no_result` |
+| any photo not read | `200 { ok, mode, status: "unreadable", reason, confidence, image_type }` (plus `requested: "auto"` for an auto photo, with `mode` the detected kind, or `"auto"` when none was detected or the call was refused / gave no result); reason: `blurry`, `glare`, `too_dark`, `cut_off`, `wrong_image`, `no_size_visible`, `low_confidence`, `invalid_size`, `invalid_vin`, `refused`, `no_result` |
 | errors | `400 bad_mode / missing_image / bad_image / bad_body`, `405`, `413 image_too_large`, `415 unsupported_image`, `429 rate_limited`, `502 scanner_unavailable` (Claude unreachable, or the key refused: 401/403), `503 scanner_busy` (Anthropic 429 rate/spend limit or 529 overloaded), `503 scanner_not_configured` |
 
 `image` is base64 or a `data:image/...;base64,` URL. `/api/status` reports
 `scanner: "on" | "off"`.
+
+### One camera (auto)
+
+`mode: "auto"` takes one photo of any of the three (door-jamb sticker, tire
+sidewall or VIN). Claude sets `image_type` to what it shows and fills only
+that kind's fields; the server then checks the reply exactly as the matching
+specific mode would (same sizes, confidence and reason rules), and decodes a
+VIN through vPIC. A door sticker that also shows a VIN counts as a door
+sticker (the sizes win). The auto schema has **no nullable fields** (an
+absent value is `""` or `0`, and `fromAutoReply` turns those back into null
+before checking), because nullable fields are union types and the API caps
+structured output at 16 of them; a test keeps it at zero. Entry points: the
+finder's one "Scan a photo" tile, the home hero's Scan button and "Scan your
+tire size" on /tires (`src/components/shop/ScanTireButton.jsx`: on a phone the
+camera opens on that tap and the photo is handed to the finder in memory,
+`src/data/scanHandoff.js`). The page uses `auto` for every photo; the specific
+`door` / `sidewall` / `vin` modes are kept for compatibility. Same model,
+effort, fallbacks, cost and rate limit (5 photos per 10 minutes, all modes
+together). Log lines read `mode=auto:door`, `auto:sidewall`, `auto:vin`, or
+`mode=auto` when the photo was none of them.
 
 ## (d) Real-phone test plan (after the key is in)
 

@@ -27,6 +27,7 @@ import ServiceAreaCounties from "../components/ui/ServiceAreaCounties.jsx";
 import { MOBILE_SERVICES, SHOP_SERVICES } from "../data/services.js";
 import { TIRES, TIRE_CATEGORIES } from "../data/products.js";
 import ProductCard from "../components/shop/ProductCard.jsx";
+import ScanTireButton from "../components/shop/ScanTireButton.jsx";
 import SearchPanel from "../components/shop/SearchPanel.jsx";
 import { searchTires } from "../data/api.js";
 import { Seo, Section, SectionHead } from "../components/ui/index.jsx";
@@ -133,9 +134,25 @@ function Hero() {
           <p className="eyebrow mb-1.5">Start here</p>
           <h2 className="h2 mb-1 text-3xl md:text-4xl">Find your fit</h2>
           <p className="mb-5 text-sm text-smoke">
-            Shop by vehicle, or by the size stamped on your sidewall.
+            Shop by vehicle, by the size stamped on your sidewall, or snap a
+            photo.
           </p>
           <SearchPanel onSearch={onSearch} />
+          {/* The third way in: one camera for the door sticker, a sidewall
+              or the VIN. On a phone it opens the camera on this tap and the
+              Tire Size Finder reads the photo (ScanTireButton). */}
+          <div aria-hidden className="mt-5 flex items-center gap-3 text-xs font-bold uppercase tracking-wider text-smoke">
+            <span className="h-px flex-1 bg-ink/15" />
+            or
+            <span className="h-px flex-1 bg-ink/15" />
+          </div>
+          <ScanTireButton
+            testId="hero-scan"
+            className="btn-outline mt-4 min-h-[48px] w-full justify-center"
+          />
+          <p className="mt-2 text-center text-xs text-smoke">
+            Door sticker, tire sidewall or VIN. We read the size for you.
+          </p>
         </div>
 
         <div className="order-3 lg:col-start-1 lg:row-start-2 lg:self-start">

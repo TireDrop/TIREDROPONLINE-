@@ -17,25 +17,32 @@ import {
 } from "../../data/fitmentCheck.js";
 import {
   PhotoError,
+  isTouchDevice,
   lookUpVin,
   scanPhoto,
   scannerOn,
   shrinkPhoto,
   vehicleFromDecode,
 } from "../../data/scanner.js";
+import { takeHandedOffPhoto } from "../../data/scanHandoff.js";
 import { normalizeVin, vinProblem, vinProblemText } from "../../data/vin.js";
 import { trackToolUse } from "../../lib/analytics.js";
 
 /**
  * /tire-size-finder: "What size tires does my car have?"
  *
- * Four ways in, the flow Justin approved in the clickable prototype:
- *   Scan door sticker  (primary; the factory size, front and rear)
- *   Scan tire sidewall (the size on that tire)
- *   Enter or scan VIN  (decodes the car through NHTSA; no tire size, so it
- *                       asks for the sticker, or offers the sizes on file
- *                       when the data has more than one for that car)
+ * Three ways in:
+ *   Scan a photo   (primary; ONE camera for all three: the door sticker, a
+ *                   tire sidewall or the VIN. The page always asks for mode
+ *                   "auto" and the server works out which it is; the answer's
+ *                   `mode` says what it found: door, sidewall or vin)
+ *   Enter my VIN   (decodes the car through NHTSA; no tire size, so it asks
+ *                   for the sticker, or offers the sizes on file when the
+ *                   data has more than one for that car)
  *   Type my size
+ * A photo can also arrive from a Scan button elsewhere (the home hero,
+ * /tires: src/components/shop/ScanTireButton.jsx), handed over in memory
+ * (src/data/scanHandoff.js); /tire-size-finder?scan=1 opens on the camera.
  * then Snap → Confirm ("Use these sizes" / "Edit", or "Couldn't read it
  * clearly") → Shop: the confirmed size(s) go into the same vehicle store as
  * the door-jamb entry under the Shopping-for bar (selectVehicle with size
@@ -57,6 +64,14 @@ const H2 =
   "font-display text-[1.35rem] font-extrabold leading-tight tracking-[-0.01em] text-ink focus:outline-none md:text-2xl";
 
 const MODE_COPY = {
+  // The one camera: any of the three below.
+  auto: {
+    title: "Point your camera at the door sticker, the tire size or your VIN",
+    frame: "Fit the label or size inside the box",
+    tip: 'Most accurate: the door sticker on the edge of the driver\'s door or the door frame ("Tire and Loading Information"). No sticker? Snap the size on the tire\'s sidewall, or the VIN at the bottom of the windshield.',
+    read: "Here's what your photo says",
+    thing: "photo",
+  },
   door: {
     title: "Point your camera at the door sticker",
     frame: "Fit the sticker inside the box",
@@ -89,6 +104,7 @@ const UNCLEAR = {
 };
 
 const WRONG = {
+  auto: "We couldn't find a door sticker, tire size or VIN in that photo",
   door: "That doesn't look like the door sticker",
   sidewall: "That doesn't look like a tire sidewall",
   vin: "That doesn't look like a VIN",
@@ -194,7 +210,8 @@ export default function TireSizeFinderPage() {
   const { resolved, selectVehicle, selectSize } = useVehicle();
 
   const [step, setStep] = useState("home");
-  const [mode, setMode] = useState("door");
+  // Where the camera step was opened from, for its Back button.
+  const [cameraFrom, setCameraFrom] = useState("home");
   // null until /api/status answers; false shows "Photo scan coming soon".
   const [photoOn, setPhotoOn] = useState(null);
   const [reading, setReading] = useState(false);
@@ -244,8 +261,8 @@ export default function TireSizeFinderPage() {
     setStep(next);
   };
 
-  const openCamera = (m) => {
-    setMode(m);
+  const openCamera = (from = "home") => {
+    setCameraFrom(from);
     setPreview("");
     go("camera");
     // On a phone or tablet the camera opens on this same tap: a browser only
@@ -255,10 +272,14 @@ export default function TireSizeFinderPage() {
     if (photoOn === true && isTouchDevice()) cameraRef.current?.click();
   };
 
-  const onPhoto = async (event) => {
+  const onPhoto = (event) => {
     const file = event.target.files?.[0];
     event.target.value = "";
-    if (!file || reading) return;
+    if (file && !reading) readFile(file);
+  };
+
+  // One photo, any of the three kinds: the server says which it was.
+  async function readFile(file) {
     setScanError("");
     setPreview(URL.createObjectURL(file));
     setReading(true);
@@ -270,7 +291,7 @@ export default function TireSizeFinderPage() {
       setScanError(err instanceof PhotoError ? SCAN_ERRORS.photo : SCAN_ERRORS.unreachable);
       return;
     }
-    const answer = await scanPhoto(mode, image);
+    const answer = await scanPhoto("auto", image);
     setReading(false);
     if (!answer.ok) {
       if (answer.error === "scanner_not_configured") {
@@ -286,7 +307,7 @@ export default function TireSizeFinderPage() {
       go("unclear");
       return;
     }
-    if (mode === "vin") {
+    if (data.mode === "vin") {
       setVin(data.vin ?? "");
       showVehicle(data);
       go("vin");
@@ -294,7 +315,24 @@ export default function TireSizeFinderPage() {
     }
     setResult(data);
     go("result");
-  };
+  }
+
+  // A photo taken from a Scan button elsewhere is read straight away;
+  // ?scan=1 alone opens on the camera step. Once, on arrival.
+  useEffect(() => {
+    const handed = takeHandedOffPhoto();
+    const wantsScan = new URLSearchParams(window.location.search).get("scan") === "1";
+    if (!handed && !wantsScan) return;
+    moved.current = true;
+    // After hydration, not in useState's initializer: the prerendered page
+    // is the home step, and the hand-off and the URL only exist in the
+    // browser.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setStep("camera");
+    if (handed) readFile(handed);
+    // A one-time arrival; readFile reads current state when it runs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function showVehicle(data) {
     const found = vehicleFromDecode(data.vehicle);
@@ -408,7 +446,7 @@ export default function TireSizeFinderPage() {
     : "";
 
   const comingSoon = photoOn === false;
-  const copy = MODE_COPY[mode];
+  const copy = MODE_COPY.auto;
 
   /* ---------------------------- steps ---------------------------- */
 
@@ -422,22 +460,19 @@ export default function TireSizeFinderPage() {
         <div className="grid grid-cols-2 gap-2.5">
           <OptionButton
             primary
-            icon="📷"
-            title="Scan door sticker"
-            note={comingSoon ? "Photo scan coming soon" : "Most accurate · one photo"}
+            icon="📸"
+            title="Scan a photo"
+            note={
+              comingSoon
+                ? "Photo scan coming soon"
+                : "Door sticker, tire sidewall or VIN · one camera, we figure out which"
+            }
             disabled={comingSoon}
-            onClick={() => openCamera("door")}
-          />
-          <OptionButton
-            icon="🛞"
-            title="Scan tire sidewall"
-            note={comingSoon ? "Photo scan coming soon" : "No sticker? Snap the tire"}
-            disabled={comingSoon}
-            onClick={() => openCamera("sidewall")}
+            onClick={() => openCamera()}
           />
           <OptionButton
             icon="🔢"
-            title="Enter or scan VIN"
+            title="Enter my VIN"
             note="We look up your car"
             onClick={() => go("vin")}
           />
@@ -457,7 +492,7 @@ export default function TireSizeFinderPage() {
   } else if (step === "camera") {
     body = (
       <>
-        <BackButton onClick={() => go(mode === "vin" ? "vin" : "home")} />
+        <BackButton onClick={() => go(cameraFrom === "vin" ? "vin" : "home")} />
         <Steps at={0} />
         <h2 ref={headingRef} tabIndex={-1} className={H2}>
           {copy.title}
@@ -498,18 +533,15 @@ export default function TireSizeFinderPage() {
             <p className="font-semibold">Photo scan coming soon.</p>
             <p className="mt-1">
               For now, type the size printed on your{" "}
-              {mode === "vin" ? "door sticker or tire" : copy.thing}.
-              {mode === "vin" ? " You can still type your VIN." : ""}
+              door sticker or tire. You can still type your VIN.
             </p>
             <div className="mt-3 flex flex-wrap gap-3">
               <button type="button" className="btn-primary btn-sm min-h-[44px]" onClick={() => startEdit(null)}>
                 ✏️ Type my size
               </button>
-              {mode === "vin" && (
-                <button type="button" className="btn-outline btn-sm min-h-[44px]" onClick={() => go("vin")}>
-                  Type my VIN
-                </button>
-              )}
+              <button type="button" className="btn-outline btn-sm min-h-[44px]" onClick={() => go("vin")}>
+                Type my VIN
+              </button>
             </div>
           </div>
         ) : (
@@ -554,7 +586,7 @@ export default function TireSizeFinderPage() {
     const pr = result.pressure_rear_psi;
     body = (
       <>
-        <BackButton onClick={() => openCamera(result.mode)}>← Retake</BackButton>
+        <BackButton onClick={() => openCamera()}>← Retake</BackButton>
         <Steps at={1} />
         {result.confidence === "high" ? (
           <Pill tone="good">✓ Read clearly</Pill>
@@ -654,7 +686,7 @@ export default function TireSizeFinderPage() {
         : (UNCLEAR[result.reason] ?? "We couldn't read it clearly");
     body = (
       <>
-        <BackButton onClick={() => openCamera(result.mode)}>← Retake</BackButton>
+        <BackButton onClick={() => openCamera()}>← Retake</BackButton>
         <Pill tone="warn">⚠ Couldn&rsquo;t read it clearly</Pill>
         <h2 ref={headingRef} tabIndex={-1} className={H2}>
           {headline}
@@ -665,7 +697,7 @@ export default function TireSizeFinderPage() {
             : `We won't guess your tire size. Try again with the ${MODE_COPY[result.mode].thing === "tire" ? "size" : "sticker"} filling the box and no glare, or type the size printed on it.`}
         </p>
         <div className="flex flex-wrap gap-3">
-          <button type="button" className="btn-primary min-h-[46px]" onClick={() => openCamera(result.mode)}>
+          <button type="button" className="btn-primary min-h-[46px]" onClick={() => openCamera()}>
             📸 Retake photo
           </button>
           <button
@@ -755,7 +787,7 @@ export default function TireSizeFinderPage() {
                   e.preventDefault();
                   const pick = carChoices.find((o) => describeOption(o) === wheel);
                   if (pick) saveSizes(pick.front, pick.rear ?? "");
-                  else openCamera("door");
+                  else openCamera("vin");
                 }}
               >
                 <fieldset className="grid gap-2">
@@ -811,7 +843,7 @@ export default function TireSizeFinderPage() {
                     type="button"
                     className={`${comingSoon ? "btn-outline" : "btn-primary"} min-h-[46px]`}
                     disabled={comingSoon}
-                    onClick={() => openCamera("door")}
+                    onClick={() => openCamera("vin")}
                   >
                     {comingSoon ? "📷 Photo scan coming soon" : "📷 Scan your door sticker"}
                   </button>
@@ -974,11 +1006,6 @@ export default function TireSizeFinderPage() {
       </Section>
     </>
   );
-}
-
-/** A phone or tablet: its main pointer is a finger, so it has a camera to open. */
-function isTouchDevice() {
-  return typeof window !== "undefined" && Boolean(window.matchMedia?.("(pointer: coarse)").matches);
 }
 
 function OptionButton({ primary = false, icon, title, note, disabled = false, onClick }) {

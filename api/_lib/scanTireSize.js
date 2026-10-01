@@ -1,6 +1,10 @@
 // The Tire Size Finder's photo reader: one door-jamb sticker, tire sidewall
 // or VIN photo in, the sizes (or VIN) printed on it out, checked.
 //
+// Modes: "door", "sidewall" and "vin" say what the photo should be; "auto"
+// (one camera, what the page uses) lets Claude say which of the three it is,
+// and the reply is then checked exactly as that mode's would be.
+//
 // Claude reads the photo (vision + structured output). Everything it returns
 // is then checked here before it reaches a shopper:
 //   - every tire size must parse with the site's own size reader
@@ -45,7 +49,9 @@ export const SCAN_MAX_TOKENS = 4096;
 /** How long one Claude call may take before it is abandoned. */
 export const SCAN_TIMEOUT_MS = 30_000;
 
-export const MODES = Object.freeze(["door", "sidewall", "vin"]);
+export const MODES = Object.freeze(["door", "sidewall", "vin", "auto"]);
+/** The modes that name one kind of photo (everything but "auto"). */
+const SPECIFIC_MODES = Object.freeze(["door", "sidewall", "vin"]);
 
 /** Image types Claude accepts and the page sends (the page converts HEIC). */
 export const MEDIA_TYPES = Object.freeze(["image/jpeg", "image/png", "image/webp"]);
@@ -134,6 +140,34 @@ const tireFields = {
 
 const Tire = z.object(tireFields);
 
+const SidewallTire = z.object({
+  ...tireFields,
+  dot_week_year: z
+    .string()
+    .nullable()
+    .describe(
+      "The last four digits of the DOT code (week then year, e.g. 2319) only if they are visible, else null.",
+    ),
+});
+
+// The auto schema's tire rows: the same fields as Tire and SidewallTire, as
+// plain strings, "" when absent (see SCHEMAS.auto).
+const autoText = (what) =>
+  z.string().describe(`${what} Empty string if it is not printed, not readable, or not this kind of photo.`);
+const AutoTire = z.object({
+  size: autoText(
+    "The tire size exactly as printed, without the load index and speed rating, e.g. 225/40R19, P215/55R17, LT265/70R17, T125/70D17 or 33x12.50R20.",
+  ),
+  load_index: autoText("The load index printed right after the size (e.g. 93, or 121/118)."),
+  speed_rating: autoText("The speed rating letter printed with the load index (e.g. V, W, Y, or (Y))."),
+});
+const AutoSidewallTire = z.object({
+  size: AutoTire.shape.size,
+  load_index: AutoTire.shape.load_index,
+  speed_rating: AutoTire.shape.speed_rating,
+  dot_week_year: autoText("The last four digits of the DOT code (week then year, e.g. 2319), only if visible."),
+});
+
 export const SCHEMAS = Object.freeze({
   door: z.object({
     ...common,
@@ -155,18 +189,7 @@ export const SCHEMAS = Object.freeze({
   }),
   sidewall: z.object({
     ...common,
-    tire: z
-      .object({
-        ...tireFields,
-        dot_week_year: z
-          .string()
-          .nullable()
-          .describe(
-            "The last four digits of the DOT code (week then year, e.g. 2319) only if they are visible, else null.",
-          ),
-      })
-      .nullable()
-      .describe("The tire on the photo, or null."),
+    tire: SidewallTire.nullable().describe("The tire on the photo, or null."),
   }),
   vin: z.object({
     ...common,
@@ -175,6 +198,46 @@ export const SCHEMAS = Object.freeze({
       .nullable()
       .describe(
         "The 17-character VIN exactly as printed, or null if it is not fully readable.",
+      ),
+  }),
+  // One camera: every kind's fields, filled only for the kind of photo it
+  // is. Deliberately NO nullable field (nullable is a union type, and the
+  // API caps structured output at 16 of them): an absent value is "" or 0
+  // here, and fromAutoReply turns those back into null before checking.
+  auto: z.object({
+    image_type: common.image_type,
+    confidence: common.confidence,
+    unreadable_reason: z
+      .enum([...UNREADABLE, "none"])
+      .describe(
+        "Why the values could not be read, or none when they were read.",
+      ),
+    front: AutoTire.describe(
+      "Door sticker only: the FRONT tire row. Empty strings for any other kind of photo.",
+    ),
+    rear: AutoTire.describe(
+      "Door sticker only: the REAR tire row when the sticker lists a rear size; empty strings when it does not, and for any other kind of photo.",
+    ),
+    spare: AutoTire.describe(
+      "Door sticker only: the SPARE tire row when it lists a size; empty strings for NONE, a missing row, and any other kind of photo.",
+    ),
+    pressure_front_psi: z
+      .number()
+      .describe(
+        "Door sticker only: front cold tire pressure in PSI as printed; 0 when not printed or not readable, and for any other kind of photo.",
+      ),
+    pressure_rear_psi: z
+      .number()
+      .describe(
+        "Door sticker only: rear cold tire pressure in PSI as printed; 0 when not printed or not readable, and for any other kind of photo.",
+      ),
+    tire: AutoSidewallTire.describe(
+      "Tire sidewall only: the tire on the photo. Empty strings for any other kind of photo.",
+    ),
+    vin: z
+      .string()
+      .describe(
+        "VIN photo only: the 17-character VIN exactly as printed; an empty string if it is not fully readable, and for any other kind of photo, including a door sticker that also shows a VIN.",
       ),
   }),
 });
@@ -192,6 +255,11 @@ export const MODE_PROMPTS = Object.freeze({
   sidewall:
     "This should be the sidewall of a tire. Read the tire size molded on it, the load index and speed rating next to it, and the DOT date code's last four digits if they are visible.",
   vin: "This should show a vehicle's 17-character VIN (dashboard plate, door-jamb label or barcode sticker). Read the VIN characters exactly.",
+  auto: `This photo should be ONE of three things: the tire and loading information sticker from a car's door jamb, the sidewall of a tire, or a vehicle's 17-character VIN (dashboard plate, door-jamb label or barcode sticker). Set image_type to what it shows, then fill only the fields for that kind; every other text field is an empty string and every other number is 0. Set unreadable_reason to none when you read the values.
+- door_sticker: read the FRONT, REAR and SPARE tire sizes into front, rear and spare, and the cold tire pressures in PSI. If there is only one size for all four tires, put it in front and leave rear empty. A door sticker that also shows a VIN is still a door_sticker: read the sizes and leave vin empty.
+- tire_sidewall: in tire, read the tire size molded on it, the load index and speed rating next to it, and the DOT date code's last four digits if they are visible.
+- vin: read the VIN characters exactly into vin.
+If the photo is none of these, set image_type to other, leave every value empty (0 for numbers) and set unreadable_reason to wrong_image. If a character is unclear, leave that value empty rather than null.`,
 });
 
 const EXPECTED_IMAGE = { door: "door_sticker", sidewall: "tire_sidewall", vin: "vin" };
@@ -304,22 +372,69 @@ function checkDot(v) {
 const unreadable = (mode, reason, extra = {}) => ({
   ok: true,
   mode,
+  ...(mode === "auto" ? { requested: "auto" } : {}),
   status: "unreadable",
   reason,
   confidence: extra.confidence ?? null,
   image_type: extra.image_type ?? null,
 });
 
+const metaOf = (parsed) => ({
+  confidence: CONFIDENCE.includes(parsed.confidence) ? parsed.confidence : null,
+  image_type: IMAGE_TYPES.includes(parsed.image_type) ? parsed.image_type : null,
+});
+
 /**
  * The checked answer for one parsed reply (the model's structured output),
  * before any VIN decode: `{ ok, mode, status: "read" | "unreadable", ... }`.
+ *
+ * "auto": the photo's image_type picks the mode (door_sticker → door,
+ * tire_sidewall → sidewall, vin → vin) and the reply is checked as that mode;
+ * the answer's `mode` is the detected one and it carries `requested: "auto"`.
+ * A photo that is none of the three (other, or no image_type) is unreadable
+ * with mode "auto" and reason wrong_image.
  */
 export function checkReading(mode, parsed) {
+  if (mode !== "auto") return checkMode(mode, parsed);
   if (!parsed || typeof parsed !== "object") return unreadable(mode, "no_result");
-  const meta = {
-    confidence: CONFIDENCE.includes(parsed.confidence) ? parsed.confidence : null,
-    image_type: IMAGE_TYPES.includes(parsed.image_type) ? parsed.image_type : null,
+  parsed = fromAutoReply(parsed);
+  const detected = SPECIFIC_MODES.find((m) => EXPECTED_IMAGE[m] === parsed.image_type);
+  if (!detected) return unreadable(mode, "wrong_image", metaOf(parsed));
+  const result = checkMode(detected, parsed);
+  return { ok: result.ok, mode: result.mode, requested: "auto", ...result };
+}
+
+/**
+ * An auto reply in the specific modes' shape: "" and 0 (the auto schema's
+ * "absent") become null, a tire row with no size becomes null, and
+ * unreadable_reason "none" becomes null. Already-null values pass through.
+ */
+export function fromAutoReply(parsed) {
+  const text = (v) => (str(v) ? str(v) : null);
+  const row = (r, extra = []) => {
+    if (!r || typeof r !== "object" || !str(r.size)) return null;
+    const out = { size: text(r.size), load_index: text(r.load_index), speed_rating: text(r.speed_rating) };
+    for (const k of extra) out[k] = text(r[k]);
+    return out;
   };
+  const psi = (v) => (typeof v === "number" && v > 0 ? v : null);
+  return {
+    ...parsed,
+    unreadable_reason: parsed.unreadable_reason === "none" ? null : (parsed.unreadable_reason ?? null),
+    front: row(parsed.front),
+    rear: row(parsed.rear),
+    spare: row(parsed.spare),
+    pressure_front_psi: psi(parsed.pressure_front_psi),
+    pressure_rear_psi: psi(parsed.pressure_rear_psi),
+    tire: row(parsed.tire, ["dot_week_year"]),
+    vin: text(parsed.vin),
+  };
+}
+
+/** checkReading for one specific mode ("door", "sidewall" or "vin"). */
+function checkMode(mode, parsed) {
+  if (!parsed || typeof parsed !== "object") return unreadable(mode, "no_result");
+  const meta = metaOf(parsed);
 
   if (meta.image_type && meta.image_type !== EXPECTED_IMAGE[mode]) {
     return unreadable(mode, "wrong_image", meta);

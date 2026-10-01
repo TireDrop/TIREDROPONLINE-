@@ -13,6 +13,7 @@ import {
   InternalServerError,
   RateLimitError,
 } from "@anthropic-ai/sdk";
+import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 
 import {
   createScanTireSizeHandler,
@@ -21,6 +22,9 @@ import {
 import {
   FALLBACK_BETA,
   MAX_IMAGE_BYTES,
+  MODES,
+  MODE_PROMPTS,
+  SCHEMAS,
   upstreamHint,
   SCAN_EFFORT,
   SCAN_MODEL,
@@ -338,6 +342,210 @@ test("VIN photo: a misread VIN (check digit) is unreadable, never decoded", asyn
   assert.equal(fetched, 0);
 });
 
+// ---- one camera (auto) ------------------------------------------------------
+
+/** An auto reply: every field null except what `over` fills in. */
+const auto = (over = {}) => ({
+  image_type: "other",
+  confidence: "high",
+  unreadable_reason: null,
+  front: null,
+  rear: null,
+  spare: null,
+  pressure_front_psi: null,
+  pressure_rear_psi: null,
+  tire: null,
+  vin: null,
+  ...over,
+});
+
+test("auto: sends the auto schema and prompt, same model, effort, betas and fallbacks", async () => {
+  assert.deepEqual(MODES, ["door", "sidewall", "vin", "auto"]);
+  const { call, claude } = setup({ reply: parsed(auto({ ...door() })) });
+  const res = await call({ mode: "auto", image: JPEG_B64 });
+  assert.equal(res.statusCode, 200);
+
+  const { params } = claude.calls[1];
+  assert.equal(params.model, SCAN_MODEL);
+  assert.equal(params.output_config.effort, SCAN_EFFORT);
+  assert.deepEqual(params.betas, [FALLBACK_BETA]);
+  assert.equal(params.fallbacks, "default");
+  assert.equal(params.thinking, undefined);
+  assert.equal(params.system, SYSTEM_PROMPT);
+  assert.deepEqual(params.output_config.format.schema, betaZodOutputFormat(SCHEMAS.auto).schema);
+  assert.notDeepEqual(params.output_config.format.schema, betaZodOutputFormat(SCHEMAS.door).schema);
+  const [img, text] = params.messages[0].content;
+  assert.equal(img.source.data, JPEG_B64);
+  assert.equal(text.text, MODE_PROMPTS.auto);
+  assert.match(MODE_PROMPTS.auto, /ONE of three/);
+  assert.match(MODE_PROMPTS.auto, /still a door_sticker/);
+  assert.match(MODE_PROMPTS.auto, /wrong_image/);
+
+  // The schema asks for every kind's fields, each nullable.
+  const props = params.output_config.format.schema.properties;
+  for (const k of ["image_type", "confidence", "unreadable_reason", "front", "rear", "spare", "pressure_front_psi", "pressure_rear_psi", "tire", "vin"]) {
+    assert.ok(props[k], k);
+  }
+});
+
+test("auto + door sticker: answered as door, with requested: auto", async () => {
+  const { call, lines } = setup({ reply: parsed(auto({ ...door(), vin: null })) });
+  const res = await call({ mode: "auto", image: `data:image/jpeg;base64,${JPEG_B64}` });
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body, {
+    ok: true,
+    mode: "door",
+    requested: "auto",
+    status: "read",
+    confidence: "high",
+    image_type: "door_sticker",
+    front: { size: "225/40R19", load_index: "93", speed_rating: "Y" },
+    rear: { size: "255/35R19", load_index: "96", speed_rating: "Y" },
+    spare: null,
+    pressure_front_psi: 35,
+    pressure_rear_psi: 38,
+  });
+  assert.equal(lines.length, 1);
+  assert.match(lines[0], /^\[scan\] mode=auto:door outcome=read confidence=high ms=\d+$/);
+});
+
+test("auto + tire sidewall: answered as sidewall", async () => {
+  const { call, lines } = setup({
+    reply: parsed(
+      auto({
+        image_type: "tire_sidewall",
+        confidence: "medium",
+        tire: { size: "LT265/70R17", load_index: "121/118", speed_rating: "s", dot_week_year: "2319" },
+      }),
+    ),
+  });
+  const res = await call({ mode: "auto", image: PNG_B64 });
+  assert.deepEqual(res.body, {
+    ok: true,
+    mode: "sidewall",
+    requested: "auto",
+    status: "read",
+    confidence: "medium",
+    image_type: "tire_sidewall",
+    tire: { size: "LT265/70R17", load_index: "121/118", speed_rating: "S", dot_week_year: "2319" },
+  });
+  assert.match(lines[0], /^\[scan\] mode=auto:sidewall outcome=read confidence=medium ms=\d+$/);
+});
+
+test("auto + VIN: answered as vin and decoded by vPIC; the VIN is never logged", async () => {
+  const urls = [];
+  const { call, lines } = setup({
+    reply: parsed(auto({ image_type: "vin", vin: "3mw5u9j03m8b12345" })),
+    fetchImpl: async (url) => {
+      urls.push(url);
+      return vpicFetch(url);
+    },
+  });
+  const res = await call({ mode: "auto", image: WEBP_B64 });
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body, {
+    ok: true,
+    mode: "vin",
+    requested: "auto",
+    status: "read",
+    confidence: "high",
+    image_type: "vin",
+    vin: BMW_VIN,
+    vehicle: {
+      year: "2021",
+      make: "BMW",
+      model: "M340i",
+      series: "xDrive",
+      trim: "",
+      drive: "AWD",
+      body: "Sedan",
+    },
+    decode: "ok",
+  });
+  assert.equal(urls.length, 1);
+  assert.match(lines[0], /^\[scan\] mode=auto:vin outcome=read confidence=high ms=\d+$/);
+  assert.ok(!lines.join("\n").toLowerCase().includes(BMW_VIN.toLowerCase()));
+});
+
+test("auto + a photo of something else: unreadable, wrong_image, mode auto", async () => {
+  const { call, lines } = setup({
+    reply: parsed(auto({ image_type: "other", unreadable_reason: "wrong_image" })),
+  });
+  const res = await call({ mode: "auto", image: JPEG_B64 });
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body, {
+    ok: true,
+    mode: "auto",
+    requested: "auto",
+    status: "unreadable",
+    reason: "wrong_image",
+    confidence: "high",
+    image_type: "other",
+  });
+  assert.match(lines[0], /^\[scan\] mode=auto outcome=wrong_image confidence=high ms=\d+$/);
+
+  // No image_type, or one that is not on the list, is the same answer.
+  for (const image_type of [undefined, null, "license_plate", "constructor"]) {
+    const r = checkReading("auto", auto({ image_type, front: door().front }));
+    assert.equal(r.mode, "auto", String(image_type));
+    assert.equal(r.requested, "auto");
+    assert.equal(r.status, "unreadable");
+    assert.equal(r.reason, "wrong_image");
+    assert.equal(r.front, undefined);
+  }
+});
+
+test("auto: low confidence, the model's own reason and a bad size follow the specific modes' rules", async () => {
+  const { call, lines } = setup({ reply: parsed(auto({ ...door(), confidence: "low" })) });
+  const res = await call({ mode: "auto", image: JPEG_B64 });
+  assert.deepEqual(res.body, {
+    ok: true,
+    mode: "door",
+    requested: "auto",
+    status: "unreadable",
+    reason: "low_confidence",
+    confidence: "low",
+    image_type: "door_sticker",
+  });
+  assert.match(lines[0], /mode=auto:door outcome=low_confidence confidence=low/);
+
+  let r = checkReading("auto", auto({ image_type: "tire_sidewall", confidence: "medium", unreadable_reason: "glare" }));
+  assert.equal(r.mode, "sidewall");
+  assert.equal(r.reason, "glare");
+  r = checkReading("auto", auto({ ...door(), front: { size: "225/4OR19", load_index: null, speed_rating: null } }));
+  assert.equal(r.reason, "invalid_size");
+  r = checkReading("auto", auto({ image_type: "vin", vin: "3MW5U9J04M8B12345" }));
+  assert.equal(r.mode, "vin");
+  assert.equal(r.reason, "invalid_vin");
+});
+
+test("auto: refusal and no result are unreadable with mode auto", async () => {
+  let res = await setup({ reply: parsed(null, "refusal") }).call({ mode: "auto", image: JPEG_B64 });
+  assert.equal(res.body.mode, "auto");
+  assert.equal(res.body.requested, "auto");
+  assert.equal(res.body.reason, "refused");
+  res = await setup({ reply: parsed(null) }).call({ mode: "auto", image: JPEG_B64 });
+  assert.equal(res.body.mode, "auto");
+  assert.equal(res.body.reason, "no_result");
+});
+
+test("auto counts toward the photo rate limit; a VIN typed with mode auto is not a typed lookup", async () => {
+  const { call, claude } = setup({ reply: parsed(auto({ ...door() })) });
+  for (let i = 0; i < 3; i += 1) {
+    assert.equal((await call({ mode: "auto", image: JPEG_B64 })).statusCode, 200);
+  }
+  for (let i = 0; i < 2; i += 1) {
+    assert.equal((await call({ mode: "door", image: JPEG_B64 })).statusCode, 200);
+  }
+  const res = await call({ mode: "auto", image: JPEG_B64 });
+  assert.equal(res.statusCode, 429);
+  assert.equal(claude.calls.filter((c) => c.params).length, 5);
+
+  const other = await call({ mode: "auto", vin: BMW_VIN }, { ip: "198.51.100.20" });
+  assert.equal(other.statusCode, 400);
+  assert.deepEqual(other.body, { error: "missing_image" });
+});
+
 // ---- couldn't read it -------------------------------------------------------
 
 test("low confidence is 'couldn't read it', with no values", async () => {
@@ -508,7 +716,7 @@ test("media types: JPEG, PNG and WebP only, read from the bytes", async () => {
 
 test("bad mode, bad body and the wrong method are refused before anything runs", async () => {
   const { call, claude } = setup({ reply: parsed(door()) });
-  for (const mode of ["", "plate", "DOOR", undefined, 3]) {
+  for (const mode of ["", "plate", "DOOR", "AUTO", "Auto", undefined, 3]) {
     const res = await call({ mode, image: JPEG_B64 });
     assert.equal(res.statusCode, 400);
     assert.deepEqual(res.body, { error: "bad_mode" });
@@ -596,3 +804,53 @@ test("vPIC decode (vpic-mock fixtures): the URL, tidy names, and the timeout", a
     (err) => err instanceof VpicError && /timed out/.test(err.message),
   );
 });
+
+test("auto schema has no nullable (union) fields, so it stays inside the API's limit", () => {
+  const json = JSON.stringify(betaZodOutputFormat(SCHEMAS.auto));
+  assert.ok(!json.includes("anyOf"), "no anyOf");
+  assert.ok(!/"type":\s*\[/.test(json), "no type arrays");
+  assert.ok(!json.includes('"null"'), "no null type");
+});
+
+test("auto reply in the empty-string shape reads like the nullable one", () => {
+  const empty = { size: "", load_index: "", speed_rating: "" };
+  const reply = {
+    image_type: "door_sticker",
+    confidence: "high",
+    unreadable_reason: "none",
+    front: { size: "225/40R19", load_index: "93", speed_rating: "Y" },
+    rear: { size: "255/35R19", load_index: "96", speed_rating: "Y" },
+    spare: empty,
+    pressure_front_psi: 35,
+    pressure_rear_psi: 0,
+    tire: { ...empty, dot_week_year: "" },
+    vin: "",
+  };
+  const r = checkReading("auto", reply);
+  assert.equal(r.status, "read");
+  assert.equal(r.mode, "door");
+  assert.equal(r.requested, "auto");
+  assert.equal(r.front.size, "225/40R19");
+  assert.equal(r.rear.size, "255/35R19");
+  assert.equal(r.spare, null);
+  assert.equal(r.pressure_front_psi, 35);
+  assert.equal(r.pressure_rear_psi, null);
+
+  const side = checkReading("auto", {
+    ...reply,
+    image_type: "tire_sidewall",
+    front: empty,
+    rear: empty,
+    pressure_front_psi: 0,
+    tire: { size: "245/75R16", load_index: "", speed_rating: "", dot_week_year: "2319" },
+  });
+  assert.equal(side.mode, "sidewall");
+  assert.equal(side.tire.size, "245/75R16");
+  assert.equal(side.tire.load_index, null);
+  assert.equal(side.tire.dot_week_year, "2319");
+
+  const blurry = checkReading("auto", { ...reply, unreadable_reason: "blurry" });
+  assert.equal(blurry.status, "unreadable");
+  assert.equal(blurry.reason, "blurry");
+});
+
