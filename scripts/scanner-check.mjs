@@ -243,7 +243,9 @@ async function open(width, { status = STATUS, scan } = {}) {
           : body.mode === "sidewall"
             ? { json: SIDEWALL }
             : { json: VIN_PHOTO };
-    await r.fulfill({ status: answer.status ?? 200, json: answer.json });
+    await (answer.json === undefined
+      ? r.fulfill({ status: answer.status ?? 200, body: answer.body ?? "", contentType: answer.contentType })
+      : r.fulfill({ status: answer.status ?? 200, json: answer.json }));
   });
   return { context, page, sent, errors };
 }
@@ -350,7 +352,7 @@ async function runWidth(width) {
     await page.locator('[data-testid="shopping-for-text"]').waitFor();
     assert.match(await shoppingFor(page), /front 225\/40R19, rear 255\/35R19/);
     assert.match(await page.locator('[data-testid="staggered-note"]').innerText(), /2 front \+ 2 rear/);
-    assert.deepEqual(await selection(page), { type: "size", size: "225/40R19", rear: "255/35R19" });
+    assert.deepEqual(await selection(page), { v: 1, type: "size", size: "225/40R19", rear: "255/35R19" });
     // The tires in those sizes are grouped first.
     assert.match(await page.locator("main").innerText(), /In your size/);
     await page.screenshot({ path: `${SHOTS}/${width}-tires-after.png` });
@@ -376,7 +378,7 @@ async function runWidth(width) {
     await page.waitForURL(/\/tires$/);
     await page.locator('[data-testid="shopping-for-text"]').waitFor();
     assert.match(await shoppingFor(page), /245\/75R16/);
-    assert.deepEqual(await selection(page), { type: "size", size: "245/75R16" });
+    assert.deepEqual(await selection(page), { v: 1, type: "size", size: "245/75R16" });
     assert.deepEqual(errors, [], "console errors");
     await context.close();
   });
@@ -414,6 +416,7 @@ async function runWidth(width) {
     assert.match(bar, /2021 BMW M340i/);
     assert.match(bar, /front 225\/40R19, rear 255\/35R19/);
     assert.deepEqual(await selection(page), {
+      v: 1,
       type: "vehicle",
       year: "2021",
       make: "BMW",
@@ -456,7 +459,7 @@ async function runWidth(width) {
     await finder(page).getByRole("button", { name: "Show tires that fit" }).click();
     await page.waitForURL(/\/tires$/);
     await page.locator('[data-testid="shopping-for-text"]').waitFor();
-    assert.deepEqual(await selection(page), { type: "size", size: "225/45R17", rear: "245/40R17" });
+    assert.deepEqual(await selection(page), { v: 1, type: "size", size: "225/45R17", rear: "245/40R17" });
     assert.deepEqual(errors, [], "console errors");
     await context.close();
   });
@@ -487,14 +490,28 @@ async function runWidth(width) {
     await page.locator('[data-testid="scan-camera"]').setInputFiles(PHOTO);
     await finder(page).getByRole("alert").waitFor();
     assert.match(await finder(page).getByRole("alert").innerText(), /Wait about ten minutes/);
+    // Anthropic's rate or spend limit (429/529) answers 503 scanner_busy.
+    answer = { status: 503, json: { error: "scanner_busy" } };
+    await page.locator('[data-testid="scan-camera"]').setInputFiles(PHOTO);
+    await page.waitForFunction(() =>
+      /scanner is busy/.test(document.querySelector('[data-testid="finder"] [role="alert"]')?.textContent || ""),
+    );
+    assert.equal(await step(page), "camera", "a busy scanner is not 'coming soon'");
+    // A refused key or an unreachable Claude: 502 scanner_unavailable.
     answer = { status: 502, json: { error: "scanner_unavailable" } };
     await page.locator('[data-testid="scan-camera"]').setInputFiles(PHOTO);
     await page.waitForFunction(() =>
-      /couldn't reach the scanner/.test(document.querySelector('[data-testid="finder"] [role="alert"]')?.textContent || ""),
+      /isn't working right now/.test(document.querySelector('[data-testid="finder"] [role="alert"]')?.textContent || ""),
+    );
+    // Vercel's own 413 page (not JSON) still reads as "too large".
+    answer = { status: 413, body: "Request Entity Too Large", contentType: "text/plain" };
+    await page.locator('[data-testid="scan-camera"]').setInputFiles(PHOTO);
+    await page.waitForFunction(() =>
+      /too large to send/.test(document.querySelector('[data-testid="finder"] [role="alert"]')?.textContent || ""),
     );
     assert.equal(await step(page), "camera");
-    // The browser itself logs the mocked 429/502 responses.
-    assert.deepEqual(errors.filter((e) => !/status of (429|502)/.test(e)), [], "console errors");
+    // The browser itself logs the mocked 429/503/502/413 responses.
+    assert.deepEqual(errors.filter((e) => !/status of (429|503|502|413)/.test(e)), [], "console errors");
     await context.close();
   });
 

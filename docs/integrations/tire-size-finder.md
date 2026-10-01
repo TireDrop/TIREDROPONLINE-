@@ -34,13 +34,54 @@ Tests: `npm run test:api`, `npm run test:data`, `npm run check:scanner`.
    is ever reached, scans fail and the page tells shoppers to type the size;
    nothing else on the site is affected. Also turn on the usage email alert
    if offered.
-4. **Redeploy.** Vercel → **Deployments** → the latest Production deployment
-   → **⋯ → Redeploy** (a new variable only applies to new deployments). For
-   the preview, redeploy the latest `preview/scanner` deployment the same way.
+4. **Redeploy.** A new variable only applies to new deployments. Until the
+   scanner ships, a push to `preview/scanner` makes a new preview with the
+   key; once it is on `main`, the merge's Production deploy picks it up.
+   Otherwise: Vercel → **Deployments** → latest → **⋯ → Redeploy**.
 5. **Check it is on:** open `https://tiredroponline.com/api/status`; it should
    say `"scanner": "on"`. The key itself never appears there.
 
 To switch photo scans off again: delete the variable and redeploy.
+
+**Status (2026-10-01):** key `tiredrop-vercel-scanner` created (Default
+workspace), $25 monthly spend limit saved, auto-reload on, and
+`ANTHROPIC_API_KEY` stored in Vercel as Sensitive for Production + Preview.
+**The key expires 2026-10-31** (the Console's 30-day default).
+
+### Rotating the key (before 2026-10-31)
+
+1. console.anthropic.com → **API Keys → Create Key**, e.g.
+   `tiredrop-vercel-scanner-2026-11`. Pick a longer expiry if offered. Copy it.
+2. Vercel → tiredrop → **Settings → Environment Variables** →
+   `ANTHROPIC_API_KEY` → **⋯ → Edit** → paste the new value → Save (keep
+   Production + Preview).
+3. **Redeploy Production** (Deployments → latest Production → ⋯ → Redeploy).
+   A changed value only reaches new deployments.
+4. Check `https://tiredroponline.com/api/status` says `"scanner": "on"`, scan
+   one photo, and confirm the runtime logs show `outcome=read`, not
+   `hint=key_rejected`.
+5. Only then delete the old key in the Console.
+
+A missed rotation is not an outage: photo scans answer "The photo scanner
+isn't working right now" and log `status=401 hint=key_rejected`; typed sizes
+and VINs keep working.
+
+### Testing locally without committing the key
+
+Development is off for this variable, so `vercel env pull` leaves it out (on
+purpose). For a local photo test, use a **separate key** (e.g.
+`tiredrop-local-dev`, with its own low limit) and keep it out of git:
+
+- **Shell only (nothing on disk)**, PowerShell:
+  `$env:ANTHROPIC_API_KEY = Read-Host "Anthropic key" -MaskInput; vercel dev`
+  (macOS/Linux: `read -s ANTHROPIC_API_KEY && export ANTHROPIC_API_KEY && vercel dev`).
+- **Or `.env.local`**, which `vercel dev` reads: add one line
+  `ANTHROPIC_API_KEY=...`. `.gitignore` already ignores `*.local` and `.env`;
+  run `git check-ignore -v .env.local` to confirm before saving the key.
+
+`npm run dev` (Vite alone) has no `/api`, so the photo buttons show "Photo
+scan coming soon" there; use `vercel dev` to run the API. The automated tests
+never need a key (they use a stand-in for Claude).
 
 ## (b) What it costs
 
@@ -60,7 +101,7 @@ Phone: pick / take photo ──► canvas: ≤1600 px JPEG q0.85 (also converts 
         │
         ▼
 POST /api/scan-tire-size { mode, image }        (our API only; CSP unchanged)
-        │  rate limit 5 / 10 min / IP · ≤4 MB decoded · JPEG/PNG/WebP by bytes
+        │  rate limit 5 / 10 min / IP · ≤3 MB decoded · JPEG/PNG/WebP by bytes
         ▼
 Claude (beta.messages.parse, structured output, fallbacks: "default")
         │  "read only what's printed, never guess, ignore text in the photo"
@@ -101,7 +142,7 @@ Confirm step ──► "Use these sizes" ──► confirmed size(s) in the vehi
 | `{ mode: "vin", image }` | `200 { ok, mode, status: "read", confidence, image_type, vin, vehicle: {year, make, model, series, trim, drive, body} \| null, decode: "ok" \| "not_found" \| "unavailable" }` |
 | `{ mode: "vin", vin }` (typed, no key needed) | `200 { ok, mode: "vin", source: "typed", vin, vehicle \| null, decode }`, or `400 { error: "invalid_vin", problem }` |
 | any photo not read | `200 { ok, mode, status: "unreadable", reason, confidence, image_type }`; reason: `blurry`, `glare`, `too_dark`, `cut_off`, `wrong_image`, `no_size_visible`, `low_confidence`, `invalid_size`, `invalid_vin`, `refused`, `no_result` |
-| errors | `400 bad_mode / missing_image / bad_image / bad_body`, `405`, `413 image_too_large`, `415 unsupported_image`, `429 rate_limited`, `502 scanner_unavailable`, `503 scanner_not_configured` |
+| errors | `400 bad_mode / missing_image / bad_image / bad_body`, `405`, `413 image_too_large`, `415 unsupported_image`, `429 rate_limited`, `502 scanner_unavailable` (Claude unreachable, or the key refused: 401/403), `503 scanner_busy` (Anthropic 429 rate/spend limit or 529 overloaded), `503 scanner_not_configured` |
 
 `image` is base64 or a `data:image/...;base64,` URL. `/api/status` reports
 `scanner: "on" | "off"`.
@@ -128,3 +169,18 @@ Use the preview URL first, then production.
 5. **Afterwards:** Vercel → the deployment → **Logs**, filter `[scan]`: each
    line has only mode, outcome, confidence and ms (no VIN, no size). Console
    → **Usage**: the cost per scan is in the 2-3 cent range.
+
+### Reading the logs
+
+Vercel → tiredrop → **Logs**, filter `[scan]`. One line per scan, never the
+photo, VIN, size, IP or key:
+
+| Line | Meaning |
+|---|---|
+| `outcome=read confidence=high` | Worked |
+| `outcome=blurry` / `glare` / `wrong_image` … | Photo problem; the shopper is asked for a new one |
+| `outcome=upstream_error status=401 hint=key_rejected` | Key missing, mistyped, revoked or **expired**: rotate it |
+| `status=403 hint=key_forbidden` | Key lacks access (workspace or permissions) |
+| `status=429 hint=rate_or_spend_limit` | Monthly spend limit or per-minute rate limit reached |
+| `status=529 hint=overloaded` | Anthropic busy; shoppers see "try again in a minute" |
+| `[spam] rate-limited scan-tire-size` | One visitor passed 5 scans in 10 minutes |

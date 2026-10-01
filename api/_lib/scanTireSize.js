@@ -49,8 +49,32 @@ export const MODES = Object.freeze(["door", "sidewall", "vin"]);
 
 /** Image types Claude accepts and the page sends (the page converts HEIC). */
 export const MEDIA_TYPES = Object.freeze(["image/jpeg", "image/png", "image/webp"]);
-/** The decoded photo, at most. The page sends ~0.2-0.8 MB (1600 px JPEG). */
-export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+/**
+ * The decoded photo, at most. The page sends ~0.2-0.8 MB (1600 px JPEG).
+ * 3 MB decoded is ~4 MB as base64, under Vercel's 4.5 MB request-body limit,
+ * so an oversized photo gets this endpoint's own friendly 413 rather than
+ * Vercel's bare FUNCTION_PAYLOAD_TOO_LARGE page.
+ */
+export const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
+
+/**
+ * A log hint for an Anthropic API error status, so the Vercel runtime logs
+ * say what to fix without quoting the request: 401 a missing, mistyped,
+ * revoked or expired key; 403 a key without access; 429 the per-minute rate
+ * limit or the Console's monthly spend limit; 529 Anthropic overloaded.
+ */
+export function upstreamHint(status) {
+  if (status === 401) return "key_rejected";
+  if (status === 403) return "key_forbidden";
+  if (status === 429) return "rate_or_spend_limit";
+  if (status === 529) return "overloaded";
+  if (typeof status === "number" && status >= 500) return "anthropic_error";
+  if (typeof status === "number") return "request_error";
+  return "network";
+}
+
+/** Anthropic statuses that mean "busy, try again soon" to a shopper. */
+export const BUSY_STATUSES = Object.freeze([429, 529]);
 
 /* ------------------------------------------------------------------ *
  * What Claude is asked for

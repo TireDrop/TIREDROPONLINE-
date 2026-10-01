@@ -7,7 +7,12 @@ import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
 
-import { AnthropicError, InternalServerError } from "@anthropic-ai/sdk";
+import {
+  AnthropicError,
+  AuthenticationError,
+  InternalServerError,
+  RateLimitError,
+} from "@anthropic-ai/sdk";
 
 import {
   createScanTireSizeHandler,
@@ -16,6 +21,7 @@ import {
 import {
   FALLBACK_BETA,
   MAX_IMAGE_BYTES,
+  upstreamHint,
   SCAN_EFFORT,
   SCAN_MODEL,
   SYSTEM_PROMPT,
@@ -396,6 +402,38 @@ test("Claude unreachable: 502 scanner_unavailable, logged without the message", 
   assert.ok(!lines.join("\n").includes("secret detail"));
 });
 
+test("bad or expired key (401): 502, logged as key_rejected without the key", async () => {
+  const err = new AuthenticationError(401, { error: { message: "invalid x-api-key" } }, "invalid x-api-key", new Headers());
+  const { call, lines } = setup({ reply: err });
+  const res = await call({ mode: "door", image: JPEG_B64 });
+  assert.equal(res.statusCode, 502);
+  assert.deepEqual(res.body, { error: "scanner_unavailable" });
+  const log = lines.join("\n");
+  assert.match(log, /outcome=upstream_error status=401 hint=key_rejected/);
+  assert.ok(!log.includes("invalid x-api-key"));
+  assert.ok(!log.includes(KEY_ENV.ANTHROPIC_API_KEY));
+});
+
+test("rate or spend limit (429): 503 scanner_busy with Retry-After", async () => {
+  const err = new RateLimitError(429, { error: { message: "spend limit" } }, "spend limit", new Headers());
+  const { call, lines } = setup({ reply: err });
+  const res = await call({ mode: "sidewall", image: JPEG_B64 });
+  assert.equal(res.statusCode, 503);
+  assert.deepEqual(res.body, { error: "scanner_busy" });
+  assert.equal(res.headers["retry-after"], "60");
+  assert.match(lines.join("\n"), /status=429 hint=rate_or_spend_limit/);
+});
+
+test("upstreamHint names each failure", () => {
+  assert.equal(upstreamHint(401), "key_rejected");
+  assert.equal(upstreamHint(403), "key_forbidden");
+  assert.equal(upstreamHint(429), "rate_or_spend_limit");
+  assert.equal(upstreamHint(529), "overloaded");
+  assert.equal(upstreamHint(500), "anthropic_error");
+  assert.equal(upstreamHint(400), "request_error");
+  assert.equal(upstreamHint(undefined), "network");
+});
+
 // ---- guards -----------------------------------------------------------------
 
 test("missing key: photo scans answer 503 scanner_not_configured; status says off", async () => {
@@ -427,7 +465,7 @@ test("rate limit: 5 photo scans per IP in 10 minutes, then 429", async () => {
   assert.equal((await call({ mode: "door", image: JPEG_B64 }, { ip: "198.51.100.9" })).statusCode, 200);
 });
 
-test("size cap: an image over 4 MB decoded, or a body over the cap, is 413", async () => {
+test("size cap: an image over 3 MB decoded, or a body over the cap, is 413", async () => {
   const { call, claude } = setup({ reply: parsed(door()) });
   const big = jpeg(MAX_IMAGE_BYTES + 3).toString("base64");
   let res = await call({ mode: "door", image: big });

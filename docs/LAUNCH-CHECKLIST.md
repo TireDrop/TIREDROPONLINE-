@@ -111,6 +111,10 @@ _Last updated: 2026-10-01 (REVIEW: Tire Size Finder scanner on preview/scanner (
 - [ ] Book an install time at checkout
 - [ ] Fitment by trim + staggered (logic + badge shipped in 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API)
 - [ ] Tire Size Finder scanner (door sticker / sidewall / VIN) on preview/scanner 8826c25 → Justin adds ANTHROPIC_API_KEY in Vercel + monthly cap → test with real photos → ship (steps: docs/integrations/tire-size-finder.md)
+  - [x] ~~Justin: Anthropic key `tiredrop-vercel-scanner` in Vercel (Sensitive, Production + Preview), $25 monthly spend limit, auto-reload on~~ (2026-10-01)
+  - [x] ~~Guardrails: key read only server-side; per-IP limit 5 scans / 10 min; photo ≤3 MB (under Vercel's 4.5 MB body limit) and JPEG/PNG/WebP checked by bytes; 401/403/429/529 logged with a hint, never the key; "busy" and "isn't working" messages for shoppers~~ (preview/scanner)
+  - [ ] Justin tests real photos on the preview (door sticker, sidewall, VIN) → Claude checks the runtime logs → "ship scanner"
+  - [ ] Rotate the key before it expires 2026-10-31 (calendar reminder Oct 24; steps in docs/integrations/tire-size-finder.md)
 - [ ] Local city pages: wave 1 (7 cities) live 2026-10-01; wave 2 next
 - [ ] Real review collection (no stars until real reviews exist)
 

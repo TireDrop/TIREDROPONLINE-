@@ -4,7 +4,7 @@
 //
 //   Photo   { mode: "door" | "sidewall" | "vin", image }
 //           image: a JPEG, PNG or WebP photo as base64 or a data URL (at most
-//           4 MB decoded). Claude reads it (api/_lib/scanTireSize.js); a VIN
+//           3 MB decoded). Claude reads it (api/_lib/scanTireSize.js); a VIN
 //           read off the photo is then decoded by NHTSA vPIC. Needs
 //           ANTHROPIC_API_KEY; without it: 503 { error: "scanner_not_configured" }.
 //   Typed   { mode: "vin", vin }
@@ -42,7 +42,14 @@
 //   400 { error: "invalid_vin", problem }  typed VIN that fails the check digit
 //   405, 413 { error: "image_too_large" | ... }, 415 { error: "unsupported_image" }
 //   429 { error: "rate_limited" }
-//   502 { error: "scanner_unavailable" }   Claude could not be reached
+//   502 { error: "scanner_unavailable" }   Claude could not be reached, or
+//                                          refused the key (401/403)
+//   503 { error: "scanner_busy" }          Anthropic said 429 (rate or monthly
+//                                          spend limit) or 529 (overloaded)
+//
+// Upstream failures log "[scan] mode=… outcome=upstream_error status=… hint=…"
+// (hint: key_rejected, key_forbidden, rate_or_spend_limit, overloaded,
+// anthropic_error, request_error, network) and never the key or the message.
 //   503 { error: "scanner_not_configured" }
 
 import Anthropic from "@anthropic-ai/sdk";
@@ -52,11 +59,13 @@ import { HttpError, methodNotAllowed, readJsonBody, send } from "./_lib/http.js"
 import { clientIp, createRateLimiter } from "./_lib/ratelimit.js";
 import { BODY_LIMITS, logRateLimited } from "./_lib/spam.js";
 import {
+  BUSY_STATUSES,
   MODES,
   ScanInputError,
   defaultAnthropic,
   readImage,
   readPhoto,
+  upstreamHint,
 } from "./_lib/scanTireSize.js";
 import { VpicError, decodeVin } from "./_lib/vpic.js";
 import { normalizeVin, vinProblem } from "../src/data/vin.js";
@@ -175,8 +184,13 @@ export function createScanTireSizeHandler({
       result = await readPhoto(anthropic(config.scanner.apiKey), mode, image);
     } catch (err) {
       if (err instanceof Anthropic.APIError) {
-        // Status only: an SDK error message can quote the request.
-        log.error(`[scan] mode=${mode} outcome=upstream_error status=${err.status ?? "-"}`);
+        // Status and hint only: an SDK error message can quote the request.
+        log.error(
+          `[scan] mode=${mode} outcome=upstream_error status=${err.status ?? "-"} hint=${upstreamHint(err.status)}`,
+        );
+        if (BUSY_STATUSES.includes(err.status)) {
+          return send(res, 503, { error: "scanner_busy" }, { ...NO_STORE, "Retry-After": "60" });
+        }
         return send(res, 502, { error: "scanner_unavailable" }, NO_STORE);
       }
       log.error(`[scan] mode=${mode} outcome=error`);

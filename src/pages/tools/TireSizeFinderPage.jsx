@@ -9,6 +9,7 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 import { useVehicle } from "../../context/VehicleContext.jsx";
+import { BUSINESS } from "../../data/business.js";
 import {
   describeOption,
   readSize,
@@ -42,8 +43,8 @@ import { trackToolUse } from "../../lib/analytics.js";
  *
  * The photo is shrunk on the phone (src/data/scanner.js) and read once by
  * POST /api/scan-tire-size; nothing is stored. When photo scans are off
- * (/api/status scanner "off", or a 503), the photo buttons say "Photo scan
- * coming soon" and typing a VIN or a size still works.
+ * (/api/status scanner "off", or a 503 scanner_not_configured), the photo
+ * buttons say "Photo scan coming soon" and typing a VIN or a size still works.
  *
  * Copy rules: never "safe", "OK" or "fine"; pressures are "the pressure
  * printed on your sticker"; no promises.
@@ -101,6 +102,10 @@ const SCAN_ERRORS = {
   unsupported_image:
     "We couldn't open that photo. Take a new one with your camera, or type the size instead.",
   photo: "We couldn't open that photo on this device. Take a new one with your camera, or type the size instead.",
+  scanner_busy:
+    "The photo scanner is busy right now. Try again in a minute, or type the size instead.",
+  scanner_unavailable:
+    `The photo scanner isn't working right now. Type the size from your door sticker or tire instead, or call us at ${BUSINESS.phone}.`,
   unreachable:
     "We couldn't reach the scanner just now. Try again in a minute, or type the size instead.",
 };

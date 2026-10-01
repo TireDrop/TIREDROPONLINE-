@@ -24,6 +24,14 @@ const BASE = String(import.meta.env?.VITE_API_BASE || "/api").replace(
 export const MAX_EDGE = 1600;
 export const JPEG_QUALITY = 0.85;
 
+/**
+ * The longest photo data URL sent: about 3 MB of JPEG, the server's own cap
+ * (MAX_IMAGE_BYTES in api/_lib/scanTireSize.js) and under Vercel's 4.5 MB
+ * request limit. A 1600 px JPEG is far below it; this only stops an odd
+ * device's huge canvas from going up the wire just to be refused.
+ */
+export const MAX_UPLOAD_CHARS = Math.ceil((3 * 1024 * 1024 * 4) / 3);
+
 // A photo read takes a few seconds; a typed VIN is one vPIC call.
 const TIMEOUT_MS = { photo: 45000, vin: 15000 };
 
@@ -124,8 +132,13 @@ async function post(body, timeout) {
       }
     }
     if (res.ok && data && typeof data === "object") return { ok: true, data };
+    // Vercel answers an oversized body itself, with a page that is not JSON.
     const error =
-      data && typeof data.error === "string" ? data.error : "unreachable";
+      data && typeof data.error === "string"
+        ? data.error
+        : res.status === 413
+          ? "image_too_large"
+          : "unreachable";
     return {
       ok: false,
       error,
@@ -140,7 +153,10 @@ async function post(body, timeout) {
 }
 
 /** Sends one photo (a data URL from shrinkPhoto) to be read. */
-export const scanPhoto = (mode, image) => post({ mode, image }, TIMEOUT_MS.photo);
+export const scanPhoto = (mode, image) =>
+  String(image ?? "").length > MAX_UPLOAD_CHARS
+    ? Promise.resolve({ ok: false, error: "image_too_large", status: 0 })
+    : post({ mode, image }, TIMEOUT_MS.photo);
 
 /** Decodes a VIN typed by hand (no photo, works with scans off). */
 export const lookUpVin = (vin) => post({ mode: "vin", vin }, TIMEOUT_MS.vin);
