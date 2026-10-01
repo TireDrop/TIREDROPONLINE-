@@ -15,6 +15,7 @@ import { InPageAnchors, ScrollToTop } from "./components/ui/index.jsx";
 import { trackPageView } from "./lib/analytics.js";
 import { lazyPage } from "./lib/lazyPage.js";
 import { TOOL_PAGE_ALIASES } from "./components/demos/toolPages.js";
+import { isProductPath } from "./data/mobileBar.js";
 
 // Every route except the home page is loaded on demand.
 //
@@ -183,14 +184,39 @@ function PageViewTracker() {
 
 export default function App() {
   const { pathname } = useLocation();
+  // A product page has no phone action bar (MobileCallBar): its own buy bar
+  // drops to the bottom edge, which it finds through --call-bar-h.
+  const productPage = isProductPath(pathname);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div
+      className="flex min-h-screen flex-col"
+      style={productPage ? { "--call-bar-h": "0px" } : undefined}
+    >
+      {/* First thing a keyboard reaches; out of sight until it is focused.
+          Moves focus itself rather than leaving it to the hash, which the
+          HashRouter preview build would read as a route. */}
+      <a
+        href="#main"
+        onClick={(event) => {
+          const main = document.getElementById("main");
+          if (!main) return;
+          event.preventDefault();
+          main.focus();
+        }}
+        className="sr-only z-[60] rounded-sm bg-ink px-4 py-3 font-semibold text-bone focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+      >
+        Skip to main content
+      </a>
       <ScrollToTop pathname={pathname} />
       <InPageAnchors />
-      <Header />
+      {/* `contents` keeps the masthead's sticky row sticky against the page,
+          not against this wrapper. */}
+      <header className="contents">
+        <Header />
+      </header>
 
-      <main className="flex-1">
+      <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">
         {/* Holds the viewport open while a route chunk loads, so the
             footer does not jump up and back on first navigation. */}
         <Suspense fallback={<div className="min-h-screen" aria-hidden />}>
@@ -312,13 +338,16 @@ export default function App() {
 
       <Footer />
 
-      {/* Sits above the fixed call bar on phones. */}
       {/* Keeps the end of the page clear of whatever is floating over the
-          bottom edge: the phone action bar always, the compare tray when it
-          has something in it. */}
+          bottom edge: the phone action bar (or, on a product page, its buy
+          bar, about as tall), the compare tray when it has something in it. */}
       <div
         aria-hidden
-        className="h-[calc(var(--call-bar-h)+var(--compare-tray-h)+env(safe-area-inset-bottom))] lg:h-[var(--compare-tray-h)]"
+        className={
+          productPage
+            ? "h-[calc(4.5rem+env(safe-area-inset-bottom))] lg:h-0"
+            : "h-[calc(var(--call-bar-h)+var(--compare-tray-h)+env(safe-area-inset-bottom))] lg:h-[var(--compare-tray-h)]"
+        }
       />
       <CompareTray />
       <MobileCallBar />

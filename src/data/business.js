@@ -1,7 +1,7 @@
 // Single source of truth for business facts.
 //
-// TireDrop is the online store. Tires ship free anywhere in the continental
-// US, direct from a distributor warehouse. Customers in South
+// TireDrop is the online store. Tires ship free anywhere in the 48 contiguous
+// states and DC, direct from a distributor warehouse. Customers in South
 // Florida can instead choose free ship-to-store and have them installed at
 // Extreme Tires in Sunrise — the parent business, which also runs the mobile
 // install vans.
@@ -71,7 +71,7 @@ export const BUSINESS = {
   // Where tires can be shipped, versus where they can be installed. Shipping
   // is free to every address in the area, with no order minimum.
   shipping: {
-    area: "the continental United States",
+    area: "the 48 contiguous states and DC",
     storePickup: true,
   },
 

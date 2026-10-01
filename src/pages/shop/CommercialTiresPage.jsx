@@ -164,7 +164,7 @@ export default function CommercialTiresPage() {
     <>
       <Seo
         title="Commercial & Fleet Tires"
-        description="Load-rated commercial tires for vans, box trucks and work fleets from TireDrop — shipped anywhere in the continental US, or delivered free to our South Florida shop for fitting."
+        description="Load-rated commercial tires for vans, box trucks and work fleets from TireDrop — shipped to the 48 contiguous states and DC, or delivered free to our South Florida shop for fitting."
       />
       <PageHero
         eyebrow="Commercial"

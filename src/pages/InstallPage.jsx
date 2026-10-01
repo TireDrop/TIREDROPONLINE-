@@ -93,7 +93,7 @@ const COMPARISON = [
   },
   {
     store: "Free — ship-to-store costs nothing",
-    home: "Also free to any continental-US address",
+    home: "Also free to any address in the 48 states + DC",
   },
   {
     store: "Old set taken away and recycled",
@@ -107,7 +107,7 @@ const FAQ = [
     a:
       "Yes. Shipping to the " +
       BUSINESS.shop.city +
-      " shop is free, the same as shipping to any address in the continental US. You still pay for the tires and, separately, for the installation when you come in.",
+      " shop is free, the same as shipping to any address in the 48 contiguous states and DC. You still pay for the tires and, separately, for the installation when you come in.",
   },
   {
     q: "What does the installation itself cost?",
@@ -135,7 +135,7 @@ const FAQ = [
     a:
       "No. Ship-to-store means one shop: " +
       BUSINESS.shop.full +
-      ". If you are anywhere else in the continental US your order ships to your address, and you take it to a fitter you trust.",
+      ". If you are anywhere else in the 48 contiguous states or DC, your order ships to your address, and you take it to a fitter you trust.",
   },
   {
     q: "Can the van install them at my house instead?",
@@ -205,7 +205,7 @@ export default function InstallPage() {
               This one is local.
             </span>{" "}
             Ship-to-store and installation happen at the {BUSINESS.shop.city}{" "}
-            shop in South Florida. Everywhere else in the continental US,{" "}
+            shop in South Florida. Everywhere else in the 48 contiguous states and DC,{" "}
             <Link
               to="/shipping"
               className="text-drop underline hover:text-dive"
@@ -234,7 +234,7 @@ export default function InstallPage() {
                 </span>
                 <span
                   aria-hidden
-                  className="font-display text-4xl leading-none text-ink/10"
+                  className="font-display text-4xl leading-none text-ink/50"
                 >
                   0{i + 1}
                 </span>
@@ -338,7 +338,7 @@ export default function InstallPage() {
         <SectionHead
           eyebrow="Install area"
           title="Where installing is on the table"
-          lede={`Ship-to-store means the ${BUSINESS.shop.city} shop, and the mobile vans work ${SERVICE_AREA_LABEL}. Shipping reaches the whole continental US — installing does not, and we would rather say so plainly.`}
+          lede={`Ship-to-store means the ${BUSINESS.shop.city} shop, and the mobile vans work ${SERVICE_AREA_LABEL}. Shipping reaches all 48 contiguous states and DC — installing does not, and we would rather say so plainly.`}
         />
 
         <ServiceAreaCounties />

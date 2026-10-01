@@ -8,6 +8,7 @@ import { readFileSync } from "node:fs";
 
 import { createCspReportHandler } from "../csp-report.js";
 import { summarizeReports } from "./cspReport.js";
+import { GOOGLE_TRANSLATE_CSP } from "../../src/lib/translate.js";
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 
@@ -119,6 +120,17 @@ test("every route gets the security headers", () => {
   for (const f of ["camera", "microphone", "geolocation", "payment", "usb"]) {
     assert.match(header("Permissions-Policy"), new RegExp(`\\b${f}=\\(\\)`));
   }
+});
+
+test("the CSP allows every host Google Translate's element loads from (src/lib/translate.js)", () => {
+  const csp = header("Content-Security-Policy-Report-Only");
+  for (const [directive, hosts] of Object.entries(GOOGLE_TRANSLATE_CSP)) {
+    const sources = csp.match(new RegExp(`(?:^|; )${directive} ([^;]*)`))?.[1]?.split(/\s+/) ?? [];
+    for (const host of hosts) {
+      assert.ok(sources.includes(`https://${host}`), `${directive} is missing https://${host}`);
+    }
+  }
+  assert.match(csp, /img-src [^;]*\bhttps:(?:\s|;)/, "img-src allows https: (Translate's icons)");
 });
 
 test("the CSP is report-only and allows the inline gtag snippet by hash", () => {

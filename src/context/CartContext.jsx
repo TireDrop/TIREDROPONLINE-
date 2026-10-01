@@ -113,7 +113,7 @@ export function CartProvider({ children }) {
       (n, l) => n + (l.install ? l.installPrice * l.qty : 0),
       0,
     );
-    // Shipping is free to every continental-US address and to the shop, so
+    // Shipping is free to every address in the 48 contiguous states and DC, and to the shop, so
     // there is no shipping charge to add. Sales tax is not estimated here:
     // Shopify calculates the real figure for the address at checkout, so the
     // total is before tax.

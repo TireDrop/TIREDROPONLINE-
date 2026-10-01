@@ -360,7 +360,7 @@ test("renderBody marks internal links and opens external ones safely", () => {
     /<a href="https:\/\/www.nhtsa.gov\/" target="_blank" rel="noopener">NHTSA/,
   );
   assert.match(html, /<a href="\/install" data-internal="">us<\/a>/);
-  assert.match(html, /<div class="table-scroll"><table>/);
+  assert.match(html, /<div class="table-scroll" tabindex="0" role="region" aria-label="[^"]+"><table>/);
 });
 
 test("links to unpublished Learn/Blog pages render as text and warn", () => {
