@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (security headers, CSP report-only, + GA4 conversion events (abcf645); prompt 25 for GA4 key events)_
+_Last updated: 2026-10-01 (Language button shipped (c05e3ac): Google element + translate.google.com fallback, Translate hosts in the CSP, finder tabs wrap on phones; Spanish checkout is Justin's switch)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -30,6 +30,8 @@ _Last updated: 2026-10-01 (security headers, CSP report-only, + GA4 conversion e
 - [x] ~~404 heading: "fine" removed~~ (ded56ec)
 - [x] ~~Fitment confidence: badge + no Add on won't-fit + Compare same-size + year-aware search~~ (347c4e1, shipped 2026-10-01)
 - [x] ~~6 new tools (load/speed, plus-size, pressure-temp, repair check, shaking checker, rotation) with their own pages + article embeds~~ (shipped 2026-10-01)
+- [x] ~~Language button: translate any page (Google element + translate.google.com fallback)~~ (c05e3ac)
+- [x] ~~Spanish tab labels overflow the home finder on phones (SearchPanel whitespace-nowrap) → let tabs wrap below md~~ (c05e3ac)
 
 ## Admin (Justin)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
@@ -51,6 +53,7 @@ _Last updated: 2026-10-01 (security headers, CSP report-only, + GA4 conversion e
 - [ ] Someone can sign into Outlook as info@tiredroponline.com
 - [ ] SPF/DMARC: fix only if the Gmail test fails (never add a 2nd DMARC record)
 - [ ] HSTS preload: decide whether to add `preload` and submit to hstspreload.org (hard to undo; docs/ops/deploy.md)
+- [ ] Justin: enable Spanish in Shopify Settings → Languages (checkout)
 
 ## Next phase (Chrome prompt after the builds land)
 - [x] ~~Webhooks: 2 in Shopify, signing key into Vercel, redeploy, test (prompt 21)~~ (2026-09-30: 2 webhooks configured, test notifications 200)
