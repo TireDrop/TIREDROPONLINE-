@@ -48,7 +48,7 @@ const DIFFERENTIATORS = [
   {
     icon: Tag,
     title: "The price is the price",
-    copy: "What you see at checkout covers the tires, and shipping is free to any continental-US address. If anything about your order changes, we call you before we do anything about it.",
+    copy: "What you see at checkout covers the tires, and shipping is free to any address in the 48 contiguous states and DC. If anything about your order changes, we call you before we do anything about it.",
   },
   {
     icon: Clock,
@@ -112,7 +112,7 @@ export default function AboutPage() {
     <>
       <Seo
         title="About TireDrop"
-        description={`${BUSINESS.name} is the online store of ${BUSINESS.parent}, a tire shop in ${BUSINESS.shop.city}, FL. Tires and wheels shipped across the continental US, or fitted at the shop.`}
+        description={`${BUSINESS.name} is the online store of ${BUSINESS.parent}, a tire shop in ${BUSINESS.shop.city}, FL. Tires and wheels shipped to the 48 contiguous states and DC, or fitted at the shop.`}
       />
 
       <PageHero
@@ -209,7 +209,7 @@ export default function AboutPage() {
             ))}
           </dl>
           <p className="mt-8 text-xs text-bone/60">
-            The state count is the continental-US shipping area and the county
+            The state count is the shipping area (the 48 contiguous states, plus DC) and the county
             count is the mobile install area: Miami-Dade, Broward and Palm
             Beach. None of these are marketing
             round-ups.

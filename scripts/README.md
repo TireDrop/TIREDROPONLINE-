@@ -23,9 +23,10 @@ header comment, and `shopify/assets/td-tiremath.js` names
 | `newsletter-signup-check.mjs` | `check:newsletter` | The newsletter is only the footer form: no pop-up, validation, success and failure messages. |
 | `docs-links-check.mjs` | `check:docs` | Every relative Markdown link and every `docs/...` path in the docs resolves to a real file. |
 | `ga-events-check.mjs` | `check:ga` | GA4 conversion events through a real funnel (view_item, add_to_cart, view_cart, begin_checkout, add_shipping_info, generate_lead) with the expected shape, and nothing typed into a form in any GA call. |
+| `a11y-check.mjs` | `check:a11y` | axe-core (WCAG 2.1 A/AA plus best practice) on 12 key routes at 390px and 1280px: fails on serious or critical issues. Also checks the skip link is the first Tab stop and moves focus to `<main>`. |
 
 `check:schema` reads `dist/` directly, so it needs `npm run build` first.
-So do the four Chromium checks. They start
+So do the Chromium checks. They start
 `vite preview` themselves and mock every `/api` call, so nothing reaches
 Shopify. `test:api`, `test:content`, `test:data` and `test:lib` are `node --test`
 suites in `api/_lib/`, `src/content/`, `src/data/` (the mobile city pages:

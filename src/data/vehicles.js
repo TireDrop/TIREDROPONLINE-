@@ -161,12 +161,45 @@ function tableModels(make, year) {
     .map((key) => key.split("|")[1]);
 }
 
+/**
+ * How long one vPIC request may take, body included, before it is abandoned,
+ * and how many times a failed request is tried again. vPIC usually answers in
+ * well under a second; when it hangs, a visitor should not watch "Loading
+ * models…" for longer than about two of these before the size-table list and
+ * "Other / not listed" appear.
+ */
+export const VPIC_TIMEOUT_MS = 7000;
+export const VPIC_RETRIES = 1;
+
+async function fetchOnce(url) {
+  const controller =
+    typeof AbortController === "undefined" ? null : new AbortController();
+  const timer = controller
+    ? setTimeout(() => controller.abort(), VPIC_TIMEOUT_MS)
+    : null;
+  try {
+    const res = await fetch(url, {
+      credentials: "omit",
+      signal: controller ? controller.signal : undefined,
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return (data && data.Results) || [];
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 async function fetchType(vpicMake, year, type) {
   const url = `${VPIC}${encodeURIComponent(vpicMake)}/modelyear/${encodeURIComponent(year)}/vehicletype/${type}?format=json`;
-  const res = await fetch(url, { credentials: "omit" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  return (data && data.Results) || [];
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await fetchOnce(url);
+    } catch (e) {
+      if (attempt >= VPIC_RETRIES) throw e;
+      log("retrying", type, e && (e.name === "AbortError" ? "timed out" : e.message));
+    }
+  }
 }
 
 function merge(make, year, names) {

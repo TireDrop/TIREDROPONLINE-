@@ -53,7 +53,7 @@ const STEPS = [
 const CHOICES = [
   {
     icon: Truck,
-    badge: "Anywhere in the lower 48",
+    badge: "48 contiguous states + DC",
     title: "Ship to my address — free",
     body: "Home, work, or the shop you already trust with your car. Tires arrive where you told us to send them, and you arrange fitting on your own schedule.",
     points: [
@@ -85,7 +85,7 @@ const CHOICES = [
 const FAQ = [
   {
     q: "How much does shipping cost?",
-    a: "Nothing. Shipping is free to any address in the continental US, with no order minimum. Ship-to-store at our Sunrise shop is free too.",
+    a: "Nothing. Shipping is free to any address in the 48 contiguous states and DC, with no order minimum. Ship-to-store at our Sunrise shop is free too.",
   },
   {
     q: "How long will my tires take to arrive?",
@@ -96,11 +96,11 @@ const FAQ = [
     a: "From a distributor warehouse, not from us. TireDrop holds no stock of its own — your tires leave from whichever distributor warehouse has your size. That is why we are not limited to what fits in one building.",
   },
   {
-    q: "Do you ship outside the continental US?",
+    q: "Do you ship to Alaska, Hawaii or outside the US?",
     a:
       "Our standard shipping covers " +
       BUSINESS.shipping.area +
-      " — the lower 48 states. If you are outside that, call " +
+      ". That leaves out Alaska, Hawaii and US territories. If you are outside that, call " +
       BUSINESS.phone +
       " before ordering and we will tell you honestly whether we can get your order there.",
   },
@@ -286,7 +286,7 @@ export default function ShippingPage() {
                 </span>
                 <span
                   aria-hidden
-                  className="font-display text-4xl leading-none text-ink/10"
+                  className="font-display text-4xl leading-none text-ink/50"
                 >
                   0{i + 1}
                 </span>
@@ -332,7 +332,7 @@ export default function ShippingPage() {
           <div className="rounded-card border border-graphite bg-steel-wash p-6 md:p-8">
             <h3 className="h3">Shipping cost and dates, straight</h3>
             <p className="mt-3 text-sm leading-relaxed text-bone/70">
-              Shipping is free to any address in the continental US, so there
+              Shipping is free to any address in the 48 contiguous states and DC, so there
               is no price to publish. We do not print a delivery window on this
               page, and that is deliberate. It depends on your address, your
               tire size and which warehouse fills the order — anything we
@@ -340,7 +340,7 @@ export default function ShippingPage() {
             </p>
             <ul className="mt-6 space-y-3">
               {[
-                "Shipping is free to any continental-US address, no minimum",
+                "Shipping is free to any address in the 48 contiguous states and DC, no minimum",
                 "Your delivery estimate is shown at checkout, for your address",
                 "Ship-to-store at our Sunrise shop is free too",
                 "No handling fee gets added after you have paid",

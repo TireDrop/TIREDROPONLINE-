@@ -765,7 +765,7 @@ function TrackForm() {
     <div className="space-y-6">
       <form noValidate onSubmit={handleSubmit} className="card relative p-6 md:p-8">
         <FormTrap id="track-website" />
-        <h3 className="h3 mb-1">Look up an order</h3>
+        <h2 className="h3 mb-1">Look up an order</h2>
         <p className="mb-6 text-sm text-smoke">
           Both are on your order confirmation email.
         </p>

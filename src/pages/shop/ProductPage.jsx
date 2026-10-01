@@ -107,7 +107,7 @@ export default function ProductPage({ kind = "tire" }) {
       <>
         <Seo
           title="Product Not Found"
-          description="That product is no longer listed. Browse the current TireDrop tire and wheel catalog, shipped anywhere in the continental US."
+          description="That product is no longer listed. Browse the current TireDrop tire and wheel catalog, shipped free to the 48 contiguous states and DC."
           noindex
         />
         <PageHero
@@ -257,7 +257,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
     <>
       <Seo
         title={`${name} ${sizeLabel}`}
-        description={`${name} ${sizeLabel} — ${money(product.price * SET_SIZE)} for a set of ${SET_SIZE} from TireDrop, shipped anywhere in the continental US or free to our South Florida shop for installation.`}
+        description={`${name} ${sizeLabel} — ${money(product.price * SET_SIZE)} for a set of ${SET_SIZE} from TireDrop, shipped free to the 48 contiguous states and DC or free to our South Florida shop for installation.`}
       />
       <Breadcrumbs
         trail={[

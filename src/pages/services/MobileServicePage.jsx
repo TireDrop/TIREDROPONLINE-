@@ -283,7 +283,7 @@ export default function MobileServicePage() {
                 </span>
                 <span
                   aria-hidden
-                  className="font-display text-4xl leading-none text-ink/10"
+                  className="font-display text-4xl leading-none text-ink/50"
                 >
                   0{i + 1}
                 </span>

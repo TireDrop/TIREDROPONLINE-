@@ -19,6 +19,7 @@
     "check:schema": "node scripts/schema-check.mjs",
     "check:docs": "node scripts/docs-links-check.mjs",
     "check:ga": "node scripts/ga-events-check.mjs",
+    "check:a11y": "node scripts/a11y-check.mjs",
     "test:api": "node --test \"api/_lib/*.test.mjs\"",
     "test:content": "node --test \"src/content/*.test.mjs\"",
     "test:data": "node --test \"src/data/*.test.mjs\"",
@@ -36,6 +37,7 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.17",
+    "axe-core": "^4.13.0",
     "eslint": "^9.39.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.12.0",

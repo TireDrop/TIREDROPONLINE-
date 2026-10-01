@@ -1,7 +1,7 @@
 {
   "name": "TireDrop",
   "short_name": "TireDrop",
-  "description": "Tires and wheels shipped free across the continental US, or delivered free to our Sunrise, FL shop and installed for you.",
+  "description": "Tires and wheels shipped free to the 48 contiguous states and DC, or delivered free to our Sunrise, FL shop and installed for you.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
