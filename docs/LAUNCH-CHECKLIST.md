@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (on preview for Justin: /tires Shop by Vehicle uses the full NHTSA year/make/model lists with a searchable Model box, cached /api/vehicles (preview/remember e8f1d6f); remember vehicle + shareable /tires filters (preview/remember 9be62b0); SHIPPED: fitment no longer blocks on a model-level guess, door-jamb size entry front/rear (dee5157); Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
+_Last updated: 2026-10-01 (SHIPPED: remember vehicle + shareable /tires filters + full NHTSA year/make/model lists with a searchable Model box, cached /api/vehicles (preview/remember 519e321, all 16 gates pass); fitment no longer blocks on a model-level guess, door-jamb size entry front/rear (dee5157); Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -100,7 +100,7 @@ _Last updated: 2026-10-01 (on preview for Justin: /tires Shop by Vehicle uses th
 ## Big upgrades (Claude)
 - [x] ~~Prerender pages for Google (covered by Blog + Learn Phase 0)~~ (be6a2a2)
 - [ ] Hero finder goes straight to results
-- [ ] Remember vehicle (no pop-up after first entry) + shareable /tires URL filters (preview/remember 9be62b0) → Justin reviews → ship
+- [x] ~~Remember vehicle (no pop-up after first entry) + shareable /tires URL filters~~ (preview/remember 9be62b0, shipped to main 2026-10-01)
   - Filters: season, tire type, brand, price per tire, speed rating, load index, load range, treadwear warranty, sort by warranty / brand. Skipped for lack of data: EV-ready, XL on passenger tires, run-flat (appears automatically once a run-flat tire is listed)
   - [x] ~~/tires Shop by Vehicle (and its Change) use the full lists, not the catalog's 10 makes / 45 models: years 1981-2027, every make sold that year, every model NHTSA lists (BMW: 3 Series, 4 Series, M3, X5, X7…); Model box filters as you type and takes a typed model~~ (preview/remember e8f1d6f)
   - [x] ~~Model lists hold up: `/api/vehicles` asks NHTSA with a timeout and is cached at Vercel's edge for a day; the build saves a snapshot as the fallback; when nothing loads the finder says "Couldn't load models. Type your model or enter your door-jamb size."~~ (preview/remember e8f1d6f)
