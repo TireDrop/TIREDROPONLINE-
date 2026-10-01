@@ -78,6 +78,14 @@
       "statusCode": 301
     },
     { "source": "/tools/tread-gauge", "destination": "/tire-check", "statusCode": 301 },
+    { "source": "/tools/load-speed-check", "destination": "/load-speed-check", "statusCode": 301 },
+    { "source": "/tools/plus-size-speedo", "destination": "/plus-size-calculator", "statusCode": 301 },
+    { "source": "/tools/plus-size", "destination": "/plus-size-calculator", "statusCode": 301 },
+    { "source": "/tools/pressure-temp", "destination": "/tire-pressure-temperature", "statusCode": 301 },
+    { "source": "/tools/pressure-temperature", "destination": "/tire-pressure-temperature", "statusCode": 301 },
+    { "source": "/tools/damage-map", "destination": "/can-my-tire-be-repaired", "statusCode": 301 },
+    { "source": "/tools/noise-vibration", "destination": "/car-shaking-checker", "statusCode": 301 },
+    { "source": "/tools/rotation-pattern", "destination": "/tire-rotation-pattern", "statusCode": 301 },
     { "source": "/pages", "destination": "/", "statusCode": 301 },
     { "source": "/pages/:path*", "destination": "/", "statusCode": 301 },
     {

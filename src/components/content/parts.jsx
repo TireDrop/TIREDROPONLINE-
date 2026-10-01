@@ -19,6 +19,7 @@ import { BUSINESS } from "../../data/business.js";
 import { getService } from "../../data/services.js";
 import { Badge } from "../ui/index.jsx";
 import { getHub, isExternalUrl, isLive } from "../../content/index.js";
+import { TOOL_PAGES } from "../demos/toolPages.js";
 
 /* ------------------------------------------------------------------ *
  * Formatting
@@ -276,6 +277,7 @@ const SITE_PAGES = {
   "/tire-check": "Do I need tires yet? (free check)",
   "/tire-size": "Tire size decoder",
   "/find-my-tires": "Find tires for your vehicle",
+  ...Object.fromEntries(TOOL_PAGES.map((t) => [t.path, t.label])),
   "/learn": "All Learn guides",
   "/blog": "The TireDrop blog",
   "/locations": "Visit the shop",

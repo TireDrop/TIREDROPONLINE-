@@ -36,12 +36,18 @@ import { ApiError, submitCheckout } from "../../data/api.js";
 import { useApiStatus } from "../../data/useApi.js";
 import { hasChanges, readFormValues } from "../../data/forms.js";
 import { recallVehicle } from "../../data/vehicles.js";
+import {
+  checkFit,
+  fitSizeOf,
+  resolveSelection,
+} from "../../data/fitmentCheck.js";
+import { useVehicle } from "../../context/VehicleContext.jsx";
 import VehicleSelect, {
   MAX_VEHICLE_YEAR,
   MIN_VEHICLE_YEAR,
   vehicleErrors,
 } from "../../components/shop/VehicleSelect.jsx";
-import { TAX_NOTE, summarize } from "./CartPage.jsx";
+import { FitFlag, TAX_NOTE, summarize } from "./CartPage.jsx";
 
 /* ------------------------------------------------------------------ */
 /*  Scheduling helpers — the shop is closed Sundays per BUSINESS.hours */
@@ -504,6 +510,36 @@ export default function CheckoutPage() {
     [subtotal, installTotal],
   );
 
+  // Fitment on the review step: each line against the vehicle entered on
+  // step three (with the size the shopper picked or gave, when it is the
+  // vehicle they were shopping for), or against the size they are shopping
+  // for. A line that does not match is flagged with a way to swap it, never
+  // blocked: a tech confirms fitment by phone before the order is released.
+  const { selection, ready: fitReady } = useVehicle();
+  const fitFlagsFor = (f) => {
+    if (!fitReady) return [];
+    const same =
+      selection?.type === "vehicle" &&
+      ["year", "make", "model"].every(
+        (k) =>
+          String(selection[k] ?? "")
+            .trim()
+            .toLowerCase() ===
+          String(f[k] ?? "")
+            .trim()
+            .toLowerCase(),
+      );
+    const target = resolveSelection(
+      selection?.type === "size" || same
+        ? selection
+        : { type: "vehicle", year: f.year, make: f.make, model: f.model },
+    );
+    return safeLines
+      .filter((l) => l.kind !== "wheel")
+      .map((line) => ({ line, fit: checkFit(fitSizeOf(line), target) }))
+      .filter((x) => x.fit.status === "no-fit");
+  };
+
   // What the cart already committed to, so step two can refuse a delivery
   // choice that contradicts it.
   const stepContext = useMemo(
@@ -615,6 +651,15 @@ export default function CheckoutPage() {
         `Install at the shop: ${installLines
           .map((l) => `${l.qty}x ${l.brand} ${l.name} ${l.size}`.trim())
           .join("; ")}`,
+      // So the fitment call starts from what the site already flagged.
+      ...fitFlagsFor(form)
+        .slice(0, 3)
+        .map(({ line, fit }) =>
+          `Fitment flag: ${line.brand} ${line.name} ${line.size} does not match ${fit.sizes.join(" / ") || "the size on file"}`.slice(
+            0,
+            160,
+          ),
+        ),
     ]
       .filter(Boolean)
       .join("\n");
@@ -1426,6 +1471,60 @@ export default function CheckoutPage() {
                     ].filter(Boolean)}
                   />
                 </div>
+
+                {(() => {
+                  const flagged = fitFlagsFor(form);
+                  if (flagged.length === 0) return null;
+                  const n = flagged.length;
+                  return (
+                    <div className="mt-7" data-testid="review-fit-flags">
+                      <h3 className="font-display text-lg font-bold">
+                        Fitment check
+                      </h3>
+                      <p className="mt-1 text-sm leading-relaxed text-smoke">
+                        {n === 1
+                          ? "One item doesn't match"
+                          : `${n} items don't match`}{" "}
+                        {selection?.type === "size"
+                          ? "the size you're shopping for"
+                          : `your ${form.year} ${form.make} ${form.model}`}
+                        . Swap {n === 1 ? "it" : "them"} first, or send the
+                        order as it is: we call to confirm fitment before it is
+                        released.
+                      </p>
+                      {flagged.map(({ line, fit }) => (
+                        <div key={line.key} className="mt-3">
+                          <p className="text-sm font-semibold text-ink">
+                            {line.brand} {line.name} · {line.size}
+                          </p>
+                          <FitFlag
+                            fit={fit}
+                            change={
+                              selection?.type === "size" ? null : (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    readForm();
+                                    setStepIndex(2);
+                                  }}
+                                  className="text-smoke underline underline-offset-4 hover:text-drop"
+                                >
+                                  Not your vehicle? Change it
+                                </button>
+                              )
+                            }
+                          />
+                        </div>
+                      ))}
+                      <Link
+                        to="/cart"
+                        className="mt-3 inline-block text-sm text-ink underline underline-offset-4 hover:text-drop"
+                      >
+                        Edit your cart
+                      </Link>
+                    </div>
+                  );
+                })()}
 
                 <div className="mt-7 rounded-sm border-2 border-ink/15 bg-bone p-5">
                   <div className="flex items-start gap-3">

@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
+  AlertTriangle,
   CalendarClock,
   Minus,
   Plus,
@@ -18,7 +19,14 @@ import {
   Badge,
 } from "../../components/ui/index.jsx";
 import { useCart, money } from "../../context/CartContext.jsx";
+import { useVehicle } from "../../context/VehicleContext.jsx";
 import ProductArt from "../../components/shop/ProductArt.jsx";
+import {
+  ChangeButton,
+  FitBadge,
+  ShoppingForBar,
+} from "../../components/shop/Fitment.jsx";
+import { fitSizeOf, sizeSearch } from "../../data/fitmentCheck.js";
 import { BUSINESS } from "../../data/business.js";
 import { productHref } from "../../data/products.js";
 
@@ -95,7 +103,63 @@ function QtyStepper({ line, setQty }) {
   );
 }
 
+/**
+ * A line that does not fit what the shopper is shopping for: said plainly,
+ * with the way to swap it. Checkout is not blocked over it, because a tech
+ * confirms fitment by phone before any order is released.
+ */
+export function FitFlag({ fit, onRemove = null, change = null }) {
+  const { resolved } = useVehicle();
+  if (!fit || fit.status !== "no-fit") return null;
+  const bySize = resolved.kind === "size";
+  const swap = fit.sizes.map(sizeSearch).find(Boolean) ?? "/tires";
+  return (
+    <div
+      data-testid="cart-fit-flag"
+      className="mt-3 rounded-sm border border-extremeDeep/30 bg-[#FDEEEE] p-3 text-sm text-ink"
+    >
+      <p className="flex items-start gap-2">
+        <AlertTriangle
+          size={16}
+          aria-hidden
+          className="mt-0.5 shrink-0 text-extremeDeep"
+        />
+        <span className="min-w-0">
+          <span className="font-semibold">{fit.title}.</span> {fit.detail}
+        </span>
+      </p>
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 pl-6">
+        <Link
+          to={swap}
+          className="font-semibold underline underline-offset-4 hover:text-drop"
+        >
+          Swap it for a tire that fits
+        </Link>
+        {onRemove && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="text-smoke underline underline-offset-4 hover:text-drop"
+          >
+            Remove it
+          </button>
+        )}
+        {change ?? (
+          <ChangeButton
+            tab={bySize ? "size" : "vehicle"}
+            className="text-smoke underline underline-offset-4 hover:text-drop"
+          >
+            {bySize ? "Not your size? Change it" : "Not your vehicle? Change it"}
+          </ChangeButton>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function CartLine({ line, setQty, remove, addItem }) {
+  const { fitFor } = useVehicle();
+  const fit = line.kind === "wheel" ? null : fitFor(fitSizeOf(line));
   // Catalog lines link to their slug page, live distributor tires to their
   // sku page, and anything with neither back to the listing.
   const base = line.kind === "wheel" ? "/wheels" : "/tires";
@@ -136,6 +200,9 @@ function CartLine({ line, setQty, remove, addItem }) {
                 Size <span className="text-ink">{line.size}</span>
               </p>
             )}
+            {fit && fit.status !== "no-fit" && fit.code !== "no-selection" && (
+              <FitBadge fit={fit} className="mt-2" />
+            )}
           </div>
 
           <div className="tnum text-right">
@@ -145,6 +212,8 @@ function CartLine({ line, setQty, remove, addItem }) {
             <p className="mt-1 text-xs text-smoke">{money(line.price)} each</p>
           </div>
         </div>
+
+        <FitFlag fit={fit} />
 
         <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
           <QtyStepper line={line} setQty={setQty} />
@@ -222,6 +291,10 @@ export default function CartPage() {
   const { lines, count, subtotal, installTotal, addItem, setQty, remove } =
     useCart();
   const safeLines = Array.isArray(lines) ? lines : [];
+  const { fitFor, resolved } = useVehicle();
+  const noFitCount = safeLines.filter(
+    (l) => l.kind !== "wheel" && fitFor(fitSizeOf(l))?.status === "no-fit",
+  ).length;
 
   const totals = useMemo(
     () => summarize({ subtotal, installTotal }),
@@ -267,6 +340,7 @@ export default function CartPage() {
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
             {/* Line items */}
             <section aria-label="Cart items" className="min-w-0">
+              <ShoppingForBar className="mb-6" />
               <ul className="divide-y divide-ink/10 border-y border-ink/10">
                 {safeLines.map((line) => (
                   <CartLine
@@ -352,6 +426,23 @@ export default function CartPage() {
                     {money(totals.total)}
                   </span>
                 </div>
+
+                {noFitCount > 0 && (
+                  <p
+                    role="note"
+                    className="mt-5 rounded-sm border border-extremeDeep/30 bg-[#FDEEEE] p-3 text-xs leading-relaxed text-ink"
+                  >
+                    <span className="font-semibold">
+                      {noFitCount === 1
+                        ? "1 item doesn't match"
+                        : `${noFitCount} items don't match`}{" "}
+                      {resolved.kind === "size" ? "your size" : "your vehicle"}.
+                    </span>{" "}
+                    Swap {noFitCount === 1 ? "it" : "them"} above, or check out
+                    anyway: we call to confirm fitment before the order is
+                    released.
+                  </p>
+                )}
 
                 <Link to="/checkout" className="btn-primary mt-5 w-full">
                   Checkout

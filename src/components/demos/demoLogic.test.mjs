@@ -336,18 +336,14 @@ const BUILT = [
   "size-decoder",
   "tpms-light",
   "utqg-explainer",
-];
-const RESERVED = [
+  "load-speed-check",
+  "plus-size-speedo",
   "pressure-temp",
-  "load-speed",
-  "plus-size",
-  "wear-pattern",
-  "rotation",
-  "hydroplaning",
-  "spare-types",
   "damage-map",
   "noise-vibration",
+  "rotation-pattern",
 ];
+const RESERVED = ["wear-pattern", "hydroplaning", "spare-types"];
 
 test("registry: DEMOS holds exactly the built demos, code-split", () => {
   assert.deepEqual(Object.keys(DEMOS).sort(), [...BUILT].sort());

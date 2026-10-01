@@ -16,9 +16,9 @@ import {
   OTHER_LABEL,
   YEARS as ALL_YEARS,
   makesFor,
-  rememberVehicle,
   useVehicleModels,
 } from "../../data/vehicles.js";
+import { useVehicle } from "../../context/VehicleContext.jsx";
 
 // The storefront's primary finder. Tab one narrows by vehicle, tab two by the
 // numbers stamped on the sidewall (or, on the wheel catalog, by rim size).
@@ -80,6 +80,7 @@ export default function SearchPanel({
   const [tab, setTab] = useState(requested === "size" ? "size" : "vehicle");
   const [error, setError] = useState("");
 
+  const { selectVehicle } = useVehicle();
   const [year, setYear] = useState("");
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
@@ -155,8 +156,9 @@ export default function SearchPanel({
       return;
     }
     setError("");
-    // So checkout and the booking form can start from this vehicle.
-    rememberVehicle({ year, make: makeValue, model: modelValue });
+    // The vehicle being shopped for from here on (every tire shows whether
+    // it fits), remembered so checkout and the booking form start from it.
+    selectVehicle({ year, make: makeValue, model: modelValue });
     onSearch({ type: "vehicle", year, make: makeValue, model: modelValue });
   };
 

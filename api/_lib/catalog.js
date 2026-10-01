@@ -6,12 +6,14 @@
 //            sample item reports available: null and qty: null.
 //   live   — ATD, through api/_lib/atd.js.
 //
-// Vehicle searches resolve to the typical original-equipment size from
-// src/data/fitment.js in both modes, unless ATD's own fitment endpoint has
-// been confirmed (see ENDPOINTS.searchByVehicle in atd.js).
+// Vehicle searches resolve to the factory size for that model year from
+// src/data/fitment.js (through src/data/fitmentCheck.js, the same answer the
+// pages give) in both modes, unless ATD's own fitment endpoint has been
+// confirmed (see ENDPOINTS.searchByVehicle in atd.js).
 
 import { TIRES } from "../../src/data/products.js";
-import { FITMENT, oeSizeFor } from "../../src/data/fitment.js";
+import { FITMENT } from "../../src/data/fitment.js";
+import { factorySizes, readSize } from "../../src/data/fitmentCheck.js";
 import { parseSize } from "../../src/data/tireMath.js";
 import {
   ENDPOINTS as ATD_ENDPOINTS,
@@ -62,15 +64,32 @@ const FITMENT_KEYS = new Map(
 );
 
 /**
- * Case-insensitive lookup in the fitment table. Returns the OE size record,
- * or null when the vehicle is not in the table. The table is year-agnostic.
+ * Case-insensitive lookup in the fitment tables, by model year. Returns
+ * `{ make, model, size, bodyStyle, width, aspect, rimDiameter }`, or null
+ * when there is no single factory size to search: the vehicle is not on
+ * file, the year is outside the generations on file, or the size depends
+ * on the trim (or the car is staggered). Null is never a guess.
  */
-export function resolveVehicle(make, model) {
+export function resolveVehicle(make, model, year) {
   const canonical = FITMENT_KEYS.get(`${make}|${model}`.toLowerCase());
   if (!canonical) return null;
   const [m, mo] = canonical;
-  const oe = oeSizeFor(m, mo);
-  return oe ? { make: m, model: mo, ...oe } : null;
+  const found = factorySizes({ make: m, model: mo, year });
+  if (found.status !== "sized") return null;
+  const keys = new Set(found.options.map((o) => readSize(o.front)?.key));
+  const [only] = found.options;
+  if (keys.size !== 1 || only.rear) return null;
+  const size = readSize(only.front);
+  if (!size || size.format !== "metric") return null;
+  return {
+    make: m,
+    model: mo,
+    size: size.key,
+    bodyStyle: FITMENT[`${m}|${mo}`]?.[1] ?? null,
+    width: size.width,
+    aspect: size.aspect,
+    rimDiameter: size.rimDiameter,
+  };
 }
 
 // ---- Search -----------------------------------------------------------------
@@ -103,13 +122,13 @@ export async function searchTires(query, config, deps = {}) {
       make: query.make,
       model: query.model,
     });
-    const fitment = resolveVehicle(query.make, query.model);
+    const fitment = resolveVehicle(query.make, query.model, query.year);
     echo.size = fitment?.size ?? null;
     echo.fitment = fitment
       ? {
           size: fitment.size,
           bodyStyle: fitment.bodyStyle,
-          source: "typical original-equipment size; check the sidewall",
+          source: "typical factory size for the model year; check the sidewall",
         }
       : null;
 

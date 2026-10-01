@@ -64,6 +64,7 @@ import {
   shopToday,
 } from "../../src/data/booking.js";
 import { BUSINESS } from "../../src/data/business.js";
+import { MOBILE_AREA_ERROR, isInServiceArea } from "../../src/data/serviceArea.js";
 
 export const BOOKING_METAFIELD = Object.freeze({
   namespace: "tiredrop",
@@ -90,6 +91,17 @@ export const BOOKING_ORDER_UPDATE = `mutation bookingOrderUpdate($input: OrderIn
   }
 }`;
 
+/**
+ * The service address ZIP of a mobile-install order. Its own read, so a store
+ * whose app may not read addresses still books (the check is then skipped:
+ * checkout already held the order to the ZIP rule).
+ */
+export const BOOKING_SERVICE_ZIP_QUERY = `query bookingServiceZip($id: ID!) {
+  order(id: $id) {
+    shippingAddress { zip }
+  }
+}`;
+
 export const BOOKING_TAGS_REMOVE = `mutation bookingTagsRemove($id: ID!, $tags: [String!]!) {
   tagsRemove(id: $id, tags: $tags) {
     node { id }
@@ -103,6 +115,8 @@ export const BOOK_NOT_FOUND =
   `We couldn't find a paid install order with that number and email. Check both against your confirmation email, or call the shop at ${BUSINESS.phone}.`;
 export const BOOK_FAILED =
   `We couldn't save your install request just now, so it is not in yet. Please try again in a minute, or call the shop at ${BUSINESS.phone}.`;
+/** A mobile-install order whose service ZIP is outside the area (400). */
+export const BOOK_OUT_OF_AREA = MOBILE_AREA_ERROR;
 export const BOOK_UNAVAILABLE =
   `Online install requests aren't available right now. Please call the shop at ${BUSINESS.phone} to set up your install.`;
 
@@ -278,6 +292,22 @@ export async function findOrderForBooking({ ref, email }, cfg, deps = {}) {
   ) ?? null;
 }
 
+/**
+ * The 5-digit ZIP the van would drive to on a mobile-install order, or null
+ * when the order has none or Shopify will not say (logged, never thrown).
+ */
+export async function readServiceZip(node, cfg, deps = {}) {
+  const log = deps.log ?? console;
+  try {
+    const data = await shopifyGraphQL(cfg, BOOKING_SERVICE_ZIP_QUERY, { id: node.id }, deps);
+    const zip = String(data?.order?.shippingAddress?.zip ?? "").trim();
+    return zip || null;
+  } catch (err) {
+    log.warn(`[book-install] ${node.name ?? node.id}: service ZIP not read (${err?.message}); booking without the area check.`);
+    return null;
+  }
+}
+
 /** True when `node` is an order this booking may be made on. */
 export const bookable = (node) => Boolean(node?.id) && needsBooking(node);
 
@@ -298,6 +328,9 @@ const STEPS = Object.keys(STEP_TEXT);
  *
  * Resolves one of:
  *   { result: "already-booked", booking }   nothing written
+ *   { result: "out-of-area" }               a mobile order whose service ZIP
+ *                                           is outside the area: nothing
+ *                                           written (BOOK_OUT_OF_AREA, 400)
  *   { result: "booked", booking }
  *   { result: "missing-scope" }             the app lacks write_orders
  *   { result: "failed", step, done }        a write failed; logged
@@ -311,6 +344,15 @@ export async function bookOrderInstall(node, request, config, deps = {}) {
 
   if (hasTag(node, INSTALL_BOOKED_TAG)) {
     return { result: "already-booked", booking: readInstallBooking(node) };
+  }
+
+  // The van only goes inside the service area (src/data/serviceArea.js).
+  if (installKind(node) === "mobile") {
+    const zip = await readServiceZip(node, cfg, deps);
+    if (zip && !isInServiceArea(zip)) {
+      log.warn(`[book-install] ${label}: NOT booked: mobile install at ZIP ${zip}, outside the service area. The customer was told to ship to the shop or call.`);
+      return { result: "out-of-area" };
+    }
   }
 
   const missingScope = () => {
@@ -475,5 +517,6 @@ export async function bookFromLead(lead, config, deps = {}) {
     return { status: 200, body: { ok: true, booking: { ...outcome.booking, alreadyBooked: true } } };
   }
   if (outcome.result === "missing-scope") return null;
+  if (outcome.result === "out-of-area") return { status: 400, body: { error: BOOK_OUT_OF_AREA } };
   return { status: 502, body: { error: BOOK_FAILED } };
 }

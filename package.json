@@ -20,7 +20,9 @@
     "test:api": "node --test \"api/_lib/*.test.mjs\"",
     "test:content": "node --test \"src/content/*.test.mjs\"",
     "test:lib": "node --test \"src/lib/*.test.mjs\"",
-    "check:translate": "node scripts/translate-check.mjs"
+    "check:translate": "node scripts/translate-check.mjs",
+    "test:data": "node --test \"src/data/*.test.mjs\"",
+    "test:fitment": "node --test \"src/data/fitment*.test.mjs\""
   },
   "dependencies": {
     "js-yaml": "^4.3.2",

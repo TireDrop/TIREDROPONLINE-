@@ -77,7 +77,7 @@ export const SERVICES = [
     mobile: true,
     category: "Tires",
     blurb:
-      "Even out wear and add thousands of miles to your set. Recommended every 5,000–7,500 miles.",
+      "Even out wear and add thousands of miles to your set. Recommended every 5,000–7,000 miles.",
     duration: "30 min",
     priceFrom: 40,
     priceUnit: "per service",
@@ -89,7 +89,7 @@ export const SERVICES = [
     ],
     symptoms: [
       "Front tires wearing faster than rear",
-      "It has been over 7,500 miles",
+      "It has been over 7,000 miles",
       "Noise that changes with vehicle speed",
     ],
   },

@@ -29,7 +29,15 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 import ServiceAreaCounties from "../../components/ui/ServiceAreaCounties.jsx";
+import ZipCheck from "../../components/ui/ZipCheck.jsx";
+import { faqSchema } from "../../components/content/schema.js";
 import { BUSINESS } from "../../data/business.js";
+import {
+  CITY_PAGES,
+  CITY_PAGE_SHARED,
+  cityPath,
+} from "../../data/cityPages.js";
+import RoadsideHelp from "../../components/ui/RoadsideHelp.jsx";
 import { SERVICE_AREA_LABEL } from "../../data/serviceArea.js";
 import { MOBILE_SERVICES, getService } from "../../data/services.js";
 
@@ -93,7 +101,7 @@ const VAN_KIT = [
     icon: Truck,
     name: "Tire cart, floor jack & stands",
     detail:
-      "Rated jack, stands and a cart so heavy assemblies get handled safely on your driveway.",
+      "A rated jack, stands and a cart for lifting and moving heavy wheel and tire assemblies on your driveway.",
   },
   {
     icon: Zap,
@@ -136,6 +144,9 @@ const COMPARISON = [
   },
 ];
 
+/** Justin's wording (2026-10-01). Shared with the city pages. */
+const ROADSIDE_HIGHWAY = CITY_PAGE_SHARED.highwayLine;
+
 const FAQ = [
   {
     q: "Is mobile install available everywhere you ship?",
@@ -176,6 +187,12 @@ const FAQ = [
     a: "Yes, and we do it every week. Some complexes want the van checked in at the gate or ask that work happen in a visitor space rather than a covered garage. Tell us the complex name and any gate code or call-up instructions when you book and we will handle it with management on arrival.",
   },
   {
+    q: "Can you help if I get a flat away from home?",
+    a:
+      "Yes: on a side street, in a parking lot, at your home or at work, anywhere in the three counties, during shop hours. The technician changes or swaps the tire, puts your spare on, or repairs the flat if it can be repaired; a technician inspects the inside first. We confirm an arrival window when we book. " +
+      ROADSIDE_HIGHWAY,
+  },
+  {
     q: "How long does a mobile appointment take?",
     a: "A four-tire installation runs about 45 to 75 minutes. A single flat repair is roughly 30 minutes, a rotation about 30, and a full-synthetic oil change 30 to 45. Your confirmation lists the estimate for the exact service you booked.",
   },
@@ -194,15 +211,16 @@ export default function MobileServicePage() {
       <Seo
         title="Mobile Tire Installation in South Florida"
         description={`Bought tires on ${BUSINESS.name}? ${BUSINESS.parent} brings a fully equipped van to your home, office or jobsite across ${SERVICE_AREA_LABEL} to fit them — plus balancing, repair, rotation, oil changes and TPMS.`}
+        schema={[faqSchema(FAQ, "/mobile-service")]}
       />
 
       <PageHero
-        eyebrow="Mobile install — South Florida"
-        title="You bought the tires. We'll come fit them."
-        lede={`A fully equipped van, a technician who does this every day, and your new set — parked where your car already is. It is the bonus that comes with buying from a store whose parent company fits tires in ${BUSINESS.shop.city} every day.`}
+        eyebrow="Mobile install — Miami-Dade, Broward, Palm Beach"
+        title="Mobile Tire Installation in South Florida"
+        lede={`You bought the tires. We'll come fit them. A fully equipped ${BUSINESS.parent} van brings your new set to your home, office or jobsite anywhere in ${SERVICE_AREA_LABEL}, and fits it where the car is already parked.`}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <Link to="/schedule" className="btn-primary">
+          <Link to="/schedule?service=tire-installation" className="btn-primary">
             Book Mobile Install
             <ArrowRight size={18} aria-hidden />
           </Link>
@@ -339,8 +357,16 @@ export default function MobileServicePage() {
         </div>
       </Section>
 
-      {/* ---------- Install area ---------- */}
+      {/* ---------- Roadside flat help ---------- */}
       <Section className="bg-bone">
+        <RoadsideHelp
+          title="Roadside flat tire help, off the highway"
+          lede={`A flat on a side street, in a parking lot, in your driveway or at work? Call during shop hours and the van comes to the car anywhere in ${SERVICE_AREA_LABEL}. The tire gets changed, repaired if it can be, or swapped for your spare.`}
+        />
+      </Section>
+
+      {/* ---------- Install area ---------- */}
+      <Section className="bg-fog">
         <SectionHead
           eyebrow="Install area"
           title="Where the van rolls"
@@ -349,16 +375,58 @@ export default function MobileServicePage() {
 
         <ServiceAreaCounties />
 
+        {/* ---------- City pages ---------- */}
+        <div className="mt-12">
+          <h3 className="h3">Cities we serve</h3>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-smoke">
+            Each city page has its ZIP codes, the roads we use, local notes and
+            the questions people there ask us.
+          </p>
+          <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {CITY_PAGES.map((city) => (
+              <li key={city.slug}>
+                <Link
+                  to={cityPath(city.slug)}
+                  className="card-hover group flex min-h-[64px] items-center justify-between gap-3 px-5 py-4"
+                >
+                  <span>
+                    <span className="block font-display text-[1.0625rem] font-bold text-ink group-hover:text-drop">
+                      {city.name}
+                    </span>
+                    <span className="block text-xs text-smoke">
+                      Mobile tire installation · {city.county}
+                    </span>
+                  </span>
+                  <ArrowRight size={16} aria-hidden className="shrink-0 text-drop" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-10 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,460px)] lg:items-start">
+          <div>
+            <h3 className="h3">Not listed? Check your ZIP</h3>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-smoke">
+              No city page doesn&rsquo;t mean no van. Coverage is decided by
+              ZIP code: if the place your car is parked has a ZIP in{" "}
+              {SERVICE_AREA_LABEL}, we come to you. The Florida Keys are not
+              covered.
+            </p>
+          </div>
+          <ZipCheck />
+        </div>
+
         <div className="card mt-8 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-relaxed text-smoke">
             <span className="font-display text-[15px] font-bold text-ink">
-              Just outside the area?
+              Near a county line?
             </span>{" "}
-            Call before you assume the answer is no. We regularly stretch past
-            the county line for fleet accounts, jobsites and full four-tire jobs
-            — a dispatcher will tell you straight whether we can get a van to
-            you and what it costs. Further afield, your tires still ship to your
-            door.
+            Call before you assume the answer is no. Inside Miami-Dade, Broward
+            and Palm Beach, we regularly stretch past the county line for fleet
+            accounts, jobsites and full four-tire jobs — a dispatcher will set it
+            up with you. Outside those three
+            counties, your tires still ship free to your door.
           </p>
           <a href={BUSINESS.phoneHref} className="btn-dark btn-sm shrink-0">
             <Phone size={16} aria-hidden />
@@ -451,7 +519,7 @@ export default function MobileServicePage() {
         <SectionHead
           eyebrow="Questions, answered"
           title="Before you book"
-          lede="The eight things local customers ask us most about mobile install. If yours is not here, call and ask."
+          lede="The things local customers ask us most about mobile install and flat tire help. If yours is not here, call and ask."
         />
         <Accordion items={FAQ} />
       </Section>
@@ -469,7 +537,7 @@ export default function MobileServicePage() {
             </p>
           </div>
           <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
-            <Link to="/schedule" className="btn-primary">
+            <Link to="/schedule?service=tire-installation" className="btn-primary">
               Schedule Now
               <ArrowRight size={18} aria-hidden />
             </Link>

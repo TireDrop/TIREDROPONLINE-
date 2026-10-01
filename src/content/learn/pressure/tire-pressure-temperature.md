@@ -10,7 +10,7 @@ secondaryKeywords:
 hub: pressure
 date: 2026-09-30
 updated: 2026-09-30
-demo: null
+demo: pressure-temp
 takeaways:
   - "USTMA and Goodyear put the change at one to two psi for every 10°F; Bridgestone says about 1 psi."
   - "Warmer air raises the reading and cooler air lowers it. The air in the tire is the same; only its temperature changed."
@@ -93,6 +93,8 @@ This assumes the tire's volume stays the same, which is close enough for an esti
 | 80°F (before a front) | 55°F (after a front) | about 32.7 psi | −2.3 |
 
 That works out to a little under 1 psi per 10°F at this pressure, which sits at the low end of the industry range. Real tires can move more, which is why the sources give a range.
+
+[[demo:pressure-temp]]
 
 ## Driving heat is a separate effect
 

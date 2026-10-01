@@ -309,6 +309,69 @@ export function recallVehicle() {
   }
 }
 
+/* ------------------------------------------------------------------ *
+ * What the shopper is shopping for (the fitment selection)
+ * ------------------------------------------------------------------ */
+
+const SELECTION_KEY = "tiredrop.fitment.v1";
+
+const clip = (x, n = 60) => (typeof x === "string" ? x.trim().slice(0, n) : "");
+
+/** A stored selection checked field by field, or null. */
+function cleanSelection(v) {
+  if (!v || typeof v !== "object") return null;
+  if (v.type === "size") {
+    const size = clip(v.size, 40);
+    return size ? { type: "size", size } : null;
+  }
+  if (v.type === "vehicle") {
+    const out = { type: "vehicle", year: clip(v.year), make: clip(v.make), model: clip(v.model) };
+    if (!out.year || !out.make) return null;
+    if (clip(v.pick, 80)) out.pick = clip(v.pick, 80);
+    if (clip(v.size, 40)) out.size = clip(v.size, 40);
+    return out;
+  }
+  return null;
+}
+
+/**
+ * The vehicle or size the shopper is shopping for, as the fitment store
+ * keeps it (src/context/VehicleContext.jsx), or null. Falls back to the last
+ * vehicle a finder remembered, so a vehicle picked before this existed still
+ * counts. Call it in an effect, never while rendering.
+ */
+export function loadSelection() {
+  try {
+    const raw = window.localStorage.getItem(SELECTION_KEY);
+    if (raw) return cleanSelection(JSON.parse(raw));
+  } catch {
+    /* storage unavailable or junk */
+  }
+  const last = recallVehicle();
+  return last ? { type: "vehicle", ...last } : null;
+}
+
+/**
+ * Stores the selection. A vehicle is also remembered for the checkout and
+ * booking forms. null forgets both, so "Shopping for a different car?"
+ * leaves nothing behind to come back on the next visit.
+ */
+export function saveSelection(selection) {
+  const clean = cleanSelection(selection);
+  try {
+    if (!clean) {
+      window.localStorage.removeItem(SELECTION_KEY);
+      window.localStorage.removeItem(LAST_VEHICLE_KEY);
+      return null;
+    }
+    window.localStorage.setItem(SELECTION_KEY, JSON.stringify(clean));
+  } catch {
+    /* storage unavailable: the selection lasts for this page load */
+  }
+  if (clean.type === "vehicle") rememberVehicle(clean);
+  return clean;
+}
+
 /**
  * `{ year, make, model }` from a vehicle written as one line, the way
  * checkout stores it on an order ("Vehicle: 2020 Land Rover Range Rover

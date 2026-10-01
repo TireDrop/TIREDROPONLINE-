@@ -19,7 +19,7 @@
  */
 
 import { TIRES } from "./products.js";
-import { oeSizeFor } from "./fitment.js";
+import { factorySizes, readSize } from "./fitmentCheck.js";
 
 // `?.` keeps this importable outside Vite (node scripts, tests).
 const BASE = String(import.meta.env?.VITE_API_BASE || "/api").replace(
@@ -309,15 +309,28 @@ export function tireQuery({ size, year, make, model, brand, limit } = {}) {
 const queryKey = (q) => new URLSearchParams(q).toString();
 
 /**
+ * The one factory size on file for a vehicle in its model year, or null:
+ * not on file, a year outside the generations on file, or a size that
+ * depends on the trim. The API resolves a vehicle the same way.
+ */
+function vehicleSize({ year, make, model }) {
+  const found = factorySizes({ year, make, model });
+  if (found.status !== "sized") return null;
+  const keys = new Set(found.options.map((o) => readSize(o.front)?.key));
+  return keys.size === 1 && !found.options[0].rear
+    ? (readSize(found.options[0].front)?.key ?? null)
+    : null;
+}
+
+/**
  * The sample catalog answering the same question, synchronously. By size it
- * is an exact size match; by vehicle it is the typical original size from the
- * fitment table, or nothing when the table has no record.
+ * is an exact size match; by vehicle it is the factory size on file for that
+ * model year, or nothing when there is no single one.
  */
 export function searchSample(query) {
   const q = tireQuery(query);
   if (!q) return { source: "sample", query: q, items: [], fallback: true };
-  const size =
-    q.size ?? (q.make && q.model ? oeSizeFor(q.make, q.model)?.size : null);
+  const size = q.size ?? (q.make && q.model ? vehicleSize(q) : null);
   let items = size ? TIRES.filter((t) => t.size === size) : [];
   if (q.brand) items = items.filter((t) => norm(t.brand) === norm(q.brand));
   if (q.limit) items = items.slice(0, Number(q.limit));

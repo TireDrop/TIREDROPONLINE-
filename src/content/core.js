@@ -15,6 +15,7 @@
  */
 import { CORE_SCHEMA, load as loadYaml } from "js-yaml";
 import { Marked } from "marked";
+import { TOOL_PAGE_ALIASES } from "../components/demos/toolPages.js";
 
 export const ORIGIN = "https://tiredroponline.com";
 
@@ -50,6 +51,10 @@ const PATH_ALIASES = {
   "/tools/tire-check": "/tire-check",
   "/tools/tread-gauge": "/tire-check",
   "/tools/find-my-tires": "/find-my-tires",
+  // The demo tool pages: /tools/<demo id or planned alias> -> their page.
+  ...Object.fromEntries(
+    Object.entries(TOOL_PAGE_ALIASES).map(([a, path]) => [`/tools/${a}`, path]),
+  ),
   "/tire-care": "/learn",
 };
 

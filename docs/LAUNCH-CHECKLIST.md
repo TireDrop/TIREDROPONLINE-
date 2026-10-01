@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (6 new tools on preview for review; $1 install tests #D3/#D4 ready to pay; 404 wording fixed; install booking live)_
+_Last updated: 2026-10-01 (SHIPPED: 334 ZIPs outside Palm Beach excluded + server-side booking ZIP check; fitment confidence; 6 new tools + tool pages; mobile hub + 7 wave-1 city pages, roadside flat help; install booking live)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -24,11 +24,12 @@ _Last updated: 2026-10-01 (6 new tools on preview for review; $1 install tests #
 - [x] ~~Post-payment install scheduling handoff~~ (f705e25, 2026-09-30)
 - [x] ~~Install booking tags the order install-booked~~ (f774c41)
 - [x] ~~Mobile/install area: Miami-Dade, Broward, Palm Beach~~ (f8a053c)
-- [ ] Exclude non-Palm-Beach 334 ZIPs (33440, 33455, 33471, 33475) + server-side ZIP check for bookings
+- [x] ~~Exclude non-Palm-Beach 334 ZIPs (33440, 33455, 33471, 33475) + server-side ZIP check for bookings~~ (6e256ba)
 - [x] ~~Arrival wording: "We confirm an arrival window when we book"~~ (be6a2a2)
 - [x] ~~Repo organized: docs map, audits/archive, README guide~~ (c5846e7, 2026-09-30)
 - [x] ~~404 heading: "fine" removed~~ (ded56ec)
-- [ ] 6 new tools (load/speed, plus-size, pressure-temp, repair check, shaking checker, rotation) with their own pages + article embeds: built on `preview/tools` (210b348) → Justin reviews the preview → ship to main
+- [x] ~~Fitment confidence: badge + no Add on won't-fit + Compare same-size + year-aware search~~ (347c4e1, shipped 2026-10-01)
+- [x] ~~6 new tools (load/speed, plus-size, pressure-temp, repair check, shaking checker, rotation) with their own pages + article embeds~~ (shipped 2026-10-01)
 
 ## Admin (Justin)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
@@ -54,6 +55,7 @@ _Last updated: 2026-10-01 (6 new tools on preview for review; $1 install tests #
 - [x] ~~Webhooks: 2 in Shopify, signing key into Vercel, redeploy, test (prompt 21)~~ (2026-09-30: 2 webhooks configured, test notifications 200)
 - [x] ~~Prompt 22: email button + High-risk order review (tag, hold, email) + Needs scheduling alert (order paid → 24h → not install-booked)~~ (Justin, 2026-09-30)
 - [ ] Re-run prompt 15 (local vs ship block was never saved; paste it right above the new install button)
+- [ ] Prompt 23: add 33440, 33455, 33471, 33475 to the "Order routing: local vs ship" Flow ZIP condition (and to the email block if prompt 15 is already saved)
 - [ ] $1 install test: pay #D3 and book it on /track → tags flip + [BOOKED] to info@ + no [SCHEDULE] after 24h; pay #D4 and don't book → [SCHEDULE] after 24h; then refund both (drafts created 2026-09-30)
 - [ ] Confirm info@tiredroponline.com receives Shopify mail (test emails go to the logged-in staff account)
 - [ ] Justin: INSTALL_BOOKING_URL after the Tire Guru call (booking link → set it in Vercel and redeploy; API → tell Claude, it's a follow-up build; see docs/integrations/install-scheduling.md)
@@ -69,8 +71,8 @@ _Last updated: 2026-10-01 (6 new tools on preview for review; $1 install tests #
 - [ ] Fitment hold before orders go to ATD
 - [ ] "Tires arrived at the shop" notice
 - [ ] Checkout spam guard, and no writing into other customers' notes
-- [ ] No Add button on won't-fit tires; Compare crowns same-size tires only
-- [ ] Year-aware fitment on /tires
+- [x] ~~No Add button on won't-fit tires; Compare crowns same-size tires only~~ (347c4e1)
+- [x] ~~Year-aware fitment on /tires~~ (347c4e1)
 
 ## Quick wins (Claude)
 - [ ] Phone bottom bar changes by page
@@ -88,8 +90,8 @@ _Last updated: 2026-10-01 (6 new tools on preview for review; $1 install tests #
 - [ ] Hero finder goes straight to results
 - [ ] Installed-price toggle
 - [ ] Book an install time at checkout
-- [ ] Fitment by trim + staggered, and a "Fits your vehicle" badge
-- [ ] Local city pages: Sunrise, Fort Lauderdale, Plantation, Davie…
+- [ ] Fitment by trim + staggered (logic + badge shipped in 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API)
+- [ ] Local city pages: wave 1 (7 cities) live 2026-10-01; wave 2 next
 - [ ] Real review collection (no stars until real reviews exist)
 
 ## Content & SEO: Blog + Learn (Claude; plan in docs/prompts/blog-learn-build.md)
@@ -97,7 +99,14 @@ _Last updated: 2026-10-01 (6 new tools on preview for review; $1 install tests #
 - [x] ~~Phase 1: keyword map, 90–100 titles, demo list → Justin approves~~ (b813381, plans approved)
 - [x] ~~Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves~~ (800247b, pilot approved + 5 demos)
 - [x] ~~Blog + Learn live: 20 articles, 5 demos, 98 prerendered routes~~ (be6a2a2)
-- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); Batches 2–9 to go. Demos: 6 more built (preview/tools); D7, D9, D12 cut by Justin ("only useful tools")
+- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); Batches 2–9 to go. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
+- [x] ~~6 new tools with their own tool pages, embedded in 8 articles~~ (preview/tools 210b348, shipped 2026-10-01)
+- [x] ~~Wave 1 city pages + mobile hub: Sunrise, Plantation, Tamarac, Coral Springs, Davie, Fort Lauderdale, Weston~~ (preview/cities bb42574, shipped 2026-10-01)
+- [ ] Justin: Google Business Profile link + map pin (for geo schema)
+- [x] ~~Mobile claims confirmed by Justin: no trip fee, cross-county, roadside flat help (not highway shoulders)~~ (2026-10-01)
+- [ ] Justin: confirm the city facts the research left unverified, so they can go on the pages: Tamarac ZIPs, roads and neighbourhoods; Coral Springs, Davie and Weston roads; Coral Springs and Weston neighbourhoods; whether Plantation 33388 is a PO Box ZIP
+- [ ] Roadside flat tire help: give it a starting price → it joins the service catalog and online booking (phone only until then)
+- [ ] City pages wave 2: Pompano Beach, Miramar, Oakland Park, Pembroke Pines, Hollywood, Lauderhill (after wave 1 is indexed)
 - [ ] Phase 4: internal links, Search Console submit, monthly refresh
 
 ## ATD and business (Justin)
@@ -108,7 +117,8 @@ _Last updated: 2026-10-01 (6 new tools on preview for review; $1 install tests #
 - [ ] Brand pricing rules: minimum advertised prices, online-sale limits
 - [ ] Decide: direct API vs Spark / Slingshot / our own sync
 - [x] ~~Tire Guru call made~~ (Justin, 2026-09-30)
-- [ ] Tire Guru answer: booking link → INSTALL_BOOKING_URL in Vercel; API → Claude builds it; neither → /schedule stays
+- [x] ~~Tire Guru answer received~~ (Josh Nail, 2026-09-30): no direct integration; their tire + service search widget is $150/mo and feeds orders/appointments into the POS
+- [ ] Justin/Melissa: send Josh the 7 questions (appointments-only mode? booking link + prefill? live ATD inventory/pricing? payment processor? embed type? contract? notifications?) → then decide on the $150/mo widget
 
 ## Later
 - [ ] Vercel Pro ($20/mo)

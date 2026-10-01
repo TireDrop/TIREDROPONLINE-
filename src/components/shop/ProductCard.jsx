@@ -4,6 +4,7 @@ import { Check, ShoppingCart, Truck } from "lucide-react";
 
 import { money, useCart } from "../../context/CartContext.jsx";
 import { useCompare } from "../../context/CompareContext.jsx";
+import { useFit } from "../../context/VehicleContext.jsx";
 import {
   DELIVERY_NOTE_SHORT,
   SET_SIZE,
@@ -11,6 +12,7 @@ import {
 } from "../../data/pricing.js";
 import { productHref } from "../../data/products.js";
 import ProductArt from "./ProductArt.jsx";
+import { ChangeButton, FitBadge, NoFitActions } from "./Fitment.jsx";
 
 // Sizes, load/speed codes, prices and brand or model names are never put
 // through a page translator (see src/lib/translate.js): "Pilot Sport" is a
@@ -65,6 +67,13 @@ export default function ProductCard({ product }) {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
 
+  // Whether it fits what the shopper is shopping for. A tire that does not
+  // fit gets no Add button: "See tires that fit" takes its place. Nothing is
+  // blocked before the saved vehicle loads (fit is null) or when nothing is
+  // chosen ("Check fitment").
+  const fit = useFit(product);
+  const noFit = fit?.status === "no-fit";
+
   const addSet = () => {
     addItem(
       {
@@ -79,6 +88,8 @@ export default function ProductCard({ product }) {
         size: isTire
           ? product.size
           : `${product.diameter}x${product.wheelWidth}`,
+        // Read by the cart's fitment check (a dual index marks an LT tire).
+        loadIndex: isTire ? (product.loadIndex ?? null) : null,
         price: product.price,
         installPrice: product.installPrice,
         install: false,
@@ -158,6 +169,21 @@ export default function ProductCard({ product }) {
         <p className="tnum mt-1 text-[11px] leading-snug text-smoke sm:mt-1.5 sm:text-xs">
           {specLine(product)}
         </p>
+        {fit && (
+          <div className="mt-2" data-testid="card-fit">
+            {fit.code === "no-selection" ? (
+              <ChangeButton className="text-left" tab="vehicle">
+                <FitBadge
+                  as="span"
+                  fit={{ ...fit, title: "Check fitment: pick your vehicle" }}
+                  className="underline-offset-2 hover:underline"
+                />
+              </ChangeButton>
+            ) : (
+              <FitBadge fit={fit} />
+            )}
+          </div>
+        )}
 
         {/* The price block is ruled off from the description above it, and
             every figure is tabular so the column of cards lines up. */}
@@ -215,27 +241,31 @@ export default function ProductCard({ product }) {
           )}
 
           <div className="mt-2.5 flex flex-col gap-2 sm:mt-3.5">
-            <button
-              type="button"
-              onClick={addSet}
-              className="btn-primary btn-sm min-h-[44px] w-full px-2 sm:px-4"
-              aria-label={`Add a set of ${SET_SIZE} ${product.brand} ${product.model} to the cart`}
-            >
-              {added ? (
-                <>
-                  <Check size={15} aria-hidden />
-                  Added
-                </>
-              ) : (
-                <>
-                  <ShoppingCart size={15} aria-hidden />
-                  <span className="sm:hidden">Add 4</span>
-                  <span className="hidden sm:inline">
-                    Add set of {SET_SIZE}
-                  </span>
-                </>
-              )}
-            </button>
+            {noFit ? (
+              <NoFitActions fit={fit} compact />
+            ) : (
+              <button
+                type="button"
+                onClick={addSet}
+                className="btn-primary btn-sm min-h-[44px] w-full px-2 sm:px-4"
+                aria-label={`Add a set of ${SET_SIZE} ${product.brand} ${product.model} to the cart`}
+              >
+                {added ? (
+                  <>
+                    <Check size={15} aria-hidden />
+                    Added
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart size={15} aria-hidden />
+                    <span className="sm:hidden">Add 4</span>
+                    <span className="hidden sm:inline">
+                      Add set of {SET_SIZE}
+                    </span>
+                  </>
+                )}
+              </button>
+            )}
 
             {href && (
               <Link

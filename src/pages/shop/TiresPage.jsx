@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Phone, SearchX, SlidersHorizontal, Truck, X } from "lucide-react";
 
@@ -15,6 +15,7 @@ import Filters, {
   countActiveFilters,
 } from "../../components/shop/Filters.jsx";
 import SearchPanel from "../../components/shop/SearchPanel.jsx";
+import { ShoppingForBar } from "../../components/shop/Fitment.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
 import { TireArt } from "../../components/shop/ProductArt.jsx";
 import {
@@ -26,7 +27,8 @@ import {
 import { ratingsFor } from "../../data/tireRatings.js";
 import { setPrice } from "../../data/pricing.js";
 import { BUSINESS } from "../../data/business.js";
-import { oeSizeFor } from "../../data/fitment.js";
+import { fitSizeOf, sizesOf } from "../../data/fitmentCheck.js";
+import { useVehicle } from "../../context/VehicleContext.jsx";
 import { useTireSearch } from "../../data/useApi.js";
 import { money } from "../../context/CartContext.jsx";
 
@@ -119,17 +121,16 @@ export default function TiresPage() {
     aspect: params.get("a") || "",
     diameter: params.get("d") || "",
   };
-  const vehicle = {
+  // A vehicle handed over in the URL (?vy=&vmk=&vmd=, from a link or an
+  // older bookmark) becomes the vehicle being shopped for, then leaves the
+  // URL: the selection is the one source of truth (VehicleContext.jsx).
+  const urlVehicle = {
     year: params.get("vy") || "",
     make: params.get("vmk") || "",
     model: params.get("vmd") || "",
   };
-  const hasVehicle = Boolean(vehicle.year && vehicle.make && vehicle.model);
-  // The typical original size for that vehicle, so the page can keep the
-  // promise the home-page finder makes: "We match your vehicle to the sizes
-  // we stock." Null when the table has no record for the make and model, in
-  // which case nothing below claims a match.
-  const oe = hasVehicle ? oeSizeFor(vehicle.make, vehicle.model) : null;
+  const fitment = useVehicle();
+  const { ready, resolved, selectVehicle, selectSize, openChanger } = fitment;
   const hasSize = Boolean(
     sizeQuery.width || sizeQuery.aspect || sizeQuery.diameter,
   );
@@ -138,16 +139,46 @@ export default function TiresPage() {
       ? `${sizeQuery.width}/${sizeQuery.aspect}R${sizeQuery.diameter}`
       : "";
 
-  // Vehicle and full-size searches go through the API (ATD when it is live).
-  // Until it answers, or when there is no API at all, the search answers from
-  // the sample catalog, which is exactly what this page always showed.
-  const search = useTireSearch(
-    hasVehicle
-      ? { year: vehicle.year, make: vehicle.make, model: vehicle.model }
-      : fullSize
-        ? { size: fullSize }
-        : null,
-  );
+  const handOff = [
+    urlVehicle.year,
+    urlVehicle.make,
+    urlVehicle.model,
+    params.get("fit") || "",
+  ].join("|");
+  useEffect(() => {
+    const [year, make, model, open] = handOff.split("|");
+    if (!(year && make && model) && !open) return;
+    if (year && make && model) selectVehicle({ year, make, model });
+    if (open) openChanger(open === "size" ? "size" : "vehicle");
+    const next = new URLSearchParams(params);
+    ["vy", "vmk", "vmd", "fit"].forEach((k) => next.delete(k));
+    setParams(next, { replace: true });
+    // Runs once per hand-off; the setters are stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handOff]);
+
+  // Searches go through the API (ATD when it is live): a size typed in the
+  // filters first, else the size being shopped for, else the vehicle (the
+  // API resolves it to the factory size for that model year). Until it
+  // answers, or with no API at all, the sample catalog answers, which is
+  // exactly what this page always showed.
+  const chosen = resolved.kind === "vehicle" ? resolved.chosen : null;
+  // A size the shopper gave, or the trim they picked, is searched as a size;
+  // otherwise the vehicle itself, so the distributor's own fitment answers
+  // once it is wired.
+  const ownSize =
+    chosen &&
+    !chosen.rear &&
+    (resolved.basis === "entered" || resolved.basis === "trim");
+  let query = null;
+  if (fullSize) query = { size: fullSize };
+  else if (!ready) query = null;
+  else if (resolved.kind === "size") query = { size: resolved.size.display };
+  else if (resolved.kind === "vehicle") {
+    if (ownSize) query = { size: chosen.front };
+    else if (resolved.vehicle.model) query = resolved.vehicle;
+  }
+  const search = useTireSearch(query);
   const live = search.active && search.source === "atd";
   // Live results replace the sample catalog outright: a page that mixed
   // distributor stock with sample listings would be quoting two sources as
@@ -181,17 +212,16 @@ export default function TiresPage() {
       maxp: value.maxPrice,
     });
 
+  // The finder above the list sets what is being shopped for: a vehicle
+  // (SearchPanel selects it itself), or a full sidewall size. A partial size
+  // ("any"/45/R17) only filters.
   const onSearch = (payload) => {
     if (payload.type === "vehicle") {
-      patchParams({
-        vy: payload.year,
-        vmk: payload.make,
-        vmd: payload.model,
-        w: "",
-        a: "",
-        d: "",
-      });
+      patchParams({ w: "", a: "", d: "", vy: "", vmk: "", vmd: "" });
     } else {
+      if (payload.width && payload.aspect && payload.diameter) {
+        selectSize(`${payload.width}/${payload.aspect}R${payload.diameter}`);
+      }
       patchParams({
         w: payload.width,
         a: payload.aspect,
@@ -234,21 +264,44 @@ export default function TiresPage() {
     sort,
   ]);
 
-  // A vehicle narrows the page rather than replacing it. Filtering the catalog
-  // down to one size outright can leave a single card on screen, and someone
-  // who arrived by vehicle still wants to see what else is stocked — so the
-  // sizes that fit come first and the rest keep their own heading below.
+  // What is being shopped for narrows the page rather than replacing it.
+  // Filtering the catalog down to one size outright can leave a single card
+  // on screen, and the shopper still wants to see what else is stocked — so
+  // the tires in their size come first and the rest keep their own heading
+  // below, each card saying in words that it does not fit.
   //
-  // What "fits" is the vehicle search's answer: the distributor's fitment
-  // when ATD is live, the typical original size from the fitment table when
-  // it is not.
-  const fitIds = new Set(hasVehicle ? search.items.map((t) => t.id) : []);
-  const fitSizes = [...new Set(hasVehicle ? search.items.map((t) => t.size) : [])];
-  const fitSize = live ? fitSizes.join(", ") || oe?.size : oe?.size;
-  const showFit = hasVehicle && (oe != null || (live && fitSizes.length > 0));
-  const fitsVehicle = (t) => fitIds.has(t.id);
-  const fitting = showFit ? results.filter(fitsVehicle) : [];
-  const others = showFit ? results.filter((t) => !fitsVehicle(t)) : results;
+  // "In your size" is the same fitment answer every card shows (year-aware,
+  // from src/data/fitmentCheck.js); with ATD live, a vehicle search returns
+  // the distributor's own fitment, and those tires count as in your size.
+  const fitSizes = ready ? sizesOf(resolved) : [];
+  const fitSize = fitSizes.join(" or ");
+  const showFit = fitSizes.length > 0;
+  const liveVehicle = live && query && !query.size;
+  const inSize = (t) => {
+    if (liveVehicle) return true;
+    // Every tire in the size, including one a trim or an LT casing leaves
+    // to confirm: its own card says which.
+    const f = fitment.fitFor(fitSizeOf(t));
+    return (
+      f?.status === "fits" || f?.code === "some-trims" || f?.code === "casing"
+    );
+  };
+  const fitting = showFit ? results.filter(inSize) : [];
+  const others = showFit ? results.filter((t) => !inSize(t)) : results;
+  const fitHeading =
+    resolved.kind === "size"
+      ? `In your size, ${resolved.size.display}`
+      : chosen
+        ? `In the size for your ${resolved.label}`
+        : `In the factory sizes for a ${resolved.label}`;
+  const fitLede =
+    resolved.kind === "size"
+      ? `Tires on this page in ${fitSize}.`
+      : resolved.basis === "typical"
+        ? `Tires on this page in ${fitSize}, the typical factory size on file for a ${resolved.label}. Trims and options vary, so check the sticker in your driver's door jamb.`
+        : resolved.basis === "entered"
+          ? `Tires on this page in ${fitSize}, the size you gave us.`
+          : `Tires on this page in ${fitSize}.`;
 
   const activeFilterCount = countActiveFilters(filters);
   const sizeLabel = `${sizeQuery.width || "any"}/${sizeQuery.aspect || "any"}R${
@@ -375,47 +428,7 @@ export default function TiresPage() {
       </div>
 
       <Section>
-        {hasVehicle && (
-          <div className="card mb-8 flex flex-col gap-3 border-l-4 border-l-drop p-5 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="eyebrow mb-1">Your vehicle</p>
-              <p className="font-display text-xl font-bold">
-                {vehicle.year} {vehicle.make} {vehicle.model}
-              </p>
-              <p className="mt-1 text-sm text-smoke">
-                {oe ? (
-                  <>
-                    Typical original size{" "}
-                    <span className="font-semibold text-ink">{oe.size}</span>.
-                    Trims and factory options vary, so check your sidewall — or
-                    call and we will confirm the exact fitment before anything
-                    ships.
-                  </>
-                ) : (
-                  <>
-                    We do not have an original size on file for this one. Read
-                    us the size off your sidewall, or call and we will confirm
-                    the exact fitment before anything ships.
-                  </>
-                )}
-              </p>
-            </div>
-            <div className="flex shrink-0 flex-wrap gap-2">
-              <a href={BUSINESS.phoneHref} className="btn-primary btn-sm">
-                <Phone size={16} aria-hidden />
-                {BUSINESS.phone}
-              </a>
-              <button
-                type="button"
-                onClick={() => patchParams({ vy: "", vmk: "", vmd: "" })}
-                className="btn-outline btn-sm"
-              >
-                <X size={16} aria-hidden />
-                Clear
-              </button>
-            </div>
-          </div>
-        )}
+        <ShoppingForBar className="mb-8" />
 
         {/* Block flow below `lg`: the sidebar is a drawer there, so the
             aside renders nothing and a grid row would leave its gap behind
@@ -570,13 +583,9 @@ export default function TiresPage() {
                     id="fits-heading"
                     className="h3 mb-1 text-[1.25rem] md:text-[1.375rem]"
                   >
-                    Fits your {vehicle.year} {vehicle.make} {vehicle.model}
+                    {fitHeading}
                   </h2>
-                  <p className="mb-4 text-sm text-smoke">
-                    {oe && !live
-                      ? `Tires on this page in ${oe.size}, the typical original size.`
-                      : `Tires on this page in ${fitSize}.`}
-                  </p>
+                  <p className="mb-4 text-sm text-smoke">{fitLede}</p>
                   {fitting.length > 0 ? (
                     <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
                       {fitting.map((tire) => (
@@ -609,8 +618,8 @@ export default function TiresPage() {
                       Other sizes we stock
                     </h2>
                     <p className="mb-4 text-sm text-smoke">
-                      These are not {fitSize} and will not fit without a wheel
-                      change.
+                      These are not {fitSize}, so they don&rsquo;t match what
+                      you&rsquo;re shopping for. Each one says so on its card.
                     </p>
                     <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
                       {others.map((tire) => (

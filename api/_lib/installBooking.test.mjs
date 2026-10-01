@@ -15,6 +15,7 @@ import { clearAppScopeCache } from "./shopify.js";
 import {
   BOOK_FAILED,
   BOOK_NOT_FOUND,
+  BOOK_OUT_OF_AREA,
   BOOKING_NOTE_PREFIX,
   appendNoteLine,
   bookingFromNote,
@@ -100,6 +101,8 @@ function fakeShop({
       case "bookingOrdersByEmail":
         // Loose search: every order comes back, the code's own checks decide.
         return Response.json({ data: { orders: { nodes: structuredClone(store.orders) } } });
+      case "bookingServiceZip":
+        return Response.json({ data: { order: { shippingAddress: byId(v.id)?.shippingAddress ?? null } } });
       case "bookingContact":
         return Response.json({
           data: { order: { phone: "+19545550199", shippingAddress: null, billingAddress: { name: "Billing Name", phone: null }, customer: { displayName: "Buyer Person" } } },
@@ -195,6 +198,55 @@ beforeEach(() => {
 });
 
 // ---- happy path --------------------------------------------------------------------------
+
+// ---- mobile install: the service area (src/data/serviceArea.js) ---------------------------
+
+function paidMobileOrder(zip) {
+  return paidStoreOrder({
+    note: "TireDrop live order TD-260920-ABCDEF\nCustomer: Buyer Person, (954) 555-0100\nDelivery: Mobile install at my address",
+    tags: ["vercel-live", "mobile-install", "needs-scheduling"],
+    customAttributes: [
+      { key: "Delivery", value: "Mobile install at my address" },
+      { key: "Order ref", value: "TD-260920-ABCDEF" },
+    ],
+    shippingLine: null,
+    shippingAddress: zip === null ? null : { zip },
+  });
+}
+
+test("book-install: a mobile order whose service ZIP is outside the area is a 400 and nothing is written", async () => {
+  for (const zip of ["33440", "33455", "33471", "33475", "33040", "33037", "33455-1234"]) {
+    resetTrackRateLimit();
+    const shop = fakeShop({ orders: [paidMobileOrder(zip)] });
+    const { handler, lines } = bookHandler(shop);
+    const res = await post(handler, REQUEST);
+    assert.equal(res.statusCode, 400, zip);
+    assert.deepEqual(res.body, { error: BOOK_OUT_OF_AREA, field: null }, zip);
+    assert.deepEqual(shop.ops(), ["trackOrder", "bookingServiceZip"], zip);
+    assert.ok(shop.store.orders[0].tags.includes("needs-scheduling"), zip);
+    assert.ok(lines.some((l) => l.includes(`ZIP ${zip}, outside the service area`)), zip);
+  }
+  assert.equal(
+    BOOK_OUT_OF_AREA,
+    "That ZIP is outside our mobile service area (Miami-Dade, Broward and Palm Beach). Ship to our Sunrise shop instead, or call (954) 773-1896.",
+  );
+});
+
+test("book-install: a mobile order inside the area books; no readable ZIP skips the check; shop orders never read it", async () => {
+  for (const zip of ["33351", "33301", "33480", "33012", null]) {
+    resetTrackRateLimit();
+    clearAppScopeCache();
+    const shop = fakeShop({ orders: [paidMobileOrder(zip)] });
+    const res = await post(bookHandler(shop).handler, REQUEST);
+    assert.equal(res.statusCode, 200, String(zip));
+    assert.equal(res.body.alreadyBooked, false);
+    assert.deepEqual(shop.ops().slice(0, 3), ["trackOrder", "bookingServiceZip", "appAccessScopes"]);
+    assert.ok(shop.store.orders[0].tags.includes("install-booked"));
+  }
+  const store = fakeShop();
+  await post(bookHandler(store).handler, REQUEST);
+  assert.ok(!store.ops().includes("bookingServiceZip"), "an in-shop install needs no ZIP");
+});
 
 test("book-install: a paid ship-to-store order is booked on the order, and info@ gets a [BOOKED] lead", async () => {
   const shop = fakeShop();

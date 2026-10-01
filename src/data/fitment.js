@@ -126,6 +126,26 @@ export const FITMENT_YEARS = {
 };
 
 /**
+ * Factory sizes by trim, including staggered fronts and rears, for the model
+ * years where they have been checked trim by trim:
+ *
+ *   "Make|Model": [[firstYear, lastYear, [option, ...]], ...]
+ *   option: { trim, front, rear?, alternates? }
+ *
+ * `rear` is set only on a staggered car (a different size on the rear axle).
+ * `alternates` lists sizes the vehicle maker approves besides the factory
+ * one; nothing else counts as a fit, so a plus size is never inferred.
+ *
+ * Empty on purpose. No trim-by-trim source has been checked for this site
+ * yet, and a wrong "fits" is worse than an honest "check fitment", so no row
+ * goes in from memory. When a year is listed here it wins over FITMENT_YEARS;
+ * otherwise the single mainstream-trim size there is used and every surface
+ * says it is the typical size. The distributor's fitment data (ATD) is what
+ * fills this in. src/data/fitmentCheck.js reads it.
+ */
+export const FITMENT_TRIMS = {};
+
+/**
  * [size, bodyStyle] for the generation that contains `year`, or null when the
  * table has no record of the make and model at all. The size is null until a
  * year is given (it cannot be told without one) and for a year the model was

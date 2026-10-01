@@ -2,7 +2,7 @@
  * Generates public/robots.txt and public/sitemap.xml.
  *
  * The route list is derived, never hand-typed: static routes are read out of
- * src/App.jsx (the only place the router is defined) and the two parameterised
+ * src/App.jsx (the only place the router is defined) and the parameterised
  * routes are expanded from the catalogs that feed them. Add a <Route> and the
  * sitemap grows with it; delete one and the stale URL disappears. A hand-typed
  * sitemap drifts the first time somebody renames a page, and a sitemap full of
@@ -153,6 +153,7 @@ function priorityFor(path) {
     return "0.9";
   if (path.startsWith("/tires/") || path.startsWith("/wheels/")) return "0.7";
   if (path.startsWith("/services/")) return "0.6";
+  if (path.startsWith("/mobile-service/")) return "0.7";
   if (/^\/(learn|blog)\/.+/.test(path)) return "0.6";
   if (["/terms", "/privacy", "/accessibility", "/sitemap"].includes(path))
     return "0.3";
@@ -180,7 +181,8 @@ function redirectedPaths() {
 /**
  * Every page route the site serves, indexable or not, as
  * `{ path, sources, lastmod }`. This is the prerender list: the router's
- * static pages and one page per catalog product and service.
+ * static pages, one page per catalog product and service, and one per
+ * mobile city page (src/data/cityPages.js).
  *
  * `extra` adds routes this script cannot find on its own, as `{ path,
  * lastmod }`. scripts/prerender.mjs passes the content routes (/learn,
@@ -193,9 +195,11 @@ function redirectedPaths() {
 export async function allRoutes({ extra = [] } = {}) {
   const { TIRES, WHEELS } = await import(resolve(ROOT, "src/data/products.js"));
   const { SERVICES } = await import(resolve(ROOT, "src/data/services.js"));
+  const { CITY_PAGES } = await import(resolve(ROOT, "src/data/cityPages.js"));
   const { files } = parseRouter();
   const productFiles = [files.get("ProductPage"), "src/data/products.js"];
   const serviceFiles = [files.get("ServiceDetailPage"), "src/data/services.js"];
+  const cityFiles = [files.get("MobileCityPage"), "src/data/cityPages.js"];
 
   // Content routes first: where a path is also a router route (/learn,
   // /blog), the first entry wins, and its lastmod should be the content's
@@ -211,6 +215,7 @@ export async function allRoutes({ extra = [] } = {}) {
     ...TIRES.map((t) => ({ path: `/tires/${t.slug}`, sources: productFiles })),
     ...WHEELS.map((w) => ({ path: `/wheels/${w.slug}`, sources: productFiles })),
     ...SERVICES.map((s) => ({ path: `/services/${s.slug}`, sources: serviceFiles })),
+    ...CITY_PAGES.map((c) => ({ path: `/mobile-service/${c.slug}`, sources: cityFiles })),
   ];
 
   const redirected = redirectedPaths();

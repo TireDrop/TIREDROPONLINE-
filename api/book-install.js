@@ -16,7 +16,9 @@
 //   200 { ok: true, alreadyBooked: true, booking }    was already booked;
 //                                                     nothing changed
 //       booking = { day, window, dayLabel, windowLabel, notes }
-//   400 { error, field }                 bad order / email / day / window / notes
+//   400 { error, field }                 bad order / email / day / window / notes,
+//                                        or (field null) a mobile-install order
+//                                        whose service ZIP is outside the area
 //   404 { error }                        no bookable order for that number and
 //                                        email: the same answer for a wrong
 //                                        email, an unknown number, an unpaid,
@@ -37,6 +39,7 @@ import { clientIp } from "./_lib/ratelimit.js";
 import {
   BOOK_FAILED,
   BOOK_NOT_FOUND,
+  BOOK_OUT_OF_AREA,
   BOOK_UNAVAILABLE,
   bookOrderInstall,
   bookable,
@@ -91,6 +94,9 @@ export function createBookInstallHandler({ env, shopify = {}, now = Date.now } =
           { ok: true, alreadyBooked: outcome.result === "already-booked", booking: outcome.booking },
           NO_STORE,
         );
+      }
+      if (outcome.result === "out-of-area") {
+        return send(res, 400, { error: BOOK_OUT_OF_AREA, field: null }, NO_STORE);
       }
       if (outcome.result === "missing-scope") {
         return send(res, 503, { configured: false, error: BOOK_UNAVAILABLE }, NO_STORE);

@@ -555,6 +555,15 @@ export function validateLead(body) {
     fields.push([label, value]);
   }
 
+  // A mobile booking sends the van to the address typed, so its ZIP must be
+  // in the service area, the same rule and sentence as /schedule and
+  // checkout. An in-shop booking ("shop") needs no ZIP at all.
+  if (form === "booking" && cleanText(body.locationType) === "mobile") {
+    const zip = cleanText(body.zip);
+    if (!ZIP.test(zip)) return { ok: false, error: "Enter a five-digit ZIP code." };
+    if (!isInServiceArea(zip)) return { ok: false, error: MOBILE_AREA_ERROR };
+  }
+
   return {
     ok: true,
     bot: false,

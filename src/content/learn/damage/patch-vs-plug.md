@@ -10,7 +10,7 @@ secondaryKeywords:
 hub: damage
 date: 2026-09-30
 updated: 2026-09-30
-demo: null
+demo: damage-map
 takeaways:
   - "Industry guidance accepts neither a plug alone nor a patch alone. A proper repair fills the hole with a rubber stem and seals the inner liner with a patch."
   - "USTMA limits repairs to the tread area, for punctures no larger than 1/4 inch (6 mm)."
@@ -93,6 +93,8 @@ USTMA and TIA draw the repairable zone tightly:
 | Overlapping an earlier repair | Any | Not repairable; replace |
 
 Some tire makers set their own limits on top of these, for run-flat tires and other types. USTMA notes this, so a technician will follow the tire maker's rules where they're stricter.
+
+[[demo:damage-map]]
 
 ## Why the tire has to come off the wheel
 

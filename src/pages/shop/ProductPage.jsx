@@ -30,11 +30,16 @@ import {
 } from "../../components/ui/index.jsx";
 import ProductArt from "../../components/shop/ProductArt.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
+import {
+  FitPanel,
+  ShoppingForBar,
+} from "../../components/shop/Fitment.jsx";
 import { getProduct, TIRES, WHEELS } from "../../data/products.js";
 import { BUSINESS } from "../../data/business.js";
 import { SERVICE_AREA_LABEL } from "../../data/serviceArea.js";
 import { useCart, money } from "../../context/CartContext.jsx";
 import { useCompare } from "../../context/CompareContext.jsx";
+import { useFit } from "../../context/VehicleContext.jsx";
 import {
   DELIVERY_NOTE,
   SET_SIZE,
@@ -159,6 +164,11 @@ export default function ProductPage({ kind = "tire" }) {
 export function ProductDetail({ product, kind = "tire", reportStock = false }) {
   const { addItem } = useCart();
   const compare = useCompare();
+  // Whether it fits what the shopper is shopping for (null for a wheel, and
+  // until the saved vehicle has loaded). A tire that does not fit has no Add
+  // to Cart anywhere on the page; the fitment panel says why and what fits.
+  const fit = useFit(product);
+  const noFit = fit?.status === "no-fit";
 
   const isTire = kind !== "wheel";
   const unit = isTire ? "tire" : "wheel";
@@ -215,7 +225,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
       : null;
 
   const handleAdd = () => {
-    if (soldOut) return;
+    if (soldOut || noFit) return;
     addItem(
       {
         id: product.id,
@@ -227,6 +237,8 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
         name: product.model,
         brand: product.brand,
         size: sizeLabel,
+        // Read by the cart's fitment check (a dual index marks an LT tire).
+        loadIndex: isTire ? (product.loadIndex ?? null) : null,
         price: product.price,
         installPrice: product.installPrice,
         install,
@@ -257,6 +269,12 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
           { label: product.model },
         ]}
       />
+
+      {isTire && (
+        <div className="wrap mt-6">
+          <ShoppingForBar />
+        </div>
+      )}
 
       <Section>
         <div className="grid items-start gap-10 lg:grid-cols-2">
@@ -323,6 +341,8 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                 <p className="mt-2 text-sm text-smoke">Available to order.</p>
               )}
             </div>
+
+            {isTire && <FitPanel fit={fit} />}
 
             {/* Quantity. Presets first, because tapping "4" is faster than
                 four taps on a plus button, with free entry for oddities. */}
@@ -503,15 +523,26 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
               Shipping is free. Taxes are calculated at checkout.
             </p>
 
-            <button
-              type="button"
-              onClick={handleAdd}
-              disabled={soldOut}
-              className="btn-primary mt-5 w-full disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <ShoppingCart size={18} aria-hidden />
-              Add to Cart
-            </button>
+            {noFit ? (
+              <p
+                data-testid="no-add"
+                className="mt-5 rounded-sm border border-ink/15 bg-fog p-3 text-sm text-ink"
+              >
+                <span className="font-semibold">{fit.title}.</span> To keep
+                the wrong size out of your cart, it can&rsquo;t be added. The
+                tires that fit are one tap away, above.
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={handleAdd}
+                disabled={soldOut}
+                className="btn-primary mt-5 w-full disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <ShoppingCart size={18} aria-hidden />
+                Add to Cart
+              </button>
+            )}
             {soldOut && (
               <p className="mt-2 text-sm text-smoke">
                 Call{" "}
@@ -724,15 +755,21 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                 {qty} {plural(qty)} · {money(product.price)} each
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleAdd}
-              disabled={soldOut}
-              className="btn-primary btn-sm ml-auto shrink-0 min-h-[44px] disabled:opacity-50"
-            >
-              <ShoppingCart size={16} aria-hidden />
-              Add to cart
-            </button>
+            {noFit ? (
+              <p className="ml-auto shrink-0 text-right text-xs font-semibold text-ink">
+                {fit.title}
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={handleAdd}
+                disabled={soldOut}
+                className="btn-primary btn-sm ml-auto shrink-0 min-h-[44px] disabled:opacity-50"
+              >
+                <ShoppingCart size={16} aria-hidden />
+                Add to cart
+              </button>
+            )}
           </div>
         </div>
       )}

@@ -7,6 +7,9 @@
  *      in place (the <h1> element the HTML arrived with is still the one on
  *      screen), with no console errors, so no hydration mismatch.
  *   3. A query-string URL and an unknown path render fresh, without errors.
+ *      A saved cart, compare list and vehicle hydrate without a mismatch;
+ *      the vehicle and its fitment answers appear after hydration, never
+ *      in the served HTML.
  *   4. Client-side navigation still works after hydration: a header link
  *      changes the page, title and canonical without a full page load.
  *
@@ -253,6 +256,64 @@ const routes = [
     }
   }
   await context.close();
+}
+
+// A shopper with a saved vehicle. The server renders with no vehicle; the
+// saved one loads in an effect after hydration, so the served markup must
+// hydrate in place and then show the vehicle and its fitment answers.
+{
+  const { context, page, errors } = await newPage();
+  await context.addInitScript(() => {
+    localStorage.setItem(
+      "tiredrop.fitment.v1",
+      JSON.stringify({ type: "vehicle", year: "2019", make: "Ford", model: "F-150" }),
+    );
+  });
+  for (const route of [
+    "/tires",
+    "/tires/continental-terraincontact-at-265-70r17",
+    "/tires/nitto-ridge-grappler-285-70r17",
+    "/cart",
+    "/compare",
+  ]) {
+    for (let run = 1; run <= 2; run += 1) {
+      errors.length = 0;
+      await page.goto(BASE + route, { waitUntil: "load" });
+      await page.waitForFunction(isMounted);
+      await page.waitForLoadState("networkidle");
+      const state = await page.evaluate(() => ({
+        kept: window.__servedH1 === document.querySelector("h1"),
+        bar:
+          document.querySelector('[data-testid="shopping-for-text"]')?.textContent ?? "",
+      }));
+      // The tire search asks /api/tires, which this harness answers 404.
+      const real = errors.filter((e) => !/status of 404/.test(e));
+      // An empty cart or compare list has no bar to show.
+      const barOk =
+        /^\/(cart|compare)$/.test(route) ||
+        /2019 Ford F-150 \(265\/70R17\)/.test(state.bar);
+      (state.kept && barOk && real.length === 0
+        ? ok
+        : bad)(
+        `hydrated ${route} with a saved vehicle ("${state.bar.trim()}"), run ${run} ${real.join(" | ")}`,
+      );
+    }
+  }
+  await context.close();
+}
+
+// The served HTML itself carries no vehicle and no fitment answer: those
+// depend on the visitor's storage, so they only appear after hydration.
+{
+  const html = await (await fetch(`${BASE}/tires/nitto-ridge-grappler-285-70r17`)).text();
+  const clean =
+    !/data-fit=/.test(html) &&
+    !/Doesn(&#x27;|')t fit/.test(html) &&
+    /data-testid="shopping-for"/.test(html) &&
+    />Add to Cart</.test(html);
+  (clean ? ok : bad)(
+    "prerendered product page: Shopping-for bar shell, no fitment answer, Add to Cart present",
+  );
 }
 
 for (const url of ["/tires?size=225/45R18", "/tire-size?size=225/45R17", "/no-such-page"]) {

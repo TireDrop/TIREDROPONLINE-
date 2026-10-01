@@ -338,7 +338,7 @@ const mobileOrder = (address = {}) =>
   });
 
 const AREA_ERROR =
-  "Mobile install covers Miami-Dade, Broward and Palm Beach counties. Choose ship-to-home or ship-to-store instead.";
+  "That ZIP is outside our mobile service area (Miami-Dade, Broward and Palm Beach). Ship to our Sunrise shop instead, or call (954) 773-1896.";
 
 test("mobile install accepts an in-area ZIP and keeps the city as typed", async () => {
   const res = await call(checkoutHandler, { method: "POST", body: mobileOrder({ city: "Fort Lauderdale", zip: "33301" }) });
@@ -774,4 +774,21 @@ test("shopifyGraphQL is generic: returns data, throws on userErrors under any ro
     shopifyGraphQL(getConfig({}).shopify, "query { shop { name } }"),
     (err) => err instanceof ShopifyCheckoutError && err.status === 503,
   );
+});
+
+test("vehicle search resolves the factory size for the model year (sample mode)", async () => {
+  // Tacoma: 245/75R16 through 2023, 245/70R17 from 2024.
+  const old = await call(tiresHandler, { method: "GET", query: { year: "2019", make: "toyota", model: "tacoma" } });
+  assert.equal(old.statusCode, 200);
+  assert.equal(old.body.query.size, "245/75R16");
+  assert.ok(old.body.items.length > 0);
+  assert.ok(old.body.items.every((i) => i.size === "245/75R16"));
+  const next = await call(tiresHandler, { method: "GET", query: { year: "2024", make: "Toyota", model: "Tacoma" } });
+  assert.equal(next.body.query.size, "245/70R17");
+  assert.ok(next.body.items.every((i) => i.size === "245/70R17"));
+  // A year with no size on file is not guessed: no size, no items.
+  const none = await call(tiresHandler, { method: "GET", query: { year: "2004", make: "Toyota", model: "Tacoma" } });
+  assert.equal(none.statusCode, 200);
+  assert.equal(none.body.query.size, null);
+  assert.deepEqual(none.body.items, []);
 });
