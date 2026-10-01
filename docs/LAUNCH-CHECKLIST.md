@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (SHIPPED: Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
+_Last updated: 2026-10-01 (SHIPPED: fitment no longer blocks on a model-level guess, door-jamb size entry front/rear (dee5157); Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -29,6 +29,7 @@ _Last updated: 2026-10-01 (SHIPPED: Tesla tires Learn hub with 6 guides; languag
 - [x] ~~Repo organized: docs map, audits/archive, README guide~~ (c5846e7, 2026-09-30)
 - [x] ~~404 heading: "fine" removed~~ (ded56ec)
 - [x] ~~Fitment confidence: badge + no Add on won't-fit + Compare same-size + year-aware search~~ (347c4e1, shipped 2026-10-01)
+- [x] ~~Fitment: stop blocking tires on a model-level guess; door-jamb size entry (front/rear)~~ (dee5157)
 - [x] ~~6 new tools (load/speed, plus-size, pressure-temp, repair check, shaking checker, rotation) with their own pages + article embeds~~ (shipped 2026-10-01)
 - [x] ~~Language button: translate any page (Google element + translate.google.com fallback)~~ (c05e3ac)
 - [x] ~~Spanish tab labels overflow the home finder on phones (SearchPanel whitespace-nowrap) → let tabs wrap below md~~ (c05e3ac)
