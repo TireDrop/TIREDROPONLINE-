@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import { ApiError, subscribeNewsletter } from "../../data/api.js";
 import { hasChanges, readFormValues } from "../../data/forms.js";
+import { guardFields } from "../../data/formGuard.js";
 import { useApiStatus } from "../../data/useApi.js";
 import { FormTrap, Input } from "../ui/index.jsx";
 
@@ -123,8 +124,9 @@ export function NewsletterSignup({ tone = "dark", source = "footer", className =
     // event, which state never saw.
     const { values, changed } = readFormValues(form, { email });
     if (hasChanges(changed)) setEmail(values.email);
-    // The honeypot is read straight from the DOM, however it was filled.
-    const website = form.elements.namedItem("website")?.value || "";
+    // The honeypot (read straight from the DOM, however it was filled) and
+    // the fill-time token.
+    const guard = guardFields(form);
     const value = values.email.trim();
     if (!EMAIL.test(value)) {
       setError(COPY.invalid);
@@ -134,7 +136,7 @@ export function NewsletterSignup({ tone = "dark", source = "footer", className =
     setBusy(true);
     setError(null);
     try {
-      await subscribeNewsletter({ email: value, source, website });
+      await subscribeNewsletter({ email: value, source, ...guard });
       setDone(true);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : COPY.failed);

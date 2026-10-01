@@ -21,6 +21,7 @@ import { useEffect, useState } from "react";
 
 import { BUSINESS } from "./business.js";
 import { ApiError, getStatus, sendForm } from "./api.js";
+import { guardFields } from "./formGuard.js";
 
 /**
  * The address the confirmations name: VITE_CONTACT_EMAIL if set, otherwise the
@@ -61,16 +62,6 @@ export function useFormsWired() {
     };
   }, []);
   return wired;
-}
-
-/**
- * The honeypot every form carries (`<FormTrap />`): a field people never
- * see, so a value in it means a bot filled the form. The server answers a
- * bot like a success and stores nothing.
- */
-function trapValue(formElement) {
-  const field = formElement?.elements?.namedItem?.("website");
-  return typeof field?.value === "string" ? field.value : "";
 }
 
 /**
@@ -127,7 +118,10 @@ export const hasChanges = (changed) => Object.keys(changed).length > 0;
 
 /**
  * Posts one form's values to /api/forms. `formElement` is the submitted
- * <form>, read only for its honeypot.
+ * <form>, read only for the spam guard (data/formGuard.js): its honeypot
+ * (`<FormTrap />`, a field people never see, so a value in it means a bot)
+ * and how long it has been on screen (`ft`). The server answers a bot like
+ * a success and stores nothing.
  *
  * Resolves `{ delivered: boolean, error: string | null, data? }` and never
  * throws (`data` is the server's answer when delivered, e.g. a paid order's
@@ -140,11 +134,11 @@ export const hasChanges = (changed) => Object.keys(changed).length > 0;
  */
 export async function submitForm(formName, values, formElement = null) {
   // Read the trap before any await: the form may re-render meanwhile.
-  const website = trapValue(formElement);
+  const guard = guardFields(formElement);
   if (!(await formsOn())) return { delivered: false, error: null };
 
   try {
-    const data = await sendForm({ ...values, form: formName, website });
+    const data = await sendForm({ ...values, form: formName, ...guard });
     return { delivered: true, error: null, data };
   } catch (err) {
     if (err instanceof ApiError) return { delivered: false, error: err.message };

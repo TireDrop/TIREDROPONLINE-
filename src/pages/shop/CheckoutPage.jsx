@@ -23,6 +23,7 @@ import {
   Badge,
   Input,
   Select,
+  FormTrap,
 } from "../../components/ui/index.jsx";
 import { useCart, money } from "../../context/CartContext.jsx";
 import { BUSINESS } from "../../data/business.js";
@@ -35,6 +36,7 @@ import { getService } from "../../data/services.js";
 import { ApiError, submitCheckout } from "../../data/api.js";
 import { useApiStatus } from "../../data/useApi.js";
 import { hasChanges, readFormValues } from "../../data/forms.js";
+import { guardFields } from "../../data/formGuard.js";
 import { recallVehicle } from "../../data/vehicles.js";
 import {
   checkFit,
@@ -664,9 +666,12 @@ export default function CheckoutPage() {
       .filter(Boolean)
       .join("\n");
 
+    // The spam guard's honeypot and fill-time token (data/formGuard.js).
+    const guard = guardFields(formRef.current);
     let outcome;
     try {
       outcome = await submitCheckout({
+        ...guard,
         items: safeLines.map((l) => ({ sku: l.sku ?? l.id, qty: l.qty })),
         delivery: form.fulfillment,
         customer: {
@@ -1045,6 +1050,7 @@ export default function CheckoutPage() {
             }}
             className="min-w-0"
           >
+            <FormTrap id="checkout-website" />
             {/* ---------- 1. Contact ---------- */}
             {step.id === "contact" && (
               <section>

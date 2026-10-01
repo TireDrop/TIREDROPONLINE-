@@ -26,9 +26,11 @@ export function articleSchema(article) {
     dateModified: article.updated || article.date,
     inLanguage: "en-US",
     image: OG_IMAGE,
+    // The visible byline, as an organization: never a person
+    // (src/content/core.js fixes it to AUTHOR on every article).
     author: {
       "@type": "Organization",
-      name: BUSINESS.name,
+      name: article.author,
       url: ORIGIN,
     },
     publisher: { "@id": `${ORIGIN}/#organization` },

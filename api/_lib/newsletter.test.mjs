@@ -4,6 +4,7 @@ import { test, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 
 import { createNewsletterHandler } from "../newsletter.js";
+import { fillToken } from "../../src/data/formGuard.js";
 import { statusBody } from "../status.js";
 import { getConfig } from "./config.js";
 import { clearShopifyTokenCache } from "./shopify.js";
@@ -47,9 +48,17 @@ function mockRes() {
   };
 }
 
+// What a real page sends with every form: the fill-time token of a form that
+// was on screen for 8 seconds (src/data/formGuard.js). A test that sends its
+// own `ft` (or none) keeps it.
+const withFillToken = (body) =>
+  body && typeof body === "object" && !Array.isArray(body) && !("ft" in body)
+    ? { ...body, ft: fillToken(1_000_000, 1_008_000) }
+    : body;
+
 async function post(handler, body, headers = {}) {
   const res = mockRes();
-  await handler({ method: "POST", headers, body }, res);
+  await handler({ method: "POST", headers, body: withFillToken(body) }, res);
   return res;
 }
 

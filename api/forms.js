@@ -14,14 +14,23 @@
 // customer (found by email, else phone, or created without any marketing
 // consent) and Shopify Flow emails it to info@ (api/_lib/leads.js,
 // docs/integrations/website-leads.md). No third-party form service.
-// `website` is a honeypot the forms hide from people.
+//
+// Spam guard (api/_lib/spam.js): per-IP rate limit, a 16 KB body cap, the
+// `website` honeypot, the `ft` fill-time token (src/data/formGuard.js) and
+// conservative content checks. An EXISTING customer's note is never written
+// from here: the lead goes to the tiredrop.last_lead / tiredrop.leads
+// metafields and fires the alert tags (api/_lib/leads.js).
 //
 // Responses (all JSON, never cached):
-//   200 { ok: true }                   recorded (or a bot filled the honeypot:
-//                                      same answer, nothing stored)
+//   200 { ok: true }                   recorded (or a bot: honeypot, too fast,
+//                                      forged token or spam content; same
+//                                      answer, nothing stored, logged)
 //   200 { ok: true, booking }          a paid order's install booked (or
 //                                      already booked: booking.alreadyBooked)
 //   400 { error }                      bad input; `error` is shown as-is
+//                                      (no `ft`: a page from before the guard,
+//                                      "reload the page")
+//   413 { error }                      body over 16 KB
 //   429 { error }                      too many submissions from this client
 //   503 { configured: false, error }   Shopify is not configured
 //   502/504 { error }                  Shopify refused or did not answer
@@ -36,6 +45,13 @@ import { ShopifyCheckoutError } from "./_lib/shopify.js";
 import { recordLead } from "./_lib/leads.js";
 import { bookFromLead } from "./_lib/installBooking.js";
 import { clientIp, createRateLimiter } from "./_lib/ratelimit.js";
+import {
+  BODY_LIMITS,
+  STALE_PAGE,
+  inspectSubmission,
+  logBlocked,
+  logRateLimited,
+} from "./_lib/spam.js";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 const FAILED = "We could not send that just now. Please call the shop instead.";
@@ -47,6 +63,20 @@ const limiter = createRateLimiter({ limit: FORMS_RATE_LIMIT, windowMs: FORMS_RAT
 /** Test hook. */
 export function resetFormsRateLimit() {
   limiter.reset();
+}
+
+/** Body keys that are not free text a person typed for the shop to read. */
+const NOT_TEXT = new Set(["name", "contact", "email", "website", "ft", "form"]);
+
+/** What the content check reads: the person's name, and every other typed value. */
+export function formsContent(body) {
+  const b = body && typeof body === "object" ? body : {};
+  return {
+    names: [b.name, b.contact],
+    texts: Object.entries(b)
+      .filter(([key]) => !NOT_TEXT.has(key))
+      .map(([, value]) => value),
+  };
 }
 
 /** The handler, with `env` and Shopify deps (e.g. fetchImpl) injectable for tests. */
@@ -68,6 +98,7 @@ export function createFormsHandler({ env, shopify = {}, now = Date.now } = {}) {
     }
 
     if (limiter.hit(clientIp(req), now())) {
+      logRateLimited("forms");
       return send(
         res,
         429,
@@ -77,9 +108,19 @@ export function createFormsHandler({ env, shopify = {}, now = Date.now } = {}) {
     }
 
     try {
-      const checked = validateLead(await readJsonBody(req));
+      const body = await readJsonBody(req, { maxBytes: BODY_LIMITS.forms });
+      // A bot (honeypot, too fast, forged token, spam content) is answered
+      // like a success and nothing is stored.
+      const guard = inspectSubmission(body, { env: env ?? process.env, content: formsContent(body) });
+      if (guard.verdict === "bot") {
+        logBlocked("forms", guard, { form: body?.form });
+        return send(res, 200, { ok: true }, NO_STORE);
+      }
+      if (guard.verdict === "stale") return send(res, 400, { error: STALE_PAGE }, NO_STORE);
+
+      const checked = validateLead(body);
       if (!checked.ok) return send(res, 400, { error: checked.error }, NO_STORE);
-      // Honeypot filled: answer like a success, store nothing.
+      // Honeypot filled (already caught above; kept as a second line).
       if (checked.bot) return send(res, 200, { ok: true }, NO_STORE);
 
       // A booking for a paid order, whose order verifies with the email on

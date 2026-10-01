@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (SHIPPED: 334 ZIPs outside Palm Beach excluded + server-side booking ZIP check; fitment confidence; 6 new tools + tool pages; mobile hub + 7 wave-1 city pages, roadside flat help; install booking live)_
+_Last updated: 2026-10-01 (SHIPPED: search-result data, breadcrumbs + schema check; 334 ZIPs outside Palm Beach excluded + server-side booking ZIP check; fitment confidence; 6 new tools + tool pages; mobile hub + 7 wave-1 city pages, roadside flat help; install booking live)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -56,6 +56,7 @@ _Last updated: 2026-10-01 (SHIPPED: 334 ZIPs outside Palm Beach excluded + serve
 - [x] ~~Prompt 22: email button + High-risk order review (tag, hold, email) + Needs scheduling alert (order paid → 24h → not install-booked)~~ (Justin, 2026-09-30)
 - [ ] Re-run prompt 15 (local vs ship block was never saved; paste it right above the new install button)
 - [ ] Prompt 23: add 33440, 33455, 33471, 33475 to the "Order routing: local vs ship" Flow ZIP condition (and to the email block if prompt 15 is already saved)
+- [ ] Prompt 24: "Website lead alert" reads the lead from the `tiredrop.last_lead` metafield (not `customer.note`), new last line; then the two-message test
 - [ ] $1 install test: pay #D3 and book it on /track → tags flip + [BOOKED] to info@ + no [SCHEDULE] after 24h; pay #D4 and don't book → [SCHEDULE] after 24h; then refund both (drafts created 2026-09-30)
 - [ ] Confirm info@tiredroponline.com receives Shopify mail (test emails go to the logged-in staff account)
 - [ ] Justin: INSTALL_BOOKING_URL after the Tire Guru call (booking link → set it in Vercel and redeploy; API → tell Claude, it's a follow-up build; see docs/integrations/install-scheduling.md)
@@ -77,7 +78,8 @@ _Last updated: 2026-10-01 (SHIPPED: 334 ZIPs outside Palm Beach excluded + serve
 ## Quick wins (Claude)
 - [ ] Phone bottom bar changes by page
 - [x] ~~Pop-up off shop pages~~ (2026-09-30: superseded, the pop-up is gone)
-- [ ] Google search-result data: breadcrumbs, FAQ, map coordinates
+- [x] ~~Google search-result data: breadcrumbs (one per page, matching the visible trail), FAQ (kept where it was), article author, `npm run check:schema` gate~~ (27d477c)
+- [ ] Google search-result data: map coordinates. Waiting on Justin's Google Maps pin; paste it into `geo` in `src/data/business.js`
 - [ ] Accessibility fixes + skip link
 - [ ] Security headers: CSP, HSTS, Permissions-Policy
 - [ ] NHTSA lookup timeout

@@ -24,6 +24,8 @@ import { chromium } from "playwright";
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import assert from "node:assert/strict";
+import { inspectSubmission } from "../api/_lib/spam.js";
+import { readFillToken } from "../src/data/formGuard.js";
 
 const CHROME =
   process.env.AUDIT_CHROME ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
@@ -251,7 +253,14 @@ async function runWidth(width) {
     await email.fill("driver@example.com");
     await button.click();
     await form.getByText("You're on the list. Watch your inbox.").waitFor();
-    assert.deepEqual(signups, [{ email: "driver@example.com", source: "footer", website: "" }]);
+    // What the page sends, minus the fill-time token, which is checked with
+    // the server's own guard (test mode: only the 2 s minimum is off).
+    assert.deepEqual(
+      signups.map(({ ft: _ft, ...rest }) => rest),
+      [{ email: "driver@example.com", source: "footer", website: "" }],
+    );
+    assert.ok(readFillToken(signups[0].ft), "a valid fill-time token is sent");
+    assert.deepEqual(inspectSubmission(signups[0], { env: { SPAM_GUARD_TEST_MODE: "1" } }), { verdict: "ok" });
     const live = await form.locator("[aria-live]").innerText();
     assert.match(live, /You're on the list/, "success is in the live region");
     await form.screenshot({ path: `${SHOTS}/${width}-footer-success.png` });

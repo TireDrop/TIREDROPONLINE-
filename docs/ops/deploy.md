@@ -120,17 +120,20 @@ that do the server-side work:
 |                      | configured/off.                                           |
 | `POST /api/forms`    | The site's forms (contact, financing, fleet quote,        |
 |                      | booking). Finds or creates the Shopify customer (no       |
-|                      | marketing consent), stores the lead in the note and the   |
-|                      | `tiredrop.last_lead` metafield, and re-adds the tag       |
-|                      | `new-lead` so Shopify Flow emails info@. Honeypot and     |
-|                      | per-IP rate limit; 503 `{ configured: false }` without    |
-|                      | Shopify. `docs/integrations/website-leads.md`.            |
+|                      | marketing consent), stores the lead in the metafields     |
+|                      | `tiredrop.last_lead` and `tiredrop.leads` (the note only  |
+|                      | for a customer it just created; never an existing one's), |
+|                      | and adds the tag `new-lead` so Shopify Flow emails info@. |
+|                      | Spam guard (rate limit, size cap, honeypot, fill time,    |
+|                      | content); 503 `{ configured: false }` without Shopify.    |
+|                      | `docs/integrations/website-leads.md`.                     |
 | `POST /api/newsletter` | `{ email }`: newsletter sign-up from the footer form.   |
 |                      | Makes the email a Shopify customer subscribed to email    |
 |                      | marketing, tagged `newsletter`, `footer`, `vercel` (an    |
-|                      | existing customer is subscribed and tagged). Honeypot and |
-|                      | per-IP rate limit; 503 `{ configured: false }` without    |
-|                      | Shopify. On whenever Shopify is configured.               |
+|                      | existing customer is subscribed and tagged). Spam guard   |
+|                      | (rate limit, 2 KB cap, honeypot, fill time); 503          |
+|                      | `{ configured: false }` without Shopify. On whenever      |
+|                      | Shopify is configured.                                    |
 | `GET /api/tires`     | Tire search by `size=225/45R17` or `year`/`make`/`model`. |
 |                      | Live ATD data when configured, the sample catalog if not. |
 |                      | `?sku=<sku>` alone returns one tire, `{ source, item }`,  |
@@ -148,7 +151,9 @@ that do the server-side work:
 |                      | `src/data/business.js`).                                  |
 |                      | Mobile is always an order request, even when online       |
 |                      | payment is on: the van is booked and the install quoted   |
-|                      | on the call.                                              |
+|                      | on the call. Spam guard (10 per 10 min per IP, 16 KB cap, |
+|                      | honeypot, fill time, content); see                        |
+|                      | `docs/integrations/website-leads.md`.                     |
 | `GET /api/cron/atd-sweep` | Vercel Cron, every 5 min: the ATD forwarder. Places  |
 |                      | paid Shopify orders with ATD and syncs tracking back.     |
 |                      | Needs `Authorization: Bearer $CRON_SECRET`; off unless    |

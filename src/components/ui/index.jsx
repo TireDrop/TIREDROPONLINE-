@@ -14,6 +14,7 @@ import { SERVICE_AREA_SCHEMA } from "../../data/serviceArea.js";
 import { getCityPage } from "../../data/cityPages.js";
 import { getProduct } from "../../data/products.js";
 import { getService } from "../../data/services.js";
+import { noteFormStart } from "../../data/formGuard.js";
 
 const ORIGIN = `https://${BUSINESS.domain}`;
 const OG_IMAGE = `${ORIGIN}/brand/og-tiredrop.jpg`;
@@ -141,12 +142,33 @@ function organizationNode() {
 }
 
 /**
+ * BUSINESS.geo ("26.1xxxxx, -80.2xxxxx", as Google Maps copies a pin) as
+ * GeoCoordinates, or null. Null while the pin is unset, and also when it does
+ * not read as two numbers inside South Florida: swapped order or a dropped
+ * minus sign would otherwise publish a point in the ocean or in Asia.
+ * scripts/schema-check.mjs fails the build check in that case, so a bad paste
+ * is caught rather than silently skipped.
+ */
+function geoFor(pin) {
+  if (typeof pin !== "string") return null;
+  const parts = pin.split(",").map((s) => s.trim());
+  if (parts.length !== 2 || parts.some((s) => !/^-?\d+(\.\d+)?$/.test(s)))
+    return null;
+  const [latitude, longitude] = parts.map(Number);
+  // South Florida, generously: the Keys to Palm Beach, the Gulf to the coast.
+  if (latitude < 24.3 || latitude > 27.3) return null;
+  if (longitude < -82.2 || longitude > -79.8) return null;
+  return { "@type": "GeoCoordinates", latitude, longitude };
+}
+
+/**
  * The Sunrise shop. This is the local business: it holds the address, the
  * hours and the service area, and it is the parent of the TireDrop brand.
  * AutoPartsStore covers the retail side, AutoRepair the bay work — both are
  * LocalBusiness subtypes Google recognises, and the shop genuinely does both.
  */
 function shopNode() {
+  const geo = geoFor(BUSINESS.geo);
   return {
     "@type": ["AutoPartsStore", "AutoRepair"],
     "@id": `${ORIGIN}/#shop`,
@@ -156,6 +178,10 @@ function shopNode() {
     telephone: BUSINESS.phone,
     image: OG_IMAGE,
     hasMap: BUSINESS.mapsHref,
+    // The map pin, once Justin's is pasted into BUSINESS.geo. Until then the
+    // key is left out entirely, never published as null or as a guess from
+    // the street address.
+    ...(geo ? { geo } : {}),
     address: {
       "@type": "PostalAddress",
       streetAddress: BUSINESS.shop.street,
@@ -168,16 +194,35 @@ function shopNode() {
     // Miami-Dade, Broward and Palm Beach counties (src/data/serviceArea.js).
     areaServed: SERVICE_AREA_SCHEMA.map((area) => ({ ...area })),
     // The shop's own confirmed profiles (src/data/business.js). The Google
-    // Business Profile joins them once its URL is confirmed.
+    // Business Profile joins them once its URL is confirmed. They are the
+    // shop's profiles, not TireDrop's, so they sit here and not on the
+    // TireDrop Organization: sameAs means "the same entity".
     sameAs: [YELP_PROFILE.url, SOCIAL.facebook].filter(Boolean),
-    // TODO(geo): no `geo` until Justin sends the Google Business Profile map
-    // pin. Coordinates guessed from the street address would put the shop in
-    // the wrong place on every map that reads them.
+    // No priceRange: there is no honest single band for a shop that sells
+    // anything from a tire repair to a set of performance wheels.
     // No aggregateRating, no review and no foundingDate. This site publishes
     // no reviews of its own — it links to the shop's Google and Yelp profiles
     // instead — and marking up reviews or ratings it does not hold breaches
     // Google's structured-data policy. The founding year is left out until
     // the owner confirms it.
+  };
+}
+
+/**
+ * The shop as a plain Organization, for pages that are not about the shop.
+ * TireDrop's parentOrganization and a service's provider point at #shop on
+ * every page, and a reference has to land on a node on the same page. This
+ * one carries no address or hours on purpose: a LocalBusiness belongs on the
+ * pages about the shop (SHOP_ROUTES), and a LocalBusiness without its
+ * address is an invalid item in Google's eyes.
+ */
+function shopStubNode() {
+  return {
+    "@type": "Organization",
+    "@id": `${ORIGIN}/#shop`,
+    name: BUSINESS.parent,
+    url: `${ORIGIN}/locations`,
+    sameAs: [YELP_PROFILE.url, SOCIAL.facebook].filter(Boolean),
   };
 }
 
@@ -221,14 +266,16 @@ function isShopRoute(pathname) {
  * Publishing price and availability as fact would promise inventory nobody
  * has confirmed.
  *
- * The consequence, stated plainly: with no offers and no aggregateRating, a
- * Product node produces no rich result at all — Google needs one of offers,
- * review or aggregateRating. The markup is still worth emitting, because it
- * describes the product to crawlers that read entities rather than snippets.
- * Rich results come back when the catalog is real.
+ * So while this is false, no Product node is emitted at all. Google requires
+ * one of offers, review or aggregateRating on a Product; without them it is
+ * reported as an invalid item in Search Console and earns no rich result, and
+ * the only one of the three this site could honestly add is the offer. The
+ * product pages keep their WebPage and BreadcrumbList.
  *
  * WHEN ATD OR U.S. AUTOFORCE PRICING AND INVENTORY ARE LIVE: set this true and
- * the offer below starts shipping. Do not flip it before then.
+ * the Product, with its offer, starts shipping. Do not flip it before then.
+ * `npm run check:schema` checks every Product it finds carries an offer with
+ * a price and currency.
  * ------------------------------------------------------------------ */
 const EMIT_OFFERS = false;
 
@@ -260,6 +307,11 @@ function productNode(product, url) {
     // No aggregateRating. The catalog carries no ratings, and rating markup
     // for ratings nobody left is a policy breach, not a shortcut.
   };
+
+  // Only a real product photo, the same rule the page uses to show one. The
+  // drawn placeholder art is not a picture of the product.
+  if (typeof product.image === "string" && /^https:\/\//i.test(product.image))
+    node.image = product.image;
 
   if (isTire && product.warranty) {
     node.additionalProperty.push({
@@ -339,14 +391,19 @@ function cityAreaServed(city) {
 
 /**
  * Where an inner page sits, for BreadcrumbList. Top-level pages are
- * Home > Page; these few have a real parent page in between, matching the
- * visible breadcrumbs on /install and the service pages.
+ * Home > Page; these have a real parent page in between, and each one
+ * matches the page's visible <Breadcrumbs> trail, names included. A page's
+ * own `crumbs` prop wins over this list. Product pages add their brand level
+ * in graphFor. `npm run check:schema` compares every built page's
+ * BreadcrumbList with its visible trail.
  */
 const CRUMB_PARENTS = [
-  [/^\/tires\/.+/, { name: "Shop Tires", path: "/tires" }],
-  [/^\/wheels\/.+/, { name: "Shop Wheels", path: "/wheels" }],
+  [/^\/tires\/.+/, { name: "Tires", path: "/tires" }],
+  [/^\/wheels\/.+/, { name: "Wheels", path: "/wheels" }],
+  [/^\/compare$/, { name: "Tires", path: "/tires" }],
+  [/^\/tire-check$/, { name: "Learn", path: "/learn" }],
   [/^\/services\/.+/, { name: "Auto Service", path: "/auto-service" }],
-  [/^\/install$/, { name: "How Shipping Works", path: "/shipping" }],
+  [/^\/install$/, { name: "How shipping works", path: "/shipping" }],
   [CITY_ROUTE, { name: "Mobile Tire Service", path: "/mobile-service" }],
 ];
 
@@ -402,8 +459,9 @@ function graphFor(pathname, url, title, fullTitle, description, noindex, crumbs)
 
   let missing = false;
   let crumbName = title;
+  let crumbParents = crumbs;
 
-  if (isShopRoute(pathname)) graph.push(shopNode());
+  graph.push(isShopRoute(pathname) ? shopNode() : shopStubNode());
 
   if (pathname === "/mobile-service") {
     graph.push(
@@ -438,8 +496,17 @@ function graphFor(pathname, url, title, fullTitle, description, noindex, crumbs)
     );
     if (found) {
       const node = productNode(found, url);
-      graph.push(node);
+      if (EMIT_OFFERS) graph.push(node);
       crumbName = node.name;
+      // The visible trail: Tires > <brand> (the listing filtered to that
+      // brand) > the product.
+      crumbParents ??= [
+        CRUMB_PARENTS.find(([re]) => re.test(pathname))[1],
+        {
+          name: found.brand,
+          path: `/${product[1]}?brands=${encodeURIComponent(found.brand)}`,
+        },
+      ];
     } else missing = true;
   }
 
@@ -456,7 +523,7 @@ function graphFor(pathname, url, title, fullTitle, description, noindex, crumbs)
 
   // Inner pages that are meant to be indexed get a breadcrumb trail.
   if (pathname !== "/" && !hide) {
-    graph.push(breadcrumbNode(pathname, url, crumbName, crumbs));
+    graph.push(breadcrumbNode(pathname, url, crumbName, crumbParents));
     webPage.breadcrumb = { "@id": `${url}#breadcrumb` };
   }
 
@@ -959,10 +1026,18 @@ export function EmptyState({
 /**
  * A field people never see or reach: off-screen, out of the tab order and
  * hidden from screen readers. Bots that fill every input fill this one, and
- * /api/forms answers them like a success while storing nothing. Put it
- * inside the <form> and pass the form element to submitForm().
+ * the API answers them like a success while storing nothing. Put it
+ * inside the <form> and pass the form element to submitForm() (or read it
+ * with guardFields() from data/formGuard.js).
+ *
+ * It also notes when the form appeared, for the fill-time token the form
+ * sends with it (data/formGuard.js): a submission sooner than people can
+ * manage is treated like a filled trap.
  */
 export function FormTrap({ id }) {
+  useEffect(() => {
+    noteFormStart(id);
+  }, [id]);
   return (
     <div
       aria-hidden="true"

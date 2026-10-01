@@ -43,7 +43,13 @@
  * (which replaces the markup) on /track?ref=… — and be the ones submitted.
  * /contact and /schedule get the same before-the-app check.
  *
- * Every /api request is answered by a mock; nothing reaches Shopify.
+ * Every /api request is answered by a mock; nothing reaches Shopify. Each
+ * body sent to a write endpoint (/api/forms, /api/checkout, /api/newsletter,
+ * /api/book-install) is also run through the server's real spam guard
+ * (api/_lib/spam.js) with SPAM_GUARD_TEST_MODE=1, which only drops the 2 s
+ * minimum fill time (Playwright fills faster than any person): every real
+ * submission must carry a valid fill-time token and pass the honeypot and
+ * content checks, and the one bot submission must be caught.
  *
  *   npm run build && npm run check:forms
  *
@@ -57,6 +63,27 @@ import { existsSync } from "node:fs";
 import assert from "node:assert/strict";
 
 import { mockVpic } from "./vpic-mock.mjs";
+import { inspectSubmission } from "../api/_lib/spam.js";
+import { formsContent } from "../api/forms.js";
+import { checkoutContent } from "../api/checkout.js";
+import { readFillToken } from "../src/data/formGuard.js";
+
+/* --------------------------- the spam guard -------------------------- */
+
+const GUARD_ENV = { SPAM_GUARD_TEST_MODE: "1" };
+const CONTENT = {
+  forms: formsContent,
+  checkout: checkoutContent,
+  newsletter: () => null,
+  "book-install": (b) => ({ texts: [b?.notes] }),
+};
+/** Every write the pages sent, with the real guard's verdict on it. */
+const judged = [];
+function judge(endpoint, body) {
+  const result = inspectSubmission(body, { env: GUARD_ENV, content: CONTENT[endpoint](body) });
+  judged.push({ endpoint, body, ...result, elapsedMs: readFillToken(body?.ft)?.elapsedMs ?? null });
+  return result;
+}
 
 const CHROME =
   process.env.AUDIT_CHROME ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
@@ -186,11 +213,13 @@ async function open(
   });
   await page.route("**/api/forms", async (route) => {
     sent.forms.push(JSON.parse(route.request().postData() || "{}"));
+    judge("forms", sent.forms.at(-1));
     await route.fulfill({ json: { ok: true } });
   });
   await page.route("**/api/checkout", async (route) => {
     const body = JSON.parse(route.request().postData() || "{}");
     sent.checkout.push(body);
+    judge("checkout", body);
     await route.fulfill({
       json: {
         mode: "request",
@@ -203,6 +232,7 @@ async function open(
   });
   await page.route("**/api/newsletter", async (route) => {
     sent.newsletter.push(JSON.parse(route.request().postData() || "{}"));
+    judge("newsletter", sent.newsletter.at(-1));
     await route.fulfill({ json: { ok: true } });
   });
   // Order lookup: always "not found", after `trackDelay`.
@@ -492,6 +522,7 @@ for (const width of [390, 1440]) {
     await page.getByRole("button", { name: "Send Message" }).click();
     await waitFor(() => h.sent.forms.length === 1, "/api/forms");
     assert.equal(h.sent.forms[0].website, "http://spam.example", "honeypot value sent");
+    assert.equal(judged.at(-1).reason, "honeypot", "the server's guard catches it");
     assert.equal(h.sent.forms[0].name, "Al");
     noErrors(h.errors);
     await h.context.close();
@@ -940,7 +971,10 @@ for (const width of [390, 1440]) {
       await expectDom(page, fields, `(${mode})`);
       await button.click();
       await waitFor(() => h.sent.newsletter.length === 1, "/api/newsletter");
-      assert.deepEqual(h.sent.newsletter[0], {
+      // The fill-time token is checked by the spam-guard check at the end.
+      const { ft, ...signup } = h.sent.newsletter[0];
+      assert.ok(ft, "a fill-time token is sent");
+      assert.deepEqual(signup, {
         email: "driver@example.com",
         source: "footer",
         website: "",
@@ -1280,6 +1314,7 @@ for (const width of [390, 1440]) {
     await page.route("**/api/book-install", async (route) => {
       const body = JSON.parse(route.request().postData() || "{}");
       sent.push(body);
+      judge("book-install", body);
       await sleep(delay);
       await route.fulfill({
         status,
@@ -1329,7 +1364,10 @@ for (const width of [390, 1440]) {
       await page.getByRole("button", { name: "Sending…" }).waitFor();
       await expectDom(page, [...when, ["#install-notes", "Locking lugs"]], "(while sending)");
       await waitFor(() => booked.length === 1, "/api/book-install");
-      assert.deepEqual(booked[0], {
+      // The fill-time token is checked by the spam-guard check at the end.
+      const { ft, ...sentFields } = booked[0];
+      assert.ok(ft, "a fill-time token is sent");
+      assert.deepEqual(sentFields, {
         order: "#1002",
         email: "buyer@example.com",
         day,
@@ -1675,6 +1713,28 @@ for (const width of [390, 1440]) {
   });
 
 }
+
+// Every real submission above passes the server's spam guard (with only the
+// minimum fill time switched off); the honeypot one is the only block.
+await check("spam guard: every real submission carries a valid token and passes; the honeypot bot is caught", async () => {
+  if (ONLY && !judged.length) return;
+  assert.ok(judged.length > 0, "no write was sent");
+  const bots = judged.filter((j) => String(j.body?.website ?? "").trim());
+  const people = judged.filter((j) => !String(j.body?.website ?? "").trim());
+  const blocked = people.filter((j) => j.verdict !== "ok");
+  assert.deepEqual(
+    blocked.map((j) => `${j.endpoint}: ${j.verdict} ${j.reason ?? ""}`),
+    [],
+    "real submissions the guard would block",
+  );
+  assert.ok(people.every((j) => j.elapsedMs !== null), "every submission sends a fill-time token");
+  assert.ok(bots.every((j) => j.verdict === "bot" && j.reason === "honeypot"), "honeypot caught");
+  const by = Object.groupBy(people, (j) => j.endpoint);
+  console.log(
+    `     guard: ${people.length} real submissions passed (${Object.entries(by).map(([e, l]) => `${e} ${l.length}`).join(", ")}), ` +
+      `${bots.length} honeypot caught; shortest fill ${Math.min(...people.map((j) => j.elapsedMs))} ms`,
+  );
+});
 
 await browser.close();
 stopServer();

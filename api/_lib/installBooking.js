@@ -16,8 +16,10 @@
 //      notes, bookedAt) is set in the same call.
 //   2. The booking lead: the customer (found by the order's email, else
 //      created) gets the lead text, starting "[BOOKED] #1001: <day> <window>",
-//      and the tags install-booking and order-<ref>. That fires the existing
-//      "Website lead alert" Flow, which emails info@ (api/_lib/leads.js).
+//      in the tiredrop.last_lead / tiredrop.leads metafields (never in an
+//      existing customer's note), and the tags install-booking and
+//      order-<ref> are added. That fires the existing "Website lead alert"
+//      Flow, which emails info@ (api/_lib/leads.js).
 //   3. tagsAdd install-booked on the ORDER. This is the commit: from here the
 //      order counts as booked, and the Flow "Needs scheduling alert" (order
 //      paid, wait 24 hours, needs-scheduling AND NOT install-booked) stays
@@ -241,7 +243,7 @@ export function readInstallBooking(node) {
  * 8:00 – 10:00 AM" on the first line, then the lead as every website form
  * writes it (name, email, phone, then the booking's own fields).
  */
-export function bookedLeadText({ orderName, ref, booking, name, email, phone, install, vehicle, fields = [], source }, now = new Date()) {
+export function bookedLeadText({ orderName, ref, booking, name, email, phone, install, vehicle, fields = [], source, existing = false }, now = new Date()) {
   const b = publicBooking(booking);
   const where = install === "mobile"
     ? "Mobile install at the customer's address (on the order)"
@@ -254,6 +256,12 @@ export function bookedLeadText({ orderName, ref, booking, name, email, phone, in
         name,
         email,
         phone,
+        existing,
+        // The order was found by its number AND this email, which is all the
+        // checking there is: say exactly that, no more.
+        emailCheck: email
+          ? `Matches the email on paid order ${orderName}; not otherwise verified.`
+          : null,
         fields: [
           ["Paid order", ref && ref !== orderName ? `${orderName} (${ref})` : orderName],
           ["Requested day", b.dayLabel],
@@ -415,6 +423,11 @@ export async function bookOrderInstall(node, request, config, deps = {}) {
 
   if (
     !(await run("lead", async () => {
+      const customer = await findOrCreateLeadCustomer(
+        { name, email, phoneE164: toE164(phone) },
+        cfg,
+        deps,
+      );
       const text = bookedLeadText(
         {
           orderName: node.name,
@@ -427,13 +440,9 @@ export async function bookOrderInstall(node, request, config, deps = {}) {
           vehicle: vehicleFor(node),
           fields: request.fields ?? [],
           source: request.source,
+          existing: !customer.created,
         },
         now,
-      );
-      const customer = await findOrCreateLeadCustomer(
-        { name, email, phoneE164: toE164(phone) },
-        cfg,
-        deps,
       );
       await saveLead(customer, "booking", text, cfg, deps, [INSTALL_BOOKING_TAG, bookingRefTag(ref)]);
     }))

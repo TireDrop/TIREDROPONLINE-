@@ -46,8 +46,11 @@ customer, so answer by writing to the customer's address in it or calling
 the phone in it; check where "Reply" goes before relying on it.
 
 In Shopify, the customer carries tags `lead` and `lead-<form>`, the newest
-lead in the "last lead" metafield, and every lead (newest first) in the
-customer's notes. Nobody is subscribed to marketing by sending a form.
+lead in the "last lead" metafield (`tiredrop.last_lead`) and the last 10
+(newest first) in `tiredrop.leads`. The customer's note gets the lead only
+when the form created that customer: an existing customer's note is never
+changed from the website, since anyone can type anyone's email. Nobody is
+subscribed to marketing by sending a form.
 
 ## Order requests
 

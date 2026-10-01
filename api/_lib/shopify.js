@@ -191,6 +191,10 @@ export function buildDraftOrderInput(order) {
   return input;
 }
 
+/** The request draft note's line about the email nobody verified. */
+export const REQUEST_EMAIL_UNVERIFIED =
+  "Email UNVERIFIED (typed on the website): confirm it with the customer by phone before you send the invoice.";
+
 /**
  * The DraftOrderInput for an ORDER REQUEST: nothing is charged and no invoice
  * is sent. It is the checkout draft (same custom lines at the server's
@@ -198,7 +202,9 @@ export function buildDraftOrderInput(order) {
  * the "order-request" tag and a note telling the shop what to do. Mobile
  * install requests are drafts too, addressed to the service address, with no
  * shipping line: the install is quoted on the call and added before the
- * invoice goes out. `customerId`, when known, links the draft to the customer.
+ * invoice goes out. `customerId` links the draft to the customer; the caller
+ * passes it only for a customer this request created (api/_lib/orders.js),
+ * never for an existing one, since nobody verified the email.
  */
 export function buildRequestDraftInput(order, { customerId = null } = {}) {
   const f = order.fulfillment;
@@ -215,6 +221,7 @@ export function buildRequestDraftInput(order, { customerId = null } = {}) {
       : null,
     `TireDrop order request ${order.orderRef}`,
     `Customer: ${order.customer.name}, ${order.customer.phone}`,
+    REQUEST_EMAIL_UNVERIFIED,
     `Delivery: ${delivery}`,
     order.notes ? `Customer notes: ${order.notes}` : null,
   ]

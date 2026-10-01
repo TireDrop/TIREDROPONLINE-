@@ -77,8 +77,8 @@ function as the checkout draft, with these differences:
 | Field | Request draft |
 | --- | --- |
 | `tags` | `order-request`, `vercel-live`, plus `ship-to-home`, `ship-to-store` or `mobile-install` |
-| `note` | starts "Request only — confirm price and availability, then Send invoice."; mobile adds "add the install charge quoted on the call before you send the invoice" |
-| `purchasingEntity` | `{ customerId }` of the customer the lead was recorded on |
+| `note` | starts "Request only — confirm price and availability, then Send invoice."; mobile adds "add the install charge quoted on the call before you send the invoice"; every one says "Email UNVERIFIED (typed on the website): confirm it with the customer by phone before you send the invoice." |
+| `purchasingEntity` | `{ customerId }` only when this request created the customer; never set for an existing customer, since nobody verified the email |
 | `customAttributes` | same three; `Delivery` = `Mobile install at my address` for mobile |
 | `shippingAddress` | ship: the shipping address; mobile: the service address; pickup: none |
 | `shippingLine` | same free line for ship and pickup; **none** for mobile |

@@ -25,6 +25,19 @@
 // Mobile orders are always "request", with `delivery: "mobile"`, `total` as
 // the tires total and `installNote: "Install quoted on the call"`: the van
 // is booked and the install priced on the phone, so nothing is charged here.
+//
+// Spam guard (api/_lib/spam.js): per-IP rate limit (CHECKOUT_RATE_LIMIT in
+// 10 minutes, 429), a 16 KB body cap (413), the `website` honeypot, the `ft`
+// fill-time token and conservative content checks on the name, address and
+// notes. A bot gets a request-mode answer that looks delivered, and nothing
+// is priced, created or sent; the block is logged without personal data. A
+// body without `ft` (a page loaded before the guard) is a 400 asking for a
+// reload.
+//
+// Another customer's data: the order request's lead never writes an
+// existing customer's note (api/_lib/leads.js), and its draft is linked to
+// the customer only when this request created that customer; the draft's
+// note says the email is unverified (api/_lib/orders.js).
 
 import { getConfig } from "./_lib/config.js";
 import { HttpError, methodNotAllowed, readJsonBody, send } from "./_lib/http.js";
@@ -37,8 +50,54 @@ import {
 } from "./_lib/orders.js";
 import { createDraftCheckout, ShopifyCheckoutError } from "./_lib/shopify.js";
 import { AtdError } from "./_lib/atd.js";
+import { makeOrderRef } from "./_lib/orders.js";
+import { clientIp, createRateLimiter } from "./_lib/ratelimit.js";
+import {
+  BODY_LIMITS,
+  STALE_PAGE,
+  inspectSubmission,
+  logBlocked,
+  logRateLimited,
+} from "./_lib/spam.js";
 
 const NO_STORE = { "Cache-Control": "no-store" };
+
+/**
+ * Order attempts per client IP (per warm instance). Each one that passes can
+ * create a customer and a draft order, so the budget is small; a shopper
+ * correcting a rejected address a few times stays well inside it.
+ */
+export const CHECKOUT_RATE_LIMIT = 10;
+export const CHECKOUT_RATE_WINDOW_MS = 10 * 60 * 1000;
+const limiter = createRateLimiter({ limit: CHECKOUT_RATE_LIMIT, windowMs: CHECKOUT_RATE_WINDOW_MS });
+
+/** Test hook. */
+export function resetCheckoutRateLimit() {
+  limiter.reset();
+}
+
+/** What the content check reads: the person's name, then address and notes. */
+export function checkoutContent(body) {
+  const c = body?.customer && typeof body.customer === "object" ? body.customer : {};
+  const a = body?.address && typeof body.address === "object" ? body.address : {};
+  return {
+    names: [c.name],
+    texts: [a.line1, a.line2, a.city, a.zip, body?.notes],
+  };
+}
+
+/** The answer a bot gets: an order request that looks sent. Nothing was. */
+function botAnswer(body) {
+  const delivery = ["ship", "pickup", "mobile"].includes(body?.delivery) ? body.delivery : "ship";
+  return {
+    mode: "request",
+    orderRef: makeOrderRef(),
+    total: null,
+    delivered: true,
+    paid: false,
+    delivery,
+  };
+}
 
 /**
  * "redirect" when this order goes to the online payment page, "request"
@@ -56,12 +115,29 @@ export function paymentModeFor(order, config) {
  * to process.env), `atd` (deps for the ATD lookup, e.g. fetchImpl and
  * endpoints) and `shopify` (deps for the draft order, e.g. fetchImpl).
  */
-export function createCheckoutHandler({ env, atd = {}, shopify = {} } = {}) {
+export function createCheckoutHandler({ env, atd = {}, shopify = {}, now = Date.now } = {}) {
   return async function handler(req, res) {
     if (req.method !== "POST") return methodNotAllowed(res, "POST");
 
+    if (limiter.hit(clientIp(req), now())) {
+      logRateLimited("checkout");
+      return send(
+        res,
+        429,
+        { error: "Too many order attempts from this connection. Please wait a few minutes, or call the shop." },
+        { ...NO_STORE, "Retry-After": "600" },
+      );
+    }
+
     try {
-      const body = await readJsonBody(req);
+      const body = await readJsonBody(req, { maxBytes: BODY_LIMITS.checkout });
+      const guard = inspectSubmission(body, { env: env ?? process.env, content: checkoutContent(body) });
+      if (guard.verdict === "bot") {
+        logBlocked("checkout", guard);
+        return send(res, 200, botAnswer(body), NO_STORE);
+      }
+      if (guard.verdict === "stale") return send(res, 400, { error: STALE_PAGE }, NO_STORE);
+
       const checked = validateCheckout(body);
       if (!checked.ok) return send(res, 400, { error: checked.error }, NO_STORE);
 

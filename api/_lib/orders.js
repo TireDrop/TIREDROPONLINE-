@@ -7,6 +7,13 @@
 // confirms price and availability, then clicks "Send invoice" in Shopify and
 // the customer pays on Shopify's checkout. Nothing here charges a card or
 // claims one was charged.
+//
+// The name, email, phone, address and notes are whatever the shopper typed;
+// nobody verified the email. So an order request never changes an EXISTING
+// customer's data: the lead does not touch their note (api/_lib/leads.js),
+// the draft is linked to the customer only when this request created them,
+// and the draft's note says the email is unverified. Everything typed lives
+// on the draft and in the lead, nowhere else.
 
 import { randomBytes } from "node:crypto";
 import { BUSINESS } from "../../src/data/business.js";
@@ -136,7 +143,9 @@ export async function recordOrderRequest(order, cfg, deps = {}) {
   );
   let draft = null;
   try {
-    draft = await createRequestDraft(order, cfg, deps, { customerId: customer.id });
+    draft = await createRequestDraft(order, cfg, deps, {
+      customerId: customer.created ? customer.id : null,
+    });
   } catch (err) {
     log.error(
       `[checkout] Draft order for request ${order.orderRef} failed (${err?.message}). Order:`,
@@ -149,6 +158,7 @@ export async function recordOrderRequest(order, cfg, deps = {}) {
       name: c.name,
       email: c.email,
       phone: c.phone,
+      existing: !customer.created,
       fields: orderRequestFields(order, draft),
     },
     now(),

@@ -10,17 +10,25 @@
 //      not subscribe anyone. An existing customer's name and email are never
 //      changed.
 //   2. The lead is written as plain text ("TireDrop contact form — 2026-09-28
-//      14:05 ET", then one field per line, the message last):
-//        * to the customer metafield tiredrop.last_lead
-//          (multi_line_text_field) with metafieldsSet, and
-//        * at the top of the customer note (customerUpdate), newest first,
-//          kept under NOTE_MAX characters by dropping the oldest website leads.
-//   3. tagsRemove ["new-lead"], then tagsAdd ["new-lead", "lead",
-//      "lead-<form>"]. The Shopify Flow workflow "Website lead alert"
-//      (docs/integrations/website-leads.md) runs on "Customer tags added",
-//      emails info@ the customer's tiredrop.last_lead, and removes
-//      "new-lead" again, so the next lead from the same customer re-adds the
-//      tag and alerts again.
+//      14:05 ET", then one field per line, the message last). Nobody proves
+//      they own the email or phone they type, so the text says so ("Email
+//      check: UNVERIFIED …") and is kept apart from what the shop wrote:
+//        * the customer metafield tiredrop.last_lead (multi_line_text_field):
+//          always the newest lead, the text Flow emails to info@;
+//        * the customer metafield tiredrop.leads (json): a capped list of the
+//          last LEADS_KEEP leads, newest first, each { at, form, text }, so
+//          one submission can never erase another's text;
+//        * the customer NOTE only when this submission created the customer.
+//          An existing customer's note (what staff wrote, earlier history) is
+//          never read, appended to or overwritten from the website: anyone
+//          can type anyone's email.
+//      Both metafields go in one metafieldsSet call.
+//   3. tagsAdd ["new-lead", "lead", "lead-<form>"] (plus any extra tags).
+//      Tags are only ever ADDED from here, never removed. The Shopify Flow
+//      workflow "Website lead alert" (docs/integrations/website-leads.md)
+//      runs on "Customer tags added", emails info@ the customer's
+//      tiredrop.last_lead, and removes "new-lead" itself, so the next lead
+//      from the same customer adds the tag again and alerts again.
 //
 // What is real and checked: every operation below was validated against the
 // Shopify Admin GraphQL schema (2026-07). Scopes: read_customers and
@@ -34,6 +42,27 @@ export const LEAD_METAFIELD = Object.freeze({
   key: "last_lead",
   type: "multi_line_text_field",
 });
+
+/**
+ * Every website lead, newest first, capped: a per-lead record that no later
+ * submission can rewrite (only push out once LEADS_KEEP newer ones arrive).
+ */
+export const LEADS_METAFIELD = Object.freeze({
+  namespace: "tiredrop",
+  key: "leads",
+  type: "json",
+});
+export const LEADS_KEEP = 10;
+export const LEADS_MAX_CHARS = 60000;
+
+/** The line every lead with an email carries: nobody verified the address. */
+export const UNVERIFIED_EMAIL =
+  "UNVERIFIED. Typed on the website; anyone can enter any address. Confirm with the customer before sharing order or account details.";
+export const UNVERIFIED_PHONE =
+  "UNVERIFIED. Typed on the website; anyone can enter any number. Confirm with the customer before sharing order or account details.";
+/** Added for a customer who already existed: where their history is now. */
+export const EXISTING_CUSTOMER =
+  "Existing customer. Their Shopify note was NOT changed; this and earlier website messages are in the customer metafield tiredrop.leads.";
 
 /** The tag Flow listens for; removed by Flow once the email is sent. */
 export const ALERT_TAG = "new-lead";
@@ -57,7 +86,8 @@ export const NOTE_TRIMMED = "\n[older notes trimmed]";
 export const LEAD_CUSTOMER = `query leadCustomer($identifier: CustomerIdentifierInput!) {
   customer: customerByIdentifier(identifier: $identifier) {
     id
-    note
+    tags
+    leads: metafield(namespace: "tiredrop", key: "leads") { value }
   }
 }`;
 
@@ -79,13 +109,6 @@ export const LEAD_METAFIELD_SET = `mutation leadMetafieldSet($metafields: [Metaf
   metafieldsSet(metafields: $metafields) {
     metafields { id }
     userErrors { field message code }
-  }
-}`;
-
-export const LEAD_TAGS_REMOVE = `mutation leadTagsRemove($id: ID!, $tags: [String!]!) {
-  tagsRemove(id: $id, tags: $tags) {
-    node { id }
-    userErrors { field message }
   }
 }`;
 
@@ -117,16 +140,29 @@ export function easternStamp(now = new Date()) {
 }
 
 /**
- * The lead as text: heading, then Name / Email / Phone, then the form's own
- * fields in order (the message is last in every form's list). A multi-line
- * value starts on the line under its label.
+ * The lead as text: heading, then Name / Email / Phone, the check line
+ * ("Email check: UNVERIFIED …", or `emailCheck` when the caller matched the
+ * email to something, e.g. a paid order), "Customer: Existing customer …"
+ * when `existing`, then the form's own fields in order (the message is last
+ * in every form's list). A multi-line value starts on the line under its
+ * label.
  */
-export function formatLead({ form, name, email, phone, fields = [] }, now = new Date()) {
+export function formatLead(
+  { form, name, email, phone, fields = [], emailCheck = null, existing = false },
+  now = new Date(),
+) {
   const title = FORM_TITLES[form] ?? `TireDrop ${form} form`;
+  const check = email
+    ? ["Email check", emailCheck ?? UNVERIFIED_EMAIL]
+    : phone
+      ? ["Phone check", UNVERIFIED_PHONE]
+      : null;
   const pairs = [
     ["Name", name],
     ["Email", email],
     ["Phone", phone],
+    ...(check ? [check] : []),
+    ...(existing ? [["Customer", EXISTING_CUSTOMER]] : []),
     ...fields,
   ].filter(([, value]) => value !== null && value !== undefined && String(value) !== "");
   return [
@@ -189,13 +225,20 @@ const userErrorText = (err) =>
 async function lookup(identifier, cfg, deps) {
   const data = await shopifyGraphQL(cfg, LEAD_CUSTOMER, { identifier }, deps);
   const c = data?.customer;
-  return c?.id ? { id: c.id, note: c.note ?? "", created: false } : null;
+  return c?.id
+    ? {
+        id: c.id,
+        created: false,
+        tags: Array.isArray(c.tags) ? c.tags : [],
+        leads: c.leads?.value ?? null,
+      }
+    : null;
 }
 
 /**
  * The customer a lead belongs to: found by email (else by phone), or
  * created with name, email and phone and nothing else. Resolves
- * `{ id, note, created }`.
+ * `{ id, created, tags, leads }` (`leads`: the raw tiredrop.leads value).
  *
  * Two refusals are handled rather than failed on: an email or phone that
  * another request created a moment ago (found again), and a phone Shopify
@@ -223,7 +266,7 @@ export async function findOrCreateLeadCustomer({ name, email, phoneE164 }, cfg, 
       const data = await shopifyGraphQL(cfg, LEAD_CUSTOMER_CREATE, { input }, deps);
       const id = data?.customerCreate?.customer?.id;
       if (!id) throw new ShopifyCheckoutError("Shopify created no customer for the lead.");
-      return { id, note: "", created: true };
+      return { id, created: true, tags: [], leads: null };
     } catch (err) {
       if (!(err instanceof ShopifyCheckoutError) || !err.userErrors) throw err;
       const text = userErrorText(err);
@@ -242,27 +285,75 @@ export async function findOrCreateLeadCustomer({ name, email, phoneE164 }, cfg, 
   throw new ShopifyCheckoutError("Shopify would not create the customer for the lead.");
 }
 
+/** The tiredrop.leads list as stored (newest first), or [] when unreadable. */
+export function parseLeads(value) {
+  if (typeof value !== "string" || !value) return [];
+  try {
+    const list = JSON.parse(value);
+    return Array.isArray(list)
+      ? list.filter((e) => e && typeof e === "object" && typeof e.text === "string")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
 /**
- * Writes `text` to the customer (note on top, metafield) and fires the
- * alert tags: remove "new-lead", then add it back with "lead",
- * "lead-<form>" and any `extraTags` (a booking for a paid order adds
- * "install-booking" and "order-<ref>"). The note and metafield are written
- * first, so Flow always reads the new lead when the tag lands.
+ * The tiredrop.leads list with `entry` on top: at most LEADS_KEEP entries
+ * and LEADS_MAX_CHARS of JSON, the oldest dropped first. Earlier entries are
+ * kept exactly as they were.
+ */
+export function pushLead(entry, oldValue, { keep = LEADS_KEEP, maxChars = LEADS_MAX_CHARS } = {}) {
+  const top = { ...entry, text: String(entry.text ?? "").slice(0, NOTE_MAX) };
+  const list = [top, ...parseLeads(oldValue)].slice(0, keep);
+  while (list.length > 1 && JSON.stringify(list).length > maxChars) list.pop();
+  return list;
+}
+
+/**
+ * Saves `text` on the customer and fires the alert tags:
+ *   1. metafieldsSet: tiredrop.last_lead = text, and tiredrop.leads with
+ *      the text pushed on top (one call);
+ *   2. the customer note = text, ONLY when `customer.created` (this
+ *      submission made the customer). An existing customer's note is never
+ *      touched;
+ *   3. tagsAdd "new-lead", "lead", "lead-<form>" and any `extraTags` (a
+ *      booking for a paid order adds "install-booking" and "order-<ref>").
+ *      Nothing is ever removed.
+ * The text is written before the tags, so Flow always reads the new lead
+ * when the tag lands.
  */
 export async function saveLead(customer, form, text, cfg, deps = {}, extraTags = []) {
-  await shopifyGraphQL(
-    cfg,
-    LEAD_NOTE_UPDATE,
-    { input: { id: customer.id, note: prependToNote(text, customer.note) } },
-    deps,
-  );
+  const { log = console, now = () => new Date() } = deps;
+  const leads = pushLead({ at: new Date(now()).toISOString(), form, text }, customer.leads);
   await shopifyGraphQL(
     cfg,
     LEAD_METAFIELD_SET,
-    { metafields: [{ ownerId: customer.id, ...LEAD_METAFIELD, value: text }] },
+    {
+      metafields: [
+        { ownerId: customer.id, ...LEAD_METAFIELD, value: text },
+        { ownerId: customer.id, ...LEADS_METAFIELD, value: JSON.stringify(leads) },
+      ],
+    },
     deps,
   );
-  await shopifyGraphQL(cfg, LEAD_TAGS_REMOVE, { id: customer.id, tags: [ALERT_TAG] }, deps);
+  if (customer.created) {
+    await shopifyGraphQL(
+      cfg,
+      LEAD_NOTE_UPDATE,
+      { input: { id: customer.id, note: prependToNote(text, "") } },
+      deps,
+    );
+  }
+  if ((customer.tags ?? []).includes(ALERT_TAG)) {
+    // Flow removes the tag after each email; still there means an alert is
+    // in flight (or Flow failed to finish one). Tags are never removed from
+    // here, so this lead's alert depends on another tag being new.
+    log.warn(
+      `[leads] ${customer.id} still has "${ALERT_TAG}" (Flow has not cleared the last alert); ` +
+        "this lead is saved in tiredrop.last_lead and tiredrop.leads.",
+    );
+  }
   await shopifyGraphQL(cfg, LEAD_TAGS_ADD, { id: customer.id, tags: leadTags(form, extraTags) }, deps);
 }
 
@@ -273,8 +364,8 @@ export async function saveLead(customer, form, text, cfg, deps = {}, extraTags =
  */
 export async function recordLead(lead, cfg, deps = {}) {
   const { now = () => new Date() } = deps;
-  const text = formatLead(lead, now());
   const customer = await findOrCreateLeadCustomer(lead, cfg, deps);
+  const text = formatLead({ ...lead, existing: !customer.created }, now());
   await saveLead(customer, lead.form, text, cfg, deps, lead.tags ?? []);
   return { customerId: customer.id, created: customer.created };
 }
