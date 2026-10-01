@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (6 new tools on preview for review; $1 install tests #D3/#D4 ready to pay; 404 wording fixed; install booking live)_
+_Last updated: 2026-10-01 (fitment confidence on preview/fitment for review; 6 new tools on preview for review; $1 install tests #D3/#D4 ready to pay; 404 wording fixed; install booking live)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -28,6 +28,7 @@ _Last updated: 2026-10-01 (6 new tools on preview for review; $1 install tests #
 - [x] ~~Arrival wording: "We confirm an arrival window when we book"~~ (be6a2a2)
 - [x] ~~Repo organized: docs map, audits/archive, README guide~~ (c5846e7, 2026-09-30)
 - [x] ~~404 heading: "fine" removed~~ (ded56ec)
+- [ ] Fitment confidence: badge + no Add on won't-fit + Compare same-size (preview/fitment 347c4e1) → Justin reviews → ship
 - [ ] 6 new tools (load/speed, plus-size, pressure-temp, repair check, shaking checker, rotation) with their own pages + article embeds: built on `preview/tools` (210b348) → Justin reviews the preview → ship to main
 
 ## Admin (Justin)
@@ -69,8 +70,8 @@ _Last updated: 2026-10-01 (6 new tools on preview for review; $1 install tests #
 - [ ] Fitment hold before orders go to ATD
 - [ ] "Tires arrived at the shop" notice
 - [ ] Checkout spam guard, and no writing into other customers' notes
-- [ ] No Add button on won't-fit tires; Compare crowns same-size tires only
-- [ ] Year-aware fitment on /tires
+- [ ] No Add button on won't-fit tires; Compare crowns same-size tires only (built on preview/fitment 347c4e1, awaiting review)
+- [ ] Year-aware fitment on /tires (built on preview/fitment 347c4e1, awaiting review)
 
 ## Quick wins (Claude)
 - [ ] Phone bottom bar changes by page
@@ -88,7 +89,7 @@ _Last updated: 2026-10-01 (6 new tools on preview for review; $1 install tests #
 - [ ] Hero finder goes straight to results
 - [ ] Installed-price toggle
 - [ ] Book an install time at checkout
-- [ ] Fitment by trim + staggered, and a "Fits your vehicle" badge
+- [ ] Fitment by trim + staggered, and a "Fits your vehicle" badge (badge + trim/staggered logic built on preview/fitment 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API)
 - [ ] Local city pages: Sunrise, Fort Lauderdale, Plantation, Davie…
 - [ ] Real review collection (no stars until real reviews exist)
 
