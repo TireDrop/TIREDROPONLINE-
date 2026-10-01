@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (SHIPPED: 334 ZIPs outside Palm Beach excluded + server-side booking ZIP check; fitment confidence; 6 new tools + tool pages; mobile hub + 7 wave-1 city pages, roadside flat help; install booking live)_
+_Last updated: 2026-10-01 (SHIPPED: search-result data, breadcrumbs + schema check; 334 ZIPs outside Palm Beach excluded + server-side booking ZIP check; fitment confidence; 6 new tools + tool pages; mobile hub + 7 wave-1 city pages, roadside flat help; install booking live)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -77,7 +77,8 @@ _Last updated: 2026-10-01 (SHIPPED: 334 ZIPs outside Palm Beach excluded + serve
 ## Quick wins (Claude)
 - [ ] Phone bottom bar changes by page
 - [x] ~~Pop-up off shop pages~~ (2026-09-30: superseded, the pop-up is gone)
-- [ ] Google search-result data: breadcrumbs, FAQ, map coordinates
+- [x] ~~Google search-result data: breadcrumbs (one per page, matching the visible trail), FAQ (kept where it was), article author, `npm run check:schema` gate~~ (2026-10-01)
+- [ ] Google search-result data: map coordinates. Waiting on Justin's Google Maps pin; paste it into `geo` in `src/data/business.js`
 - [ ] Accessibility fixes + skip link
 - [ ] Security headers: CSP, HSTS, Permissions-Policy
 - [ ] NHTSA lookup timeout

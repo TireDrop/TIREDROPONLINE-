@@ -18,11 +18,13 @@ header comment, and `shopify/assets/td-tiremath.js` names
 | Script | npm script | What it checks |
 | --- | --- | --- |
 | `prerender-check.mjs` | `check:prerender` | The built site in Chromium: per-page head tags with JavaScript off, hydration without mismatch, client-side navigation. |
+| `schema-check.mjs` | `check:schema` | The JSON-LD in every built page: parses, every `@id` resolves, Google's required properties per type, one BreadcrumbList matching the visible trail, no ratings or reviews, the shop's `geo` pin once set. No browser. |
 | `forms-keep-values-check.mjs` | `check:forms` | Every form keeps and sends a value however it was entered (typing, automation, autofill), at 390px and 1440px. |
 | `newsletter-signup-check.mjs` | `check:newsletter` | The newsletter is only the footer form: no pop-up, validation, success and failure messages. |
 | `docs-links-check.mjs` | `check:docs` | Every relative Markdown link and every `docs/...` path in the docs resolves to a real file. |
 
-The three Chromium checks need `npm run build` first. They start
+`check:schema` reads `dist/` directly, so it needs `npm run build` first.
+So do the three Chromium checks. They start
 `vite preview` themselves and mock every `/api` call, so nothing reaches
 Shopify. `test:api`, `test:content` and `test:data` are `node --test`
 suites in `api/_lib/`, `src/content/` and `src/data/` (the mobile city pages:

@@ -50,6 +50,18 @@ export const BUSINESS = {
   mapsHref:
     "https://www.google.com/maps/search/?api=1&query=7712+West+Oakland+Park+Blvd+Sunrise+FL+33351",
 
+  // The shop's map pin: "latitude, longitude", exactly as Google Maps copies
+  // it (right-click the shop's pin, click the numbers at the top of the menu).
+  //
+  // TODO(geo): waiting on Justin for the Google Business Profile pin. Paste
+  // it between quotes, replacing null, e.g.  geo: "26.1xxxxx, -80.2xxxxx",
+  // Nothing else needs to change: the shop's structured data picks it up
+  // as GeoCoordinates, and `npm run check:schema` fails if it does not parse
+  // or lands outside South Florida. Never fill this from the street address:
+  // a guessed point puts the shop in the wrong place on every map that reads
+  // it. While null, no coordinates are published at all.
+  geo: null,
+
   hours: [
     { days: "Mon – Fri", time: "8:00 AM – 6:30 PM" },
     { days: "Saturday", time: "8:00 AM – 4:00 PM" },
