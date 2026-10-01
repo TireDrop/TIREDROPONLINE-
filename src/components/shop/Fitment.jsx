@@ -566,8 +566,11 @@ function basisLine(resolved) {
  * "Shopping for: 2019 Toyota Tacoma (245/75R16) · Change", or "Shopping
  * for size 225/45R17 · Change", or a prompt to pick one. Sits at the top of
  * /tires, the product pages, Compare and the cart.
+ *
+ * `inline={false}` leaves the Change panel to the page: /tires reopens its
+ * own finder (the one Shop Tires shows first) instead, prefilled.
  */
-export function ShoppingForBar({ className = "" }) {
+export function ShoppingForBar({ className = "", inline = true }) {
   const {
     ready,
     resolved,
@@ -583,10 +586,16 @@ export function ShoppingForBar({ className = "" }) {
 
   // A "Change vehicle" link elsewhere on the page brings the panel into view.
   useEffect(() => {
-    if (changer.open && changer.nonce > 0) {
+    // The door-jamb size form is always this bar's own, even where the page
+    // brings back its own finder for Change (/tires).
+    if (
+      (inline || changer.tab === "sticker") &&
+      changer.open &&
+      changer.nonce > 0
+    ) {
       ref.current?.scrollIntoView({ block: "start", behavior: "smooth" });
     }
-  }, [changer.open, changer.nonce]);
+  }, [inline, changer.open, changer.tab, changer.nonce]);
 
   const kind = resolved.kind;
   const basis = ready ? basisLine(resolved) : null;
@@ -734,7 +743,7 @@ export function ShoppingForBar({ className = "" }) {
 
           {sticker && <StickerForm key={changer.nonce} />}
 
-          {changer.open && !sticker && (
+          {inline && changer.open && !sticker && (
             <Changer key={changer.nonce} initialTab={changer.tab} />
           )}
         </>

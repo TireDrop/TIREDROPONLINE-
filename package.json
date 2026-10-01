@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/prerender.mjs",
+    "build": "vite build && node scripts/prerender.mjs && node scripts/vpic-snapshot.mjs",
     "build:preview": "vite build --mode preview",
     "preview": "vite preview",
     "lint": "eslint .",
@@ -19,6 +19,7 @@
     "check:schema": "node scripts/schema-check.mjs",
     "check:docs": "node scripts/docs-links-check.mjs",
     "check:ga": "node scripts/ga-events-check.mjs",
+    "check:remember": "node scripts/remember-check.mjs",
     "check:a11y": "node scripts/a11y-check.mjs",
     "check:scanner": "node scripts/scanner-check.mjs",
     "test:api": "node --test \"api/_lib/*.test.mjs\"",

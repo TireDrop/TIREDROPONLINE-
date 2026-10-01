@@ -293,14 +293,15 @@ const DOCS = {
         paragraphs: [
           "This website uses Google Analytics to measure how the site is used — pages viewed, how visitors arrived, general location at the city or region level, device and browser type, and steps in the shop such as a tire viewed, added to the cart or searched for by size or vehicle, a delivery option chosen, a tool used, or the fact that a form was sent (its name, never what you typed into it). Google Analytics sets its own first-party cookies (named _ga and _ga_ followed by an ID) to tell one visit from the next. We have switched off Google signals and ad personalization, so this measurement is not used to build advertising profiles or to show you ads. We see the results only as aggregate reports, not as a record of what any named person did.",
           "The site loads no advertising or social tracking pixels. You are welcome to check both statements in your browser's developer tools.",
-          "Separately, the site uses local storage in your own browser for two things:",
+          "Separately, the site uses local storage in your own browser for three things:",
         ],
         list: [
           "Your cart — so the tires you picked are still there if you close the tab and come back",
           "The comparison tray — which products you lined up side by side",
+          "The vehicle or tire size you choose to shop for — so Shop Tires takes you straight to tires for it next time. It is never sent to us except to look up tires for it and with an order or a form you send, and clearing your site data removes it",
         ],
         after: [
-          "Both stay on your device. They are not sent to us, they contain no name, email address, street address or payment detail, and nobody else can read them. Clearing your browsing data deletes them, and you lose your cart.",
+          "All three stay on your device. The cart and comparison tray are not sent to us; none of the three contains a name, email address, street address or payment detail, and nobody else can read them. Clearing your browsing data deletes them, and you lose your cart.",
           "The email sign-up form in the site footer saves nothing in your browser. An earlier version of the site had a sign-up pop-up that remembered whether you had closed it, under the name td-nl-popup. The pop-up is gone, and the site now deletes that entry if your browser still has it.",
           "Translating a page is optional. Nothing from Google Translate loads until you open the Language button at the top of the page. Once you do, the site loads Google Translate (or, if that is unavailable, opens the page through translate.google.com), and Google processes the page's text to translate it and may set its own cookies, such as googtrans, which remembers the language you picked. The site keeps your pick in your browser's session storage until you close the tab, and \"English (original)\" switches translation off.",
           "You can block or delete the Google Analytics cookies in your browser settings, or install Google's opt-out add-on at tools.google.com/dlpage/gaoptout; the site works the same either way. If we add any other third-party script, this section gets rewritten before that ships, not after.",
@@ -347,7 +348,7 @@ const DOCS = {
           "Ask us to delete it. Call and request deletion. We will remove what we are not required to keep for warranty, accounting or legal reasons — including an email sign-up and any form messages on your Shopify customer record — and we will tell you plainly what we had to retain and why.",
           `Unsubscribe from TireDrop emails. Use the unsubscribe link in any of those emails, or email ${BUSINESS.email} and ask, and we will unsubscribe you.`,
           "Opt out of reminders. Say the word on the phone, or reply to any message asking to stop, and we will take you off the reminder list.",
-          "Clear what the site stored on your device. Your cart and comparison tray live in your own browser; the sign-up form in the site footer stores nothing there. Clearing your browsing data removes them. It does not remove anything you sent us — for that, ask us to delete it.",
+          "Clear what the site stored on your device. Your cart, comparison tray and the vehicle or tire size you shop for live in your own browser; the sign-up form in the site footer stores nothing there. Clearing your browsing data removes them. It does not remove anything you sent us — for that, ask us to delete it.",
           "Opt out of analytics. Block or clear the Google Analytics cookies in your browser, or use Google's opt-out add-on (tools.google.com/dlpage/gaoptout). We do not sell personal information or share it for cross-context behavioral advertising.",
         ],
         after: [

@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Phone, SearchX, SlidersHorizontal, Truck, X } from "lucide-react";
 
 import {
@@ -10,10 +10,10 @@ import {
   SectionHead,
   EmptyState,
 } from "../../components/ui/index.jsx";
-import Filters, {
-  activeFilterChips,
-  countActiveFilters,
-} from "../../components/shop/Filters.jsx";
+import TireFilters, {
+  countTireFilters,
+  tireFilterChips,
+} from "../../components/shop/TireFilters.jsx";
 import SearchPanel from "../../components/shop/SearchPanel.jsx";
 import { ShoppingForBar } from "../../components/shop/Fitment.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
@@ -22,34 +22,51 @@ import {
   TIRES,
   TIRE_CATEGORIES,
   TIRE_BRAND_NAMES,
-  TIRE_DIAMETERS,
+  VEHICLE_DATA,
+  VEHICLE_MAKES,
 } from "../../data/products.js";
+import { FITMENT } from "../../data/fitment.js";
+import { makesFor } from "../../data/vehicles.js";
 import { ratingsFor } from "../../data/tireRatings.js";
 import { setPrice } from "../../data/pricing.js";
 import { BUSINESS } from "../../data/business.js";
 import {
   fitSizeOf,
+  readSize,
   selectionSizeText,
   sizesOf,
 } from "../../data/fitmentCheck.js";
+import {
+  SEASONS,
+  TYPES,
+  facetCounts,
+  matchesFilters,
+  warrantyMilesOf,
+} from "../../data/tireFacets.js";
+import {
+  EMPTY_TIRE_FILTERS,
+  parseTiresQuery,
+  selectionKey,
+  slug,
+  serializeTiresQuery,
+} from "../../lib/tiresUrl.js";
 import { useVehicle } from "../../context/VehicleContext.jsx";
 import { useTireSearch } from "../../data/useApi.js";
 import { money } from "../../context/CartContext.jsx";
 
 // Tires sell as sets of four, so the price sorts are sorted on the set — the
-// number the shopper is actually comparing between two sites. The last two
-// sort on the tire's own published grades (UTQG treadwear and traction), which
-// is what a tire buyer is really shopping for once price is settled.
+// number the shopper is actually comparing between two sites. Warranty sorts
+// on the treadwear miles the tire's own warranty states; the last two sort on
+// its published grades (UTQG treadwear and traction).
 const SORTS = [
-  { value: "best", label: "Featured" },
+  { value: "best", label: "Recommended" },
   { value: "price-asc", label: "Price: set of 4, low to high" },
   { value: "price-desc", label: "Price: set of 4, high to low" },
+  { value: "warranty", label: "Warranty miles: high to low" },
+  { value: "brand", label: "Brand: A–Z" },
   { value: "wear", label: "Longest tread life" },
   { value: "wet", label: "Best wet grip" },
 ];
-
-const PRICE_MIN = Math.min(...TIRES.map((t) => t.price));
-const PRICE_MAX = Math.max(...TIRES.map((t) => t.price));
 
 // Written from the catalog rather than typed, so a brand cannot be advertised
 // after its last product is gone.
@@ -59,8 +76,31 @@ const brandSentence = TIRE_BRAND_NAMES.length
     TIRE_BRAND_NAMES[TIRE_BRAND_NAMES.length - 1]
   : "Major-brand";
 
-const listParam = (params, key) =>
-  (params.get(key) || "").split(",").filter(Boolean);
+// What turns the address bar's lowercase slugs back into the catalog's own
+// spelling (src/lib/tiresUrl.js).
+const tableModels = (make) =>
+  Object.keys(FITMENT)
+    .filter((k) => k.startsWith(`${make}|`))
+    .map((k) => k.split("|")[1]);
+const VOCAB = {
+  brands: TIRE_BRAND_NAMES,
+  categories: TIRE_CATEGORIES,
+  makes: [
+    ...new Set([
+      ...VEHICLE_MAKES,
+      ...Object.keys(FITMENT).map((k) => k.split("|")[0]),
+      ...makesFor(""),
+    ]),
+  ],
+  models: (make) => [
+    ...new Set([...tableModels(make), ...Object.keys(VEHICLE_DATA[make] || {})]),
+  ],
+};
+
+const FACET_LABELS = Object.fromEntries(
+  [...SEASONS, ...TYPES].map((o) => [o.value, o.label]),
+);
+const NO_PARTIAL = { width: "", aspect: "", diameter: "" };
 
 /**
  * Sorts on one spec-derived axis, best first. An axis can be genuinely unrated —
@@ -83,58 +123,117 @@ function sortProducts(list, sort) {
       return out.sort((a, b) => setPrice(a) - setPrice(b));
     case "price-desc":
       return out.sort((a, b) => setPrice(b) - setPrice(a));
+    case "warranty":
+      // A tire whose warranty states no miles sorts last, not as zero.
+      return out.sort(
+        (a, b) => (warrantyMilesOf(b) ?? -1) - (warrantyMilesOf(a) ?? -1),
+      );
+    case "brand":
+      return out.sort(
+        (a, b) =>
+          String(a.brand).localeCompare(String(b.brand)) ||
+          String(a.model).localeCompare(String(b.model)),
+      );
     case "wear":
       return out.sort(byAxis("wear"));
     case "wet":
       return out.sort(byAxis("wet"));
     default:
-      // "Featured" is catalog order: there is no sales or review data behind
-      // any other ranking yet.
+      // "Recommended" is catalog order, with the tires that fit what you are
+      // shopping for first: there is no sales or review data behind any
+      // other ranking yet.
       return out;
   }
 }
 
 export default function TiresPage() {
-  const [params, setParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const view = params.get("view");
-  const sort = params.get("sort") || "best";
 
-  const filters = useMemo(
-    () => ({
-      brands: listParam(params, "brands"),
-      // `cats` is the internal multi-select the filter panel writes. `category`
-      // is the readable single-category entry point the home page tiles and any
-      // future campaign link use; both land in the same filter.
-      categories: [
-        ...new Set([
-          ...listParam(params, "cats"),
-          ...listParam(params, "category"),
-        ]),
-      ],
-      diameters: listParam(params, "dia").map(Number),
-      finishes: [],
-      minPrice: params.get("minp") || "",
-      maxPrice: params.get("maxp") || "",
-    }),
-    [params],
+  // The address bar holds the page (src/lib/tiresUrl.js). Only a bare
+  // /tires hydrates the prerendered page, which is the nothing-chosen state
+  // too; one with a query renders fresh (src/main.jsx), so reading it here
+  // never makes a hydration mismatch.
+  const state = useMemo(
+    () => parseTiresQuery(location.search, VOCAB),
+    [location.search],
   );
+  const { filters, partial, sort, view } = state;
 
-  const sizeQuery = {
-    width: params.get("w") || "",
-    aspect: params.get("a") || "",
-    diameter: params.get("d") || "",
-  };
-  // A vehicle handed over in the URL (?vy=&vmk=&vmd=, from a link or an
-  // older bookmark) becomes the vehicle being shopped for, then leaves the
-  // URL: the selection is the one source of truth (VehicleContext.jsx).
-  const urlVehicle = {
-    year: params.get("vy") || "",
-    make: params.get("vmk") || "",
-    model: params.get("vmd") || "",
-  };
   const fitment = useVehicle();
-  const { ready, resolved, selectVehicle, selectSize, openChanger } = fitment;
+  const {
+    ready,
+    selection,
+    resolved,
+    selectVehicle,
+    selectSize,
+    openChanger,
+    closeChanger,
+    changer,
+  } = fitment;
+
+  /** The page as it stands: the address bar's filters, the saved selection. */
+  const current = { ...state, selection: ready ? selection : state.selection };
+
+  /** Writes a state to the address bar: replace for a tweak, push for a new vehicle or size. */
+  const write = (next, { push = false } = {}) => {
+    const qs = serializeTiresQuery(next);
+    const search = qs ? `?${qs}` : "";
+    if (search === location.search) return;
+    navigate(
+      { pathname: location.pathname, search, hash: location.hash },
+      { replace: !push },
+    );
+  };
+
+  // ?fit=change|size (a "Change vehicle" link on a page with no bar) opens
+  // the finder here, prefilled; ?fit=sticker opens the bar's door-jamb size
+  // form. The canonical write below drops it.
+  useEffect(() => {
+    if (state.fit)
+      openChanger(
+        state.fit === "size" || state.fit === "sticker" ? state.fit : "vehicle",
+      );
+    // Once per hand-off; openChanger is stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.fit]);
+
+  // The address bar and the saved selection agree, every render:
+  //  - a vehicle or size in the address that this page has not seen yet (a
+  //    shared link, back/forward, a link from another page) wins, and
+  //    becomes the saved selection;
+  //  - one chosen here (the finder, Change, Clear) goes into the address as
+  //    a new history entry, so Back returns to the one before;
+  //  - an address with none (Shop Tires, from anywhere) gets the saved one
+  //    written in, replacing the entry;
+  //  - otherwise the address is rewritten in its canonical spelling (older
+  //    keys, slugs), replacing the entry.
+  const urlKey = selectionKey(state.selection);
+  const ctxKey = ready ? selectionKey(selection) : null;
+  const synced = useRef(undefined);
+  useEffect(() => {
+    if (state.selection && urlKey !== synced.current) {
+      synced.current = urlKey;
+      if (urlKey !== ctxKey) {
+        if (state.selection.type === "size")
+          selectSize(state.selection.size, state.selection.rear);
+        else selectVehicle(state.selection);
+        return;
+      }
+    }
+    if (!ready) return;
+    if (ctxKey !== urlKey) {
+      const push = synced.current !== undefined && ctxKey !== synced.current;
+      synced.current = ctxKey;
+      write({ ...state, selection }, { push });
+      return;
+    }
+    synced.current = urlKey;
+    write({ ...state, selection });
+  });
+
+  const sizeQuery = partial;
   const hasSize = Boolean(
     sizeQuery.width || sizeQuery.aspect || sizeQuery.diameter,
   );
@@ -142,25 +241,6 @@ export default function TiresPage() {
     sizeQuery.width && sizeQuery.aspect && sizeQuery.diameter
       ? `${sizeQuery.width}/${sizeQuery.aspect}R${sizeQuery.diameter}`
       : "";
-
-  const handOff = [
-    urlVehicle.year,
-    urlVehicle.make,
-    urlVehicle.model,
-    params.get("fit") || "",
-  ].join("|");
-  useEffect(() => {
-    const [year, make, model, open] = handOff.split("|");
-    if (!(year && make && model) && !open) return;
-    if (year && make && model) selectVehicle({ year, make, model });
-    if (open)
-      openChanger(open === "size" || open === "sticker" ? open : "vehicle");
-    const next = new URLSearchParams(params);
-    ["vy", "vmk", "vmd", "fit"].forEach((k) => next.delete(k));
-    setParams(next, { replace: true });
-    // Runs once per hand-off; the setters are stable.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [handOff]);
 
   // Searches go through the API (ATD when it is live): a size typed in the
   // filters first, else the size being shopped for, else the vehicle (the
@@ -191,84 +271,55 @@ export default function TiresPage() {
   // one. Partial sizes ("any"/45/R17) still narrow the catalog locally.
   const pool = live ? search.items : TIRES;
 
-  /** Writes only the keys we own, so ?view and ?search survive. */
-  const patchParams = (patch) => {
-    const next = new URLSearchParams(params);
-    Object.entries(patch).forEach(([k, v]) => {
-      if (v === "" || v == null || (Array.isArray(v) && v.length === 0)) {
-        next.delete(k);
-      } else {
-        next.set(k, Array.isArray(v) ? v.join(",") : String(v));
-      }
-    });
-    setParams(next, { replace: true });
-  };
+  const onFilterChange = (next) => write({ ...current, filters: next });
 
-  const onFilterChange = (value) =>
-    patchParams({
-      brands: value.brands,
-      cats: value.categories,
-      // `category` is the readable entry point the home tiles link to, and it
-      // folds into the same filter as `cats`. Writing only `cats` would leave
-      // it behind in the URL, so the chip, the sidebar checkbox and "Clear
-      // all" would all appear to do nothing. Clear it on every write.
-      category: "",
-      dia: value.diameters,
-      minp: value.minPrice,
-      maxp: value.maxPrice,
-    });
-
-  // The finder above the list sets what is being shopped for: a vehicle
-  // (SearchPanel selects it itself), or a full sidewall size. A partial size
-  // ("any"/45/R17) only filters.
+  // The finder (the "pop-up" Shop Tires shows first) sets what is being
+  // shopped for: a vehicle (SearchPanel selects it itself), or a full
+  // sidewall size. A partial size ("any"/45/R17) only filters. Opened from
+  // "Enter the size on your tires" for a vehicle, the size is that
+  // vehicle's.
   const onSearch = (payload) => {
     if (payload.type === "vehicle") {
-      patchParams({ w: "", a: "", d: "", vy: "", vmk: "", vmd: "" });
-    } else {
-      if (payload.width && payload.aspect && payload.diameter) {
-        selectSize(`${payload.width}/${payload.aspect}R${payload.diameter}`);
-      }
-      patchParams({
-        w: payload.width,
-        a: payload.aspect,
-        d: payload.diameter,
-        vy: "",
-        vmk: "",
-        vmd: "",
-      });
+      write({ ...current, partial: NO_PARTIAL });
+      return;
     }
+    const { width, aspect, diameter } = payload;
+    if (width && aspect && diameter) {
+      const size = `${width}/${aspect}R${diameter}`;
+      if (changer.open && changer.tab === "size" && selection?.type === "vehicle") {
+        const { pick: _pick, size: _old, rear: _rear, ...vehicle } = selection;
+        selectVehicle({ ...vehicle, size });
+      } else {
+        selectSize(size);
+      }
+      write({ ...current, partial: NO_PARTIAL });
+      return;
+    }
+    write({ ...current, partial: { width, aspect, diameter } });
+    closeChanger();
   };
 
-  const results = useMemo(() => {
-    const min = Number(filters.minPrice) || 0;
-    const max = Number(filters.maxPrice) || Infinity;
-    const filtered = pool.filter((t) => {
-      if (filters.brands.length && !filters.brands.includes(t.brand))
-        return false;
-      if (filters.categories.length && !filters.categories.includes(t.category))
-        return false;
-      if (
-        filters.diameters.length &&
-        !filters.diameters.includes(t.rimDiameter)
-      )
-        return false;
-      if (t.price < min || t.price > max) return false;
-      if (sizeQuery.width && String(t.width) !== sizeQuery.width) return false;
-      if (sizeQuery.aspect && String(t.aspect) !== sizeQuery.aspect)
-        return false;
-      if (sizeQuery.diameter && String(t.rimDiameter) !== sizeQuery.diameter)
-        return false;
-      return true;
-    });
-    return sortProducts(filtered, sort);
-  }, [
-    pool,
-    filters,
-    sizeQuery.width,
-    sizeQuery.aspect,
-    sizeQuery.diameter,
-    sort,
-  ]);
+  // A partial size narrows the list outright; the filters then apply on top.
+  const sized = useMemo(
+    () =>
+      pool.filter((t) => {
+        if (sizeQuery.width && String(t.width) !== sizeQuery.width) return false;
+        if (sizeQuery.aspect && String(t.aspect) !== sizeQuery.aspect)
+          return false;
+        if (sizeQuery.diameter && String(t.rimDiameter) !== sizeQuery.diameter)
+          return false;
+        return true;
+      }),
+    [pool, sizeQuery.width, sizeQuery.aspect, sizeQuery.diameter],
+  );
+  const results = useMemo(
+    () =>
+      sortProducts(
+        sized.filter((t) => matchesFilters(t, filters)),
+        sort,
+      ),
+    [sized, filters, sort],
+  );
 
   // What is being shopped for narrows the page rather than replacing it.
   // Filtering the catalog down to one size outright can leave a single card
@@ -309,7 +360,13 @@ export default function TiresPage() {
           ? `Tires on this page in ${fitSize}, the size you gave us.`
           : `Tires on this page in ${fitSize}.`;
 
-  const activeFilterCount = countActiveFilters(filters);
+  // The filters count what is in your size when you are shopping for one,
+  // and the whole list otherwise.
+  const facetBase = showFit ? sized.filter(inSize) : sized;
+  const facets = facetCounts(facetBase, filters);
+  const shown = showFit ? fitting.length : results.length;
+
+  const activeFilterCount = countTireFilters(filters);
   const sizeLabel = `${sizeQuery.width || "any"}/${sizeQuery.aspect || "any"}R${
     sizeQuery.diameter || "any"
   }`;
@@ -317,7 +374,7 @@ export default function TiresPage() {
   // One chip per thing narrowing the list, size included — a shopper who
   // landed here from the size search needs to see that it is a filter, and
   // needs the same one tap to drop it.
-  const chips = activeFilterChips(filters).map((chip) => ({
+  const chips = tireFilterChips(filters, FACET_LABELS).map((chip) => ({
     id: chip.id,
     label: chip.label,
     onRemove: () => onFilterChange(chip.next),
@@ -326,24 +383,51 @@ export default function TiresPage() {
     chips.push({
       id: "size",
       label: sizeLabel,
-      onRemove: () => patchParams({ w: "", a: "", d: "" }),
+      onRemove: () => write({ ...current, partial: NO_PARTIAL }),
     });
   }
 
-  // Everything drops in one URL write. Two patches in a row would each build
-  // from the same `params` snapshot and the second would undo the first.
+  // Everything drops in one URL write.
   const clearAllFilters = () =>
-    patchParams({
-      brands: [],
-      cats: [],
-      category: "",
-      dia: [],
-      minp: "",
-      maxp: "",
-      w: "",
-      a: "",
-      d: "",
+    write({
+      ...current,
+      filters: { ...EMPTY_TIRE_FILTERS },
+      partial: NO_PARTIAL,
     });
+
+  // The finder shows first, while nothing is saved (and in the prerendered
+  // page, which never knows); once a vehicle or size is saved, Shop Tires
+  // lands straight on the results and "Change" brings it back, prefilled.
+  // The door-jamb size form ("sticker") opens in the Shopping-for bar
+  // instead, so it leaves the finder closed.
+  const changing = changer.open && changer.tab !== "sticker";
+  const showFinder = !ready || !selection || changing;
+  const finderInitial = useMemo(() => {
+    if (!changing || !selection) return undefined;
+    if (selection.type === "size" || changer.tab === "size") {
+      const r = readSize(selection.size ?? "");
+      return {
+        tab: "size",
+        width: r?.width ?? "",
+        aspect: r?.aspect ?? "",
+        diameter: r?.rimDiameter ?? "",
+      };
+    }
+    return {
+      tab: "vehicle",
+      year: selection.year,
+      make: selection.make,
+      model: selection.model,
+    };
+  }, [changing, changer.tab, selection]);
+  const finderRef = useRef(null);
+  useEffect(() => {
+    if (!changing || changer.nonce === 0) return;
+    const el = finderRef.current;
+    if (!el) return;
+    el.scrollIntoView({ block: "start", behavior: "smooth" });
+    el.querySelector("select, input")?.focus({ preventScroll: true });
+  }, [changing, changer.nonce]);
 
   const brandGroups = useMemo(() => {
     const map = new Map();
@@ -388,7 +472,7 @@ export default function TiresPage() {
               return (
                 <Link
                   key={brand}
-                  to={`/tires?brands=${encodeURIComponent(brand)}`}
+                  to={`/tires?brand=${slug(brand)}`}
                   className="card-hover flex items-center gap-4 p-5"
                 >
                   <TireArt
@@ -429,47 +513,52 @@ export default function TiresPage() {
       />
       <Breadcrumbs trail={[{ label: "Tires" }]} />
 
-      <div className="wrap mt-6 md:-mt-8">
-        <SearchPanel kind="tire" onSearch={onSearch} />
-        {/* Not sure of the size? The Tire Size Finder reads it off the
-            door sticker, the sidewall or the VIN, then comes back here
-            with it confirmed (/tire-size-finder). */}
-        <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-smoke">
-          <Link
-            to="/tire-size-finder"
-            data-testid="scan-size-link"
-            className="btn-outline btn-sm min-h-[44px] bg-bone"
-          >
-            <span aria-hidden>📷</span> Scan your tire size
-          </Link>
-          <span>Door sticker, tire sidewall or VIN.</span>
-        </p>
-      </div>
+      {showFinder && (
+        <div
+          ref={finderRef}
+          className="wrap mt-6 scroll-mt-[calc(var(--header-h)+1rem)] md:-mt-8"
+          data-testid="tire-finder"
+        >
+          <SearchPanel
+            key={changing ? `change-${changer.nonce}` : "first"}
+            kind="tire"
+            onSearch={onSearch}
+            initial={finderInitial}
+            onCancel={ready && selection ? closeChanger : undefined}
+            onEnterSize={() => openChanger("sticker")}
+          />
+          {/* Not sure of the size? The Tire Size Finder reads it off the
+              door sticker, the sidewall or the VIN, then comes back here
+              with it confirmed (/tire-size-finder). */}
+          <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-smoke">
+            <Link
+              to="/tire-size-finder"
+              data-testid="scan-size-link"
+              className="btn-outline btn-sm min-h-[44px] bg-bone"
+            >
+              <span aria-hidden>📷</span> Scan your tire size
+            </Link>
+            <span>Door sticker, tire sidewall or VIN.</span>
+          </p>
+        </div>
+      )}
 
       <Section>
-        <ShoppingForBar className="mb-8" />
+        <ShoppingForBar className="mb-8" inline={false} />
 
         {/* Block flow below `lg`: the sidebar is a drawer there, so the
             aside renders nothing and a grid row would leave its gap behind
             as dead space above the results. */}
         <div className="lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8">
           <aside aria-label="Filter tires">
-            <Filters
+            <TireFilters
               value={filters}
               onChange={onFilterChange}
+              onClearAll={clearAllFilters}
               open={filtersOpen}
               onOpenChange={setFiltersOpen}
-              resultCount={results.length}
-              resultNoun={results.length === 1 ? "tire" : "tires"}
-              facets={{
-                kind: "tire",
-                brands: TIRE_BRAND_NAMES,
-                categories: TIRE_CATEGORIES,
-                diameters: TIRE_DIAMETERS,
-                finishes: [],
-                priceMin: PRICE_MIN,
-                priceMax: PRICE_MAX,
-              }}
+              resultCount={shown}
+              facets={facets}
             />
           </aside>
 
@@ -483,6 +572,7 @@ export default function TiresPage() {
                 type="button"
                 onClick={() => setFiltersOpen(true)}
                 aria-expanded={filtersOpen}
+                aria-haspopup="dialog"
                 className="btn-outline btn-sm h-11 min-w-0 flex-1"
               >
                 <SlidersHorizontal size={16} aria-hidden />
@@ -497,7 +587,7 @@ export default function TiresPage() {
               <select
                 id="tire-sort-mobile"
                 value={sort}
-                onChange={(e) => patchParams({ sort: e.target.value })}
+                onChange={(e) => write({ ...current, sort: e.target.value })}
                 className="field h-11 min-w-0 flex-1"
               >
                 {SORTS.map((s) => (
@@ -542,7 +632,7 @@ export default function TiresPage() {
                 <select
                   id="tire-sort"
                   value={sort}
-                  onChange={(e) => patchParams({ sort: e.target.value })}
+                  onChange={(e) => write({ ...current, sort: e.target.value })}
                   className="field w-auto"
                 >
                   {SORTS.map((s) => (
@@ -586,9 +676,13 @@ export default function TiresPage() {
                 lede="Try widening the price range or clearing a size. If you know your size and cannot find it listed, call us — we can order sizes this page does not carry."
                 action={
                   <div className="flex flex-wrap justify-center gap-3">
-                    <Link to="/tires" className="btn-primary btn-sm">
-                      Reset search
-                    </Link>
+                    <button
+                      type="button"
+                      onClick={clearAllFilters}
+                      className="btn-primary btn-sm min-h-[44px]"
+                    >
+                      Clear filters
+                    </button>
                     <a href={BUSINESS.phoneHref} className="btn-outline btn-sm">
                       <Phone size={16} aria-hidden />
                       Call {BUSINESS.phone}
@@ -611,6 +705,30 @@ export default function TiresPage() {
                       {fitting.map((tire) => (
                         <ProductCard key={tire.id} product={tire} />
                       ))}
+                    </div>
+                  ) : activeFilterCount > 0 || hasSize ? (
+                    <div className="card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-sm leading-relaxed text-ink">
+                        No tires in {fitSize} match these filters. Clear them
+                        to see every tire in your size, or call and we will
+                        quote one.
+                      </p>
+                      <div className="flex shrink-0 flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={clearAllFilters}
+                          className="btn-primary btn-sm min-h-[44px]"
+                        >
+                          Clear filters
+                        </button>
+                        <a
+                          href={BUSINESS.phoneHref}
+                          className="btn-outline btn-sm min-h-[44px]"
+                        >
+                          <Phone size={16} aria-hidden />
+                          Call {BUSINESS.phone}
+                        </a>
+                      </div>
                     </div>
                   ) : (
                     <div className="card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">

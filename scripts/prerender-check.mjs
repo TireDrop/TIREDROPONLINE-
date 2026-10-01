@@ -322,8 +322,11 @@ for (const url of ["/tires?size=225/45R18", "/tire-size?size=225/45R17", "/no-su
   await page.waitForFunction(isMounted);
   await page.waitForLoadState("networkidle");
   const h1 = await page.evaluate(() => document.querySelector("h1")?.textContent);
-  if (errors.length === 0 && h1) ok(`rendered ${url}: h1 "${h1.trim()}"`);
-  else bad(`render ${url}: h1 "${h1}" ${errors.join(" | ")}`);
+  // /tires?size= searches /api/tires for that size, which this harness
+  // answers 404 (the sample catalog then answers).
+  const real = errors.filter((e) => !/status of 404/.test(e) || url === "/no-such-page");
+  if (real.length === 0 && h1) ok(`rendered ${url}: h1 "${h1.trim()}"`);
+  else bad(`render ${url}: h1 "${h1}" ${real.join(" | ")}`);
   await context.close();
 }
 

@@ -23,7 +23,12 @@
  * INSTALL_BOOKING_URL only that link is shown. The Year / Make / Model dropdowns (VehicleSelect)
  * are picked from, including "Other / not listed", a silent pick taken in on
  * the next render, the NHTSA-down fallback, and the finder's vehicle
- * prefilling the booking form. vPIC is mocked in its own JSON shape
+ * prefilling the booking form. The finder's Model box (SearchPanel) lists
+ * every model vPIC has (2021 BMW: 28, not the size table's 4), filters as
+ * you type, takes Enter, Down and a click, takes a model typed that it does
+ * not list, and says "Couldn't load models. Type your model or enter your
+ * door-jamb size." when vPIC is down (on /tires that opens the bar's
+ * door-jamb form). vPIC is mocked in its own JSON shape
  * (scripts/vpic-mock.mjs). Also: start over clears, validation errors clear as
  * you type, the honeypot still reaches the server, no console errors.
  *
@@ -33,7 +38,10 @@
  * size" and every other size says "Check fitment" and KEEPS Add; once a
  * door-jamb sticker size is saved next to the Shopping-for bar, a tire in
  * another size has no Add (and links to the right size), on the cards and
- * the product pages; a staggered front/rear sticker entry answers per axle
+ * the product pages; a model with no size on file (BMW 4 Series, Audi Q5,
+ * a typed Audi S4 Avant) lands on results where every tire says "Check
+ * fitment" and keeps Add, with the door-jamb prompt in the bar; a staggered
+ * front/rear sticker entry answers per axle
  * with the 2 front + 2 rear note; a year change in the Shopping-for bar
  * changes the answer; "Shopping for a different car?" clears it; size-only
  * mode; Compare crowns a Best only between tires of one size; with a
@@ -442,6 +450,28 @@ async function fillVehicle(page, mode, { year, make, model }, pokes) {
 /** Waits for the model list to finish loading (the select is enabled). */
 const modelsLoaded = (page) =>
   page.waitForSelector("#model:not([disabled])", { state: "attached" });
+
+/** The finder's Model box (SearchPanel) once its list has loaded. */
+const finderModelReady = (page) => page.waitForSelector("#finder-model:not([disabled])");
+
+/** The models the finder's Model box lists for what is typed in it now. */
+async function finderOptions(page) {
+  const list = page.locator("#finder-model-list");
+  if (await list.isHidden()) return [];
+  return list.getByRole("option").allInnerTexts();
+}
+
+/**
+ * Picks a model in the finder's Model box: types part of it, then takes it
+ * from the filtered list with a click.
+ */
+async function pickFinderModel(page, model, typed = model.slice(0, -1) || model) {
+  await finderModelReady(page);
+  const box = page.locator("#finder-model");
+  await box.fill(typed);
+  await page.locator("#finder-model-list").getByRole("option", { name: model, exact: true }).click();
+  assert.equal(await box.inputValue(), model, `picked ${model}`);
+}
 
 const MODES = ["typing", "automation", "autofill"];
 
@@ -1151,8 +1181,26 @@ for (const width of [390, 1440]) {
     await page.waitForSelector("#finder-year");
     await page.selectOption("#finder-year", "2019");
     await page.selectOption("#finder-make", "Toyota");
-    await page.locator('#finder-model option[value="Tacoma"]').waitFor({ state: "attached" });
-    await page.selectOption("#finder-model", "Tacoma");
+    await finderModelReady(page);
+    // Said plainly, with the size-table models still offered.
+    assert.equal(
+      await page.locator('[data-testid="finder-model-note"]').innerText(),
+      "Couldn’t load models. Type your model or enter your door-jamb size.",
+    );
+    await page.locator("#finder-model").click();
+    assert.deepEqual(
+      await finderOptions(page),
+      ["4Runner", "Camry", "Corolla", "Highlander", "RAV4", "Tacoma"],
+      "size-table models",
+    );
+    await page.locator("#finder-model").press("Escape");
+    assert.deepEqual(await finderOptions(page), [], "Escape closes the list");
+    // "enter your door-jamb size" goes to the size tab; the vehicle stays.
+    await page.getByRole("button", { name: "enter your door-jamb size" }).click();
+    await page.waitForSelector("#finder-width");
+    await page.getByRole("tab", { name: "Shop by Vehicle" }).click();
+    assert.equal(await page.inputValue("#finder-make"), "Toyota");
+    await pickFinderModel(page, "Tacoma", "tac");
     await page.getByRole("button", { name: "Find Tires" }).click();
     await page.waitForURL(/find-my-tires/);
 
@@ -1582,7 +1630,7 @@ for (const width of [390, 1440]) {
     await page.waitForFunction(() => /2019 Ford F-150 · 265\/70R17/.test(document.querySelector('[data-testid="shopping-for-text"]')?.textContent ?? ""));
     assert.deepEqual(
       JSON.parse(await page.evaluate(() => localStorage.getItem("tiredrop.fitment.v1"))),
-      { type: "vehicle", year: "2019", make: "Ford", model: "F-150", size: "265/70R17" },
+      { v: 1, type: "vehicle", year: "2019", make: "Ford", model: "F-150", size: "265/70R17" },
     );
     assert.match(await card(page, FITS).locator("[data-fit]").innerText(), /Matches your size \(265\/70R17\)/);
     assert.match(await card(page, NO_FIT).locator("[data-fit]").innerText(), /Doesn't fit your 2019 Ford F-150/);
@@ -1592,15 +1640,16 @@ for (const width of [390, 1440]) {
       "/tires?w=265&a=70&d=17",
     );
 
-    // Change to a 2009 F-150 in the bar: that generation is 235/75R17, and
-    // a new vehicle drops the sticker size, so nothing is blocked again.
+    // Change to a 2009 F-150: that generation is 235/75R17, and a new
+    // vehicle drops the sticker size, so nothing is blocked again. On
+    // /tires, Change reopens the finder Shop Tires showed first, prefilled.
     await bar.getByRole("button", { name: "Change" }).click();
-    await page.waitForSelector("#fit-year");
-    await page.selectOption("#fit-year", "2009");
-    await page.selectOption("#fit-make", "Ford");
-    await page.locator('#fit-model option[value="F-150"]').waitFor({ state: "attached" });
-    await page.selectOption("#fit-model", "F-150");
-    await page.getByRole("button", { name: "Show what fits" }).click();
+    await page.waitForSelector("#finder-year");
+    assert.equal(await page.inputValue("#finder-model"), "F-150");
+    await page.selectOption("#finder-year", "2009");
+    await page.selectOption("#finder-make", "Ford");
+    await pickFinderModel(page, "F-150", "f15");
+    await page.getByRole("button", { name: "Find Tires" }).click();
     await page.waitForFunction(() => /2009 Ford F-150 \(235\/75R17\)/.test(document.querySelector('[data-testid="shopping-for-text"]')?.textContent ?? ""));
     assert.match(await card(page, FITS).locator("[data-fit]").innerText(), /^Check fitment$/);
     assert.equal(await addOnCard(page, FITS).count(), 1);
@@ -1611,6 +1660,115 @@ for (const width of [390, 1440]) {
     assert.equal(await addOnCard(page, NO_FIT).count(), 1);
     assert.equal(await page.evaluate(() => localStorage.getItem("tiredrop.fitment.v1")), null);
     noErrors(fitErrors(h.errors));
+    await h.context.close();
+  });
+
+  await check(`${width} fitment: a model with no size on file (2021 BMW 4 Series, Audi Q5, a typed Audi) — the full list, type to filter, results say Check fitment`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    await page.goto(`${BASE}/tires`);
+    await page.waitForSelector("#finder-year");
+    // The full lists: every model year and make, not the catalog's 2005-2026 and 10 makes.
+    const years = await page.locator("#finder-year option").allInnerTexts();
+    assert.ok(years.includes("1995") && years.includes("2027"), "years 1981-2027");
+    await page.selectOption("#finder-year", "2021");
+    const makes = await page.locator("#finder-make option").allInnerTexts();
+    assert.ok(makes.includes("Audi") && makes.includes("Tesla") && makes.includes("Subaru"), "every make sold in 2021");
+    await page.selectOption("#finder-make", "BMW");
+    await finderModelReady(page);
+    await page.locator("#finder-model").click();
+    const all = await finderOptions(page);
+    assert.equal(all.length, 28, `every BMW model vPIC lists: ${all.join(", ")}`);
+    for (const m of ["3 Series", "4 Series", "5 Series", "M3", "X3", "X5", "X7", "Z4", "i4"]) {
+      assert.ok(all.includes(m), m);
+    }
+    // Type to filter; Enter takes the best match.
+    await page.locator("#finder-model").fill("4 ser");
+    assert.deepEqual(await finderOptions(page), ["4 Series"]);
+    await page.locator("#finder-model").press("Enter");
+    assert.equal(await page.inputValue("#finder-model"), "4 Series");
+    assert.deepEqual(await finderOptions(page), [], "the list closes on a pick");
+    await page.getByRole("button", { name: "Find Tires" }).click();
+
+    await page.waitForFunction(() => /2021 BMW 4 Series \(factory size not on file\)/.test(document.querySelector('[data-testid="shopping-for-text"]')?.textContent ?? ""));
+    await page.waitForFunction(() => /make=bmw&model=4\+series/.test(location.search));
+    const bar = page.locator('[data-testid="shopping-for"]');
+    await bar.getByText("We don’t have the factory size for this one on file.").waitFor();
+    await bar.getByRole("button", { name: "Know your exact size? Enter it from your door-jamb sticker" }).waitFor();
+    const everyCardChecks = async (label) => {
+      await page.locator('[data-testid="card-fit"]').first().waitFor();
+      const texts = await page.locator('[data-testid="card-fit"]').allInnerTexts();
+      assert.ok(texts.length >= 10, `${label}: ${texts.length} cards`);
+      assert.ok(texts.every((t) => /Check fitment/.test(t)), `${label}: ${texts.join(" | ")}`);
+      const adds = await page.getByRole("button", { name: /^Add a set of 4/ }).count();
+      assert.equal(adds, texts.length, `${label}: a vehicle alone never blocks`);
+      assert.equal(await page.getByText(/Doesn't fit/).count(), 0);
+    };
+    await everyCardChecks("BMW 4 Series");
+
+    // Change: the finder comes back prefilled with the full lists; an Audi.
+    await bar.getByRole("button", { name: "Change", exact: true }).click();
+    await finderModelReady(page);
+    assert.equal(await page.inputValue("#finder-model"), "4 Series");
+    await page.selectOption("#finder-make", "Audi");
+    await finderModelReady(page);
+    assert.equal(await page.inputValue("#finder-model"), "", "a new make clears the model");
+    await page.locator("#finder-model").fill("q5");
+    assert.deepEqual(await finderOptions(page), ["Q5", "SQ5"], "starts-with first");
+    await page.locator("#finder-model").press("ArrowDown");
+    await page.locator("#finder-model").press("Enter");
+    assert.equal(await page.inputValue("#finder-model"), "SQ5", "Down then Enter takes the next one");
+    await pickFinderModel(page, "Q5", "Q");
+    await page.getByRole("button", { name: "Find Tires" }).click();
+    await page.waitForFunction(() => /2021 Audi Q5 \(factory size not on file\)/.test(document.querySelector('[data-testid="shopping-for-text"]')?.textContent ?? ""));
+    await everyCardChecks("Audi Q5");
+
+    // A model the list does not carry can be typed; it is sent as typed.
+    await bar.getByRole("button", { name: "Change", exact: true }).click();
+    await finderModelReady(page);
+    await page.locator("#finder-model").fill("S4 Avant");
+    assert.deepEqual(await finderOptions(page), []);
+    await page.getByRole("button", { name: "Find Tires" }).click();
+    await page.waitForFunction(() => /2021 Audi S4 Avant \(factory size not on file\)/.test(document.querySelector('[data-testid="shopping-for-text"]')?.textContent ?? ""));
+    assert.deepEqual(
+      JSON.parse(await page.evaluate(() => localStorage.getItem("tiredrop.fitment.v1"))),
+      { v: 1, type: "vehicle", year: "2021", make: "Audi", model: "S4 Avant" },
+    );
+    await everyCardChecks("Audi S4 Avant");
+    noErrors(fitErrors(h.errors));
+    await h.context.close();
+  });
+
+  await check(`${width} fitment: models can't load on /tires — said plainly; type the model, or enter the door-jamb size in the bar`, async () => {
+    const h = await open(width, { delay: 0, vpicDown: true });
+    const { page } = h;
+    await page.goto(`${BASE}/tires`);
+    await page.waitForSelector("#finder-year");
+    await page.selectOption("#finder-year", "2019");
+    await page.selectOption("#finder-make", "Audi");
+    await finderModelReady(page);
+    assert.equal(await page.locator("#finder-model").getAttribute("placeholder"), "Type your model");
+    const note = page.locator('[data-testid="finder-model-note"]');
+    assert.equal(await note.innerText(), "Couldn’t load models. Type your model or enter your door-jamb size.");
+    assert.equal(await page.locator("#finder-model").getAttribute("aria-describedby"), "finder-model-note");
+    // The door-jamb size: the Shopping-for bar's front/rear form opens.
+    await note.getByRole("button", { name: "enter your door-jamb size" }).click();
+    await page.locator("#sticker-front").fill("245/40R18");
+    await page.getByRole("button", { name: "Save my size" }).click();
+    await page.waitForFunction(() => /Shopping for size 245\/40R18/.test(document.querySelector('[data-testid="shopping-for-text"]')?.textContent ?? ""));
+    // Or the model, typed: results, every other size "Check fitment".
+    await page.locator('[data-testid="shopping-for"]').getByRole("button", { name: "Change", exact: true }).click();
+    await page.getByRole("tab", { name: "Shop by Vehicle" }).click();
+    await page.selectOption("#finder-year", "2019");
+    await page.selectOption("#finder-make", "Audi");
+    await finderModelReady(page);
+    await page.locator("#finder-model").fill("A4");
+    await page.getByRole("button", { name: "Find Tires" }).click();
+    await page.waitForFunction(() => /2019 Audi A4 \(factory size not on file\)/.test(document.querySelector('[data-testid="shopping-for-text"]')?.textContent ?? ""));
+    const texts = await page.locator('[data-testid="card-fit"]').allInnerTexts();
+    assert.ok(texts.length >= 10 && texts.every((t) => /Check fitment/.test(t)), texts.join(" | "));
+    // Only the outage itself may log.
+    noErrors(h.errors.filter((e) => !/Failed to load resource|status of 404/.test(e)));
     await h.context.close();
   });
 

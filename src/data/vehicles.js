@@ -1,125 +1,51 @@
 import { useEffect, useState } from "react";
 
-import { FITMENT, FITMENT_YEAR_SPANS } from "./fitment.js";
+import {
+  YEARS,
+  findMake,
+  makesFor,
+  mergeModels,
+  vpicModelsUrl,
+  vpicNames,
+} from "./vehicleList.js";
+
+export { YEARS, makesFor };
 
 /**
  * Vehicle picker data: every model year 1981-2027, every make sold in the US
- * in that span, and the models for a make + year. A port of the Shopify
- * theme's assets/td-vehicles.js, so the React finder and the theme offer the
- * same list.
+ * in that span (src/data/vehicleList.js, shared with the API), and the models
+ * for a make + year. The Shopify theme's assets/td-vehicles.js offers the same
+ * makes and years.
  *
- * Models come live from the NHTSA vPIC database (vpic.nhtsa.dot.gov, free,
- * public, CORS-open), called straight from the browser and filtered to
- * passenger cars, trucks and SUVs/vans (vehicle types car, truck, mpv). The
- * typical-size table in fitment.js is merged in under its own spelling, so
- * every vehicle the Find My Tires tool can size still resolves to that size.
+ * Models come from NHTSA vPIC (passenger cars, trucks and SUVs/vans), asked
+ * in this order until one answers:
  *
- * NHTSA does not publish tire sizes, so a vehicle outside the size table is
- * still selectable; Find My Tires then asks for the size off the sidewall.
+ *   1. our own GET /api/vehicles (api/vehicles.js), which asks vPIC with a
+ *      timeout and is cached at Vercel's edge for a day, so most shoppers get
+ *      a cached list and a blocker that stops vpic.nhtsa.dot.gov does not
+ *      matter;
+ *   2. vPIC straight from the browser (CORS-open), when there is no API to
+ *      ask (a static preview, local dev) - not when the API answered that
+ *      vPIC is down, which would only make the shopper wait twice;
+ *   3. the build's snapshot, /data/vpic-models.json (scripts/vpic-snapshot.mjs):
+ *      every model of the make across all years, when the build could reach
+ *      vPIC;
+ *   4. the size-table models only ("fallback"), and the finders say so and
+ *      let the shopper type the model or enter the door-jamb size.
  *
- * If vPIC cannot be reached, the list falls back to the size-table models for
- * that make, and an "Other / not listed" choice is always offered.
+ * The typical-size table in fitment.js is merged in under its own spelling
+ * every time, so every vehicle the size table knows still resolves to its
+ * size. NHTSA does not publish tire sizes, so a vehicle outside the table is
+ * still selectable; its tires say "Check fitment" and ask for the size off
+ * the door-jamb sticker or sidewall.
  */
-
-const FIRST_YEAR = 1981;
-const LAST_YEAR = 2027;
 
 /** Value of the "Other / not listed" model choice. */
 export const OTHER = "Other";
 export const OTHER_LABEL = "Other / not listed";
 
-/** ["2027", ..., "1981"] */
-export const YEARS = Array.from(
-  { length: LAST_YEAR - FIRST_YEAR + 1 },
-  (_, i) => String(LAST_YEAR - i),
-);
-
-// [display name, [[firstYear, lastYear], ...], vPIC make (if different), model prefix to keep + strip]
-// prettier-ignore
-const MAKES = [
-  ["Acura", [[1986, 2027]]],
-  ["Alfa Romeo", [[1981, 1995], [2014, 2027]]],
-  ["American Motors", [[1981, 1987]]],
-  ["Aston Martin", [[1981, 2027]]],
-  ["Audi", [[1981, 2027]]],
-  ["Bentley", [[1985, 2027]]],
-  ["BMW", [[1981, 2027]]],
-  ["Buick", [[1981, 2027]]],
-  ["Cadillac", [[1981, 2027]]],
-  ["Chevrolet", [[1981, 2027]]],
-  ["Chrysler", [[1981, 2027]]],
-  ["Daewoo", [[1999, 2002]]],
-  ["Daihatsu", [[1988, 1992]]],
-  ["Datsun", [[1981, 1983]]],
-  ["Dodge", [[1981, 2027]]],
-  ["Eagle", [[1988, 1998]]],
-  ["Ferrari", [[1981, 2027]]],
-  ["Fiat", [[1981, 1982], [2012, 2027]]],
-  ["Fisker", [[2012, 2012], [2023, 2024]]],
-  ["Ford", [[1981, 2027]]],
-  ["Genesis", [[2017, 2027]]],
-  ["Geo", [[1989, 1997]]],
-  ["GMC", [[1981, 2027]]],
-  ["Honda", [[1981, 2027]]],
-  ["Hummer", [[1992, 2010]]],
-  ["Hyundai", [[1986, 2027]]],
-  ["INEOS", [[2024, 2027]]],
-  ["Infiniti", [[1990, 2027]]],
-  ["Isuzu", [[1981, 2013]]],
-  ["Jaguar", [[1981, 2027]]],
-  ["Jeep", [[1981, 2027]]],
-  ["Karma", [[2018, 2027]]],
-  ["Kia", [[1994, 2027]]],
-  ["Lamborghini", [[1981, 2027]]],
-  ["Land Rover", [[1987, 2027]]],
-  ["Lexus", [[1990, 2027]]],
-  ["Lincoln", [[1981, 2027]]],
-  ["Lotus", [[1981, 2027]]],
-  ["Lucid", [[2022, 2027]]],
-  ["Maserati", [[1981, 2027]]],
-  ["Maybach", [[2003, 2012]]],
-  ["Mazda", [[1981, 2027]]],
-  ["McLaren", [[2012, 2027]]],
-  ["Mercedes-Benz", [[1981, 2027]]],
-  ["Mercury", [[1981, 2011]]],
-  ["Merkur", [[1985, 1989]]],
-  ["MINI", [[2002, 2027]]],
-  ["Mitsubishi", [[1983, 2027]]],
-  ["Nissan", [[1981, 2027]]],
-  ["Oldsmobile", [[1981, 2004]]],
-  ["Peugeot", [[1981, 1991]]],
-  ["Plymouth", [[1981, 2001]]],
-  ["Polestar", [[2021, 2027]]],
-  ["Pontiac", [[1981, 2010]]],
-  ["Porsche", [[1981, 2027]]],
-  ["Ram", [[2012, 2027]]],
-  ["Renault", [[1981, 1987]]],
-  ["Rivian", [[2022, 2027]]],
-  ["Rolls-Royce", [[1981, 2027]]],
-  ["Saab", [[1981, 2011]]],
-  ["Saturn", [[1991, 2010]]],
-  ["Scion", [[2004, 2016]], "Toyota", "Scion "],
-  ["smart", [[2008, 2019]]],
-  ["Subaru", [[1981, 2027]]],
-  ["Suzuki", [[1985, 2013]]],
-  ["Tesla", [[2008, 2027]]],
-  ["Toyota", [[1981, 2027]]],
-  ["VinFast", [[2023, 2027]]],
-  ["Volkswagen", [[1981, 2027]]],
-  ["Volvo", [[1981, 2027]]],
-  ["Yugo", [[1986, 1992]]],
-];
-
-const VPIC =
-  "https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/";
-const TYPES = ["car", "truck", "mpv"];
-// vPIC files a few sub-brands under the parent make; they get their own entry above.
-const EXCLUDE_PREFIX = { Toyota: "Scion " };
-// Replica and kit builders that registered under a big make ("Classic Sedan", "'34").
-const JUNK = /^(Classic|Cordova|Malibu) Sedan$|^['"(]/;
-
-// "Make|Year" -> Promise<{ models, source }>. A failed lookup is dropped so
-// the next pick tries the network again.
+// "Make|Year" -> Promise<{ models, source }>. Only a vPIC answer is kept, so
+// the next pick after a failure tries the network again.
 const cache = new Map();
 
 function log(...args) {
@@ -130,71 +56,78 @@ function log(...args) {
   }
 }
 
-const findMake = (name) => MAKES.find((m) => m[0] === name) ?? null;
-
-function soldIn(entry, year) {
-  if (!year) return true;
-  const y = Number(year);
-  return entry[1].some(([first, last]) => y >= first && y <= last);
-}
-
-/** ["Acura", ...] sold in `year`; every make when `year` is "". */
-export function makesFor(year) {
-  return MAKES.filter((m) => soldIn(m, year)).map((m) => m[0]);
-}
-
-// "GLC-Class" and "GLC", "3-Series" and "3 Series" are the same model.
-const norm = (s) =>
-  String(s)
-    .toLowerCase()
-    .replace(/class|series/g, "")
-    .replace(/[^a-z0-9]/g, "");
-
-function tableModels(make, year) {
-  const y = Number(year);
-  return Object.keys(FITMENT)
-    .filter((key) => {
-      if (key.split("|")[0] !== make) return false;
-      const span = FITMENT_YEAR_SPANS[key];
-      return !y || !span || (y >= span[0] && y <= span[1]);
-    })
-    .map((key) => key.split("|")[1]);
-}
-
 /**
  * How long one vPIC request may take, body included, before it is abandoned,
  * and how many times a failed request is tried again. vPIC usually answers in
  * well under a second; when it hangs, a visitor should not watch "Loading
- * models…" for longer than about two of these before the size-table list and
- * "Other / not listed" appear.
+ * models…" for longer than about two of these before the fallback appears.
  */
 export const VPIC_TIMEOUT_MS = 7000;
 export const VPIC_RETRIES = 1;
+/**
+ * How long the browser waits for /api/vehicles: a little over the server's
+ * own two vPIC attempts (api/_lib/vehicles.js), so a slow vPIC comes back as
+ * the server's "vPIC is down" rather than a timeout here.
+ */
+export const API_TIMEOUT_MS = 10000;
+export const API_URL = "/api/vehicles";
+export const SNAPSHOT_URL = "/data/vpic-models.json";
+const SNAPSHOT_TIMEOUT_MS = 5000;
 
-async function fetchOnce(url) {
+async function getJson(url, timeoutMs, credentials = "omit") {
   const controller =
     typeof AbortController === "undefined" ? null : new AbortController();
   const timer = controller
-    ? setTimeout(() => controller.abort(), VPIC_TIMEOUT_MS)
+    ? setTimeout(() => controller.abort(), timeoutMs)
     : null;
   try {
     const res = await fetch(url, {
-      credentials: "omit",
+      credentials,
       signal: controller ? controller.signal : undefined,
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    return (data && data.Results) || [];
+    let data = null;
+    try {
+      data = await res.json();
+    } catch {
+      /* not JSON: a page, not an answer */
+    }
+    return { ok: res.ok, status: res.status, data };
   } finally {
     if (timer) clearTimeout(timer);
   }
 }
 
-async function fetchType(vpicMake, year, type) {
-  const url = `${VPIC}${encodeURIComponent(vpicMake)}/modelyear/${encodeURIComponent(year)}/vehicletype/${type}?format=json`;
+/**
+ * Asks /api/vehicles: `{ models }`, or "down" when the API answered that vPIC
+ * is down (or took too long to say), or "none" when there is no API here.
+ */
+async function fromApi(make, year) {
+  const url = `${API_URL}?kind=models&make=${encodeURIComponent(make)}&year=${encodeURIComponent(year)}`;
+  try {
+    const r = await getJson(url, API_TIMEOUT_MS, "same-origin");
+    if (r.ok && r.data && Array.isArray(r.data.models)) {
+      return { models: r.data.models.map(String) };
+    }
+    if (r.data && r.data.upstream === true) return "down";
+    log("no vehicles API", r.status);
+    return "none";
+  } catch (e) {
+    if (e && e.name === "AbortError") {
+      log("vehicles API timed out");
+      return "down";
+    }
+    log("no vehicles API", e && e.message);
+    return "none";
+  }
+}
+
+async function fetchType(make, year, type) {
+  const url = vpicModelsUrl(make, year, type);
   for (let attempt = 0; ; attempt += 1) {
     try {
-      return await fetchOnce(url);
+      const r = await getJson(url, VPIC_TIMEOUT_MS);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return (r.data && r.data.Results) || [];
     } catch (e) {
       if (attempt >= VPIC_RETRIES) throw e;
       log("retrying", type, e && (e.name === "AbortError" ? "timed out" : e.message));
@@ -202,31 +135,45 @@ async function fetchType(vpicMake, year, type) {
   }
 }
 
-function merge(make, year, names) {
-  const seen = new Set();
-  const out = [];
-  // Size-table spellings go in first, so they win a tie.
-  tableModels(make, year).forEach((m) => {
-    seen.add(norm(m));
-    out.push(m);
-  });
-  names.forEach((m) => {
-    const clean = String(m || "").trim();
-    if (!clean || /^['"(]/.test(clean)) return; // drops replica-builder junk like "'34"
-    const k = norm(clean);
-    if (!k || seen.has(k)) return;
-    seen.add(k);
-    out.push(clean);
-  });
-  return out.sort((a, b) =>
-    a.localeCompare(b, "en", { numeric: true, sensitivity: "base" }),
+/** vPIC straight from the browser: the model names, or null. */
+async function fromVpic(make, year) {
+  const parts = await Promise.all(
+    ["car", "truck", "mpv"].map((t) =>
+      fetchType(make, year, t).catch((e) => {
+        log("fetch failed", make, year, t, e && e.message);
+        return null;
+      }),
+    ),
   );
+  const ok = parts.filter((x) => x !== null);
+  return ok.length ? vpicNames(make, ok) : null;
+}
+
+// The build's snapshot, fetched once per page load: { makes } or null.
+let snapshot = null;
+function loadSnapshot() {
+  if (!snapshot) {
+    snapshot = getJson(SNAPSHOT_URL, SNAPSHOT_TIMEOUT_MS, "same-origin")
+      .then((r) =>
+        r.ok && r.data && r.data.makes && typeof r.data.makes === "object"
+          ? r.data
+          : null,
+      )
+      .catch(() => null);
+  }
+  return snapshot;
+}
+
+/** Forgets every answer (tests). */
+export function resetVehicleModels() {
+  cache.clear();
+  snapshot = null;
 }
 
 /**
  * Models for a make in a model year:
- * `Promise<{ models: string[], source: "nhtsa" | "fallback" | "none" }>`.
- * Never rejects: when vPIC is unreachable it answers from the size table.
+ * `Promise<{ models: string[], source: "nhtsa" | "snapshot" | "fallback" | "none" }>`.
+ * Never rejects: when nothing answers it falls back to the size table.
  */
 export function modelsFor(make, year) {
   const entry = findMake(make);
@@ -234,43 +181,25 @@ export function modelsFor(make, year) {
   const key = `${make}|${year}`;
   if (cache.has(key)) return cache.get(key);
 
-  const vpicMake = entry[2] || make;
-  const prefix = entry[3] || "";
-  const p = Promise.all(
-    TYPES.map((t) =>
-      fetchType(vpicMake, year, t).catch((e) => {
-        log("fetch failed", make, year, t, e && e.message);
-        return null;
-      }),
-    ),
-  )
-    .then((parts) => {
-      const ok = parts.filter((x) => x !== null);
-      if (!ok.length) throw new Error("vPIC unreachable");
-      const names = [];
-      ok.forEach((rows) =>
-        rows.forEach((r) => {
-          let n = r.Model_Name || "";
-          if (prefix) {
-            if (!n.startsWith(prefix)) return;
-            n = n.slice(prefix.length);
-          } else if (
-            EXCLUDE_PREFIX[vpicMake] &&
-            n.startsWith(EXCLUDE_PREFIX[vpicMake])
-          ) {
-            return; // Scion lives under its own make
-          }
-          if (JUNK.test(n)) return;
-          names.push(n);
-        }),
-      );
-      return { models: merge(make, year, names), source: "nhtsa" };
-    })
-    .catch((e) => {
-      log("falling back to size table for", make, year, e && e.message);
-      cache.delete(key); // try the network again next time
-      return { models: merge(make, year, []), source: "fallback" };
-    });
+  const p = (async () => {
+    const api = await fromApi(make, year);
+    if (api && typeof api === "object") {
+      return { models: mergeModels(make, year, api.models), source: "nhtsa" };
+    }
+    if (api === "none") {
+      const names = await fromVpic(make, year);
+      if (names) return { models: mergeModels(make, year, names), source: "nhtsa" };
+    }
+    cache.delete(key); // try the network again next time
+    const snap = await loadSnapshot();
+    const names = snap && Array.isArray(snap.makes[make]) ? snap.makes[make] : null;
+    if (names && names.length) {
+      log("using the build snapshot for", make, year);
+      return { models: mergeModels(make, year, names.map(String)), source: "snapshot" };
+    }
+    log("falling back to size table for", make, year);
+    return { models: mergeModels(make, year, []), source: "fallback" };
+  })();
   cache.set(key, p);
   return p;
 }
@@ -347,29 +276,42 @@ export function recallVehicle() {
  * ------------------------------------------------------------------ */
 
 /**
- * The saved selection, in localStorage:
+ * The one saved selection, in localStorage, so it survives a browser
+ * restart until the shopper clears their site data (or taps "Shopping for a
+ * different car?"):
  *
- *   tiredrop.fitment.v1 = { "type": "vehicle", "year": "2019", "make": "BMW",
- *                           "model": "3 Series", "pick"?: trim option,
- *                           "size"?: "225/40R19", "rear"?: "255/35R19" }
- *                       | { "type": "size", "size": "225/40R19",
+ *   tiredrop.fitment.v1 = { "v": 1, "type": "vehicle", "year": "2019",
+ *                           "make": "BMW", "model": "3 Series",
+ *                           "pick"?: trim option, "size"?: "225/40R19",
  *                           "rear"?: "255/35R19" }
+ *                       | { "v": 1, "type": "size", "size": "225/40R19",
+ *                           "rear"?: "255/35R19" }
+ *
+ * `v` is the format version. An entry from before it existed (no `v`) is
+ * read as version 1; one from a newer format this build does not know is
+ * ignored rather than misread. Every read and write is wrapped in
+ * try/catch: with storage blocked (private mode, site data off) the
+ * selection lasts for the page session only (VehicleContext.jsx keeps it in
+ * memory) and Shop Tires shows the finder again next time.
  *
  * `size` on a vehicle is a size the shopper confirmed (the door-jamb
  * sticker, or typed over the typical size in Find My Tires); only a
  * confirmed size can rule a tire out (fitmentCheck.js). `rear` (added
- * 2026-10-01) is the rear size of a staggered setup and is only kept next to
- * a `size`. It is an optional extra field, so the key and format version
- * stay the same: a build from before it reads the entry as the front size
- * only, and an entry from before it has no rear.
+ * 2026-10-01, main dee5157) is the rear size of a staggered setup and is
+ * only kept next to a `size`. It is an optional extra field, so the key and
+ * `v` stay at 1: a build from before it reads the entry as the front size
+ * only, and an entry from before it simply has no rear. Bump `v` only for a
+ * change an older build would misread (a renamed or re-meant field).
  */
 const SELECTION_KEY = "tiredrop.fitment.v1";
+export const SELECTION_VERSION = 1;
 
 const clip = (x, n = 60) => (typeof x === "string" ? x.trim().slice(0, n) : "");
 
 /** A stored selection checked field by field, or null. */
 function cleanSelection(v) {
   if (!v || typeof v !== "object") return null;
+  if (v.v != null && v.v !== SELECTION_VERSION) return null;
   if (v.type === "size") {
     const size = clip(v.size, 40);
     if (!size) return null;
@@ -420,7 +362,10 @@ export function saveSelection(selection) {
       window.localStorage.removeItem(LAST_VEHICLE_KEY);
       return null;
     }
-    window.localStorage.setItem(SELECTION_KEY, JSON.stringify(clean));
+    window.localStorage.setItem(
+      SELECTION_KEY,
+      JSON.stringify({ v: SELECTION_VERSION, ...clean }),
+    );
   } catch {
     /* storage unavailable: the selection lasts for this page load */
   }
