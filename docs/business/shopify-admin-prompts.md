@@ -469,8 +469,11 @@ after saving (except #5, leave it OFF), and don't change any other settings.
      least one item with Key equal to "Delivery" AND Value contains
      "Ship to store"
    Then (S true): Add order tags "ship-to-store-install"
-     + nested Condition: at least one of Order / Fulfillment orders has
-       Delivery method / Method type equal to PICK_UP
+     + nested Condition (ANY of): at least one of Order / Fulfillment
+       orders has Delivery method / Method type equal to PICK_UP, OR
+       Order / Shipping line / Title contains "Pickup at Extreme Tires"
+       (website orders use that $0 shipping line, which Shopify treats as
+       shipping, not pick-up)
        If NOT true: Send internal email
          Subject: [CHECK] {{order.name}}: chose ship-to-store but checkout shipped
          Message: {{order.name}} ({{order.email}}) picked "Ship to store for
