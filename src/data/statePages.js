@@ -24,14 +24,14 @@
 //               snippet is not verification)
 //   conflict    sources disagree; never rendered
 //
-// On 2026-10-01 the session's network policy blocked every state, statute and
-// NOAA site, so nothing here is "fetched": every fact is unverified. The pilot
-// pages render "search-primary" facts only because PREVIEW_SHOW_SEARCH_PRIMARY
-// is on, so Justin can review real pages. Before the pilot goes to main,
-// someone opens each source link, confirms the line, and sets
-// `evidence: "fetched", unverified: false`; then the switch goes off and only
-// confirmed facts render. "search-secondary" and conflicting facts never
-// render, switch or not.
+// On 2026-10-01 every one of the 40 pilot facts was read against its official
+// source page in a browser (Justin's fact-check): 27 matched as written and 13
+// were corrected to the source's own wording, together with the same claims
+// in the FAQs and paragraphs. They are all `verified` (evidence "fetched",
+// unverified false), and PREVIEW_SHOW_SEARCH_PRIMARY is off, so only checked
+// facts render. A new fact starts as `primary` or `secondary` and renders only
+// once someone reads its source and makes it `verified`. "search-secondary"
+// and conflicting facts never render.
 //
 // COPY RULES (statePages.test.mjs): never "safe", "OK" or "fine"; no
 // delivery dates or arrival promises; no discounts or "sale"; no reviews or
@@ -44,7 +44,7 @@
  * they are flagged unverified. Turn off once the pilot facts are confirmed
  * against their sources (or to see exactly what a strict build would show).
  */
-export const PREVIEW_SHOW_SEARCH_PRIMARY = true;
+export const PREVIEW_SHOW_SEARCH_PRIMARY = false;
 
 /** Facts checked through this date (shown on each page). */
 export const FACTS_CHECKED = "October 2026";
@@ -63,7 +63,15 @@ const NOAA = (abbr) => ({
   url: `https://statesummaries.ncics.org/chapter/${abbr}/`,
 });
 
-// A primary-source fact found through search, and a secondary one.
+// A fact read on its official source page (renders), a primary-source fact
+// found only through search (preview-only), and a secondary one (never).
+const verified = (text, sources, extra = {}) => ({
+  text,
+  sources,
+  evidence: "fetched",
+  unverified: false,
+  ...extra,
+});
 const primary = (text, sources, extra = {}) => ({
   text,
   sources,
@@ -114,7 +122,7 @@ const PILOT = {
     intro:
       "TireDrop is the online store of Extreme Tires, a shop in Sunrise, so Florida is the one state where we do more than ship. Anywhere in Florida, your tires ship free to your address. In Miami-Dade, Broward and Palm Beach counties you can also have them fitted by our mobile van or in the bay at the Sunrise shop.",
     facts: {
-      tread: primary(
+      tread: verified(
         "FLHSMV tells drivers to replace tires with less than 2/32 inch of tread, and shows the penny test for checking it: Lincoln's head goes into a groove upside down, and if you can see above the top of his head, the tread is under 2/32 inch.",
         [{ name: "FLHSMV, Tire Safety", url: "https://www.flhsmv.gov/safety-center/vehicle-safety/tire-safety/" }],
       ),
@@ -127,18 +135,18 @@ const PILOT = {
         "Florida ended periodic safety inspections (which checked tires) in 1981 and its emissions test in 2000.",
         [{ name: "LegalClarity", url: "https://legalclarity.org/why-did-florida-stop-vehicle-inspections/" }],
       ),
-      fee: primary(
+      fee: verified(
         "Florida law puts a $1 fee on each new motor vehicle tire sold at retail in the state, listed on its own line of the invoice. The money goes to the state's Solid Waste Management Trust Fund.",
         [{ name: "Florida Statutes § 403.718", url: "https://www.flsenate.gov/Laws/Statutes/2023/403.718" }],
       ),
     },
     climate: [
-      primary(
+      verified(
         "Florida has hot, humid summers and mild winters, and it is the most humid state in the nation.",
         [NOAA("fl")],
       ),
-      primary(
-        "Florida gets more thunderstorms each year than any other state, and hurricanes and strong coastal storms, its most serious weather threat, strike the coast on average three times every five years.",
+      verified(
+        "Florida gets more thunderstorms than any other state, and hurricane-force winds impact the state an average of three times every five years.",
         [NOAA("fl")],
       ),
     ],
@@ -174,7 +182,7 @@ const PILOT = {
       },
       {
         q: "Does hurricane season change anything about ordering?",
-        a: "Only the timing you plan around. Hurricanes and strong coastal storms hit Florida on average three times every five years, and a parcel in transit waits out a storm like any other; the tracking email shows where it is. If your street flooded, check the tires coming off for cuts and debris before you buy the same size again.",
+        a: "Only the timing you plan around. Hurricane-force winds impact Florida an average of three times every five years, and a parcel in transit waits out a storm like any other; the tracking email shows where it is. If your street flooded, check the tires coming off for cuts and debris before you buy the same size again.",
       },
       {
         q: "How do I check my tread before I order?",
@@ -194,20 +202,20 @@ const PILOT = {
     intro:
       "Tires ship free to any street address in Georgia, from Savannah to the north Georgia mountains. We don't install in Georgia: your tires ship to your door, or to the shop you pick, with tracking emailed, and that shop mounts them. Below are Georgia's tread and stud rules, its $1 tire fee and what its short, mild winters mean for the tire you buy.",
     facts: {
-      tread: primary(
+      tread: verified(
         "Georgia law requires at least 2/32 inch of tread, measurable in all major grooves. School buses and commercial vehicles need 4/32 inch on the front tires.",
         [{ name: "O.C.G.A. § 40-8-74", url: "https://law.justia.com/codes/georgia/title-40/chapter-8/article-1/part-4/section-40-8-74/" }],
       ),
-      studs: primary(
+      studs: verified(
         "Georgia bans studs, spikes and other non-rubber protrusions on tires, with one exception: chains and studded tires may be used when snow, ice or similar conditions could make a vehicle skid.",
         [{ name: "O.C.G.A. § 40-8-74", url: "https://law.justia.com/codes/georgia/title-40/chapter-8/article-1/part-4/section-40-8-74/" }],
       ),
-      inspection: primary(
+      inspection: verified(
         "Georgia's vehicle inspection is an emissions test, not a tire check. For 2026 registrations, most 2002 to 2023 gas cars and light trucks registered in 13 metro Atlanta counties are tested every year, before the owner's birthday.",
         [{ name: "Georgia's Clean Air Force, FAQ", url: "https://cleanairforce.com/frequently-asked-questions" }],
       ),
-      fee: primary(
-        "Georgia charges $1 on each new replacement tire sold in the state. Since a 2023 change to the law, the distributor that first sells the tire in Georgia collects it. The money funds scrap tire cleanup and recycling grants.",
+      fee: verified(
+        "Georgia charges $1 on each new replacement tire. Since July 1, 2023, the distributor that first sells the tire in Georgia collects the fee.",
         [
           { name: "Georgia EPD, Tire Fee Collection 2023", url: "https://epd.georgia.gov/georgia-tire-fee-collection-2023" },
           { name: "Georgia DOR (O.C.G.A. § 12-8-40.1)", url: "https://dor.georgia.gov/taxes/sales-use-tax/what-subject-sales-and-use-tax" },
@@ -215,11 +223,11 @@ const PILOT = {
       ),
     },
     climate: [
-      primary(
+      verified(
         "Georgia has long, hot, humid summers and short, usually mild winters. Snowfall is light: even the northern mountains average only about 5 inches a year.",
         [NOAA("ga")],
       ),
-      primary(
+      verified(
         "Rain is plentiful year-round, from more than 70 inches a year in the mountainous northeast corner to about 45 inches in the southeast and central parts of the state.",
         [NOAA("ga")],
       ),
@@ -244,7 +252,7 @@ const PILOT = {
       },
       {
         q: "Why is there a $1 fee on tires in Georgia?",
-        a: "O.C.G.A. § 12-8-40.1 puts $1 on each new replacement tire sold in the state to pay for scrap tire cleanup and recycling. From July 1, 2023, the distributor collects it. Taxes and fees are calculated at checkout.",
+        a: "Georgia charges $1 on each new replacement tire. Since July 1, 2023, the distributor that first sells the tire in Georgia collects it. Taxes and fees are calculated at checkout.",
       },
       {
         q: "I'm in metro Atlanta. Does my emissions test check my tires?",
@@ -271,25 +279,25 @@ const PILOT = {
         [{ name: "Tex. Transp. Code § 547.612 (FindLaw)", url: "https://codes.findlaw.com/tx/transportation-code/transp-sect-547-612/" }],
         { conflict: true },
       ),
-      inspection: primary(
+      inspection: verified(
         "Since January 1, 2025, non-commercial vehicles in Texas no longer need a safety inspection before registration (House Bill 3297). Owners pay a $7.50 inspection program replacement fee when they register instead. Commercial vehicles still need a passing safety inspection.",
         [{ name: "Texas DPS, Inspection Program Changes", url: "https://www.dps.texas.gov/news/vehicle-safety-inspection-program-changes-now-effect" }],
       ),
-      emissions: primary(
+      emissions: verified(
         "Emissions testing still applies in Collin, Dallas, Denton, Ellis, Johnson, Kaufman, Parker, Rockwall and Tarrant counties around Dallas-Fort Worth; Brazoria, Fort Bend, Galveston, Harris and Montgomery around Houston; Travis and Williamson around Austin; and El Paso County, with Bexar County starting November 1, 2026. It is an emissions test, not a tire check.",
         [{ name: "TCEQ, Vehicle Emissions Inspections", url: "https://www.tceq.texas.gov/airquality/mobilesource/vim/overview.html" }],
       ),
-      fee: primary(
+      fee: verified(
         "Texas has no state fee on new tires. Its per-tire recycling fee program ended on December 31, 1997; tire shops now set their own charges for taking old tires.",
         [{ name: "TCEQ, Scrap Tire Management in Texas", url: "https://www.tceq.texas.gov/downloads/permitting/waste-permits/publications/as212-20_scraptire_5yrplan.pdf" }],
       ),
     },
     climate: [
-      primary(
-        "Texas has hot summers and mild to cool winters. The Rocky Mountains tend to steer arctic air south into the state in winter, and the flat middle of the continent lets that cold air move in quickly.",
+      verified(
+        "Texas has hot summers and mild to cool winters. The Rocky Mountains channel arctic air south in winter, and the flat interior lets air masses move north and south easily.",
         [NOAA("tx")],
       ),
-      primary(
+      verified(
         "January low temperatures typically run from about 20°F in the northern Panhandle to about 50°F near the mouth of the Rio Grande.",
         [NOAA("tx")],
       ),
@@ -297,7 +305,7 @@ const PILOT = {
     tireTypeTitle: "All-season down south, all-weather up north",
     tireType: [
       "Texas is too big for one answer. Along the Gulf and in the Valley, where January lows sit around 50°F, an all-season or touring tire fits the whole year. Heat is the bigger enemy there: check pressures in the morning before you drive, because a hot afternoon reading runs high and hides a slow leak.",
-      "In the Panhandle and North Texas, January lows near 20°F and arctic air that drops in fast make an all-weather tire with the three-peak mountain snowflake symbol worth a look. It passes a severe-snow traction test yet stays on all year, which suits a place where winter comes in short, sharp spells rather than a long season.",
+      "In the Panhandle and North Texas, January lows near 20°F and arctic air channeled south by the Rockies make an all-weather tire with the three-peak mountain snowflake symbol worth a look. It passes a severe-snow traction test yet stays on all year, which suits a place where winter comes in short, sharp spells rather than a long season.",
     ],
     shipNote:
       "Texas orders ship free to your home, your office or the shop that will mount them. Texas adds no state tire fee; taxes and fees are calculated at checkout.",
@@ -331,33 +339,33 @@ const PILOT = {
     intro:
       "Tires ship free to any street address in California, from San Diego to the Oregon line. California's tire rules are unusually specific: a 1/32 inch tread minimum, chain controls in the mountains with a 6/32 inch rule for snow tires used instead of chains, a stud season and a $1.75 tire fee. Here they are with sources, and what they mean for the set you choose.",
     facts: {
-      tread: primary(
+      tread: verified(
         "Passenger tires need at least 1/32 inch of tread in any two adjacent grooves at any point on the tire. Snow tires used instead of chains in a posted chain-control area need 6/32 inch.",
         [{ name: "California Vehicle Code § 27465", url: "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=27465.&lawCode=VEH" }],
       ),
-      traction: primary(
-        "Caltrans posts chain controls in three levels. R-1: chains required, except on passenger cars and light trucks under 6,000 pounds with snow tires on at least two drive wheels. R-2: chains required, except on four-wheel or all-wheel drive vehicles with snow-tread tires on all four wheels, which must still carry chains. R-3: chains on every vehicle. Snow tires are marked M+S or MUD AND SNOW on the sidewall.",
+      traction: verified(
+        "R-1: chains required except on passenger vehicles and light trucks under 6,000 lb with snow tires on at least two drive wheels. R-2: chains or traction devices required except on 4WD/AWD vehicles with snow-tread tires on all four wheels, which must still carry traction devices. R-3: chains or traction devices required on all vehicles, no exceptions. Snow tires are marked MS, M/S, M+S or MUD AND SNOW on the sidewall.",
         [{ name: "Caltrans, Chain Controls", url: "https://dot.ca.gov/travel/winter-driving-tips/chain-controls" }],
       ),
-      studs: primary(
-        "Studded tires are allowed anywhere in the state from November 1 through April 30. They are not traction devices, so they can't be used in place of chains.",
+      studs: verified(
+        "Studded tires are allowed from November 1 through April 30. The CHP commissioner can extend this period in bad weather.",
         [{ name: "California Vehicle Code § 27454", url: "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=VEH&sectionNum=27454" }],
       ),
-      inspection: primary(
+      inspection: verified(
         "California's periodic vehicle test is the Smog Check, an emissions inspection run by the Bureau of Automotive Repair. It is required every other year at registration once a car is more than eight model years old.",
         [{ name: "Bureau of Automotive Repair, Smog Check", url: "https://bar.ca.gov/pdf/smog-check-brochure.pdf" }],
       ),
-      fee: primary(
-        "California charges $1.75 on each new tire bought separately from a vehicle, under the California Tire Fee law. CDTFA collects it with CalRecycle, and it is scheduled to drop to 75 cents a tire on January 1, 2034.",
-        [{ name: "CDTFA, California Tire Fee", url: "https://cdtfa.ca.gov/taxes-and-fees/california-tire-fee/" }],
+      fee: verified(
+        "California charges a $1.75 fee per new tire. It applies to new tires sold on their own and to new tires (including the spare) sold with a new or used vehicle. CDTFA administers it with CalRecycle.",
+        [{ name: "CDTFA, California Tire Fee: Getting Started", url: "https://cdtfa.ca.gov/taxes-and-fees/california-tire-fee/getting-started.htm" }],
       ),
     },
     climate: [
-      primary(
+      verified(
         "California's climate runs from some of the nation's hottest, driest deserts in the south to heavy snowfall at higher elevations.",
         [NOAA("ca")],
       ),
-      primary(
+      verified(
         "The Pacific keeps coastal temperatures mild all year; inland areas see a much wider range.",
         [NOAA("ca")],
       ),
@@ -365,7 +373,7 @@ const PILOT = {
     tireTypeTitle: "All-season at home, chain rules in the mountains",
     tireType: [
       "Most Californians never see snow at home. On the coast and in the valleys, an all-season or summer tire fits the year; in the desert, heat and tire age matter more than tread pattern, so check the four-digit date code on the sidewall of anything you buy.",
-      "If you drive into the Sierra Nevada or other mountain areas in winter, chain controls shape the choice. Under R-1, a car with M+S snow tires on two drive wheels can skip chains; under R-2, only 4WD or AWD vehicles with snow-tread tires on all four wheels can, and they still carry chains. Either way, a snow tire used instead of chains needs 6/32 inch of tread, so a set bought for ski trips should start the winter well above it.",
+      "If you drive into the Sierra Nevada or other mountain areas in winter, chain controls shape the choice. Under R-1, a car with M+S snow tires on two drive wheels can skip chains; under R-2, only 4WD or AWD vehicles with snow-tread tires on all four wheels can, and they still carry traction devices. Either way, a snow tire used instead of chains needs 6/32 inch of tread, so a set bought for ski trips should start the winter well above it.",
     ],
     shipNote:
       "California orders ship free to any street address in the state. Taxes and fees, including the California tire fee where it applies, are calculated at checkout.",
@@ -378,15 +386,15 @@ const PILOT = {
       },
       {
         q: "Can my all-wheel-drive car skip chains in the Sierra?",
-        a: "Under R-2, yes, if it has snow-tread tires on all four wheels, but it must still carry chains. Under R-3 every vehicle chains up. Caltrans posts the level in force at each control point.",
+        a: "Under R-2, yes, if it has snow-tread tires on all four wheels, but it must still carry traction devices. Under R-3 every vehicle needs chains or traction devices. Caltrans posts the level in force at each control point.",
       },
       {
         q: "When can I run studded tires in California?",
-        a: "From November 1 through April 30, anywhere in the state. Studs don't count as traction devices, so when chains are required, studs alone won't do.",
+        a: "From November 1 through April 30. The CHP commissioner can extend this period in bad weather.",
       },
       {
         q: "What is the $1.75 on California tire orders?",
-        a: "The California Tire Fee: $1.75 per new tire, collected by CDTFA and spent on tire recycling grants and air quality programs. It is set to drop to 75 cents in 2034. Taxes and fees are calculated at checkout.",
+        a: "The California Tire Fee: $1.75 per new tire, administered by CDTFA with CalRecycle. Taxes and fees are calculated at checkout.",
       },
     ],
     seoTitle: "Tires Shipped Free to California",
@@ -399,33 +407,33 @@ const PILOT = {
     intro:
       "Tires ship free to any street address in New York, from Long Island to Buffalo. New York looks at your tires every year at inspection, sets a stud season and adds a $2.50 tire fee, and its lake-effect snow belts are among the snowiest places in the East. Here is each rule with its source, and what it means for the tires you pick.",
     facts: {
-      tread: primary(
+      tread: verified(
         "At inspection, cars and light trucks need at least 2/32 inch of tread, measured in two adjacent major grooves where the tire is most worn.",
         [{ name: "NY DMV, Safety/Emissions Inspection Program", url: "https://dmv.ny.gov/new-york-state-vehicle-safetyemissions-inspection-program" }],
       ),
-      inspection: primary(
+      inspection: verified(
         "Every vehicle registered in New York must be inspected at least once every 12 months. Besides tread depth, the inspection fails a tire with a cut longer than an inch that shows fabric, a visible bump, bulge or knot, or a restricted-use marking.",
         [{ name: "NY DMV, Safety/Emissions Inspection Program", url: "https://dmv.ny.gov/new-york-state-vehicle-safetyemissions-inspection-program" }],
       ),
-      studs: primary(
+      studs: verified(
         "Tires with metal studs may be used only from October 16 through April 30.",
         [{ name: "NY DMV Driver's Manual, Chapter 10", url: "https://dmv.ny.gov/new-york-state-drivers-manual-and-practice-tests/chapter-10-special-driving-conditions" }],
       ),
-      fee: primary(
-        "New York's waste tire management and recycling fee is $2.50 on most new tires bought at retail in the state, and the Tax Department's guidance names online tire retailers among the sellers that collect it. Used and recapped tires are exempt. The fee is currently set to run through December 31, 2027.",
+      fee: verified(
+        "New York charges a $2.50 waste tire fee on most new tires sold at retail. Tax Department guidance names online tire retailers among the businesses that collect it. Used and recapped tires are exempt.",
         [{ name: "NYS Tax Department, Waste Tire Fee", url: "https://www.tax.ny.gov/bus/tire/wtm.htm" }],
       ),
     },
     climate: [
-      primary(
+      verified(
         "Northern New York often gets heavy lake-effect snow: arctic air warms and picks up moisture over Lakes Erie and Ontario, then drops intense bands of snow downwind.",
         [NOAA("ny")],
       ),
-      primary(
+      verified(
         "In November 2014 one lake-effect storm left more than 5 feet of snow just east of Buffalo, and a second storm right behind it added as much as 4 more feet.",
         [NOAA("ny")],
       ),
-      primary(
+      verified(
         "The Atlantic moderates the coast, while the Great Lakes and Lake Champlain moderate the northwest and northeast of the state.",
         [NOAA("ny")],
       ),
@@ -465,47 +473,47 @@ const PILOT = {
   "north-carolina": {
     dmv: { name: "NCDMV", url: "https://www.ncdot.gov/dmv/" },
     intro:
-      "Tires ship free to any street address in North Carolina, from the Outer Banks to the Blue Ridge. North Carolina still checks tires at its annual inspection, allows studded tires within a size limit, and figures its tire tax as a share of the price rather than a flat fee. Its winters range from almost no snow on the coast to about 89 inches a year on Mount Mitchell.",
+      "Tires ship free to any street address in North Carolina, from the Outer Banks to the Blue Ridge. North Carolina still checks tires at its safety inspection, allows studded tires within a size limit, and figures its tire tax as a share of the price rather than a flat fee. Snowfall averages about 5 inches a year across the state and about 89 inches on Mount Mitchell.",
     facts: {
-      tread: primary(
+      tread: verified(
         "North Carolina's tire law fails a tire with less than 2/32 inch of tread at two or more places around it, in two adjacent major grooves. Steering-axle tires on heavy-duty vehicles need 4/32 inch.",
         [{ name: "N.C.G.S. § 20-122.1", url: "https://ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_20/GS_20-122.1.html" }],
       ),
-      inspection: primary(
-        "The annual safety inspection covers the tires, checked against that tread law, along with brakes and lights. NCDMV's October 2026 guidance on digital registration says you still need a safety inspection before you register or renew.",
+      inspection: verified(
+        "North Carolina's safety inspection covers tires (against the state tread law), brakes and lights. You need a passing inspection no more than 90 days before you register or renew.",
         [
           { name: "N.C.G.S. § 20-183.3", url: "https://ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_20/GS_20-183.3.html" },
           { name: "NCDMV, Digital Vehicle Registration", url: "https://www.ncdot.gov/dmv/title-registration/registration/Pages/digital-vehicle-registration.aspx" },
         ],
       ),
-      studs: primary(
+      studs: verified(
         "Regular and snow tires with studs are allowed, as long as the studs stick out no more than 1/16 inch beyond the tread when compressed.",
         [{ name: "N.C.G.S. § 20-122", url: "https://ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_20/GS_20-122.html" }],
       ),
-      fee: primary(
-        "Instead of a flat fee, North Carolina charges a scrap tire disposal tax on new tires: 2% of the price for tires under 20 inches in bead diameter, and 1% for 20 inches and up. The price it is figured on includes the retailer's charges for installation and shipping.",
+      fee: verified(
+        "North Carolina's scrap tire disposal tax is 2% of the price for tires under 20-inch bead diameter and 1% for 20 inches and up.",
         [{ name: "NCDOR, Scrap Tire Disposal Tax", url: "https://www.ncdor.gov/taxes-forms/other-taxes-and-fees/scrap-tire-disposal-tax" }],
       ),
     },
     climate: [
-      primary(
-        "North Carolina averages about 5 inches of snow a year, but the higher Appalachians can get up to 100 inches, while the coast sees little to none.",
+      verified(
+        "North Carolina averages about 5 inches of snow a year, and the higher Appalachian elevations can get up to 100 inches.",
         [NOAA("nc")],
       ),
-      primary(
+      verified(
         "Mount Mitchell, the state's snowiest site, averages 89.1 inches a year. In many winter storms the Piedmont sits between cold air to the west and warm air to the east, and freezing rain is common enough there that it has been called the Ice Storm Capital of the South.",
         [{ name: "NC State Climate Office", url: "https://products.climate.ncsu.edu/weather/winter/types/" }],
       ),
     ],
     tireTypeTitle: "All-season on the coast, all-weather inland",
     tireType: [
-      "On the coastal plain, where snow is rare, an all-season tire fits the year. The Piedmont, from Charlotte through Greensboro to Raleigh and Durham, is the tricky part of the state: freezing rain is more likely than deep snow there, and no tire grips glaze ice well. An all-weather tire with the three-peak mountain snowflake symbol is the sensible upgrade over an all-season, with better bite in slush and cold rain and no seasonal swap.",
+      "On the coastal plain, an all-season tire fits most driving. The Piedmont, from Charlotte through Greensboro to Raleigh and Durham, is the tricky part of the state: freezing rain is more likely than deep snow there, and no tire grips glaze ice well. An all-weather tire with the three-peak mountain snowflake symbol is the sensible upgrade over an all-season, with better bite in slush and cold rain and no seasonal swap.",
       "In the mountains around Boone and Asheville, where totals climb far past the state average, a winter tire earns its place on a daily driver, and studs are an option within the 1/16 inch limit.",
     ],
     shipNote:
       "North Carolina orders ship free to any street address in the state. Taxes and fees, including the scrap tire disposal tax where it applies, are calculated at checkout.",
     mountNote:
-      "Your new tires will be looked at again at your next annual inspection, so ask the shop for an invoice showing the tire size and the date mounted, and keep it with your order confirmation. Running studs? Ask the shop to confirm they sit within the 1/16 inch limit.",
+      "Your new tires will be looked at again at your next safety inspection, so ask the shop for an invoice showing the tire size and the date mounted, and keep it with your order confirmation. Running studs? Ask the shop to confirm they sit within the 1/16 inch limit.",
     faq: [
       {
         q: "Does North Carolina still require a safety inspection?",
@@ -513,7 +521,7 @@ const PILOT = {
       },
       {
         q: "How is North Carolina's tire tax figured?",
-        a: "As a percentage of the price: 2% for tires under 20 inches in bead diameter, 1% for 20 inches and up, and the price includes the retailer's installation and shipping charges. Taxes and fees are calculated at checkout.",
+        a: "As a percentage of the price: 2% for tires under 20 inches in bead diameter, 1% for 20 inches and up. Taxes and fees are calculated at checkout.",
       },
       {
         q: "Are studded tires legal in North Carolina?",
@@ -537,8 +545,8 @@ const PILOT = {
     intro:
       "Tires ship free to any street address in Colorado, from the Eastern Plains to the Western Slope. If you drive the mountains, your tires are a legal matter as much as a choice: from September 1 through May 31 the Traction Law applies on the I-70 mountain corridor, and it asks for more tread than most states' minimums.",
     facts: {
-      traction: primary(
-        "From September 1 through May 31 the Traction Law is in effect on the I-70 Mountain Corridor between Dotsero and Morrison, and CDOT can put it in force on other state highways when conditions call for it. While it's on, a 4WD or AWD vehicle needs tires with at least 3/16 inch of tread that are winter tires (mountain snowflake symbol), all-weather tires or mud-and-snow (M+S) tires. Any vehicle that doesn't meet that, two-wheel drive included, needs chains or an approved alternative traction device on two or more drive tires.",
+      traction: verified(
+        "The Traction Law is in effect Sept 1–May 31 on the I-70 Mountain Corridor between Dotsero and Morrison. 4WD/AWD vehicles need tires with at least 3/16-inch tread that are winter (mountain-snowflake), all-weather or M+S tires. Vehicles that don't meet these standards need chains or an approved alternative traction device on two or more drive tires.",
         [{ name: "CDOT, New Traction Law requirements (Nov 2025)", url: "https://www.codot.gov/news/2025/november/new-traction-law-requirements" }],
       ),
       penalty: secondary(
@@ -551,28 +559,28 @@ const PILOT = {
         [AGG_STUDS],
         { conflict: true },
       ),
-      inspection: primary(
-        "Colorado's periodic vehicle test is an emissions inspection, required for many vehicles registered in the Denver metro area and the North Front Range. It is not a tire check.",
+      inspection: verified(
+        "Colorado's periodic vehicle test is an emissions inspection, not a tire check.",
         [{ name: "CDPHE, Emissions Inspection Requirements", url: "https://cdphe.colorado.gov/air-emissions/general-emissions-inspection-requirements-and-information" }],
       ),
-      fee: primary(
+      fee: verified(
         "Beginning January 1, 2026, Colorado's Waste Tire Management Enterprise collects $1.50 on each new tire sold in the state.",
         [{ name: "CDPHE, Waste Tire Management Enterprise", url: "https://cdphe.colorado.gov/hm/waste-tire-management-enterprise" }],
       ),
     },
     climate: [
-      primary(
-        "Snowfall swings enormously across Colorado: the high mountains get 150 to more than 400 inches a year. Wolf Creek Pass averages nearly 400 inches, while Manassa in the San Luis Valley, just to the east, gets barely 40.",
+      verified(
+        "Wolf Creek Pass averages nearly 400 inches of snow a year and sometimes tops 600, while Manassa in the San Luis Valley gets barely 40.",
         [{ name: "Colorado Climate Center", url: "https://climate.colostate.edu/climate_long.html" }],
       ),
-      primary(
+      verified(
         "On the eastern plains and in the valleys most precipitation falls in spring and summer; the high peaks get most of theirs in winter.",
         [NOAA("co")],
       ),
     ],
     tireTypeTitle: "Where you drive decides it",
     tireType: [
-      "In Colorado the question is less where you live than where you drive. If your winter includes I-70 west of Morrison or any mountain pass, a 4WD or AWD vehicle needs winter, all-weather or M+S tires with at least 3/16 inch of tread, and a two-wheel-drive car needs chains or a traction device when the law is on. A winter tire with the mountain snowflake symbol is the strongest choice for mountain commuters; an all-weather tire suits Front Range drivers who head up on weekends.",
+      "In Colorado the question is less where you live than where you drive. If your winter includes I-70 west of Morrison or any mountain pass, a 4WD or AWD vehicle needs winter, all-weather or M+S tires with at least 3/16 inch of tread, and a vehicle that doesn't meet that needs chains or an approved alternative traction device when the law is on. A winter tire with the mountain snowflake symbol is the strongest choice for mountain commuters; an all-weather tire suits Front Range drivers who head up on weekends.",
       "On the eastern plains, where most precipitation comes in spring and summer, an all-season tire covers most driving. Whatever you buy for the mountains, watch the tread: a tire that starts the season just above 3/16 inch may not finish it there.",
     ],
     shipNote:
