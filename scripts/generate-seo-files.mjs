@@ -114,9 +114,9 @@ export function navigateRoutes() {
  * (NOINDEX_ROUTES in src/components/ui/index.jsx).
  *
  * /track (Track My Order) is a lookup form with nothing to rank, and it is
- * noindex too.
+ * noindex too. So is /search: a results page, different for every query.
  */
-export const EXCLUDE = new Set(["/cart", "/checkout", "/track"]);
+export const EXCLUDE = new Set(["/cart", "/checkout", "/track", "/search"]);
 
 /**
  * Learn guides and blog posts, from the Markdown in src/content, parsed by the

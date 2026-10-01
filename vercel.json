@@ -123,7 +123,6 @@
     { "source": "/policies/:path*", "destination": "/terms", "statusCode": 301 },
     { "source": "/blogs", "destination": "/blog", "statusCode": 301 },
     { "source": "/blogs/:path*", "destination": "/blog", "statusCode": 301 },
-    { "source": "/search", "destination": "/tires", "statusCode": 301 },
     {
       "source": "/account",
       "destination": "https://shop.tiredroponline.com/account",

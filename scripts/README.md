@@ -26,6 +26,7 @@ header comment, and `shopify/assets/td-tiremath.js` names
 | `docs-links-check.mjs` | `check:docs` | Every relative Markdown link and every `docs/...` path in the docs resolves to a real file. |
 | `ga-events-check.mjs` | `check:ga` | GA4 conversion events through a real funnel (view_item, add_to_cart, view_cart, begin_checkout, add_shipping_info, generate_lead) with the expected shape, and nothing typed into a form in any GA call. |
 | `a11y-check.mjs` | `check:a11y` | axe-core (WCAG 2.1 A/AA plus best practice) on 12 key routes at 390px and 1280px: fails on serious or critical issues. Also checks the skip link is the first Tab stop and moves focus to `<main>`. |
+| `search-check.mjs` | `check:search` | The header's store-wide search: size, brand and page suggestions as you type, the ARIA combobox (arrow keys, Enter, Escape, Tab, click outside), Enter and "See all results" to `/search?q=`, the `search` and `search_suggestion` GA4 events, 44px rows and no sideways scroll at 390px, axe with the list open, `/search` noindex and hydrating. `SEARCH_SHOTS=<dir>` sets where screenshots go. |
 
 `check:schema` reads `dist/` directly, so it needs `npm run build` first.
 So do the Chromium checks. They start
@@ -33,7 +34,7 @@ So do the Chromium checks. They start
 Shopify. `test:api`, `test:content`, `test:data` and `test:lib` are `node --test`
 suites in `api/_lib/`, `src/content/`, `src/data/` (the mobile city pages:
 ZIPs, copy rules and the text-overlap check) and `src/lib/` (the GA4 event
-parameter filter and the translate helpers), not scripts here.
+parameter filter, the translate helpers and the store search's matching), not scripts here.
 
 ## Run by hand
 
@@ -48,4 +49,4 @@ parameter filter and the translate helpers), not scripts here.
 
 | Script | Used by |
 | --- | --- |
-| `vpic-mock.mjs` | `forms-keep-values-check.mjs`, `remember-check.mjs`, `api/_lib/vehicles.test.mjs`, `src/data/vehicles.test.mjs`: a stand-in for NHTSA vPIC's model lookup (Toyota, Honda, Ford, BMW, Audi), which the sandbox cannot reach. In a browser it also answers `/api/vehicles` through the real handler logic, and the snapshot (404 unless given one). |
+| `vpic-mock.mjs` | `forms-keep-values-check.mjs`, `remember-check.mjs`, `search-check.mjs`, `api/_lib/vehicles.test.mjs`, `src/data/vehicles.test.mjs`: a stand-in for NHTSA vPIC's model lookup (Toyota, Honda, Ford, BMW, Audi), which the sandbox cannot reach. In a browser it also answers `/api/vehicles` through the real handler logic, and the snapshot (404 unless given one). |
