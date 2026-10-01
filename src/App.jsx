@@ -82,6 +82,10 @@ const DemoToolPage = lazyPage("pages/tools/DemoToolPage.jsx", () =>
 const MobileServicePage = lazyPage("pages/services/MobileServicePage.jsx", () =>
   import("./pages/services/MobileServicePage.jsx"),
 );
+// One page per city the vans cover, under the hub (src/data/cityPages.js).
+const MobileCityPage = lazyPage("pages/services/MobileCityPage.jsx", () =>
+  import("./pages/services/MobileCityPage.jsx"),
+);
 const AutoServicePage = lazyPage("pages/services/AutoServicePage.jsx", () =>
   import("./pages/services/AutoServicePage.jsx"),
 );
@@ -249,6 +253,10 @@ export default function App() {
 
             {/* Services */}
             <Route path="/mobile-service" element={<MobileServicePage />} />
+            <Route
+              path="/mobile-service/:city"
+              element={<MobileCityPage />}
+            />
             <Route path="/auto-service" element={<AutoServicePage />} />
             <Route path="/services/:slug" element={<ServiceDetailPage />} />
             <Route path="/schedule" element={<SchedulePage />} />

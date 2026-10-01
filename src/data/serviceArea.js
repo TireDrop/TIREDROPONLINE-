@@ -52,7 +52,8 @@ export const MOBILE_AREA_ERROR = `Mobile install covers ${SERVICE_AREA_LABEL}. C
 
 /**
  * Example cities for copy and SEO only, grouped by county. Never use these
- * to decide eligibility: that is the ZIP rule above.
+ * to decide eligibility: that is the ZIP rule above. A city with a page in
+ * src/data/cityPages.js is linked to it wherever these are shown.
  */
 export const SERVICE_AREA_EXAMPLES = [
   {
@@ -68,6 +69,8 @@ export const SERVICE_AREA_EXAMPLES = [
       "Davie",
       "Weston",
       "Coral Springs",
+      "Tamarac",
+      "Lauderhill",
       "Pembroke Pines",
       "Miramar",
       "Hollywood",

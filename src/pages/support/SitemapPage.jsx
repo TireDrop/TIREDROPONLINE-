@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { BUSINESS, FOOTER_COLUMNS, NAV } from "../../data/business.js";
 import { SERVICES } from "../../data/services.js";
+import { CITY_PAGES, cityPath } from "../../data/cityPages.js";
 import {
   getBlogPosts,
   getLearnArticles,
@@ -103,6 +104,18 @@ export default function SitemapPage() {
       icon: Wrench,
       links: SERVICES.filter((s) => !s.mobile).map(toLink),
     },
+    // Every live city page, so none is an island (src/data/cityPages.js).
+    {
+      title: "Mobile Service Areas",
+      icon: MapPin,
+      links: [
+        { label: "All mobile service areas", to: "/mobile-service" },
+        ...CITY_PAGES.map((c) => ({
+          label: `Mobile Tire Installation in ${c.name}`,
+          to: cityPath(c.slug),
+        })),
+      ],
+    },
   ];
 
   const listed = new Set(
@@ -178,7 +191,7 @@ export default function SitemapPage() {
           lede={`Installation and repair happen in South Florida: the van travels to you across Miami-Dade, Broward and Palm Beach, and the rest happens at the ${BUSINESS.shop.city} shop. Tires and wheels themselves ship anywhere in ${BUSINESS.shipping.area}.`}
         />
 
-        <div className="grid gap-10 sm:grid-cols-2">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
           {serviceGroups.map((group) => (
             <LinkColumn
               key={group.title}

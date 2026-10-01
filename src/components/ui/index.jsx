@@ -9,8 +9,9 @@ import React, {
 } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
-import { BUSINESS } from "../../data/business.js";
+import { BUSINESS, SOCIAL, YELP_PROFILE } from "../../data/business.js";
 import { SERVICE_AREA_SCHEMA } from "../../data/serviceArea.js";
+import { getCityPage } from "../../data/cityPages.js";
 import { getProduct } from "../../data/products.js";
 import { getService } from "../../data/services.js";
 
@@ -166,6 +167,12 @@ function shopNode() {
     openingHoursSpecification: openingHours(),
     // Miami-Dade, Broward and Palm Beach counties (src/data/serviceArea.js).
     areaServed: SERVICE_AREA_SCHEMA.map((area) => ({ ...area })),
+    // The shop's own confirmed profiles (src/data/business.js). The Google
+    // Business Profile joins them once its URL is confirmed.
+    sameAs: [YELP_PROFILE.url, SOCIAL.facebook].filter(Boolean),
+    // TODO(geo): no `geo` until Justin sends the Google Business Profile map
+    // pin. Coordinates guessed from the street address would put the shop in
+    // the wrong place on every map that reads them.
     // No aggregateRating, no review and no foundingDate. This site publishes
     // no reviews of its own — it links to the shop's Google and Yelp profiles
     // instead — and marking up reviews or ratings it does not hold breaches
@@ -193,6 +200,16 @@ const SHOP_ROUTES = [
   "/mobile-service",
   "/schedule",
 ];
+
+/** /mobile-service/<city>: the mobile city pages (src/data/cityPages.js). */
+const CITY_ROUTE = /^\/mobile-service\/([^/]+)$/;
+
+/** Exact SHOP_ROUTES, plus every city page that exists. */
+function isShopRoute(pathname) {
+  if (SHOP_ROUTES.includes(pathname)) return true;
+  const city = CITY_ROUTE.exec(pathname);
+  return Boolean(city && getCityPage(city[1]));
+}
 
 /* ------------------------------------------------------------------ *
  * Offers: deliberately off.
@@ -282,6 +299,45 @@ function serviceNode(service, url) {
 }
 
 /**
+ * Mobile tire installation as a Service of the shop: on the /mobile-service
+ * hub for all three counties, and on each city page for that city, placed in
+ * its county. The provider is always the one shop entity; no city gets a
+ * LocalBusiness of its own.
+ */
+function mobileServiceNode(url, { name, description, areaServed }) {
+  return {
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name,
+    url,
+    ...(description ? { description } : {}),
+    serviceType: "Mobile tire installation",
+    provider: { "@id": `${ORIGIN}/#shop` },
+    areaServed,
+    availableChannel: {
+      "@type": "ServiceChannel",
+      serviceUrl: `${ORIGIN}/schedule?service=tire-installation`,
+      servicePhone: {
+        "@type": "ContactPoint",
+        telephone: BUSINESS.phone,
+        contactType: "customer service",
+      },
+    },
+  };
+}
+
+function cityAreaServed(city) {
+  return {
+    "@type": "City",
+    name: `${city.name}, FL`,
+    containedInPlace: {
+      "@type": "AdministrativeArea",
+      name: `${city.county} County, FL`,
+    },
+  };
+}
+
+/**
  * Where an inner page sits, for BreadcrumbList. Top-level pages are
  * Home > Page; these few have a real parent page in between, matching the
  * visible breadcrumbs on /install and the service pages.
@@ -291,6 +347,7 @@ const CRUMB_PARENTS = [
   [/^\/wheels\/.+/, { name: "Shop Wheels", path: "/wheels" }],
   [/^\/services\/.+/, { name: "Auto Service", path: "/auto-service" }],
   [/^\/install$/, { name: "How Shipping Works", path: "/shipping" }],
+  [CITY_ROUTE, { name: "Mobile Tire Service", path: "/mobile-service" }],
 ];
 
 function breadcrumbNode(pathname, url, name, parents) {
@@ -346,7 +403,32 @@ function graphFor(pathname, url, title, fullTitle, description, noindex, crumbs)
   let missing = false;
   let crumbName = title;
 
-  if (SHOP_ROUTES.includes(pathname)) graph.push(shopNode());
+  if (isShopRoute(pathname)) graph.push(shopNode());
+
+  if (pathname === "/mobile-service") {
+    graph.push(
+      mobileServiceNode(url, {
+        name: "Mobile tire installation in South Florida",
+        description,
+        areaServed: SERVICE_AREA_SCHEMA.map((area) => ({ ...area })),
+      }),
+    );
+  }
+
+  const cityMatch = CITY_ROUTE.exec(pathname);
+  if (cityMatch) {
+    const city = getCityPage(cityMatch[1]);
+    if (city) {
+      graph.push(
+        mobileServiceNode(url, {
+          name: `Mobile tire installation in ${city.name}, FL`,
+          description,
+          areaServed: cityAreaServed(city),
+        }),
+      );
+      crumbName = city.name;
+    } else missing = true;
+  }
 
   const product = /^\/(tires|wheels)\/(.+)$/.exec(pathname);
   if (product) {

@@ -20,7 +20,8 @@
  *                  from the live distributor API (vercel.json rewrites to it).
  *
  * The route list is scripts/generate-seo-files.mjs's allRoutes(): the router's
- * static routes and every catalog product and service, plus every content
+ * static routes, every catalog product and service and every mobile city
+ * page (src/data/cityPages.js), plus every content
  * route (/learn, /blog) that src/content/index.js lists, read from the server
  * bundle (see the hook in src/entry-server.jsx). With the content routes
  * known, the sitemap is regenerated to include them, with their lastmod.
