@@ -482,6 +482,45 @@ async function runWidth(width) {
     await context.close();
   });
 
+  if (width < 768) {
+    await check(`${width} phone: tapping Scan door sticker opens the rear camera on the same tap`, async () => {
+      const { page, context, errors, sent } = await open(width);
+      await gotoFinder(page);
+      const [chooser] = await Promise.all([
+        page.waitForEvent("filechooser", { timeout: 5000 }),
+        finder(page).getByRole("button", { name: /Scan door sticker/ }).click(),
+      ]);
+      // The camera input, not the photo library one.
+      assert.equal(await chooser.element().getAttribute("data-testid"), "scan-camera");
+      assert.equal(await chooser.element().getAttribute("capture"), "environment");
+      await chooser.setFiles(PHOTO);
+      await waitStep(page, "result");
+      assert.equal(sent.length, 1);
+      assert.equal(sent[0].mode, "door");
+      // Retake opens the camera straight away too.
+      const [again] = await Promise.all([
+        page.waitForEvent("filechooser", { timeout: 5000 }),
+        finder(page).getByRole("button", { name: /Retake/ }).first().click(),
+      ]);
+      assert.equal(await again.element().getAttribute("data-testid"), "scan-camera");
+      assert.deepEqual(errors, [], "console errors");
+      await context.close();
+    });
+  } else {
+    await check(`${width} computer: a scan tile shows the camera step and opens nothing by itself`, async () => {
+      const { page, context, errors } = await open(width);
+      await gotoFinder(page);
+      let opened = false;
+      page.on("filechooser", () => (opened = true));
+      await finder(page).getByRole("button", { name: /Scan door sticker/ }).click();
+      await waitStep(page, "camera");
+      await page.waitForTimeout(300);
+      assert.equal(opened, false, "no file picker without a tap on Take photo / Upload");
+      assert.deepEqual(errors, [], "console errors");
+      await context.close();
+    });
+  }
+
   await check(`${width} scan errors: rate limit and an unreachable scanner say so`, async () => {
     let answer = { status: 429, json: { error: "rate_limited" } };
     const { page, context, errors } = await open(width, { scan: () => answer });

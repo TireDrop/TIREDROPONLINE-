@@ -248,6 +248,11 @@ export default function TireSizeFinderPage() {
     setMode(m);
     setPreview("");
     go("camera");
+    // On a phone or tablet the camera opens on this same tap: a browser only
+    // lets a file input open from the user's own tap, so it can't wait for
+    // the camera step to render (the inputs are always mounted below).
+    // Cancelling the camera leaves the camera step's Take photo / Upload.
+    if (photoOn === true && isTouchDevice()) cameraRef.current?.click();
   };
 
   const onPhoto = async (event) => {
@@ -508,49 +513,24 @@ export default function TireSizeFinderPage() {
             </div>
           </div>
         ) : (
-          <>
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                className="btn-primary min-h-[46px]"
-                disabled={reading}
-                onClick={() => cameraRef.current?.click()}
-              >
-                {reading ? "Reading…" : "📸 Take photo"}
-              </button>
-              <button
-                type="button"
-                className="btn-outline min-h-[46px]"
-                disabled={reading}
-                onClick={() => uploadRef.current?.click()}
-              >
-                Upload a photo
-              </button>
-            </div>
-            <input
-              ref={cameraRef}
-              id="scan-camera"
-              data-testid="scan-camera"
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              tabIndex={-1}
-              aria-hidden
-              onChange={onPhoto}
-            />
-            <input
-              ref={uploadRef}
-              id="scan-upload"
-              data-testid="scan-upload"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              tabIndex={-1}
-              aria-hidden
-              onChange={onPhoto}
-            />
-          </>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              className="btn-primary min-h-[46px]"
+              disabled={reading}
+              onClick={() => cameraRef.current?.click()}
+            >
+              {reading ? "Reading…" : preview ? "📸 Retake photo" : "📸 Take photo"}
+            </button>
+            <button
+              type="button"
+              className="btn-outline min-h-[46px]"
+              disabled={reading}
+              onClick={() => uploadRef.current?.click()}
+            >
+              Upload a photo
+            </button>
+          </div>
         )}
 
         <p className="sr-only" aria-live="polite">
@@ -948,6 +928,32 @@ export default function TireSizeFinderPage() {
           className="card mx-auto grid max-w-xl scroll-mt-[calc(var(--header-h)+1rem)] gap-4 p-5 md:p-7"
         >
           {body}
+          {/* Always mounted, so a scan tile can open the camera on the same
+              tap (see openCamera). capture="environment" asks a phone for
+              its rear camera; the upload input opens the photo library. */}
+          <input
+            ref={cameraRef}
+            id="scan-camera"
+            data-testid="scan-camera"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            tabIndex={-1}
+            aria-hidden
+            onChange={onPhoto}
+          />
+          <input
+            ref={uploadRef}
+            id="scan-upload"
+            data-testid="scan-upload"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            tabIndex={-1}
+            aria-hidden
+            onChange={onPhoto}
+          />
         </section>
         <p className="mx-auto mt-4 max-w-xl text-center text-xs text-smoke">
           Photos and VINs are used once to answer you and never saved. See our{" "}
@@ -968,6 +974,11 @@ export default function TireSizeFinderPage() {
       </Section>
     </>
   );
+}
+
+/** A phone or tablet: its main pointer is a finger, so it has a camera to open. */
+function isTouchDevice() {
+  return typeof window !== "undefined" && Boolean(window.matchMedia?.("(pointer: coarse)").matches);
 }
 
 function OptionButton({ primary = false, icon, title, note, disabled = false, onClick }) {
