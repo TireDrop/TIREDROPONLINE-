@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight,
   ArrowLeftRight,
+  Camera,
   CircleGauge,
   Phone,
   RefreshCw,
@@ -35,6 +36,12 @@ import {
 } from "../../content/index.js";
 
 const TOOLS = [
+  {
+    to: "/tire-size-finder",
+    Icon: Camera,
+    title: "Tire size finder",
+    copy: "Scan your door sticker, tire or VIN to find your exact size.",
+  },
   {
     to: "/tire-check",
     Icon: Ruler,

@@ -89,6 +89,7 @@ const ROUTES = [
   firstIn("mobile-service"),
   firstIn(`learn/${learnHub}`),
   "/tire-size",
+  "/tire-size-finder",
   "/contact",
 ];
 

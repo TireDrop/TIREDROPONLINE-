@@ -289,11 +289,28 @@
       theme("colors.ink") 14px 28px
     );
   }
+
+  /* The Tire Size Finder's "reading" line, sweeping the photo frame. */
+  .scan-line {
+    top: 12%;
+    animation: scan-sweep 1.4s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes scan-sweep {
+  to {
+    top: 86%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .scan-line {
+    top: 50%;
+    animation: none;
   }
 
   *,

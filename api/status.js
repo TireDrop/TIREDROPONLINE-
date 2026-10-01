@@ -21,6 +21,10 @@
 // the verified order), "internal" otherwise (the button opens
 // /schedule?order=<ref>). The link itself is never in this body
 // (docs/integrations/install-scheduling.md).
+//
+// `scanner` is "on" when ANTHROPIC_API_KEY is set, so the Tire Size Finder
+// (/tire-size-finder) can read a photo; "off" shows "Photo scan coming soon"
+// there, and typed VIN and size entry keep working.
 
 import { getConfig } from "./_lib/config.js";
 import { methodNotAllowed, send } from "./_lib/http.js";
@@ -51,6 +55,7 @@ export function statusBody(config, endpoints = ATD_ENDPOINTS) {
     forms: config.forms.mode,
     webhooks: config.webhooks.mode,
     booking: config.booking.mode,
+    scanner: config.scanner.mode,
     version: config.version,
   };
   if (issues.length) body.issues = issues;

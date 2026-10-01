@@ -1,6 +1,7 @@
 /**
- * A stand-in for NHTSA vPIC's GetModelsForMakeYear endpoint, for the
- * Playwright checks (the sandbox and CI cannot reach vpic.nhtsa.dot.gov).
+ * A stand-in for NHTSA vPIC's GetModelsForMakeYear and DecodeVinValues
+ * endpoints, for the Playwright checks and the API tests (the sandbox and CI
+ * cannot reach vpic.nhtsa.dot.gov).
  * Answers in vPIC's own JSON shape, per make, model year and vehicle type:
  *
  *   GET /api/vehicles/GetModelsForMakeYear/make/Toyota/modelyear/2019/vehicletype/truck?format=json
@@ -38,8 +39,51 @@ const MODELS = {
 const PATH =
   /GetModelsForMakeYear\/make\/([^/]+)\/modelyear\/(\d+)\/vehicletype\/(\w+)/i;
 
+/**
+ * DecodeVinValues fixtures: made-up serial numbers with real check digits,
+ * answered in vPIC's flat shape (one row, every value a string, "" when vPIC
+ * has nothing). Make comes back in capitals, as vPIC sends it.
+ */
+// prettier-ignore
+export const VIN_FIXTURES = {
+  "3MW5U9J03M8B12345": { ModelYear: "2021", Make: "BMW", Model: "M340i", Series: "xDrive", Trim: "", DriveType: "AWD/All-Wheel Drive", BodyClass: "Sedan/Saloon" },
+  "4T1B11HK8KU123456": { ModelYear: "2019", Make: "TOYOTA", Model: "Camry", Series: "", Trim: "LE", DriveType: "FWD/Front-Wheel Drive", BodyClass: "Sedan/Saloon" },
+  "1FTEW1EP4KFA12345": { ModelYear: "2019", Make: "FORD", Model: "F-150", Series: "XLT", Trim: "SuperCrew", DriveType: "4WD/4-Wheel Drive/4x4", BodyClass: "Pickup" },
+};
+
+const DECODE = /DecodeVinValues\/([A-Za-z0-9]+)/i;
+
+/** vPIC's DecodeVinValues body for one VIN (an unknown one decodes to blanks). */
+export function vinDecodeBody(vin) {
+  const v = String(vin).toUpperCase();
+  const hit = VIN_FIXTURES[v];
+  const row = {
+    VIN: v,
+    ModelYear: "",
+    Make: "",
+    Model: "",
+    Series: "",
+    Trim: "",
+    DriveType: "",
+    BodyClass: "",
+    ErrorCode: hit ? "0" : "7",
+    ErrorText: hit
+      ? "0 - VIN decoded clean. Check Digit (9th position) is correct"
+      : "7 - Manufacturer is not registered with NHTSA for sale or importation in the U.S. for use on U.S roads; Please contact the manufacturer directly for more information",
+    ...(hit ?? {}),
+  };
+  return {
+    Count: 1,
+    Message: "Results returned successfully. NOTE: Any missing decoded values should be interpreted as NHTSA does not have data on the specific variable. Missing value should NOT be interpreted as an indication that a feature or technology is unavailable for a vehicle.",
+    SearchCriteria: `VIN(s): ${v}`,
+    Results: [row],
+  };
+}
+
 /** The vPIC JSON body for one request URL. */
 export function vpicBody(url) {
+  const d = String(url).match(DECODE);
+  if (d) return vinDecodeBody(d[1]);
   const m = String(url).match(PATH);
   if (!m) return { Count: 0, Message: "Invalid request", SearchCriteria: null, Results: [] };
   const make = decodeURIComponent(m[1]);

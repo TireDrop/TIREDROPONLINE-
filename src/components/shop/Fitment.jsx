@@ -228,6 +228,24 @@ export function FitPanel({ fit }) {
         </button>
       )}
       {fit.code === "some-trims" && <TrimChoices choices={fit.choices} />}
+      {/* "Check fitment": the Tire Size Finder reads the exact size off a
+          photo of the door sticker, sidewall or VIN (/tire-size-finder). */}
+      {fit.status === "check" &&
+        fit.code !== "casing" &&
+        fit.code !== "bad-size" && (
+          <p className="mt-1">
+            <Link
+              to="/tire-size-finder"
+              data-testid="fit-scan-link"
+              className={LINK}
+            >
+              <span aria-hidden className="mr-1.5">
+                📷
+              </span>
+              Scan your tire size
+            </Link>
+          </p>
+        )}
       <NoFitActions fit={fit} />
       <p className="mt-3 text-xs text-smoke">{CONFIRM_LINE}</p>
     </div>

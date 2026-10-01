@@ -44,7 +44,11 @@
 //          request also becomes a Shopify draft order (no invoice sent).
 //      The only server code is the site's own API (`api/`), which asks ATD
 //      for tire data, creates paid orders in the shop's Shopify store and
-//      records the sign-ups and form messages above. The only browser storage
+//      records the sign-ups and form messages above. The optional Tire Size
+//      Finder (/tire-size-finder → api/scan-tire-size.js) sends a photo the
+//      visitor picks to Anthropic's API once to read the size or VIN, and a
+//      VIN to NHTSA vPIC to decode it; neither is stored or logged
+//      (sections 1 and 4 say so). The only browser storage
 //      is localStorage for the cart and the comparison tray. The sign-up form
 //      stores nothing; it deletes the old pop-up's "td-nl-popup" entry if a
 //      browser still has one. Section 3 says exactly that. Card payments are taken on Shopify's hosted
@@ -266,6 +270,7 @@ const DOCS = {
           "What you type into the site's forms: the contact form, the financing form, the fleet quote form, the install booking form, and an order request sent from checkout",
           `Messages you send to ${BUSINESS.email} or leave on the phone`,
           "Your email address, if you sign up for TireDrop emails using the sign-up form in the site footer. It asks for nothing else.",
+          "A photo or a VIN, only if you use the optional Tire Size Finder. A photo of your door sticker, tire or VIN is sent to our server and to Anthropic's API to read the tire size or VIN off it; we do not store the photo. A VIN, typed or read from a photo, is looked up in NHTSA's public vehicle database to find the year, make and model; we do not store it unless you include it with an order.",
         ],
         after: [
           "We do not store card numbers. Card payments are taken on Shopify's checkout page: Shopify receives the card details directly and handles them under its own security obligations, and we see only that a payment went through.",
@@ -314,6 +319,8 @@ const DOCS = {
           "Manufacturers, when a warranty claim requires it",
           "The company that hosts this website, which keeps ordinary server logs of requests made to it — and, if an order request cannot be saved in Shopify, a copy of that request in the same logs, so it is not lost",
           "Google, which provides Google Analytics and receives information about how the site is used (see section 3), processed under Google's own privacy policy",
+          "Anthropic, whose API reads a photo you choose to scan in the Tire Size Finder to find the tire size or VIN printed on it. Only the photo is sent, once, with no name or contact details, and we do not keep a copy",
+          "NHTSA, the US Department of Transportation agency whose public vehicle database decodes a VIN you enter or scan in the Tire Size Finder. Only the VIN is sent",
           "Law enforcement or regulators, where we are legally required to respond",
         ],
         after: [

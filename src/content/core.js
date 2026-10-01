@@ -51,6 +51,7 @@ const PATH_ALIASES = {
   "/tools/tire-check": "/tire-check",
   "/tools/tread-gauge": "/tire-check",
   "/tools/find-my-tires": "/find-my-tires",
+  "/tools/tire-size-finder": "/tire-size-finder",
   // The demo tool pages: /tools/<demo id or planned alias> -> their page.
   ...Object.fromEntries(
     Object.entries(TOOL_PAGE_ALIASES).map(([a, path]) => [`/tools/${a}`, path]),

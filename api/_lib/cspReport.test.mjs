@@ -133,6 +133,24 @@ test("the CSP allows every host Google Translate's element loads from (src/lib/t
   assert.match(csp, /img-src [^;]*\bhttps:(?:\s|;)/, "img-src allows https: (Translate's icons)");
 });
 
+test("the Tire Size Finder talks to our own API only (photo read and VIN decode are server-side)", () => {
+  const csp = header("Content-Security-Policy-Report-Only");
+  const connect = csp.match(/(?:^|; )connect-src ([^;]*)/)[1].split(/\s+/);
+  assert.ok(connect.includes("'self'"), "connect-src 'self' covers POST /api/scan-tire-size");
+  assert.ok(!connect.some((s) => /anthropic/i.test(s)), "the browser never calls Anthropic");
+  // vPIC stays: the vehicle pickers load model lists from the browser
+  // (src/data/vehicles.js). The VIN decode itself runs on the server.
+  assert.ok(connect.includes("https://vpic.nhtsa.dot.gov"));
+  // The photo preview is a blob: URL.
+  assert.match(csp, /img-src [^;]*\bblob:/);
+  // <input type="file" capture> opens the phone's own camera app; it never
+  // uses the Camera API, so camera=() stays off.
+  assert.match(header("Permissions-Policy"), /\bcamera=\(\)/);
+  const scan = vercel.headers.find((h) => h.source === "/api/scan-tire-size");
+  assert.equal(scan?.headers.find((h) => h.key === "Cache-Control")?.value, "no-store");
+  assert.ok(vercel.functions["api/scan-tire-size.js"].maxDuration >= 45);
+});
+
 test("the CSP is report-only and allows the inline gtag snippet by hash", () => {
   assert.equal(header("Content-Security-Policy"), undefined, "not enforced yet");
   const csp = header("Content-Security-Policy-Report-Only");

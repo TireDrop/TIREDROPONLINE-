@@ -431,6 +431,19 @@ export default function TiresPage() {
 
       <div className="wrap mt-6 md:-mt-8">
         <SearchPanel kind="tire" onSearch={onSearch} />
+        {/* Not sure of the size? The Tire Size Finder reads it off the
+            door sticker, the sidewall or the VIN, then comes back here
+            with it confirmed (/tire-size-finder). */}
+        <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-smoke">
+          <Link
+            to="/tire-size-finder"
+            data-testid="scan-size-link"
+            className="btn-outline btn-sm min-h-[44px] bg-bone"
+          >
+            <span aria-hidden>📷</span> Scan your tire size
+          </Link>
+          <span>Door sticker, tire sidewall or VIN.</span>
+        </p>
       </div>
 
       <Section>

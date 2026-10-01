@@ -369,6 +369,15 @@ export function getConfig(env = process.env) {
     issues: bookingRead.issues,
   };
 
+  // ---- Tire Size Finder photo scan (POST /api/scan-tire-size) -------------
+  // ANTHROPIC_API_KEY: optional. Set, a door-sticker, sidewall or VIN photo
+  // is read by Claude (api/_lib/scanTireSize.js). Unset, photo scans answer
+  // 503 "scanner_not_configured" and the page shows "Photo scan coming soon";
+  // typed VIN lookups (NHTSA vPIC) and typed sizes still work. Only the mode
+  // reaches a browser through /api/status, never the key.
+  const anthropicKey = clean(env.ANTHROPIC_API_KEY);
+  const scanner = { mode: anthropicKey ? "on" : "off", apiKey: anthropicKey };
+
   const sha = clean(env.VERCEL_GIT_COMMIT_SHA);
   return {
     atd,
@@ -378,6 +387,7 @@ export function getConfig(env = process.env) {
     forms,
     webhooks,
     booking,
+    scanner,
     checkout: paymentsReady ? "shopify" : "request",
     issues,
     version: sha ? `${API_VERSION}+${sha.slice(0, 7)}` : API_VERSION,

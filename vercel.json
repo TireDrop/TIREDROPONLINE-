@@ -6,7 +6,8 @@
   "crons": [{ "path": "/api/cron/atd-sweep", "schedule": "0 12 * * *" }],
   "functions": {
     "api/cron/atd-sweep.js": { "maxDuration": 60 },
-    "api/webhooks/shopify.js": { "maxDuration": 60 }
+    "api/webhooks/shopify.js": { "maxDuration": 60 },
+    "api/scan-tire-size.js": { "maxDuration": 60 }
   },
   "headers": [
     {
@@ -57,6 +58,10 @@
       "headers": [{ "key": "Cache-Control", "value": "no-store" }]
     },
     {
+      "source": "/api/scan-tire-size",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    },
+    {
       "source": "/api/cron/(.*)",
       "headers": [{ "key": "Cache-Control", "value": "no-store" }]
     },
@@ -85,7 +90,7 @@
     { "source": "/pages/tire-care", "destination": "/learn", "statusCode": 301 },
     { "source": "/tire-care", "destination": "/learn", "statusCode": 301 },
     {
-      "source": "/tools/:tool(tire-size|tire-check|find-my-tires)",
+      "source": "/tools/:tool(tire-size|tire-check|find-my-tires|tire-size-finder)",
       "destination": "/:tool",
       "statusCode": 301
     },

@@ -73,6 +73,10 @@ const FindMyTiresPage = lazyPage("pages/tools/FindMyTiresPage.jsx", () =>
 const TireCheckPage = lazyPage("pages/tools/TireCheckPage.jsx", () =>
   import("./pages/tools/TireCheckPage.jsx"),
 );
+// Photo of the door sticker, sidewall or VIN -> the exact size (api/scan-tire-size.js).
+const TireSizeFinderPage = lazyPage("pages/tools/TireSizeFinderPage.jsx", () =>
+  import("./pages/tools/TireSizeFinderPage.jsx"),
+);
 // The Learn demos that also stand alone as tools: one template, one route
 // each (copy in src/components/demos/toolPages.js).
 const DemoToolPage = lazyPage("pages/tools/DemoToolPage.jsx", () =>
@@ -157,6 +161,7 @@ const TOOL_PATHS = {
   "tire-check": "/tire-check",
   "tread-gauge": "/tire-check",
   "find-my-tires": "/find-my-tires",
+  "tire-size-finder": "/tire-size-finder",
   // load-speed-check, pressure-temp, damage-map... and the planned aliases.
   ...TOOL_PAGE_ALIASES,
 };
@@ -243,6 +248,10 @@ export default function App() {
             <Route path="/tire-size" element={<TireSizePage />} />
             <Route path="/find-my-tires" element={<FindMyTiresPage />} />
             <Route path="/tire-check" element={<TireCheckPage />} />
+            <Route
+              path="/tire-size-finder"
+              element={<TireSizeFinderPage />}
+            />
             <Route
               path="/load-speed-check"
               element={<DemoToolPage tool="load-speed-check" />}
