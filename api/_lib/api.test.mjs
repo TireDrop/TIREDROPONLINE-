@@ -164,6 +164,22 @@ test("tires query needs size or a full vehicle, not both", () => {
   assert.equal(validateTiresQuery({ year: "2020", make: "Toyota", model: "Camry" }).ok, true);
 });
 
+test("GET /api/tires takes the /tires page's readable params as they are", async () => {
+  // ?size=265-70r17 and ?year=2019&make=ford&model=f-150, as the address bar
+  // writes them (src/lib/tiresUrl.js).
+  const bySize = await call(tiresHandler, { method: "GET", query: { size: "265-70r17" } });
+  assert.equal(bySize.statusCode, 200);
+  assert.equal(bySize.body.query.size, "265/70R17");
+  assert.ok(bySize.body.items.length >= 1);
+  assert.equal(validateTiresQuery({ size: "lt265-70r17" }).ok, true);
+  const byVehicle = await call(tiresHandler, {
+    method: "GET",
+    query: { year: "2019", make: "ford", model: "f-150" },
+  });
+  assert.equal(byVehicle.statusCode, 200);
+  assert.equal(byVehicle.body.query.size, "265/70R17");
+});
+
 // ---- free-shipping area -----------------------------------------------------
 
 test("free shipping covers the 48 contiguous states and DC only", () => {

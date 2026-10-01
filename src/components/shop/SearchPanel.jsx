@@ -33,6 +33,20 @@ import { trackEvent } from "../../lib/analytics.js";
 // Only the visible panel is mounted, so `aria-controls` is set on the selected
 // tab alone: pointing it at an id that is not in the document is a dangling
 // ARIA reference rather than a useful one.
+//
+// `initial` prefills it ({ tab, year, make, model, width, aspect, diameter }),
+// for /tires reopening it on "Change"; a prefilled value the lists do not
+// carry is added to its list so it still shows. `onCancel` adds a Cancel
+// button beside the search one.
+
+/** `options`, plus `value` when it is set and not already one of them. */
+const withValue = (options, value, order) => {
+  if (!value || options.some((o) => String(o) === String(value))) return options;
+  const out = [value, ...options];
+  return order ? out.sort(order) : out;
+};
+const up = (a, b) => Number(a) - Number(b);
+const down = (a, b) => Number(b) - Number(a);
 
 const SELECT = "field appearance-none bg-bone pr-8";
 const TAB_ICON = "h-4 w-4 shrink-0 md:h-[18px] md:w-[18px]";
@@ -75,20 +89,24 @@ export default function SearchPanel({
   kind = "tire",
   vehicles = "catalog",
   onSearch,
+  initial,
+  onCancel,
 }) {
   const [params] = useSearchParams();
   const requested = params.get("search");
-  const [tab, setTab] = useState(requested === "size" ? "size" : "vehicle");
+  const [tab, setTab] = useState(
+    initial?.tab ?? (requested === "size" ? "size" : "vehicle"),
+  );
   const [error, setError] = useState("");
 
   const { selectVehicle } = useVehicle();
-  const [year, setYear] = useState("");
-  const [make, setMake] = useState("");
-  const [model, setModel] = useState("");
+  const [year, setYear] = useState(initial?.year ?? "");
+  const [make, setMake] = useState(initial?.make ?? "");
+  const [model, setModel] = useState(initial?.model ?? "");
 
-  const [width, setWidth] = useState("");
-  const [aspect, setAspect] = useState("");
-  const [diameter, setDiameter] = useState("");
+  const [width, setWidth] = useState(String(initial?.width ?? ""));
+  const [aspect, setAspect] = useState(String(initial?.aspect ?? ""));
+  const [diameter, setDiameter] = useState(String(initial?.diameter ?? ""));
 
   // Keep the visible tab in step with the nav links that deep-link into it.
   useEffect(() => {
@@ -114,15 +132,22 @@ export default function SearchPanel({
 
   // Every make sold in the chosen year, and that year's models from NHTSA.
   const liveMakes = useMemo(() => makesFor(year), [year]);
-  const years = allVehicles ? ALL_YEARS : catalogYears;
-  const makes = allVehicles ? liveMakes : VEHICLE_MAKES;
+  const years = withValue(allVehicles ? ALL_YEARS : catalogYears, year, down);
+  const makes = allVehicles ? liveMakes : withValue(VEHICLE_MAKES, make);
   // A pick survives a year change only while the new year still lists it.
   const makeValue = !allVehicles || makes.includes(make) ? make : "";
   const live = useVehicleModels(
     allVehicles ? makeValue : "",
     allVehicles ? year : "",
   );
-  const models = allVehicles ? live.models : catalogModels;
+  // A prefilled model stays listed while its year and make are unchanged.
+  const keepModel =
+    initial?.model && year === initial.year && makeValue === initial.make
+      ? initial.model
+      : "";
+  const models = allVehicles
+    ? withValue(live.models, keepModel)
+    : withValue(catalogModels, keepModel);
   const modelValue =
     !allVehicles || (makeValue && (model === OTHER || models.includes(model)))
       ? model
@@ -194,6 +219,16 @@ export default function SearchPanel({
         ? "border-drop bg-bone text-ink"
         : "border-transparent bg-steel text-bone/70 hover:bg-graphite hover:text-bone"
     }`;
+
+  const cancel = onCancel ? (
+    <button
+      type="button"
+      onClick={onCancel}
+      className="btn-outline min-h-[48px] w-full whitespace-nowrap sm:w-auto"
+    >
+      Cancel
+    </button>
+  ) : null;
 
   return (
     <div className="overflow-hidden rounded-card border border-ink/10 bg-bone shadow-lift">
@@ -277,13 +312,16 @@ export default function SearchPanel({
                 }
               />
             </div>
-            <button
-              type="submit"
-              className="btn-primary mt-4 min-h-[48px] w-full whitespace-nowrap sm:w-auto"
-            >
-              <Search size={18} aria-hidden />
-              Find {isWheel ? "Wheels" : "Tires"}
-            </button>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <button
+                type="submit"
+                className="btn-primary min-h-[48px] w-full whitespace-nowrap sm:w-auto"
+              >
+                <Search size={18} aria-hidden />
+                Find {isWheel ? "Wheels" : "Tires"}
+              </button>
+              {cancel}
+            </div>
             <p className="mt-3 text-xs leading-relaxed text-smoke">
               We match your vehicle to the sizes that fit. Not sure? Call us and
               read the sidewall to us.
@@ -302,7 +340,7 @@ export default function SearchPanel({
                 label={isWheel ? "Wheel Width" : "Width"}
                 value={width}
                 onChange={setWidth}
-                options={isWheel ? wheelWidths : TIRE_WIDTHS}
+                options={withValue(isWheel ? wheelWidths : TIRE_WIDTHS, width, up)}
                 placeholder={isWheel ? "Any width" : "Any width"}
               />
               <Field
@@ -310,7 +348,7 @@ export default function SearchPanel({
                 label={isWheel ? "Bolt Pattern" : "Aspect Ratio"}
                 value={aspect}
                 onChange={setAspect}
-                options={isWheel ? boltPatterns : TIRE_ASPECTS}
+                options={withValue(isWheel ? boltPatterns : TIRE_ASPECTS, aspect, up)}
                 placeholder={isWheel ? "Any pattern" : "Any ratio"}
               />
               <Field
@@ -318,17 +356,24 @@ export default function SearchPanel({
                 label={isWheel ? "Diameter" : "Rim Diameter"}
                 value={diameter}
                 onChange={setDiameter}
-                options={isWheel ? WHEEL_DIAMETERS : TIRE_DIAMETERS}
+                options={withValue(
+                  isWheel ? WHEEL_DIAMETERS : TIRE_DIAMETERS,
+                  diameter,
+                  up,
+                )}
                 placeholder="Any diameter"
               />
             </div>
-            <button
-              type="submit"
-              className="btn-primary mt-4 min-h-[48px] w-full whitespace-nowrap sm:w-auto"
-            >
-              <Search size={18} aria-hidden />
-              Search Sizes
-            </button>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <button
+                type="submit"
+                className="btn-primary min-h-[48px] w-full whitespace-nowrap sm:w-auto"
+              >
+                <Search size={18} aria-hidden />
+                Search Sizes
+              </button>
+              {cancel}
+            </div>
             <p className="mt-3 text-xs leading-relaxed text-smoke">
               {isWheel
                 ? "Wheel sizes read diameter by width, e.g. 18x8.5. Bolt pattern is stamped on the back of your current wheel."

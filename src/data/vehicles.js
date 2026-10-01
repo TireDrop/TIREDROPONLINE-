@@ -313,13 +313,32 @@ export function recallVehicle() {
  * What the shopper is shopping for (the fitment selection)
  * ------------------------------------------------------------------ */
 
+/**
+ * The one saved selection, in localStorage, so it survives a browser
+ * restart until the shopper clears their site data (or taps "Shopping for a
+ * different car?"):
+ *
+ *   tiredrop.fitment.v1 = { "v": 1, "type": "vehicle", "year": "2019",
+ *                           "make": "Ford", "model": "F-150",
+ *                           "pick"?: trim option, "size"?: "LT275/65R18" }
+ *                       | { "v": 1, "type": "size", "size": "265/70R17" }
+ *
+ * `v` is the format version. An entry from before it existed (no `v`) is
+ * read as version 1; one from a newer format this build does not know is
+ * ignored rather than misread. Every read and write is wrapped in
+ * try/catch: with storage blocked (private mode, site data off) the
+ * selection lasts for the page session only (VehicleContext.jsx keeps it in
+ * memory) and Shop Tires shows the finder again next time.
+ */
 const SELECTION_KEY = "tiredrop.fitment.v1";
+export const SELECTION_VERSION = 1;
 
 const clip = (x, n = 60) => (typeof x === "string" ? x.trim().slice(0, n) : "");
 
 /** A stored selection checked field by field, or null. */
 function cleanSelection(v) {
   if (!v || typeof v !== "object") return null;
+  if (v.v != null && v.v !== SELECTION_VERSION) return null;
   if (v.type === "size") {
     const size = clip(v.size, 40);
     return size ? { type: "size", size } : null;
@@ -364,7 +383,10 @@ export function saveSelection(selection) {
       window.localStorage.removeItem(LAST_VEHICLE_KEY);
       return null;
     }
-    window.localStorage.setItem(SELECTION_KEY, JSON.stringify(clean));
+    window.localStorage.setItem(
+      SELECTION_KEY,
+      JSON.stringify({ v: SELECTION_VERSION, ...clean }),
+    );
   } catch {
     /* storage unavailable: the selection lasts for this page load */
   }

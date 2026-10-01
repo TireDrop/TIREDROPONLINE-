@@ -1569,14 +1569,16 @@ for (const width of [390, 1440]) {
     );
     await page.getByRole("heading", { name: "In the size for your 2019 Ford F-150" }).waitFor();
 
-    // Change to a 2009 F-150 in the bar: that generation is 235/75R17.
+    // Change to a 2009 F-150: that generation is 235/75R17. On /tires,
+    // Change reopens the finder Shop Tires showed first, prefilled.
     await page.locator('[data-testid="shopping-for"]').getByRole("button", { name: "Change" }).click();
-    await page.waitForSelector("#fit-year");
-    await page.selectOption("#fit-year", "2009");
-    await page.selectOption("#fit-make", "Ford");
-    await page.locator('#fit-model option[value="F-150"]').waitFor({ state: "attached" });
-    await page.selectOption("#fit-model", "F-150");
-    await page.getByRole("button", { name: "Show what fits" }).click();
+    await page.waitForSelector("#finder-year");
+    assert.equal(await page.inputValue("#finder-model"), "F-150");
+    await page.selectOption("#finder-year", "2009");
+    await page.selectOption("#finder-make", "Ford");
+    await page.locator('#finder-model option[value="F-150"]').waitFor({ state: "attached" });
+    await page.selectOption("#finder-model", "F-150");
+    await page.getByRole("button", { name: "Find Tires" }).click();
     await page.waitForFunction(() => /2009 Ford F-150 \(235\/75R17\)/.test(document.querySelector('[data-testid="shopping-for-text"]')?.textContent ?? ""));
     assert.equal(await addOnCard(page, FITS).count(), 0, "265/70R17 is not the 2009 size");
     assert.match(await card(page, FITS).locator("[data-fit]").innerText(), /Doesn't fit your 2009 Ford F-150/);
