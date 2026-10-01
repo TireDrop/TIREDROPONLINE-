@@ -19,6 +19,7 @@ import { randomBytes } from "node:crypto";
 import { BUSINESS } from "../../src/data/business.js";
 import { findOrCreateLeadCustomer, formatLead, saveLead } from "./leads.js";
 import { createRequestDraft, toE164 } from "./shopify.js";
+import { fitmentFields, orderFitment } from "./fitmentAttrs.js";
 
 const cents = (n) => Math.round(n * 100) / 100;
 
@@ -77,6 +78,9 @@ export function buildOrder(input, lines, now = new Date()) {
     // shop adds tax and fees when it takes payment.
     total: subtotal,
     notes: input.notes,
+    // The vehicle and sizes, with the cart checked against them here
+    // (api/_lib/fitmentAttrs.js); null when the shopper gave none.
+    fitment: orderFitment(input.fitment ?? null, lines),
   };
 }
 
@@ -107,6 +111,7 @@ export function orderRequestFields(order, draft) {
           ? `Mobile install at ${oneLine(f.address)}. ${MOBILE_INSTALL_NOTE}: confirm fitment, schedule the van and quote the install on the call.`
           : `Ship to ${oneLine(f.address)}`,
     ],
+    ...fitmentFields(order.fitment),
     [
       "Items",
       order.lines

@@ -47,6 +47,7 @@ import {
   selectionSizeText,
 } from "../../data/fitmentCheck.js";
 import { useVehicle } from "../../context/VehicleContext.jsx";
+import { fitmentPayload } from "../../data/sizeSource.js";
 import VehicleSelect, {
   MAX_VEHICLE_YEAR,
   MIN_VEHICLE_YEAR,
@@ -526,7 +527,7 @@ export default function CheckoutPage() {
   // vehicle they were shopping for), or against the size they are shopping
   // for. A line that does not match is flagged with a way to swap it, never
   // blocked: a tech confirms fitment by phone before the order is released.
-  const { selection, ready: fitReady } = useVehicle();
+  const { selection, resolved, ready: fitReady } = useVehicle();
   // Every tire line's answer. Only a mismatch against a size the shopper
   // confirmed is flagged ("no-fit"); a size that differs from the typical
   // one for a vehicle-only selection gets the soft phone note instead.
@@ -725,6 +726,10 @@ export default function CheckoutPage() {
             }
           : null),
         notes,
+        // The vehicle, sizes and where the size came from, for the order's
+        // Vehicle / Size source / Fitment attributes (src/data/sizeSource.js).
+        // The server checks the cart against these sizes itself.
+        ...(fitReady && fitmentPayload(resolved) ? { fitment: fitmentPayload(resolved) } : null),
       });
     } catch (err) {
       setSending(false);

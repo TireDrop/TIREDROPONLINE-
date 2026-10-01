@@ -117,6 +117,7 @@ _Last updated: 2026-10-01 (SHIPPED: one-camera Tire Size Finder scanner + hero S
   - [x] ~~One camera for all three: a single "Scan a photo" (door sticker, sidewall or VIN), the server works out which (`mode: "auto"`, no nullable schema fields); Scan button in the home hero and on /tires, photo handed to the finder~~ (preview/scanner)
   - [x] ~~Justin tested real photos on the preview: works; logs show `mode=auto:door outcome=read confidence=high` (3.9-8.2 s)~~ (2026-10-01)
   - [x] ~~"ship scanner": all 18 gates pass on the merge with search~~ (2026-10-01)
+  - [ ] Orders carry the fitment: Vehicle / Size source / Front / Rear / Fitment attributes + fitment-check, staggered, size-scanned tags; ATD forwarder skips fitment-check (preview/fitment-attrs) → Justin reviews → ship → run Shopify admin prompt 26 (Flow: hold + email) → $1 staggered test
   - [ ] Rotate the key before it expires 2026-10-31 (calendar reminder Oct 24; steps in docs/integrations/tire-size-finder.md)
 - [ ] Local city pages: wave 1 (7 cities) live 2026-10-01; wave 2 next
 - [ ] Real review collection (no stars until real reviews exist)

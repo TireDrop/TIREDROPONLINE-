@@ -71,6 +71,10 @@ export const TAGS = Object.freeze({
   failed: "atd-failed",
   // Added by hand or by a Flow on a risky order: the forwarder keeps out.
   fraudReview: "fraud-review",
+  // Set by checkout when a tire in the cart is not the shopper's size
+  // (api/_lib/fitmentAttrs.js): a person confirms the size first, then
+  // removes the tag.
+  fitmentCheck: "fitment-check",
   // Ship-to-store order whose tracking has been recorded; the shop fulfils
   // it in Shopify at install time.
   inboundToStore: "atd-inbound-to-store",
@@ -298,6 +302,7 @@ export function skipReason(order, { forwardTestOrders = false } = {}) {
     // index lags behind a tag written a moment ago.
     if (hasTag(order, tag)) return tag === TAGS.fraudReview ? "fraud-review" : "already-tagged";
   }
+  if (hasTag(order, TAGS.fitmentCheck)) return "fitment-check";
   if (order.displayFinancialStatus !== "PAID") return "not-paid";
   if (order.test && !forwardTestOrders) return "test-order";
 

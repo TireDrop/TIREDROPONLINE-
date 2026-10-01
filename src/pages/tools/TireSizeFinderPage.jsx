@@ -25,6 +25,7 @@ import {
   vehicleFromDecode,
 } from "../../data/scanner.js";
 import { takeHandedOffPhoto } from "../../data/scanHandoff.js";
+import { noteSizeSource } from "../../data/sizeSource.js";
 import { normalizeVin, vinProblem, vinProblemText } from "../../data/vin.js";
 import { trackToolUse } from "../../lib/analytics.js";
 
@@ -370,11 +371,14 @@ export default function TireSizeFinderPage() {
   };
 
   /** Saves the confirmed size(s) in the vehicle store and goes to /tires. */
-  const saveSizes = (frontSize, rearSize) => {
+  // `source` says where the sizes came from, for the order's "Size source"
+  // (src/data/sizeSource.js): scan-door, scan-sidewall, vin or typed.
+  const saveSizes = (frontSize, rearSize, source) => {
     const f = readSize(frontSize);
     if (!f) return false;
     const r = rearSize ? readSize(rearSize) : null;
     const rearOut = r && r.key !== f.key ? r.display : "";
+    noteSizeSource(source, f.display, rearOut);
     const vehicle =
       car ?? (resolved.kind === "vehicle" ? resolved.vehicle : null);
     if (vehicle) {
@@ -420,7 +424,7 @@ export default function TireSizeFinderPage() {
       );
       return;
     }
-    saveSizes(f.display, rear.trim());
+    saveSizes(f.display, rear.trim(), "typed");
   };
 
   // The sizes on file for a decoded car: a wheel-package choice only when
@@ -667,8 +671,8 @@ export default function TireSizeFinderPage() {
             className="btn-primary min-h-[46px]"
             onClick={() =>
               isDoor
-                ? saveSizes(result.front.size, result.rear?.size ?? "")
-                : saveSizes(result.tire.size, "")
+                ? saveSizes(result.front.size, result.rear?.size ?? "", "scan-door")
+                : saveSizes(result.tire.size, "", "scan-sidewall")
             }
           >
             ✅ {staggered ? "Use these sizes" : "Use this size"}
@@ -786,7 +790,7 @@ export default function TireSizeFinderPage() {
                 onSubmit={(e) => {
                   e.preventDefault();
                   const pick = carChoices.find((o) => describeOption(o) === wheel);
-                  if (pick) saveSizes(pick.front, pick.rear ?? "");
+                  if (pick) saveSizes(pick.front, pick.rear ?? "", "vin");
                   else openCamera("vin");
                 }}
               >

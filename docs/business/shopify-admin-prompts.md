@@ -1393,3 +1393,70 @@ REPORT BACK:
 backdated). New events can take up to 24 hours to show in reports; GA4
 DebugView (Admin → Data display → DebugView) shows them within seconds when
 the site is opened through Google Tag Assistant (tagassistant.google.com).
+
+## 26. "Fitment check + scanner tags": hold an order whose tires are not the shopper's size
+
+**Why:** checkout now writes the shopper's vehicle and size onto every
+website order (`api/_lib/fitmentAttrs.js`): order attributes `Vehicle`,
+`Size source` (e.g. "Scanned door sticker", "Typed size"), `Front size`,
+`Rear size` and `Fitment`, and the tags `fitment-check` (a tire in the cart
+is not their size, or a staggered car has only one of its sizes),
+`staggered` and `size-scanned`. The site already adds the tags; this Flow
+does the two things only Flow can: **hold fulfillment** on a `fitment-check`
+order and **email info@** for it and for every staggered set. The ATD
+forwarder also skips `fitment-check` orders on its own. Fires on real orders
+("Order created"), i.e. once the invoice is paid; order requests show the
+same lines in the lead email straight away. Build only: you turn it on.
+
+```
+TASK: Build ONE Shopify Flow for TireDrop called "Fitment check + scanner tags".
+Store: 3rxp1x-ym (Shopify admin). Use Shopify Flow (Apps → Flow).
+
+HARD RULES:
+- Do NOT edit, turn off or delete any existing Flow. Do NOT touch themes,
+  payments, checkout settings, discounts, products or DNS.
+- Do NOT press "Turn on workflow". At the end: STOP FOR SAVE — Justin
+  reviews and turns it on himself.
+
+1. Flow → Create workflow → Name: Fitment check + scanner tags
+2. Trigger: "Order created".
+
+3. Condition A — Fitment check:
+   Order → Tags: includes "fitment-check"
+   THEN (2 actions):
+   a) Hold fulfillment orders (hold reason: Other; note:
+      "Fitment check: verify size before ordering from ATD")
+   b) Send internal email
+      To: info@tiredroponline.com
+      Subject: ⚠️ Fitment check — order {{ order.name }}
+      Body:
+      Order {{ order.name }} needs a size check before it is ordered
+      from ATD. Fulfillment is on hold.
+      {% for a in order.customAttributes %}{{ a.key }}: {{ a.value }}
+      {% endfor %}
+      Items:
+      {% for li in order.lineItems %}{{ li.quantity }} x {{ li.title }} ({{ li.sku }})
+      {% endfor %}
+      Call the customer to confirm, remove the fitment-check tag, then
+      release the hold.
+
+4. Condition B — Staggered (a separate branch after Condition A, not
+   inside it):
+   Order → Tags: includes "staggered" AND does NOT include "fitment-check"
+   THEN: Send internal email
+      To: info@tiredroponline.com
+      Subject: Staggered set — order {{ order.name }}: front + rear sizes
+      Body: the same attribute and items loops as above, plus:
+      "Order the front size for the front axle and the rear size for the
+      rear axle (see Fitment)."
+
+5. Check: both conditions read Order → Tags (not Note, not Customer tags).
+6. STOP FOR SAVE. Do not turn it on. Report: the workflow name, the 2
+   conditions as built, and any field you could not find.
+```
+
+**Test after turning it on:** a $1 test order for a staggered BMW (front
+225/40R19 + rear 255/35R19, 2 of each) → tag `staggered`, one email; then
+one with 4 × the front size only → tag `fitment-check`, fulfillment on hold,
+one email. The `size-scanned` tag shows on orders whose size came from the
+photo scanner (Orders → filter by tag to see scanner-driven sales).

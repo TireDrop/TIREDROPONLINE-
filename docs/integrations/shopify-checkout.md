@@ -59,7 +59,7 @@ mutation draftOrderCreate($input: DraftOrderInput!) {
 | `lineItems[]` | `{ title, sku, quantity, originalUnitPriceWithCurrency: { amount: "114.82", currencyCode: USD }, requiresShipping: true, taxable: true, customAttributes: [Size, Brand] }` |
 | `shippingAddress` | ship orders only: first/last name, `address1`, `address2`, `city`, `provinceCode`, `zip`, `countryCode: US`, `phone` |
 | `shippingLine` | `{ title, priceWithCurrency: { amount: "0.00", currencyCode: USD } }`: title `Free Shipping` for ship, `Pickup at Extreme Tires (Sunrise, FL)` for pickup |
-| `customAttributes` | `Delivery` = `Ship to my address` or `Ship to store for install (Extreme Tires, Sunrise)`; `Source` = `TireDrop live (Vercel)`; `Order ref` = the TireDrop order reference |
+| `customAttributes` | `Delivery` = `Ship to my address` or `Ship to store for install (Extreme Tires, Sunrise)`; `Source` = `TireDrop live (Vercel)`; `Order ref` = the TireDrop order reference; then, when the shopper gave a vehicle or size (`api/_lib/fitmentAttrs.js`): `Vehicle`, `Size source`, `Front size`, `Rear size`, `Fitment` (OK / STAGGERED / CHECK / UNCONFIRMED / NO TIRES, checked against the priced lines). Tags add `fitment-check`, `staggered`, `size-scanned` or `fitment-unconfirmed` (Flow: shopify-admin-prompts.md #26) |
 | `tags` | `vercel-live`, plus `ship-to-home` or `ship-to-store` |
 | `note` | order reference, customer name and phone, delivery choice, customer notes |
 | `acceptAutomaticDiscounts`, `allowDiscountCodesInCheckout` | both `false`: no discounts or coupons on these orders |

@@ -29,6 +29,8 @@
 //
 // See docs/integrations/shopify-checkout.md.
 
+import { fitmentAttributes, fitmentFields } from "./fitmentAttrs.js";
+
 export const SHOPIFY_TIMEOUT_MS = 8000;
 export const SHOPIFY_RETRY_DELAY_MS = 250;
 
@@ -134,11 +136,16 @@ function noteFor(order) {
     `TireDrop live order ${order.orderRef}`,
     `Customer: ${order.customer.name}, ${order.customer.phone}`,
     `Delivery: ${DELIVERY_ATTRIBUTE[f.type]}`,
+    ...fitmentLines(order),
     order.notes ? `Customer notes: ${order.notes}` : null,
   ]
     .filter(Boolean)
     .join("\n");
 }
+
+/** "Vehicle: …", "Fitment: …" note lines (api/_lib/fitmentAttrs.js). */
+const fitmentLines = (order) =>
+  "fitment" in order ? fitmentFields(order.fitment).map(([k, v]) => `${k}: ${v}`) : [];
 
 /**
  * The DraftOrderInput for one priced order. Only "ship" and "pickup" orders
@@ -158,11 +165,14 @@ export function buildDraftOrderInput(order) {
     email: order.customer.email,
     ...(phone ? { phone } : {}),
     note: noteFor(order),
-    tags: [ORDER_TAG, DELIVERY_TAG[f.type]],
+    tags: [ORDER_TAG, DELIVERY_TAG[f.type], ...(order.fitment?.tags ?? [])],
     customAttributes: [
       { key: "Delivery", value: DELIVERY_ATTRIBUTE[f.type] },
       { key: "Source", value: SOURCE_ATTRIBUTE },
       { key: "Order ref", value: order.orderRef },
+      // Vehicle, Size source, Front/Rear size, Fitment: read by the Flow
+      // "Fitment check + scanner tags".
+      ...fitmentAttributes(order.fitment),
     ],
     lineItems: order.lines.map(lineItem),
     shippingLine: {
@@ -213,7 +223,7 @@ export function buildRequestDraftInput(order, { customerId = null } = {}) {
     mobile ? { ...order, fulfillment: { ...f, type: "ship" } } : order,
   );
   const delivery = mobile ? MOBILE_DELIVERY_ATTRIBUTE : DELIVERY_ATTRIBUTE[f.type];
-  input.tags = [REQUEST_TAG, ORDER_TAG, DELIVERY_TAG[f.type]];
+  input.tags = [REQUEST_TAG, ORDER_TAG, DELIVERY_TAG[f.type], ...(order.fitment?.tags ?? [])];
   input.note = [
     REQUEST_NOTE_HEADING,
     mobile
@@ -223,6 +233,7 @@ export function buildRequestDraftInput(order, { customerId = null } = {}) {
     `Customer: ${order.customer.name}, ${order.customer.phone}`,
     REQUEST_EMAIL_UNVERIFIED,
     `Delivery: ${delivery}`,
+    ...fitmentLines(order),
     order.notes ? `Customer notes: ${order.notes}` : null,
   ]
     .filter(Boolean)

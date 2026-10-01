@@ -3,6 +3,7 @@
 // shopper can read, because the frontend shows it as-is.
 
 import { parseSize } from "../../src/data/tireMath.js";
+import { readFitment } from "./fitmentAttrs.js";
 import { BUSINESS } from "../../src/data/business.js";
 import { MOBILE_AREA_ERROR, isInServiceArea } from "../../src/data/serviceArea.js";
 import {
@@ -362,6 +363,9 @@ export function validateCheckout(body) {
       },
       address,
       notes: notes || null,
+      // Optional and never an error: what does not check out is dropped
+      // (api/_lib/fitmentAttrs.js).
+      fitment: readFitment(body.fitment),
     },
   };
 }
