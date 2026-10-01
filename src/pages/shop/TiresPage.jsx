@@ -525,6 +525,7 @@ export default function TiresPage() {
             onSearch={onSearch}
             initial={finderInitial}
             onCancel={ready && selection ? closeChanger : undefined}
+            onEnterSize={() => openChanger("sticker")}
           />
         </div>
       )}

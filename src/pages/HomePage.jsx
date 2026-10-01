@@ -135,7 +135,7 @@ function Hero() {
           <p className="mb-5 text-sm text-smoke">
             Shop by vehicle, or by the size stamped on your sidewall.
           </p>
-          <SearchPanel vehicles="all" onSearch={onSearch} />
+          <SearchPanel onSearch={onSearch} />
         </div>
 
         <div className="order-3 lg:col-start-1 lg:row-start-2 lg:self-start">

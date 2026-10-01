@@ -4,8 +4,11 @@
  *
  *   Remember (src/data/vehicles.js, tiredrop.fitment.v1)
  *   - first visit: Shop Tires opens the finder (the "pop-up");
- *   - picking a vehicle saves it (with its version field) and shows its
- *     results, with the vehicle in the URL; after a reload, Shop Tires from
+ *   - picking a vehicle in the finder's full lists (a 2019 BMW 4 Series,
+ *     typed in part and taken from the Model box's list; the size table has
+ *     no size for it) saves it (with its version field) and shows its
+ *     results, every tire "Check fitment" with Add kept and the door-jamb
+ *     prompt in the bar, with the vehicle in the URL; after a reload, Shop Tires from
  *     every entry point (header or menu, the phone's bottom bar, the home
  *     hero, a Learn article's call to action) goes straight to the results:
  *     the finder never appears, the Shopping-for bar does;
@@ -37,6 +40,8 @@ import { chromium } from "playwright";
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import assert from "node:assert/strict";
+
+import { mockVpic } from "./vpic-mock.mjs";
 
 const CHROME =
   process.env.AUDIT_CHROME ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
@@ -109,6 +114,8 @@ async function open(width, { blockStorage = false } = {}) {
   );
   // No API: the sample catalog answers, as on a preview without ATD.
   await page.route("**/api/tires**", (route) => route.fulfill({ status: 404, body: "" }));
+  // The finder's model lists: /api/vehicles and vPIC from the fixtures.
+  await mockVpic(page);
   if (blockStorage) {
     await page.addInitScript(() => {
       const blocked = () => {
@@ -184,13 +191,25 @@ async function clickShopTires(page, width, via = "header") {
   await page.waitForURL(/\/tires(\?|$)/);
 }
 
+/** Year and make from their lists; the model typed in part and taken from the filtered list. */
 async function pickVehicleInFinder(page, { year, make, model }) {
   await page.waitForSelector("#finder-year");
   await page.selectOption("#finder-year", year);
   await page.selectOption("#finder-make", make);
-  await page.locator(`#finder-model option[value="${model}"]`).waitFor({ state: "attached" });
-  await page.selectOption("#finder-model", model);
+  await page.waitForSelector("#finder-model:not([disabled])");
+  await page.locator("#finder-model").fill(model.slice(0, -1) || model);
+  await page.locator("#finder-model-list").getByRole("option", { name: model, exact: true }).click();
+  assert.equal(await page.inputValue("#finder-model"), model);
   await page.getByRole("button", { name: "Find Tires" }).click();
+}
+
+/** Every card says "Check fitment" and keeps its Add button. */
+async function everyCardChecks(page) {
+  await page.locator('[data-testid="card-fit"]').first().waitFor();
+  const texts = await page.locator('[data-testid="card-fit"]').allInnerTexts();
+  assert.ok(texts.length >= 10, `${texts.length} cards`);
+  assert.ok(texts.every((t) => /Check fitment/.test(t)), texts.join(" | "));
+  assert.equal(await page.getByRole("button", { name: /^Add a set of 4/ }).count(), texts.length);
 }
 
 /* ------------------------------- remember ------------------------------ */
@@ -209,12 +228,15 @@ for (const width of [390, 1440]) {
     await page.waitForTimeout(200);
     await page.screenshot({ path: `${SHOTS}/popup-first-visit-${width}.png` });
 
-    await pickVehicleInFinder(page, { year: "2019", make: "Ford", model: "F-150" });
-    await waitBar(page, /2019 Ford F-150 \(265\/70R17\)/);
-    await page.waitForFunction(() => /year=2019&make=ford&model=f-150/.test(location.search));
+    // A model the size table has no size for (the catalog list had 4 BMWs).
+    await pickVehicleInFinder(page, { year: "2019", make: "BMW", model: "4 Series" });
+    await waitBar(page, /2019 BMW 4 Series \(factory size not on file\)/);
+    await page.waitForFunction(() => /year=2019&make=bmw&model=4\+series/.test(location.search));
     assert.equal(await finder(page).count(), 0, "finder put away once saved");
-    assert.deepEqual(await stored(page), { v: 1, type: "vehicle", year: "2019", make: "Ford", model: "F-150" });
-    await page.getByRole("heading", { name: "In the size for your 2019 Ford F-150" }).waitFor();
+    assert.deepEqual(await stored(page), { v: 1, type: "vehicle", year: "2019", make: "BMW", model: "4 Series" });
+    await everyCardChecks(page);
+    await page.locator('[data-testid="shopping-for"]').getByText("We don’t have the factory size for this one on file.").waitFor();
+    await page.getByRole("button", { name: "Know your exact size? Enter it from your door-jamb sticker" }).waitFor();
 
     // Reload, then Shop Tires from every entry point: straight to results.
     await page.reload();
@@ -227,8 +249,8 @@ for (const width of [390, 1440]) {
       await page.waitForFunction(mounted);
       await page.waitForLoadState("networkidle");
       await clickShopTires(page, width, via);
-      await waitBar(page, /2019 Ford F-150 \(265\/70R17\)/);
-      await page.waitForFunction(() => /year=2019&make=ford&model=f-150/.test(location.search));
+      await waitBar(page, /2019 BMW 4 Series \(factory size not on file\)/);
+      await page.waitForFunction(() => /year=2019&make=bmw&model=4\+series/.test(location.search));
       assert.equal(await page.evaluate(() => window.__finderSeen), false, `no finder via ${via} from ${from}`);
     }
     await page.evaluate(() => window.scrollTo(0, 0));

@@ -138,6 +138,15 @@ that do the server-side work:
 |                      | Live ATD data when configured, the sample catalog if not. |
 |                      | `?sku=<sku>` alone returns one tire, `{ source, item }`,  |
 |                      | or 404 `{ error }`; it feeds the `/tires/p/:sku` pages.   |
+| `GET /api/vehicles`  | The vehicle finders' lists. `kind=makes[&year=]`: the     |
+|                      | makes sold that year. `kind=models&make=&year=`: NHTSA    |
+|                      | vPIC's cars, trucks and SUVs/vans for that make and year, |
+|                      | merged with the size table. 4 s timeout per vPIC request, |
+|                      | one retry; edge-cached a day (`s-maxage=86400`) then      |
+|                      | served stale for a week; 502 `{ upstream: true }` (never  |
+|                      | cached) when vPIC is down. The build also writes          |
+|                      | `dist/data/vpic-models.json` (every make's models, all    |
+|                      | years) as the browser's fallback when it can reach vPIC.  |
 | `POST /api/checkout` | Creates the order. With Shopify checkout on, it prices    |
 |                      | every line, creates a Shopify draft order of custom line  |
 |                      | items and returns its `invoiceUrl`; the shopper pays on   |

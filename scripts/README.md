@@ -12,6 +12,7 @@ header comment, and `shopify/assets/td-tiremath.js` names
 | --- | --- |
 | `generate-seo-files.mjs` | Writes `public/robots.txt` and `public/sitemap.xml` from the router and content. Runs at the start of every `vite build` (plugin in `vite.config.js`) and again from the prerender. `ALLOW_INDEXING` lives here. |
 | `prerender.mjs` | After `vite build`: renders every route to `dist/<route>.html`, plus `dist/404.html` and `dist/spa.html`. |
+| `vpic-snapshot.mjs` | Last: writes `dist/data/vpic-models.json`, every listed make's models across all years from NHTSA vPIC, the vehicle finders' fallback when neither `/api/vehicles` nor vPIC answers. One probe request first: with no network (this sandbox) it writes nothing and never fails the build. `VPIC_SNAPSHOT=off` skips it; `VPIC_BASE` points it at another vPIC. |
 
 ## Gates (run before every push to `main`)
 
@@ -47,4 +48,4 @@ parameter filter and the translate helpers), not scripts here.
 
 | Script | Used by |
 | --- | --- |
-| `vpic-mock.mjs` | `forms-keep-values-check.mjs`: a stand-in for NHTSA vPIC's make/model lookup, which the sandbox cannot reach. |
+| `vpic-mock.mjs` | `forms-keep-values-check.mjs`, `remember-check.mjs`, `api/_lib/vehicles.test.mjs`, `src/data/vehicles.test.mjs`: a stand-in for NHTSA vPIC's model lookup (Toyota, Honda, Ford, BMW, Audi), which the sandbox cannot reach. In a browser it also answers `/api/vehicles` through the real handler logic, and the snapshot (404 unless given one). |

@@ -1205,8 +1205,10 @@ export function getProduct(kind, slug) {
 const MODEL_YEARS = Array.from({ length: 22 }, (_, i) => 2026 - i);
 
 /**
- * Make -> model -> years lookup powering the "Shop by Vehicle" search.
- * Trimmed to the makes we see most often in Broward County.
+ * Make -> model -> years: the catalog's first vehicle table, trimmed to the
+ * makes we see most often in Broward County. No picker offers it any more
+ * (every finder uses the full NHTSA lists in src/data/vehicles.js); /tires
+ * still reads it to spell a vehicle from an older link or saved pick.
  */
 export const VEHICLE_DATA = {
   Toyota: {
