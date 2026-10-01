@@ -366,10 +366,6 @@ export default function Header() {
         <div className="wrap flex items-center gap-4 py-2 lg:gap-8">
           <Link to="/" className="flex shrink-0 items-center gap-3">
             <Logo className="h-[72px] lg:h-20" variant="full" />
-            <span className="hidden whitespace-nowrap font-display text-[11px] uppercase leading-tight tracking-[0.12em] text-smoke sm:block">
-              Powered by
-              <span className="block text-extremeRed">Extreme Tires</span>
-            </span>
           </Link>
 
           {/* The middle of the masthead is where a shopper looks for search,
