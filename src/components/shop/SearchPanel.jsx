@@ -19,6 +19,7 @@ import {
   useVehicleModels,
 } from "../../data/vehicles.js";
 import { useVehicle } from "../../context/VehicleContext.jsx";
+import { trackEvent } from "../../lib/analytics.js";
 
 // The storefront's primary finder. Tab one narrows by vehicle, tab two by the
 // numbers stamped on the sidewall (or, on the wheel catalog, by rim size).
@@ -159,6 +160,10 @@ export default function SearchPanel({
     // The vehicle being shopped for from here on (every tire shows whether
     // it fits), remembered so checkout and the booking form start from it.
     selectVehicle({ year, make: makeValue, model: modelValue });
+    trackEvent("search", {
+      search_type: "vehicle",
+      search_term: [year, makeValue, modelValue].join(" "),
+    });
     onSearch({ type: "vehicle", year, make: makeValue, model: modelValue });
   };
 
@@ -173,6 +178,12 @@ export default function SearchPanel({
       return;
     }
     setError("");
+    trackEvent("search", {
+      search_type: isWheel ? "wheel_size" : "tire_size",
+      search_term: isWheel
+        ? `${diameter || "any"}x${width || "any"}`
+        : `${width || "any"}/${aspect || "any"}R${diameter || "any"}`,
+    });
     onSearch({ type: "size", width, aspect, diameter });
   };
 

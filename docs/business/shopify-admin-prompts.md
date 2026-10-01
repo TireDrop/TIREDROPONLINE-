@@ -1338,3 +1338,55 @@ results of tests 8–10.
 
 **Undo:** paste the Part A message back into action 1 (you click Save).
 Metafield definitions can stay; they only show the values.
+
+## 25. GA4: mark the lead, order-request and install-booking events as Key events
+
+**Why:** the site now sends GA4 conversion events (`src/lib/analytics.js`;
+list in `docs/ops/deploy.md`, "GA4 conversion events"). GA4 only counts an
+event as a conversion once it is marked as a **Key event** in GA4 Admin.
+Three of them are TireDrop's real conversions: `generate_lead` (a contact,
+booking, fleet quote, financing or newsletter form sent), `order_request`
+(a checkout order request) and `install_booking` (an install booked from
+Track My Order). Read and click only; you click each Save.
+
+```
+TASK: In Google Analytics 4, mark three events as Key events for the
+TireDrop property. I am logged into analytics.google.com in this browser.
+
+HARD RULES:
+- NEVER click Save, Create or a toggle that saves on its own without telling
+  me first. When a step says "STOP FOR SAVE", stop, say what is ready, and
+  wait for me to click it and say "saved".
+- Do not change data retention, Google signals, data streams, filters,
+  links (Ads, Search Console, BigQuery), users or any other setting.
+- Do not delete or rename anything.
+
+1. Open the property "Tire Drop" (web stream measurement ID G-2MCPDH5WF9).
+   If you see a different property, stop and tell me.
+2. Admin (gear, bottom left) → Data display → Key events.
+3. Report the key events already listed (name, and whether they are on).
+4. For each of these three names, if it is not already listed:
+     generate_lead
+     order_request
+     install_booking
+   click "New key event", type the name EXACTLY (lowercase, underscores),
+   and STOP FOR SAVE. After I say "saved", do the next one.
+   If one is already listed but switched off, tell me; do not switch it.
+5. Read only: Admin → Data streams → the web stream → Enhanced measurement
+   (gear icon) → Page views → Show advanced settings. Report whether
+   "Page changes based on browser history events" is ON or OFF. Do not
+   change it (it must be OFF; the site sends its own page views).
+
+REPORT BACK:
+- The key events listed before you started (step 3).
+- For each of the three: added / already there / switched off, and saved Y/N.
+- The history-events setting from step 5.
+```
+
+**Undo:** Admin → Data display → Key events → the event's ⋮ menu →
+"Unmark as key event" (you click it).
+
+**After this:** key events count from the time they are marked (not
+backdated). New events can take up to 24 hours to show in reports; GA4
+DebugView (Admin → Data display → DebugView) shows them within seconds when
+the site is opened through Google Tag Assistant (tagassistant.google.com).

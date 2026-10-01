@@ -172,6 +172,10 @@ that do the server-side work:
 |                      | Honeypot and per-IP rate limit; 503 without Shopify.      |
 |                      | Scopes: `read_orders`, `read_draft_orders` (orders older  |
 |                      | than 60 days also need `read_all_orders`).                |
+| `POST /api/csp-report` | Browsers' Content-Security-Policy violation reports.    |
+|                      | Logs one `[csp]` line per report (directive, blocked      |
+|                      | host, page path; no query string, IP or user agent),      |
+|                      | stores nothing, rate-limited. See "Security headers".     |
 
 Payment runs on **Shopify's hosted checkout** (Shopify Payments / Shop Pay),
 and the paid order lives in Shopify, so Flow, the order emails and Order
@@ -371,6 +375,119 @@ Shopify serving the domain until the Vercel site is verified.
    and look for `301` and the right `location`.
 7. **Keep the Shopify plan.** Checkout, the orders, Flow, the order emails
    and Order Printer all run on it. Only the storefront moves to Vercel.
+
+## Security headers
+
+Set for every response (pages, `/api/*`, the 404 page and the `/spa`
+fallback) by the first `headers` block in `vercel.json`:
+
+| Header | Value |
+| --- | --- |
+| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains` (2 years). **No `preload` yet:** adding it and submitting to hstspreload.org is Justin's decision, and hard to undo. `includeSubDomains` means every subdomain must keep working on HTTPS (shop. does). |
+| `X-Content-Type-Options` | `nosniff` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `X-Frame-Options` | `SAMEORIGIN` (the CSP's `frame-ancestors 'self'` takes over once the CSP is enforced: browsers ignore `frame-ancestors` in a report-only policy) |
+| `Permissions-Policy` | camera, microphone, geolocation, payment, USB, serial, HID, MIDI, motion sensors, display capture, autoplay, encrypted media, passkeys, screen wake lock, XR and Topics all off (`=()`). Nothing on the site uses them; there is no "near me" button. Payment happens on Shopify's own domain, which this header does not reach. |
+| `Content-Security-Policy-Report-Only` | Below. **Report-only:** nothing is blocked; the browser only reports. |
+
+### The CSP and why each source is there
+
+| Directive | Allows | For |
+| --- | --- | --- |
+| `default-src` | `'self'` | everything not listed |
+| `script-src` | `'self'`, the gtag snippet's `sha256-` hash, `*.googletagmanager.com` | the Vite bundle, GA4 (`gtag.js`) |
+| | `translate.google.com`, `translate.googleapis.com`, `translate-pa.googleapis.com`, `www.gstatic.com` | Google Translate (`preview/translate`, loaded on demand) |
+| `style-src` | `'self'`, `'unsafe-inline'`, `fonts.googleapis.com`, `translate.googleapis.com`, `www.gstatic.com` | the CSS bundle, Google Fonts CSS, Translate's CSS. `'unsafe-inline'` because React writes `style="…"` attributes into the prerendered HTML (and Translate injects styles); hashes cannot cover attributes. Style injection is low risk next to script injection, which stays locked down. |
+| `font-src` | `'self'`, `data:`, `fonts.gstatic.com` | Archivo and Instrument Sans |
+| `img-src` | `'self'`, `data:`, `blob:`, any `https:` | product photos come from the distributor's image host (not confirmed yet), plus GA and Translate images |
+| `connect-src` | `'self'`, `vpic.nhtsa.dot.gov`, `*.google-analytics.com`, `*.analytics.google.com`, `*.googletagmanager.com`, `translate.googleapis.com`, `translate-pa.googleapis.com` | `/api`, the NHTSA make/model lookup, GA4 hits (incl. `region1.google-analytics.com`), Translate |
+| `frame-src` | `translate.google.com`, `translate.googleapis.com` | Translate's frames; nothing else on the site embeds a frame |
+| `object-src` `'none'`, `base-uri` `'self'`, `form-action` `'self'`, `manifest-src` `'self'`, `worker-src` `'self'` | | |
+| `report-uri` | `/api/csp-report` | |
+
+Not in the CSP because they are only **links** (navigation is not covered):
+shop.tiredroponline.com (checkout, account, invoices; the `/account`,
+`/checkouts/*` and `/cart/c/*` redirects), `*.myshopify.com`, Google Maps,
+Facebook, Yelp, carrier tracking sites and the sources the Learn pages cite.
+The JSON-LD `<script type="application/ld+json">` blocks are data, not code,
+and need no hash.
+
+**The gtag hash.** The only executable inline script is the GA4 snippet in
+`index.html`; the prerender copies it byte for byte into every page. Change
+one character of it and its hash changes: `npm run test:api`
+(`api/_lib/cspReport.test.mjs`) then fails and prints the new
+`'sha256-…'` to put in `vercel.json`.
+
+### Reading the reports
+
+Vercel → the project → Logs, filter `[csp]`. Each line is
+`[csp] report <directive> blocked=<origin|inline|eval> page=<path> source=<origin>`.
+Or open any page with DevTools → Console: report-only violations show as
+"[Report Only] Refused to …" warnings. Browser extensions (password
+managers, translators, ad blockers) cause some reports; those name
+`chrome-extension` or a host the site never uses, and can be ignored.
+
+### Switching from report-only to enforced
+
+After **seven days with no unexplained `[csp]` lines** (and after
+`preview/translate` has been merged and clicked through with the Console
+open, if it is going live):
+
+1. In `vercel.json`, rename the key `Content-Security-Policy-Report-Only`
+   to `Content-Security-Policy`, and add `frame-ancestors 'self'` before
+   `report-uri` in its value. Keep `report-uri`, so a later break still
+   reports.
+2. `npm run test:api` (update the "report-only" assertion in
+   `api/_lib/cspReport.test.mjs` to expect the enforced header), push, and
+   on the deploy click through: home, a tire search by size and by vehicle
+   (NHTSA models load), a product page, cart, checkout to the review step,
+   `/track`, a Learn demo, the contact form, and Translate if it is live.
+   Console must show no "Refused to" errors, and GA4 Realtime must still
+   show the visit.
+3. Rollback: rename the key back to `…-Report-Only` and push.
+
+If a report names a host the site really needs (a new supplier image host
+is already covered by `img-src https:`), add that host to the one directive
+it was blocked under, not to `default-src`.
+
+## GA4 conversion events
+
+Sent from the browser through `src/lib/analytics.js` (`trackEvent`), which
+keeps only allow-listed parameter names and drops any email- or phone-shaped
+value, so no name, email, phone, address, notes or order email reaches
+Google. No-ops in the prerender and wherever `gtag` is missing.
+
+| Event | When | Parameters |
+| --- | --- | --- |
+| `view_item` | a product page opens (once per page view) | `currency`, `value`, `items[1]` |
+| `add_to_cart` | any Add button, or cart quantity up | `currency`, `value`, `items` |
+| `remove_from_cart` | cart Remove, or quantity down | `currency`, `value`, `items` |
+| `view_cart` | `/cart` with something in it | `currency`, `value`, `items` |
+| `begin_checkout` | `/checkout` with something in the cart | `currency`, `value`, `items` |
+| `add_shipping_info` | leaving the checkout's Delivery step | `shipping_tier` (`ship`, `ship-to-store`, `mobile`), `currency`, `value`, `items` |
+| `order_request` | a request-only order is sent | `currency` USD, `value` (incl. install), `shipping_tier`, `items` |
+| `generate_lead` | a form is delivered | `form_name`: `contact`, `booking` (/schedule), `fleet-quote`, `financing`, `newsletter` |
+| `install_booking` | `/track` booking panel: booked inline, or the external booking link clicked | `install_type`, `method` (`inline` / `external`) |
+| `search` | the tire/wheel finder is submitted | `search_type`, `search_term` (a size like `225/45R17` or "year make model" from the dropdowns) |
+| `tool_use` | first touch of a Learn demo / free tool (once per page view) | `tool_id` |
+
+Items carry `item_id` (the SKU), `item_name`, `item_brand`,
+`item_category` (tire/wheel), `item_variant` (size), `price` (per unit,
+before install) and `quantity`.
+
+**`purchase` is not sent.** Checkout is request-only, so nothing is paid on
+this site. When online payment is switched on, record the purchase on
+Shopify's checkout (it knows the transaction id and that payment went
+through) rather than at the redirect from here, which would count abandoned
+payments as sales.
+
+Key events (conversions) are set in GA4 Admin, not in code: prompt 25 in
+`docs/business/shopify-admin-prompts.md` marks `generate_lead`,
+`order_request` and `install_booking`. To watch events live, open the site
+through Google Tag Assistant (tagassistant.google.com) and use GA4 Admin →
+DebugView. Tests: `npm run test:lib` (the parameter filter) and
+`npm run check:ga` (Chromium, after a build: the funnel's events and their
+shape).
 
 ## Free alternative
 

@@ -23,13 +23,15 @@ header comment, and `shopify/assets/td-tiremath.js` names
 | `newsletter-signup-check.mjs` | `check:newsletter` | The newsletter is only the footer form: no pop-up, validation, success and failure messages. |
 | `translate-check.mjs` | `check:translate` | The header's Language control: nothing loads from Google until it is opened, keyboard and 320px use, translating in place with a stand-in for Google's element (routes, cart and a form throw nothing; prices and sizes stay as written), the translate.google.com fallback, and the site served from Google's translate.goog proxy. `TRANSLATE_SHOTS=<dir>` saves screenshots. |
 | `docs-links-check.mjs` | `check:docs` | Every relative Markdown link and every `docs/...` path in the docs resolves to a real file. |
+| `ga-events-check.mjs` | `check:ga` | GA4 conversion events through a real funnel (view_item, add_to_cart, view_cart, begin_checkout, add_shipping_info, generate_lead) with the expected shape, and nothing typed into a form in any GA call. |
 
 `check:schema` reads `dist/` directly, so it needs `npm run build` first.
 So do the four Chromium checks. They start
 `vite preview` themselves and mock every `/api` call, so nothing reaches
-Shopify. `test:api`, `test:content`, `test:lib` and `test:data` are `node --test`
-suites in `api/_lib/`, `src/content/`, `src/lib/` and `src/data/` (the mobile
-city pages: ZIPs, copy rules and the text-overlap check), not scripts here.
+Shopify. `test:api`, `test:content`, `test:data` and `test:lib` are `node --test`
+suites in `api/_lib/`, `src/content/`, `src/data/` (the mobile city pages:
+ZIPs, copy rules and the text-overlap check) and `src/lib/` (the GA4 event
+parameter filter and the translate helpers), not scripts here.
 
 ## Run by hand
 

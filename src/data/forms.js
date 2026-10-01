@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import { BUSINESS } from "./business.js";
 import { ApiError, getStatus, sendForm } from "./api.js";
 import { guardFields } from "./formGuard.js";
+import { trackEvent } from "../lib/analytics.js";
 
 /**
  * The address the confirmations name: VITE_CONTACT_EMAIL if set, otherwise the
@@ -139,6 +140,8 @@ export async function submitForm(formName, values, formElement = null) {
 
   try {
     const data = await sendForm({ ...values, form: formName, ...guard });
+    // GA4 lead: the form's name only, never what was typed into it.
+    trackEvent("generate_lead", { form_name: formName });
     return { delivered: true, error: null, data };
   } catch (err) {
     if (err instanceof ApiError) return { delivered: false, error: err.message };

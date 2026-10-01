@@ -40,6 +40,7 @@ import { SERVICE_AREA_LABEL } from "../../data/serviceArea.js";
 import { useCart, money } from "../../context/CartContext.jsx";
 import { useCompare } from "../../context/CompareContext.jsx";
 import { useFit } from "../../context/VehicleContext.jsx";
+import { trackViewItem } from "../../lib/analytics.js";
 import {
   DELIVERY_NOTE,
   SET_SIZE,
@@ -175,6 +176,8 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
   const [qty, setQty] = useState(SET_SIZE);
   const [install, setInstall] = useState(false);
   const [added, setAdded] = useState(false);
+
+  useEffect(() => trackViewItem(product), [product]);
 
   // The sticky bar only earns its place once the real buy box has scrolled
   // away; before that it would cover the page for no reason.

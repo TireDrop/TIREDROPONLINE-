@@ -18,7 +18,7 @@ import {
   EmptyState,
   Badge,
 } from "../../components/ui/index.jsx";
-import { useCart, money } from "../../context/CartContext.jsx";
+import { useCart, useCartEvent, money } from "../../context/CartContext.jsx";
 import { useVehicle } from "../../context/VehicleContext.jsx";
 import ProductArt from "../../components/shop/ProductArt.jsx";
 import {
@@ -170,8 +170,8 @@ function CartLine({ line, setQty, remove, addItem }) {
   // retiring the old line and re-adding the opposite variant at the same qty.
   function toggleInstall() {
     const { key, qty, ...rest } = line;
-    remove(key);
-    addItem({ ...rest, install: !line.install }, qty);
+    remove(key, { track: false });
+    addItem({ ...rest, install: !line.install }, qty, { track: false });
   }
 
   return (
@@ -295,6 +295,7 @@ export default function CartPage() {
   const noFitCount = safeLines.filter(
     (l) => l.kind !== "wheel" && fitFor(fitSizeOf(l))?.status === "no-fit",
   ).length;
+  useCartEvent("view_cart");
 
   const totals = useMemo(
     () => summarize({ subtotal, installTotal }),
