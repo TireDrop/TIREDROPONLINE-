@@ -20,14 +20,24 @@
 {%- assign td_zip5 = td_zip | slice: 0, 5 -%}
 {%- assign td_zip3 = td_zip | slice: 0, 3 -%}
 {%- assign td_choice = attributes.Delivery | default: "" -%}
+{%- comment -%}
+  Website orders (tiredroponline.com) check out on a draft-order invoice with a
+  $0 shipping line titled "Pickup at Extreme Tires (Sunrise, FL)". Shopify
+  treats that as shipping, not pick-up, so the title counts as pick-up too.
+{%- endcomment -%}
+{%- assign td_ship_title = shipping_method.title | default: "" -%}
+{%- assign td_pickup = false -%}
+{%- if delivery_method == "pick-up" or td_ship_title contains "Pickup at Extreme Tires" -%}
+  {%- assign td_pickup = true -%}
+{%- endif -%}
 {%- assign td_mode = "ship" -%}
 {%- if td_choice contains "Ship to store" -%}
-  {%- if delivery_method == "pick-up" -%}
+  {%- if td_pickup -%}
     {%- assign td_mode = "store" -%}
   {%- else -%}
     {%- assign td_mode = "store_mismatch" -%}
   {%- endif -%}
-{%- elsif delivery_method == "pick-up" -%}
+{%- elsif td_pickup -%}
   {%- assign td_mode = "pickup" -%}
 {%- elsif td_local_prefixes contains td_zip3 -%}
   {%- unless td_excluded_zips contains td_zip5 -%}
@@ -37,7 +47,7 @@
 <div style="margin: 20px 0; padding: 16px 18px; border: 1px solid #0068E8; border-radius: 8px; background: #F2F7FF; font-family: Arial, sans-serif; font-size: 15px; line-height: 1.5; color: #111;">
 {%- if td_mode == "store" %}
   <strong style="font-size: 16px;">Shipping free to Extreme Tires for your install</strong><br>
-  We'll email you as soon as your tires arrive at the shop. Then pick a bay time: reply to this email or call <a href="tel:+19547731896" style="color: #0068E8;">(954) 773-1896</a> and mention {{ order_name }}.<br>
+  We'll email you as soon as your tires arrive at the shop. To pick your install day and time, use the "Schedule your install" button below, reply to this email, or call <a href="tel:+19547731896" style="color: #0068E8;">(954) 773-1896</a> and mention {{ order_name }}.<br>
   Installation is booked and paid separately at the shop.<br>
   <span style="color: #444;">Extreme Tires · 7712 West Oakland Park Blvd, Sunrise, FL 33351</span>
 {%- elsif td_mode == "store_mismatch" %}

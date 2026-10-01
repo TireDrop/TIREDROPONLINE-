@@ -219,7 +219,10 @@ async function runWidth(width) {
     // It is above the link columns.
     const order = await page.evaluate((sel) => {
       const nl = document.querySelector(sel);
-      const cols = [...document.querySelectorAll("footer h3")][0];
+      // The first footer heading outside the sign-up: the link columns'.
+      const cols = [...document.querySelectorAll("footer h2, footer h3")].find(
+        (h) => !nl.contains(h),
+      );
       return nl.compareDocumentPosition(cols) & Node.DOCUMENT_POSITION_FOLLOWING;
     }, FORM);
     assert.ok(order, "sign-up comes before the footer link columns");

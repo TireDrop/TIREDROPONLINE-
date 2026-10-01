@@ -60,6 +60,22 @@ export default function LearnHubPage() {
       />
 
       <Section className="bg-bone">
+        {(hub.intro || hub.links.length > 0) && (
+          <div className="mb-8 max-w-[72ch] space-y-3 text-[15px] leading-relaxed text-ink/85">
+            {hub.intro && <p>{hub.intro}</p>}
+            {hub.links.map((l) => (
+              <p key={l.href}>
+                {l.text && <>{l.text} </>}
+                <Link
+                  to={l.href}
+                  className="font-semibold text-drop underline underline-offset-2 hover:text-dive"
+                >
+                  {l.label}
+                </Link>
+              </p>
+            ))}
+          </div>
+        )}
         {articles.length > 0 ? (
           <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {articles.map((article) => (
@@ -88,6 +104,9 @@ export default function LearnHubPage() {
               </div>
             }
           />
+        )}
+        {hub.note && (
+          <p className="mt-8 text-sm text-smoke">{hub.note}</p>
         )}
       </Section>
 

@@ -58,5 +58,20 @@
     "title": "Tire Age, Storage & Records",
     "description": "How old is too old, dry rot and sidewall cracks, storing tires in the heat, recalls and tire registration.",
     "order": 10
+  },
+  {
+    "slug": "tesla",
+    "title": "Tesla Tires",
+    "description": "Tires on a Tesla: EV tire basics, factory sizes by model, T-marked and foam-lined tires, rotation and TPMS, flats with no spare, and Florida picks.",
+    "intro": "Teslas are heavy, quick off the line and quiet inside, and that changes what their tires have to do. These guides stick to what Tesla's owner's manuals and the tire makers publish, so you can check every point yourself.",
+    "links": [
+      {
+        "text": "Shopping for a Model Y set?",
+        "label": "Read our Model Y tire buying guide on the blog",
+        "href": "/blog/tesla-model-y-tires-guide"
+      }
+    ],
+    "note": "TireDrop and Extreme Tires are not affiliated with Tesla, Inc.",
+    "order": 11
   }
 ]

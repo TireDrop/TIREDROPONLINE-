@@ -27,7 +27,7 @@ export function priceBreakdown(product, qty = SET_SIZE) {
  * the estimate once the address is known.
  */
 export const DELIVERY_NOTE =
-  "Free shipping to the continental US — the delivery estimate is shown at checkout.";
+  "Free shipping to the 48 contiguous states and DC — the delivery estimate is shown at checkout.";
 
 /** The same promise where a card has one short line to spare. */
 export const DELIVERY_NOTE_SHORT = "Free shipping · estimate at checkout";

@@ -41,9 +41,9 @@ export default function Footer() {
       <div className="wrap grid grid-cols-2 gap-x-5 gap-y-8 py-14 md:gap-10 lg:grid-cols-4">
         {FOOTER_COLUMNS.map((col) => (
           <div key={col.title}>
-            <h3 className="mb-4 font-display text-[15px] text-amber">
+            <h2 className="mb-4 font-display text-[15px] text-amber">
               {col.title}
-            </h3>
+            </h2>
             <ul className="space-y-2">
               {col.links.map((link) => (
                 <li key={link.label}>
@@ -71,16 +71,17 @@ export default function Footer() {
 
         {/* Visit & Contact column — built from live business data. */}
         <div className="col-span-full md:col-span-1">
-          <h3 className="mb-4 font-display text-[15px] text-amber">
+          <h2 className="mb-4 font-display text-[15px] text-amber">
             The Shop Behind Us
-          </h3>
+          </h2>
 
           <ul className="space-y-4 text-sm">
             <li>
               <p className="label mb-1.5 text-bone/55">Phone Number</p>
               <a
                 href={BUSINESS.phoneHref}
-                className="-my-1 flex min-h-[36px] items-center gap-2 py-1 font-display text-lg font-bold tracking-[-0.012em] text-bone transition-colors hover:text-amber"
+                translate="no"
+                className="notranslate -my-1 flex min-h-[36px] items-center gap-2 py-1 font-display text-lg font-bold tracking-[-0.012em] text-bone transition-colors hover:text-amber"
               >
                 <Phone size={15} aria-hidden />
                 {BUSINESS.phone}
@@ -92,7 +93,8 @@ export default function Footer() {
                 <p className="label mb-1.5 text-bone/55">Email</p>
                 <a
                   href={`mailto:${BUSINESS.email}`}
-                  className="-my-1 flex min-h-[36px] items-center gap-2 py-1 font-display text-base font-bold tracking-[-0.012em] text-bone transition-colors hover:text-amber"
+                  translate="no"
+                  className="notranslate -my-1 flex min-h-[36px] items-center gap-2 py-1 font-display text-base font-bold tracking-[-0.012em] text-bone transition-colors hover:text-amber"
                 >
                   <Mail size={15} aria-hidden className="shrink-0" />
                   <span className="break-all">{BUSINESS.email}</span>
@@ -111,7 +113,7 @@ export default function Footer() {
                 className="flex items-start gap-2 text-bone/65 hover:text-bone"
               >
                 <MapPin size={15} aria-hidden className="mt-0.5 shrink-0" />
-                <span>
+                <span className="notranslate" translate="no">
                   {BUSINESS.shop.name}
                   <br />
                   {BUSINESS.shop.street}
@@ -179,7 +181,14 @@ export default function Footer() {
           <div className="flex items-center gap-3">
             <Logo className="h-16 shrink-0" variant="full" onDark />
             <p>
-              © {year} {BUSINESS.name} · {BUSINESS.poweredBy}
+              © {year}{" "}
+              <span className="notranslate" translate="no">
+                {BUSINESS.name}
+              </span>{" "}
+              · Powered by{" "}
+              <span className="notranslate" translate="no">
+                {BUSINESS.parent}
+              </span>
             </p>
           </div>
           <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">

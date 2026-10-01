@@ -280,10 +280,15 @@ const markdown = new Marked({
 });
 
 function renderMarkdown(text) {
-  return markdown
-    .parse(text)
-    .replace(/<table>/g, '<div class="table-scroll"><table>')
-    .replace(/<\/table>/g, "</table></div>");
+  // A keyboard user can only scroll a box they can focus, and each such
+  // region needs a name of its own: the table's column headings.
+  return markdown.parse(text).replace(/<table>([\s\S]*?)<\/table>/g, (_, body) => {
+    const heads = [...body.matchAll(/<th(?:\s[^>]*)?>([\s\S]*?)<\/th>/g)]
+      .map((m) => m[1].replace(/<[^>]+>/g, "").replace(/"/g, "&quot;").trim())
+      .filter(Boolean);
+    const label = heads.length ? `Table: ${heads.join(", ")}` : "Table";
+    return `<div class="table-scroll" tabindex="0" role="region" aria-label="${label}"><table>${body}</table></div>`;
+  });
 }
 
 const CONTENT_PATH = /^\/(learn|blog)(\/|$)/;
@@ -535,6 +540,17 @@ export function buildContent({
       title: asString(h.title),
       description: asString(h.description),
       order: Number(h.order) || 0,
+      // Optional, shown on the hub page only: a longer intro, a one-line
+      // note (e.g. a no-affiliation disclaimer) and in-site links.
+      intro: asString(h.intro) || null,
+      note: asString(h.note) || null,
+      links: (Array.isArray(h.links) ? h.links : [])
+        .map((l) => ({
+          label: asString(l?.label),
+          text: asString(l?.text) || null,
+          href: canonicalSitePath(asString(l?.href)),
+        }))
+        .filter((l) => l.label && l.href),
     }))
     .sort((a, b) => a.order - b.order);
   const hubSlugs = new Set(hubList.map((h) => h.slug));

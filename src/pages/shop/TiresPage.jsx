@@ -430,12 +430,12 @@ export default function TiresPage() {
       <>
         <Seo
           title="Tire Brands"
-          description={`${brandSentence} tires from TireDrop, shipped anywhere in the continental US.`}
+          description={`${brandSentence} tires from TireDrop, shipped free to the 48 contiguous states and DC.`}
         />
         <PageHero
           eyebrow="Tires"
           title="Shop Tires by Brand"
-          lede={`${brandSentence} tires in one catalog, shipped direct from a distributor warehouse anywhere in the continental US.`}
+          lede={`${brandSentence} tires in one catalog, shipped direct from a distributor warehouse to the 48 contiguous states and DC.`}
         />
         <Breadcrumbs
           trail={[{ label: "Tires", to: "/tires" }, { label: "Brands" }]}
@@ -490,12 +490,12 @@ export default function TiresPage() {
     <>
       <Seo
         title="Shop Tires"
-        description={`Shop ${brandSentence} tires by vehicle or by size. Shipped anywhere in the continental US, or free to our South Florida shop.`}
+        description={`Shop ${brandSentence} tires by vehicle or by size. Shipped free to the 48 contiguous states and DC, or free to our South Florida shop.`}
       />
       <PageHero
         eyebrow="Tires"
         title="Shop Tires"
-        lede="Find your size, pick your set, then choose where it lands at checkout — your address anywhere in the continental US, or free to our South Florida shop where we fit them for you."
+        lede="Find your size, pick your set, then choose where it lands at checkout — your address in the 48 contiguous states or DC, or free to our South Florida shop where we fit them for you."
       />
       <Breadcrumbs trail={[{ label: "Tires" }]} />
 
@@ -642,6 +642,7 @@ export default function TiresPage() {
 
             {results.length === 0 ? (
               <EmptyState
+                as="h2"
                 icon={SearchX}
                 title="No tires match those filters"
                 lede="Try widening the price range or clearing a size. If you know your size and cannot find it listed, call us — we can order sizes this page does not carry."
@@ -739,11 +740,16 @@ export default function TiresPage() {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
-                {results.map((tire) => (
-                  <ProductCard key={tire.id} product={tire} />
-                ))}
-              </div>
+              <>
+                {/* The cards are h3s; on a phone the Filter h2 is in a
+                    closed drawer, so the results need a heading of their own. */}
+                <h2 className="sr-only">Tires</h2>
+                <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
+                  {results.map((tire) => (
+                    <ProductCard key={tire.id} product={tire} />
+                  ))}
+                </div>
+              </>
             )}
 
             <div className="hazard mt-10 rounded-sm p-1">
@@ -757,7 +763,7 @@ export default function TiresPage() {
                   <div>
                     <h2 className="h3">Shipped to you, or fitted by us</h2>
                     <p className="mt-1 text-sm text-bone/70">
-                      Every order ships anywhere in the continental US. In South
+                      Every order ships free to the 48 contiguous states and DC. In South
                       Florida, send it free to the shop instead and we mount,
                       balance and dispose of the old set.
                     </p>

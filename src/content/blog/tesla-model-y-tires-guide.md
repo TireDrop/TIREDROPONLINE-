@@ -9,7 +9,7 @@ secondaryKeywords:
   - "Tesla T0 T1 tires"
 category: vehicles
 date: 2026-09-30
-updated: 2026-09-30
+updated: 2026-10-01
 demo: size-decoder
 takeaways:
   - "Start from the size, load index and speed rating on your door placard. Model Y wheel packages differ, and some use different front and rear sizes."
@@ -139,3 +139,5 @@ Once the new tires are on, two Tesla rules keep them lasting.
 | Rotation | Tesla manual | Every 6,250 mi or a 2/32 in difference |
 
 When you've got your size, use [Find My Tires](/find-my-tires) or [shop by size](/tires). In South Florida, Extreme Tires can install them in Sunrise or by mobile van in the local install area, and handles rotation and TPMS service. Have a foam-lined tire that needs a repair? Call (954) 773-1896 and ask.
+
+Own a different Tesla, or want the details behind this checklist? Our [Tesla Tires guides](/learn/tesla) cover sizes for every model, T-marked and foam-lined tires, rotation and TPMS, and flats with no spare.

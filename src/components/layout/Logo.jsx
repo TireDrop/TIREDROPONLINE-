@@ -33,7 +33,10 @@ function ParentLine({ onDark }) {
       }`}
     >
       Powered by{" "}
-      <span className={onDark ? "text-bone/70" : "text-extremeRed"}>
+      <span
+        className={`notranslate ${onDark ? "text-bone/70" : "text-extremeRed"}`}
+        translate="no"
+      >
         Extreme Tires
       </span>
     </span>
@@ -65,6 +68,7 @@ export default function Logo({
     <img
       src={sources[srcIndex]}
       alt="TireDrop"
+      translate="no"
       width={size.width}
       height={size.height}
       className={`${className} w-auto object-contain`}
@@ -72,7 +76,8 @@ export default function Logo({
     />
   ) : (
     <span
-      className={`font-display text-2xl uppercase leading-none tracking-tight md:text-[28px] ${
+      translate="no"
+      className={`notranslate font-display text-2xl uppercase leading-none tracking-tight md:text-[28px] ${
         onDark ? "text-bone" : "text-ink"
       }`}
     >

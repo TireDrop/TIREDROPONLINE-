@@ -140,7 +140,7 @@ export default function MobileCityPage() {
             <li key={step.title} className="card p-6">
               <span
                 aria-hidden
-                className="font-display text-3xl leading-none text-ink/15"
+                className="font-display text-3xl leading-none text-ink/50"
               >
                 0{i + 1}
               </span>
