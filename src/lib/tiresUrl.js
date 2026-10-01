@@ -11,6 +11,8 @@
  *   year, make, model   the vehicle (make and model lowercased, spaces as +)
  *   size                a sidewall size: 265-70r17, lt265-70r17, 31x10.50r15lt
  *                       (265/70R17 and LT265/70R17 are read too)
+ *   rear                the rear size of a staggered door-jamb entry, only
+ *                       with size: size=225-40r19&rear=255-35r19
  *   season              all-season, all-weather, summer, winter (a list)
  *   type                touring, performance, highway, all-terrain,
  *                       mud-terrain, commercial (a list)
@@ -170,15 +172,20 @@ export function paramToSize(param) {
  * "ford / f-150" and the saved "Ford / F-150" compare equal. A saved trim
  * pick is not part of it: the URL does not carry one.
  */
+function rearKey(sel) {
+  const rear = sel.size && sel.rear ? readSize(sel.rear) : null;
+  return rear ? `|rear ${rear.display.toUpperCase()}` : "";
+}
+
 export function selectionKey(sel) {
   if (!sel) return "";
   if (sel.type === "size") {
     const r = readSize(sel.size);
-    return r ? `s|${r.display.toUpperCase()}` : "";
+    return r ? `s|${r.display.toUpperCase()}${rearKey(sel)}` : "";
   }
   if (sel.type === "vehicle") {
     const size = sel.size ? readSize(sel.size)?.display.toUpperCase() ?? "" : "";
-    return `v|${norm(sel.year)}|${norm(sel.make)}|${norm(sel.model)}|${size}`;
+    return `v|${norm(sel.year)}|${norm(sel.make)}|${norm(sel.model)}|${size}${rearKey(sel)}`;
   }
   return "";
 }
@@ -248,10 +255,12 @@ export function parseTiresQuery(input, vocab = {}) {
       : new URLSearchParams(String(input ?? "").replace(/^\?/, ""));
 
   const size = paramToSize(params.get("size"));
+  const rear = size ? paramToSize(params.get("rear")) : null;
+  const sized = rear ? { size, rear } : { size };
   const vehicle = readVehicle(params, vocab);
   let selection = null;
-  if (vehicle) selection = size ? { ...vehicle, size } : vehicle;
-  else if (size) selection = { type: "size", size };
+  if (vehicle) selection = size ? { ...vehicle, ...sized } : vehicle;
+  else if (size) selection = { type: "size", ...sized };
 
   const brands = uniq(
     list(params, "brand", "brands")
@@ -303,7 +312,7 @@ export function parseTiresQuery(input, vocab = {}) {
   const view = params.get("view") === "brands" ? "brands" : "";
   const search = ["vehicle", "size"].includes(params.get("search")) ? params.get("search") : "";
   const fitRaw = params.get("fit") ?? "";
-  const fit = ["change", "vehicle", "size"].includes(fitRaw) ? fitRaw : "";
+  const fit = ["change", "vehicle", "size", "sticker"].includes(fitRaw) ? fitRaw : "";
 
   return {
     selection,
@@ -352,9 +361,13 @@ export function serializeTiresQuery(state = {}) {
     add("year", sel.year);
     add("make", String(sel.make).toLowerCase());
     add("model", String(sel.model ?? "").toLowerCase());
-    if (sel.size) add("size", sizeToParam(sel.size));
+    if (sel.size) {
+      add("size", sizeToParam(sel.size));
+      if (sel.rear) add("rear", sizeToParam(sel.rear));
+    }
   } else if (sel?.type === "size") {
     add("size", sizeToParam(sel.size));
+    if (sel.rear) add("rear", sizeToParam(sel.rear));
   }
 
   // Lists in one order, whatever order they were ticked in, so one page

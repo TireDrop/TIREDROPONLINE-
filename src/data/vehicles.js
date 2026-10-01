@@ -352,9 +352,11 @@ export function recallVehicle() {
  * different car?"):
  *
  *   tiredrop.fitment.v1 = { "v": 1, "type": "vehicle", "year": "2019",
- *                           "make": "Ford", "model": "F-150",
- *                           "pick"?: trim option, "size"?: "LT275/65R18" }
- *                       | { "v": 1, "type": "size", "size": "265/70R17" }
+ *                           "make": "BMW", "model": "3 Series",
+ *                           "pick"?: trim option, "size"?: "225/40R19",
+ *                           "rear"?: "255/35R19" }
+ *                       | { "v": 1, "type": "size", "size": "225/40R19",
+ *                           "rear"?: "255/35R19" }
  *
  * `v` is the format version. An entry from before it existed (no `v`) is
  * read as version 1; one from a newer format this build does not know is
@@ -362,6 +364,15 @@ export function recallVehicle() {
  * try/catch: with storage blocked (private mode, site data off) the
  * selection lasts for the page session only (VehicleContext.jsx keeps it in
  * memory) and Shop Tires shows the finder again next time.
+ *
+ * `size` on a vehicle is a size the shopper confirmed (the door-jamb
+ * sticker, or typed over the typical size in Find My Tires); only a
+ * confirmed size can rule a tire out (fitmentCheck.js). `rear` (added
+ * 2026-10-01, main dee5157) is the rear size of a staggered setup and is
+ * only kept next to a `size`. It is an optional extra field, so the key and
+ * `v` stay at 1: a build from before it reads the entry as the front size
+ * only, and an entry from before it simply has no rear. Bump `v` only for a
+ * change an older build would misread (a renamed or re-meant field).
  */
 const SELECTION_KEY = "tiredrop.fitment.v1";
 export const SELECTION_VERSION = 1;
@@ -374,13 +385,19 @@ function cleanSelection(v) {
   if (v.v != null && v.v !== SELECTION_VERSION) return null;
   if (v.type === "size") {
     const size = clip(v.size, 40);
-    return size ? { type: "size", size } : null;
+    if (!size) return null;
+    const out = { type: "size", size };
+    if (clip(v.rear, 40)) out.rear = clip(v.rear, 40);
+    return out;
   }
   if (v.type === "vehicle") {
     const out = { type: "vehicle", year: clip(v.year), make: clip(v.make), model: clip(v.model) };
     if (!out.year || !out.make) return null;
     if (clip(v.pick, 80)) out.pick = clip(v.pick, 80);
-    if (clip(v.size, 40)) out.size = clip(v.size, 40);
+    if (clip(v.size, 40)) {
+      out.size = clip(v.size, 40);
+      if (clip(v.rear, 40)) out.rear = clip(v.rear, 40);
+    }
     return out;
   }
   return null;

@@ -41,8 +41,10 @@ import { guardFields } from "../../data/formGuard.js";
 import { recallVehicle } from "../../data/vehicles.js";
 import {
   checkFit,
+  describeOption,
   fitSizeOf,
   resolveSelection,
+  selectionSizeText,
 } from "../../data/fitmentCheck.js";
 import { useVehicle } from "../../context/VehicleContext.jsx";
 import VehicleSelect, {
@@ -50,7 +52,12 @@ import VehicleSelect, {
   MIN_VEHICLE_YEAR,
   vehicleErrors,
 } from "../../components/shop/VehicleSelect.jsx";
-import { FitFlag, TAX_NOTE, summarize } from "./CartPage.jsx";
+import {
+  FitFlag,
+  FitSoftNote,
+  TAX_NOTE,
+  summarize,
+} from "./CartPage.jsx";
 
 /* ------------------------------------------------------------------ */
 /*  Scheduling helpers — the shop is closed Sundays per BUSINESS.hours */
@@ -520,8 +527,10 @@ export default function CheckoutPage() {
   // for. A line that does not match is flagged with a way to swap it, never
   // blocked: a tech confirms fitment by phone before the order is released.
   const { selection, ready: fitReady } = useVehicle();
-  const fitFlagsFor = (f) => {
-    if (!fitReady) return [];
+  // Every tire line's answer. Only a mismatch against a size the shopper
+  // confirmed is flagged ("no-fit"); a size that differs from the typical
+  // one for a vehicle-only selection gets the soft phone note instead.
+  const fitTargetFor = (f) => {
     const same =
       selection?.type === "vehicle" &&
       ["year", "make", "model"].every(
@@ -533,15 +542,28 @@ export default function CheckoutPage() {
             .trim()
             .toLowerCase(),
       );
-    const target = resolveSelection(
+    return resolveSelection(
       selection?.type === "size" || same
         ? selection
         : { type: "vehicle", year: f.year, make: f.make, model: f.model },
     );
+  };
+  const fitAnswersFor = (f) => {
+    if (!fitReady) return [];
+    const target = fitTargetFor(f);
     return safeLines
       .filter((l) => l.kind !== "wheel")
-      .map((line) => ({ line, fit: checkFit(fitSizeOf(line), target) }))
-      .filter((x) => x.fit.status === "no-fit");
+      .map((line) => ({ line, fit: checkFit(fitSizeOf(line), target) }));
+  };
+  const fitFlagsFor = (f) =>
+    fitAnswersFor(f).filter((x) => x.fit.status === "no-fit");
+  /** The confirmed door-jamb size(s) checkout measured against, or "". */
+  const confirmedSizeFor = (f) => {
+    if (!fitReady) return "";
+    const target = fitTargetFor(f);
+    if (!target.confirmed) return "";
+    if (target.kind === "size") return selectionSizeText(target);
+    return target.basis === "entered" ? describeOption(target.chosen) : "";
   };
 
   // What the cart already committed to, so step two can refuse a delivery
@@ -652,6 +674,10 @@ export default function CheckoutPage() {
       `Vehicle: ${[form.year, form.make, form.model, form.trim]
         .filter(Boolean)
         .join(" ")}`,
+      // The exact size the shopper confirmed off the door-jamb sticker
+      // (front and rear when staggered), for the fitment call.
+      confirmedSizeFor(form) &&
+        `Size the shopper confirmed: ${confirmedSizeFor(form)}`.slice(0, 160),
       pickup &&
         form.date &&
         `Preferred install: ${formatLongDate(form.date)}, ${windowLabel(form.timeWindow)}`,
@@ -1493,6 +1519,28 @@ export default function CheckoutPage() {
                     ].filter(Boolean)}
                   />
                 </div>
+
+                {(() => {
+                  const soft = fitAnswersFor(form).filter(
+                    (x) => x.fit.code === "unconfirmed",
+                  );
+                  if (soft.length === 0) return null;
+                  return (
+                    <div className="mt-7" data-testid="review-fit-soft">
+                      <h3 className="font-display text-lg font-bold">
+                        Fitment check
+                      </h3>
+                      <p className="mt-1 text-sm leading-relaxed text-smoke">
+                        {soft.length === 1
+                          ? "One item is a different size"
+                          : `${soft.length} items are a different size`}{" "}
+                        than the typical one for a {form.year} {form.make}{" "}
+                        {form.model}. Sizes vary by trim and wheel.
+                      </p>
+                      <FitSoftNote fit={soft[0].fit} className="mt-2" />
+                    </div>
+                  );
+                })()}
 
                 {(() => {
                   const flagged = fitFlagsFor(form);

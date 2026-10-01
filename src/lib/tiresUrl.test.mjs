@@ -100,6 +100,20 @@ test("size and vehicle-with-size round-trip", () => {
   assert.deepEqual(parse(q).selection, withSize);
 });
 
+test("a staggered door-jamb entry carries its rear size", () => {
+  const veh = { type: "vehicle", year: "2019", make: "Ford", model: "F-150", size: "275/40R20", rear: "315/35R20" };
+  const q = serializeTiresQuery({ selection: veh });
+  assert.equal(q, "year=2019&make=ford&model=f-150&size=275-40r20&rear=315-35r20");
+  assert.deepEqual(parse(q).selection, veh);
+  const size = { type: "size", size: "225/40R19", rear: "255/35R19" };
+  assert.equal(serializeTiresQuery({ selection: size }), "size=225-40r19&rear=255-35r19");
+  assert.deepEqual(parse("size=225-40r19&rear=255-35r19").selection, size);
+  // A rear size alone is not a selection; one is part of the key.
+  assert.equal(parse("rear=255-35r19").selection, null);
+  assert.notEqual(selectionKey(size), selectionKey({ type: "size", size: "225/40R19" }));
+  assert.equal(parse("fit=sticker").fit, "sticker");
+});
+
 test("bad vehicles are ignored", () => {
   for (const q of [
     "year=19&make=ford&model=f-150",

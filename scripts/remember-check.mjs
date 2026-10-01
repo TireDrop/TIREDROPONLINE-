@@ -12,6 +12,8 @@
  *   - Change reopens the finder prefilled; Cancel puts it away;
  *   - "Shopping for a different car?" wipes it, and Shop Tires shows the
  *     finder again;
+ *   - a door-jamb size (front, and rear when staggered) is saved with the
+ *     vehicle, goes in the URL (size=…&rear=…) and survives a reload;
  *   - a URL with a vehicle or size wins over the saved one and is saved;
  *   - cleared site data, or storage that throws (private mode): the finder
  *     again, and nothing breaks.
@@ -284,6 +286,36 @@ for (const width of [390, 1440]) {
     await context.close();
   });
 }
+
+await check("1440 a door-jamb size, front and rear, is saved (v: 1), goes in the URL, and survives a reload", async () => {
+  const { context, page, errors } = await open(1440);
+  await page.addInitScript(([k]) => {
+    if (!sessionStorage.getItem("seeded")) {
+      sessionStorage.setItem("seeded", "1");
+      localStorage.setItem(k, JSON.stringify({ v: 1, type: "vehicle", year: "2019", make: "BMW", model: "3 Series" }));
+    }
+  }, [KEY]);
+  await page.goto(`${BASE}/tires`);
+  await waitBar(page, /2019 BMW 3 Series \(225\/45R18\)/);
+  await page.getByRole("button", { name: "Know your exact size? Enter it from your door-jamb sticker" }).click();
+  await page.locator("#sticker-front").fill("225/40R19");
+  await page.locator("#sticker-rear").fill("255/35R19");
+  assert.equal(await finder(page).count(), 0, "the sticker form is the bar's, not the finder");
+  await page.getByRole("button", { name: "Save my size" }).click();
+  await waitBar(page, /2019 BMW 3 Series · front 225\/40R19, rear 255\/35R19/);
+  const saved = await stored(page);
+  assert.deepEqual(
+    { v: saved.v, type: saved.type, year: saved.year, make: saved.make, size: saved.size, rear: saved.rear },
+    { v: 1, type: "vehicle", year: "2019", make: "BMW", size: "225/40R19", rear: "255/35R19" },
+  );
+  await page.waitForFunction(() => /size=225-40r19&rear=255-35r19/.test(location.search));
+  await page.reload();
+  await waitBar(page, /2019 BMW 3 Series · front 225\/40R19, rear 255\/35R19/);
+  assert.equal(await finder(page).count(), 0);
+  assert.equal((await stored(page)).rear, "255/35R19");
+  assert.deepEqual(real(errors), []);
+  await context.close();
+});
 
 await check("1440 a URL with a vehicle or size wins over the saved one, and is saved", async () => {
   const { context, page, errors } = await open(1440);

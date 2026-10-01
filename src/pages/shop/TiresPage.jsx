@@ -30,7 +30,12 @@ import { makesFor } from "../../data/vehicles.js";
 import { ratingsFor } from "../../data/tireRatings.js";
 import { setPrice } from "../../data/pricing.js";
 import { BUSINESS } from "../../data/business.js";
-import { fitSizeOf, readSize, sizesOf } from "../../data/fitmentCheck.js";
+import {
+  fitSizeOf,
+  readSize,
+  selectionSizeText,
+  sizesOf,
+} from "../../data/fitmentCheck.js";
 import {
   SEASONS,
   TYPES,
@@ -183,9 +188,13 @@ export default function TiresPage() {
   };
 
   // ?fit=change|size (a "Change vehicle" link on a page with no bar) opens
-  // the finder here, prefilled; the canonical write below drops it.
+  // the finder here, prefilled; ?fit=sticker opens the bar's door-jamb size
+  // form. The canonical write below drops it.
   useEffect(() => {
-    if (state.fit) openChanger(state.fit === "size" ? "size" : "vehicle");
+    if (state.fit)
+      openChanger(
+        state.fit === "size" || state.fit === "sticker" ? state.fit : "vehicle",
+      );
     // Once per hand-off; openChanger is stable.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.fit]);
@@ -207,7 +216,8 @@ export default function TiresPage() {
     if (state.selection && urlKey !== synced.current) {
       synced.current = urlKey;
       if (urlKey !== ctxKey) {
-        if (state.selection.type === "size") selectSize(state.selection.size);
+        if (state.selection.type === "size")
+          selectSize(state.selection.size, state.selection.rear);
         else selectVehicle(state.selection);
         return;
       }
@@ -241,10 +251,11 @@ export default function TiresPage() {
   // A size the shopper gave, or the trim they picked, is searched as a size;
   // otherwise the vehicle itself, so the distributor's own fitment answers
   // once it is wired.
+  // (A staggered size the shopper gave is searched by its front size.)
   const ownSize =
     chosen &&
-    !chosen.rear &&
-    (resolved.basis === "entered" || resolved.basis === "trim");
+    (resolved.basis === "entered" ||
+      (!chosen.rear && resolved.basis === "trim"));
   let query = null;
   if (fullSize) query = { size: fullSize };
   else if (!ready) query = null;
@@ -276,7 +287,7 @@ export default function TiresPage() {
     if (width && aspect && diameter) {
       const size = `${width}/${aspect}R${diameter}`;
       if (changer.open && changer.tab === "size" && selection?.type === "vehicle") {
-        const { pick: _pick, size: _old, ...vehicle } = selection;
+        const { pick: _pick, size: _old, rear: _rear, ...vehicle } = selection;
         selectVehicle({ ...vehicle, size });
       } else {
         selectSize(size);
@@ -336,7 +347,7 @@ export default function TiresPage() {
   const others = showFit ? results.filter((t) => !inSize(t)) : results;
   const fitHeading =
     resolved.kind === "size"
-      ? `In your size, ${resolved.size.display}`
+      ? `In your size, ${selectionSizeText(resolved)}`
       : chosen
         ? `In the size for your ${resolved.label}`
         : `In the factory sizes for a ${resolved.label}`;
@@ -387,9 +398,12 @@ export default function TiresPage() {
   // The finder shows first, while nothing is saved (and in the prerendered
   // page, which never knows); once a vehicle or size is saved, Shop Tires
   // lands straight on the results and "Change" brings it back, prefilled.
-  const showFinder = !ready || !selection || changer.open;
+  // The door-jamb size form ("sticker") opens in the Shopping-for bar
+  // instead, so it leaves the finder closed.
+  const changing = changer.open && changer.tab !== "sticker";
+  const showFinder = !ready || !selection || changing;
   const finderInitial = useMemo(() => {
-    if (!changer.open || !selection) return undefined;
+    if (!changing || !selection) return undefined;
     if (selection.type === "size" || changer.tab === "size") {
       const r = readSize(selection.size ?? "");
       return {
@@ -405,15 +419,15 @@ export default function TiresPage() {
       make: selection.make,
       model: selection.model,
     };
-  }, [changer.open, changer.tab, selection]);
+  }, [changing, changer.tab, selection]);
   const finderRef = useRef(null);
   useEffect(() => {
-    if (!changer.open || changer.nonce === 0) return;
+    if (!changing || changer.nonce === 0) return;
     const el = finderRef.current;
     if (!el) return;
     el.scrollIntoView({ block: "start", behavior: "smooth" });
     el.querySelector("select, input")?.focus({ preventScroll: true });
-  }, [changer.open, changer.nonce]);
+  }, [changing, changer.nonce]);
 
   const brandGroups = useMemo(() => {
     const map = new Map();
@@ -506,7 +520,7 @@ export default function TiresPage() {
           data-testid="tire-finder"
         >
           <SearchPanel
-            key={changer.open ? `change-${changer.nonce}` : "first"}
+            key={changing ? `change-${changer.nonce}` : "first"}
             kind="tire"
             onSearch={onSearch}
             initial={finderInitial}
