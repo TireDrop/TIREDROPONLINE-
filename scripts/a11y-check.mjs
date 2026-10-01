@@ -87,6 +87,8 @@ const ROUTES = [
   "/schedule",
   "/mobile-service",
   firstIn("mobile-service"),
+  "/tires-shipped",
+  firstIn("tires-shipped"),
   firstIn(`learn/${learnHub}`),
   "/tire-size",
   "/tire-size-finder",

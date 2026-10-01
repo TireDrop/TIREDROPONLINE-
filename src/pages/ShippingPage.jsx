@@ -317,6 +317,17 @@ export default function ShippingPage() {
               Florida. Everywhere else, your tires arrive and you take them to
               whoever you trust with your car.
             </p>
+            <p className="mt-4 text-sm leading-relaxed text-bone/60">
+              Shipping out of state? The{" "}
+              <Link
+                to="/tires-shipped"
+                className="text-volt underline underline-offset-2 hover:text-bone"
+              >
+                nationwide shipping page
+              </Link>{" "}
+              has state guides to tread laws, tire fees and the tire type each
+              climate calls for.
+            </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Link to="/install" className="btn-primary">
                 Local? Ship to the store

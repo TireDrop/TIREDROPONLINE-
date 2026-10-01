@@ -12,6 +12,7 @@ import { ChevronRight } from "lucide-react";
 import { BUSINESS, SOCIAL, YELP_PROFILE } from "../../data/business.js";
 import { SERVICE_AREA_SCHEMA } from "../../data/serviceArea.js";
 import { getCityPage } from "../../data/cityPages.js";
+import { getLiveState } from "../../data/stateList.js";
 import { getProduct } from "../../data/products.js";
 import { getService } from "../../data/services.js";
 import { noteFormStart } from "../../data/formGuard.js";
@@ -249,6 +250,9 @@ const SHOP_ROUTES = [
 /** /mobile-service/<city>: the mobile city pages (src/data/cityPages.js). */
 const CITY_ROUTE = /^\/mobile-service\/([^/]+)$/;
 
+/** /tires-shipped/<state>: the state shipping pages (src/data/stateList.js). */
+const STATE_ROUTE = /^\/tires-shipped\/([^/]+)$/;
+
 /** Exact SHOP_ROUTES, plus every city page that exists. */
 function isShopRoute(pathname) {
   if (SHOP_ROUTES.includes(pathname)) return true;
@@ -390,6 +394,28 @@ function cityAreaServed(city) {
 }
 
 /**
+ * Free tire shipping to one state, as a Service of TireDrop (the online
+ * store, not the shop) with the state as areaServed. No LocalBusiness and no
+ * address per state: the only physical business is the Sunrise shop.
+ */
+function stateShippingNode(url, state, description) {
+  return {
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name: `Free tire shipping to ${state.name}`,
+    url,
+    ...(description ? { description } : {}),
+    serviceType: "Tire shipping",
+    provider: { "@id": `${ORIGIN}/#organization` },
+    areaServed: {
+      "@type": state.abbr === "DC" ? "AdministrativeArea" : "State",
+      name: state.name,
+      containedInPlace: { "@type": "Country", name: "United States" },
+    },
+  };
+}
+
+/**
  * Where an inner page sits, for BreadcrumbList. Top-level pages are
  * Home > Page; these have a real parent page in between, and each one
  * matches the page's visible <Breadcrumbs> trail, names included. A page's
@@ -405,6 +431,7 @@ const CRUMB_PARENTS = [
   [/^\/services\/.+/, { name: "Auto Service", path: "/auto-service" }],
   [/^\/install$/, { name: "How shipping works", path: "/shipping" }],
   [CITY_ROUTE, { name: "Mobile Tire Service", path: "/mobile-service" }],
+  [STATE_ROUTE, { name: "Tires Shipped Nationwide", path: "/tires-shipped" }],
 ];
 
 function breadcrumbNode(pathname, url, name, parents) {
@@ -485,6 +512,15 @@ function graphFor(pathname, url, title, fullTitle, description, noindex, crumbs)
         }),
       );
       crumbName = city.name;
+    } else missing = true;
+  }
+
+  const stateMatch = STATE_ROUTE.exec(pathname);
+  if (stateMatch) {
+    const state = getLiveState(stateMatch[1]);
+    if (state) {
+      graph.push(stateShippingNode(url, state, description));
+      crumbName = state.name;
     } else missing = true;
   }
 

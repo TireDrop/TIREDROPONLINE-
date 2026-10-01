@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (SHIPPED: one-camera Tire Size Finder scanner + hero Scan button (all 18 gates pass); store-wide search with typeahead + /search results (1214d45, all 17 gates pass); remember vehicle + shareable /tires filters + full NHTSA year/make/model lists with a searchable Model box, cached /api/vehicles (preview/remember 519e321, all 16 gates pass); fitment no longer blocks on a model-level guess, door-jamb size entry front/rear (dee5157); Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
+_Last updated: 2026-10-01 (SHIPPED: nationwide hub + 7 pilot state pages, all 40 facts checked against their official sources (13 corrected); one-camera Tire Size Finder scanner + hero Scan button (all 18 gates pass); store-wide search with typeahead + /search results (1214d45, all 17 gates pass); remember vehicle + shareable /tires filters + full NHTSA year/make/model lists with a searchable Model box, cached /api/vehicles (preview/remember 519e321, all 16 gates pass); fitment no longer blocks on a model-level guess, door-jamb size entry front/rear (dee5157); Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -120,6 +120,11 @@ _Last updated: 2026-10-01 (SHIPPED: one-camera Tire Size Finder scanner + hero S
   - [ ] Orders carry the fitment: Vehicle / Size source / Front / Rear / Fitment attributes + fitment-check, staggered, size-scanned tags; ATD forwarder skips fitment-check (preview/fitment-attrs) → Justin reviews → ship → run Shopify admin prompt 26 (Flow: hold + email) → $1 staggered test
   - [ ] Rotate the key before it expires 2026-10-31 (calendar reminder Oct 24; steps in docs/integrations/tire-size-finder.md)
 - [ ] Local city pages: wave 1 (7 cities) live 2026-10-01; wave 2 next
+- [x] ~~Nationwide hub + 7 pilot state pages (FL, GA, TX, CA, NY, NC, CO) live~~ (preview/states 62fbb42, shipped to main 2026-10-01)
+- [ ] Roll out the remaining states in batches (each fact read on its source before it renders)
+- [ ] Search Console: submit /tires-shipped and the 7 state pages
+  - [x] ~~Fact-check: 40 facts read against their official sources (27 confirmed, 13 corrected incl. the same claims in FAQs and paragraphs); every pilot fact now `fetched`, preview-only switch off~~ (2026-10-01)
+  - [x] ~~"ship states": all 18 gates pass~~ (2026-10-01)
 - [ ] Real review collection (no stars until real reviews exist)
 - [x] ~~Store-wide search with typeahead: sizes in any spelling, vehicles, brands/types, tires, 91 pages; /search results page; GA4 `search` + `search_suggestion`~~ (preview/search 1214d45, shipped to main 2026-10-01)
 

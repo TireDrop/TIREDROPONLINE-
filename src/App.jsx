@@ -35,6 +35,16 @@ const ShippingPage = lazyPage("pages/ShippingPage.jsx", () =>
 const InstallPage = lazyPage("pages/InstallPage.jsx", () =>
   import("./pages/InstallPage.jsx"),
 );
+// Nationwide shipping hub, and one page per state in STATE_PAGES_LIVE
+// (src/data/stateList.js; facts and copy in src/data/statePages.js).
+const NationwideShippingPage = lazyPage(
+  "pages/shipping/NationwideShippingPage.jsx",
+  () => import("./pages/shipping/NationwideShippingPage.jsx"),
+);
+const StateShippingPage = lazyPage(
+  "pages/shipping/StateShippingPage.jsx",
+  () => import("./pages/shipping/StateShippingPage.jsx"),
+);
 
 // Shop
 const TiresPage = lazyPage("pages/shop/TiresPage.jsx", () =>
@@ -235,6 +245,11 @@ export default function App() {
             {/* The two fulfillment paths: ship anywhere, or ship free to the shop. */}
             <Route path="/shipping" element={<ShippingPage />} />
             <Route path="/install" element={<InstallPage />} />
+            <Route path="/tires-shipped" element={<NationwideShippingPage />} />
+            <Route
+              path="/tires-shipped/:state"
+              element={<StateShippingPage />}
+            />
 
             {/* Tires & wheels e-commerce */}
             <Route path="/tires" element={<TiresPage />} />
