@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-09-30 (install booking tags the order install-booked; prompt 22 done; Tire Guru called, awaiting answer; Cannavibe repo being deleted, backup sent; repo organized; Blog + Learn live)_
+_Last updated: 2026-10-01 (6 new tools on preview for review; $1 install tests #D3/#D4 ready to pay; 404 wording fixed; install booking live)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -27,6 +27,8 @@ _Last updated: 2026-09-30 (install booking tags the order install-booked; prompt
 - [ ] Exclude non-Palm-Beach 334 ZIPs (33440, 33455, 33471, 33475) + server-side ZIP check for bookings
 - [x] ~~Arrival wording: "We confirm an arrival window when we book"~~ (be6a2a2)
 - [x] ~~Repo organized: docs map, audits/archive, README guide~~ (c5846e7, 2026-09-30)
+- [x] ~~404 heading: "fine" removed~~ (ded56ec)
+- [ ] 6 new tools (load/speed, plus-size, pressure-temp, repair check, shaking checker, rotation) with their own pages + article embeds: built on `preview/tools` (210b348) → Justin reviews the preview → ship to main
 
 ## Admin (Justin)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
@@ -41,7 +43,7 @@ _Last updated: 2026-09-30 (install booking tags the order install-booked; prompt
 - [ ] Footer sign-up test: sign up once with a test address; the Shopify customer is tagged `newsletter`, `footer`, `vercel` (was `popup`; update any Shopify segment that filters on `popup`)
 - [x] ~~Go-live test: contact form (lead + Flow)~~ (2026-09-30)
 - [x] ~~Go-live test: order-request draft #D2 + /track shows it~~ (2026-09-30)
-- [ ] Go-live test: $1 order #D1: pay → confirm order, then refund
+- [x] ~~Go-live test: $1 order #D1~~ (replaced by the $1 install tests #D3/#D4 below; delete drafts #D1/#D2)
 - [ ] Go-live test: email folders + SPF/DKIM/DMARC (blocked: Outlook needs info@ sign-in)
 - [ ] Google: retry "Request indexing" (robots.txt delay)
 - [ ] 2-step login for all Shopify staff (Melissa keeps full access)
@@ -52,7 +54,7 @@ _Last updated: 2026-09-30 (install booking tags the order install-booked; prompt
 - [x] ~~Webhooks: 2 in Shopify, signing key into Vercel, redeploy, test (prompt 21)~~ (2026-09-30: 2 webhooks configured, test notifications 200)
 - [x] ~~Prompt 22: email button + High-risk order review (tag, hold, email) + Needs scheduling alert (order paid → 24h → not install-booked)~~ (Justin, 2026-09-30)
 - [ ] Re-run prompt 15 (local vs ship block was never saved; paste it right above the new install button)
-- [ ] $1 install test: book it → tags flip + no [SCHEDULE] after 24h; a second unbooked order → [SCHEDULE] arrives after 24h (this proves Flow re-reads tags after the wait)
+- [ ] $1 install test: pay #D3 and book it on /track → tags flip + [BOOKED] to info@ + no [SCHEDULE] after 24h; pay #D4 and don't book → [SCHEDULE] after 24h; then refund both (drafts created 2026-09-30)
 - [ ] Confirm info@tiredroponline.com receives Shopify mail (test emails go to the logged-in staff account)
 - [ ] Justin: INSTALL_BOOKING_URL after the Tire Guru call (booking link → set it in Vercel and redeploy; API → tell Claude, it's a follow-up build; see docs/integrations/install-scheduling.md)
 - [ ] `/track` tested with the $1 order
@@ -95,7 +97,7 @@ _Last updated: 2026-09-30 (install booking tags the order install-booked; prompt
 - [x] ~~Phase 1: keyword map, 90–100 titles, demo list → Justin approves~~ (b813381, plans approved)
 - [x] ~~Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves~~ (800247b, pilot approved + 5 demos)
 - [x] ~~Blog + Learn live: 20 articles, 5 demos, 98 prerendered routes~~ (be6a2a2)
-- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); Batches 2–9 + 9 demos to go
+- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); Batches 2–9 to go. Demos: 6 more built (preview/tools); D7, D9, D12 cut by Justin ("only useful tools")
 - [ ] Phase 4: internal links, Search Console submit, monthly refresh
 
 ## ATD and business (Justin)
