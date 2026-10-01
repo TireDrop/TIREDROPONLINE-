@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (spam guard on every form + checkout, existing customers' notes never written (7cc12f2); prompt 24 for the lead Flow)_
+_Last updated: 2026-10-01 (security headers, CSP report-only, + GA4 conversion events (abcf645); prompt 25 for GA4 key events)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -50,6 +50,7 @@ _Last updated: 2026-10-01 (spam guard on every form + checkout, existing custome
 - [ ] 2-step login for all Shopify staff (Melissa keeps full access)
 - [ ] Someone can sign into Outlook as info@tiredroponline.com
 - [ ] SPF/DMARC: fix only if the Gmail test fails (never add a 2nd DMARC record)
+- [ ] HSTS preload: decide whether to add `preload` and submit to hstspreload.org (hard to undo; docs/ops/deploy.md)
 
 ## Next phase (Chrome prompt after the builds land)
 - [x] ~~Webhooks: 2 in Shopify, signing key into Vercel, redeploy, test (prompt 21)~~ (2026-09-30: 2 webhooks configured, test notifications 200)
@@ -63,6 +64,7 @@ _Last updated: 2026-10-01 (spam guard on every form + checkout, existing custome
 - [ ] `/track` tested with the $1 order
 - [ ] Header links checked on desktop and phone
 - [ ] Checkout branding (prompt 20)
+- [ ] GA4: mark generate_lead, order_request and install_booking as Key events (prompt 25)
 - [x] ~~Publish EDIT HERE (shop. storefront → main-site redirect is live)~~ (2026-09-30, theme 166982615192)
 - [x] ~~Redirect test: shop. pages → tiredroponline.com; checkout, /account and invoices stay on Shopify~~ (2026-09-30)
 
@@ -81,7 +83,9 @@ _Last updated: 2026-10-01 (spam guard on every form + checkout, existing custome
 - [x] ~~Google search-result data: breadcrumbs (one per page, matching the visible trail), FAQ (kept where it was), article author, `npm run check:schema` gate~~ (27d477c)
 - [ ] Google search-result data: map coordinates. Waiting on Justin's Google Maps pin; paste it into `geo` in `src/data/business.js`
 - [ ] Accessibility fixes + skip link
-- [ ] Security headers: CSP, HSTS, Permissions-Policy
+- [x] ~~Security headers: CSP, HSTS, Permissions-Policy~~ (abcf645; CSP is report-only for now)
+- [x] ~~GA4 conversion events~~ (abcf645)
+- [ ] Switch the CSP from report-only to enforced after a week of clean `[csp]` logs (docs/ops/deploy.md, "Security headers")
 - [ ] NHTSA lookup timeout
 - [ ] Returns window + warranty/road-hazard links
 - [ ] "Continental US" wording (~40 places) → "48 contiguous states + DC"
