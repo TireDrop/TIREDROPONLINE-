@@ -143,7 +143,10 @@ ship-to-store and pickup orders. The rule covers mobile anyway.
 - `notes`: optional, one line, 500 characters at most.
 
 Checks, in order: the rate limit (the SAME budget as `/api/track`: 10
-lookups per 10 minutes per connection, counted across both), the input, then
+lookups per 10 minutes per connection, counted across both, plus 5 bookings
+per 10 minutes of its own), the spam guard (4 KB body cap, honeypot,
+fill-time token, links in the notes: `docs/integrations/website-leads.md`),
+the input, then
 the order: number (or ref) AND email (case-insensitive), paid, not
 cancelled, not fulfilled, involves installation. Every miss is the same
 `404` with the same sentence, so nothing says whether the order exists or
@@ -154,7 +157,9 @@ why it cannot be booked.
 | `200 { ok: true, alreadyBooked: false, booking }` | booked now |
 | `200 { ok: true, alreadyBooked: true, booking }` | the order was already `install-booked`: its booking comes back (from the metafield, else the note line) and nothing is written |
 | `400 { error, field }` | `field` is `order`, `email`, `day`, `window` or `notes` |
-| `404 { error }` | no bookable order for that number and email (or the honeypot) |
+| `400 { error, field: null }` | no fill-time token: a page loaded before the spam guard; "reload the page" |
+| `404 { error }` | no bookable order for that number and email (or a bot: honeypot, too fast, forged token, spam notes; nothing is looked up) |
+| `413 { error }` | body over 4 KB |
 | `429 { error }` | too many tries |
 | `503 { configured: false, error }` | Shopify not configured, or the app lacks `write_orders` (logged; nothing written) |
 | `502 { error }` | Shopify refused or a write failed partway: nothing claims the booking |
@@ -170,10 +175,13 @@ What it writes, in this order (each step only if the one before worked):
    and the metafield `tiredrop.install_booking` (type json:
    `{ day, window, notes, bookedAt }`) in the same call.
 2. The lead, through the existing lead code (`api/_lib/leads.js`): the
-   customer found by the order's email (or created), the lead text on top of
-   the customer note and in `tiredrop.last_lead`, starting
+   customer found by the order's email (or created), the lead text in
+   `tiredrop.last_lead` and `tiredrop.leads` (and the customer note only if
+   this booking created the customer; an existing customer's note is never
+   touched), starting
    `[BOOKED] #1001: Thursday, October 1, 2026 8:00 – 10:00 AM`, then name,
-   email, phone, the order, the requested day and window, where, the vehicle
+   email, phone, "Email check: Matches the email on paid order #1001; not
+   otherwise verified.", the order, the requested day and window, where, the vehicle
    and the notes; tags `install-booking` and `order-<ref>` (plus the usual
    `new-lead`, `lead`, `lead-booking`). The "Website lead alert" Flow emails
    it to info@. No other email service.

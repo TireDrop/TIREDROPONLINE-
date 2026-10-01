@@ -8,7 +8,8 @@
 import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 
-import { createBookInstallHandler } from "../book-install.js";
+import { createBookInstallHandler, resetBookInstallRateLimit } from "../book-install.js";
+import { fillToken } from "../../src/data/formGuard.js";
 import { createTrackHandler, resetTrackRateLimit, TRACK_RATE_LIMIT } from "../track.js";
 import { createFormsHandler, resetFormsRateLimit } from "../forms.js";
 import { clearAppScopeCache } from "./shopify.js";
@@ -129,7 +130,10 @@ function fakeShop({
       }
       case "leadCustomer": {
         const c = store.customers.find((x) => x.email === v.identifier.emailAddress);
-        return Response.json({ data: { customer: c ? { id: c.id, note: c.note } : null } });
+        // What the query asks for: no note (it is never read or written for
+        // an existing customer).
+        const leads = c?.metafields?.["tiredrop.leads"];
+        return Response.json({ data: { customer: c ? { id: c.id, tags: c.tags, leads: leads ? { value: leads.value } : null } : null } });
       }
       case "leadCustomerCreate": {
         const c = { id: `gid://shopify/Customer/${900 + store.customers.length}`, email: v.input.email, note: "", tags: [], metafields: {}, input: v.input };
@@ -157,6 +161,14 @@ function logger() {
   return { lines, log: { log: push, warn: push, error: push } };
 }
 
+// What a real page sends with every form: the fill-time token of a form that
+// was on screen for 8 seconds (src/data/formGuard.js). A test that sends its
+// own `ft` (or none) keeps it.
+const withFillToken = (body) =>
+  body && typeof body === "object" && !Array.isArray(body) && !("ft" in body)
+    ? { ...body, ft: fillToken(1_000_000, 1_008_000) }
+    : body;
+
 let ipCounter = 0;
 async function post(handler, body, { ip } = {}) {
   ipCounter += 1;
@@ -166,7 +178,7 @@ async function post(handler, body, { ip } = {}) {
     setHeader(k, v) { this.headers[k.toLowerCase()] = v; },
     end(text) { this.body = text === undefined ? undefined : JSON.parse(text); },
   };
-  await handler({ method: "POST", headers: { "x-forwarded-for": ip ?? `10.1.0.${ipCounter}` }, body }, res);
+  await handler({ method: "POST", headers: { "x-forwarded-for": ip ?? `10.1.0.${ipCounter}` }, body: withFillToken(body) }, res);
   return res;
 }
 
@@ -189,11 +201,14 @@ const REQUEST = Object.freeze({
   website: "",
 });
 
-const WRITES = ["bookingOrderUpdate", "leadCustomer", "leadCustomerCreate", "leadNoteUpdate", "leadMetafieldSet", "leadTagsRemove", "leadTagsAdd", "bookingTagsAdd", "bookingTagsRemove"];
+// The lead only ever ADDS customer tags; the order's needs-scheduling is the
+// one tag removed, on the verified order.
+const WRITES = ["bookingOrderUpdate", "leadCustomer", "leadCustomerCreate", "leadMetafieldSet", "leadNoteUpdate", "leadTagsAdd", "bookingTagsAdd", "bookingTagsRemove"];
 
 beforeEach(() => {
   resetTrackRateLimit();
   resetFormsRateLimit();
+  resetBookInstallRateLimit();
   clearAppScopeCache();
 });
 
@@ -301,10 +316,12 @@ test("book-install: a paid ship-to-store order is booked on the order, and info@
   assert.match(lead, /\nName: Buyer Person\n/);
   assert.match(lead, /\nEmail: buyer@example\.com\n/);
   assert.match(lead, /\nPhone: \+19545550199\n/);
+  // Matched against the order, and the alert says that is all it is.
+  assert.match(lead, /\nEmail check: Matches the email on paid order #1002; not otherwise verified\.\n/);
   assert.match(lead, /\nPaid order: #1002 \(TD-260920-ABCDEF\)\n/);
   assert.match(lead, /\nVehicle: 2020 Toyota Camry LE\n/);
   assert.match(lead, /\nWhere: At the shop \(7712 West Oakland Park Blvd, Sunrise, FL 33351\)\n/);
-  assert.ok(customer.note.startsWith("[BOOKED] #1002:"), "the customer note starts with the booked line");
+  assert.ok(customer.note.startsWith("[BOOKED] #1002:"), "a NEW customer's note starts with the booked line");
   assert.deepEqual(customer.tags, ["new-lead", "lead", "lead-booking", "install-booking", "order-TD-260920-ABCDEF"]);
   assert.equal(customer.input.email, "buyer@example.com");
   assert.equal(customer.input.phone, "+19545550199");

@@ -27,6 +27,7 @@ import {
   weekdayOf,
 } from "../../data/booking.js";
 import { hasChanges, readFormValues } from "../../data/forms.js";
+import { guardFields } from "../../data/formGuard.js";
 import {
   Breadcrumbs,
   FormTrap,
@@ -211,7 +212,7 @@ function InstallBookingForm({ orderName, email, install, onBooked }) {
       document.getElementById(next.day ? "install-day" : "install-window")?.focus();
       return;
     }
-    const website = formElement.elements.namedItem("website")?.value ?? "";
+    const guard = guardFields(formElement);
     setSending(true);
     setFailure(null);
     try {
@@ -221,7 +222,7 @@ function InstallBookingForm({ orderName, email, install, onBooked }) {
         day: current.day,
         window: current.window,
         notes: current.notes.trim(),
-        website,
+        ...guard,
       });
       onBooked({ booking: data.booking, already: data.alreadyBooked === true });
     } catch (err) {

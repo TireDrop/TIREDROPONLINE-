@@ -9,7 +9,8 @@ import { searchAtd, clearAtdCache, retailPrice, AtdNotConfirmedError, getBySku }
 import { buildHostedLinkUrl } from "./tireguru.js";
 import statusHandler from "../status.js";
 import tiresHandler from "../tires.js";
-import checkoutHandler, { paymentModeFor, createCheckoutHandler } from "../checkout.js";
+import checkoutHandler, { paymentModeFor, createCheckoutHandler, resetCheckoutRateLimit } from "../checkout.js";
+import { fillToken } from "../../src/data/formGuard.js";
 import { buildOrder } from "./orders.js";
 import {
   createDraftCheckout,
@@ -28,6 +29,7 @@ let savedWarn;
 let warnings;
 
 beforeEach(() => {
+  resetCheckoutRateLimit();
   savedEnv = { ...process.env };
   for (const key of Object.keys(process.env)) {
     if (INTEGRATION_VARS.test(key)) delete process.env[key];
@@ -55,9 +57,18 @@ function mockRes() {
   };
 }
 
+// What a real page sends with every form: the fill-time token of a form that
+// was on screen for 8 seconds (src/data/formGuard.js). A test that sends its
+// own `ft` (or none) keeps it.
+const withFillToken = (body) =>
+  body && typeof body === "object" && !Array.isArray(body) && !("ft" in body)
+    ? { ...body, ft: fillToken(1_000_000, 1_008_000) }
+    : body;
+
 async function call(handler, req) {
   const res = mockRes();
-  await handler({ headers: {}, ...req }, res);
+  const body = req.method === "POST" ? withFillToken(req.body) : req.body;
+  await handler({ headers: {}, ...req, ...(body === undefined ? {} : { body }) }, res);
   return res;
 }
 

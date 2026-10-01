@@ -1250,3 +1250,91 @@ found, the preview result, saved Y/N, whether the test email arrived.
 
 **Undo:** Part A: delete the four added rules (you click Save). Part B:
 paste the step-6 backup back in (you click Save).
+
+## 24. "Website lead alert": read the lead from the metafield, not the note
+
+**Why:** since 2026-10-01 the website no longer writes into an EXISTING
+customer's note (anyone could type a stranger's email and add text to that
+real customer's record). Every lead still goes to the customer metafield
+`tiredrop.last_lead`, which the Flow emails, plus a list of the last 10 in
+`tiredrop.leads`. The note gets the lead only for a customer the form just
+created. Tags are only added, never removed, by the website; the Flow keeps
+removing `new-lead` itself.
+
+The Flow keeps working **if its message reads the metafield** (the loop over
+`customer.metafields` for `tiredrop` / `last_lead`). Prompt 19 allowed a
+fallback to `{{ customer.note }}`; if that fallback is what got saved, a
+returning customer's alert would show their old note instead of the new
+message. This prompt checks which one is live, fixes it if needed, and
+updates the last line of the email. Background:
+`docs/integrations/website-leads.md`.
+
+```
+TASK: Check and update the Shopify Flow workflow "Website lead alert" for
+TireDrop. I'm logged into Shopify admin (store 3rxp1x-ym.myshopify.com).
+
+HARD RULES:
+- NEVER click Save, "Turn on" or "Turn off" yourself. When a step says
+  "STOP FOR SAVE", stop, tell me exactly what is ready, and wait for me to
+  click it and say "saved".
+- Change only the "Website lead alert" workflow and (Part C) the two
+  customer metafield definitions. Don't touch any other workflow, theme,
+  order, customer or setting. Don't delete anything.
+
+PART A: Read it (no changes)
+1. Shopify admin → Apps → Flow → open "Website lead alert".
+2. Report: the trigger, the condition, and the actions in order.
+   Expected: trigger "Customer tags added"; condition tags include
+   new-lead; action 1 "Send internal email" to info@tiredroponline.com;
+   action 2 "Remove customer tags" new-lead. Report ON/OFF.
+3. Open action 1 and copy the whole Message text into your report.
+   Say which of these it uses for the lead:
+   (a) {% for mf in customer.metafields %}…"last_lead"…{% endfor %}
+   (b) {{ customer.note }}
+   (c) something else (copy it)
+
+PART B: Fix the message
+4. If it is (b) or (c): replace that part with this line exactly:
+{% for mf in customer.metafields %}{% if mf.namespace == "tiredrop" and mf.key == "last_lead" %}{{ mf.value | newline_to_br }}{% endif %}{% endfor %}
+   If Flow rejects it on save: first remove " | newline_to_br". If it
+   still errors, delete the line and use Flow's "Add variable" picker to
+   insert the customer metafield tiredrop.last_lead (its value). Do NOT
+   use customer.note. Report which version you used.
+5. In every case, change the last line of the message from
+   "Earlier messages from this customer are in the customer's notes."
+   to
+   "Earlier website messages from this customer are in the customer metafield tiredrop.leads."
+   (If that line is not there, add it at the end.)
+6. If action 2 "Remove customer tags → new-lead" is missing, add it AFTER
+   the email action. It must stay: the website no longer removes that tag.
+   STOP FOR SAVE. Wait for "saved". Then confirm it is still ON.
+
+PART C (optional): show the leads on the customer page
+7. Settings → Custom data → Customers. If there is no definition for
+   tiredrop.last_lead, add one: name "Last website lead", namespace and
+   key tiredrop.last_lead, type Multi-line text. If there is none for
+   tiredrop.leads, add: name "Website leads", namespace and key
+   tiredrop.leads, type JSON. Don't change an existing definition (report
+   its type instead). STOP FOR SAVE after each.
+
+PART D: Test (uses my Gmail; no orders)
+8. https://tiredroponline.com/contact → name "Website test", email = my
+   Gmail, message "TEST 23-A, please ignore". Wait up to 5 minutes for the
+   info@ email "New website lead: Website test" (check Junk). Report Y/N,
+   and copy the line starting "Email check:".
+9. Send a second message with the same Gmail: "TEST 23-B, please ignore".
+   The second email must show "TEST 23-B" (not 23-A) and a line starting
+   "Customer: Existing customer". Report Y/N for both.
+10. Shopify → Customers → that Gmail customer: report the tags (expect
+    lead, lead-contact, and NOT new-lead) and whether the note still shows
+    only the first test (it should: the second message must NOT be in the
+    note).
+
+REPORT BACK: Part A findings (trigger, condition, actions, ON/OFF, which
+message version a/b/c, the copied message), what you changed in Part B and
+which lead line saved, Part C definitions added or already there, and the
+results of tests 8–10.
+```
+
+**Undo:** paste the Part A message back into action 1 (you click Save).
+Metafield definitions can stay; they only show the values.

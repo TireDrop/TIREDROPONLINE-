@@ -1,15 +1,21 @@
 // POST /api/newsletter   { email, source?: "popup" | "footer", website? }
 //
 // Signs an email up for the TireDrop newsletter as a Shopify customer with
-// email marketing consent (see api/_lib/newsletter.js). `website` is a
-// honeypot the pop-up hides from people.
+// email marketing consent (see api/_lib/newsletter.js).
+//
+// Spam guard (api/_lib/spam.js): per-IP rate limit (5 in 10 minutes), a 2 KB
+// body cap, the `website` honeypot and the `ft` fill-time token
+// (src/data/formGuard.js). A bot gets the normal success and nothing is sent
+// to Shopify; the block is logged without the email.
 //
 // Responses (all JSON, never cached):
 //   200 { ok: true }                   signed up (new or existing customer;
 //                                      the answer is the same, so it cannot
 //                                      be used to test whether an email has
 //                                      an account)
-//   400 { error }                      bad email or body
+//   400 { error }                      bad email or body (no `ft`: a page
+//                                      from before the guard, "reload")
+//   413 { error }                      body over 2 KB
 //   429 { error }                      too many attempts from this client
 //   503 { configured: false, error }   Shopify is not configured
 //   502/504 { error }                  Shopify refused or did not answer
@@ -22,6 +28,13 @@ import { HttpError, methodNotAllowed, readJsonBody, send } from "./_lib/http.js"
 import { validateNewsletter } from "./_lib/validate.js";
 import { ShopifyCheckoutError } from "./_lib/shopify.js";
 import { clientIp, rateLimited, subscribeEmail } from "./_lib/newsletter.js";
+import {
+  BODY_LIMITS,
+  STALE_PAGE,
+  inspectSubmission,
+  logBlocked,
+  logRateLimited,
+} from "./_lib/spam.js";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 const FAILED = "We couldn't sign you up just now. Please try again in a few minutes.";
@@ -45,6 +58,7 @@ export function createNewsletterHandler({ env, shopify = {}, now = Date.now } = 
     }
 
     if (rateLimited(clientIp(req), now())) {
+      logRateLimited("newsletter");
       return send(
         res,
         429,
@@ -54,9 +68,18 @@ export function createNewsletterHandler({ env, shopify = {}, now = Date.now } = 
     }
 
     try {
-      const checked = validateNewsletter(await readJsonBody(req));
+      const body = await readJsonBody(req, { maxBytes: BODY_LIMITS.newsletter });
+      // Honeypot, too fast or a forged token: answer like a success, send
+      // nothing anywhere.
+      const guard = inspectSubmission(body, { env: env ?? process.env });
+      if (guard.verdict === "bot") {
+        logBlocked("newsletter", guard);
+        return send(res, 200, { ok: true }, NO_STORE);
+      }
+      if (guard.verdict === "stale") return send(res, 400, { error: STALE_PAGE }, NO_STORE);
+
+      const checked = validateNewsletter(body);
       if (!checked.ok) return send(res, 400, { error: checked.error }, NO_STORE);
-      // Honeypot filled: answer like a success, send nothing anywhere.
       if (checked.bot) return send(res, 200, { ok: true }, NO_STORE);
 
       const { email, source } = checked.value;

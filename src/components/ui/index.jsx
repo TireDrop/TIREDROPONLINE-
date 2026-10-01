@@ -14,6 +14,7 @@ import { SERVICE_AREA_SCHEMA } from "../../data/serviceArea.js";
 import { getCityPage } from "../../data/cityPages.js";
 import { getProduct } from "../../data/products.js";
 import { getService } from "../../data/services.js";
+import { noteFormStart } from "../../data/formGuard.js";
 
 const ORIGIN = `https://${BUSINESS.domain}`;
 const OG_IMAGE = `${ORIGIN}/brand/og-tiredrop.jpg`;
@@ -1025,10 +1026,18 @@ export function EmptyState({
 /**
  * A field people never see or reach: off-screen, out of the tab order and
  * hidden from screen readers. Bots that fill every input fill this one, and
- * /api/forms answers them like a success while storing nothing. Put it
- * inside the <form> and pass the form element to submitForm().
+ * the API answers them like a success while storing nothing. Put it
+ * inside the <form> and pass the form element to submitForm() (or read it
+ * with guardFields() from data/formGuard.js).
+ *
+ * It also notes when the form appeared, for the fill-time token the form
+ * sends with it (data/formGuard.js): a submission sooner than people can
+ * manage is treated like a filled trap.
  */
 export function FormTrap({ id }) {
+  useEffect(() => {
+    noteFormStart(id);
+  }, [id]);
   return (
     <div
       aria-hidden="true"

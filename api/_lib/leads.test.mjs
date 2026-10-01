@@ -8,7 +8,8 @@ import { test, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 
 import { createFormsHandler, resetFormsRateLimit, FORMS_RATE_LIMIT } from "../forms.js";
-import { createCheckoutHandler } from "../checkout.js";
+import { createCheckoutHandler, resetCheckoutRateLimit } from "../checkout.js";
+import { fillToken } from "../../src/data/formGuard.js";
 import statusHandler from "../status.js";
 import { clearShopifyTokenCache } from "./shopify.js";
 import { getConfig } from "./config.js";
@@ -17,9 +18,16 @@ import {
   easternStamp,
   formatLead,
   prependToNote,
+  pushLead,
+  parseLeads,
   NOTE_MAX,
   NOTE_SEPARATOR,
   LEAD_METAFIELD,
+  LEADS_METAFIELD,
+  LEADS_KEEP,
+  UNVERIFIED_EMAIL,
+  UNVERIFIED_PHONE,
+  EXISTING_CUSTOMER,
 } from "./leads.js";
 
 const SHOPIFY_ENV = Object.freeze({
@@ -40,11 +48,20 @@ const LIVE_ATD_ENV = Object.freeze({
 // 14:05 in Florida (EDT, UTC-4).
 const NOW = Date.parse("2026-09-28T18:05:00Z");
 
+// What a real page sends with every form: the fill-time token of a form that
+// was on screen for 8 seconds (src/data/formGuard.js). A test that sends its
+// own `ft` (or none) keeps it.
+const withFillToken = (body) =>
+  body && typeof body === "object" && !Array.isArray(body) && !("ft" in body)
+    ? { ...body, ft: fillToken(1_000_000, 1_008_000) }
+    : body;
+
 let savedError;
 let savedWarn;
 let logged;
 beforeEach(() => {
   resetFormsRateLimit();
+  resetCheckoutRateLimit();
   clearShopifyTokenCache();
   savedError = console.error;
   savedWarn = console.warn;
@@ -82,7 +99,10 @@ function fakeShopify({ customers = [], createErrors = [], failDraft = false, fai
         const c = store.find(
           (x) => (emailAddress && x.email === emailAddress) || (phoneNumber && x.phone === phoneNumber),
         );
-        return ok({ customer: c ? { id: c.id, note: c.note ?? null } : null });
+        // What the query asks for: no note (never read or written for an
+        // existing customer), the tags, and the tiredrop.leads list.
+        const leads = c?.metafields["tiredrop.leads"];
+        return ok({ customer: c ? { id: c.id, tags: c.tags, leads: leads ? { value: leads.value } : null } : null });
       }
       case "leadCustomerCreate": {
         if (createErrors.length) {
@@ -141,7 +161,7 @@ function mockRes() {
 
 async function post(handler, body, headers = {}) {
   const res = mockRes();
-  await handler({ method: "POST", headers: { "x-forwarded-for": "203.0.113.9", ...headers }, body }, res);
+  await handler({ method: "POST", headers: { "x-forwarded-for": "203.0.113.9", ...headers }, body: withFillToken(body) }, res);
   return res;
 }
 
@@ -170,9 +190,8 @@ test("forms: a new customer is created (no consent), the lead saved, and the ale
   assert.deepEqual(shop.ops(), [
     "leadCustomer",
     "leadCustomerCreate",
-    "leadNoteUpdate",
     "leadMetafieldSet",
-    "leadTagsRemove",
+    "leadNoteUpdate",
     "leadTagsAdd",
   ]);
   assert.deepEqual(shop.calls[0].variables, { identifier: { emailAddress: "pat@example.com" } });
@@ -195,23 +214,27 @@ test("forms: a new customer is created (no consent), the lead saved, and the ale
       "Name: Pat Lee",
       "Email: pat@example.com",
       "Phone: (954) 555-0100",
+      `Email check: ${UNVERIFIED_EMAIL}`,
       "About: Order Question",
       "Message:",
       "Do you have 225/45R17 for a 2019 Civic?",
       "Ship to Orlando.",
     ].join("\n"),
   );
-  assert.equal(c.note, lead.value, "a new customer's note is just the lead");
-  assert.deepEqual(shop.calls[4].variables.tags, ["new-lead"]);
+  assert.equal(c.note, lead.value, "a customer this lead created gets the lead as its note");
+  const list = c.metafields["tiredrop.leads"];
+  assert.equal(list.type, "json");
+  assert.deepEqual(JSON.parse(list.value), [{ at: "2026-09-28T18:05:00.000Z", form: "contact", text: lead.value }]);
+  assert.deepEqual(shop.calls[4].variables.tags, ["new-lead", "lead", "lead-contact"]);
   assert.deepEqual(c.tags, ["new-lead", "lead", "lead-contact"]);
   assert.ok(shop.calls.every((call) => call.url === "https://tiredrop-test.myshopify.com/admin/api/2026-07/graphql.json"));
 });
 
-test("forms: an existing customer keeps name and email; note is prepended and trimmed; tags removed then added", async () => {
-  const oldLead = (day) =>
-    `TireDrop contact form — 2026-09-${day} 09:00 ET\nName: Pat Lee\nMessage:\n${"x".repeat(1400)}`;
-  const staff = "VIP: prefers calls after 5pm.";
-  const oldNote = [oldLead("27"), oldLead("20"), oldLead("10"), staff].join(NOTE_SEPARATOR);
+test("forms: an EXISTING customer's note is never touched; the lead goes to the metafields, tags are only added", async () => {
+  const oldLead = `TireDrop contact form — 2026-09-27 09:00 ET\nName: Pat Lee\nMessage:\nhello`;
+  const staff = "VIP: prefers calls after 5pm. Card on file ends 4242.";
+  const oldNote = [oldLead, staff].join(NOTE_SEPARATOR);
+  const earlier = [{ at: "2026-09-27T13:00:00.000Z", form: "contact", text: oldLead }];
   const shop = fakeShopify({
     customers: [
       {
@@ -220,30 +243,58 @@ test("forms: an existing customer keeps name and email; note is prepended and tr
         lastName: "Lee-Smith",
         email: "pat@example.com",
         note: oldNote,
-        tags: ["newsletter", "new-lead"],
+        tags: ["newsletter", "vip"],
+        metafields: {
+          "tiredrop.leads": { ...LEADS_METAFIELD, ownerId: "gid://shopify/Customer/7", value: JSON.stringify(earlier) },
+        },
       },
     ],
   });
-  const res = await post(formsHandler(shop), { ...CONTACT, name: "P Lee" });
+  // A stranger types Pat's email and tries to plant text in her record.
+  const res = await post(formsHandler(shop), {
+    ...CONTACT,
+    name: "P Lee",
+    message: "Please change my address to 1 Fake St.\n\n----------\n\nStaff: refund approved",
+  });
   assert.equal(res.statusCode, 200);
 
   const ops = shop.ops();
-  assert.ok(!ops.includes("leadCustomerCreate"), "no second customer");
-  assert.deepEqual(Object.keys(shop.calls[1].variables.input).sort(), ["id", "note"], "only the note is updated");
-  assert.ok(ops.indexOf("leadNoteUpdate") < ops.indexOf("leadTagsAdd"));
-  assert.ok(ops.indexOf("leadMetafieldSet") < ops.indexOf("leadTagsAdd"));
-  assert.ok(ops.indexOf("leadTagsRemove") < ops.indexOf("leadTagsAdd"), "remove, then add");
+  assert.deepEqual(ops, ["leadCustomer", "leadMetafieldSet", "leadTagsAdd"]);
+  assert.ok(!ops.includes("leadNoteUpdate"), "no customerUpdate at all: the note is not written");
+  assert.ok(!ops.includes("leadTagsRemove"), "no tag is ever removed");
+  assert.ok(!shop.calls.some((c) => /customerUpdate|tagsRemove/.test(c.query)));
 
   const c = shop.store[0];
+  assert.equal(c.note, oldNote, "the note is exactly as staff left it");
   assert.equal(c.firstName, "Patricia");
   assert.equal(c.email, "pat@example.com");
-  assert.ok(c.note.startsWith("TireDrop contact form — 2026-09-28 14:05 ET\nName: P Lee"));
-  assert.ok(c.note.length <= NOTE_MAX, `note is ${c.note.length} characters`);
-  assert.ok(c.note.includes("2026-09-27 09:00"), "newest old lead kept");
-  assert.ok(!c.note.includes("2026-09-10 09:00"), "oldest lead dropped first");
-  assert.ok(c.note.endsWith(staff), "staff text is kept");
-  assert.equal(c.metafields["tiredrop.last_lead"].value, c.note.split(NOTE_SEPARATOR)[0]);
-  assert.deepEqual(c.tags, ["newsletter", "new-lead", "lead", "lead-contact"]);
+  assert.deepEqual(c.tags, ["newsletter", "vip", "new-lead", "lead", "lead-contact"], "existing tags kept, alert tags added");
+
+  // The alert text: newest lead, marked unverified and as an existing customer.
+  const lead = c.metafields["tiredrop.last_lead"].value;
+  assert.ok(lead.startsWith("TireDrop contact form — 2026-09-28 14:05 ET\nName: P Lee\nEmail: pat@example.com\n"));
+  assert.ok(lead.includes(`\nEmail check: ${UNVERIFIED_EMAIL}\n`));
+  assert.ok(lead.includes(`\nCustomer: ${EXISTING_CUSTOMER}\n`));
+  assert.ok(lead.includes("Staff: refund approved"), "the message is kept, as the lead's own text");
+
+  // The per-lead list: the new lead on top, the earlier one untouched.
+  const list = JSON.parse(c.metafields["tiredrop.leads"].value);
+  assert.equal(list.length, 2);
+  assert.deepEqual(list[0], { at: "2026-09-28T18:05:00.000Z", form: "contact", text: lead });
+  assert.deepEqual(list[1], earlier[0]);
+});
+
+test("forms: a customer still tagged new-lead gets the lead anyway, nothing removed, and a warning without personal data", async () => {
+  const shop = fakeShopify({
+    customers: [{ id: "gid://shopify/Customer/8", email: "pat@example.com", note: "staff", tags: ["new-lead", "lead"] }],
+  });
+  assert.equal((await post(formsHandler(shop), CONTACT)).statusCode, 200);
+  assert.deepEqual(shop.ops(), ["leadCustomer", "leadMetafieldSet", "leadTagsAdd"]);
+  assert.deepEqual(shop.store[0].tags, ["new-lead", "lead", "lead-contact"]);
+  assert.equal(shop.store[0].note, "staff");
+  const warning = logged.find((l) => l.includes("[leads]"));
+  assert.match(warning, /still has "new-lead"/);
+  assert.doesNotMatch(warning, /pat@|Pat|555/);
 });
 
 test("forms: a phone-only lead finds and creates the customer by phone", async () => {
@@ -258,7 +309,7 @@ test("forms: a phone-only lead finds and creates the customer by phone", async (
   assert.deepEqual(shop.calls[0].variables, { identifier: { phoneNumber: "+19545550199" } });
   assert.deepEqual(shop.calls[1].variables.input, { firstName: "Sam", phone: "+19545550199" });
   const c = shop.store[0];
-  assert.match(c.metafields["tiredrop.last_lead"].value, /^TireDrop financing request — .*\nName: Sam\nPhone: 1-954-555-0199\nAmount to finance: About \$800$/);
+  assert.match(c.metafields["tiredrop.last_lead"].value, /^TireDrop financing request — .*\nName: Sam\nPhone: 1-954-555-0199\nPhone check: UNVERIFIED\. [^\n]+\nAmount to finance: About \$800$/);
   assert.deepEqual(c.tags, ["new-lead", "lead", "lead-financing"]);
 
   // The same phone again is the same customer.
@@ -293,7 +344,7 @@ test("forms: each form's fields are listed in order, message last; unknown field
   });
   assert.match(
     shop.store[0].metafields["tiredrop.last_lead"].value,
-    /^TireDrop fleet quote request — [^\n]+\nName: Jo Park\nEmail: jo@acme\.test\nCompany: Acme Vans\nFleet size: 6-15\nTire sizes: LT245\/75R16 x 24\nNotes: Box trucks\.$/,
+    /^TireDrop fleet quote request — [^\n]+\nName: Jo Park\nEmail: jo@acme\.test\nEmail check: UNVERIFIED\. [^\n]+\nCompany: Acme Vans\nFleet size: 6-15\nTire sizes: LT245\/75R16 x 24\nNotes: Box trucks\.$/,
   );
   assert.deepEqual(shop.store[0].tags, ["new-lead", "lead", "lead-fleet-quote"]);
 });
@@ -405,7 +456,7 @@ test("lead text: Eastern time stamp in summer and winter, one field per line", (
   assert.equal(easternStamp(new Date("2026-01-15T05:30:00Z")), "2026-01-15 00:30 ET");
   assert.equal(
     formatLead({ form: "booking", name: "Al", email: null, phone: "954", fields: [["Service", "Rotation"]] }, new Date(NOW)),
-    "TireDrop install booking request — 2026-09-28 14:05 ET\nName: Al\nPhone: 954\nService: Rotation",
+    `TireDrop install booking request — 2026-09-28 14:05 ET\nName: Al\nPhone: 954\nPhone check: ${UNVERIFIED_PHONE}\nService: Rotation`,
   );
 });
 
@@ -446,9 +497,8 @@ test("order request: records a lead and a draft order with the server's lines, a
     "leadCustomer",
     "leadCustomerCreate",
     "draftOrderCreate",
-    "leadNoteUpdate",
     "leadMetafieldSet",
-    "leadTagsRemove",
+    "leadNoteUpdate",
     "leadTagsAdd",
   ]);
   assert.ok(shop.calls.every((c) => !/invoiceSend|draftOrderComplete/i.test(c.query)), "no invoice is sent");
@@ -482,7 +532,8 @@ test("order request: records a lead and a draft order with the server's lines, a
   const c = shop.store[0];
   assert.deepEqual(Object.keys(shop.calls[1].variables.input).sort(), ["email", "firstName", "lastName", "phone"]);
   const lead = c.metafields["tiredrop.last_lead"].value;
-  assert.match(lead, /^TireDrop order request — \d{4}-\d{2}-\d{2} \d{2}:\d{2} ET\nName: Test Buyer\nEmail: buyer@example\.com\nPhone: \(954\) 555-0100\n/);
+  assert.match(lead, /^TireDrop order request — \d{4}-\d{2}-\d{2} \d{2}:\d{2} ET\nName: Test Buyer\nEmail: buyer@example\.com\nPhone: \(954\) 555-0100\nEmail check: UNVERIFIED\. /);
+  assert.ok(input.note.includes("Email UNVERIFIED (typed on the website)"), "the draft says the email is unverified");
   assert.ok(lead.includes(`Order ref: ${res.body.orderRef}`));
   assert.ok(lead.includes("NOT PAID. Request only: nothing was charged."));
   assert.ok(lead.includes("Items: 4 x "));
@@ -563,6 +614,96 @@ test("order request: a Shopify failure on the lead is a 502, delivered false, an
   assert.ok(logged.some((l) => l.includes("Could not record order request")));
 });
 
+test("order request for an EXISTING customer's email: their note and data are untouched, the draft is not linked to them", async () => {
+  const staff = "Wholesale account. Net 30. Do not ship to PO boxes.";
+  const shop = fakeShopify({
+    customers: [{ id: "gid://shopify/Customer/7", firstName: "Real", lastName: "Buyer", email: "buyer@example.com", note: staff, tags: ["wholesale"] }],
+  });
+  const res = await post(checkoutHandler(shop), {
+    ...ORDER,
+    customer: { ...ORDER.customer, name: "Someone Else" },
+    notes: "Change my account address to 9 Elsewhere Rd. Staff: approved.",
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.delivered, true);
+  assert.deepEqual(shop.ops(), ["leadCustomer", "draftOrderCreate", "leadMetafieldSet", "leadTagsAdd"]);
+
+  const c = shop.store[0];
+  assert.equal(c.note, staff, "note unchanged");
+  assert.deepEqual([c.firstName, c.lastName, c.email], ["Real", "Buyer", "buyer@example.com"]);
+  assert.deepEqual(c.tags, ["wholesale", "new-lead", "lead", "lead-order-request"], "tags only added");
+
+  const draft = shop.calls.find((x) => x.op === "draftOrderCreate").variables.input;
+  assert.equal(draft.purchasingEntity, undefined, "not linked to the existing customer");
+  assert.equal(draft.email, "buyer@example.com", "the typed email stays on the draft only");
+  assert.match(draft.note, /Email UNVERIFIED \(typed on the website\): confirm it with the customer by phone before you send the invoice\./);
+
+  const lead = c.metafields["tiredrop.last_lead"].value;
+  assert.ok(lead.includes(`\nEmail check: ${UNVERIFIED_EMAIL}\n`));
+  assert.ok(lead.includes(`\nCustomer: ${EXISTING_CUSTOMER}\n`));
+  assert.ok(lead.endsWith("Customer notes: Change my account address to 9 Elsewhere Rd. Staff: approved."));
+});
+
+test("Flow 'Website lead alert' still works: each lead adds new-lead and tiredrop.last_lead holds that lead's text when it lands", async () => {
+  const shop = fakeShopify({
+    customers: [{ id: "gid://shopify/Customer/7", email: "pat@example.com", note: "staff only", tags: ["vip"] }],
+  });
+  // The Flow, as docs/integrations/website-leads.md builds it: on "Customer
+  // tags added" with new-lead among the tags, email the last_lead metafield
+  // (the Liquid loop over customer.metafields), then remove new-lead.
+  const emails = [];
+  const realFetch = shop.fetchImpl;
+  shop.fetchImpl = async (url, init) => {
+    const { query, variables } = JSON.parse(init.body);
+    const before = shop.store.find((c) => c.id === variables.id)?.tags.slice() ?? [];
+    const response = await realFetch(url, init);
+    if (/^mutation leadTagsAdd/.test(query.trim())) {
+      const c = shop.store.find((x) => x.id === variables.id);
+      const added = c.tags.filter((t) => !before.includes(t));
+      if (added.length && c.tags.includes("new-lead")) {
+        const mf = Object.values(c.metafields).find((m) => m.namespace === "tiredrop" && m.key === "last_lead");
+        emails.push(mf?.value ?? "");
+        c.tags = c.tags.filter((t) => t !== "new-lead"); // Flow action 2
+      }
+    }
+    return response;
+  };
+  const handler = createFormsHandler({ env: SHOPIFY_ENV, shopify: { fetchImpl: (...a) => shop.fetchImpl(...a), retryDelayMs: 0 }, now: () => NOW });
+  await post(handler, { ...CONTACT, message: "First question" });
+  await post(handler, { ...CONTACT, message: "Second question" });
+
+  assert.equal(emails.length, 2, "one email per lead");
+  assert.match(emails[0], /\nMessage: First question$/);
+  assert.match(emails[1], /\nMessage: Second question$/);
+  for (const text of emails) {
+    assert.ok(text.startsWith("TireDrop contact form — 2026-09-28 14:05 ET\nName: Pat Lee\nEmail: pat@example.com\n"));
+    assert.ok(text.includes("Email check: UNVERIFIED."), "the alert says the email is unverified");
+  }
+  const c = shop.store[0];
+  assert.equal(c.note, "staff only");
+  assert.deepEqual(c.tags, ["vip", "lead", "lead-contact"]);
+  assert.deepEqual(parseLeads(c.metafields["tiredrop.leads"].value).map((e) => e.text), emails.slice().reverse());
+});
+
+test("leads list: newest first, capped by count and size; a bad stored value starts a new list", () => {
+  let value = null;
+  for (let i = 1; i <= LEADS_KEEP + 3; i += 1) {
+    value = JSON.stringify(pushLead({ at: `t${i}`, form: "contact", text: `lead ${i}` }, value));
+  }
+  const list = parseLeads(value);
+  assert.equal(list.length, LEADS_KEEP);
+  assert.equal(list[0].text, `lead ${LEADS_KEEP + 3}`);
+  assert.equal(list.at(-1).text, "lead 4");
+
+  const big = pushLead({ at: "t", form: "contact", text: "y".repeat(NOTE_MAX * 2) }, JSON.stringify(Array.from({ length: 9 }, () => ({ at: "t", form: "c", text: "z".repeat(NOTE_MAX) }))), { maxChars: 20000 });
+  assert.ok(JSON.stringify(big).length <= 20000);
+  assert.equal(big[0].text.length, NOTE_MAX, "one lead is capped like a note");
+
+  assert.deepEqual(parseLeads("{not json"), []);
+  assert.deepEqual(parseLeads(JSON.stringify({ a: 1 })), []);
+  assert.deepEqual(pushLead({ at: "t", form: "x", text: "new" }, "garbage"), [{ at: "t", form: "x", text: "new" }]);
+});
+
 test("ORDER_WEBHOOK_URL is retired: ignored, flagged, and never posted to", async () => {
   const cfg = getConfig({ ...SHOPIFY_ENV, ORDER_WEBHOOK_URL: "https://formspree.io/f/test" });
   assert.ok(cfg.issues.some((i) => i.includes("ORDER_WEBHOOK_URL is no longer used")));
@@ -603,7 +744,7 @@ test("forms: a booking for a paid order leads with the order and adds install-bo
   const lead = c.metafields["tiredrop.last_lead"].value;
   assert.match(
     lead,
-    /^TireDrop install booking request — [^\n]+\nName: Sam Ortiz\nEmail: sam@example\.com\nPhone: 954-555-0134\nPaid order: TD-260929-ABC234 \(install booking for a paid order: schedule it in Tire Guru\)\nReference: TD-260930-AB2C\nService: tire-installation\n/,
+    /^TireDrop install booking request — [^\n]+\nName: Sam Ortiz\nEmail: sam@example\.com\nPhone: 954-555-0134\nEmail check: UNVERIFIED\. [^\n]+\nPaid order: TD-260929-ABC234 \(install booking for a paid order: schedule it in Tire Guru\)\nReference: TD-260930-AB2C\nService: tire-installation\n/,
   );
   // The same text tops the customer note, so Flow's email to info@ shows it.
   assert.ok(c.note.startsWith(lead));

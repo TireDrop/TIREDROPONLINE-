@@ -521,12 +521,13 @@ export async function submitCheckout(order) {
  * ApiError when the server rejects the input (bad email, too many tries),
  * with a message safe to show; anything else (unreachable, Shopify down,
  * not configured) throws a plain Error for the caller's generic message.
- * `website` is the honeypot's value, normally empty.
+ * `website` is the honeypot's value, normally empty, and `ft` the fill-time
+ * token (guardFields() in formGuard.js).
  */
-export async function subscribeNewsletter({ email, source = "footer", website = "" }) {
+export async function subscribeNewsletter({ email, source = "footer", website = "", ft }) {
   const data = await request("/newsletter", {
     method: "POST",
-    body: { email, source, website },
+    body: { email, source, website, ft },
     timeout: TIMEOUT_MS.newsletter,
   });
   if (data?.ok !== true) throw new Error("unexpected answer");
@@ -587,10 +588,10 @@ export async function trackOrder({ order, email, website = "" }) {
  * order, 429); anything else (unreachable, Shopify down, a write that failed)
  * throws a plain Error, and nothing was booked.
  */
-export async function bookInstall({ order, email, day, window, notes = "", website = "" }) {
+export async function bookInstall({ order, email, day, window, notes = "", website = "", ft }) {
   const data = await request("/book-install", {
     method: "POST",
-    body: { order, email, day, window, notes, website },
+    body: { order, email, day, window, notes, website, ft },
     timeout: TIMEOUT_MS.bookInstall,
   });
   if (data?.ok !== true || !data.booking) throw new Error("unexpected answer");

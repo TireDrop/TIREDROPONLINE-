@@ -20,6 +20,7 @@ import { BUSINESS } from "../../src/data/business.js";
 import { validateLead } from "./validate.js";
 import { createCheckoutHandler } from "../checkout.js";
 import { createFormsHandler, resetFormsRateLimit } from "../forms.js";
+import { fillToken } from "../../src/data/formGuard.js";
 
 const AREA_ERROR =
   "That ZIP is outside our mobile service area (Miami-Dade, Broward and Palm Beach). Ship to our Sunrise shop instead, or call (954) 773-1896.";
@@ -103,11 +104,15 @@ function mockRes() {
   };
 }
 
+// What a real page sends with every form: the fill-time token of a form that
+// was on screen for 8 seconds (src/data/formGuard.js).
+const withFillToken = (body) => ({ ...body, ft: fillToken(1_000_000, 1_008_000) });
+
 let ip = 0;
 async function post(handler, body) {
   ip += 1;
   const res = mockRes();
-  await handler({ method: "POST", headers: { "x-forwarded-for": `198.18.0.${ip}` }, body }, res);
+  await handler({ method: "POST", headers: { "x-forwarded-for": `198.18.0.${ip}` }, body: withFillToken(body) }, res);
   return res;
 }
 

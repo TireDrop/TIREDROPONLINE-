@@ -47,12 +47,22 @@ export function getQuery(req) {
 }
 
 const MAX_BODY_BYTES = 32 * 1024;
+const TOO_LARGE = "Request body is too large.";
 
 /**
- * The JSON body. Vercel pre-parses JSON into `req.body` (and its getter
- * throws on malformed JSON); anything else is read from the stream here.
+ * The JSON body, at most `maxBytes` (default 32 KB; the write endpoints pass
+ * their own, smaller caps from api/_lib/spam.js). Vercel pre-parses JSON into
+ * `req.body` (and its getter throws on malformed JSON), accepting bodies up
+ * to its own 4.5 MB limit, so the cap is checked on the declared
+ * Content-Length first and on the parsed body too; anything else is read
+ * from the stream here, stopping as soon as it passes the cap.
  */
-export async function readJsonBody(req) {
+export async function readJsonBody(req, { maxBytes = MAX_BODY_BYTES } = {}) {
+  const declared = Number(req?.headers?.["content-length"]);
+  if (Number.isFinite(declared) && declared > maxBytes) {
+    throw new HttpError(413, TOO_LARGE);
+  }
+
   let body;
   try {
     body = req.body;
@@ -61,6 +71,13 @@ export async function readJsonBody(req) {
   }
 
   if (body !== undefined && body !== null && typeof body === "object" && !Buffer.isBuffer(body)) {
+    let size;
+    try {
+      size = Buffer.byteLength(JSON.stringify(body));
+    } catch {
+      throw new HttpError(400, "Request body is not valid JSON.");
+    }
+    if (size > maxBytes) throw new HttpError(413, TOO_LARGE);
     return body;
   }
 
@@ -72,8 +89,8 @@ export async function readJsonBody(req) {
     let size = 0;
     for await (const chunk of req) {
       size += chunk.length;
-      if (size > MAX_BODY_BYTES) {
-        throw new HttpError(413, "Request body is too large.");
+      if (size > maxBytes) {
+        throw new HttpError(413, TOO_LARGE);
       }
       chunks.push(Buffer.from(chunk));
     }
@@ -82,8 +99,8 @@ export async function readJsonBody(req) {
     text = "";
   }
 
-  if (text.length > MAX_BODY_BYTES) {
-    throw new HttpError(413, "Request body is too large.");
+  if (Buffer.byteLength(text) > maxBytes) {
+    throw new HttpError(413, TOO_LARGE);
   }
   if (!text.trim()) throw new HttpError(400, "Request body is empty.");
   try {
