@@ -116,7 +116,8 @@ _Last updated: 2026-10-01 (SHIPPED: fitment confidence; 6 new tools + tool pages
 - [ ] Brand pricing rules: minimum advertised prices, online-sale limits
 - [ ] Decide: direct API vs Spark / Slingshot / our own sync
 - [x] ~~Tire Guru call made~~ (Justin, 2026-09-30)
-- [ ] Tire Guru answer: booking link → INSTALL_BOOKING_URL in Vercel; API → Claude builds it; neither → /schedule stays
+- [x] ~~Tire Guru answer received~~ (Josh Nail, 2026-09-30): no direct integration; their tire + service search widget is $150/mo and feeds orders/appointments into the POS
+- [ ] Justin/Melissa: send Josh the 7 questions (appointments-only mode? booking link + prefill? live ATD inventory/pricing? payment processor? embed type? contract? notifications?) → then decide on the $150/mo widget
 
 ## Later
 - [ ] Vercel Pro ($20/mo)
