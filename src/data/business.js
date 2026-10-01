@@ -9,6 +9,8 @@
 // Contact details are Extreme Tires' and come from the client-supplied
 // artwork, plus the TireDrop email the owner confirmed. Do not invent new ones.
 
+import { RETURNS_FOOTER_LINK } from "./returnsFlag.js";
+
 export const BUSINESS = {
   name: "TireDrop",
   parent: "Extreme Tires",
@@ -204,7 +206,7 @@ export const FOOTER_COLUMNS = [
       { label: "Track Order", to: "/track" },
       // External (same tab): customer accounts live on Shopify.
       { label: "Account", href: BUSINESS.accountUrl },
-      { label: "Returns & Refunds", to: "/terms#returns" },
+      RETURNS_FOOTER_LINK, // /returns once shown, else /terms#returns
       { label: "Shipping Policy", to: "/terms#shipping" },
     ],
   },

@@ -30,6 +30,7 @@ import {
 } from "../../components/ui/index.jsx";
 import ProductArt from "../../components/shop/ProductArt.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
+import ReturnsLink from "../../components/shop/ReturnsLink.jsx";
 import { getProduct, TIRES, WHEELS } from "../../data/products.js";
 import { BUSINESS } from "../../data/business.js";
 import { SERVICE_AREA_LABEL } from "../../data/serviceArea.js";
@@ -574,6 +575,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                 <Truck size={14} aria-hidden className="text-drop" />
                 Ships anywhere in {BUSINESS.shipping.area}
               </span>
+              <ReturnsLink />
             </div>
           </div>
         </div>

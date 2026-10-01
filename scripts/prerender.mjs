@@ -32,7 +32,11 @@
  *   - renders the 404 page (a route with no <Route> to match it),
  *   - has no Seo head, or a canonical that is not its own URL,
  *   - is meant to be indexed but says noindex,
- *   - shares its <title> with another indexable page.
+ *   - shares its <title> with another indexable page,
+ *   - still contains a {TODO_JUSTIN: ...} policy placeholder and is in the
+ *     sitemap — or is in any production build (VERCEL_ENV=production), in
+ *     or out of the sitemap. Placeholders are for preview review only (see
+ *     src/data/returnsFlag.js).
  * It also fails if a <Navigate> route in App.jsx has no redirect in
  * vercel.json, since those paths no longer fall through to the app.
  *
@@ -60,6 +64,10 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = resolve(ROOT, "dist");
 const SSR_OUT = resolve(ROOT, "node_modules/.cache/prerender");
 const MIN_TEXT = 200;
+// An unanswered policy question, left in page copy on purpose so it is
+// visible in review (src/data/returnsPolicy.js). Never publishable.
+const TODO_MARKER = /TODO_JUSTIN/;
+const PRODUCTION = process.env.VERCEL_ENV === "production";
 
 const started = Date.now();
 const fail = (msg) => {
@@ -277,6 +285,13 @@ for (const { path } of routes) {
   }
 
   const out = page({ head, html, pages, route: path });
+  if (TODO_MARKER.test(out) && (indexable || PRODUCTION))
+    problems.push(
+      `${path}: still has a TODO_JUSTIN placeholder` +
+        (indexable ? " and is in the sitemap" : " in a production build") +
+        ". Answer it, or keep the page out of the sitemap " +
+        "(RETURNS_PAGE_LIVE in src/data/returnsFlag.js).",
+    );
   bytes += out.length;
   write(path, out);
 }

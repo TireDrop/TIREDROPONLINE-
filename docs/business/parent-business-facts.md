@@ -102,7 +102,10 @@ but it is a decision nobody has recorded, not an oversight to leave standing.
 5. **Instagram and YouTube** — Facebook is confirmed and wired; the other two
    stay hidden until someone confirms they exist.
 6. **Return policy numbers**: window, who pays return freight, restocking fee,
-   damage-claim deadline.
+   damage-claim deadline. The full question list (also mounted tires, road
+   hazard, install workmanship, refunds) is `QUESTIONS_FOR_JUSTIN` in
+   `src/data/returnsPolicy.js`; the draft /returns page shows each open one as
+   a `{TODO_JUSTIN: ...}` marker.
 7. **Whether the owner and team names on `/about` are accurate.** A reviewer
    may compare them against the name on the dealer application.
 

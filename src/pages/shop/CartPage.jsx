@@ -19,6 +19,7 @@ import {
 } from "../../components/ui/index.jsx";
 import { useCart, money } from "../../context/CartContext.jsx";
 import ProductArt from "../../components/shop/ProductArt.jsx";
+import ReturnsLink from "../../components/shop/ReturnsLink.jsx";
 import { BUSINESS } from "../../data/business.js";
 import { productHref } from "../../data/products.js";
 
@@ -360,6 +361,7 @@ export default function CartPage() {
                   We check the fitment against your vehicle before anything
                   ships.
                 </p>
+                <ReturnsLink className="mt-2 w-full justify-center" />
 
                 <div className="mt-6 flex items-start gap-2.5 border-t border-ink/10 pt-5">
                   <Wrench

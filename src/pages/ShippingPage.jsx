@@ -26,6 +26,7 @@ import {
   Seo,
 } from "../components/ui/index.jsx";
 import { BUSINESS } from "../data/business.js";
+import ReturnsLink from "../components/shop/ReturnsLink.jsx";
 
 const STEPS = [
   {
@@ -439,6 +440,7 @@ export default function ShippingPage() {
           lede="The eight things customers ask before they order. If yours is not here, call and ask — we would rather answer it now than after it ships."
         />
         <Accordion items={FAQ} />
+        <ReturnsLink className="mt-6" />
       </Section>
 
       {/* ---------- Closing CTA ---------- */}

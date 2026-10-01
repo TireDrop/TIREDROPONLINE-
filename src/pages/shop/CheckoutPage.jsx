@@ -42,6 +42,7 @@ import VehicleSelect, {
   vehicleErrors,
 } from "../../components/shop/VehicleSelect.jsx";
 import { TAX_NOTE, summarize } from "./CartPage.jsx";
+import ReturnsLink from "../../components/shop/ReturnsLink.jsx";
 
 /* ------------------------------------------------------------------ */
 /*  Scheduling helpers — the shop is closed Sundays per BUSINESS.hours */
@@ -1511,6 +1512,7 @@ export default function CheckoutPage() {
                       )}
                     </div>
                   </div>
+                  <ReturnsLink className="mt-4" />
                 </div>
               </section>
             )}

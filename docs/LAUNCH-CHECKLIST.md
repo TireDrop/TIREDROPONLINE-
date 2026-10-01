@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (SHIPPED: 6 new tools + tool pages, mobile hub + 7 wave-1 city pages, roadside flat help; mobile claims confirmed by Justin; install booking live)_
+_Last updated: 2026-10-01 (returns/warranty page on preview/returns, waiting on Justin's policy answers; SHIPPED: 6 new tools + tool pages, mobile hub + 7 wave-1 city pages, roadside flat help; mobile claims confirmed by Justin; install booking live)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -79,7 +79,8 @@ _Last updated: 2026-10-01 (SHIPPED: 6 new tools + tool pages, mobile hub + 7 wav
 - [ ] Accessibility fixes + skip link
 - [ ] Security headers: CSP, HSTS, Permissions-Policy
 - [ ] NHTSA lookup timeout
-- [ ] Returns window + warranty/road-hazard links
+- [ ] Returns window + warranty/road-hazard links (page + links built on `preview/returns`, held back by `RETURNS_PAGE_LIVE`; waiting on Justin's answers below)
+- [ ] Justin: answer the 7 returns/warranty questions (return window, return shipping, restocking fee, mounted tires, road hazard, install workmanship, refunds; listed in `src/data/returnsPolicy.js`), then flip `RETURNS_PAGE_LIVE` and update Terms §9–11 to match
 - [ ] "Continental US" wording (~40 places) → "48 contiguous states + DC"
 - [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search)
 

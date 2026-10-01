@@ -28,6 +28,11 @@ import {
   contentProblems,
   contentRoutes,
 } from "../src/content/node.js";
+import {
+  RETURNS_PAGE_LIVE,
+  RETURNS_PAGE_SHOWN,
+  RETURNS_PATH,
+} from "../src/data/returnsFlag.js";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ORIGIN = "https://tiredroponline.com";
@@ -115,8 +120,28 @@ export function navigateRoutes() {
  *
  * /track (Track My Order) is a lookup form with nothing to rank, and it is
  * noindex too.
+ *
+ * /returns, where this build makes it at all, stays out until
+ * RETURNS_PAGE_LIVE (src/data/returnsFlag.js): the draft carries
+ * {TODO_JUSTIN: ...} markers, renders noindex, and scripts/prerender.mjs
+ * fails any sitemap page that still has one. (Where it is not built, see
+ * NOT_BUILT below; it is listed here only when it is prerendered, because
+ * scripts/prerender-check.mjs hydrates every route in this set.)
  */
-export const EXCLUDE = new Set(["/cart", "/checkout", "/track"]);
+export const EXCLUDE = new Set([
+  "/cart",
+  "/checkout",
+  "/track",
+  ...(RETURNS_PAGE_SHOWN && !RETURNS_PAGE_LIVE ? [RETURNS_PATH] : []),
+]);
+
+/**
+ * Routes App.jsx defines that this build does not serve as pages. The draft
+ * /returns page is only built where it may be shown (a preview or dev build);
+ * in production its route renders the 404 page, so there is nothing to
+ * prerender and Vercel answers it with dist/404.html.
+ */
+const NOT_BUILT = new Set(RETURNS_PAGE_SHOWN ? [] : [RETURNS_PATH]);
 
 /**
  * Learn guides and blog posts, from the Markdown in src/content, parsed by the
@@ -221,7 +246,8 @@ export async function allRoutes({ extra = [] } = {}) {
   const redirected = redirectedPaths();
   const byPath = new Map();
   for (const r of routes)
-    if (!byPath.has(r.path) && !redirected.has(r.path)) byPath.set(r.path, r);
+    if (!byPath.has(r.path) && !redirected.has(r.path) && !NOT_BUILT.has(r.path))
+      byPath.set(r.path, r);
   return [...byPath.values()].sort((a, b) => a.path.localeCompare(b.path));
 }
 

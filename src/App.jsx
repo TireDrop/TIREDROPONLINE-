@@ -124,6 +124,10 @@ const SitemapPage = lazyPage("pages/support/SitemapPage.jsx", () =>
 const LegalPage = lazyPage("pages/support/LegalPage.jsx", () =>
   import("./pages/support/LegalPage.jsx"),
 );
+// Draft until the policy questions are answered: see src/data/returnsFlag.js.
+const ReturnsPage = lazyPage("pages/support/ReturnsPage.jsx", () =>
+  import("./pages/support/ReturnsPage.jsx"),
+);
 const NotFoundPage = lazyPage("pages/NotFoundPage.jsx", () =>
   import("./pages/NotFoundPage.jsx"),
 );
@@ -295,6 +299,8 @@ export default function App() {
               path="/track-order"
               element={<Navigate to="/track" replace />}
             />
+
+            <Route path="/returns" element={<ReturnsPage />} />
 
             {/* Legal — one component, three documents */}
             <Route path="/terms" element={<LegalPage doc="terms" />} />
