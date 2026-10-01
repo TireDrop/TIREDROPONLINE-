@@ -41,9 +41,9 @@ export default function Footer() {
       <div className="wrap grid grid-cols-2 gap-x-5 gap-y-8 py-14 md:gap-10 lg:grid-cols-4">
         {FOOTER_COLUMNS.map((col) => (
           <div key={col.title}>
-            <h3 className="mb-4 font-display text-[15px] text-amber">
+            <h2 className="mb-4 font-display text-[15px] text-amber">
               {col.title}
-            </h3>
+            </h2>
             <ul className="space-y-2">
               {col.links.map((link) => (
                 <li key={link.label}>
@@ -71,9 +71,9 @@ export default function Footer() {
 
         {/* Visit & Contact column — built from live business data. */}
         <div className="col-span-full md:col-span-1">
-          <h3 className="mb-4 font-display text-[15px] text-amber">
+          <h2 className="mb-4 font-display text-[15px] text-amber">
             The Shop Behind Us
-          </h3>
+          </h2>
 
           <ul className="space-y-4 text-sm">
             <li>

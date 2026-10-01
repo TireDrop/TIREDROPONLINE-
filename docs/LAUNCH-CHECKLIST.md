@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (Language button shipped (c05e3ac): Google element + translate.google.com fallback, Translate hosts in the CSP, finder tabs wrap on phones; Spanish checkout is Justin's switch)_
+_Last updated: 2026-10-01 (Language button shipped (c05e3ac): Google element + translate.google.com fallback, Translate hosts in the CSP, finder tabs wrap on phones; Spanish checkout is Justin's switch. Before that: phone bar by page, accessibility fixes + skip link + `check:a11y`, 48 states + DC wording, NHTSA timeout (c541339))_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -81,17 +81,19 @@ _Last updated: 2026-10-01 (Language button shipped (c05e3ac): Google element + t
 - [x] ~~Year-aware fitment on /tires~~ (347c4e1)
 
 ## Quick wins (Claude)
-- [ ] Phone bottom bar changes by page
+- [x] ~~Phone bottom bar changes by page~~ (c541339)
 - [x] ~~Pop-up off shop pages~~ (2026-09-30: superseded, the pop-up is gone)
 - [x] ~~Google search-result data: breadcrumbs (one per page, matching the visible trail), FAQ (kept where it was), article author, `npm run check:schema` gate~~ (27d477c)
 - [ ] Google search-result data: map coordinates. Waiting on Justin's Google Maps pin; paste it into `geo` in `src/data/business.js`
-- [ ] Accessibility fixes + skip link
+- [x] ~~Accessibility fixes + skip link~~ (c541339)
 - [x] ~~Security headers: CSP, HSTS, Permissions-Policy~~ (abcf645; CSP is report-only for now)
 - [x] ~~GA4 conversion events~~ (abcf645)
 - [ ] Switch the CSP from report-only to enforced after a week of clean `[csp]` logs (docs/ops/deploy.md, "Security headers")
-- [ ] NHTSA lookup timeout
+- [x] ~~NHTSA lookup timeout~~ (c541339)
 - [ ] Returns window + warranty/road-hazard links
-- [ ] "Continental US" wording (~40 places) → "48 contiguous states + DC"
+- [x] ~~"Continental US" wording (~40 places) → "48 contiguous states + DC"~~ (c541339)
+- [ ] Accessibility, second pass: heading order on the Learn hubs, /blog, /wheels and /compare, and a blank first column heading in the UTQG table (axe "moderate"/"minor"; `npm run check:a11y` covers 12 key routes)
+- [ ] Shopify theme copy still says "continental United States" (shop. redirects to the main site, so it does not render; update the draft theme only if the redirect ever comes off)
 - [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search)
 
 ## Big upgrades (Claude)

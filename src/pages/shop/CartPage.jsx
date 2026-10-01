@@ -42,7 +42,7 @@ export const TAX_NOTE = "Calculated at checkout";
 
 /**
  * The money rail: parts + installation, before tax. Shipping is free to any
- * continental-US address, so it adds nothing. Sales tax depends on the
+ * address in the 48 contiguous states and DC, so it adds nothing. Sales tax depends on the
  * address and Shopify works it out at checkout, so no figure is shown here.
  */
 export function summarize({ subtotal, installTotal }) {
@@ -323,9 +323,10 @@ export default function CartPage() {
 
         {safeLines.length === 0 ? (
           <EmptyState
+            as="h2"
             icon={ShoppingCart}
             title="Your cart is empty"
-            lede="Pick a set of tires or a new set of wheels and we'll ship them anywhere in the continental US."
+            lede="Pick a set of tires or a new set of wheels and we'll ship them anywhere in the 48 contiguous states and DC."
             action={
               <div className="flex flex-wrap justify-center gap-3">
                 <Link to="/tires" className="btn-primary">

@@ -177,7 +177,7 @@ const TRUST = [
   },
   {
     Icon: MapPin,
-    title: "Ships anywhere in the lower 48",
+    title: "Ships to the 48 contiguous states + DC",
     copy: `Any street address in ${BUSINESS.shipping.area} — home, work, or your own installer.`,
   },
   {
@@ -283,7 +283,7 @@ function ShopByCategory() {
 const DELIVERY = [
   {
     Icon: Package,
-    eyebrow: "Anywhere in the continental US",
+    eyebrow: "48 contiguous states + DC",
     title: "Ship it to me",
     copy: "Your order ships direct from a distributor warehouse to the address you give us — home, work, or your own installer. Shipping is free, and the delivery estimate is shown at checkout before you commit.",
     to: "/shipping",
@@ -343,7 +343,7 @@ const CATEGORIES = [
   {
     to: "/tires",
     label: "Tires",
-    copy: "All-season, performance, truck and SUV — shipped free to the lower 48.",
+    copy: "All-season, performance, truck and SUV — shipped free to the 48 contiguous states and DC.",
     Icon: BadgeCheck,
   },
   {
@@ -442,7 +442,7 @@ function HowItWorks() {
           <li key={s.n} className="card relative p-6">
             <span
               aria-hidden
-              className="font-display text-5xl font-bold leading-none text-drop/35"
+              className="font-display text-5xl font-bold leading-none text-drop/80"
             >
               {s.n}
             </span>
@@ -632,7 +632,7 @@ function Proof() {
           <p className="lede mt-4">
             {BUSINESS.parent} mounts tires in {BUSINESS.shop.city}, and{" "}
             {BUSINESS.name} is the same crew selling online. Orders ship direct
-            to wherever you want them: your own door anywhere in the lower 48,
+            to wherever you want them: your own door anywhere in the 48 contiguous states or DC,
             or our bay in {BUSINESS.shop.city}.
           </p>
 
@@ -745,7 +745,7 @@ export default function HomePage() {
     <>
       <Seo
         title="Tires & Wheels Shipped Nationwide"
-        description="TireDrop is an online tire and wheel store shipping anywhere in the continental US. Ship to your address, or free to our South Florida shop where we install them. Powered by Extreme Tires."
+        description="TireDrop is an online tire and wheel store shipping free to the 48 contiguous states and DC. Ship to your address, or free to our South Florida shop where we install them. Powered by Extreme Tires."
       />
       {/* Same order as the storefront theme's home template. Real products
           and real prices come third, the first proof that there is a shop

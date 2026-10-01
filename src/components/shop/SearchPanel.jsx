@@ -238,14 +238,15 @@ export default function SearchPanel({
         </button>
       </div>
 
-      <div className="bg-bone p-5 md:p-6">
+      {/* The panel is the wrapper: a <form> may not take the tabpanel role. */}
+      <div
+        id={`finder-panel-${tab}`}
+        role="tabpanel"
+        aria-labelledby={`finder-tab-${tab}`}
+        className="bg-bone p-5 md:p-6"
+      >
         {tab === "vehicle" ? (
-          <form
-            id="finder-panel-vehicle"
-            role="tabpanel"
-            aria-labelledby="finder-tab-vehicle"
-            onSubmit={submitVehicle}
-          >
+          <form onSubmit={submitVehicle}>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Field
                 id="finder-year"
@@ -294,12 +295,7 @@ export default function SearchPanel({
             </p>
           </form>
         ) : (
-          <form
-            id="finder-panel-size"
-            role="tabpanel"
-            aria-labelledby="finder-tab-size"
-            onSubmit={submitSize}
-          >
+          <form onSubmit={submitSize}>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Field
                 id="finder-width"

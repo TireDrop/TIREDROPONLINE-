@@ -106,7 +106,7 @@ function HubCard({ hub }) {
 
   if (hub.count === 0) {
     return (
-      <li className="card flex h-full flex-col bg-fog/60 p-6 opacity-80">
+      <li className="card flex h-full flex-col bg-fog/60 p-6">
         {body}
       </li>
     );

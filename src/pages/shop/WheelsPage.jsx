@@ -285,12 +285,12 @@ export default function WheelsPage() {
     <>
       <Seo
         title="Shop Wheels"
-        description="Alloy, forged, off-road and truck wheels from Enkei, Method, Fuel, Vossen and more, shipped anywhere in the continental US or free to our South Florida shop."
+        description="Alloy, forged, off-road and truck wheels from Enkei, Method, Fuel, Vossen and more, shipped to the 48 contiguous states and DC or free to our South Florida shop."
       />
       <PageHero
         eyebrow="Wheels"
         title="Shop Wheels"
-        lede="Cast, flow-formed and forged wheels, fitment-checked before they ship. Send them to your address anywhere in the continental US, or free to our South Florida shop where we fit them for you."
+        lede="Cast, flow-formed and forged wheels, fitment-checked before they ship. Send them to your address in the 48 contiguous states or DC, or free to our South Florida shop where we fit them for you."
       />
       <Breadcrumbs trail={[{ label: "Wheels" }]} />
 

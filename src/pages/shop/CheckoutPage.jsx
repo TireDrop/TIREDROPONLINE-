@@ -106,7 +106,7 @@ function windowsForDate(iso) {
 const windowLabel = (value) =>
   TIME_WINDOWS.find((w) => w.value === value)?.label || "";
 
-// Free shipping covers the lower 48 states and DC, and nowhere else, so the
+// Free shipping covers the 48 contiguous states and DC, and nowhere else, so the
 // state list is exactly those. The server checks again and says so if not.
 const SHIP_STATES = [
   ["AL", "Alabama"],
@@ -173,8 +173,8 @@ const FULFILLMENT = [
   {
     value: "ship",
     icon: Package,
-    title: "Ship to my address (free, continental US)",
-    copy: "Delivered free to any address in the lower 48 states and DC. The delivery estimate is confirmed before your order ships.",
+    title: "Ship to my address (free, 48 states + DC)",
+    copy: "Delivered free to any address in the 48 contiguous states and DC. The delivery estimate is confirmed before your order ships.",
   },
   {
     value: "pickup",
@@ -244,7 +244,7 @@ function validateInstall(f, { hasShopInstall = false } = {}) {
     if (!mobile) {
       if (!f.state) e.state = "Choose the state.";
       else if (!SHIP_STATES.some(([code]) => code === f.state))
-        e.state = "We only ship to the lower 48 states and DC.";
+        e.state = "We only ship to the 48 contiguous states and DC.";
     }
     if (!f.zip.trim()) e.zip = "Enter a ZIP code.";
     else if (!ZIP_RE.test(f.zip.trim()))
@@ -496,8 +496,8 @@ export default function CheckoutPage() {
   // Set once the API hands back a hosted payment page, just before the
   // browser leaves for it.
   const [redirecting, setRedirecting] = useState(false);
-  // A rejection from the server ("We only ship to the lower 48 states and
-  // DC"), shown inline on the review step.
+  // A rejection from the server ("We ship free to the 48 contiguous states
+  // and DC only…"), shown inline on the review step.
   const [serverError, setServerError] = useState("");
   const status = useApiStatus();
   // Online payment is on whenever the server's checkout flag says anything
@@ -744,7 +744,7 @@ export default function CheckoutPage() {
       <>
         <Seo
           title="Checkout"
-          description="Complete your TireDrop order — shipped anywhere in the continental US, or free to our South Florida shop for installation."
+          description="Complete your TireDrop order — shipped to the 48 contiguous states and DC, or free to our South Florida shop for installation."
         />
         <Breadcrumbs
           trail={[{ label: "Cart", to: "/cart" }, { label: "Checkout" }]}
@@ -755,6 +755,7 @@ export default function CheckoutPage() {
               so nothing tells a screen reader what page this is. */}
           <h1 className="h1 mb-8">Checkout</h1>
           <EmptyState
+            as="h2"
             icon={ShoppingCart}
             title="There's nothing to check out"
             lede="Your cart is empty. Add a set of tires or wheels and we'll get them moving."
@@ -992,7 +993,7 @@ export default function CheckoutPage() {
     <>
       <Seo
         title="Checkout"
-        description="Complete your TireDrop order — shipped to your address anywhere in the continental US, or free to our South Florida shop for installation."
+        description="Complete your TireDrop order — shipped to your address in the 48 contiguous states and DC, or free to our South Florida shop for installation."
       />
       <Breadcrumbs
         trail={[{ label: "Cart", to: "/cart" }, { label: "Checkout" }]}
@@ -1124,7 +1125,7 @@ export default function CheckoutPage() {
                 <StepHeading
                   step={2}
                   title="Where should this go?"
-                  lede="Ship it free anywhere in the lower 48 states and DC, or — if you are in South Florida — send it free to our shop and let us fit it, or have our van fit it at your address."
+                  lede="Ship it free anywhere in the 48 contiguous states and DC, or — if you are in South Florida — send it free to our shop and let us fit it, or have our van fit it at your address."
                   headingRef={headingRef}
                 />
 
@@ -1307,7 +1308,7 @@ export default function CheckoutPage() {
                     />
                     {!mobile && (
                       <p className="-mt-2 text-xs leading-relaxed text-smoke sm:col-span-2">
-                        Free shipping covers the lower 48 states and DC. We
+                        Free shipping covers the 48 contiguous states and DC. We
                         can&rsquo;t ship to Alaska, Hawaii or US territories.
                       </p>
                     )}
