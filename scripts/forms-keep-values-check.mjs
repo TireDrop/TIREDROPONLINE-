@@ -27,6 +27,14 @@
  * (scripts/vpic-mock.mjs). Also: start over clears, validation errors clear as
  * you type, the honeypot still reaches the server, no console errors.
  *
+ * Fitment (src/data/fitmentCheck.js): with no vehicle every card says "Check
+ * fitment" and keeps its Add button; with a 2019 F-150 the tire that fits
+ * keeps Add and the one that doesn't has none (and links to the right size),
+ * on the cards and the product pages; a year change in the Shopping-for bar
+ * changes the answer; "Shopping for a different car?" clears it; size-only
+ * mode; Compare crowns a Best only between tires of one size; a won't-fit
+ * cart line is flagged in the cart and on checkout's review and still sends.
+ *
  * /track (order lookup): the three modes with a late /api/status, a late
  * (slow) /api/track answer, and the values still on screen after it. And
  * before the app starts: the page's JavaScript is held back while the
@@ -1451,6 +1459,221 @@ for (const width of [390, 1440]) {
       await h.context.close();
     }
   });
+  /* ---------------- Fitment: badges, no Add on won't-fit, Compare ---------------- */
+
+  const F150 = { type: "vehicle", year: "2019", make: "Ford", model: "F-150" };
+  const FITS = "continental-terraincontact-at-265-70r17"; // 265/70R17, the 2019 F-150's size
+  const NO_FIT = "nitto-ridge-grappler-285-70r17"; // 285/70R17
+
+  /** Seeds what is being shopped for (and a cart / compare list) once per context. */
+  async function seedFitment(page, { selection = null, cart = null, compare = null } = {}) {
+    await page.addInitScript(
+      ({ selection, cart, compare }) => {
+        if (sessionStorage.getItem("fit-seeded")) return;
+        sessionStorage.setItem("fit-seeded", "1");
+        if (selection) {
+          localStorage.setItem("tiredrop.fitment.v1", JSON.stringify(selection));
+          if (selection.type === "vehicle") {
+            const { year, make, model } = selection;
+            localStorage.setItem("tiredrop.vehicle.v1", JSON.stringify({ year, make, model }));
+          }
+        }
+        if (cart) localStorage.setItem("tiredrop.cart.v1", JSON.stringify(cart));
+        if (compare) localStorage.setItem("tiredrop.compare.v1", JSON.stringify(compare));
+      },
+      { selection, cart, compare },
+    );
+  }
+
+  // A vehicle or size search asks /api/tires, which the harness answers
+  // with a bare 404 (no API: the sample catalog answers). The browser logs
+  // that 404; nothing else may.
+  const fitErrors = (errors) => errors.filter((e) => !/status of 404/.test(e));
+
+  /** The product card for a catalog slug. */
+  const card = (page, slug) =>
+    page.locator("article", { has: page.locator(`a[href="/tires/${slug}"]`) }).first();
+  const addOnCard = (page, slug) => card(page, slug).getByRole("button", { name: /^Add a set of 4/ });
+  const shoppingFor = (page) => page.locator('[data-testid="shopping-for-text"]');
+
+  await check(`${width} fitment: no vehicle → every card says Check fitment and keeps its Add button`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    await page.goto(`${BASE}/tires`);
+    await page.locator('[data-testid="card-fit"]').first().waitFor();
+    const cards = await page.locator("article:has([data-testid='card-fit'])").count();
+    const adds = await page.getByRole("button", { name: /^Add a set of 4/ }).count();
+    assert.ok(cards >= 10, `cards with a fitment line: ${cards}`);
+    assert.equal(adds, cards, "never blocked without a vehicle");
+    const texts = await page.locator('[data-testid="card-fit"]').allInnerTexts();
+    assert.ok(texts.every((t) => /Check fitment/.test(t)), texts.join(" | "));
+    assert.match(await shoppingFor(page).innerText(), /no vehicle picked yet/);
+    noErrors(fitErrors(h.errors));
+    await h.context.close();
+  });
+
+  await check(`${width} fitment: 2019 F-150 on /tires — Add on the tire that fits, none on the one that doesn't; year-aware change; clear`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    await seedFitment(page, { selection: F150 });
+    await page.goto(`${BASE}/tires`);
+    await page.waitForFunction(() => /2019 Ford F-150 \(265\/70R17\)/.test(document.querySelector('[data-testid="shopping-for-text"]')?.textContent ?? ""));
+
+    assert.match(await card(page, FITS).locator("[data-fit]").innerText(), /Fits your 2019 Ford F-150/);
+    assert.equal(await addOnCard(page, FITS).count(), 1, "Add shown for a tire that fits");
+    assert.equal(await card(page, FITS).locator('[data-fit="fits"]').count(), 1);
+
+    assert.match(await card(page, NO_FIT).locator("[data-fit]").innerText(), /Doesn't fit your 2019 Ford F-150/);
+    assert.equal(await addOnCard(page, NO_FIT).count(), 0, "no Add on a won't-fit tire");
+    assert.equal(
+      await card(page, NO_FIT).getByRole("link", { name: "See tires that fit" }).getAttribute("href"),
+      "/tires?w=265&a=70&d=17",
+    );
+    await page.getByRole("heading", { name: "In the size for your 2019 Ford F-150" }).waitFor();
+
+    // Change to a 2009 F-150 in the bar: that generation is 235/75R17.
+    await page.locator('[data-testid="shopping-for"]').getByRole("button", { name: "Change" }).click();
+    await page.waitForSelector("#fit-year");
+    await page.selectOption("#fit-year", "2009");
+    await page.selectOption("#fit-make", "Ford");
+    await page.locator('#fit-model option[value="F-150"]').waitFor({ state: "attached" });
+    await page.selectOption("#fit-model", "F-150");
+    await page.getByRole("button", { name: "Show what fits" }).click();
+    await page.waitForFunction(() => /2009 Ford F-150 \(235\/75R17\)/.test(document.querySelector('[data-testid="shopping-for-text"]')?.textContent ?? ""));
+    assert.equal(await addOnCard(page, FITS).count(), 0, "265/70R17 is not the 2009 size");
+    assert.match(await card(page, FITS).locator("[data-fit]").innerText(), /Doesn't fit your 2009 Ford F-150/);
+
+    // Shopping for a different car? clears it: everything can be added again.
+    await page.getByRole("button", { name: "Shopping for a different car?" }).first().click();
+    await page.waitForFunction(() => /no vehicle picked yet/.test(document.querySelector('[data-testid="shopping-for-text"]')?.textContent ?? ""));
+    assert.equal(await addOnCard(page, NO_FIT).count(), 1);
+    assert.equal(await page.evaluate(() => localStorage.getItem("tiredrop.fitment.v1")), null);
+    noErrors(fitErrors(h.errors));
+    await h.context.close();
+  });
+
+  await check(`${width} fitment: product pages — Add to Cart on a fit, none on a won't-fit (with See tires that fit, Change, different car)`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    await seedFitment(page, { selection: F150 });
+    await page.goto(`${BASE}/tires/${FITS}`);
+    const panel = page.locator('[data-testid="fit-panel"]');
+    await panel.waitFor();
+    assert.match(await panel.innerText(), /Fits your 2019 Ford F-150/);
+    assert.match(await panel.innerText(), /Matches the typical factory size on file for a 2019 Ford F-150 \(265\/70R17\)/);
+    assert.match(await panel.innerText(), /We confirm fitment before your order ships\./);
+    assert.equal(await page.getByRole("button", { name: "Add to Cart", exact: true }).count(), 1);
+
+    await page.goto(`${BASE}/tires/${NO_FIT}`);
+    await panel.waitFor();
+    assert.match(await panel.innerText(), /Doesn't fit your 2019 Ford F-150/);
+    assert.equal(await page.getByRole("button", { name: /^Add to cart$/i }).count(), 0, "no Add to Cart anywhere");
+    await page.locator('[data-testid="no-add"]').waitFor();
+    assert.equal(await panel.getByRole("link", { name: "See tires that fit" }).getAttribute("href"), "/tires?w=265&a=70&d=17");
+    await panel.getByRole("button", { name: "Not your vehicle? Change it" }).click();
+    await page.locator('[data-testid="fit-changer"]').waitFor();
+    await panel.getByRole("button", { name: "Shopping for a different car?" }).click();
+    await page.waitForFunction(() => /no vehicle picked yet/.test(document.querySelector('[data-testid="shopping-for-text"]')?.textContent ?? ""));
+    // (The phone's sticky buy bar may be up too, by now.)
+    assert.ok(await page.getByRole("button", { name: /^Add to cart$/i }).count() >= 1, "back once nothing is chosen");
+    assert.match(await panel.innerText(), /Check fitment/);
+    noErrors(fitErrors(h.errors));
+    await h.context.close();
+  });
+
+  await check(`${width} fitment: size-only — Add only on that size`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    await seedFitment(page, { selection: { type: "size", size: "225/45R17" } });
+    await page.goto(`${BASE}/tires`);
+    await page.waitForFunction(() => /Shopping for size 225\/45R17/.test(document.querySelector('[data-testid="shopping-for-text"]')?.textContent ?? ""));
+    const yes = "continental-vikingcontact-7-225-45r17";
+    const no = "continental-purecontact-ls-225-50r17";
+    assert.equal(await addOnCard(page, yes).count(), 1);
+    assert.match(await card(page, yes).locator("[data-fit]").innerText(), /Matches your size \(225\/45R17\)/);
+    assert.equal(await addOnCard(page, no).count(), 0);
+    assert.match(await card(page, no).locator("[data-fit]").innerText(), /Not your size \(225\/45R17\)/);
+    noErrors(fitErrors(h.errors));
+    await h.context.close();
+  });
+
+  await check(`${width} fitment: Compare crowns a Best only between tires of one size`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    await seedFitment(page, { compare: [FITS, NO_FIT] });
+    await page.goto(`${BASE}/compare`);
+    await page.locator('[data-testid="compare-notice"]').waitFor();
+    assert.match(await page.locator('[data-testid="compare-notice"]').innerText(), /different sizes \(265\/70R17, 285\/70R17\)/);
+    assert.equal(await page.locator("table").getByText("Best", { exact: true }).count(), 0, "mixed sizes: no crown");
+
+    await page.evaluate(() =>
+      localStorage.setItem(
+        "tiredrop.compare.v1",
+        JSON.stringify(["continental-vancontact-as-245-75r16", "bridgestone-duravis-r500-hd-245-75r16"]),
+      ),
+    );
+    await page.reload();
+    await page.locator("table").waitFor();
+    await page.locator("table").getByText("Best", { exact: true }).first().waitFor();
+    assert.equal(await page.locator('[data-testid="compare-notice"]').count(), 0);
+    assert.equal(await page.locator("table").getByText("Best", { exact: true }).count(), 2, "set price and price each");
+
+    // With a vehicle those 245/75R16 tires do not fit: no crown, no Add.
+    await page.evaluate(() =>
+      localStorage.setItem("tiredrop.fitment.v1", JSON.stringify({ type: "vehicle", year: "2019", make: "Ford", model: "F-150" })),
+    );
+    await page.reload();
+    await page.locator('[data-testid="compare-notice"]').waitFor();
+    assert.equal(await page.locator("table").getByText("Best", { exact: true }).count(), 0);
+    assert.equal(await page.locator("table").getByRole("button", { name: /^Add 4$/ }).count(), 0);
+    noErrors(fitErrors(h.errors));
+    await h.context.close();
+  });
+
+  await check(`${width} fitment: a won't-fit cart line is flagged in the cart and on checkout's review, and checkout still goes through`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    const tire = (id, slug, name, size) => ({
+      key: `${id}:n`, id, sku: id, kind: "tire", name, brand: "Test", size, price: 200, installPrice: 25, install: false, slug, qty: 4,
+    });
+    await seedFitment(page, {
+      selection: F150,
+      cart: { lines: [tire("t-fits", FITS, "Fits", "265/70R17"), tire("t-nofit", NO_FIT, "Wide", "285/70R17")] },
+    });
+    await page.goto(`${BASE}/cart`);
+    const flag = page.locator('[data-testid="cart-fit-flag"]');
+    await flag.waitFor();
+    assert.equal(await flag.count(), 1, "only the line that doesn't fit");
+    assert.match(await flag.innerText(), /Doesn't fit your 2019 Ford F-150/);
+    assert.equal(await flag.getByRole("link", { name: "Swap it for a tire that fits" }).getAttribute("href"), "/tires?w=265&a=70&d=17");
+    await page.getByText("We check the fitment against your vehicle before").waitFor();
+
+    await page.getByRole("link", { name: "Checkout" }).click();
+    await page.waitForSelector("#firstName");
+    await page.getByText("We confirm fitment against your vehicle before your order is released.").waitFor();
+    const cont = () => page.getByRole("button", { name: "Continue" }).click();
+    await fill(page, "typing", [["#firstName", "Fit"], ["#lastName", "Check"], ["#email", "fit@example.com"], ["#phone", "9545550123"]]);
+    await cont();
+    await page.locator("#fulfillment-pickup").check();
+    await page.waitForSelector("#date");
+    await fill(page, "typing", [["#date", nextWeekday()], ["#timeWindow", "10-12"]]);
+    await cont();
+    await page.waitForSelector("#year");
+    await modelsLoaded(page);
+    await expectDom(page, [["#year", "2019"], ["#make", "Ford"], ["#model", "F-150"]], "(the vehicle being shopped for)");
+    await cont();
+    const review = page.locator('[data-testid="review-fit-flags"]');
+    await review.waitFor();
+    assert.match(await review.innerText(), /One item doesn't match your 2019 Ford F-150/);
+    assert.match(await review.innerText(), /Test Wide · 285\/70R17/);
+    await fill(page, "typing", [["#agree", true]]);
+    await page.getByRole("button", { name: "Place Order Request" }).click();
+    await waitFor(() => h.sent.checkout.length === 1, "/api/checkout");
+    assert.match(h.sent.checkout[0].notes, /Fitment flag: Test Wide 285\/70R17 does not match 265\/70R17/);
+    noErrors(fitErrors(h.errors));
+    await h.context.close();
+  });
+
 }
 
 await browser.close();

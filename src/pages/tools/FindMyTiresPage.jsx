@@ -31,9 +31,9 @@ import {
   OTHER_LABEL,
   YEARS,
   makesFor,
-  rememberVehicle,
   useVehicleModels,
 } from "../../data/vehicles.js";
+import { useVehicle } from "../../context/VehicleContext.jsx";
 import { useTireSearch } from "../../data/useApi.js";
 import { RATING_AXES, ratingsFor } from "../../data/tireRatings.js";
 import { compareSizes, parseSize } from "../../data/tireMath.js";
@@ -1038,6 +1038,7 @@ function ResultCard({ entry, entries, answers, weights, rank, size, group }) {
 
 export default function FindMyTiresPage() {
   const [params, setParams] = useSearchParams();
+  const { selectVehicle, selectSize } = useVehicle();
 
   const answers = (() => {
     const priorities = (params.get("pri") || "")
@@ -1294,8 +1295,21 @@ export default function FindMyTiresPage() {
         );
         return;
       }
-      // So checkout and the booking form can start from this vehicle.
-      if (mode === "vehicle") rememberVehicle({ year, make, model });
+      // What the shopper is shopping for from here on: every tire card says
+      // whether it fits. A size typed over the table's is theirs and wins;
+      // the table's own size stays "typical". Also remembered for checkout
+      // and the booking form.
+      if (mode === "vehicle") {
+        const typical = fitmentForYear(make, model, year)?.[0] ?? "";
+        selectVehicle({
+          year,
+          make,
+          model,
+          size: readSize.normalized === typical ? "" : readSize.normalized,
+        });
+      } else {
+        selectSize(readSize.normalized);
+      }
       patch(
         {
           mode,

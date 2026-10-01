@@ -4,6 +4,7 @@ import { BrowserRouter, HashRouter } from "react-router-dom";
 import App from "./App.jsx";
 import { CartProvider } from "./context/CartContext.jsx";
 import { CompareProvider } from "./context/CompareContext.jsx";
+import { VehicleProvider } from "./context/VehicleContext.jsx";
 import { watchTyped } from "./lib/keepTyped.js";
 import { preloadPages } from "./lib/lazyPage.js";
 import "./index.css";
@@ -33,7 +34,9 @@ const app = (
       <Router>
         <CartProvider>
           <CompareProvider>
-            <App />
+            <VehicleProvider>
+              <App />
+            </VehicleProvider>
           </CompareProvider>
         </CartProvider>
       </Router>

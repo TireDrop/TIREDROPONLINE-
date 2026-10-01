@@ -1,12 +1,23 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Check, Scale, ShoppingCart, X } from "lucide-react";
+import { AlertTriangle, Check, Scale, ShoppingCart, X } from "lucide-react";
 
 import { getProduct } from "../../data/products.js";
 import { SET_SIZE, setPrice } from "../../data/pricing.js";
 import { useCompare } from "../../context/CompareContext.jsx";
 import { money, useCart } from "../../context/CartContext.jsx";
+import { useVehicle } from "../../context/VehicleContext.jsx";
+import {
+  compareCrown,
+  fitSizeOf,
+  sizeSearch,
+} from "../../data/fitmentCheck.js";
 import ProductArt from "../../components/shop/ProductArt.jsx";
+import {
+  CONFIRM_LINE,
+  FitBadge,
+  ShoppingForBar,
+} from "../../components/shop/Fitment.jsx";
 import {
   Breadcrumbs,
   EmptyState,
@@ -21,6 +32,10 @@ import {
 // differ. That is why the price rows carry a "Best" marker — a table that
 // only lines values up leaves the comparing to the customer, which is the work
 // they came here to avoid.
+//
+// A "Best" is only crowned between tires of one size (compareCrown in
+// src/data/fitmentCheck.js): the cheapest set in a size that does not go on
+// the car is not a best pick. Mixed sizes get a notice and no crown at all.
 
 const LABEL_COL = 124; // px — narrow enough to leave room for two tires at 360px
 const TIRE_COL = 168;
@@ -155,6 +170,7 @@ function ColumnHead({ product, onRemove }) {
 export default function ComparePage() {
   const { slugs, remove, clear } = useCompare();
   const { addItem } = useCart();
+  const { fitFor, resolved, ready } = useVehicle();
 
   // The catalog is the source of truth, so a slug that no longer resolves is
   // dropped rather than rendered as an empty column.
@@ -164,8 +180,11 @@ export default function ComparePage() {
     addItem(
       {
         id: product.id,
+        sku: product.sku ?? product.id,
         kind: product.kind,
-        name: `${product.brand} ${product.model}`,
+        // The cart prints the brand itself (see ProductCard).
+        name: product.model,
+        loadIndex: product.loadIndex ?? null,
         brand: product.brand,
         size: product.size,
         price: product.price,
@@ -226,6 +245,15 @@ export default function ComparePage() {
   const setPrices = tires.map((t) => setPrice(t));
   const eachPrices = tires.map((t) => t.price);
 
+  // One answer per tire, null until the saved vehicle has loaded.
+  const fits = tires.map((t) => fitFor(fitSizeOf(t)));
+  const crown = compareCrown(
+    tires.map((t) => t.size),
+    fits,
+  );
+  const best = (values, direction) =>
+    crown.crown ? bestIndex(values, direction) : -1;
+
   const span = tires.length;
   const minWidth = LABEL_COL + span * TIRE_COL;
 
@@ -237,12 +265,57 @@ export default function ComparePage() {
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-smoke">
             Comparing {span} {span === 1 ? "tire" : "tires"}. Prices are for a
-            set of {SET_SIZE}.
+            set of {SET_SIZE}. {CONFIRM_LINE}
           </p>
           <button type="button" onClick={clear} className="btn-outline btn-sm">
             Clear all
           </button>
         </div>
+
+        <ShoppingForBar className="mb-5" />
+
+        {!crown.crown && (
+          <div
+            role="note"
+            data-testid="compare-notice"
+            className="mb-5 flex items-start gap-3 rounded-sm border border-amber/60 bg-amber/10 p-4 text-sm text-ink"
+          >
+            <AlertTriangle
+              size={18}
+              aria-hidden
+              className="mt-0.5 shrink-0 text-amberInk"
+            />
+            <p className="min-w-0 leading-relaxed">
+              {crown.reason === "mixed-sizes" ? (
+                <>
+                  <span className="font-semibold">
+                    These tires are different sizes ({crown.sizes.join(", ")}).
+                  </span>{" "}
+                  A tire only fits in its own size, so no best pick is marked.
+                  Compare tires in the size on your car.
+                </>
+              ) : (
+                <>
+                  <span className="font-semibold">
+                    These tires don&rsquo;t fit what you&rsquo;re shopping for.
+                  </span>{" "}
+                  No best pick is marked.
+                </>
+              )}{" "}
+              {resolved.kind !== "none" &&
+                ready &&
+                fits[0]?.sizes?.[0] &&
+                sizeSearch(fits[0].sizes[0]) && (
+                  <Link
+                    to={sizeSearch(fits[0].sizes[0])}
+                    className="whitespace-nowrap font-semibold underline underline-offset-4 hover:text-drop"
+                  >
+                    See tires in {fits[0].sizes[0]}
+                  </Link>
+                )}
+            </p>
+          </div>
+        )}
 
         {/* The scroll lives here, not on the page: at phone width four columns
             cannot fit, and a document that scrolls sideways is the fastest way
@@ -281,7 +354,7 @@ export default function ComparePage() {
               <GroupRow label="Price" span={span} />
               <Row
                 label={`Set of ${SET_SIZE}`}
-                bestAt={bestIndex(setPrices, "low")}
+                bestAt={best(setPrices, "low")}
                 cells={setPrices.map((p, i) => (
                   <span
                     key={i}
@@ -294,12 +367,21 @@ export default function ComparePage() {
               <Row
                 label="Price each"
                 tint
-                bestAt={bestIndex(eachPrices, "low")}
+                bestAt={best(eachPrices, "low")}
                 cells={eachPrices.map((p) => money(p))}
               />
 
               <GroupRow label="Fitment" span={span} />
               <Row label="Size" cells={tires.map((t) => t.size)} />
+              {ready && (
+                <Row
+                  label="Fits?"
+                  tint
+                  cells={fits.map((f, i) => (
+                    <FitBadge key={i} fit={f} />
+                  ))}
+                />
+              )}
               <Row
                 label="Load index"
                 tint
@@ -340,18 +422,34 @@ export default function ComparePage() {
                 >
                   Buy
                 </th>
-                {tires.map((t) => (
-                  <td key={t.slug} className="px-3 py-4 align-top">
-                    <button
-                      type="button"
-                      onClick={() => addSet(t)}
-                      className="btn-primary btn-sm w-full"
-                    >
-                      <ShoppingCart size={15} aria-hidden />
-                      Add {SET_SIZE}
-                    </button>
-                  </td>
-                ))}
+                {tires.map((t, i) =>
+                  fits[i]?.status === "no-fit" ? (
+                    <td key={t.slug} className="px-3 py-4 align-top">
+                      <p className="text-xs font-semibold text-ink">
+                        {fits[i].title}
+                      </p>
+                      {sizeSearch(fits[i].sizes[0]) && (
+                        <Link
+                          to={sizeSearch(fits[i].sizes[0])}
+                          className="btn-outline btn-sm mt-2 w-full"
+                        >
+                          See tires that fit
+                        </Link>
+                      )}
+                    </td>
+                  ) : (
+                    <td key={t.slug} className="px-3 py-4 align-top">
+                      <button
+                        type="button"
+                        onClick={() => addSet(t)}
+                        className="btn-primary btn-sm w-full"
+                      >
+                        <ShoppingCart size={15} aria-hidden />
+                        Add {SET_SIZE}
+                      </button>
+                    </td>
+                  ),
+                )}
               </tr>
             </tfoot>
           </table>

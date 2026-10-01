@@ -13,6 +13,7 @@ import { Writable } from "node:stream";
 import App from "./App.jsx";
 import { CartProvider } from "./context/CartContext.jsx";
 import { CompareProvider } from "./context/CompareContext.jsx";
+import { VehicleProvider } from "./context/VehicleContext.jsx";
 import { HeadCollectorContext } from "./components/ui/index.jsx";
 import {
   allPageKeys,
@@ -109,7 +110,9 @@ export function render(url) {
           <HeadCollectorContext.Provider value={collector}>
             <CartProvider>
               <CompareProvider>
-                <App />
+                <VehicleProvider>
+                  <App />
+                </VehicleProvider>
               </CompareProvider>
             </CartProvider>
           </HeadCollectorContext.Provider>
