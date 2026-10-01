@@ -1,25 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import {
   ChevronDown,
   MapPin,
   Menu,
   Package,
   Phone,
-  Search,
   ShoppingCart,
   Truck,
   UserRound,
   X,
 } from "lucide-react";
 import { BUSINESS, NAV } from "../../data/business.js";
-import {
-  TIRES,
-  TIRE_CATEGORIES,
-  TIRE_BRAND_NAMES,
-} from "../../data/products.js";
-import { parseSize } from "../../data/tireMath.js";
 import { useCart } from "../../context/CartContext.jsx";
+import HeaderSearch from "./HeaderSearch.jsx";
 import Logo from "./Logo.jsx";
 import { LanguageControl, TranslationNotice } from "./LanguageControl.jsx";
 
@@ -51,112 +45,6 @@ function UtilityBar() {
         </span>
       </div>
     </div>
-  );
-}
-
-/**
- * Masthead search.
- *
- * The catalog has no free-text index — it filters on size, vehicle, brand and
- * category — so rather than invent a `q` parameter that nothing reads, this
- * works out which of those the shopper typed and hands off to the filter that
- * exists. A size goes through the same parser the tools use, so `225/45ZR17`
- * and `31x10.50R15` both resolve.
- *
- * When nothing matches it says so in place instead of navigating to an
- * unfiltered catalog and letting the shopper conclude the search is broken.
- */
-function HeaderSearch({ id = "masthead-search", className = "", onDone }) {
-  const missId = `${id}-miss`;
-  const navigate = useNavigate();
-  const [term, setTerm] = useState("");
-  const [miss, setMiss] = useState("");
-
-  const resolve = (raw) => {
-    const text = raw.trim();
-    if (!text) return null;
-
-    const size = parseSize(text);
-    if (size) {
-      return size.format === "flotation"
-        ? `/tires?d=${size.rimDiameter}`
-        : `/tires?w=${size.width}&a=${size.aspect}&d=${size.rimDiameter}`;
-    }
-
-    const lower = text.toLowerCase();
-    const brand =
-      TIRE_BRAND_NAMES.find((b) => b.toLowerCase() === lower) ??
-      TIRE_BRAND_NAMES.find((b) => b.toLowerCase().startsWith(lower));
-    if (brand) return `/tires?brands=${encodeURIComponent(brand)}`;
-
-    const category =
-      TIRE_CATEGORIES.find((c) => c.toLowerCase() === lower) ??
-      TIRE_CATEGORIES.find((c) => c.toLowerCase().includes(lower));
-    if (category) return `/tires?category=${encodeURIComponent(category)}`;
-
-    // A model name is the other thing people type. Match it against the
-    // catalog and go straight to the product rather than to a filter.
-    const product = TIRES.find((t) =>
-      `${t.brand} ${t.model}`.toLowerCase().includes(lower),
-    );
-    if (product) return `/tires/${product.slug}`;
-
-    return null;
-  };
-
-  const submit = (e) => {
-    e.preventDefault();
-    const to = resolve(term);
-    if (!to) {
-      setMiss(
-        `Nothing matched "${term.trim()}". Try a size like 225/45R17, a brand, or a model.`,
-      );
-      return;
-    }
-    setMiss("");
-    setTerm("");
-    onDone?.();
-    navigate(to);
-  };
-
-  return (
-    <form role="search" onSubmit={submit} className={`relative ${className}`}>
-      <label htmlFor={id} className="sr-only">
-        Search tires by size, brand or model
-      </label>
-      <Search
-        size={17}
-        aria-hidden
-        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-smoke"
-      />
-      <input
-        id={id}
-        type="search"
-        value={term}
-        onChange={(e) => {
-          setTerm(e.target.value);
-          if (miss) setMiss("");
-        }}
-        placeholder="Search a size, brand or model — 225/45R17"
-        aria-describedby={miss ? missId : undefined}
-        className="field h-11 w-full rounded-full pl-10 pr-24 text-[15px]"
-      />
-      <button
-        type="submit"
-        className="btn-primary btn-sm absolute right-1 top-1 h-9 min-h-0 rounded-full px-4"
-      >
-        Search
-      </button>
-      {miss && (
-        <p
-          id={missId}
-          role="alert"
-          className="absolute left-0 top-full z-50 mt-1.5 w-full rounded-sm border border-ink/10 bg-bone px-3 py-2 text-[13px] leading-snug text-ink shadow-lift"
-        >
-          {miss}
-        </p>
-      )}
-    </form>
   );
 }
 
@@ -382,7 +270,8 @@ export default function Header() {
           </Link>
 
           {/* The middle of the masthead is where a shopper looks for search,
-              and it was the one thing this header did not have. */}
+              and it was the one thing this header did not have. It searches
+              the whole store, with suggestions as you type (HeaderSearch.jsx). */}
           <HeaderSearch className="hidden min-w-0 flex-1 lg:block" />
 
           <div className="ml-auto flex items-center gap-1.5 lg:ml-0">

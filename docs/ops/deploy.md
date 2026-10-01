@@ -87,7 +87,7 @@ collects leads: its forms and its newsletter pop-up. Do every item here
 - [ ] **Old Shopify URLs redirect.** `vercel.json` carries 301s for every
       common Shopify path (listed in step 6 of the cutover checklist):
       `/pages/*`, `/collections/*`, `/products/*`, `/cart/*`, `/policies/*`,
-      `/blogs/*`, `/search`, and `/account`, `/checkouts/*` and the
+      `/blogs/*`, and `/account`, `/checkouts/*` and the
       `/<shop id>/invoices|orders|checkouts/...` links, which go on to
       `shop.tiredroponline.com` so account logins, abandoned-checkout emails
       and invoices sent before the move keep working. `/cart` itself is the
@@ -372,7 +372,9 @@ Shopify serving the domain until the Vercel site is verified.
      `/terms#returns`, `shipping-policy` → `/terms#shipping`,
      `terms-of-service` → `/terms`, `contact-information` → `/contact`;
      any other `/policies/*` → `/terms`
-   - `/blogs` and `/blogs/*` → `/blog`; `/search` → `/tires`
+   - `/blogs` and `/blogs/*` → `/blog`. `/search` is no longer redirected:
+     it is the store's own results page now, so an old Shopify
+     `/search?q=…` link lands on results for the same words
    - `/account` and `/account/*` → `shop.tiredroponline.com/account/*`
      (customer accounts stay on Shopify)
    - `/checkouts/*` and `/<shop id>/invoices|orders|checkouts/*` →

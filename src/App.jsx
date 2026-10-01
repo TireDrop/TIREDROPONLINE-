@@ -125,6 +125,10 @@ const SitemapPage = lazyPage("pages/support/SitemapPage.jsx", () =>
 const LegalPage = lazyPage("pages/support/LegalPage.jsx", () =>
   import("./pages/support/LegalPage.jsx"),
 );
+// Store-wide search results: the header search's "See all results".
+const SearchPage = lazyPage("pages/SearchPage.jsx", () =>
+  import("./pages/SearchPage.jsx"),
+);
 const NotFoundPage = lazyPage("pages/NotFoundPage.jsx", () =>
   import("./pages/NotFoundPage.jsx"),
 );
@@ -300,6 +304,8 @@ export default function App() {
             />
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/sitemap" element={<SitemapPage />} />
+            {/* Search results (noindex, not in the sitemap). */}
+            <Route path="/search" element={<SearchPage />} />
 
             {/* Learn guides and blog */}
             <Route path="/learn" element={<LearnIndexPage />} />
