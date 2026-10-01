@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (SHIPPED: Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
+_Last updated: 2026-10-01 (Nationwide shipping hub + 7 pilot state pages on preview/states, awaiting review. Before that: SHIPPED: Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -103,6 +103,7 @@ _Last updated: 2026-10-01 (SHIPPED: Tesla tires Learn hub with 6 guides; languag
 - [ ] Book an install time at checkout
 - [ ] Fitment by trim + staggered (logic + badge shipped in 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API)
 - [ ] Local city pages: wave 1 (7 cities) live 2026-10-01; wave 2 next
+- [ ] Nationwide hub + pilot state pages (preview/states d4b027c) → Justin reviews → roll out remaining states in batches
 - [ ] Real review collection (no stars until real reviews exist)
 
 ## Content & SEO: Blog + Learn (Claude; plan in docs/prompts/blog-learn-build.md)
