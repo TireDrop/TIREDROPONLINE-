@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (SHIPPED: fitment confidence; 6 new tools + tool pages; mobile hub + 7 wave-1 city pages, roadside flat help; install booking live)_
+_Last updated: 2026-10-01 (SHIPPED: 334 ZIPs outside Palm Beach excluded + server-side booking ZIP check; fitment confidence; 6 new tools + tool pages; mobile hub + 7 wave-1 city pages, roadside flat help; install booking live)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -24,7 +24,7 @@ _Last updated: 2026-10-01 (SHIPPED: fitment confidence; 6 new tools + tool pages
 - [x] ~~Post-payment install scheduling handoff~~ (f705e25, 2026-09-30)
 - [x] ~~Install booking tags the order install-booked~~ (f774c41)
 - [x] ~~Mobile/install area: Miami-Dade, Broward, Palm Beach~~ (f8a053c)
-- [ ] Exclude non-Palm-Beach 334 ZIPs (33440, 33455, 33471, 33475) + server-side ZIP check for bookings
+- [x] ~~Exclude non-Palm-Beach 334 ZIPs (33440, 33455, 33471, 33475) + server-side ZIP check for bookings~~ (6e256ba)
 - [x] ~~Arrival wording: "We confirm an arrival window when we book"~~ (be6a2a2)
 - [x] ~~Repo organized: docs map, audits/archive, README guide~~ (c5846e7, 2026-09-30)
 - [x] ~~404 heading: "fine" removed~~ (ded56ec)
