@@ -181,8 +181,9 @@ function redirectedPaths() {
 /**
  * Every page route the site serves, indexable or not, as
  * `{ path, sources, lastmod }`. This is the prerender list: the router's
- * static pages, one page per catalog product and service, and one per
- * mobile city page (src/data/cityPages.js).
+ * static pages, one page per catalog product and service, one per
+ * mobile city page (src/data/cityPages.js) and one per live state page
+ * (STATE_PAGES_LIVE in src/data/stateList.js).
  *
  * `extra` adds routes this script cannot find on its own, as `{ path,
  * lastmod }`. scripts/prerender.mjs passes the content routes (/learn,
@@ -196,10 +197,12 @@ export async function allRoutes({ extra = [] } = {}) {
   const { TIRES, WHEELS } = await import(resolve(ROOT, "src/data/products.js"));
   const { SERVICES } = await import(resolve(ROOT, "src/data/services.js"));
   const { CITY_PAGES } = await import(resolve(ROOT, "src/data/cityPages.js"));
+  const { STATE_PAGES_LIVE } = await import(resolve(ROOT, "src/data/stateList.js"));
   const { files } = parseRouter();
   const productFiles = [files.get("ProductPage"), "src/data/products.js"];
   const serviceFiles = [files.get("ServiceDetailPage"), "src/data/services.js"];
   const cityFiles = [files.get("MobileCityPage"), "src/data/cityPages.js"];
+  const stateFiles = [files.get("StateShippingPage"), "src/data/statePages.js"];
 
   // Content routes first: where a path is also a router route (/learn,
   // /blog), the first entry wins, and its lastmod should be the content's
@@ -216,6 +219,8 @@ export async function allRoutes({ extra = [] } = {}) {
     ...WHEELS.map((w) => ({ path: `/wheels/${w.slug}`, sources: productFiles })),
     ...SERVICES.map((s) => ({ path: `/services/${s.slug}`, sources: serviceFiles })),
     ...CITY_PAGES.map((c) => ({ path: `/mobile-service/${c.slug}`, sources: cityFiles })),
+    // Only the routed state pages: every other state stays unlisted.
+    ...STATE_PAGES_LIVE.map((slug) => ({ path: `/tires-shipped/${slug}`, sources: stateFiles })),
   ];
 
   const redirected = redirectedPaths();

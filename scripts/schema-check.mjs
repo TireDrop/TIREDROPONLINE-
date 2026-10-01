@@ -376,6 +376,8 @@ const ROUTE_TYPES = [
   ["/services/:slug", (r) => /^\/services\/[^/]+$/.test(r)],
   ["/mobile-service", (r) => r === "/mobile-service"],
   ["city /mobile-service/*-fl", (r) => /^\/mobile-service\/[^/]+-fl$/.test(r)],
+  ["/tires-shipped", (r) => r === "/tires-shipped"],
+  ["state /tires-shipped/:state", (r) => /^\/tires-shipped\/[^/]+$/.test(r)],
   [
     "tool pages",
     (r) =>
