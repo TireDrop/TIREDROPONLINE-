@@ -1,6 +1,18 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CircleGauge, Phone, Ruler, Search } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowLeftRight,
+  CircleGauge,
+  Phone,
+  RefreshCw,
+  Ruler,
+  Scale,
+  Search,
+  Thermometer,
+  Vibrate,
+  Wrench,
+} from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
 import {
   Breadcrumbs,
@@ -40,6 +52,42 @@ const TOOLS = [
     Icon: Search,
     title: "Find my tires",
     copy: "The sizes that fit your year, make and model.",
+  },
+  {
+    to: "/load-speed-check",
+    Icon: Scale,
+    title: "Load and speed rating check",
+    copy: "Does a new tire's load index and speed rating match the old one?",
+  },
+  {
+    to: "/plus-size-calculator",
+    Icon: ArrowLeftRight,
+    title: "Plus size calculator",
+    copy: "Bigger wheels? Overall diameter and speedometer change.",
+  },
+  {
+    to: "/tire-pressure-temperature",
+    Icon: Thermometer,
+    title: "Pressure and temperature",
+    copy: "How much tire pressure moves with the weather.",
+  },
+  {
+    to: "/can-my-tire-be-repaired",
+    Icon: Wrench,
+    title: "Can my tire be repaired?",
+    copy: "Where the damage is decides it. See what repair practice says.",
+  },
+  {
+    to: "/car-shaking-checker",
+    Icon: Vibrate,
+    title: "Car shaking checker",
+    copy: "Shake, hum or thump? Possible causes and who checks each.",
+  },
+  {
+    to: "/tire-rotation-pattern",
+    Icon: RefreshCw,
+    title: "Tire rotation pattern",
+    copy: "The rotation pattern for your drivetrain and tires.",
   },
 ];
 

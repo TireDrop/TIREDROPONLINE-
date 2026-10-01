@@ -91,6 +91,8 @@ Michelin explains that EVs put three extra demands on tires:
 
 For your purposes, the rule is simple. Find the load index and any XL or HL marking on the tires Tesla specifies for your size, and don't go below it. A tire that matches the size but not the load rating isn't a match.
 
+[[demo:load-speed-check]]
+
 ## Step 3: Decide how much T-marking and foam matter to you
 
 Tesla works with tire makers on tires built for its cars. According to Tesla's manual, most Tesla-approved tires carry a **Tx** marking on the sidewall (T0, T1, T2 and so on), and they're designed to reduce road noise and optimize handling, ride and range.
@@ -118,6 +120,8 @@ A few tools help:
 Once the new tires are on, two Tesla rules keep them lasting.
 
 **Rotation.** Tesla's manual recommends rotating every **6,250 miles (10,000 km)**, or whenever the tread depth difference reaches **2/32 in (1.5 mm)** or more since the last rotation, whichever comes first. If your car has different front and rear sizes, rotation options are more limited, so ask your installer what applies to your setup.
+
+[[demo:rotation-pattern]]
 
 **Replacing in pairs.** Tesla says to replace all four tires at once when a set is worn. If a tire has to be replaced early, say after a sidewall puncture, Tesla recommends replacing in pairs unless the other tires are within **2/32 in (1.5 mm)** of the new tire's tread depth.
 

@@ -38,6 +38,24 @@ export const DEMOS = {
   "utqg-explainer": loadDemo("UtqgExplainer.jsx", () =>
     import("./UtqgExplainer.jsx"),
   ),
+  "load-speed-check": loadDemo("LoadSpeedCheck.jsx", () =>
+    import("./LoadSpeedCheck.jsx"),
+  ),
+  "plus-size-speedo": loadDemo("PlusSizeSpeedo.jsx", () =>
+    import("./PlusSizeSpeedo.jsx"),
+  ),
+  "pressure-temp": loadDemo("PressureTemp.jsx", () =>
+    import("./PressureTemp.jsx"),
+  ),
+  "damage-map": loadDemo("RepairabilityMap.jsx", () =>
+    import("./RepairabilityMap.jsx"),
+  ),
+  "noise-vibration": loadDemo("NoiseVibration.jsx", () =>
+    import("./NoiseVibration.jsx"),
+  ),
+  "rotation-pattern": loadDemo("RotationPattern.jsx", () =>
+    import("./RotationPattern.jsx"),
+  ),
 };
 
 export const DEMO_META = {
@@ -63,27 +81,37 @@ export const DEMO_META = {
     alt: "A UTQG marking such as 500 AA A gives treadwear relative to a control tire graded 100, a traction grade from wet straight-line braking (AA, A, B, C) and a temperature grade for heat resistance (A, B, C). Treadwear grades are assigned by each manufacturer and are most useful within one brand; they are not a mileage figure.",
   },
 
-  // Reserved (later phases): listed so articles can reference them now and
-  // fall back to this text until the component ships.
+  // Built (Phase 3)
+  "load-speed-check": {
+    title: "Load index and speed rating check",
+    alt: "Compares a current tire's load index and speed rating with a replacement's, showing the load per tire and for four in pounds and kilograms, and whether the replacement meets or exceeds the current tire. A speed rating is the speed a tire was tested to carry its load, not a recommended driving speed.",
+  },
+  "plus-size-speedo": {
+    title: "Plus sizing and speedometer",
+    alt: "Compares a current and a new tire size by overall diameter, sidewall height and revolutions per mile, and shows what the speedometer reads at 30, 45, 60 and 70 mph. The common 3% diameter figure is a guideline, not a fitment approval, so have fitment confirmed before you order.",
+  },
   "pressure-temp": {
     title: "Tire pressure and temperature",
     alt: "Shows how a tire's pressure rises and falls with air temperature, using both the common rule of thumb and the gas-law calculation. Set pressures cold, to the value on the vehicle's door placard.",
   },
-  "load-speed": {
-    title: "Load index and speed rating lookup",
-    alt: "Looks up the per-tire load a load index stands for and the lab test speed a speed rating stands for. Replacement tires should match or exceed the vehicle maker's specified load index, and a speed rating is a test rating, not a recommended driving speed.",
+  "damage-map": {
+    title: "Can this tire be repaired?",
+    alt: "Maps where on a tire a puncture may be repairable after an internal inspection and where damage means the tire should be replaced under industry repair practice. A technician must inspect the inside of the tire before any repair.",
   },
-  "plus-size": {
-    title: "Plus sizing and speedometer",
-    alt: "Compares a current and a new tire size by overall diameter, sidewall height and revolutions per mile, and shows how the speedometer reading changes. Have fitment confirmed before changing sizes.",
+  "noise-vibration": {
+    title: "Shake, hum or thump?",
+    alt: "Answer when a noise or vibration happens, where you feel it and what you hear to see up to four possible causes, such as balance, a tire or wheel problem, alignment wear, brake rotors or a wheel bearing, with the service that checks each. The list comes from a simple rules table, not a diagnosis, so have it inspected.",
   },
+  "rotation-pattern": {
+    title: "Tire rotation pattern",
+    alt: "Shows the rotation pattern that fits a vehicle's drivetrain, tread type and tire setup (forward cross, rearward cross, X-pattern, front-to-back or side-to-side) as a diagram and a step list. TIA suggests rotating at a regular interval, and the owner's manual's schedule and pattern come first.",
+  },
+
+  // Reserved (later phases): listed so articles can reference them now and
+  // fall back to this text until the component ships.
   "wear-pattern": {
     title: "Tire wear pattern guide",
     alt: "Matches common uneven wear patterns, such as center, shoulder, one-edge and cupping wear, with their possible causes and the service that checks each. These are possible causes only; have a technician inspect the tire.",
-  },
-  rotation: {
-    title: "Tire rotation patterns",
-    alt: "Shows the rotation pattern that fits a vehicle's drivetrain, tread type and tire setup, as a diagram and a step list. The owner's manual's schedule and pattern come first.",
   },
   hydroplaning: {
     title: "How hydroplaning happens",
@@ -92,13 +120,5 @@ export const DEMO_META = {
   "spare-types": {
     title: "Spare tire types",
     alt: "Explains the common kinds of spare, from full-size to compact temporary spares, run-flats and sealant kits, and where each one's limits are printed. Follow the label on the spare and the owner's manual.",
-  },
-  "damage-map": {
-    title: "Tire damage and repair zones",
-    alt: "Maps where on a tire a puncture may be repairable after an internal inspection and where damage means the tire should be replaced under industry repair practice. A technician must inspect the inside of the tire before any repair.",
-  },
-  "noise-vibration": {
-    title: "Tire noise and vibration checker",
-    alt: "Walks through when and where a noise or vibration happens and lists possible causes, such as balance, tire, wheel or alignment issues, with the service that inspects each. These are possible causes, not a diagnosis; have it inspected.",
   },
 };

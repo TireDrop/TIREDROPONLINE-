@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (fitment confidence on preview/fitment for review; 6 new tools on preview for review; $1 install tests #D3/#D4 ready to pay; 404 wording fixed; install booking live)_
+_Last updated: 2026-10-01 (SHIPPED: fitment confidence; 6 new tools + tool pages; mobile hub + 7 wave-1 city pages, roadside flat help; install booking live)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -28,8 +28,8 @@ _Last updated: 2026-10-01 (fitment confidence on preview/fitment for review; 6 n
 - [x] ~~Arrival wording: "We confirm an arrival window when we book"~~ (be6a2a2)
 - [x] ~~Repo organized: docs map, audits/archive, README guide~~ (c5846e7, 2026-09-30)
 - [x] ~~404 heading: "fine" removed~~ (ded56ec)
-- [ ] Fitment confidence: badge + no Add on won't-fit + Compare same-size (preview/fitment 347c4e1) → Justin reviews → ship
-- [ ] 6 new tools (load/speed, plus-size, pressure-temp, repair check, shaking checker, rotation) with their own pages + article embeds: built on `preview/tools` (210b348) → Justin reviews the preview → ship to main
+- [x] ~~Fitment confidence: badge + no Add on won't-fit + Compare same-size + year-aware search~~ (347c4e1, shipped 2026-10-01)
+- [x] ~~6 new tools (load/speed, plus-size, pressure-temp, repair check, shaking checker, rotation) with their own pages + article embeds~~ (shipped 2026-10-01)
 
 ## Admin (Justin)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
@@ -70,8 +70,8 @@ _Last updated: 2026-10-01 (fitment confidence on preview/fitment for review; 6 n
 - [ ] Fitment hold before orders go to ATD
 - [ ] "Tires arrived at the shop" notice
 - [ ] Checkout spam guard, and no writing into other customers' notes
-- [ ] No Add button on won't-fit tires; Compare crowns same-size tires only (built on preview/fitment 347c4e1, awaiting review)
-- [ ] Year-aware fitment on /tires (built on preview/fitment 347c4e1, awaiting review)
+- [x] ~~No Add button on won't-fit tires; Compare crowns same-size tires only~~ (347c4e1)
+- [x] ~~Year-aware fitment on /tires~~ (347c4e1)
 
 ## Quick wins (Claude)
 - [ ] Phone bottom bar changes by page
@@ -89,8 +89,8 @@ _Last updated: 2026-10-01 (fitment confidence on preview/fitment for review; 6 n
 - [ ] Hero finder goes straight to results
 - [ ] Installed-price toggle
 - [ ] Book an install time at checkout
-- [ ] Fitment by trim + staggered, and a "Fits your vehicle" badge (badge + trim/staggered logic built on preview/fitment 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API)
-- [ ] Local city pages: Sunrise, Fort Lauderdale, Plantation, Davie…
+- [ ] Fitment by trim + staggered (logic + badge shipped in 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API)
+- [ ] Local city pages: wave 1 (7 cities) live 2026-10-01; wave 2 next
 - [ ] Real review collection (no stars until real reviews exist)
 
 ## Content & SEO: Blog + Learn (Claude; plan in docs/prompts/blog-learn-build.md)
@@ -98,7 +98,14 @@ _Last updated: 2026-10-01 (fitment confidence on preview/fitment for review; 6 n
 - [x] ~~Phase 1: keyword map, 90–100 titles, demo list → Justin approves~~ (b813381, plans approved)
 - [x] ~~Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves~~ (800247b, pilot approved + 5 demos)
 - [x] ~~Blog + Learn live: 20 articles, 5 demos, 98 prerendered routes~~ (be6a2a2)
-- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); Batches 2–9 to go. Demos: 6 more built (preview/tools); D7, D9, D12 cut by Justin ("only useful tools")
+- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); Batches 2–9 to go. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
+- [x] ~~6 new tools with their own tool pages, embedded in 8 articles~~ (preview/tools 210b348, shipped 2026-10-01)
+- [x] ~~Wave 1 city pages + mobile hub: Sunrise, Plantation, Tamarac, Coral Springs, Davie, Fort Lauderdale, Weston~~ (preview/cities bb42574, shipped 2026-10-01)
+- [ ] Justin: Google Business Profile link + map pin (for geo schema)
+- [x] ~~Mobile claims confirmed by Justin: no trip fee, cross-county, roadside flat help (not highway shoulders)~~ (2026-10-01)
+- [ ] Justin: confirm the city facts the research left unverified, so they can go on the pages: Tamarac ZIPs, roads and neighbourhoods; Coral Springs, Davie and Weston roads; Coral Springs and Weston neighbourhoods; whether Plantation 33388 is a PO Box ZIP
+- [ ] Roadside flat tire help: give it a starting price → it joins the service catalog and online booking (phone only until then)
+- [ ] City pages wave 2: Pompano Beach, Miramar, Oakland Park, Pembroke Pines, Hollywood, Lauderhill (after wave 1 is indexed)
 - [ ] Phase 4: internal links, Search Console submit, monthly refresh
 
 ## ATD and business (Justin)

@@ -9,7 +9,7 @@ secondaryKeywords:
   - "car sat all summer Florida"
 category: weather
 date: 2026-09-30
-updated: 2026-09-30
+updated: 2026-10-01
 demo: dot-date-reader
 takeaways:
   - "Tires lose air even when the car doesn't move. Bridgestone says about 1 psi a month on average, so a summer away adds up."
@@ -143,4 +143,4 @@ A few minutes in April makes next October easier:
 | TPMS | Set pressures, then see whether the light goes out |
 | Anything unusual | Have it inspected before regular driving |
 
-Extreme Tires' mobile vans cover Sunrise, Plantation, Fort Lauderdale, Davie, Weston, Coral Springs, Tamarac, Lauderhill, Pembroke Pines and Miramar, and can do tire installation, balancing, puncture repair, rotation and TPMS service where the car is parked. Our post on [mobile tire installation at a condo or office](/blog/mobile-tire-install-condo-office) covers gate codes and garage rules. [See mobile service](/mobile-service) or call (954) 773-1896 to ask.
+Extreme Tires' mobile vans cover Miami-Dade, Broward and Palm Beach counties, decided by ZIP code, and can do tire installation, balancing, puncture repair, rotation and TPMS service where the car is parked. Our post on [mobile tire installation at a condo or office](/blog/mobile-tire-install-condo-office) covers gate codes and garage rules. [See mobile service](/mobile-service) or call (954) 773-1896 to ask.

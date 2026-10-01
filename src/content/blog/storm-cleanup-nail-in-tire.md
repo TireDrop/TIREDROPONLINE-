@@ -10,7 +10,7 @@ secondaryKeywords:
 category: hurricane
 date: 2026-09-30
 updated: 2026-09-30
-demo: null
+demo: damage-map
 takeaways:
   - "Roof repairs and debris piles put nails and screws on driveways and curbs for weeks after a storm. Look at your tread after driving near them."
   - "Found one? Check the pressure with a gauge before deciding anything, and don't drive on a tire that's flat or losing air fast."
@@ -101,6 +101,8 @@ USTMA and the Tire Industry Association set out when a puncture can be repaired,
 - **Plug and patch together.** A rubber stem fills the hole and a patch seals the inner liner. USTMA considers only that combination a permanent repair.
 
 Our guide to [tire plug vs patch](/learn/damage/patch-vs-plug) goes through each rule and why it exists.
+
+[[demo:damage-map]]
 
 ## About plug kits after a storm
 

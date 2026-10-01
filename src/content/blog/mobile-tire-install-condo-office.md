@@ -9,14 +9,14 @@ secondaryKeywords:
   - "mobile tire service Fort Lauderdale"
 category: local
 date: 2026-09-30
-updated: 2026-09-30
+updated: 2026-10-01
 demo: null
 takeaways:
   - "The van needs one standard parking space next to your car and about ten feet of clearance on the work side. No garage, lift or outlet needed."
   - "At a condo or apartment complex, give the complex name and any gate code or call-up instructions when you book."
   - "Some complexes want the van checked in at the gate or working in a visitor space rather than a covered garage. Check your association's rules first."
   - "Installation, balancing, puncture repair, rotation and TPMS service happen where you park. Alignment, brakes and suspension are shop work."
-  - "Mobile installation covers Sunrise and nine nearby Broward cities."
+  - "Mobile installation covers Miami-Dade, Broward and Palm Beach counties, decided by the ZIP code where the car is parked."
 faq:
   - q: "Can a mobile tire installer come to my condo?"
     a: "Yes, inside the local install area. When you book, give the complex name and any gate code or call-up instructions. Some complexes want the van checked in at the gate or ask that work happen in a visitor space rather than a covered garage, so check your association's rules before the appointment."
@@ -127,4 +127,4 @@ Your old tires leave with the van and are recycled, so nothing gets left in the 
 
 From there it's the usual routine: NHTSA's guidance is to check pressure with a gauge at least once a month, spare included, with the tires cold. If a TPMS light shows up afterward, our [TPMS light guide](/learn/pressure/tpms-light) explains what it's telling you.
 
-Mobile installation covers Sunrise, Plantation, Fort Lauderdale, Davie, Weston, Coral Springs, Tamarac, Lauderhill, Pembroke Pines and Miramar. Outside those cities, you can bring the car to the Sunrise shop instead. [See mobile service](/mobile-service) or call (954) 773-1896 to ask.
+Mobile installation covers Miami-Dade, Broward and Palm Beach counties, and the ZIP code where the car is parked decides it. Outside those three counties, your tires still ship to you, or you can bring the car to the Sunrise shop. [See mobile service](/mobile-service) or call (954) 773-1896 to ask.

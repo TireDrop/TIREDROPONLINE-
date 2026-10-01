@@ -10,7 +10,7 @@ secondaryKeywords:
 hub: damage
 date: 2026-09-30
 updated: 2026-09-30
-demo: null
+demo: damage-map
 takeaways:
   - "Per Michelin, a sidewall bulge or bubble generally means cords inside the tire were damaged, usually by a severe impact such as a pothole or curb."
   - "It can't be repaired. USTMA says punctures or cuts in the sidewall or shoulder can't be repaired, and Michelin says the same for a bulge."
@@ -93,6 +93,8 @@ No. There's no patch for broken cords.
 - **Michelin** says a tire with a bulge or bubble can't be repaired and must be replaced.
 
 Be wary of anyone who offers to fix one. The only fix is a replacement tire.
+
+[[demo:damage-map]]
 
 ## What to do next
 

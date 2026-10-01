@@ -24,8 +24,9 @@ header comment, and `shopify/assets/td-tiremath.js` names
 
 The three Chromium checks need `npm run build` first. They start
 `vite preview` themselves and mock every `/api` call, so nothing reaches
-Shopify. `test:api` and `test:content` are `node --test` suites in
-`api/_lib/` and `src/content/`, not scripts here.
+Shopify. `test:api`, `test:content` and `test:data` are `node --test`
+suites in `api/_lib/`, `src/content/` and `src/data/` (the mobile city pages:
+ZIPs, copy rules and the text-overlap check), not scripts here.
 
 ## Run by hand
 

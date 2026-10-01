@@ -9,7 +9,7 @@ secondaryKeywords:
   - "mobile tire installation Broward"
 category: local
 date: 2026-09-30
-updated: 2026-09-30
+updated: 2026-10-01
 demo: dot-date-reader
 takeaways:
   - "In South Florida you have three routes: ship to the Sunrise shop, have a mobile van fit them where you park, or ship home and take them to a fitter."
@@ -76,7 +76,7 @@ This route suits you if you'd rather not store four tires in a condo, or if the 
 
 ## Route 2: Have the van fit them where you park
 
-Extreme Tires also runs mobile installation vans across these Broward cities: Sunrise, Plantation, Fort Lauderdale, Davie, Weston, Coral Springs, Tamarac, Lauderhill, Pembroke Pines and Miramar.
+Extreme Tires also runs mobile installation vans across Miami-Dade, Broward and Palm Beach counties; the ZIP code where the car is parked decides it.
 
 You can send the order free to the Sunrise shop and have the van bring it to you, or ship to your house and have the van fit them there. What the van needs:
 
