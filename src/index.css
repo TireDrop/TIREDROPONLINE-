@@ -365,3 +365,21 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Footer link groups (Footer.jsx): <details> accordions below lg, always-open
+   columns from lg. Showing ::details-content whatever the open state keeps the
+   markup identical before and after hydration, so nothing shifts. Browsers
+   without ::details-content get the groups opened by Footer.jsx instead. */
+@media (min-width: 1024px) {
+  @supports selector(::details-content) {
+    .footer-group::details-content {
+      content-visibility: visible;
+    }
+    .footer-group > summary {
+      cursor: default;
+    }
+    .footer-group .footer-chevron {
+      display: none;
+    }
+  }
+}
