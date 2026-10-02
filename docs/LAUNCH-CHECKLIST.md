@@ -100,7 +100,6 @@ _Last updated: 2026-10-02 (checklist wave 2 in one release: blog batch 3 (10 pos
 - [x] ~~NHTSA lookup timeout~~ (c541339)
 - [ ] Returns window + warranty/road-hazard links → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D1)
 - [x] ~~"Continental US" wording (~40 places) → "48 contiguous states + DC"~~ (c541339)
-- [ ] Accessibility, second pass: heading order on the Learn hubs, /blog, /wheels and /compare, and a blank first column heading in the UTQG table (axe "moderate"/"minor"; `npm run check:a11y` covers 12 key routes)
 - [ ] Shopify theme copy still says "continental United States" (shop. redirects to the main site, so it does not render; update the draft theme only if the redirect ever comes off) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C10)
 - [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A9)
 - [x] ~~Accessibility, second pass: heading order on the Learn hubs, /blog, /wheels and /compare, and a blank first column heading in the UTQG table~~ (a04b749, shipped to main 2026-10-02: 0 axe issues on 24 routes at 390 and 1280, down from 25; also named the compare tray landmark and four more blank table headings; `npm run check:a11y` now covers 22 routes at both widths plus 18 at 390)
@@ -161,7 +160,6 @@ _Last updated: 2026-10-02 (checklist wave 2 in one release: blog batch 3 (10 pos
 - [ ] Justin: confirm the city facts the research left unverified, so they can go on the pages: Tamarac ZIPs, roads and neighbourhoods; Coral Springs, Davie and Weston roads; Coral Springs and Weston neighbourhoods; whether Plantation 33388 is a PO Box ZIP → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D8)
 - [ ] Roadside flat tire help: give it a starting price → it joins the service catalog and online booking (phone only until then) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D5)
 - [ ] City pages wave 2: Pompano Beach, Miramar, Oakland Park, Pembroke Pines, Hollywood, Lauderhill (after wave 1 is indexed) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C7)
-- [ ] Phase 4: internal links, Search Console submit, monthly refresh
 - [ ] Phase 4: Search Console submit, monthly refresh (internal links done, below)
 - [x] ~~Phase 4 internal links: check:links + fixes~~ (b823577, shipped to main 2026-10-02)
   - `npm run check:links` reads the build: 154 pages, 50 articles; 0 broken links, 0 indexable orphans (only /search, noindex), 0 articles without a shop or tool link, so nothing needed fixing
