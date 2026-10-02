@@ -15,7 +15,11 @@ import reactHooks from "eslint-plugin-react-hooks";
 // globals, no modules), synced from the store rather than written here, so it
 // is not linted as app code.
 export default [
-  { ignores: ["dist/**", "node_modules/**", ".scratch/**", "shopify/**"] },
+  // vite.config.js.timestamp-*.mjs: Vite's short-lived bundle of its config; a
+  // build running beside lint deletes it mid-read and crashed the lint gate.
+  {
+    ignores: ["dist/**", "node_modules/**", ".scratch/**", "shopify/**", "vite.config.js.timestamp-*"],
+  },
   js.configs.recommended,
   {
     files: ["src/**/*.{js,jsx}"],

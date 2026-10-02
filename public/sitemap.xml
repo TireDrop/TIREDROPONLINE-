@@ -163,12 +163,17 @@
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/age</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/age/how-old-is-too-old</loc>
     <lastmod>2026-09-30</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/age/tire-recalls-registration</loc>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -183,6 +188,11 @@
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/buying/all-terrain-vs-highway-tires</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/buying/ev-tires</loc>
     <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
@@ -203,12 +213,17 @@
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/damage</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/damage/patch-vs-plug</loc>
     <lastmod>2026-09-30</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/damage/spare-tire-types</loc>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -223,6 +238,11 @@
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/fitment/bolt-pattern</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/fitment/different-tire-size</loc>
     <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
@@ -247,7 +267,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://tiredroponline.com/learn/florida/hydroplaning</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://tiredroponline.com/learn/pressure</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/pressure/how-to-check-tire-pressure</loc>
     <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
@@ -277,8 +307,13 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://tiredroponline.com/learn/sidewall/load-index</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://tiredroponline.com/learn/sidewall/utqg-ratings</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -318,7 +353,17 @@
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/tread</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/tread/how-long-do-tires-last</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/tread/how-to-check-tread-depth</loc>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -508,37 +553,37 @@
   </url>
   <url>
     <loc>https://tiredroponline.com/tires-shipped/california</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tiredroponline.com/tires-shipped/colorado</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tiredroponline.com/tires-shipped/florida</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tiredroponline.com/tires-shipped/georgia</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tiredroponline.com/tires-shipped/new-york</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tiredroponline.com/tires-shipped/north-carolina</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tiredroponline.com/tires-shipped/texas</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
