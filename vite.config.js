@@ -7,6 +7,7 @@ import { articleDetail, articleSummary } from "./src/content/core.js";
 import { buildPageIndex, pageIndexContent } from "./src/lib/sitePages.js";
 import { pickHomeReading } from "./src/lib/homeReading.js";
 import { TOOL_PAGES } from "./src/components/demos/toolPages.js";
+import { CITY_PAGES } from "./src/data/cityPages.js";
 
 // robots.txt and sitemap.xml are derived from the router and the catalogs
 // rather than maintained by hand, so they are regenerated at the start of
@@ -59,6 +60,9 @@ const homeReading = () => ({
 //   "virtual:tool-links"  each tool page's path, label and blurb, for the
 //                         home page's tool list. toolPages.js is mostly the
 //                         tool pages' own copy (intro, how-to, FAQ).
+//   "virtual:city-index"  each mobile city page's slug, name and county, for
+//                         the Seo component's schema and the service-area
+//                         chips. cityPages.js is mostly the city pages' copy.
 const picked = (name, file, exportName, rows, fields) => {
   const id = `virtual:${name}`;
   const pick = (row) => Object.fromEntries(fields.map((f) => [f, row[f]]));
@@ -84,6 +88,13 @@ const toolLinks = () =>
     "label",
     "blurb",
   ]);
+const cityIndex = () =>
+  picked("city-index", "/src/data/cityPages.js", "CITY_PAGES", CITY_PAGES, [
+    "slug",
+    "name",
+    "county",
+  ]);
+
 // Learn and Blog content for the browser, split so no page downloads an
 // article it does not show (src/content/index.js, src/content/details.js):
 //   "virtual:content-summaries"  every visible article's list fields (title,
@@ -162,6 +173,7 @@ export default defineConfig(({ mode }) => ({
     sitePages(),
     homeReading(),
     toolLinks(),
+    cityIndex(),
     contentModules(),
   ],
   base: mode === "preview" ? "./" : "/",

@@ -11,7 +11,9 @@ import { Link, useLocation } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { BUSINESS, SOCIAL, YELP_PROFILE } from "../../data/business.js";
 import { SERVICE_AREA_SCHEMA } from "../../data/serviceArea.js";
-import { getCityPage } from "../../data/cityPages.js";
+// Slug, name and county of each city page, not the pages' copy
+// (cityIndex() in vite.config.js): this file is in every page's bundle.
+import CITY_INDEX from "virtual:city-index";
 import { getLiveState } from "../../data/stateList.js";
 import { getProduct } from "../../data/products.js";
 import { getService } from "../../data/services.js";
@@ -246,6 +248,9 @@ const SHOP_ROUTES = [
   "/mobile-service",
   "/schedule",
 ];
+
+const CITY_BY_SLUG = Object.fromEntries(CITY_INDEX.map((c) => [c.slug, c]));
+const getCityPage = (slug) => CITY_BY_SLUG[slug] ?? null;
 
 /** /mobile-service/<city>: the mobile city pages (src/data/cityPages.js). */
 const CITY_ROUTE = /^\/mobile-service\/([^/]+)$/;
