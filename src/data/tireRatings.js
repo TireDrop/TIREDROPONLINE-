@@ -1,9 +1,8 @@
 // Performance ratings, derived — not invented.
 //
-// Every competitor worth copying (Tire Rack, SimpleTire, Discount Tire Direct)
-// scores a tire across a handful of axes so a shopper can compare two models
-// without reading two spec sheets. Those sites score from their own road
-// tests, which we do not have.
+// Common store practice is to score a tire across a handful of axes so a
+// shopper can compare two models without reading two spec sheets. Stores that
+// do this usually score from their own road tests, which we do not have.
 //
 // So these scores are computed from the specs each tire already carries: the
 // UTQG grades, the speed rating, the tread depth, the load range, the 3PMSF

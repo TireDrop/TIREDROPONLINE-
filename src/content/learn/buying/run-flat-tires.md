@@ -25,7 +25,7 @@ faq:
   - q: "Do run-flat tires need TPMS?"
     a: "Yes. Bridgestone and Michelin both tie their run-flat tires to a working tire pressure monitoring system, because a run-flat can keep the car level with no air in it and you may not notice the loss."
   - q: "Can I replace run-flat tires with regular tires?"
-    a: "On many cars it's possible, but cars that come on run-flats often have no spare tire or jack. Before switching, check the owner's manual and plan what you'll carry for a flat, such as a spare or a repair kit."
+    a: "On many cars it's possible, but cars that come on run-flats may have no spare tire or jack. Before switching, check the owner's manual and plan what you'll carry for a flat, such as a spare or a repair kit."
 sources:
   - title: "What Are Run Flat Tires?"
     publisher: "Bridgestone"
@@ -45,9 +45,9 @@ sources:
   - title: "FMVSS No. 138, Tire Pressure Monitoring Systems (49 CFR 571.138)"
     publisher: "NHTSA / eCFR"
     url: "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-571/subpart-B/section-571.138"
-  - title: "Can I Replace Run Flat Tires with Regular Tires?"
-    publisher: "Firestone Complete Auto Care"
-    url: "https://www.firestonecompleteautocare.com/blog/tires/can-i-replace-run-flats-with-regular-tires/"
+  - title: "Run-Flat Tires: How They Work & Proper Care"
+    publisher: "Michelin"
+    url: "https://www.michelinman.com/auto/auto-tips-and-advice/tires-101/run-flat-tires"
   - title: "Mixing Tires: Safety, Winter Tires & AWD"
     publisher: "Michelin"
     url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-buying-guide/mixing-tire-brands"
@@ -135,7 +135,7 @@ Keep in mind that some cars on run-flats are also **staggered**, with different 
 
 On many cars, it's possible. Before you do it, check:
 
-1. **What the car carries for a flat.** Firestone Complete Auto Care points out that cars sold on run-flats often have **no spare tire and no jack**, because the run-flats were the plan. With regular tires, you'll want a spare, a repair kit or roadside help lined up.
+1. **What the car carries for a flat.** Michelin notes that one advantage of run-flats is not needing a spare tire or the tools to change a wheel. So a car sold on run-flats may have **no spare tire and no jack**. With regular tires, you'll want a spare, a repair kit or roadside help lined up.
 2. **The owner's manual.** Some vehicle makers say whether non-run-flat tires are approved for the car.
 3. **The load and speed ratings.** The replacement still has to match or exceed the placard. Our guide to [XL vs SL tires](/learn/buying/xl-vs-sl-tires) covers load markings.
 4. **Ride and handling.** The car may ride and handle differently on regular tires. Ask your installer what to expect on your model.

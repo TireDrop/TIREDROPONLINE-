@@ -13,14 +13,14 @@ updated: 2026-10-01
 demo: damage-map
 takeaways:
   - "On a highway or expressway shoulder, call 911 or *347 (FDOT Road Rangers) first."
-  - "Teslas generally don't come with a spare. Tesla sells an optional tire repair kit."
+  - "Teslas generally don't come with a spare. Tesla offers an optional tire repair kit."
   - "Tesla says the kit can temporarily fix punctures under 6 mm (1/4 inch) in the tread, enough to drive slowly to Tesla or a tire repair shop."
   - "For larger punctures, sidewall damage or a tire off the rim, Tesla's manual says to contact Roadside Assistance."
   - "Tesla's manual says not to use any sealant other than the one in Tesla's kit, because others can damage the pressure sensors."
   - "Foam-lined tires can be repaired in the tread area, but a technician has to dismount the tire, remove some foam and inspect the inside first."
 faq:
   - q: "Do Teslas have a spare tire?"
-    a: "Tesla's cars generally don't come with a spare. Tesla sells an optional tire repair kit for small tread punctures, and for the Cybertruck it sells a spare tire and tool kit as an accessory. For anything the kit can't handle, Tesla's manual points you to Roadside Assistance."
+    a: "Tesla's cars generally don't come with a spare. Tesla offers an optional tire repair kit for small tread punctures, and the Cybertruck's owner's manual covers installing a spare tire if the truck carries one. For anything the kit can't handle, Tesla's manual points you to Roadside Assistance."
   - q: "What can the Tesla tire repair kit fix?"
     a: "Tesla says its kit can temporarily repair small punctures, under 6 mm (about 1/4 inch), in the tread. It can't repair the sidewall. It's a temporary fix to get you slowly to Tesla or a tire repair shop, where the tire should be inspected and properly repaired or replaced."
   - q: "Can a Tesla tire with foam inside be patched?"
@@ -31,12 +31,12 @@ sources:
   - title: "Model Y Owner's Manual: Tire Repair Kit"
     publisher: "Tesla"
     url: "https://www.tesla.com/ownersmanual/modely/en_us/GUID-3A420F3F-D897-4A26-BFEE-B13742D06865.html"
-  - title: "Air Compressor + Tire Repair Kit"
+  - title: "Model 3 Owner's Manual: Temporary Tire Repair Kit"
     publisher: "Tesla"
-    url: "https://shop.tesla.com/product/tire-repair-kit"
-  - title: "Cybertruck Spare Tire + Tool Kit"
+    url: "https://www.tesla.com/ownersmanual/model3/en_us/GUID-3A420F3F-D897-4A26-BFEE-B13742D06865.html"
+  - title: "Cybertruck Owner's Manual: Installing a Spare Tire"
     publisher: "Tesla"
-    url: "https://shop.tesla.com/product/cybertruck-spare-tire-_-tool-kit"
+    url: "https://www.tesla.com/ownersmanual/cybertruck/en_us/GUID-C482029E-58E5-47A8-A748-8265A502A57C.html"
   - title: "2012-2020 Model S Service Manual: Tire Repair"
     publisher: "Tesla"
     url: "https://service.tesla.com/docs/ModelS/ServiceManual/en-us/GUID-C206BE12-2CF7-459D-B813-A0508FF93476.html"
@@ -76,7 +76,7 @@ If you're somewhere off the road and out of traffic, take a breath. Then work ou
 
 ## No spare: what Tesla gives you instead
 
-Open the trunk of most Teslas and you won't find a spare wheel. Tesla's answer is an optional **tire repair kit**: an air compressor that runs off the car's 12-volt outlet, plus a sealant canister. Tesla also sells a spare tire and tool kit for the Cybertruck as an accessory, but on most Teslas the kit, or a call for help, is the plan.
+Open the trunk of most Teslas and you won't find a spare wheel. Tesla's answer is an optional **tire repair kit**: an air compressor that runs off the car's 12-volt outlet, plus a sealant canister. The Cybertruck's owner's manual also covers installing a spare tire if the truck carries one, but on most Teslas the kit, or a call for help, is the plan.
 
 Tesla's owner's manual is specific about what the kit is for:
 

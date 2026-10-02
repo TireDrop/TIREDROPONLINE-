@@ -3,8 +3,8 @@
 // here; a demo that needs a new one gets it added to the plan first.
 //
 // S-IDs are primary (government, industry association, tire maker, consumer
-// testing). C-IDs are retailer or trade pages, cited only where the plan's
-// demo table names them.
+// testing). C-IDs fill the plan's secondary slots: tire makers, AAA or trade
+// press only. Never a retailer or installer (house rule, 2026-10-02).
 
 export const SOURCES = {
   S1: {
@@ -116,24 +116,24 @@ export const SOURCES = {
     url: "https://www.yokohamatire.com/tires-101/how-to-read-a-sidewall-1/utqg",
   },
   C2: {
-    label: "Tire Rack, Temperature and Tire Pressure",
-    url: "https://www.tirerack.com/upgrade-garage/how-does-temperature-change-affect-tire-air-pressure",
+    label: "Bridgestone, Proper Tire Inflation",
+    url: "https://www.bridgestoneamericas.com/en/company/safety/maintaining-tires/tire-inflation",
   },
   C3: {
-    label: "Tire Rack, How Much Tread Depth Is Enough",
-    url: "https://www.tirerack.com/upgrade-garage/how-much-tread-depth-is-enough",
+    label: "AAA, Worn Tires Put Drivers at Risk",
+    url: "https://newsroom.aaa.com/2018/06/tread-lightly-worn-tires-drivers-risk/",
   },
   C5: {
-    label: "Tire Rack, Best Way to Rotate Tires",
-    url: "https://www.tirerack.com/upgrade-garage/what-is-the-best-way-to-rotate-tires",
+    label: "Goodyear, What Is a Tire Rotation",
+    url: "https://www.goodyear.com/en-us/learn/what-is-a-tire-rotation",
   },
   C11: {
-    label: "Tire Rack, Tread Depth of a Tire",
-    url: "https://www.tirerack.com/upgrade-garage/what-is-the-tread-depth-of-a-tire",
+    label: "Bridgestone, The Penny Test",
+    url: "https://tires.bridgestone.com/en-us/learn/automotive/tire-maintenance/how-to-check-your-tire-tread-penny-test",
   },
   C14: {
-    label: "Discount Tire, Speedometer Accuracy",
-    url: "https://www.discounttire.com/learn/speedometer-accuracy",
+    label: "BFGoodrich, Changing Tire Size",
+    url: "https://www.bfgoodrichtires.com/auto/learn/buying-guide/changing-tire-size",
   },
   C27: {
     label: "Tire Review, Quarter Test",

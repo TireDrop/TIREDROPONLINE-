@@ -22,7 +22,7 @@ faq:
   - q: "How fast can you drive on a donut spare?"
     a: "Follow the limit printed on the spare's sidewall or label and in your owner's manual. Michelin says not to exceed 50 mph on a compact spare and to avoid aggressive acceleration, hard braking and sharp cornering. NHTSA's interpretations describe temporary-use spares labeled with a 50 mph maximum."
   - q: "How far can you drive on a compact spare?"
-    a: "Only as far as you need to reach a tire shop. Distance guidance varies by maker; Firestone Complete Auto Care's general recommendation is no more than 50 miles. Your owner's manual and the spare's label are the final word for your car."
+    a: "Only as far as you need to reach a tire shop. Distance guidance varies; AAA's general advice for a donut-type spare is no more than 50 miles. Your owner's manual and the spare's label are the final word for your car."
   - q: "What PSI should a spare tire be?"
     a: "Use the number printed on the spare or its label, or in your owner's manual. A full-size spare usually matches the door placard. Goodyear says compact temporary spares generally need about 60 psi, much more than a regular tire."
   - q: "What if my car has no spare tire?"
@@ -37,9 +37,9 @@ sources:
   - title: "Interpretation nht81-2.27 (temporary use spare tires)"
     publisher: "NHTSA"
     url: "https://www.nhtsa.gov/interpretations/nht81-227"
-  - title: "A Complete Guide to Spare Tires"
-    publisher: "Firestone Complete Auto Care"
-    url: "https://www.firestonecompleteautocare.com/tires/tire-info/maintenance/spare-tire-considerations/"
+  - title: "How Long Can You Drive On a Spare Tire"
+    publisher: "AAA"
+    url: "https://www.aaa.com/autorepair/articles/how-long-can-you-drive-on-a-spare-tire"
   - title: "The Amazing Disappearing Spare Tire"
     publisher: "AAA"
     url: "https://www.aaa.com/autorepair/articles/the-amazing-disappearing-spare-tire"
@@ -101,7 +101,7 @@ Temporary spares carry their limits on the sidewall or on a label nearby. NHTSA'
 What the makers say:
 
 - **Speed.** Michelin says not to exceed **50 mph** on a compact spare, and to avoid aggressive acceleration, hard braking and sharp cornering.
-- **Distance.** Firestone Complete Auto Care's general recommendation is to drive **no more than 50 miles** on a compact spare before replacing it with a regular tire.
+- **Distance.** AAA's general advice is to drive **no more than 50 miles** on a donut-type spare before replacing it with a regular tire.
 - **Your car's numbers win.** Michelin's advice is to check the spare's own sidewall for its restrictions, because they vary. The owner's manual has them too.
 
 In practice, a donut is a ride to a tire shop, not a plan for the rest of the week.

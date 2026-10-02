@@ -91,14 +91,6 @@ const AGG_STUDS = {
   name: "Modern Tire Dealer, studded tires state by state",
   url: "https://www.moderntiredealer.com/retail/article/55340250/studded-tires-a-state-by-state-guide",
 };
-const AGG_FEES = {
-  name: "Amazon, State Tire Fees",
-  url: "https://www.amazon.com/gp/help/customer/display.html?nodeId=202036250",
-};
-const AGG_FEES_2 = {
-  name: "Priority Tire, State Tire Fees",
-  url: "https://www.prioritytire.com/state-tire-fees",
-};
 const AGG_INSPECT = {
   name: "Vermont Legislative Research Service (Nov 2025)",
   url: "https://www.uvm.edu/d10-files/documents/2025-11/State-Motor-Vehicle-Safety-Inspections-and-Emissions-Testing.pdf",
@@ -621,85 +613,111 @@ const PILOT = {
 
 const studs = (window) =>
   secondary(`Aggregator lists studded tires as allowed ${window}.`, [AGG_STUDS]);
-const fee = (amount) =>
-  secondary(`Aggregators list a state tire fee of ${amount}.`, [AGG_FEES, AGG_FEES_2]);
-const noFee = () =>
-  secondary("Aggregators list no state tire fee.", [AGG_FEES, AGG_FEES_2]);
+// State tire fees: the retail lists these figures came from were dropped
+// (2026-10-02, resources only, no retailers). The figures below are unsourced
+// leads, not facts. A fee goes back into a state's facts only with that
+// state's own official source (statute, revenue or environment agency).
+//   alabama: $1 per tire
+//   arizona: 2% of the price, up to $2 per tire
+//   arkansas: $3 per tire
+//   connecticut: $2 per tire
+//   delaware: $2 per tire
+//   illinois: $2.50 per tire
+//   indiana: $0.25 per tire
+//   kansas: $0.25 per tire
+//   kentucky: $2 per tire
+//   louisiana: $2 per passenger tire (larger tires more)
+//   maine: $1 per tire
+//   maryland: $6 per tire (figure doubtful)
+//   mississippi: $1 per tire under 24 inches, $2 over
+//   missouri: $0.50 per tire
+//   nebraska: $1 per tire
+//   nevada: $1 per tire 12 inches and up
+//   new-jersey: $1.50 per tire
+//   new-mexico: $1.50 per tire
+//   north-dakota: none listed
+//   ohio: $1 per tire
+//   oregon: none listed
+//   pennsylvania: $1 per tire
+//   rhode-island: $1 per tire
+//   south-carolina: $2 per tire
+//   tennessee: $1.35 per tire
+//   utah: $1 per tire
+//   vermont: none listed
+//   virginia: $2 per tire (figure doubtful)
+//   washington: $1 per tire, plus $5 on studded tires
+//   west-virginia: none listed
+//   wisconsin: none listed
+//   wyoming: none listed
 const inspect = (text) => secondary(text, [AGG_INSPECT]);
 
 const DRAFTS = {
-  alabama: { fee: fee("$1 per tire") },
-  arizona: { studs: studs("October 1 to May 1"), fee: fee("2% of the price, up to $2 per tire") },
-  arkansas: { studs: studs("November 15 to April 15"), fee: fee("$3 per tire") },
+  alabama: {},
+  arizona: { studs: studs("October 1 to May 1") },
+  arkansas: { studs: studs("November 15 to April 15") },
   connecticut: {
     studs: studs("November 15 to April 30"),
-    fee: fee("$2 per tire"),
     inspection: inspect("Listed among states with biennial inspections; may be emissions only (unconfirmed)."),
   },
-  delaware: { studs: studs("October 15 to April 15"), fee: fee("$2 per tire") },
+  delaware: { studs: studs("October 15 to April 15") },
   "washington-dc": {},
   idaho: { studs: studs("October 1 to April 30") },
-  illinois: { studs: studs("only for some vehicles, such as rural mail carriers, November 15 to April 1"), fee: fee("$2.50 per tire") },
-  indiana: { studs: studs("October 1 to May 1"), fee: fee("$0.25 per tire") },
+  illinois: { studs: studs("only for some vehicles, such as rural mail carriers, November 15 to April 1") },
+  indiana: { studs: studs("October 1 to May 1") },
   iowa: { studs: studs("November 1 to April 1") },
-  kansas: { studs: studs("November 1 to April 1"), fee: fee("$0.25 per tire") },
-  kentucky: { studs: studs("with no date window"), fee: fee("$2 per tire") },
-  louisiana: { fee: fee("$2 per passenger tire (larger tires more)") },
+  kansas: { studs: studs("November 1 to April 1") },
+  kentucky: { studs: studs("with no date window") },
+  louisiana: {},
   maine: {
     studs: studs("October 2 to April 30"),
-    fee: fee("$1 per tire"),
     inspection: inspect("Listed as requiring an annual safety inspection."),
   },
-  maryland: { studs: studs("November 1 to March 31"), fee: fee("$6 per tire (figure doubtful)") },
+  maryland: { studs: studs("November 1 to March 31") },
   massachusetts: {
     studs: studs("November 2 to April 30"),
     inspection: inspect("Listed as requiring an annual safety inspection."),
   },
   michigan: {},
   minnesota: { studs: studs("only for rural mail carriers and non-residents, November 15 to April 15") },
-  mississippi: { fee: fee("$1 per tire under 24 inches, $2 over") },
-  missouri: { studs: studs("November 1 to March 31"), fee: fee("$0.50 per tire") },
+  mississippi: {},
+  missouri: { studs: studs("November 1 to March 31") },
   montana: { studs: studs("October 1 to May 31") },
-  nebraska: { studs: studs("November 1 to April 1"), fee: fee("$1 per tire") },
-  nevada: { studs: studs("October 1 to April 30"), fee: fee("$1 per tire 12 inches and up") },
+  nebraska: { studs: studs("November 1 to April 1") },
+  nevada: { studs: studs("October 1 to April 30") },
   "new-hampshire": {
     studs: studs("with no date window"),
     inspection: inspect("Annual safety inspection listed as ending January 31, 2026."),
   },
-  "new-jersey": { studs: studs("November 15 to April 1"), fee: fee("$1.50 per tire") },
-  "new-mexico": { studs: studs("when conditions call for them, with no calendar window"), fee: fee("$1.50 per tire") },
-  "north-dakota": { studs: studs("October 15 to April 15"), fee: noFee() },
-  ohio: { studs: studs("November 1 to April 15"), fee: fee("$1 per tire") },
+  "new-jersey": { studs: studs("November 15 to April 1") },
+  "new-mexico": { studs: studs("when conditions call for them, with no calendar window") },
+  "north-dakota": { studs: studs("October 15 to April 15") },
+  ohio: { studs: studs("November 1 to April 15") },
   oklahoma: { studs: studs("November 1 to April 1") },
-  oregon: { studs: studs("November 1 to March 31"), fee: noFee() },
+  oregon: { studs: studs("November 1 to March 31") },
   pennsylvania: {
     studs: studs("November 1 to April 15"),
-    fee: fee("$1 per tire"),
     inspection: inspect("Listed as requiring an annual safety inspection."),
   },
   "rhode-island": {
     studs: studs("November 15 to April 1"),
-    fee: fee("$1 per tire"),
     inspection: inspect("Listed as requiring a biennial inspection."),
   },
-  "south-carolina": { studs: studs("if studs project less than 1/16 inch when compressed"), fee: fee("$2 per tire") },
+  "south-carolina": { studs: studs("if studs project less than 1/16 inch when compressed") },
   "south-dakota": { studs: studs("October 1 to April 30") },
-  tennessee: { studs: studs("October 1 to April 15"), fee: fee("$1.35 per tire") },
-  utah: { studs: studs("October 15 to March 31"), fee: fee("$1 per tire") },
+  tennessee: { studs: studs("October 1 to April 15") },
+  utah: { studs: studs("October 15 to March 31") },
   vermont: {
     studs: studs("with no date window"),
-    fee: noFee(),
     inspection: inspect("Listed as requiring an annual safety inspection."),
   },
   virginia: {
     studs: studs("October 15 to April 15"),
-    fee: fee("$2 per tire (figure doubtful)"),
     inspection: inspect("Listed as requiring an annual safety inspection."),
   },
-  washington: { studs: studs("November 1 to March 31"), fee: fee("$1 per tire, plus $5 on studded tires") },
-  "west-virginia": { studs: studs("November 1 to April 15"), fee: noFee() },
-  wisconsin: { studs: studs("only for some vehicles, such as rural mail carriers, November 15 to April 1"), fee: noFee() },
-  wyoming: { studs: studs("with no date window"), fee: noFee() },
+  washington: { studs: studs("November 1 to March 31") },
+  "west-virginia": { studs: studs("November 1 to April 15") },
+  wisconsin: { studs: studs("only for some vehicles, such as rural mail carriers, November 15 to April 1") },
+  wyoming: { studs: studs("with no date window") },
 };
 
 /**

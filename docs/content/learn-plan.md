@@ -478,7 +478,8 @@ Scoring weighs four things: estimated demand, how beatable the current results a
 - S61 Mickey Thompson Tech Bulletin, Tires Affected by Flood Waters — https://www.mickeythompsontires.com/tech-bulletins/tires-and-tubes-affected-by-flood-waters
 - S63 Yokohama, UTQG — https://www.yokohamatire.com/tires-101/how-to-read-a-sidewall-1/utqg (UTQG grade thresholds for D10, to cross-check against S9)
 
-### Competitor / retailer pages (gap analysis; cite only where flagged)
+### Competitor / retailer pages (gap analysis only; never cited on the site)
+> Justin's rule, 2026-10-02: resources only. These pages are reading for gap analysis, not citations. The demo source IDs C2, C3, C5, C11 and C14 in `src/components/demos/sources.js` now point at Bridgestone (tire inflation), AAA (worn tires), Goodyear (tire rotation), Bridgestone (penny test) and BFGoodrich (changing tire size) instead of the URLs below.
 - C2 Tire Rack, Temperature and Tire Pressure — https://www.tirerack.com/upgrade-garage/how-does-temperature-change-affect-tire-air-pressure
 - C3 Tire Rack, How Much Tread Depth Is Enough — https://www.tirerack.com/upgrade-garage/how-much-tread-depth-is-enough
 - C4 Tire Rack, Do All 4 Tires Need to Match on AWD/4WD — https://www.tirerack.com/upgrade-garage/do-all-4-tires-need-to-match-on-an-allwheel-drive-or-fourwheel-drive-vehicle

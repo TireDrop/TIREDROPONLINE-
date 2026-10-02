@@ -43,9 +43,6 @@ sources:
   - title: "Cybertruck Owner's Manual: Wheel and Tire Specifications"
     publisher: "Tesla"
     url: "https://www.tesla.com/ownersmanual/cybertruck/en_us/GUID-9284C9F2-A2F2-4604-83BF-6599F47766B7.html"
-  - title: "2021-2025 Model S 19\" Tempest Wheel and Winter Tire Package"
-    publisher: "Tesla"
-    url: "https://shop.tesla.com/product/2021-2025-_-model-s-19_-tempest-wheel-and-winter-tire-package"
   - title: "Model Y Owner's Manual: Tire Care and Maintenance"
     publisher: "Tesla"
     url: "https://www.tesla.com/ownersmanual/modely/en_us/GUID-94F63B13-EA2C-45D9-83AB-5DCA6295D587.html"
@@ -92,7 +89,7 @@ Two things can trip you up:
 
 ## How to read the tables below
 
-The sizes below come from the Wheel and Tire Specifications pages in Tesla's owner's manuals, plus one Tesla Shop wheel package listing, as published on the date of this guide. Tesla updates these pages, so:
+The sizes below come from the Wheel and Tire Specifications pages in Tesla's owner's manuals, as published on the date of this guide. Tesla updates these pages, so:
 
 - **"Square"** means the same size on all four wheels.
 - **"Staggered"** means the rear tires are a different (wider) size from the fronts.
@@ -130,7 +127,7 @@ Shopping for a Model Y set specifically? Our [Model Y tire buying guide](/blog/t
 | 19-inch Tempest (2021-on) | 255/45R19 | 285/40R19 | **Staggered** |
 | 21-inch Arachnid (2021-on) | 265/35R21 | 295/30R21 | **Staggered** |
 
-Tesla's Model S manual pairs these with wider rear wheels (19 x 9.5J front and 19 x 10.5J rear on the 19-inch package), and Tesla's own winter package for the 19-inch Tempest wheel ships two tires of each size. Earlier Model S cars (2012 to 2020) were offered with many wheel and tire combinations over the years. **Check your door-jamb placard.**
+Tesla's Model S manual pairs these with wider rear wheels (19 x 9.5J front and 19 x 10.5J rear on the 19-inch package). Earlier Model S cars (2012 to 2020) were offered with many wheel and tire combinations over the years. **Check your door-jamb placard.**
 
 ## Model X
 

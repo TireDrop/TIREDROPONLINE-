@@ -19,7 +19,7 @@ takeaways:
   - "A wider wheel at the same offset grows by half the extra width on each side, inside and out."
 faq:
   - q: "What does ET mean on a wheel?"
-    a: "ET is the offset in millimeters. Firestone Complete Auto Care notes that the offset can usually be found on the back of the wheel after the letters ET, so ET45 means a 45 mm offset. ET comes from the German Einpresstiefe."
+    a: "ET is the offset in millimeters. KMC Wheels notes that the offset can usually be found on the back of the wheel after the letters ET, so ET45 means a 45 mm offset. ET comes from the German Einpresstiefe."
   - q: "What is the difference between offset and backspacing?"
     a: "Both describe where the wheel sits. Offset is measured in millimeters from the wheel's centerline to the mounting surface. Backspacing is measured in inches from the mounting surface to the back lip of the wheel. More positive offset means more backspacing."
   - q: "Does lower offset make a wheel stick out more?"
@@ -27,9 +27,12 @@ faq:
   - q: "How do I know what offset my car needs?"
     a: "Start from the factory wheel's offset, usually stamped on the back of the wheel, and the vehicle maker's published specs. A wheel seller or installer can confirm what range clears your suspension, brakes and fenders."
 sources:
-  - title: "Wheel Backspacing and Offset Explained"
-    publisher: "Firestone Complete Auto Care"
-    url: "https://www.firestonecompleteautocare.com/blog/tires/wheel-backspacing-and-offset-explained/"
+  - title: "What offset are my wheels?"
+    publisher: "KMC Wheels"
+    url: "https://helpcenter.kmcwheels.com/hc/en-us/articles/41323245621133-What-offset-are-my-wheels"
+  - title: "What backspace or offset do I need?"
+    publisher: "KMC Wheels"
+    url: "https://helpcenter.kmcwheels.com/hc/en-us/articles/41322908425613-What-backspace-or-offset-do-I-need"
   - title: "Wheel Offsets Explained"
     publisher: "Konig Wheels"
     url: "https://news.konigwheels.com/wheel-info-tech/wheel-offsets-explained/"
@@ -59,7 +62,7 @@ author: "TireDrop Team, Extreme Tires, Sunrise FL"
 
 Two wheels can share a diameter, width and bolt pattern and still sit in completely different places on the car. One tucks neatly under the fender. The other sticks out past it, or rubs the suspension. The difference is **offset**.
 
-Wheel Pros, Konig, Method Race Wheels and Firestone Complete Auto Care define it the same way:
+Wheel Pros, KMC, Konig and Method Race Wheels define it the same way:
 
 > **Offset** is the distance from the wheel's **centerline** to its **mounting surface**, the flat face that bolts against the hub. It's measured in millimeters.
 
@@ -77,7 +80,7 @@ Konig notes that most **front-wheel-drive** cars have positive offset wheels, an
 
 ## Reading ET on the wheel
 
-Firestone Complete Auto Care points out that offset can usually be found on the back of the wheel, after the letters **ET**. ET comes from the German *Einpresstiefe*. So:
+KMC Wheels points out that offset can usually be found on the back of the wheel, after the letters **ET**. ET comes from the German *Einpresstiefe*. So:
 
 - **ET45** means +45 mm offset,
 - **ET0** means zero offset,
@@ -87,7 +90,7 @@ Offset can't be measured directly with a ruler, as Wheel Pros notes, because the
 
 ## Backspacing: the inch version
 
-**Backspacing** is the older way to describe the same thing. Firestone Complete Auto Care defines it as the distance, in inches, from the hub mounting surface to the **back edge of the wheel**.
+**Backspacing** is the older way to describe the same thing. KMC Wheels defines it as the distance, in inches, from the mounting surface to the **back edge of the wheel**.
 
 - **Higher backspacing** sits the wheel further in, closer to the suspension.
 - **Lower backspacing** sits it further out, sometimes past the fender.
@@ -96,7 +99,7 @@ Konig puts the link simply: offset and backspacing are two ways to measure the s
 
 ### Measuring backspacing yourself
 
-Firestone Complete Auto Care's method, on a wheel that's off the car:
+KMC's method, on a wheel that's off the car:
 
 1. Lay the wheel **face down** on a flat surface.
 2. Lay a straight board or yardstick across the back of the wheel, lip to lip.

@@ -2,7 +2,7 @@
 // DOM, so it runs in the node test runner and in a build-time prerender alike.
 //
 // Two estimates, side by side:
-//   Rule of thumb  about 1 PSI per 10°F (USTMA, Tire Rack; learn-plan C2).
+//   Rule of thumb  about 1 PSI per 10°F (USTMA, Bridgestone; learn-plan C2).
 //   Gas law        Gay-Lussac's law on absolute pressure and temperature:
 //                  P2 = (P1 + 14.7) × (T2 + 459.67) / (T1 + 459.67) − 14.7
 //                  with P in gauge PSI and T in °F.
