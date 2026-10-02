@@ -12,7 +12,7 @@ to info@tiredroponline.com.
 ## What happens on each submission
 
 `POST /api/forms` (`api/forms.js`, `api/_lib/leads.js`) for the contact,
-financing, fleet quote and install booking forms, and checkout's order
+financing, fleet quote, install booking and size quote forms, and checkout's order
 requests (`api/_lib/orders.js`), all do the same four things through the
 TireDrop Shopify app (after the spam guard below lets them through):
 
@@ -68,7 +68,10 @@ TireDrop Shopify app (after the spam guard below lets them through):
    "could not get that through, please call" confirmation instead.
 
 Form tags: `lead-contact`, `lead-financing`, `lead-fleet-quote`,
-`lead-booking`, `lead-order-request`. `lead` is on everyone who ever sent
+`lead-booking`, `lead-size-quote`, `lead-order-request`. A size quote comes
+from the `/tires` card shown when nothing stocked is in the shopper's size:
+it needs a US phone number and carries the size and the vehicle, so the shop
+calls back with a price. `lead` is on everyone who ever sent
 one, so Customers → filter by tag `lead` lists them all.
 
 ## Spam guard (no captcha, no app)

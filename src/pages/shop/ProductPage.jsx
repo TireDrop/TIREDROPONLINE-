@@ -36,6 +36,7 @@ import {
 } from "../../components/shop/Fitment.jsx";
 import { getProduct, TIRES, WHEELS } from "../../data/products.js";
 import { BUSINESS } from "../../data/business.js";
+import { getService } from "../../data/services.js";
 import { SERVICE_AREA_LABEL } from "../../data/serviceArea.js";
 import { useCart, money } from "../../context/CartContext.jsx";
 import { useCompare } from "../../context/CompareContext.jsx";
@@ -46,6 +47,10 @@ import {
   SET_SIZE,
   priceBreakdown,
 } from "../../data/pricing.js";
+
+// Installation is not free: name the shop's published starting price.
+const INSTALL = getService("tire-installation");
+const INSTALL_FROM = `from $${INSTALL.priceFrom} ${INSTALL.priceUnit}`;
 
 // One, a pair, a set, or a set plus a full-size spare. Four leads because that
 // is what the overwhelming majority of tire orders actually are.
@@ -257,7 +262,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
     <>
       <Seo
         title={`${name} ${sizeLabel}`}
-        description={`${name} ${sizeLabel} — ${money(product.price * SET_SIZE)} for a set of ${SET_SIZE} from TireDrop, shipped free to the 48 contiguous states and DC or free to our South Florida shop for installation.`}
+        description={`${name} ${sizeLabel} — ${money(product.price * SET_SIZE)} for a set of ${SET_SIZE} from TireDrop, shipped free to the 48 contiguous states and DC, or to our South Florida shop to fit ${INSTALL_FROM}.`}
       />
       <Breadcrumbs
         trail={[

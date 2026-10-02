@@ -168,7 +168,7 @@ export default function InstallPage() {
       <PageHero
         eyebrow="South Florida only"
         title="Ship them to the shop. We'll fit them."
-        lede={`Buy your tires here, send them to ${BUSINESS.parent} in ${BUSINESS.shop.city} for free, and book a fitting. Delivery and installation become one stop — and four tires never touch your garage floor.`}
+        lede={`Buy your tires here, send them to ${BUSINESS.parent} in ${BUSINESS.shop.city} for free, and book a fitting from $${install.priceFrom} ${install.priceUnit}. Delivery and installation become one stop — and four tires never touch your garage floor.`}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link to="/schedule" className="btn-primary">
@@ -204,7 +204,7 @@ export default function InstallPage() {
             <span className="font-display font-bold text-ink">
               This one is local.
             </span>{" "}
-            Ship-to-store and installation happen at the {BUSINESS.shop.city}{" "}
+            Ship-to-store orders are fitted at the {BUSINESS.shop.city}{" "}
             shop in South Florida. Everywhere else in the 48 contiguous states and DC,{" "}
             <Link
               to="/shipping"

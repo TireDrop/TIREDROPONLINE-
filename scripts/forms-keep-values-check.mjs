@@ -13,8 +13,10 @@
  *              autofill does.
  *
  * Covers /contact, /financing, /commercial-tires, /schedule, /checkout
- * (request mode, ship-to-store pickup), the footer newsletter sign-up, and the Find
- * My Tires size prefill. Also the install booking for a paid order:
+ * (request mode, ship-to-store pickup), the footer newsletter sign-up, the Find
+ * My Tires size prefill, and the /tires size-quote card (a size nothing is
+ * stocked in: the quote form sends the size and vehicle, needs a phone, and
+ * keeps what was typed after a failed send and with the forms off). Also the install booking for a paid order:
  * /schedule?order= (the order read-only and sent, nothing personal taken
  * from the URL), and /track's "Schedule your install" panel: the day,
  * window and notes typed into it (three modes, a late /api/status, a slow
@@ -657,6 +659,91 @@ for (const width of [390, 1440]) {
       await h.context.close();
     });
   }
+
+  /* ---------------- /tires: size quote on zero results ---------------- */
+  // A 2019 Camry's 215/55R17 is not in the sample catalog, so the "in your
+  // size" list is empty and the size-quote card takes its place.
+  // /api/tires answers a bare 404 here (no API: the sample catalog answers),
+  // and the browser logs it; nothing else may be logged.
+  const QUOTE_URL = "/tires?year=2019&make=toyota&model=camry";
+  const quoteErrors = (errors) => errors.filter((e) => !/status of 404/.test(e));
+  for (const mode of MODES) {
+    await check(`${width} /tires size-quote: ${mode} keeps and sends every field with the size and vehicle`, async () => {
+      const h = await open(width);
+      const { page } = h;
+      await page.goto(`${BASE}${QUOTE_URL}`);
+      await page.waitForSelector("#sq-name");
+      const fields = [
+        ["#sq-name", `Rae ${mode}`],
+        ["#sq-email", "rae@example.com"],
+      ];
+      await fillAndRerender(h, mode, fields, [["#sq-phone", "9545550142"]]);
+      await page.getByRole("button", { name: "Get a quote" }).click();
+      await waitFor(() => h.sent.forms.length === 1, "/api/forms");
+      assertIncludes(
+        h.sent.forms[0],
+        {
+          form: "size-quote",
+          name: `Rae ${mode}`,
+          phone: "9545550142",
+          email: "rae@example.com",
+          size: "215/55R17",
+          vehicle: "2019 Toyota Camry",
+          website: "",
+        },
+        "size-quote",
+      );
+      await page.getByText("Got it. We’ll call you about 215/55R17.").waitFor();
+      noErrors(quoteErrors(h.errors));
+      await h.context.close();
+    });
+  }
+
+  await check(`${width} /tires size-quote: phone required; typed values stay after a failed send and with forms off`, async () => {
+    // A failed send: the server refuses it.
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    await page.route("**/api/forms", async (route) => {
+      h.sent.forms.push(JSON.parse(route.request().postData() || "{}"));
+      await route.fulfill({ status: 502, json: { error: "We could not send that just now. Please call the shop instead." } });
+    });
+    await page.goto(`${BASE}${QUOTE_URL}`);
+    await h.afterStatus();
+    await page.locator("#sq-name").fill("Rae Diaz");
+    await page.getByRole("button", { name: "Get a quote" }).click();
+    await page.getByText("We need a number to call with the quote.").waitFor();
+    assert.equal(h.sent.forms.length, 0, "nothing sent without a phone");
+    await page.locator("#sq-phone").pressSequentially("954 555 0142");
+    await page.getByText("We need a number to call with the quote.").waitFor({ state: "detached" });
+    await page.getByRole("button", { name: "Get a quote" }).click();
+    await waitFor(() => h.sent.forms.length === 1, "/api/forms");
+    await page.getByRole("alert").getByText("Your details are still here").waitFor();
+    await expectDom(page, [
+      ["#sq-name", "Rae Diaz"],
+      ["#sq-phone", "954 555 0142"],
+      ["#sq-email", ""],
+    ], "(after a failed send)");
+    assert.equal(await page.getByText("Got it.").count(), 0, "no confirmation for a failed send");
+    // The 502 is logged by the browser; that one is expected too.
+    noErrors(quoteErrors(h.errors).filter((e) => !/status of 502/.test(e)));
+    await h.context.close();
+
+    // Forms not connected: nothing is sent, the values stay, the phone is offered.
+    const off = await open(width, { delay: 0, status: { ...STATUS, forms: "off" } });
+    await off.page.goto(`${BASE}${QUOTE_URL}`);
+    await off.afterStatus();
+    await off.page.locator("#sq-name").fill("Rae Diaz");
+    await off.page.locator("#sq-phone").fill("9545550142");
+    await off.page.getByRole("button", { name: "Get a quote" }).click();
+    await off.page.getByRole("alert").getByText("nothing was sent").waitFor();
+    assert.equal(off.sent.forms.length, 0, "nothing sent with forms off");
+    await expectDom(off.page, [
+      ["#sq-name", "Rae Diaz"],
+      ["#sq-phone", "9545550142"],
+    ], "(forms off)");
+    noErrors(quoteErrors(off.errors));
+    await off.context.close();
+  });
 
   /* ---------------- Schedule / booking ---------------- */
   for (const mode of MODES) {

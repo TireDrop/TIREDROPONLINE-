@@ -21,6 +21,9 @@ import { CITY_PAGES, cityPath } from "../data/cityPages.js";
 import { MAKES } from "../data/vehicleList.js";
 import { TOOL_PAGES } from "../components/demos/toolPages.js";
 
+// Installation is not free: name the shop's published starting price.
+const INSTALL = SERVICES.find((s) => s.slug === "tire-installation");
+
 /**
  * The fixed pages, in the order they should win a tie. `keywords` are the
  * other words people use for the page ("rims", "appointment"); `boost`
@@ -90,7 +93,7 @@ export const STATIC_PAGES = [
     path: "/install",
     title: "Ship to store and install",
     keywords: "installation install pickup pick up shop store sunrise mount balance",
-    text: "Ship your tires free to the Sunrise shop and have them installed there.",
+    text: `Ship your tires free to the Sunrise shop and have them installed there, from $${INSTALL.priceFrom} ${INSTALL.priceUnit}.`,
     boost: 1,
   },
   {

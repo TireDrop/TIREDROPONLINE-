@@ -132,7 +132,7 @@ Two small jobs protect you later:
 
 If the car is in Miami-Dade, Broward or Palm Beach County, you have two more options:
 
-- **Free ship-to-store** at Extreme Tires in Sunrise, with the fitting done in the shop. See [how ship-to-store works](/install).
+- **Free ship-to-store** at Extreme Tires in Sunrise, with the fitting done in the shop for a per-tire charge. See [how ship-to-store works](/install).
 - **A mobile van** that fits the tires where the car is parked, inside the local install area. See [mobile tire service](/mobile-service).
 
 Our post on [getting online tires installed in Broward](/blog/bought-tires-online-install-broward) walks through both routes.

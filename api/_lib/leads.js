@@ -1,8 +1,8 @@
 // Website leads, stored in Shopify and emailed by Shopify Flow.
 //
-// Every website form (contact, financing, fleet quote, install booking) and
-// every checkout order request ends up the same way, with no third-party form
-// service in between:
+// Every website form (contact, financing, fleet quote, install booking, size
+// quote) and every checkout order request ends up the same way, with no
+// third-party form service in between:
 //
 //   1. The Shopify customer is found by email (else phone) with
 //      customerByIdentifier, or created with customerCreate: name, email and
@@ -76,6 +76,7 @@ export const FORM_TITLES = Object.freeze({
   financing: "TireDrop financing request",
   "fleet-quote": "TireDrop fleet quote request",
   booking: "TireDrop install booking request",
+  "size-quote": "TireDrop size quote request",
   "order-request": "TireDrop order request",
 });
 

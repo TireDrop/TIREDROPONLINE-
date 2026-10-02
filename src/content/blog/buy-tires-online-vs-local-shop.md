@@ -21,7 +21,7 @@ faq:
   - q: "Is it better to buy tires online or from a local shop?"
     a: "It depends on what you value. Buying online gives you a wide choice and time to compare specs, but you need a plan for installation. A local shop can look at the car, check the wheels and alignment, and handle everything in one place. Many people now do both: order online and have a local installer fit them."
   - q: "Can I buy tires online and have them installed locally?"
-    a: "Yes. Some shops fit tires customers bring in; call first and ask what they charge. In South Florida, TireDrop orders can ship free to Extreme Tires in Sunrise for installation, or a mobile van can fit them where you park inside the local install area."
+    a: "Yes. Some shops fit tires customers bring in; call first and ask what they charge. In South Florida, TireDrop orders can ship free to Extreme Tires in Sunrise, where installation is charged per tire, or a mobile van can fit them where you park inside the local install area."
   - q: "What should an installed tire price include?"
     a: "Ask what's in it. Mounting, balancing, valve stems, TPMS reset or relearn, and disposal of the old tires are sometimes separate line items. In Florida, a $1 fee applies to each new tire sold at retail and must be listed separately on the invoice."
   - q: "Do I need to register tires I bought online?"
@@ -87,7 +87,7 @@ A lot of drivers now split the job: buy online, install locally. It works well i
 
 In South Florida, that's how TireDrop is built. It's the online store of Extreme Tires in Sunrise, so you can:
 
-- choose **free ship-to-store** at checkout and have the tires fitted at the Sunrise shop, or
+- choose **free ship-to-store** at checkout and have the tires fitted at the Sunrise shop (installation is charged per tire), or
 - have a **mobile van** fit them at your home or office inside the local install area.
 
 Outside South Florida, the order ships to you and you take the tires to an installer you trust. Call that installer first and ask two things: whether they fit tires the customer brings in, and what they charge to do it. Our post on [getting tires installed after buying online](/blog/bought-tires-online-install-broward) walks through each South Florida route, and our [nationwide installation guide](/blog/get-tires-installed-after-buying-online) covers finding an installer anywhere else.

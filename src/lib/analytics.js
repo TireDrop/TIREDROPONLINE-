@@ -115,6 +115,9 @@ export function trackPageView(key, path = key) {
 //   search             tire/wheel finder         search_term (size or Y/M/M), search_type
 //                      header search submit,     search_term (as typed), search_type "site"
 //                      "See all results"
+//   view_search_results /tires with a vehicle  search_type, search_term, results (tires
+//                      or size in the URL      in the size; 0 is the dead end the
+//                                              size-quote form answers)
 //   search_suggestion  a header search           search_term, suggestion_type (sizes,
 //                      suggestion picked         vehicles, brands, products, pages),
 //                                                suggestion_path
@@ -141,6 +144,7 @@ const EVENT_KEYS = new Set([
   "form_name",
   "search_term",
   "search_type",
+  "results",
   "suggestion_type",
   "suggestion_path",
   "tool_id",

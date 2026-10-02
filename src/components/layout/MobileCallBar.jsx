@@ -10,7 +10,7 @@ const ICONS = { cart: ShoppingCart, search: Search, calendar: CalendarCheck };
  * Thumb-reachable action bar, phones only.
  *
  * The lit button follows the page (src/data/mobileBar.js): shopping on most
- * pages, the size finder on the catalog, Checkout on the cart, booking on the
+ * pages, Cart on the catalog, Checkout on the cart, booking on the
  * service pages, and
  * nothing but Call at checkout and order tracking. Product pages get no bar,
  * because their own price and "Add to cart" bar owns the bottom edge. The

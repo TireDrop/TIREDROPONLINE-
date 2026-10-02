@@ -169,4 +169,4 @@ Our [guide to reading a tire size](/learn/sidewall/how-to-read-tire-size) explai
 
 ## Find tires in your Tesla's size
 
-Once you have your placard sizes, [shop tires by vehicle](/tires) and choose your Tesla, or search by size. Tires ship free to the 48 contiguous states and DC, or free to our Sunrise shop for installation. In South Florida, our [mobile installation](/mobile-service) vans cover Miami-Dade, Broward and Palm Beach, and you can [schedule an install](/schedule) online. Not sure which size is yours? Call (954) 773-1896 and read us the placard.
+Once you have your placard sizes, [shop tires by vehicle](/tires) and choose your Tesla, or search by size. Tires ship free to the 48 contiguous states and DC, or free to our Sunrise shop, where installation is charged per tire. In South Florida, our [mobile installation](/mobile-service) vans cover Miami-Dade, Broward and Palm Beach, and you can [schedule an install](/schedule) online. Not sure which size is yours? Call (954) 773-1896 and read us the placard.

@@ -37,10 +37,10 @@ export function mobileBarFor(pathname = "/") {
     return { action: { to: "/checkout", label: "Checkout", icon: "cart" } };
   }
 
+  // Shoppers already find their size on /tires itself (the finder, the
+  // Shopping-for bar), so the bar takes them on to what they picked.
   if (path === "/tires") {
-    return {
-      action: { to: "/find-my-tires", label: "Find my size", icon: "search" },
-    };
+    return { action: { to: "/cart", label: "Cart", icon: "cart" } };
   }
 
   // The mobile hub and every city page under it book the van.

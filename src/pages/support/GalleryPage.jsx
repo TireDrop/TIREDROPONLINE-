@@ -259,13 +259,13 @@ export default function GalleryPage() {
     <>
       <Seo
         title="News & Gallery"
-        description={`Illustrated examples of how ${BUSINESS.name} orders, ship-to-store and installs at the ${BUSINESS.shop.city} shop work, plus how-to videos and tire care tips.`}
+        description={`Illustrated examples of how ${BUSINESS.name} orders, ship-to-store orders and installs at the ${BUSINESS.shop.city} shop work, plus how-to videos and tire care tips.`}
       />
 
       <PageHero
         eyebrow="News & Gallery"
         title="How the work goes"
-        lede={`Illustrated examples of shipping, ship-to-store and install at the ${BUSINESS.shop.city} shop, until real photos are in. Plus the videos and tips we end up repeating every week.`}
+        lede={`Illustrated examples of shipping, ship-to-store orders and installs at the ${BUSINESS.shop.city} shop, until real photos are in. Plus the videos and tips we end up repeating every week.`}
       >
         <a href={BUSINESS.phoneHref} className="btn-ghost-light">
           <Phone size={18} aria-hidden />

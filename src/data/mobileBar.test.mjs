@@ -15,13 +15,15 @@ test("product pages get no global bar (their own buy bar is the one)", () => {
   }
 });
 
-test("/tires offers the size finder", () => {
+test("/tires goes to the cart (the size is found on the page itself)", () => {
   assert.deepEqual(action("/tires"), {
-    to: "/find-my-tires",
-    label: "Find my size",
-    icon: "search",
+    to: "/cart",
+    label: "Cart",
+    icon: "cart",
   });
-  assert.equal(action("/tires/").to, "/find-my-tires");
+  assert.equal(action("/tires/").to, "/cart");
+  // A tire's own page keeps its buy bar instead.
+  assert.equal(mobileBarFor("/tires/some-tire"), null);
 });
 
 test("mobile hub, city and service pages book the service", () => {
