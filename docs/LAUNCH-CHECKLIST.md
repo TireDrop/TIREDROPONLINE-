@@ -5,9 +5,10 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (SHIPPED in one release: Learn gap fill A (5 guides) + B (4 research guides), competitor citations swapped for maker sources, CRO quick wins (hero to results, phone cart Checkout, install price shown, 48 states + DC on cards), article bundle split (article pages download 40–46% less JS); earlier today: compact mobile footer, checklist tidy + Chrome prompts, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
+_Last updated: 2026-10-02 (preview/resources-only: every competitor citation/link replaced with maker, AAA or government sources, waiting on Justin's review; earlier: SHIPPED in one release: Learn gap fill A (5 guides) + B (4 research guides), competitor citations swapped for maker sources, CRO quick wins (hero to results, phone cart Checkout, install price shown, 48 states + DC on cards), article bundle split (article pages download 40–46% less JS); earlier today: compact mobile footer, checklist tidy + Chrome prompts, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
 
 ## Site fixes (Claude)
+- [ ] Resources only: every competitor citation/link replaced with maker or government sources (preview/resources-only `7754330`) → Justin reviews → ship
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
 - [x] ~~Privacy policy: newsletter, form storage in Shopify, GA disclosed~~ (`a6a5b0c`)
 - [x] ~~Docs: "no cookies / no analytics" claims fixed~~ (`cef543a`)
