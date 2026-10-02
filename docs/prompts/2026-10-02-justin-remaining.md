@@ -633,6 +633,19 @@ Same as A18, for the 10 batch-4 posts. Paste the HEADER, then:
 
 Reply with the list. Claude fixes or cuts any NOT FOUND line. Note: the Thanksgiving post uses AAA's 2025 figures; Claude updates it when AAA publishes the 2026 forecast (mid-November).
 
+### A20. Blog reworks (#32 recall notice, #42 packed-car weight): confirm the snippet-only facts
+
+Paste the HEADER, then:
+
+> Open each URL below. For each one, reply FOUND, NOT FOUND or PAGE MISSING, and quote the line you found. Read only; change nothing.
+> 1. https://www.govinfo.gov/content/pkg/USCODE-2024-title49/html/USCODE-2024-title49-subtitleVI-partA-chap301-subchapII-sec30120.htm: the remedy is free; the maker chooses repair or replace; tires have a 180-day window
+> 2. https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-577: envelope says "SAFETY RECALL NOTICE"; letter says "IMPORTANT SAFETY RECALL"
+> 3. https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-573/section-573.13: a plan to reimburse owners who paid for a remedy before the recall notice
+> 4. https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-575/subpart-A/section-575.6: the load-limit steps and the 1,400 lb / five 150 lb passengers / 650 lb example
+> 5. https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-571/subpart-B/section-571.110: the placard's cold pressure is for the vehicle at its maximum loaded weight
+
+Reply with the list. Claude fixes or cuts any NOT FOUND line.
+
 ## B. Real-world tasks (calls and emails)
 
 ### B1. ATD: submit the connectivity form, then the call

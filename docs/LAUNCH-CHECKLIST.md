@@ -167,8 +167,8 @@ _Last updated: 2026-10-02, evening (blog reworks #32/#42 on preview/blog-rework,
 - [x] ~~Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves~~ (800247b, pilot approved + 5 demos)
 - [x] ~~Blog + Learn live: 20 articles, 5 demos, 98 prerendered routes~~ (be6a2a2)
 - [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); blog batch 2 live (f776fc1); blog batch 3 live (9e4cc11); blog batch 4 live (ecfd2af); blog batch 5 live (d2ba501). Blog: 2 planned posts left, both waiting on answers: #15 (accountant: Florida tire fee and sales tax) and #49 (Justin: used tires?). #32 and #42 reworked (below); #37 dropped as a Learn near-duplicate. Learn: 33 guides live. Status table in `docs/content/blog-plan.md`. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
-- [ ] Blog reworks #32/#37/#42 (preview/blog-rework 9eb9c44) → ship: #32 as /blog/tire-recall-notice-what-to-do, #42 as /blog/packed-car-weight-limit, #37 dropped (no distinct angle from the Tesla Learn guides)
-  - [ ] 5 facts were snippet-only (federal recall and load-limit rules: 30120, Parts 577, 573.13, 575.6, 571.110): confirm them (listed in blog-plan.md)
+- [x] ~~Blog reworks: #32 recall notice and #42 packed-car weight limit (#37 dropped: six Tesla Learn guides already cover it)~~ (shipped to main 2026-10-02)
+  - [ ] 5 facts were snippet-only (federal recall and load-limit rules: 49 USC 30120, Parts 577, 573.13, 575.6, 571.110): confirm them → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A20)
 - [x] ~~Blog batch 3: 10 posts~~ (9e4cc11, shipped to main 2026-10-02)
   - [ ] 16 facts were snippet-only: confirm them → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A18)
   - 4/32 in Florida rain, best time to buy (by season), RAV4, used car after storm season, choosing between brands, Camry, F-150 P vs LT, EV tire wear, rideshare mileage math, CR-V
