@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 
 import HOME_READING from "virtual:home-reading";
+// Path, label and blurb of each tool page (toolLinks() in vite.config.js).
+import TOOL_LINKS from "virtual:tool-links";
 import { BUSINESS, YELP_PROFILE, googleReviewHref } from "../data/business.js";
 import { SERVICE_AREA_LABEL } from "../data/serviceArea.js";
 import ServiceAreaCounties from "../components/ui/ServiceAreaCounties.jsx";
@@ -35,7 +37,6 @@ import {
   TIRE_CATEGORIES,
 } from "../data/products.js";
 import { STATE_PAGES_LIVE, getState, statePath } from "../data/stateList.js";
-import { TOOL_PAGES } from "../components/demos/toolPages.js";
 import ProductCard from "../components/shop/ProductCard.jsx";
 import ScanTireButton from "../components/shop/ScanTireButton.jsx";
 import SearchPanel from "../components/shop/SearchPanel.jsx";
@@ -753,7 +754,7 @@ function ToolsBand() {
             More calculators and checks
           </h3>
           <ul className="grid gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
-            {TOOL_PAGES.map((tool) => (
+            {TOOL_LINKS.map((tool) => (
               <li key={tool.path}>
                 <Link
                   to={tool.path}

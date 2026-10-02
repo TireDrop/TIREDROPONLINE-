@@ -6,6 +6,7 @@ import { CONTENT_DIR, loadContent } from "./src/content/node.js";
 import { articleDetail, articleSummary } from "./src/content/core.js";
 import { buildPageIndex, pageIndexContent } from "./src/lib/sitePages.js";
 import { pickHomeReading } from "./src/lib/homeReading.js";
+import { TOOL_PAGES } from "./src/components/demos/toolPages.js";
 
 // robots.txt and sitemap.xml are derived from the router and the catalogs
 // rather than maintained by hand, so they are regenerated at the start of
@@ -50,6 +51,39 @@ const homeReading = () => ({
   },
 });
 
+// A few fields of a big data file as a small module, for code that sits on
+// every page or on the home page and needs only those fields. The build
+// inlines just the picked fields as JSON; `vite dev` re-exports the real file
+// instead, so an edit there still hot-reloads.
+//
+//   "virtual:tool-links"  each tool page's path, label and blurb, for the
+//                         home page's tool list. toolPages.js is mostly the
+//                         tool pages' own copy (intro, how-to, FAQ).
+const picked = (name, file, exportName, rows, fields) => {
+  const id = `virtual:${name}`;
+  const pick = (row) => Object.fromEntries(fields.map((f) => [f, row[f]]));
+  let serve = false;
+  return {
+    name: `tiredrop-${name}`,
+    configResolved(config) {
+      serve = config.command === "serve";
+    },
+    resolveId: (source) => (source === id ? `\0${id}` : null),
+    load(source) {
+      if (source !== `\0${id}`) return null;
+      if (serve)
+        return `import { ${exportName} } from "${file}";
+export default ${exportName}.map((row) => Object.fromEntries(${JSON.stringify(fields)}.map((f) => [f, row[f]])));`;
+      return `export default ${JSON.stringify(rows.map(pick))};`;
+    },
+  };
+};
+const toolLinks = () =>
+  picked("tool-links", "/src/components/demos/toolPages.js", "TOOL_PAGES", TOOL_PAGES, [
+    "path",
+    "label",
+    "blurb",
+  ]);
 // Learn and Blog content for the browser, split so no page downloads an
 // article it does not show (src/content/index.js, src/content/details.js):
 //   "virtual:content-summaries"  every visible article's list fields (title,
@@ -122,7 +156,14 @@ const contentModules = () => {
 // once it is done. VITE_BUILD_YEAR is the footer's year in prerendered HTML
 // (see Footer.jsx).
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), seoFiles(), sitePages(), homeReading(), contentModules()],
+  plugins: [
+    react(),
+    seoFiles(),
+    sitePages(),
+    homeReading(),
+    toolLinks(),
+    contentModules(),
+  ],
   base: mode === "preview" ? "./" : "/",
   define: {
     "import.meta.env.VITE_BUILD_YEAR": JSON.stringify(
