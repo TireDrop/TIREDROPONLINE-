@@ -91,7 +91,7 @@ Bridgestone's own tire-size pages say that when the change is to larger diameter
 
 Goodyear's advice on low-profile tires adds that steering feel, noise levels and driving comfort may all change. Here's how it adds up:
 
-| | Original size | Plus size (bigger wheel, lower profile) |
+| Trait | Original size | Plus size (bigger wheel, lower profile) |
 |---|---|---|
 | Steering response | Softer | Sharper |
 | Ride over rough roads | More cushioned | Harsher |
