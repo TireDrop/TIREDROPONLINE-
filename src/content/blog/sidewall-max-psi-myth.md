@@ -51,6 +51,7 @@ related:
   - /blog/nitrogen-in-tires-myth
   - /tire-pressure-temperature
   - /tire-size
+  - /blog/tpms-still-need-tire-gauge
 cta:
   label: "Pressure vs temperature"
   href: /tire-pressure-temperature

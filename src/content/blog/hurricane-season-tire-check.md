@@ -50,6 +50,7 @@ related:
   - /blog/flooded-car-tires-wheels
   - /blog/storm-cleanup-nail-in-tire
   - /mobile-service
+  - /blog/glovebox-tire-kit-florida
 cta:
   label: "Check your tires"
   href: /tire-check

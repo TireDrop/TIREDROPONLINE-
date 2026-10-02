@@ -95,6 +95,8 @@ export const RESOURCE_DOMAINS = [
   /(^|\.)gov$/,
   "floridadisaster.org",
   "cleanairforce.com", // Georgia's state vehicle-emissions program
+  "floridasturnpike.com", // Florida's Turnpike Enterprise, part of FDOT (service plazas, Road Rangers)
+  "browardschools.com", // Broward County Public Schools, the county school district (calendar)
   // Safety, standards and trade bodies, consumer and motoring groups
   "ustires.org",
   "tireindustry.org",
