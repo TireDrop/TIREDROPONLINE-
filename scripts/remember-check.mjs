@@ -357,6 +357,16 @@ await check("1440 a URL with a vehicle or size wins over the saved one, and is s
   assert.equal((await stored(page)).model, "Tacoma");
   assert.equal(await page.inputValue("#tire-sort"), "price-asc");
 
+  // A model the size table doesn't know: "cx-5" reads as CX-5, not Cx-5,
+  // and one NHTSA lists takes NHTSA's spelling (the fixtures' Audi e-tron).
+  await page.goto(`${BASE}/tires?year=2019&make=mazda&model=cx-5`);
+  await waitBar(page, /2019 Mazda CX-5/);
+  assert.equal((await stored(page)).model, "CX-5");
+  await page.goto(`${BASE}/tires?year=2019&make=audi&model=e-tron`);
+  await waitBar(page, /2019 Audi e-tron/);
+  await page.waitForFunction((k) => JSON.parse(localStorage.getItem(k) || "{}").model === "e-tron", KEY);
+  await page.waitForFunction(() => location.search === "?year=2019&make=audi&model=e-tron");
+
   // Older links still land, in the readable spelling.
   await page.goto(`${BASE}/tires?vy=2019&vmk=Ford&vmd=F-150&brands=Continental`);
   await waitBar(page, /2019 Ford F-150/);

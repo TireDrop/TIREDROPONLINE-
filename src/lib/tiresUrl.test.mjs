@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   EMPTY_TIRE_FILTERS,
+  modelFromUrl,
   paramToSize,
   parseTiresQuery,
   selectionKey,
@@ -83,8 +84,60 @@ test("a vehicle the lists do not know is title-cased, not dropped", () => {
     type: "vehicle",
     year: "2020",
     make: "Rivian",
-    model: "R1t",
+    model: "R1T",
   });
+});
+
+test("a model from the URL keeps the table's spelling when the table knows it", () => {
+  const vocab = {
+    makes: ["Ford", "Honda", "Mazda", "Tesla", "Toyota"],
+    models: (make) =>
+      ({
+        Ford: ["F-150"],
+        Honda: ["Civic", "CR-V"],
+        Mazda: ["CX-5"],
+        Tesla: ["Model 3"],
+        Toyota: ["RAV4", "4Runner"],
+      })[make] ?? [],
+  };
+  const model = (make, m) => parseTiresQuery(`year=2020&make=${make}&model=${m}`, vocab).selection.model;
+  assert.equal(model("mazda", "cx-5"), "CX-5");
+  assert.equal(model("mazda", "cx5"), "CX-5");
+  assert.equal(model("ford", "f-150"), "F-150");
+  assert.equal(model("toyota", "rav4"), "RAV4");
+  assert.equal(model("tesla", "model+3"), "Model 3");
+  assert.equal(model("toyota", "4runner"), "4Runner");
+  assert.equal(model("honda", "civic"), "Civic");
+  assert.equal(model("honda", "cr-v"), "CR-V");
+});
+
+test("a model no list knows: hyphens and digits kept, abbreviations uppercased", () => {
+  // The bug: "cx-5" read as "Cx-5" when the size table had no Mazda.
+  assert.equal(parseTiresQuery("year=2019&make=mazda&model=cx-5").selection.model, "CX-5");
+  for (const [raw, want] of [
+    ["cx-5", "CX-5"],
+    ["f-150", "F-150"],
+    ["rav4", "RAV4"],
+    ["model 3", "Model 3"],
+    ["4runner", "4Runner"],
+    ["civic", "Civic"],
+    ["cr-v", "CR-V"],
+    ["c-hr", "C-HR"],
+    ["2500 hd", "2500 HD"],
+    ["glc300", "GLC300"],
+    ["wrx sti", "WRX STI"],
+    ["bronco sport", "Bronco Sport"],
+    ["id.4", "ID.4"],
+    // Typed with capitals: kept as typed.
+    ["iX", "iX"],
+    ["e-Tron GT", "e-Tron GT"],
+    // Three letters that are a word, not an abbreviation, read as a word.
+    ["ion", "Ion"],
+    ["fit", "Fit"],
+  ]) {
+    assert.equal(modelFromUrl(raw), want, raw);
+  }
+  assert.equal(modelFromUrl(""), "");
 });
 
 test("size and vehicle-with-size round-trip", () => {
