@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02, evening (blog reworks #32/#42 on preview/blog-rework, #37 dropped; ATD call held: site approval and API credentials pending at ATD. SHIPPED to main today: team build d2ba501 (blog batch 5, Learn gap fill C, tire page + cart, page speed, QA, search, Windows dev); resources only + check:sources; wave 2 (quote form, installed price, blog batch 3, a11y 0 issues, check:links); blog batch 4; check:forms 271s → 83s)_
+_Last updated: 2026-10-02, evening (second distributor emails sent by Justin, replies pending; blog reworks #32/#42 on preview/blog-rework, #37 dropped; ATD call held: site approval and API credentials pending at ATD. SHIPPED to main today: team build d2ba501 (blog batch 5, Learn gap fill C, tire page + cart, page speed, QA, search, Windows dev); resources only + check:sources; wave 2 (quote form, installed price, blog batch 3, a11y 0 issues, check:links); blog batch 4; check:forms 271s → 83s)_
 
 ## Site fixes (Claude)
 - [x] ~~Ship the 2026-10-02 team build to main (all 22 gates pass on the merged build; Justin said "ship it")~~ (`d2ba501`, shipped to main 2026-10-02)
@@ -211,7 +211,8 @@ _Last updated: 2026-10-02, evening (blog reworks #32/#42 on preview/blog-rework,
 - [x] ~~ATD call: API access, brands, sandbox, fees~~ (call held 2026-10-02; not recorded on Fathom)
   - [ ] ATD is reviewing the site for approval; API credentials come after approval (waiting on ATD, 2026-10-02)
   - [ ] Still to confirm with ATD once credentials arrive: sandbox + test order, freight per tire/order, cutoff time, MAP/UMAP brands, drop-ship brand list, fitment endpoint, returns on Ship to Home → questions in docs/prompts/2026-10-02-justin-remaining.md (#B1)
-- [ ] Second distributor: TireHub / US AutoForce / Wheel Pros → prompt in docs/prompts/2026-10-02-justin-remaining.md (#B3)
+- [x] ~~Second distributor: TireHub / US AutoForce / Wheel Pros~~ (Justin, 2026-10-02; done on his side, the emails aren't in the connected Gmail so Claude could not double-check)
+  - [ ] Waiting on replies from TireHub, US AutoForce and Wheel Pros (dealer account, drop-ship, brands, API/sync, freight, MAP, returns: the 7 questions in #B3)
 - [ ] Accountant: FL $1/tire fee + out-of-state sales tax → prompt in docs/prompts/2026-10-02-justin-remaining.md (#B4)
 - [ ] Brand pricing rules: minimum advertised prices, online-sale limits → prompt in docs/prompts/2026-10-02-justin-remaining.md (#B5)
 - [ ] Decide: direct API vs Spark / Slingshot / our own sync → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C2)
