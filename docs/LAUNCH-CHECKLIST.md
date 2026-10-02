@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (blog batch 4: 10 posts on preview/blog-batch-4, ready to ship; earlier: checklist wave 2 in one release: blog batch 3 (10 posts), CRO quote form + compact /tires header, installed-price toggle, footer "Shipping to 48 States + DC", accessibility pass 2 (25 issues to 0), check:links + CX-5 spelling, free-install wording priced, prompt pack for every item only Justin can do; earlier today: resources only + check:sources shipped)_
+_Last updated: 2026-10-02 (SHIPPED: blog batch 4, 10 posts (Civic, Wrangler, Silverado towing, hybrids, small fleets, potholes, new-car tires, rotation and aging myths, Thanksgiving trip); earlier today: wave 2 (quote form, installed price, blog batch 3, a11y 0 issues, check:links), resources only + check:sources)_
 
 ## Site fixes (Claude)
 - [x] ~~Resources only: every competitor citation/link replaced with maker, AAA or government sources~~ (`7754330`, shipped to main 2026-10-02)
@@ -148,16 +148,16 @@ _Last updated: 2026-10-02 (blog batch 4: 10 posts on preview/blog-batch-4, ready
 - [x] ~~Phase 1: keyword map, 90–100 titles, demo list → Justin approves~~ (b813381, plans approved)
 - [x] ~~Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves~~ (800247b, pilot approved + 5 demos)
 - [x] ~~Blog + Learn live: 20 articles, 5 demos, 98 prerendered routes~~ (be6a2a2)
-- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); blog batch 2 live (f776fc1); blog batch 3 live (9e4cc11); blog batch 4 on preview (below). Blog: 15 planned posts left (13 unwritten + #15 and #49 on hold) = 2 more batches. Learn: 33 guides live. Status table in `docs/content/blog-plan.md`. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
+- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); blog batch 2 live (f776fc1); blog batch 3 live (9e4cc11); blog batch 4 live (ecfd2af)). Blog: 15 planned posts left (13 unwritten + #15 and #49 on hold) = 2 more batches. Learn: 33 guides live. Status table in `docs/content/blog-plan.md`. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
 - [x] ~~Blog batch 3: 10 posts~~ (9e4cc11, shipped to main 2026-10-02)
   - [ ] 16 facts were snippet-only: confirm them → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A18)
   - 4/32 in Florida rain, best time to buy (by season), RAV4, used car after storm season, choosing between brands, Camry, F-150 P vs LT, EV tire wear, rideshare mileage math, CR-V
   - [ ] Justin: does Extreme Tires sell used tires? Plan post #49 waits on the answer
-- [ ] Blog batch 4: 10 posts (preview/blog-batch-4 ecfd2af) → ship
+- [x] ~~Blog batch 4: 10 posts~~ (ecfd2af, shipped to main 2026-10-02)
   - Civic, Wrangler, Silverado boat towing, low rolling resistance for hybrids, small fleet checklist, new-car tires wearing early, curb/pothole signs, rotation upsell myth, unused tires still age, Thanksgiving road trip check
   - #37 (Tesla Model 3 flat) skipped: the Learn guide /learn/tesla/tesla-flat-tire-no-spare already targets the same search. Rework with a new angle or drop
   - #11 (Thanksgiving) quotes AAA's 2025 forecast: update with the 2026 numbers when AAA publishes them in mid-November
-  - [ ] Snippet-only facts (maker and government sites blocked here): confirm on the source pages before or soon after shipping: Honda Civic manual (same size/load/speed/pressure rating; ABS + VSA; all four or pairs; summer tires not for winter), Honda Tire Rotation page (Maintenance Minder; directional front-to-back; TPMS calibration), Toyota tire warranty guide (rotation a warranty condition), Wrangler 2022 manual (specified size/load/speed; different size → false speedometer/odometer), Mopar rotation blog (Wrangler spare can join; rearward cross), Chevrolet 2024 trailering guide (tongue weight 10–15%; Trailering Information Label on 1500 doorframe), Silverado 1500 manual (label = minimum cold pressure for max load), NHTSA summer tips (check pressure before trips/heavy loads/towing), FMVSS 110 load rule, 49 CFR 393.75 (4/32 steer, 2/32 other), 390.5 (10,001 lb CMV), 396.13 (pre-trip), fueleconomy.gov (0.6%/3%, 0.2% per psi), Consumer Reports LRR (rolling resistance as tie-breaker), AAA pothole tips + survey (1 in 10 drivers), AAA Thanksgiving 2025 (81.8M, ~73M by car), Michelin rotation page (follow vehicle maker; FWD front tires), Michelin storage page (cool, dry, dark, away from ozone) → Chrome prompts in the batch 4 report
+  - [ ] 12 facts were snippet-only: confirm them → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A19)
 - [x] ~~6 new tools with their own tool pages, embedded in 8 articles~~ (preview/tools 210b348, shipped 2026-10-01)
 - [x] ~~Wave 1 city pages + mobile hub: Sunrise, Plantation, Tamarac, Coral Springs, Davie, Fort Lauderdale, Weston~~ (preview/cities bb42574, shipped 2026-10-01)
 - [ ] Justin: Google Business Profile link + map pin (for geo schema) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A9)
