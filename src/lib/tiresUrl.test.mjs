@@ -11,6 +11,7 @@ import {
   sizeToParam,
   slug,
   searchTitle,
+  partialConflicts,
 } from "./tiresUrl.js";
 
 const VOCAB = {
@@ -316,4 +317,32 @@ test("searchTitle: one line for a search in the URL, none for a bare /tires", ()
   assert.equal(searchTitle(parseTiresQuery("").selection), null);
   assert.equal(searchTitle(parseTiresQuery("?season=winter&w=225").selection), null);
   assert.equal(searchTitle(null), null);
+});
+
+test("searchTitle: a partial size titles a page with nothing else chosen", () => {
+  const t = (q) => {
+    const s = parseTiresQuery(q);
+    return searchTitle(s.selection, s.partial);
+  };
+  assert.equal(t("?w=245&a=40"), "245/40 tires");
+  assert.equal(t("?w=245&a=40&d=18"), "245/40R18 tires");
+  // A width alone keeps the hero; a size or vehicle in the URL titles it.
+  assert.equal(t("?w=245"), null);
+  assert.equal(t("?size=225-45r17&w=225&a=45"), "225/45R17 tires");
+});
+
+test("partialConflicts: the URL's size parts against the size being shopped for", () => {
+  const p = (width = "", aspect = "", diameter = "") => ({ width, aspect, diameter });
+  // The bug: 225/45R17 remembered, 245/40 typed into the header search.
+  assert.equal(partialConflicts(p("245", "40"), "225/45R17"), true);
+  assert.equal(partialConflicts(p("", "", "18"), "225/45R17"), true);
+  // Parts that agree with it (or none at all) leave it alone.
+  assert.equal(partialConflicts(p("225", "45"), "225/45R17"), false);
+  assert.equal(partialConflicts(p("", "", "17"), "225/45R17"), false);
+  assert.equal(partialConflicts(p(), "225/45R17"), false);
+  // Staggered: either axle agreeing is no contradiction.
+  assert.equal(partialConflicts(p("255", "35"), "225/40R19", "255/35R19"), false);
+  assert.equal(partialConflicts(p("245", "40"), "225/40R19", "255/35R19"), true);
+  // Not a size: nothing to contradict.
+  assert.equal(partialConflicts(p("245"), "junk"), false);
 });
