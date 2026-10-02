@@ -105,7 +105,7 @@ For those, you still need the tire maker's own spec page, its treadwear warranty
 
 ## Side by side
 
-| | All-season | All-weather | Winter |
+| Feature | All-season | All-weather | Winter |
 |---|---|---|---|
 | Typical sidewall marking | M+S | 3PMSF, usually with M+S | 3PMSF, usually with M+S |
 | Snow traction tested to a standard? | No | Yes (packed snow) | Yes (packed snow) |

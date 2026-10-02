@@ -66,7 +66,7 @@ It isn't. That number is a ceiling, set by the tire maker for that tire on any v
 
 ## Two numbers, two different jobs
 
-| | Sidewall "max press" | Door placard |
+| Detail | Sidewall "max press" | Door placard |
 |---|---|---|
 | **Who sets it** | The tire maker | The vehicle maker |
 | **What it means** | The most pressure the tire is designed to hold | The recommended cold pressure for your vehicle |

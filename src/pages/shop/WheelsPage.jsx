@@ -454,6 +454,7 @@ export default function WheelsPage() {
 
             {results.length === 0 ? (
               <EmptyState
+                as="h2"
                 icon={SearchX}
                 title="No wheels match those filters"
                 lede="There are far more wheels than this page lists. Tell us the look you want and your vehicle, and we will source the right bolt pattern and offset."
@@ -472,11 +473,16 @@ export default function WheelsPage() {
                 }
               />
             ) : (
-              <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
-                {results.map((wheel) => (
-                  <ProductCard key={wheel.id} product={wheel} />
-                ))}
-              </div>
+              <>
+                {/* The cards are h3s; on a phone the Filter h2 is in a
+                    closed drawer, so the results need a heading of their own. */}
+                <h2 className="sr-only">Wheels</h2>
+                <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
+                  {results.map((wheel) => (
+                    <ProductCard key={wheel.id} product={wheel} />
+                  ))}
+                </div>
+              </>
             )}
 
             <div className="card mt-10 flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">

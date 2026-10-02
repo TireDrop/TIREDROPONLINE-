@@ -60,7 +60,17 @@ export function DraftBadge({ article }) {
   return <Badge tone="amber">{article.sample ? "Sample" : "Draft"}</Badge>;
 }
 
-export function ArticleCard({ article, showSection = true, showDate = false }) {
+/**
+ * `headingAs`: the card title's level. h3 under a section heading (the Learn
+ * index); h2 where the cards sit straight under the page's H1 (a hub, /blog),
+ * so the outline never skips a level.
+ */
+export function ArticleCard({
+  article,
+  showSection = true,
+  showDate = false,
+  headingAs: Heading = "h3",
+}) {
   return (
     <li className="h-full">
       <Link
@@ -79,9 +89,9 @@ export function ArticleCard({ article, showSection = true, showDate = false }) {
             </span>
           )}
         </div>
-        <h3 className="h3 text-[1.15rem] transition-colors group-hover:text-drop md:text-[1.3rem]">
+        <Heading className="h3 text-[1.15rem] transition-colors group-hover:text-drop md:text-[1.3rem]">
           {article.title}
-        </h3>
+        </Heading>
         <p className="mt-2 flex-1 text-sm leading-relaxed text-smoke">
           {article.description}
         </p>

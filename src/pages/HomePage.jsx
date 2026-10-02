@@ -893,7 +893,7 @@ function Nationwide() {
               covers that state&apos;s tire fees and rules.
             </p>
             <Link to="/tires-shipped" className="btn-primary mt-7 min-h-[48px]">
-              Tires shipped nationwide
+              Shipping to 48 states + DC
               <ArrowRight size={17} aria-hidden />
             </Link>
           </div>
@@ -1065,7 +1065,7 @@ export default function HomePage() {
   return (
     <>
       <Seo
-        title="Tires & Wheels Shipped Nationwide"
+        title="Tires & Wheels Shipped Nationwide (48 states + DC)"
         description="TireDrop is an online tire and wheel store shipping free to the 48 contiguous states and DC. Ship to your address, or free to our South Florida shop where we install them. Powered by Extreme Tires."
       />
       {/* A plain wrapper for the reveal hook to search; no layout of its own. */}

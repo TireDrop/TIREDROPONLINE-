@@ -328,7 +328,7 @@ export default function ShippingPage() {
                 to="/tires-shipped"
                 className="text-volt underline underline-offset-2 hover:text-bone"
               >
-                nationwide shipping page
+                shipping to 48 states + DC page
               </Link>{" "}
               has state guides to tread laws, tire fees and the tire type each
               climate calls for.

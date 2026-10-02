@@ -115,7 +115,7 @@ Heat is worth caring about in Miami in August, but the temperature grade is a la
 
 Say one manufacturer offers two models in your size, graded like this (these are examples, not real tires):
 
-| | Model 1 | Model 2 |
+| Grade | Model 1 | Model 2 |
 |---|---|---|
 | Treadwear | 600 | 400 |
 | Traction | A | AA |

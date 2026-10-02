@@ -4,7 +4,10 @@
  *   npm run build && npm run check:a11y
  *
  * Fails on any serious or critical violation; moderate and minor ones are
- * listed but do not fail the run. Also checks that the skip link is the first
+ * listed but do not fail the run. ROUTES run at both widths; PHONE_ROUTES
+ * (more pages on templates ROUTES already cover at 1280) at 390 only, to keep
+ * the run short. "/compare#filled" queues two tires first, so the full
+ * comparison table is checked and the compare tray shows on the next routes. Also checks that the skip link is the first
  * thing Tab reaches and that it moves focus to <main id="main">.
  *
  * Starts `vite preview` on A11Y_PORT (default 4320), or tests A11Y_BASE when
@@ -72,10 +75,11 @@ const stopServer = () => {
   }
 };
 
-const learnHub = readdirSync("dist/learn", { withFileTypes: true })
+const learnHubs = readdirSync("dist/learn", { withFileTypes: true })
   .filter((d) => d.isDirectory())
   .map((d) => d.name)
-  .sort()[0];
+  .sort();
+const learnHub = learnHubs[0];
 
 const ROUTES = [
   "/",
@@ -93,7 +97,37 @@ const ROUTES = [
   "/tire-size",
   "/tire-size-finder",
   "/contact",
+  // Second pass (2026-10-02): heading order on the Learn and Blog indexes,
+  // /wheels and /compare, and the UTQG article's tables.
+  "/learn",
+  `/learn/${learnHub}`,
+  "/blog",
+  "/compare",
+  "/wheels", // between the two, so "#filled" is a real page load
+  "/compare#filled",
+  "/learn/sidewall/utqg-ratings",
 ];
+
+const PHONE_ROUTES = [
+  ...learnHubs.slice(1).map((hub) => `/learn/${hub}`),
+  firstIn("blog"),
+  firstIn("wheels"),
+  "/about",
+  "/shipping",
+  "/install",
+  "/find-my-tires",
+  "/financing",
+  "/locations",
+  "/auto-service",
+  "/load-speed-check",
+];
+
+/** Two real tire slugs for the "/compare#filled" visit. */
+const COMPARE_PICKS = readdirSync("dist/tires")
+  .filter((f) => f.endsWith(".html"))
+  .sort()
+  .slice(0, 2)
+  .map((f) => f.replace(/\.html$/, ""));
 
 /* ------------------------------ harness ------------------------------ */
 
@@ -107,6 +141,10 @@ async function newPage(width) {
     viewport: { width, height: 900 },
     reducedMotion: "reduce",
   });
+  await context.addInitScript((picks) => {
+    if (location.hash === "#filled")
+      localStorage.setItem("tiredrop.compare.v1", JSON.stringify(picks));
+  }, COMPARE_PICKS);
   const page = await context.newPage();
   page.setDefaultTimeout(15000);
   await page.route(
@@ -142,7 +180,7 @@ const report = [];
 try {
   for (const width of WIDTHS) {
     const { context, page } = await newPage(width);
-    for (const route of ROUTES) {
+    for (const route of width === 390 ? [...ROUTES, ...PHONE_ROUTES] : ROUTES) {
       await page.goto(BASE + route, { waitUntil: "load" });
       await page.waitForFunction(isMounted);
       await page.waitForLoadState("networkidle");
@@ -202,6 +240,6 @@ try {
 
 const notes = report.filter((v) => !["serious", "critical"].includes(v.impact));
 console.log(
-  `\n${ROUTES.length} routes x ${WIDTHS.length} widths: ${failures} serious/critical, ${notes.length} moderate/minor noted`,
+  `\n${ROUTES.length} routes x ${WIDTHS.length} widths + ${PHONE_ROUTES.length} at 390: ${failures} serious/critical, ${notes.length} moderate/minor noted`,
 );
 process.exit(failures ? 1 : 0);

@@ -211,7 +211,7 @@ export const FOOTER_COLUMNS = [
     title: "Shipping & Install",
     links: [
       { label: "How Shipping Works", to: "/shipping" },
-      { label: "Tires Shipped Nationwide", to: "/tires-shipped" },
+      { label: "Shipping to 48 States + DC", to: "/tires-shipped" },
       { label: "Ship to Store", to: "/install" },
       { label: "Mobile Installation", to: "/mobile-service" },
       { label: "Book an Install", to: "/schedule" },

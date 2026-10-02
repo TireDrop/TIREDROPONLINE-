@@ -77,7 +77,7 @@ An XL tire isn't simply a tougher version of the same tire. Its construction is 
 
 Toyo's guidelines for using load and inflation tables give these reference points for P-metric passenger tires:
 
-| | Reference pressure for maximum load |
+| Load type | Reference pressure for maximum load |
 |---|---|
 | Standard load (SL) | 35 psi |
 | Extra load (XL) | 41 psi |

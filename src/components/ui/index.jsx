@@ -431,7 +431,7 @@ const CRUMB_PARENTS = [
   [/^\/services\/.+/, { name: "Auto Service", path: "/auto-service" }],
   [/^\/install$/, { name: "How shipping works", path: "/shipping" }],
   [CITY_ROUTE, { name: "Mobile Tire Service", path: "/mobile-service" }],
-  [STATE_ROUTE, { name: "Tires Shipped Nationwide", path: "/tires-shipped" }],
+  [STATE_ROUTE, { name: "Shipping to 48 States + DC", path: "/tires-shipped" }],
 ];
 
 function breadcrumbNode(pathname, url, name, parents) {
