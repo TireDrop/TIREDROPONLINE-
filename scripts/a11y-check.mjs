@@ -102,6 +102,7 @@ const ROUTES = [
   firstIn("mobile-service"),
   "/tires-shipped",
   firstIn("tires-shipped"),
+  "/local-delivery", // the inline SVG map and the ZIP checker
   firstIn(`learn/${learnHub}`),
   "/tire-size",
   "/tire-size-finder",
