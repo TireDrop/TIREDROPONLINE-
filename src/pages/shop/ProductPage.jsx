@@ -294,14 +294,17 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
               while the buy box and spec table scroll past it — the
               column is far taller than the art, and stretching the panel to
               match just floats the product in an empty box. */}
-          <div className="card flex items-center justify-center bg-fog p-8 lg:sticky lg:top-[calc(var(--header-h)+1.5rem)]">
+          {/* On a phone the art is kept small, so the name, the price for a
+              set and the fitment answer reach the first screen instead of a
+              full-width picture of a tire. */}
+          <div className="card flex items-center justify-center bg-fog p-4 sm:p-8 lg:sticky lg:top-[calc(var(--header-h)+1.5rem)]">
             {photo ? (
               <img
                 src={photo}
                 alt={`${name}, ${sizeLabel}`}
                 width={420}
                 height={420}
-                className="h-auto w-full max-w-[420px] object-contain"
+                className="h-auto w-full max-w-[180px] object-contain sm:max-w-[420px]"
               />
             ) : (
               <ProductArt
@@ -309,7 +312,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                 accent={product.accent}
                 size={420}
                 label={`${name}, ${sizeLabel}`}
-                className="h-auto w-full max-w-[420px]"
+                className="h-auto w-full max-w-[180px] sm:max-w-[420px]"
               />
             )}
           </div>
@@ -354,16 +357,8 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
               )}
             </div>
 
-            {/* Installed price, one tire and a set of four, for a local
-                shopper. Display only: the Delivery choice below is what
-                adds installation to the cart. */}
-            {isTire && (
-              <div className="mt-5">
-                <InstalledPriceToggle placement="product" />
-                <InstalledPriceLines price={product.price} className="mt-3" />
-              </div>
-            )}
-
+            {/* Does it fit, straight under the price: the question a shopper
+                answers before quantity or delivery matter. */}
             {isTire && <FitPanel fit={fit} />}
 
             {/* Quantity. Presets first, because tapping "4" is faster than
@@ -591,6 +586,17 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                 </div>
               )}
             </div>
+
+            {/* Installed price, one tire and a set of four, for a local
+                shopper. Display only: the Delivery choice above is what adds
+                installation to the cart, so this sits after the button
+                rather than between the price and it. */}
+            {isTire && (
+              <div className="mt-5">
+                <InstalledPriceToggle placement="product" />
+                <InstalledPriceLines price={product.price} className="mt-3" />
+              </div>
+            )}
 
             {canCompare && (
               <div className="mt-3">
