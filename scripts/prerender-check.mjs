@@ -373,18 +373,23 @@ for (const url of ["/tires?size=225/45R18", "/tire-size?size=225/45R17", "/no-su
 // turns up in any script the page fetched, whether as Markdown or as HTML.
 {
   const content = loadContent();
-  const markers = [...content.getLearnArticles(), ...content.getBlogPosts()]
+  const articles = [...content.getLearnArticles(), ...content.getBlogPosts()];
+  const markers = articles
     .map((a) => ({
       path: a.path,
+      // 50 characters of plain prose: no heading, table, quote, fence or
+      // demo line, and no Markdown or character the HTML would escape.
       text: a.body
         .split("\n")
-        .map((l) => l.trim())
-        // A plain paragraph line: no list marker or inline Markdown, and no
-        // character the HTML would escape.
-        .find((l) => l.length > 60 && /^[A-Z]/.test(l) && !/[[\]*_`<>|#&"'’]/.test(l))
-        ?.slice(0, 60),
+        .filter((l) => !/^\s*(#|\||>|```|\[\[)/.test(l))
+        .flatMap((l) => l.split(/[[\]()*_`<>|#&"'’]/))
+        .map((part) => part.trim())
+        .find((part) => part.length >= 50 && part.includes(" "))
+        ?.slice(0, 50),
     }))
     .filter((m) => m.text);
+  if (markers.length !== articles.length)
+    bad(`only ${markers.length} of ${articles.length} articles have a plain sentence to look for`);
   const { context, page, errors } = await newPage();
   // The scripts the page requested, read back from the server here: the
   // browser's copy of a preloaded module's body is not reliably readable.
