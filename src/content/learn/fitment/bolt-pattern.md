@@ -21,15 +21,15 @@ faq:
   - q: "What does 5x114.3 mean?"
     a: "Five lug studs or bolts, arranged on a circle 114.3 mm in diameter measured through the center of each lug. The same pattern is often written 5x4.5, because 114.3 mm is 4.5 inches."
   - q: "How do you measure a 5-lug bolt pattern?"
-    a: "Because no stud sits directly opposite another, you measure from the center of one stud to the imaginary line between the two studs across from it. Tire Rack recommends a bolt pattern gauge or a published guide to confirm, since several 5-lug patterns are very close in size."
+    a: "Because no stud sits directly opposite another, Konig's method measures from the center of one stud to the center of the stud next to it, then divides that distance by 0.5878 to get the bolt circle diameter. Some 5-lug patterns are very close in size, so confirm the result against the vehicle's published spec."
   - q: "Can I use a wheel with a slightly different bolt pattern?"
     a: "Don't force it. Patterns like 5x114.3 and 5x115 are close enough to look like a match but they aren't the same. A wheel should match the vehicle's bolt pattern exactly; have fitment confirmed before buying."
   - q: "What is PCD on a wheel?"
     a: "PCD stands for pitch circle diameter, the diameter of the imaginary circle that runs through the center of every lug hole. It's the second number in a bolt pattern, like the 114.3 in 5x114.3."
 sources:
-  - title: "How Do I Measure Wheel Bolt Pattern?"
-    publisher: "Tire Rack"
-    url: "https://www.tirerack.com/upgrade-garage/how-do-i-measure-wheel-bolt-pattern"
+  - title: "What Is PCD? How To Measure Your Wheel Bolt Pattern Correctly"
+    publisher: "Konig Wheels"
+    url: "https://news.konigwheels.com/blog/pcd-explained/"
   - title: "How can I find wheel specifications on the website?"
     publisher: "Wheel Pros"
     url: "https://helpcenter.wheelpros.com/hc/en-us/articles/43488701614605-How-can-I-find-wheel-specifications-on-the-website"
@@ -42,9 +42,12 @@ sources:
   - title: "What type of lug nuts do I need to install my aftermarket wheels?"
     publisher: "Wheel Pros"
     url: "https://helpcenter.wheelpros.com/hc/en-us/articles/43489426493965-What-type-of-lug-nuts-do-I-need-to-install-my-aftermarket-wheels"
-  - title: "Lug Nuts"
-    publisher: "Discount Tire"
-    url: "https://www.discounttire.com/learn/lug-nuts"
+  - title: "Installation Hardware and Accessories"
+    publisher: "Konig Wheels"
+    url: "https://news.konigwheels.com/wheel-info-tech/installation-accessories/"
+  - title: "Tightening Your Wheels"
+    publisher: "Konig Wheels"
+    url: "https://news.konigwheels.com/wheel-info-tech/tightening-your-wheels/"
 related:
   - /learn/fitment/wheel-offset-backspacing
   - /learn/fitment/staggered-tires
@@ -88,19 +91,17 @@ The best source is always the vehicle's own spec: the owner's manual, the vehicl
 
 ### 4, 6 and 8-lug wheels
 
-With an even number of lugs, every stud has one directly across from it. Measure from the **center of one stud** straight across the hub to the **center of the opposite stud**. That distance is the bolt circle diameter.
+With an even number of lugs, every stud has one directly across from it. Konig describes this for 4-lug wheels: measure from the **center of one stud** straight across the hub to the **center of the opposite stud**. That distance is the bolt circle diameter.
 
 ### 5-lug wheels
 
-With five lugs, no stud sits directly across from another, so a center-to-center measurement across the hub comes out wrong. Tire Rack's method: measure from the **center of one lug** to the **imaginary line that bridges the two lugs opposite it**.
+With five lugs, no stud sits directly across from another, so a center-to-center measurement across the hub comes out wrong. Konig's method uses two neighboring studs instead: measure from the **center of one stud** to the **center of the stud next to it**, then **divide by 0.5878**. The result is the bolt circle diameter.
 
-That's fiddly to do with a tape measure, and it's where most mistakes happen.
+On a 5x114.3 wheel, for example, neighboring studs sit about 67.2 mm apart (114.3 × 0.5878). That's fiddly to measure with a tape, and it's where most mistakes happen.
 
-### Use a gauge for the close calls
+### Don't round a close call
 
-Tire Rack points out that several 5-lug patterns have diameters very close to each other, and recommends a bolt pattern guide or a **bolt pattern gauge** to be sure. A gauge drops into neighboring lug holes and reads the PCD directly.
-
-How close is close? Wheel catalogs list patterns like **5x114.3** and **5x115** side by side. That's 0.7 mm apart: far too small to see by eye, and still not the same pattern. If your measurement lands between two patterns, don't round it. Look up the spec.
+Some 5-lug patterns are very close in size. Wheel catalogs list patterns like **5x114.3** and **5x115** as separate fitments. That's 0.7 mm apart: far too small to see by eye, and still not the same pattern. If your measurement lands between two patterns, don't round it. Look up the spec, or have a shop check it with a bolt pattern gauge.
 
 ## A matching pattern is only step one
 
@@ -116,7 +117,7 @@ The center bore is the hole in the middle of the wheel that fits over the vehicl
 
 ### Lug seat type and thread size
 
-Wheel Pros and other wheel guides point to the **seat**, the spot where the lug nut or bolt meets the wheel, as one of the most important differences between lug nuts. Common seats are:
+Wheel Pros and Konig both stress the **seat**, the spot where the lug nut or bolt meets the wheel. Common seats are:
 
 - **conical**, or tapered,
 - **spherical**, or ball,
@@ -124,9 +125,9 @@ Wheel Pros and other wheel guides point to the **seat**, the spot where the lug 
 
 The seat on the nut or bolt has to match the seat on the wheel. Aftermarket wheels can use a different seat from the factory wheels, so check before reusing the factory lugs.
 
-The **thread size** has to match the vehicle's studs too. Lug sizes are written as diameter and pitch, such as M12x1.5. On metric studs, the pitch is the distance in millimeters between threads; on inch-sized studs, it's threads per inch.
+The **thread size** has to match the vehicle's studs too. Lug sizes are written as diameter and pitch, such as M12x1.5. Konig notes that stud size and thread pitch vary from vehicle to vehicle, and that the lugs need enough thread engagement on the studs.
 
-Finally, lugs are tightened to the **vehicle maker's torque spec**, found in the owner's manual.
+Finally, lugs are tightened with a torque wrench to the **vehicle maker's torque spec**. Konig's tightening guide says the owner's manual figure takes precedence over any general chart.
 
 ### Offset, width and brake clearance
 

@@ -40,9 +40,9 @@ sources:
   - title: "Replacing Tires"
     publisher: "U.S. Tire Manufacturers Association"
     url: "https://www.ustires.org/tire-care-safety/replacing-tires"
-  - title: "Flotation Tires vs Metric Tires"
-    publisher: "Discount Tire"
-    url: "https://www.discounttire.com/learn/flotation-tires"
+  - title: "Tire Terminology"
+    publisher: "Bridgestone"
+    url: "https://tires.bridgestone.com/en-us/learn/automotive/tire-terminology"
 related:
   - /tire-size
   - /learn/sidewall/load-index
@@ -137,14 +137,14 @@ A speed rating is a lab rating under set conditions, not a target for the Sawgra
 
 ## Flotation sizes: 31x10.50R15 and friends
 
-Trucks and off-road builds sometimes use **flotation** sizes, which look nothing like metric ones. According to Discount Tire, a flotation size reads in inches from left to right:
+Trucks and off-road builds sometimes use **flotation** sizes, which look nothing like metric ones. Bridgestone describes high flotation sizing for light trucks as overall diameter in inches, then section width in inches, then construction type, then rim diameter in inches. Read left to right:
 
 - **31**: overall diameter, 31 inches tall
 - **10.50**: section width, 10.5 inches
 - **R**: radial
 - **15**: rim diameter, 15 inches
 
-So with a flotation size, you get the overall diameter up front without doing any math. You'll often see these with **LT** after the numbers, as in 31x10.50R15LT, marking them as light truck tires.
+So with a flotation size, you get the overall diameter up front without doing any math. You'll often see these with **LT** after the numbers, as in Bridgestone's example 33x12.50R15LT, marking them as light truck tires.
 
 ## Three mistakes we'd rather you skip
 

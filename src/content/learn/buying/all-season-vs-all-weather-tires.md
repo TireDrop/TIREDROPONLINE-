@@ -15,7 +15,7 @@ takeaways:
   - "M+S (mud and snow) is based on tread design. It isn't a snow performance test."
   - "The three-peak mountain snowflake (3PMSF) means the tire met a measured snow traction standard on packed snow."
   - "All-season tires usually carry M+S only. All-weather tires carry the 3PMSF symbol and are built to stay on the car year-round."
-  - "The snow test measures acceleration on packed snow. It says nothing about rain grip, tread life or noise."
+  - "The snow test measures traction on packed snow. It says nothing about ice, rain grip, tread life or noise."
   - "Whatever the type, the size, load index and speed rating still have to match your door placard."
 faq:
   - q: "What is the difference between all-season and all-weather tires?"
@@ -39,9 +39,9 @@ sources:
   - title: "Winter tire markings"
     publisher: "Continental"
     url: "https://www.continental-tires.com/ca/en/tire-knowledge/winter-tire-markings/"
-  - title: "What is the Three-Peak Mountain Snowflake Symbol?"
-    publisher: "Tire Rack"
-    url: "https://www.tirerack.com/upgrade-garage/what-is-the-threepeak-mountain-snowflake-symbol"
+  - title: "Winter Tire Buying Guide"
+    publisher: "Michelin"
+    url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-buying-guide/guide-to-buying-winter-tires"
   - title: "Mixing Tires: Safety, Winter Tires & AWD"
     publisher: "Michelin"
     url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-buying-guide/mixing-tire-brands"
@@ -91,10 +91,11 @@ A tire that meets the standard can carry the three-peak mountain snowflake picto
 
 ### What the snow test doesn't cover
 
-Here's the catch that matters for buyers. Tire Rack's explanation of the standard notes that the qualifying test measures **acceleration traction on medium-packed snow only**. It doesn't grade braking, cornering or ice.
+Here's the catch that matters for buyers. Michelin describes the qualifying test as a **traction test on medium-packed snow**, and notes that the symbol doesn't cover performance on **pure ice**.
 
 So the snowflake tells you a tire cleared a real bar in one specific condition. It tells you nothing about:
 
+- grip on ice,
 - grip on wet roads,
 - tread life,
 - road noise or ride comfort,
