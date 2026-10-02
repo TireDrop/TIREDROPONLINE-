@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
+_Last updated: 2026-10-02 (installed-price toggle on preview/installed-price; SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
 
 ## Site fixes (Claude)
 - [x] ~~Resources only: every competitor citation/link replaced with maker, AAA or government sources~~ (`7754330`, shipped to main 2026-10-02)
@@ -114,7 +114,7 @@ _Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citati
   - [ ] After the preview deploys, check its Vercel build log for `[vpic-snapshot] wrote dist/data/vpic-models.json` (this sandbox can't reach NHTSA, so the snapshot was never generated here)
   - [ ] Shopify theme's `td-vehicles.js` still asks NHTSA straight from the browser and falls back to the 45-model table; point it at `/api/vehicles` (draft theme only) if the theme finder is ever shown again
   - [ ] A shared /tires link spells a model the size table doesn't know from the URL ("cx-5" shows as "Cx-5"); the saved pick keeps the right spelling
-- [ ] Installed-price toggle
+- [x] ~~Installed-price toggle: "Show installed price (Miami-Dade, Broward, Palm Beach)" on /tires cards and tire pages, tire + installation = total for one tire and a set of 4, price from services.js, remembered, display only (cart unchanged), GA4 `installed_price_toggle`~~ (preview/installed-price 42d49d2)
 - [ ] Book an install time at checkout
 - [ ] Fitment by trim + staggered (logic + badge shipped in 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API)
 - [x] ~~Tire Size Finder scanner (door sticker / sidewall / VIN), one camera, Scan button in the home hero and /tires~~ (preview/scanner, shipped to main 2026-10-01; steps: docs/integrations/tire-size-finder.md)
