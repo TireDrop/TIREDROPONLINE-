@@ -39,6 +39,7 @@ the code fits together is in the root [README](../README.md).
 
 - [blog-learn-build.md](prompts/blog-learn-build.md): the approved phased plan (prerender, research, pilot, batches) for the Blog + Learn build.
 - [2026-10-02-verify-and-index.md](prompts/2026-10-02-verify-and-index.md): Chrome prompts for the 2026-10-02 content: request indexing for the 17 new URLs + home page, check five snippet-only claims on their source pages, and read the Business Profile pin, Place ID and review link. Use it after a content release.
+- [2026-10-02-justin-remaining.md](prompts/2026-10-02-justin-remaining.md): every open checklist item only Justin can do, by impact on sales: Chrome prompts (with hard stops), call scripts and email drafts, what is waiting on time or data, and the questions Claude needs answered. Start here when working through the checklist.
 
 ## audits/: findings, newest last
 

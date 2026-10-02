@@ -35,7 +35,7 @@ _Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citati
 - [x] ~~Language button: translate any page (Google element + translate.google.com fallback)~~ (c05e3ac)
 - [x] ~~Spanish tab labels overflow the home finder on phones (SearchPanel whitespace-nowrap) → let tabs wrap below md~~ (c05e3ac)
 - [x] ~~Compact mobile-first footer: contact row first, collapsible link groups, 62% shorter on phones (1621 → 608px), check:footer guards it~~ (a18b709, shipped to main 2026-10-02)
-  - [ ] Footer link label "Tires Shipped Nationwide" → say 48 states + DC (Justin picks the wording)
+  - [ ] Footer link label "Tires Shipped Nationwide" → say 48 states + DC (Justin picks the wording) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D6)
 - [x] ~~check:sources gate: competitor links, mentions and meta tags fail the build; required in every gate run~~ (`0b1172b`, shipped to main 2026-10-02)
   - [x] ~~Source decisions: Wheel Pros / KMC (wheel makers) and legalclarity.org kept as resources; cleanairforce.com (Georgia emissions program) added as a resource~~ (2026-10-02)
 
@@ -49,39 +49,39 @@ _Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citati
 - [x] ~~Shopify app + Vercel keys + "Website lead alert" Flow~~
 - [x] ~~Newsletter pop-up test passed~~
 - [x] ~~Tipping removed from checkout~~ (Justin, 2026-09-30)
-- [ ] Footer sign-up test: sign up once with a test address; the Shopify customer is tagged `newsletter`, `footer`, `vercel` (was `popup`; update any Shopify segment that filters on `popup`)
+- [ ] Footer sign-up test: sign up once with a test address; the Shopify customer is tagged `newsletter`, `footer`, `vercel` (was `popup`; update any Shopify segment that filters on `popup`) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A12)
 - [x] ~~Go-live test: contact form (lead + Flow)~~ (2026-09-30)
 - [x] ~~Go-live test: order-request draft #D2 + /track shows it~~ (2026-09-30)
 - [x] ~~Go-live test: $1 order #D1~~ (replaced by the $1 install tests #D3/#D4 below; delete drafts #D1/#D2)
-- [ ] Go-live test: email folders + SPF/DKIM/DMARC (blocked: Outlook needs info@ sign-in)
-- [ ] Google: retry "Request indexing" (robots.txt delay)
-- [ ] 2-step login for all Shopify staff (Melissa keeps full access)
-- [ ] Someone can sign into Outlook as info@tiredroponline.com
-- [ ] SPF/DMARC: fix only if the Gmail test fails (never add a 2nd DMARC record)
-- [ ] HSTS preload: decide whether to add `preload` and submit to hstspreload.org (hard to undo; docs/ops/deploy.md)
-- [ ] Justin: enable Spanish in Shopify Settings → Languages (checkout)
+- [ ] Go-live test: email folders + SPF/DKIM/DMARC (blocked: Outlook needs info@ sign-in) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A3)
+- [ ] Google: retry "Request indexing" (robots.txt delay) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A8)
+- [ ] 2-step login for all Shopify staff (Melissa keeps full access) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A16)
+- [ ] Someone can sign into Outlook as info@tiredroponline.com → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A2)
+- [ ] SPF/DMARC: fix only if the Gmail test fails (never add a 2nd DMARC record) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C8)
+- [ ] HSTS preload: decide whether to add `preload` and submit to hstspreload.org (hard to undo; docs/ops/deploy.md) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D10)
+- [ ] Justin: enable Spanish in Shopify Settings → Languages (checkout) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A13)
 
 ## Next phase (Chrome prompt after the builds land)
 - [x] ~~Webhooks: 2 in Shopify, signing key into Vercel, redeploy, test (prompt 21)~~ (2026-09-30: 2 webhooks configured, test notifications 200)
 - [x] ~~Prompt 22: email button + High-risk order review (tag, hold, email) + Needs scheduling alert (order paid → 24h → not install-booked)~~ (Justin, 2026-09-30)
-- [ ] Re-run prompt 15 (local vs ship block was never saved; paste it right above the new install button)
-- [ ] Prompt 23: add 33440, 33455, 33471, 33475 to the "Order routing: local vs ship" Flow ZIP condition (and to the email block if prompt 15 is already saved)
-- [ ] Prompt 24: "Website lead alert" reads the lead from the `tiredrop.last_lead` metafield (not `customer.note`), new last line; then the two-message test
-- [ ] $1 install test: pay #D3 and book it on /track → tags flip + [BOOKED] to info@ + no [SCHEDULE] after 24h; pay #D4 and don't book → [SCHEDULE] after 24h; then refund both (drafts created 2026-09-30)
-- [ ] Confirm info@tiredroponline.com receives Shopify mail (test emails go to the logged-in staff account)
-- [ ] Justin: INSTALL_BOOKING_URL after the Tire Guru call (booking link → set it in Vercel and redeploy; API → tell Claude, it's a follow-up build; see docs/integrations/install-scheduling.md)
-- [ ] `/track` tested with the $1 order
-- [ ] Header links checked on desktop and phone
-- [ ] Checkout branding (prompt 20)
-- [ ] GA4: mark generate_lead, order_request and install_booking as Key events (prompt 25)
+- [ ] Re-run prompt 15 (local vs ship block was never saved; paste it right above the new install button) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A5)
+- [ ] Prompt 23: add 33440, 33455, 33471, 33475 to the "Order routing: local vs ship" Flow ZIP condition (and to the email block if prompt 15 is already saved) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A5)
+- [ ] Prompt 24: "Website lead alert" reads the lead from the `tiredrop.last_lead` metafield (not `customer.note`), new last line; then the two-message test → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A4)
+- [ ] $1 install test: pay #D3 and book it on /track → tags flip + [BOOKED] to info@ + no [SCHEDULE] after 24h; pay #D4 and don't book → [SCHEDULE] after 24h; then refund both (drafts created 2026-09-30) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A1)
+- [ ] Confirm info@tiredroponline.com receives Shopify mail (test emails go to the logged-in staff account) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A3)
+- [ ] Justin: INSTALL_BOOKING_URL after the Tire Guru call (booking link → set it in Vercel and redeploy; API → tell Claude, it's a follow-up build; see docs/integrations/install-scheduling.md) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C4)
+- [ ] `/track` tested with the $1 order → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A1)
+- [ ] Header links checked on desktop and phone → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A14)
+- [ ] Checkout branding (prompt 20) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A11)
+- [ ] GA4: mark generate_lead, order_request and install_booking as Key events (prompt 25) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A7)
 - [x] ~~Publish EDIT HERE (shop. storefront → main-site redirect is live)~~ (2026-09-30, theme 166982615192)
 - [x] ~~Redirect test: shop. pages → tiredroponline.com; checkout, /account and invoices stay on Shopify~~ (2026-09-30)
 
 ## Before real paid orders (Claude)
-- [ ] Bill installation on the invoice
-- [ ] Ship-to-store flow: address, emails, alerts
-- [ ] Fitment hold before orders go to ATD
-- [ ] "Tires arrived at the shop" notice
+- [ ] Bill installation on the invoice → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D2)
+- [ ] Ship-to-store flow: address, emails, alerts → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D4)
+- [ ] Fitment hold before orders go to ATD → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D3)
+- [ ] "Tires arrived at the shop" notice → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D4)
 - [x] ~~Checkout spam guard, and no writing into other customers' notes~~ (7cc12f2)
 - [x] ~~No Add button on won't-fit tires; Compare crowns same-size tires only~~ (347c4e1)
 - [x] ~~Year-aware fitment on /tires~~ (347c4e1)
@@ -90,17 +90,17 @@ _Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citati
 - [x] ~~Phone bottom bar changes by page~~ (c541339)
 - [x] ~~Pop-up off shop pages~~ (2026-09-30: superseded, the pop-up is gone)
 - [x] ~~Google search-result data: breadcrumbs (one per page, matching the visible trail), FAQ (kept where it was), article author, `npm run check:schema` gate~~ (27d477c)
-- [ ] Google search-result data: map coordinates. Waiting on Justin's Google Maps pin; paste it into `geo` in `src/data/business.js`
+- [ ] Google search-result data: map coordinates. Waiting on Justin's Google Maps pin; paste it into `geo` in `src/data/business.js` → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A9)
 - [x] ~~Accessibility fixes + skip link~~ (c541339)
 - [x] ~~Security headers: CSP, HSTS, Permissions-Policy~~ (abcf645; CSP is report-only for now)
 - [x] ~~GA4 conversion events~~ (abcf645)
-- [ ] Switch the CSP from report-only to enforced after a week of clean `[csp]` logs (docs/ops/deploy.md, "Security headers")
+- [ ] Switch the CSP from report-only to enforced after a week of clean `[csp]` logs (docs/ops/deploy.md, "Security headers") → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C9)
 - [x] ~~NHTSA lookup timeout~~ (c541339)
-- [ ] Returns window + warranty/road-hazard links
+- [ ] Returns window + warranty/road-hazard links → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D1)
 - [x] ~~"Continental US" wording (~40 places) → "48 contiguous states + DC"~~ (c541339)
 - [ ] Accessibility, second pass: heading order on the Learn hubs, /blog, /wheels and /compare, and a blank first column heading in the UTQG table (axe "moderate"/"minor"; `npm run check:a11y` covers 12 key routes)
-- [ ] Shopify theme copy still says "continental United States" (shop. redirects to the main site, so it does not render; update the draft theme only if the redirect ever comes off)
-- [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search)
+- [ ] Shopify theme copy still says "continental United States" (shop. redirects to the main site, so it does not render; update the draft theme only if the redirect ever comes off) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C10)
+- [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A9)
 - [x] ~~CRO quick wins: hero to results, phone cart Checkout, install price shown, 48 states + DC on cards~~ (shipped to main 2026-10-02, release preview/release-2026-10-02)
 
 ## Big upgrades (Claude)
@@ -111,12 +111,12 @@ _Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citati
   - Filters: season, tire type, brand, price per tire, speed rating, load index, load range, treadwear warranty, sort by warranty / brand. Skipped for lack of data: EV-ready, XL on passenger tires, run-flat (appears automatically once a run-flat tire is listed)
   - [x] ~~/tires Shop by Vehicle (and its Change) use the full lists, not the catalog's 10 makes / 45 models: years 1981-2027, every make sold that year, every model NHTSA lists (BMW: 3 Series, 4 Series, M3, X5, X7…); Model box filters as you type and takes a typed model~~ (preview/remember e8f1d6f)
   - [x] ~~Model lists hold up: `/api/vehicles` asks NHTSA with a timeout and is cached at Vercel's edge for a day; the build saves a snapshot as the fallback; when nothing loads the finder says "Couldn't load models. Type your model or enter your door-jamb size."~~ (preview/remember e8f1d6f)
-  - [ ] After the preview deploys, check its Vercel build log for `[vpic-snapshot] wrote dist/data/vpic-models.json` (this sandbox can't reach NHTSA, so the snapshot was never generated here)
-  - [ ] Shopify theme's `td-vehicles.js` still asks NHTSA straight from the browser and falls back to the 45-model table; point it at `/api/vehicles` (draft theme only) if the theme finder is ever shown again
+  - [ ] After the preview deploys, check its Vercel build log for `[vpic-snapshot] wrote dist/data/vpic-models.json` (this sandbox can't reach NHTSA, so the snapshot was never generated here) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A17)
+  - [ ] Shopify theme's `td-vehicles.js` still asks NHTSA straight from the browser and falls back to the 45-model table; point it at `/api/vehicles` (draft theme only) if the theme finder is ever shown again → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C11)
   - [ ] A shared /tires link spells a model the size table doesn't know from the URL ("cx-5" shows as "Cx-5"); the saved pick keeps the right spelling
 - [ ] Installed-price toggle
-- [ ] Book an install time at checkout
-- [ ] Fitment by trim + staggered (logic + badge shipped in 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API)
+- [ ] Book an install time at checkout → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C5)
+- [ ] Fitment by trim + staggered (logic + badge shipped in 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C3)
 - [x] ~~Tire Size Finder scanner (door sticker / sidewall / VIN), one camera, Scan button in the home hero and /tires~~ (preview/scanner, shipped to main 2026-10-01; steps: docs/integrations/tire-size-finder.md)
   - [x] ~~Justin: Anthropic key `tiredrop-vercel-scanner` in Vercel (Sensitive, Production + Preview), $25 monthly spend limit, auto-reload on~~ (2026-10-01)
   - [x] ~~Guardrails: key read only server-side; per-IP limit 5 scans / 10 min; photo ≤3 MB (under Vercel's 4.5 MB body limit) and JPEG/PNG/WebP checked by bytes; 401/403/429/529 logged with a hint, never the key; "busy" and "isn't working" messages for shoppers~~ (preview/scanner)
@@ -125,15 +125,15 @@ _Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citati
   - [x] ~~Justin tested real photos on the preview: works; logs show `mode=auto:door outcome=read confidence=high` (3.9-8.2 s)~~ (2026-10-01)
   - [x] ~~"ship scanner": all 18 gates pass on the merge with search~~ (2026-10-01)
   - [x] ~~Orders carry the fitment: Vehicle / Size source / Front / Rear / Fitment attributes + fitment-check, staggered, size-scanned tags; ATD forwarder skips fitment-check~~ (preview/fitment-attrs 8e9459b, shipped to main 2026-10-01)
-  - [ ] Justin: run Shopify admin prompt 26 (Flow "Fitment check + scanner tags": hold + email) → turn it on → $1 staggered test
-  - [ ] Rotate the key before it expires 2026-10-31 (calendar reminder Oct 24; steps in docs/integrations/tire-size-finder.md)
-- [ ] Local city pages: wave 1 (7 cities) live 2026-10-01; wave 2 next
+  - [ ] Justin: run Shopify admin prompt 26 (Flow "Fitment check + scanner tags": hold + email) → turn it on → $1 staggered test → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A6)
+  - [ ] Rotate the key before it expires 2026-10-31 (calendar reminder Oct 24; steps in docs/integrations/tire-size-finder.md) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C6)
+- [ ] Local city pages: wave 1 (7 cities) live 2026-10-01; wave 2 next → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C7)
 - [x] ~~Nationwide hub + 7 pilot state pages (FL, GA, TX, CA, NY, NC, CO) live~~ (preview/states 62fbb42, shipped to main 2026-10-01)
-- [ ] Roll out the remaining states in batches (each fact read on its source before it renders)
-- [ ] Search Console: submit /tires-shipped and the 7 state pages
+- [ ] Roll out the remaining states in batches (each fact read on its source before it renders) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D9)
+- [ ] Search Console: submit /tires-shipped and the 7 state pages → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A8)
   - [x] ~~Fact-check: 40 facts read against their official sources (27 confirmed, 13 corrected incl. the same claims in FAQs and paragraphs); every pilot fact now `fetched`, preview-only switch off~~ (2026-10-01)
   - [x] ~~"ship states": all 18 gates pass~~ (2026-10-01)
-- [ ] Real review collection (no stars until real reviews exist)
+- [ ] Real review collection (no stars until real reviews exist) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D7)
 - [x] ~~Store-wide search with typeahead: sizes in any spelling, vehicles, brands/types, tires, 91 pages; /search results page; GA4 `search` + `search_suggestion`~~ (preview/search 1214d45, shipped to main 2026-10-01)
 
 ## Content & SEO: Blog + Learn (Claude; plan in docs/prompts/blog-learn-build.md)
@@ -144,22 +144,22 @@ _Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citati
 - [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); Batches 2–9 to go. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
 - [x] ~~6 new tools with their own tool pages, embedded in 8 articles~~ (preview/tools 210b348, shipped 2026-10-01)
 - [x] ~~Wave 1 city pages + mobile hub: Sunrise, Plantation, Tamarac, Coral Springs, Davie, Fort Lauderdale, Weston~~ (preview/cities bb42574, shipped 2026-10-01)
-- [ ] Justin: Google Business Profile link + map pin (for geo schema)
+- [ ] Justin: Google Business Profile link + map pin (for geo schema) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A9)
 - [x] ~~Mobile claims confirmed by Justin: no trip fee, cross-county, roadside flat help (not highway shoulders)~~ (2026-10-01)
-- [ ] Justin: confirm the city facts the research left unverified, so they can go on the pages: Tamarac ZIPs, roads and neighbourhoods; Coral Springs, Davie and Weston roads; Coral Springs and Weston neighbourhoods; whether Plantation 33388 is a PO Box ZIP
-- [ ] Roadside flat tire help: give it a starting price → it joins the service catalog and online booking (phone only until then)
-- [ ] City pages wave 2: Pompano Beach, Miramar, Oakland Park, Pembroke Pines, Hollywood, Lauderhill (after wave 1 is indexed)
+- [ ] Justin: confirm the city facts the research left unverified, so they can go on the pages: Tamarac ZIPs, roads and neighbourhoods; Coral Springs, Davie and Weston roads; Coral Springs and Weston neighbourhoods; whether Plantation 33388 is a PO Box ZIP → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D8)
+- [ ] Roadside flat tire help: give it a starting price → it joins the service catalog and online booking (phone only until then) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D5)
+- [ ] City pages wave 2: Pompano Beach, Miramar, Oakland Park, Pembroke Pines, Hollywood, Lauderhill (after wave 1 is indexed) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C7)
 - [ ] Phase 4: internal links, Search Console submit, monthly refresh
 - [x] ~~Article bundle split: each article loads only itself (article pages 312 → 176 KB gzipped JS)~~ (shipped to main 2026-10-02, release preview/release-2026-10-02)
   - Article pages drop from 312 KB to 176 KB of gzipped JS, /blog from 306 KB to 164 KB; prerendered article HTML unchanged
 - [x] ~~Tesla tires Learn hub (6 guides) at /learn/tesla~~ (c42e16d, shipped 2026-10-01)
 - [x] ~~Blog batch 2: 7 buying-decision + myth posts~~ (f776fc1, shipped to main 2026-10-02)
-  - [ ] Two Bridgestone quote attributions (rear-axle placement, sipes/silica) were search-verified only: confirm on the source pages (prompt B in `docs/prompts/2026-10-02-verify-and-index.md`)
+  - [ ] Two Bridgestone quote attributions (rear-axle placement, sipes/silica) were search-verified only: confirm on the source pages (prompt B in `docs/prompts/2026-10-02-verify-and-index.md`) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A15)
 - [x] ~~Learn: Buying + Fitment hubs, 8 guides~~ (2674d06, shipped to main 2026-10-02)
-  - [ ] Facts were search-verified only (source sites blocked): ply ratings, XL pressures, run-flat limits; wheel guides lean on retailer sources. Prompt B in `docs/prompts/2026-10-02-verify-and-index.md` checks the ply ratings and XL pressures; run-flat limits and the wheel guides still need a pass
+  - [ ] Facts were search-verified only (source sites blocked): ply ratings, XL pressures, run-flat limits; wheel guides lean on retailer sources. Prompt B in `docs/prompts/2026-10-02-verify-and-index.md` checks the ply ratings and XL pressures; run-flat limits and the wheel guides still need a pass → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A15)
 - [x] ~~Learn sources: competitor retailer citations replaced with maker sources (7 guides)~~ (shipped to main 2026-10-02, release preview/release-2026-10-02)
-  - [ ] All new sources are search-snippet only (maker sites blocked here): confirm the quoted lines with the Chrome prompt in the ATLAS report. Demo source lines now cite Bridgestone, AAA, Goodyear and BFGoodrich (`7754330`)
-- [ ] Search Console: request indexing for the 17 URLs shipped 2026-10-02 + the home page (prompt A in `docs/prompts/2026-10-02-verify-and-index.md`; preview/checklist-tidy 788d1f4)
+  - [ ] All new sources are search-snippet only (maker sites blocked here): confirm the quoted lines with the Chrome prompt in the ATLAS report. Demo source lines now cite Bridgestone, AAA, Goodyear and BFGoodrich (`7754330`) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A15)
+- [ ] Search Console: request indexing for the 17 URLs shipped 2026-10-02 + the home page (prompt A in `docs/prompts/2026-10-02-verify-and-index.md`; preview/checklist-tidy 788d1f4) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A8)
 - [x] Blog batch 2: 7 buying-decision + myth posts (f776fc1), shipped to main 2026-10-02. Two Bridgestone quote attributions (rear-axle placement, sipes/silica) were search-verified only: confirm on the source pages
 - [x] Learn: Buying + Fitment hubs, 8 guides (2674d06), shipped to main 2026-10-02. Facts were search-verified only (source sites blocked): ply ratings, XL pressures, run-flat limits; wheel guides lean on retailer sources
 - [x] ~~Learn gap fill A: 5 guides already linked from live articles~~ (shipped to main 2026-10-02, release preview/release-2026-10-02)
@@ -168,18 +168,18 @@ _Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citati
   - Hydroplaning, spare tire types, EV tires, changing tire size. Facts are search-snippet only (maker sites blocked): confirm the spare 50 mph / 50 miles / 60 psi figures, Michelin's 20% EV wear figure and Pirelli's HL 6–9% figure on the source pages
 
 ## ATD and business (Justin)
-- [ ] Submit the ATD connectivity form
-- [ ] ATD call: API access, brands, sandbox, fees
-- [ ] Second distributor: TireHub / US AutoForce / Wheel Pros
-- [ ] Accountant: FL $1/tire fee + out-of-state sales tax
-- [ ] Brand pricing rules: minimum advertised prices, online-sale limits
-- [ ] Decide: direct API vs Spark / Slingshot / our own sync
+- [ ] Submit the ATD connectivity form → prompt in docs/prompts/2026-10-02-justin-remaining.md (#B1)
+- [ ] ATD call: API access, brands, sandbox, fees → prompt in docs/prompts/2026-10-02-justin-remaining.md (#B1)
+- [ ] Second distributor: TireHub / US AutoForce / Wheel Pros → prompt in docs/prompts/2026-10-02-justin-remaining.md (#B3)
+- [ ] Accountant: FL $1/tire fee + out-of-state sales tax → prompt in docs/prompts/2026-10-02-justin-remaining.md (#B4)
+- [ ] Brand pricing rules: minimum advertised prices, online-sale limits → prompt in docs/prompts/2026-10-02-justin-remaining.md (#B5)
+- [ ] Decide: direct API vs Spark / Slingshot / our own sync → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C2)
 - [x] ~~Tire Guru call made~~ (Justin, 2026-09-30)
 - [x] ~~Tire Guru answer received~~ (Josh Nail, 2026-09-30): no direct integration; their tire + service search widget is $150/mo and feeds orders/appointments into the POS
-- [ ] Justin/Melissa: send Josh the 7 questions (appointments-only mode? booking link + prefill? live ATD inventory/pricing? payment processor? embed type? contract? notifications?) → then decide on the $150/mo widget
+- [ ] Justin/Melissa: send Josh the 7 questions (appointments-only mode? booking link + prefill? live ATD inventory/pricing? payment processor? embed type? contract? notifications?) → then decide on the $150/mo widget → prompt in docs/prompts/2026-10-02-justin-remaining.md (#B2)
 
 ## Later
-- [ ] Vercel Pro ($20/mo)
+- [ ] Vercel Pro ($20/mo) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A10)
 - [x] ~~etwheelz.com: keep as-is (it forwards to TireDrop)~~ (Justin, 2026-09-30)
 - [x] ~~Old Cannavibe repo: not needed. Justin is deleting the whole repo; code backup zip sent; TireDrop repo kept as-is~~ (2026-09-30)
-- [ ] After ATD: live API → sandbox test → auto-ordering on → full sizes, richer specs, Google Shopping
+- [ ] After ATD: live API → sandbox test → auto-ordering on → full sizes, richer specs, Google Shopping → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C1)
