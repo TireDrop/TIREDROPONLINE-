@@ -141,4 +141,6 @@ The roads you drove last week may not be the same roads now. What to watch for:
 | Storm forecast | Recheck pressure; handle flagged tires | No time to hope on a worn tire |
 | After | Avoid floodwater; check for debris punctures | NWS Turn Around Don't Drown |
 
+Deciding when to replace? Our guide to the [best time to buy tires in South Florida](/blog/best-time-to-buy-tires-south-florida) lines tire timing up with the rainy and hurricane seasons.
+
 Want a second opinion on your readings? Run them through [Do I Need Tires Yet?](/tire-check), and if a tire needs replacing, [shop by size](/tires) with installation in Sunrise or by [mobile van](/mobile-service) in the local install area.

@@ -145,4 +145,6 @@ Uneven wear is what turns one damaged tire into a four-tire bill. The Tire Indus
 6. Replacing two? Put the new pair on the rear axle
 7. Start a rotation schedule with the new set
 
+Driving an AWD crossover? Our [Toyota RAV4](/blog/toyota-rav4-tires-guide) and [Honda CR-V](/blog/honda-cr-v-tires-guide) guides cover what each maker's manual says.
+
 Not sure where your tires stand? Run them through [Do I Need Tires Yet?](/tire-check). If it's time, [shop by size or vehicle](/tires) and buy the number your manual and your measurements call for.

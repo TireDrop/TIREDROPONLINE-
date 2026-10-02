@@ -21,6 +21,7 @@ import {
   splitDemoMarkers,
 } from "./core.js";
 import { loadContent, readContentFiles, readHubs } from "./node.js";
+import { hostOf, isResourceHost } from "../lib/competitors.js";
 
 const HUBS = [
   { slug: "tread", title: "Tread & Wear", description: "Tread.", order: 3 },
@@ -646,6 +647,68 @@ test("the Buying and Fitment hubs: eight sourced guides that follow the copy rul
     /\/learn\/(buying|fitment)\//.test(p.file),
   );
   assert.deepEqual(problems, [], "no content warnings for the new guides");
+});
+
+/* ------------------------- blog batch 3 ------------------------- */
+
+test("blog batch 3: ten posts follow the house rules and the post format", () => {
+  const store = loadContent({ checkLinks: true });
+  const slugs = [
+    "worn-tires-florida-rain-4-32",
+    "best-time-to-buy-tires-south-florida",
+    "toyota-rav4-tires-guide",
+    "used-car-after-storm-season-tires",
+    "choosing-between-tire-brands",
+    "toyota-camry-tires-guide",
+    "ford-f-150-tires-p-vs-lt",
+    "ev-tire-wear-budget",
+    "rideshare-driver-tires",
+    "honda-cr-v-tires-guide",
+  ];
+  // The [x] classes keep the house-rules grep on added lines from flagging this test itself.
+  const BANNED = /\b(safe|safer|safely|fine|guaranteed?|OK|A[P]R)\b/i;
+  const others = [...store.getLearnArticles(), ...store.getBlogPosts()];
+  for (const slug of slugs) {
+    const a = store.getArticle("blog", null, slug);
+    assert.ok(a, `${slug} is published`);
+    const text = [
+      a.title,
+      a.description,
+      a.body,
+      ...a.takeaways,
+      ...a.faq.flatMap((f) => [f.q, f.a]),
+    ].join("\n");
+    assert.ok(!BANNED.test(text), `${a.path}: "${text.match(BANNED)?.[0]}"`);
+    assert.doesNotMatch(text, /\$\d|disc[o]unt|coup[o]n|reb[a]te|% off|\bdeals?\b|sinc[e] (19|20)\d\d/i, a.path);
+    assert.doesNotMatch(text, /within \d+ (minutes|hours|days)|same[- ]day/i, a.path);
+    assert.ok(a.title.length <= 60, `${a.path}: title ${a.title.length}`);
+    assert.ok(a.description.length <= 155, `${a.path}: description ${a.description.length}`);
+    assert.ok(a.keyword && a.category, `${a.path}: keyword and category`);
+    assert.ok(a.takeaways.length >= 3 && a.takeaways.length <= 5, `${a.path}: takeaways`);
+    assert.equal(a.faq.length, 4, `${a.path}: faq`);
+    // Sources: at least five, every one a known resource (no retailers).
+    assert.ok(a.sources.length >= 5, `${a.path}: sources`);
+    for (const s of a.sources)
+      assert.ok(isResourceHost(hostOf(s.url)), `${a.path}: source ${s.url}`);
+    // 5+ internal links in the body, including the shop.
+    const links = new Set([...a.body.matchAll(/\]\((\/[^)\s#?]*)/g)].map((m) => m[1]));
+    assert.ok(links.size >= 5, `${a.path}: ${links.size} internal links`);
+    assert.ok(links.has("/tires"), `${a.path}: links /tires`);
+    const words = a.body
+      .replace(/\[\[demo:[^\]]*\]\]/g, " ")
+      .split(/\s+/)
+      .filter((w) => /[a-z0-9]/i.test(w)).length;
+    assert.ok(words >= 900 && words <= 1500, `${a.path}: ${words} words`);
+    // Linked in from at least one other published page.
+    const inbound = others
+      .filter((o) => o.path !== a.path)
+      .some((o) => o.body.includes(`](${a.path})`) || o.related.includes(a.path));
+    assert.ok(inbound, `${a.path}: no other page links to it`);
+  }
+  const problems = store.problems.filter((p) =>
+    slugs.some((slug) => p.file === `./blog/${slug}.md`),
+  );
+  assert.deepEqual(problems, [], "no content warnings for batch 3");
 });
 
 /* --------------- the browser's split: summaries + details --------------- */

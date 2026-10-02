@@ -140,4 +140,6 @@ A few things are worth a look after a heavy-rain season:
 | Hydroplaning | Ease off the gas, avoid hard braking, steer gently where you want to go | AAA |
 | After the season | Recheck tread; have pulls, vibrations or TPMS lights checked | Wet grip fades as tread wears |
 
+Not sure how much tread is enough? Our post on [why 4/32 matters more than 2/32 in Florida rain](/blog/worn-tires-florida-rain-4-32) explains the numbers.
+
 If it's time for new tires, [shop by size](/tires) and choose installation at Extreme Tires in Sunrise or by mobile van across the local install area. Questions first? Call (954) 773-1896.

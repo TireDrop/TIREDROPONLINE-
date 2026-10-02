@@ -6,6 +6,7 @@ Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
 _Last updated: 2026-10-02 (checklist wave 2 in one release: CRO quote form + compact /tires header, installed-price toggle, footer "Shipping to 48 States + DC", accessibility pass 2 (25 issues to 0), check:links + CX-5 spelling, free-install wording priced, prompt pack for every item only Justin can do; earlier today: resources only + check:sources shipped)_
+_Last updated: 2026-10-02 (blog batch 3: 10 posts on preview/blog-batch-3, ready to ship; earlier today: SHIPPED resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
 
 ## Site fixes (Claude)
 - [x] ~~Resources only: every competitor citation/link replaced with maker, AAA or government sources~~ (`7754330`, shipped to main 2026-10-02)
@@ -148,7 +149,11 @@ _Last updated: 2026-10-02 (checklist wave 2 in one release: CRO quote form + com
 - [x] ~~Phase 1: keyword map, 90–100 titles, demo list → Justin approves~~ (b813381, plans approved)
 - [x] ~~Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves~~ (800247b, pilot approved + 5 demos)
 - [x] ~~Blog + Learn live: 20 articles, 5 demos, 98 prerendered routes~~ (be6a2a2)
-- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); Batches 2–9 to go. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
+- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); blog batch 2 live (f776fc1); blog batch 3 on preview (below). Blog: 25 planned posts left (24 unwritten + #15 on hold) = 3 more batches. Learn: 33 guides live. Status table in `docs/content/blog-plan.md`. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
+- [ ] Blog batch 3: 10 posts (preview/blog-batch-3 9e4cc11) → ship
+  - 4/32 in Florida rain, best time to buy (by season), RAV4, used car after storm season, choosing between brands, Camry, F-150 P vs LT, EV tire wear, rideshare mileage math, CR-V
+  - [ ] Snippet-only facts (maker and government sites blocked here): confirm on the source pages before or soon after shipping: Toyota manual + tire warranty guide (AWD same brand/tread; replace all four or a pair), Honda CR-V manual (replacement rules; ABS/VSA/AWD warning), Ford tire replacement page, Tesla Model Y "replace at 4/32", AAA 2018 (86 ft light truck, 33% handling), NOAA AOML season dates, Michigan AG flood-car alert, NMVTIS and NICB VINCheck pages, NHTSA DOT HS 811 154 (10% rolling resistance ≈ 1.1% mpg), fueleconomy.gov 0.6%/3%, USTMA 5,000–8,000 mi rotation, Michelin EV pressure page, Consumer Reports test protocol, Bridgestone tire-types page
+  - [ ] Justin: does Extreme Tires sell used tires? Plan post #49 waits on the answer
 - [x] ~~6 new tools with their own tool pages, embedded in 8 articles~~ (preview/tools 210b348, shipped 2026-10-01)
 - [x] ~~Wave 1 city pages + mobile hub: Sunrise, Plantation, Tamarac, Coral Springs, Davie, Fort Lauderdale, Weston~~ (preview/cities bb42574, shipped 2026-10-01)
 - [ ] Justin: Google Business Profile link + map pin (for geo schema) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A9)

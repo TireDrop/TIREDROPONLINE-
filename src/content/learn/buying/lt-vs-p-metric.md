@@ -141,4 +141,6 @@ Those example markings show the format, not a recommendation for any vehicle.
 - **Match or beat the load.** Compare load index and speed rating with the [load and speed rating check](/load-speed-check).
 - **Plan the pressure.** If you're changing type, have the installer set pressures from the tire maker's load and inflation tables.
 
+Driving an F-150? Our [F-150 tire guide](/blog/ford-f-150-tires-p-vs-lt) applies all of this to Ford's half-ton.
+
 The [Tire Size Finder](/tire-size-finder) reads the size off your door-jamb sticker. Then [shop tires by size](/tires). Extreme Tires installs at the Sunrise shop or by mobile van in Miami-Dade, Broward and Palm Beach counties; elsewhere in the 48 states and DC, the order ships to your address. See [how installation works](/install), or call (954) 773-1896.

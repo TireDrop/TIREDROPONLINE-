@@ -152,4 +152,6 @@ So with a flotation size, you get the overall diameter up front without doing an
 2. **Copying the old tires.** If the previous owner put on a different size, you'll repeat the mistake. Check the placard.
 3. **Ignoring the letters.** A lower load index or speed symbol than the placard calls for isn't a like-for-like replacement.
 
+Driving a sedan? Our [Toyota Camry tire guide](/blog/toyota-camry-tires-guide) walks through size, noise and fuel economy for a commuter car.
+
 Know your size? [Find tires by vehicle](/find-my-tires) or [shop by size](/tires). Not sure what's on the placard versus the car? Call Extreme Tires at (954) 773-1896 and ask.

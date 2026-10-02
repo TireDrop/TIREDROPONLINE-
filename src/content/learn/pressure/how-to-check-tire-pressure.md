@@ -153,4 +153,6 @@ A tire that loses a few psi between monthly checks, along with the other three, 
 
 Those point to a leak: a nail, a valve stem or a bead that isn't sealing. While the gauge is out, check the tread too; our guide on [how to check tread depth](/learn/tread/how-to-check-tread-depth) takes two more minutes. Then run your readings through [Do I Need Tires Yet?](/tire-check).
 
+Driving for a living? Our post on [tires for Uber and Lyft drivers](/blog/rideshare-driver-tires) shows what low pressure costs in fuel over a high-mileage year.
+
 If a tire won't hold air, Extreme Tires repairs punctures after taking the tire off the wheel to inspect it, at the Sunrise shop or by mobile van in Miami-Dade, Broward and Palm Beach. If it's time for new ones, [shop tires by size](/tires); free shipping covers the 48 contiguous states and DC, and installation in South Florida is either ship-to-store in Sunrise or the mobile van. See [how installation works](/install), or call (954) 773-1896.
