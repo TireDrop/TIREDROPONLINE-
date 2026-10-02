@@ -23,6 +23,7 @@
     "check:search": "node scripts/search-check.mjs",
     "check:a11y": "node scripts/a11y-check.mjs",
     "check:scanner": "node scripts/scanner-check.mjs",
+    "check:home": "node scripts/home-check.mjs",
     "test:api": "node --test \"api/_lib/*.test.mjs\"",
     "test:content": "node --test \"src/content/*.test.mjs\"",
     "test:lib": "node --test \"src/lib/*.test.mjs\"",

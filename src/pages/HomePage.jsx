@@ -1,61 +1,82 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   BadgeCheck,
+  BookOpen,
   Building2,
   CalendarCheck,
+  ChevronDown,
   CircleDollarSign,
   CloudSun,
   ExternalLink,
   Gauge,
   ListChecks,
   MapPin,
-  Package,
+  MousePointerClick,
   PackageCheck,
   Phone,
   Ruler,
+  ScanLine,
   Snowflake,
   Store,
   Truck,
   Wrench,
 } from "lucide-react";
 
+import HOME_READING from "virtual:home-reading";
 import { BUSINESS, YELP_PROFILE, googleReviewHref } from "../data/business.js";
-import { SERVICE_AREA_LABEL, SERVICE_COUNTIES } from "../data/serviceArea.js";
+import { SERVICE_AREA_LABEL } from "../data/serviceArea.js";
 import ServiceAreaCounties from "../components/ui/ServiceAreaCounties.jsx";
 import { MOBILE_SERVICES, SHOP_SERVICES } from "../data/services.js";
-import { TIRES, TIRE_CATEGORIES } from "../data/products.js";
+import {
+  TIRES,
+  TIRE_BRAND_NAMES,
+  TIRE_CATEGORIES,
+} from "../data/products.js";
+import { STATE_PAGES_LIVE, getState, statePath } from "../data/stateList.js";
+import { TOOL_PAGES } from "../components/demos/toolPages.js";
 import ProductCard from "../components/shop/ProductCard.jsx";
 import ScanTireButton from "../components/shop/ScanTireButton.jsx";
 import SearchPanel from "../components/shop/SearchPanel.jsx";
 import { searchTires } from "../data/api.js";
+import { slug } from "../lib/tiresUrl.js";
+import { useScrollReveal } from "../lib/useScrollReveal.js";
 import { Seo, Section, SectionHead } from "../components/ui/index.jsx";
 
-/* ---------------------------------- Hero --------------------------------- */
+/*
+ * The home page reads top to bottom as one story:
+ *
+ *   find your fit (hero) → why buy here (trust strip) → what to buy (shop)
+ *   → how it gets to you (how it works) → who fits it locally (install band)
+ *   → help choosing (free tools) → learn more (guides and posts)
+ *   → the rest of the country (nationwide) → last questions (FAQ) → act.
+ *
+ * Motion is a fade-and-rise on scroll (src/lib/useScrollReveal.js): anything
+ * marked `data-reveal` below the fold. The hero is never animated, and the
+ * page is fully visible without JavaScript or with reduced motion.
+ */
 
-// The three free tools, in the order a stuck shopper needs them: what size,
-// which tire, and whether they need tires at all.
-const TOOLS_LIST = [
-  {
-    to: "/tire-size",
-    label: "Decode my tire size",
-    copy: "Type what is on your sidewall and see every number explained, drawn to the proportions of your own tire. Compare two sizes and see what actually changes.",
-    Icon: Ruler,
-  },
-  {
-    to: "/find-my-tires",
-    label: "Find my tires",
-    copy: "Five questions about your car, your roads and your weather, and a shortlist that says plainly why each tire made it.",
-    Icon: ListChecks,
-  },
-  {
-    to: "/tire-check",
-    label: "Do I need tires yet?",
-    copy: "Check the tread with a coin you already have, and the age with the code on the sidewall. If nothing says replace yet, it says so.",
-    Icon: Gauge,
-  },
-];
+/** A soft light line where a dark band meets the page. */
+function Hairline({ position = "top" }) {
+  return (
+    <div
+      aria-hidden
+      className={`pointer-events-none absolute inset-x-0 ${position === "top" ? "top-0" : "bottom-0"} h-px bg-gradient-to-r from-transparent via-volt/35 to-transparent`}
+    />
+  );
+}
+
+/** SectionHead, as one reveal unit. */
+function Head(props) {
+  return (
+    <div data-reveal>
+      <SectionHead {...props} />
+    </div>
+  );
+}
+
+/* ---------------------------------- Hero --------------------------------- */
 
 function Hero() {
   const navigate = useNavigate();
@@ -93,8 +114,13 @@ function Hero() {
     navigate(`/tires?${query.toString()}`);
   };
 
+  // Not a reveal target: the headline is the largest paint on the page and
+  // is shown as it arrives.
   return (
-    <section className="relative overflow-hidden bg-ink-wash text-bone">
+    <section
+      data-home-section="hero"
+      className="relative overflow-hidden bg-ink-wash text-bone"
+    >
       {/* Tread-pattern wash behind the headline. */}
       <div
         aria-hidden
@@ -108,19 +134,25 @@ function Hero() {
         aria-hidden
         className="pointer-events-none absolute -right-40 top-1/2 hidden h-[560px] w-[560px] -translate-y-1/2 rounded-full border-[72px] border-graphite lg:block"
       />
+      {/* A low cyan glow under the finder, so the card reads as lit. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-40 right-0 hidden h-[420px] w-[620px] rounded-full bg-volt/10 blur-3xl lg:block"
+      />
+      <Hairline position="bottom" />
 
       {/* Three children, ordered headline → finder → supporting copy, so on a
           phone the finder clears the fold instead of sitting under four lines
           of prose. On a wide screen the explicit row/column placement puts the
           copy back together in the left half with the finder beside it. */}
-      <div className="wrap relative grid gap-7 py-10 md:py-14 lg:grid-cols-[.9fr_1.1fr] lg:gap-x-12 lg:gap-y-6 lg:py-16">
+      <div className="wrap relative grid gap-7 py-10 md:py-14 lg:grid-cols-[.9fr_1.1fr] lg:gap-x-12 lg:gap-y-6 lg:py-20">
         <div className="order-1 lg:col-start-1 lg:row-start-1 lg:self-end">
           <p className="eyebrow-dark mb-3 flex items-center gap-2">
             <Truck size={16} aria-hidden />
             {BUSINESS.tagline}
           </p>
 
-          <h1 className="h1">
+          <h1 className="h1 text-balance">
             Order tires online.
             <span className="block text-volt">We ship them to you.</span>
           </h1>
@@ -163,11 +195,11 @@ function Hero() {
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link to="/tires" className="btn-primary">
+            <Link to="/tires" className="btn-primary min-h-[48px]">
               Shop Tires
               <ArrowRight size={17} aria-hidden />
             </Link>
-            <Link to="/shipping" className="btn-ghost-light">
+            <Link to="/shipping" className="btn-ghost-light min-h-[48px]">
               How Shipping Works
             </Link>
           </div>
@@ -179,57 +211,84 @@ function Hero() {
   );
 }
 
-/* -------------------------------- Trust bar ------------------------------- */
+/* ------------------------------- Trust strip ------------------------------ */
 
-// The band every large tire retailer puts directly under the fold, because the
-// four questions a first-time online tire buyer has — what does shipping cost,
-// will you ship to me, who fits them, and how old is the rubber — all get
-// answered before they have to ask.
+// The band every large tire retailer puts directly under the fold: what does
+// shipping cost and where does it go, how old is the rubber, who fits it, and
+// who picks up the phone.
 
 const TRUST = [
   {
     Icon: Truck,
-    title: "Free shipping on every tire",
-    copy: "No minimum and no freight surcharge. The price on the tire is the price that ships.",
-  },
-  {
-    Icon: MapPin,
-    title: "Ships to the 48 contiguous states + DC",
-    copy: `Any street address in ${BUSINESS.shipping.area} — home, work, or your own installer.`,
-  },
-  {
-    Icon: Store,
-    title: "Free ship-to-store & install",
-    copy: `Send the set to our ${BUSINESS.shop.city} shop at no charge and book the fitting.`,
+    title: "Free shipping, 48 states + DC",
+    copy: `No minimum and no freight surcharge, to any street address in ${BUSINESS.shipping.area}.`,
   },
   {
     Icon: CalendarCheck,
     title: "Fresh, DOT-dated rubber",
     copy: "Shipped direct rather than pulled off a back-room shelf, and the date code on the sidewall shows when it was made.",
   },
+  {
+    Icon: Wrench,
+    title: "Installed in South Florida",
+    copy: `Free ship-to-store at our ${BUSINESS.shop.city} shop, or the mobile van in Miami-Dade, Broward and Palm Beach.`,
+  },
 ];
 
 function TrustBar() {
   return (
-    <section className="border-b border-ink/[0.07] bg-bone">
-      <ul className="wrap grid grid-cols-2 gap-x-4 gap-y-6 py-8 md:gap-x-5 md:gap-y-7 lg:grid-cols-4 lg:gap-x-8">
-        {TRUST.map(({ Icon, title, copy }) => (
-          <li key={title} className="flex flex-col gap-2">
-            <Icon size={22} aria-hidden className="text-drop" />
-            <h3 className="text-balance text-[15px] leading-snug md:text-base">
-              {title}
-            </h3>
-            <p className="line-clamp-3 text-xs leading-relaxed text-smoke md:line-clamp-none">
-              {copy}
-            </p>
+    <section
+      data-home-section="trust"
+      aria-label="Why order from TireDrop"
+      className="border-b border-ink/[0.07] bg-bone"
+    >
+      <ul className="wrap grid grid-cols-1 gap-x-6 gap-y-5 py-8 sm:grid-cols-2 md:py-10 lg:grid-cols-4 lg:gap-x-0 lg:divide-x lg:divide-ink/[0.07]">
+        {TRUST.map(({ Icon, title, copy }, i) => (
+          <li
+            key={title}
+            data-reveal
+            style={{ "--rv-i": i }}
+            className="flex gap-3.5 lg:px-6 lg:first:pl-0"
+          >
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-sky text-drop">
+              <Icon size={21} aria-hidden />
+            </span>
+            <div>
+              <h3 className="text-balance text-[15px] leading-snug md:text-base">
+                {title}
+              </h3>
+              <p className="mt-1 text-[13px] leading-relaxed text-smoke">
+                {copy}
+              </p>
+            </div>
           </li>
         ))}
+        <li
+          data-reveal
+          style={{ "--rv-i": TRUST.length }}
+          className="flex gap-3.5 lg:px-6 lg:last:pr-0"
+        >
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-drop text-bone shadow-glow">
+            <Phone size={20} aria-hidden />
+          </span>
+          <div>
+            <h3 className="text-[15px] leading-snug md:text-base">
+              Questions? Talk to the shop
+            </h3>
+            <a
+              href={BUSINESS.phoneHref}
+              className="mt-0.5 inline-flex min-h-[44px] items-center font-display text-lg font-bold text-drop hover:text-dive"
+            >
+              {BUSINESS.phone}
+            </a>
+          </div>
+        </li>
       </ul>
     </section>
   );
 }
 
-/* ----------------------------- Shop by category --------------------------- */
+/* ---------------------------------- Shop ---------------------------------- */
 
 // Icons are keyed off the catalog's own category names, so a new category in
 // `products.js` still renders — it just falls back to the generic tire icon.
@@ -249,14 +308,18 @@ const CATEGORY_COPY = {
   Commercial: "Load-rated LT and van sizes for work trucks and fleets.",
 };
 
-function ShopByCategory() {
+function Shop() {
+  // Catalog order, not a ranking: there are no sales or review figures to
+  // rank by, so the row does not claim any.
+  const featured = (TIRES ?? []).slice(0, 4);
+
   return (
-    <Section className="bg-bone">
-      <SectionHead
-        eyebrow="Shop by category"
+    <Section id="shop" data-home-section="shop" className="bg-fog">
+      <Head
+        eyebrow="Shop tires"
         title="Start with the kind of tire you need"
         action={
-          <Link to="/tires" className="btn-outline btn-sm">
+          <Link to="/tires" className="btn-outline btn-sm min-h-[44px]">
             All tires
             <ArrowRight size={15} aria-hidden />
           </Link>
@@ -264,8 +327,13 @@ function ShopByCategory() {
       />
 
       {/* On a phone the five cards are a swipe row rather than a 900px
-          stack; the row bleeds to the screen edge and snaps card by card. */}
-      <div className="-mx-5 grid auto-cols-[68%] grid-flow-col gap-3 overflow-x-auto overscroll-x-contain scroll-px-5 px-5 pb-5 pt-1 [scrollbar-width:none] snap-x snap-mandatory sm:mx-0 sm:auto-cols-auto sm:grid-flow-row sm:grid-cols-2 sm:overflow-visible sm:p-0 sm:snap-none lg:grid-cols-5 [&::-webkit-scrollbar]:hidden">
+          stack; the row bleeds to the screen edge and snaps card by card.
+          The row reveals as one piece, so a card swiped in later is never
+          caught mid-fade. */}
+      <div
+        data-reveal
+        className="-mx-5 grid auto-cols-[68%] grid-flow-col gap-3 overflow-x-auto overscroll-x-contain scroll-px-5 px-5 pb-5 pt-1 [scrollbar-width:none] snap-x snap-mandatory sm:mx-0 sm:auto-cols-auto sm:grid-flow-row sm:grid-cols-2 sm:overflow-visible sm:p-0 sm:snap-none lg:grid-cols-5 [&::-webkit-scrollbar]:hidden"
+      >
         {TIRE_CATEGORIES.map((category) => {
           const Icon = CATEGORY_ICONS[category] ?? BadgeCheck;
           return (
@@ -274,7 +342,9 @@ function ShopByCategory() {
               to={`/tires?category=${encodeURIComponent(category)}`}
               className="card-hover group flex snap-start flex-col p-5 transition-colors hover:border-drop/40"
             >
-              <Icon size={24} aria-hidden className="mb-3 text-drop" />
+              <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-card bg-sky text-drop transition-colors group-hover:bg-drop group-hover:text-bone">
+                <Icon size={22} aria-hidden />
+              </span>
               <h3 className="text-lg leading-tight">{category}</h3>
               <p className="mt-2 flex-1 text-xs leading-relaxed text-smoke">
                 {CATEGORY_COPY[category]}
@@ -291,124 +361,73 @@ function ShopByCategory() {
           );
         })}
       </div>
-    </Section>
-  );
-}
 
-/* ----------------------------- Delivery choice ---------------------------- */
+      {/* Brands in the catalog, then the other two ways into the store. */}
+      <div
+        data-reveal
+        className="mt-6 flex flex-col gap-4 rounded-card border border-ink/[0.07] bg-bone p-5 shadow-card md:flex-row md:items-center md:gap-6 md:p-6"
+      >
+        <h3 className="shrink-0 font-display text-xs font-bold uppercase tracking-[0.09em] text-smoke">
+          Shop by brand
+        </h3>
+        <ul className="flex flex-1 flex-wrap gap-2">
+          {TIRE_BRAND_NAMES.map((brand) => (
+            <li key={brand}>
+              <Link
+                to={`/tires?brand=${slug(brand)}`}
+                className="inline-flex min-h-[44px] items-center rounded-sm border border-ink/10 bg-fog px-4 font-display text-sm font-bold text-ink transition-colors hover:border-drop/40 hover:bg-sky hover:text-drop"
+              >
+                {brand}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <div className="flex shrink-0 flex-wrap gap-x-5 gap-y-1 border-t border-ink/[0.07] pt-3 md:border-l md:border-t-0 md:pl-6 md:pt-0">
+          <Link
+            to="/wheels"
+            className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-drop hover:text-dive"
+          >
+            Wheels
+            <ArrowRight size={14} aria-hidden />
+          </Link>
+          <Link
+            to="/commercial-tires"
+            className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold text-drop hover:text-dive"
+          >
+            Commercial &amp; fleet
+            <ArrowRight size={14} aria-hidden />
+          </Link>
+        </div>
+      </div>
 
-const DELIVERY = [
-  {
-    Icon: Package,
-    eyebrow: "48 contiguous states + DC",
-    title: "Ship it to me",
-    copy: "Your order ships direct from a distributor warehouse to the address you give us — home, work, or your own installer. Shipping is free, and the delivery estimate is shown at checkout before you commit.",
-    to: "/shipping",
-    cta: "How shipping works",
-  },
-  {
-    Icon: Store,
-    eyebrow: "South Florida",
-    title: "Ship free to the shop — we'll fit them",
-    copy: `Send the order to ${BUSINESS.shop.name} at no charge, then book an install. Mounting, balancing, valve stems and disposal of the old set, all handled in the bay.`,
-    to: "/install",
-    cta: "Ship to store & install",
-  },
-];
-
-function DeliveryChoice() {
-  return (
-    <Section className="bg-bone">
-      <SectionHead
-        align="center"
-        eyebrow="Two ways to get them"
-        title="You choose where the tires land"
-        lede="Same catalog, same prices. The only decision is whether they come to your door or to our door."
-      />
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        {DELIVERY.map(({ Icon, eyebrow, title, copy, to, cta }) => (
-          <div key={title} className="card flex flex-col p-7">
-            <div className="mb-4 flex items-center gap-2">
-              <Icon size={22} aria-hidden className="text-drop" />
-              <span className="font-display text-xs font-bold uppercase tracking-[0.09em] text-smoke">
-                {eyebrow}
-              </span>
+      {featured.length > 0 && (
+        <>
+          <div
+            data-reveal
+            className="mb-5 mt-14 flex items-end justify-between gap-4 md:mt-16"
+          >
+            <div>
+              <p className="eyebrow mb-1.5">In the catalog</p>
+              <h3 className="h3">A few sets to start with</h3>
             </div>
-            <h3 className="h3">{title}</h3>
-            <p className="mt-2 flex-1 text-sm leading-relaxed text-smoke">
-              {copy}
-            </p>
-            <Link to={to} className="btn-outline btn-sm mt-6 self-start">
-              {cta}
-              <ArrowRight size={15} aria-hidden />
+            <Link
+              to="/tires"
+              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 text-sm font-semibold text-drop hover:text-dive"
+            >
+              Shop all tires
+              <ArrowRight size={14} aria-hidden />
             </Link>
           </div>
-        ))}
-      </div>
-    </Section>
-  );
-}
-
-/* ------------------------------ Category tiles ---------------------------- */
-
-// Switched off on the storefront theme ("td_tiles" is disabled in the home
-// template); kept so it can come back with one flag.
-const SHOW_CATEGORY_TILES = false;
-
-const CATEGORIES = [
-  {
-    to: "/tires",
-    label: "Tires",
-    copy: "All-season, performance, truck and SUV — shipped free to the 48 contiguous states and DC.",
-    Icon: BadgeCheck,
-  },
-  {
-    to: "/wheels",
-    label: "Wheels",
-    copy: "Alloy, forged and off-road wheels, fitment-checked before anything ships.",
-    Icon: BadgeCheck,
-  },
-  {
-    to: "/commercial-tires",
-    label: "Commercial & Fleet",
-    copy: "Load-rated sizes for vans and work trucks, shipped to the yard or to the shop.",
-    Icon: Truck,
-  },
-  {
-    to: "/auto-service",
-    label: "Service — South Florida",
-    copy: "Brakes, alignment, suspension and diagnostics at the Sunrise shop.",
-    Icon: Wrench,
-  },
-];
-
-function CategoryTiles() {
-  return (
-    <Section className="bg-fog">
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        {CATEGORIES.map(({ to, label, copy, Icon }) => (
-          <Link
-            key={to}
-            to={to}
-            className="card-hover group flex flex-col p-6 transition-colors hover:border-drop/40"
+          <div
+            data-reveal
+            className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
           >
-            <Icon size={26} aria-hidden className="mb-4 text-drop" />
-            <h3 className="h3">{label}</h3>
-            <p className="mt-2 flex-1 text-sm leading-relaxed text-smoke">
-              {copy}
-            </p>
-            <span className="mt-4 flex items-center gap-1.5 font-display text-sm font-bold text-ink group-hover:text-drop">
-              Explore
-              <ArrowRight
-                size={15}
-                aria-hidden
-                className="transition-transform group-hover:translate-x-1"
-              />
-            </span>
-          </Link>
-        ))}
-      </div>
+            {featured.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </>
+      )}
     </Section>
   );
 }
@@ -417,200 +436,265 @@ function CategoryTiles() {
 
 const STEPS = [
   {
-    n: "01",
-    title: "Find your size",
-    copy: "Search by vehicle or by the numbers on your sidewall and compare the whole catalog.",
+    Icon: MousePointerClick,
+    title: "Order online",
+    copy: "Search by vehicle, by the numbers on your sidewall, or scan them. We check the fitment against your vehicle before the order is released to ship.",
   },
   {
-    n: "02",
-    title: "Pick your delivery",
-    copy: "Ship to your address, or free to the shop if you're in South Florida.",
+    Icon: PackageCheck,
+    title: "Ship to you or the shop",
+    copy: `Free to any address in ${BUSINESS.shipping.area}, or free to our ${BUSINESS.shop.city} shop. Checkout shows the delivery estimate before you commit.`,
   },
   {
-    n: "03",
-    title: "We confirm and release it",
-    copy: "We check the fitment against your vehicle, then release the order to ship.",
-  },
-  {
-    n: "04",
-    title: "Fit them your way",
-    copy: "Use your own installer, or let us mount and balance them here in the bay.",
+    Icon: Wrench,
+    title: "Installed",
+    copy: "Your own installer fits them anywhere we ship. In South Florida we mount and balance them in the bay, or in your driveway from the van.",
   },
 ];
 
 function HowItWorks() {
-  // Fog, so it reads as its own band between the white category and
-  // delivery sections.
   return (
-    <Section className="bg-fog">
-      <SectionHead
+    <Section id="how-it-works" data-home-section="how" className="bg-bone">
+      <Head
+        align="center"
         eyebrow="How it works"
-        title="Four steps from search to installed"
-        lede="No stock sitting in a warehouse waiting to age — orders ship direct, so what turns up on your drive is fresh rubber."
-        action={
-          <Link to="/shipping" className="btn-outline btn-sm">
-            Shipping details
-          </Link>
-        }
+        title="Order online. Ship it. Get it installed."
+        lede="Orders ship direct from a distributor warehouse rather than sitting on a shelf to age, so what turns up is fresh rubber."
       />
 
-      <ol className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        {STEPS.map((s) => (
-          <li key={s.n} className="card relative p-6">
-            <span
-              aria-hidden
-              className="font-display text-5xl font-bold leading-none text-drop/80"
-            >
-              {s.n}
+      <ol className="relative grid gap-4 md:grid-cols-3 md:gap-6">
+        {/* The thread between the three steps on a wide screen. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-[16.6%] right-[16.6%] top-9 hidden h-px bg-gradient-to-r from-drop/10 via-drop/40 to-drop/10 md:block"
+        />
+        {STEPS.map(({ Icon, title, copy }, i) => (
+          <li
+            key={title}
+            data-reveal
+            style={{ "--rv-i": i }}
+            className="relative flex gap-4 rounded-card border border-ink/[0.07] bg-fog/60 p-5 md:flex-col md:items-center md:border-0 md:bg-transparent md:p-0 md:text-center"
+          >
+            <span className="relative flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-bone text-drop shadow-card ring-1 ring-ink/[0.06]">
+              <Icon size={28} aria-hidden />
+              <span
+                aria-hidden
+                className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-ink font-display text-xs font-bold text-bone"
+              >
+                {i + 1}
+              </span>
             </span>
-            <h3 className="h3 mt-3">{s.title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-smoke">{s.copy}</p>
+            <div className="md:mt-5 md:max-w-xs">
+              <h3 className="h3">
+                <span className="sr-only">Step {i + 1}: </span>
+                {title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-smoke">{copy}</p>
+            </div>
           </li>
         ))}
       </ol>
-    </Section>
-  );
-}
 
-/* ------------------------------ Featured tires ---------------------------- */
-
-function FeaturedTires() {
-  // The catalog is the source of truth; fall back gracefully if it is empty.
-  // Catalog order, not a ranking: there are no sales or review figures to
-  // rank by, so the section does not claim any.
-  const featured = (TIRES ?? []).slice(0, 4);
-
-  if (featured.length === 0) return null;
-
-  return (
-    <Section className="bg-fog">
-      <SectionHead
-        eyebrow="In the catalog"
-        title="A few sets to start with"
-        action={
-          <Link to="/tires" className="btn-outline btn-sm">
-            Shop all tires
-            <ArrowRight size={15} aria-hidden />
-          </Link>
-        }
-      />
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        {featured.map((p) => (
-          <ProductCard key={p.id} product={p} />
-        ))}
-      </div>
-    </Section>
-  );
-}
-
-/* ----------------------------- Local advantage ---------------------------- */
-
-function LocalAdvantage() {
-  return (
-    <Section className="bg-bone">
-      <SectionHead
-        eyebrow="South Florida only"
-        title="Local? We'll put them on for you"
-        lede={`Ship-to-store is free, and installation happens at ${BUSINESS.parent} in ${BUSINESS.shop.city} — or in your own driveway if the van is the easier answer.`}
-      />
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="card p-7">
-          <div className="mb-5 flex items-center gap-2">
-            <Wrench size={20} aria-hidden className="text-drop" />
-            <h3 className="h3">In the bay — {BUSINESS.shop.city}</h3>
-          </div>
-          <ul className="space-y-2.5">
-            {SHOP_SERVICES.map((s) => (
-              <li key={s.slug}>
-                <Link
-                  to={`/services/${s.slug}`}
-                  className="flex items-baseline justify-between gap-4 border-b border-ink/5 py-2 text-sm hover:text-drop"
-                >
-                  <span className="font-medium">{s.name}</span>
-                  <span className="shrink-0 text-xs text-smoke">
-                    from ${s.priceFrom} · {s.duration}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <Link to="/install" className="btn-primary btn-sm mt-6">
-            Ship to store &amp; install
-          </Link>
-        </div>
-
-        <div className="card p-7">
-          <div className="mb-5 flex items-center gap-2">
-            <Truck size={20} aria-hidden className="text-drop" />
-            <h3 className="h3">Mobile — Miami-Dade to Palm Beach</h3>
-          </div>
-          <ul className="space-y-2.5">
-            {MOBILE_SERVICES.map((s) => (
-              <li key={s.slug}>
-                <Link
-                  to={`/services/${s.slug}`}
-                  className="flex items-baseline justify-between gap-4 border-b border-ink/5 py-2 text-sm hover:text-drop"
-                >
-                  <span className="font-medium">{s.name}</span>
-                  <span className="shrink-0 text-xs text-smoke">
-                    from ${s.priceFrom} · {s.duration}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <Link to="/mobile-service" className="btn-outline btn-sm mt-6">
-            How the van works
-          </Link>
-        </div>
-      </div>
-
-      <p className="mt-10 text-center font-display text-xs font-bold uppercase tracking-[0.09em] text-smoke">
-        Mobile install covers {SERVICE_AREA_LABEL}
-      </p>
-      <ServiceAreaCounties className="mx-auto mt-4 max-w-4xl" />
-
-      <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-        <a href={BUSINESS.phoneHref} className="btn-primary">
-          <Phone size={17} aria-hidden />
-          {BUSINESS.phone}
-        </a>
-        <Link to="/locations" className="btn-outline">
-          <MapPin size={17} aria-hidden />
-          Visit the {BUSINESS.shop.city} shop
+      <div
+        data-reveal
+        className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
+      >
+        <Link to="/shipping" className="btn-outline min-h-[48px] w-full sm:w-auto">
+          <Truck size={17} aria-hidden />
+          How shipping works
+        </Link>
+        <Link to="/install" className="btn-outline min-h-[48px] w-full sm:w-auto">
+          <Store size={17} aria-hidden />
+          Ship to store &amp; install
         </Link>
       </div>
     </Section>
   );
 }
 
-/* ---------------------------------- Proof --------------------------------- */
+/* --------------------------- Install & mobile band ------------------------ */
+
+function ServiceList({ services }) {
+  return (
+    <ul className="space-y-1">
+      {services.map((s) => (
+        <li key={s.slug}>
+          <Link
+            to={`/services/${s.slug}`}
+            className="flex min-h-[44px] items-center justify-between gap-4 border-b border-ink/5 text-sm transition-colors hover:text-drop"
+          >
+            <span className="font-medium">{s.name}</span>
+            <span className="shrink-0 text-xs text-smoke">
+              from ${s.priceFrom} · {s.duration}
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function InstallBand() {
+  return (
+    <Section id="install" data-home-section="install" className="bg-fog">
+      <Head
+        eyebrow="South Florida only"
+        title="Local? We'll put them on for you"
+        lede={`Ship-to-store is free, and installation happens at ${BUSINESS.parent} in ${BUSINESS.shop.city} — or in your own driveway if the van is the easier answer.`}
+      />
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div data-reveal className="card flex flex-col p-6 md:p-7">
+          <div className="mb-4 flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-card bg-sky text-drop">
+              <Store size={21} aria-hidden />
+            </span>
+            <h3 className="h3">In the bay — {BUSINESS.shop.city}</h3>
+          </div>
+          <div className="flex-1">
+            <ServiceList services={SHOP_SERVICES} />
+          </div>
+          <Link to="/install" className="btn-primary btn-sm mt-6 min-h-[44px] self-start">
+            Ship to store &amp; install
+          </Link>
+        </div>
+
+        <div
+          data-reveal
+          style={{ "--rv-i": 1 }}
+          className="card flex flex-col p-6 md:p-7"
+        >
+          <div className="mb-4 flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-card bg-sky text-drop">
+              <Truck size={21} aria-hidden />
+            </span>
+            <h3 className="h3">Mobile — Miami-Dade to Palm Beach</h3>
+          </div>
+          <div className="flex-1">
+            <ServiceList services={MOBILE_SERVICES} />
+          </div>
+          <Link to="/mobile-service" className="btn-outline btn-sm mt-6 min-h-[44px] self-start">
+            How the van works
+          </Link>
+        </div>
+      </div>
+
+      <div data-reveal>
+        <p className="mt-12 text-center font-display text-xs font-bold uppercase tracking-[0.09em] text-smoke">
+          Mobile install covers {SERVICE_AREA_LABEL}
+        </p>
+        <ServiceAreaCounties className="mx-auto mt-4 max-w-4xl" />
+      </div>
+
+      {/* The shop behind the store, and where its real reviews live. No star
+          rating and no quote: TireDrop's own reviews are still being
+          collected, so this sends the reader to the shop's real profiles. */}
+      <div
+        data-reveal
+        className="mt-10 grid gap-6 rounded-card bg-ink-wash p-6 text-bone shadow-lift md:p-8 lg:grid-cols-[1.2fr_1fr] lg:items-center"
+      >
+        <div>
+          <p className="eyebrow-dark mb-2">A real shop behind it</p>
+          <h3 className="h3 text-bone">
+            {BUSINESS.parent} mounts tires in {BUSINESS.shop.city}
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-bone/70">
+            {BUSINESS.name} is the same crew selling online. It is new, so its
+            own reviews are still being collected; the shop&apos;s are not. We do
+            not reprint star counts here — read what is actually there.
+          </p>
+        </div>
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          <a href={BUSINESS.phoneHref} className="btn-primary min-h-[48px]">
+            <Phone size={17} aria-hidden />
+            {BUSINESS.phone}
+          </a>
+          <Link to="/locations" className="btn-ghost-light min-h-[48px]">
+            <MapPin size={16} aria-hidden />
+            Visit the shop
+          </Link>
+          <a
+            href={googleReviewHref()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-ghost-light min-h-[48px]"
+          >
+            Google reviews
+            <ExternalLink size={14} aria-hidden />
+            <span className="sr-only">(opens in a new tab)</span>
+          </a>
+          <a
+            href={YELP_PROFILE.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-ghost-light min-h-[48px]"
+          >
+            Yelp
+            <ExternalLink size={14} aria-hidden />
+            <span className="sr-only">(opens in a new tab)</span>
+          </a>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+/* --------------------------------- Free tools ----------------------------- */
+
+// The three that answer the questions that stop people buying tires online:
+// what size, which tire, and whether they need tires at all.
+const CORE_TOOLS = [
+  {
+    to: "/tire-size",
+    label: "Decode my tire size",
+    copy: "Every number on your sidewall explained, drawn to your own tire's proportions.",
+    Icon: Ruler,
+  },
+  {
+    to: "/find-my-tires",
+    label: "Find my tires",
+    copy: "Five questions about your car, roads and weather, and a shortlist that says why.",
+    Icon: ListChecks,
+  },
+  {
+    to: "/tire-check",
+    label: "Do I need tires yet?",
+    copy: "Check the tread with a coin and the age with the sidewall code.",
+    Icon: Gauge,
+  },
+];
 
 function ToolsBand() {
   return (
-    <Section className="bg-ink-wash">
-      <SectionHead
-        eyebrow="Free, no email required"
-        title="Not sure what you need? Start here"
-        lede="Three tools that answer the questions that stop people buying tires online. They work whether or not you buy anything from us."
-        tone="dark"
-      />
+    <section
+      id="tools"
+      data-home-section="tools"
+      className="section relative overflow-hidden bg-ink-wash text-bone"
+    >
+      <Hairline />
+      <div className="wrap relative">
+        <Head
+          eyebrow="Free tools, no email required"
+          title="Not sure what you need? Start here"
+          lede="They work whether or not you buy anything from us."
+          tone="dark"
+        />
 
-      <div className="mt-8 grid gap-3 sm:gap-4 lg:grid-cols-3">
-        {TOOLS_LIST.map(({ to, label, copy, Icon }) => (
+        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+          {/* The scanner leads: no typing, just the photo. */}
           <Link
-            key={to}
-            to={to}
-            className="group flex flex-col rounded-card border border-graphite bg-steel-wash p-5 transition-colors hover:border-volt/40 sm:p-6"
+            to="/tire-size-finder"
+            data-reveal
+            className="group relative flex flex-col overflow-hidden rounded-card border border-volt/40 bg-volt/[0.08] p-5 transition-[transform,border-color,background-color] duration-200 hover:-translate-y-0.5 hover:border-volt/70 hover:bg-volt/[0.12] sm:col-span-2 sm:p-6 lg:col-span-1"
           >
-            <Icon size={24} aria-hidden className="mb-4 text-volt" />
-            <h3 className="h3 text-bone">{label}</h3>
-            <p className="mt-2 flex-1 text-sm leading-relaxed text-bone/70">
-              {copy}
+            <ScanLine size={26} aria-hidden className="mb-4 text-volt" />
+            <h3 className="h3 text-bone">Tire Size Finder</h3>
+            <p className="mt-2 flex-1 text-sm leading-relaxed text-bone/75">
+              Snap the door sticker, a sidewall or the VIN, and it reads the
+              size for you.
             </p>
             <span className="mt-4 flex items-center gap-1.5 font-display text-sm font-bold text-volt">
-              Open it
+              Scan my size
               <ArrowRight
                 size={15}
                 aria-hidden
@@ -618,106 +702,293 @@ function ToolsBand() {
               />
             </span>
           </Link>
+
+          {CORE_TOOLS.map(({ to, label, copy, Icon }, i) => (
+            <Link
+              key={to}
+              to={to}
+              data-reveal
+              style={{ "--rv-i": i + 1 }}
+              className="group flex gap-4 rounded-card border border-graphite bg-steel-wash p-5 transition-[transform,border-color] duration-200 hover:-translate-y-0.5 hover:border-volt/40 sm:flex-col sm:gap-0 sm:p-6"
+            >
+              <Icon size={24} aria-hidden className="mt-0.5 shrink-0 text-volt sm:mb-4 sm:mt-0" />
+              <div className="flex flex-1 flex-col">
+                <h3 className="h3 text-bone">{label}</h3>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-bone/70">
+                  {copy}
+                </p>
+              </div>
+              <span className="mt-4 hidden items-center gap-1.5 font-display text-sm font-bold text-volt sm:flex">
+                Open it
+                <ArrowRight
+                  size={15}
+                  aria-hidden
+                  className="transition-transform group-hover:translate-x-1"
+                />
+              </span>
+            </Link>
+          ))}
+        </div>
+
+        {/* The calculators from the Learn guides, as standalone pages. */}
+        <div data-reveal className="mt-10">
+          <h3 className="mb-4 font-display text-xs font-bold uppercase tracking-[0.09em] text-bone/60">
+            More calculators and checks
+          </h3>
+          <ul className="grid gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
+            {TOOL_PAGES.map((tool) => (
+              <li key={tool.path}>
+                <Link
+                  to={tool.path}
+                  className="group flex min-h-[56px] items-center justify-between gap-4 border-b border-graphite py-3 transition-colors hover:border-volt/40"
+                >
+                  <span>
+                    <span className="block font-display text-[15px] font-bold text-bone group-hover:text-volt">
+                      {tool.label}
+                    </span>
+                    <span className="mt-0.5 block text-[13px] leading-snug text-bone/60">
+                      {tool.blurb}
+                    </span>
+                  </span>
+                  <ArrowRight
+                    size={15}
+                    aria-hidden
+                    className="shrink-0 text-volt transition-transform group-hover:translate-x-1"
+                  />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------------------------- Learn --------------------------------- */
+
+function Learn() {
+  // Real guides and posts, picked at build time (src/lib/homeReading.js).
+  const cards = HOME_READING ?? [];
+  if (cards.length === 0) return null;
+
+  return (
+    <Section id="learn" data-home-section="learn" className="bg-bone">
+      <Head
+        eyebrow="Learn"
+        title="Know your tires before you buy them"
+        lede="Plain-English guides to the sidewall, tread, pressure and Florida driving, plus blog posts on local questions."
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Link to="/learn" className="btn-outline btn-sm min-h-[44px]">
+              All guides
+              <ArrowRight size={15} aria-hidden />
+            </Link>
+            <Link to="/blog" className="btn-outline btn-sm min-h-[44px]">
+              Blog
+            </Link>
+          </div>
+        }
+      />
+
+      {/* A swipe row on a phone, like the categories, so six cards are not
+          a 2,000px stack; a grid from `sm` up. Reveals as one piece. */}
+      <ul
+        data-reveal
+        className="-mx-5 grid auto-cols-[84%] grid-flow-col gap-3 overflow-x-auto overscroll-x-contain scroll-px-5 px-5 pb-5 pt-1 [scrollbar-width:none] snap-x snap-mandatory sm:mx-0 sm:auto-cols-auto sm:grid-flow-row sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:p-0 sm:snap-none lg:grid-cols-3 [&::-webkit-scrollbar]:hidden"
+      >
+        {cards.map((card) => (
+          <li key={card.path} className="flex snap-start">
+            <Link
+              to={card.path}
+              className="card-hover group flex w-full flex-col p-6 hover:border-drop/40"
+            >
+              <span className="flex items-center gap-2 text-xs">
+                <span
+                  className={`inline-flex items-center gap-1 rounded-sm px-2 py-1 font-display text-[11px] font-bold uppercase leading-none tracking-[0.09em] ${
+                    card.kind === "guide"
+                      ? "bg-sky text-drop"
+                      : "bg-ink/[0.06] text-ink"
+                  }`}
+                >
+                  {card.kind === "guide" ? "Guide" : "Blog"}
+                </span>
+                <span className="truncate font-semibold text-smoke">
+                  {card.topic}
+                </span>
+              </span>
+              <h3 className="mt-4 text-balance font-display text-[1.15rem] leading-snug text-ink transition-colors group-hover:text-drop">
+                {card.title}
+              </h3>
+              <p className="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-smoke">
+                {card.description}
+              </p>
+              <span className="mt-5 flex items-center justify-between border-t border-ink/[0.07] pt-4 text-xs text-smoke">
+                <span className="flex items-center gap-1.5">
+                  <BookOpen size={14} aria-hidden />
+                  {card.minutes ? `${card.minutes} min read` : "Read"}
+                </span>
+                <ArrowRight
+                  size={15}
+                  aria-hidden
+                  className="text-drop transition-transform group-hover:translate-x-1"
+                />
+              </span>
+            </Link>
+          </li>
         ))}
+      </ul>
+    </Section>
+  );
+}
+
+/* -------------------------------- Nationwide ------------------------------ */
+
+function Nationwide() {
+  const states = STATE_PAGES_LIVE.map(getState).filter(Boolean);
+
+  return (
+    <Section id="nationwide" data-home-section="nationwide" className="bg-fog">
+      <div
+        data-reveal
+        className="relative overflow-hidden rounded-card bg-ink-wash text-bone shadow-lift"
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(115deg, #fff 0 2px, transparent 2px 22px)",
+          }}
+        />
+        <div className="relative grid gap-8 p-6 md:p-10 lg:grid-cols-[1.3fr_1fr] lg:items-center lg:gap-12 lg:p-14">
+          <div>
+            <p className="eyebrow-dark mb-3 flex items-center gap-2.5">
+              <span aria-hidden className="h-px w-6 bg-volt/50" />
+              Shipping nationwide
+            </p>
+            <h2 className="h2 text-balance text-bone">
+              Outside South Florida? We ship to you.
+            </h2>
+            <p className="lede mt-4 max-w-xl text-bone/75">
+              Free shipping to any street address in {BUSINESS.shipping.area}.
+              A local shop of your choosing mounts them, and each state guide
+              covers that state&apos;s tire fees and rules.
+            </p>
+            <Link to="/tires-shipped" className="btn-primary mt-7 min-h-[48px]">
+              Tires shipped nationwide
+              <ArrowRight size={17} aria-hidden />
+            </Link>
+          </div>
+
+          <div>
+            <p
+              aria-hidden
+              className="font-display text-[5.5rem] font-extrabold leading-none tracking-tight text-volt md:text-[7rem]"
+            >
+              48<span className="text-bone/40">+DC</span>
+            </p>
+            {states.length > 0 && (
+              <>
+                <h3 className="mt-5 font-display text-xs font-bold uppercase tracking-[0.09em] text-bone/60">
+                  State guides
+                </h3>
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {states.map((s) => (
+                    <li key={s.slug}>
+                      <Link
+                        to={statePath(s.slug)}
+                        className="inline-flex min-h-[44px] items-center rounded-sm border border-bone/20 bg-bone/5 px-3.5 text-sm font-semibold text-bone transition-colors hover:border-volt/60 hover:text-volt"
+                      >
+                        {s.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </Section>
   );
 }
 
-function Proof() {
-  // Figures that stay true and imply nothing about stock or tenure. No star
-  // rating and no quote: TireDrop's own reviews are still being collected, so
-  // the card sends the reader to the shop's real Google and Yelp profiles.
-  const stats = [
-    { v: "48", l: "States we ship to, plus DC" },
-    { v: "$0", l: "Shipping, with no minimum" },
-    {
-      v: `${MOBILE_SERVICES.length + SHOP_SERVICES.length}`,
-      l: "Services at the shop",
-    },
-    { v: `${SERVICE_COUNTIES.length}`, l: "Counties we install in" },
-  ];
+/* ----------------------------------- FAQ ---------------------------------- */
 
+// Answers as published on /shipping, /install and /tires-shipped, kept short.
+const FAQ = [
+  {
+    q: "How much does shipping cost?",
+    a: `Nothing. Shipping is free to any address in ${BUSINESS.shipping.area}, with no order minimum. Ship-to-store at our ${BUSINESS.shop.city} shop is free too.`,
+  },
+  {
+    q: "How long will my tires take to arrive?",
+    a: "Checkout shows the delivery estimate for your order once your address is entered, because transit depends on which distributor warehouse has your size and how far it has to travel. We would rather show you a real estimate than print a promise on a page that cannot know your ZIP code.",
+  },
+  {
+    q: "Do you ship to Alaska, Hawaii or outside the US?",
+    a: `Our standard shipping covers ${BUSINESS.shipping.area}. That leaves out Alaska, Hawaii and US territories. If you are outside that, call ${BUSINESS.phone} before ordering and we will tell you honestly whether we can get your order there.`,
+  },
+  {
+    q: "Do you install tires outside South Florida?",
+    a: "No. Our installation, at the Sunrise shop or by mobile van, covers Miami-Dade, Broward and Palm Beach counties only. Everywhere else we ship, and a local shop of your choosing does the fitting.",
+  },
+  {
+    q: "Does ship to store really cost nothing?",
+    a: `Yes. Shipping to the ${BUSINESS.shop.city} shop is free, the same as shipping to any address in ${BUSINESS.shipping.area}. You still pay for the tires and, separately, for the installation when you come in.`,
+  },
+  {
+    q: "Can the van install them at my house instead?",
+    a: `If you are in the local install area, yes. The mobile van covers ${SERVICE_AREA_LABEL}, decided by the ZIP code of the address.`,
+  },
+  {
+    q: "Can I return tires?",
+    a: "Unused, unmounted tires in their original condition can go back once we've authorized the return, so call before you send anything. A mounted tire can't be returned. The full policy is in Returns & Refunds.",
+  },
+];
+
+function Faq() {
   return (
-    <Section className="bg-fog">
-      <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
-        <div>
-          <p className="eyebrow mb-2">Why {BUSINESS.name}</p>
-          <h2 className="h2">
-            An online tire store with a real shop behind it
-          </h2>
-          <p className="lede mt-4">
-            {BUSINESS.parent} mounts tires in {BUSINESS.shop.city}, and{" "}
-            {BUSINESS.name} is the same crew selling online. Orders ship direct
-            to wherever you want them: your own door anywhere in the 48 contiguous states or DC,
-            or our bay in {BUSINESS.shop.city}.
-          </p>
-
-          <dl className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-4 lg:grid-cols-2">
-            {stats.map((s) => (
-              <div key={s.l}>
-                <dt className="sr-only">{s.l}</dt>
-                <dd>
-                  <span className="block font-display text-4xl text-drop">
-                    {s.v}
-                  </span>
-                  <span className="mt-1 block text-[13px] leading-snug text-smoke">
-                    {s.l}
-                  </span>
-                </dd>
-              </div>
-            ))}
-          </dl>
-
-          <Link to="/about" className="btn-outline btn-sm mt-8">
-            Our story
-          </Link>
+    <Section id="faq" data-home-section="faq" className="bg-bone">
+      <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+        <div data-reveal className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] lg:self-start">
+          <SectionHead
+            eyebrow="FAQ"
+            title="Questions before you order"
+            lede="The short answers. Shipping, install and returns each have a page with the full detail."
+          />
+          <div className="-mt-2 flex flex-wrap gap-2 md:-mt-6">
+            <Link to="/shipping" className="btn-outline btn-sm min-h-[44px]">
+              Shipping
+            </Link>
+            <Link to="/install" className="btn-outline btn-sm min-h-[44px]">
+              Ship to store
+            </Link>
+            <Link to="/terms#returns" className="btn-outline btn-sm min-h-[44px]">
+              Returns &amp; Refunds
+            </Link>
+            <Link to="/contact" className="btn-outline btn-sm min-h-[44px]">
+              Contact
+            </Link>
+          </div>
         </div>
 
-        <div className="card p-7">
-          <div className="border-b border-ink/10 pb-5">
-            <p className="font-display text-sm font-semibold text-smoke">
-              Customer reviews
-            </p>
-            <h3 className="h3 mt-1">Read the real ones</h3>
-          </div>
-
-          <p className="mt-5 text-sm leading-relaxed text-smoke">
-            {BUSINESS.name} is new, so its own reviews are still being
-            collected. The shop behind it is not: both profiles below are{" "}
-            {BUSINESS.parent}&apos;. We do not reprint star counts here — open
-            either one and read what is actually there.
-          </p>
-
-          <div className="mt-6 grid gap-2.5 sm:grid-cols-2">
-            <a
-              href={googleReviewHref()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary btn-sm w-full"
-            >
-              {BUSINESS.parent} on Google
-              <ExternalLink size={14} aria-hidden />
-              <span className="sr-only">(opens in a new tab)</span>
-            </a>
-            <a
-              href={YELP_PROFILE.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-outline btn-sm w-full"
-            >
-              {BUSINESS.parent} on Yelp
-              <ExternalLink size={14} aria-hidden />
-              <span className="sr-only">(opens in a new tab)</span>
-            </a>
-          </div>
-
-          <Link
-            to="/reviews"
-            className="mt-5 inline-block text-sm font-semibold text-drop underline underline-offset-2"
-          >
-            More on reviews
-          </Link>
+        {/* <details>: opens and closes without JavaScript. */}
+        <div data-reveal className="divide-y divide-ink/10 border-y border-ink/10">
+          {FAQ.map((item) => (
+            <details key={item.q} className="group">
+              <summary className="flex min-h-[56px] cursor-pointer list-none items-center justify-between gap-4 py-4 font-display text-[1.0625rem] font-bold leading-snug tracking-[-0.012em] text-ink transition-colors hover:text-drop md:text-[1.15rem] [&::-webkit-details-marker]:hidden">
+                {item.q}
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-fog text-drop transition-[transform,background-color] duration-200 group-open:rotate-180 group-open:bg-sky">
+                  <ChevronDown size={18} aria-hidden />
+                </span>
+              </summary>
+              <p className="-mt-1 pb-5 pr-12 text-sm leading-relaxed text-smoke">
+                {item.a}
+              </p>
+            </details>
+          ))}
         </div>
       </div>
     </Section>
@@ -728,20 +999,33 @@ function Proof() {
 
 function FinalCta() {
   return (
-    <Section className="bg-ink-wash text-bone">
-      <div className="flex flex-col items-center gap-6 text-center">
+    <section
+      data-home-section="cta"
+      className="section relative overflow-hidden bg-ink-wash text-bone"
+    >
+      <Hairline />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-0 h-[360px] w-[720px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-volt/10 blur-3xl"
+      />
+      <div
+        data-reveal
+        className="wrap relative flex flex-col items-center gap-6 text-center"
+      >
         <PackageCheck size={34} aria-hidden className="text-volt" />
-        <h2 className="h2 max-w-2xl">Find your size and pick your delivery</h2>
+        <h2 className="h2 max-w-2xl text-balance">
+          Find your size and pick your delivery
+        </h2>
         <p className="lede max-w-xl text-bone/65">
           Search the catalog, add a set to your cart, and choose shipping or
           free ship-to-store at checkout. Questions on fitment? Call us.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
-          <Link to="/tires" className="btn-primary">
+          <Link to="/tires" className="btn-primary min-h-[48px]">
             Shop Tires
             <ArrowRight size={17} aria-hidden />
           </Link>
-          <a href={BUSINESS.phoneHref} className="btn-ghost-light">
+          <a href={BUSINESS.phoneHref} className="btn-ghost-light min-h-[48px]">
             <Phone size={17} aria-hidden />
             Call {BUSINESS.phone}
           </a>
@@ -751,43 +1035,35 @@ function FinalCta() {
           {BUSINESS.poweredBy}
         </p>
       </div>
-    </Section>
+    </section>
   );
 }
 
 /* ---------------------------------- Page ---------------------------------- */
 
 export default function HomePage() {
+  const ref = useRef(null);
+  useScrollReveal(ref);
+
   return (
     <>
       <Seo
         title="Tires & Wheels Shipped Nationwide"
         description="TireDrop is an online tire and wheel store shipping free to the 48 contiguous states and DC. Ship to your address, or free to our South Florida shop where we install them. Powered by Extreme Tires."
       />
-      {/* Same order as the storefront theme's home template. Real products
-          and real prices come third, the first proof that there is a shop
-          here at all; the four steps follow the catalog so the process is
-          explained right after the offer, then the two ways to get the tires
-          and the tools for anyone who does not know their size. */}
-      <Hero />
-      <TrustBar />
-      <FeaturedTires />
-
-      {/* For the shopper the four featured tires did not suit. */}
-      <ShopByCategory />
-      <HowItWorks />
-      <DeliveryChoice />
-
-      {/* The way in for someone who cannot answer the finder because they do
-          not know their size — which is the single most common reason a tire
-          shopper leaves a site. */}
-      <ToolsBand />
-
-      {/* The local pitch, then the proof behind it. */}
-      <LocalAdvantage />
-      <Proof />
-      {SHOW_CATEGORY_TILES && <CategoryTiles />}
-      <FinalCta />
+      {/* A plain wrapper for the reveal hook to search; no layout of its own. */}
+      <div ref={ref} className="contents">
+        <Hero />
+        <TrustBar />
+        <Shop />
+        <HowItWorks />
+        <InstallBand />
+        <ToolsBand />
+        <Learn />
+        <Nationwide />
+        <Faq />
+        <FinalCta />
+      </div>
     </>
   );
 }

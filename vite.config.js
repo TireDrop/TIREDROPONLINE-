@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import { generateSeoFiles } from "./scripts/generate-seo-files.mjs";
 import { loadContent } from "./src/content/node.js";
 import { buildPageIndex, pageIndexContent } from "./src/lib/sitePages.js";
+import { pickHomeReading } from "./src/lib/homeReading.js";
 
 // robots.txt and sitemap.xml are derived from the router and the catalogs
 // rather than maintained by hand, so they are regenerated at the start of
@@ -33,6 +34,20 @@ const sitePages = () => ({
   },
 });
 
+// The home page's Learn cards (src/lib/homeReading.js) as "virtual:home-reading":
+// a handful of titles, paths and reading times picked in Node, because the
+// home page sits in the main bundle and src/content/index.js would pull every
+// article's Markdown in with it.
+const HOME_READING = "virtual:home-reading";
+const homeReading = () => ({
+  name: "tiredrop-home-reading",
+  resolveId: (id) => (id === HOME_READING ? `\0${HOME_READING}` : null),
+  load(id) {
+    if (id !== `\0${HOME_READING}`) return null;
+    return `export default ${JSON.stringify(pickHomeReading(loadContent()))};`;
+  },
+});
+
 // `--mode preview` produces a build that runs from any static host without
 // SPA rewrites: relative asset paths plus hash routing (see src/main.jsx).
 //
@@ -41,7 +56,7 @@ const sitePages = () => ({
 // once it is done. VITE_BUILD_YEAR is the footer's year in prerendered HTML
 // (see Footer.jsx).
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), seoFiles(), sitePages()],
+  plugins: [react(), seoFiles(), sitePages(), homeReading()],
   base: mode === "preview" ? "./" : "/",
   define: {
     "import.meta.env.VITE_BUILD_YEAR": JSON.stringify(

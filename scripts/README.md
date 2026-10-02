@@ -27,6 +27,7 @@ header comment, and `shopify/assets/td-tiremath.js` names
 | `ga-events-check.mjs` | `check:ga` | GA4 conversion events through a real funnel (view_item, add_to_cart, view_cart, begin_checkout, add_shipping_info, generate_lead) with the expected shape, and nothing typed into a form in any GA call. |
 | `a11y-check.mjs` | `check:a11y` | axe-core (WCAG 2.1 A/AA plus best practice) on 12 key routes at 390px and 1280px: fails on serious or critical issues. Also checks the skip link is the first Tab stop and moves focus to `<main>`. |
 | `search-check.mjs` | `check:search` | The header's store-wide search: size, brand and page suggestions as you type, the ARIA combobox (arrow keys, Enter, Escape, Tab, click outside), Enter and "See all results" to `/search?q=`, the `search` and `search_suggestion` GA4 events, 44px rows and no sideways scroll at 390px, axe with the list open, `/search` noindex and hydrating. `SEARCH_SHOTS=<dir>` sets where screenshots go. |
+| `home-check.mjs` | `check:home` | The home page: sections in story order in the prerendered HTML, 3-6 real Learn cards, no hidden reveal state in the markup; every scroll-reveal target visible with JavaScript off and with reduced motion; at 390px and 1440px the hero never hidden, everything revealed by scrolling, no sideways scroll, CLS under 0.1, no console errors. |
 
 `check:schema` reads `dist/` directly, so it needs `npm run build` first.
 So do the Chromium checks. They start

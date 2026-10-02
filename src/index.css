@@ -319,6 +319,30 @@
   }
 }
 
+/* ---------- Scroll reveal (src/lib/useScrollReveal.js) ----------
+   The hidden state exists only once the script has put `data-rv="hide"` on
+   an element below the fold, after hydration; the markup never carries it, so
+   prerendered and no-JS pages are fully visible. Opacity and transform only,
+   so nothing reflows. `--rv-i` staggers siblings. */
+[data-rv] {
+  transition:
+    opacity 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: calc(min(var(--rv-i, 0), 6) * 70ms);
+}
+
+[data-rv="hide"] {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+}
+
+@media print {
+  [data-rv] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -327,6 +351,11 @@
   .scan-line {
     top: 50%;
     animation: none;
+  }
+
+  [data-rv] {
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   *,
