@@ -78,7 +78,7 @@ Both are road tires for cars, crossovers and SUVs. Neither is "better". The righ
 
 Tire makers describe the same set of trade-offs:
 
-| | Touring | Performance |
+| Feature | Touring | Performance |
 |---|---|---|
 | Rubber compound | Harder-wearing, built for mileage | Softer, built for grip |
 | Sidewall | More flex, for ride comfort | Stiffer, to resist flex in corners |

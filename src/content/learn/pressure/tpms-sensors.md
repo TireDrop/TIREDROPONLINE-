@@ -29,8 +29,8 @@ faq:
     a: "Your owner's manual describes the system. A technician with a TPMS tool can also check for sensors at each wheel. Direct systems often show individual tire pressures on the dash; indirect systems infer low pressure from wheel speed instead."
 sources:
   - title: "FMVSS No. 138, Tire Pressure Monitoring Systems (49 CFR 571.138)"
-    publisher: "NHTSA / Cornell LII"
-    url: "https://www.law.cornell.edu/cfr/text/49/571.138"
+    publisher: "NHTSA / eCFR"
+    url: "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-571/subpart-B/section-571.138"
   - title: "TPMS: Tire-pressure monitoring system"
     publisher: "Pirelli"
     url: "https://www.pirelli.com/tires/en-us/car/driving-and-tire-tips/how-to-read/tpms"
@@ -67,7 +67,7 @@ The rule sets what the system must do: light a warning no more than 20 minutes a
 
 There are two ways a car can watch your tires.
 
-| | Direct TPMS | Indirect TPMS |
+| Feature | Direct TPMS | Indirect TPMS |
 |---|---|---|
 | How it measures | A pressure sensor in each wheel | The ABS wheel-speed sensors |
 | What it knows | The actual pressure in each tire | That one tire is turning at a different speed |

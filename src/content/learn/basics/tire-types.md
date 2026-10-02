@@ -43,8 +43,8 @@ sources:
     publisher: "Michelin"
     url: "https://www.michelinman.com/auto/auto-tips-and-advice/tires-101/what-are-performance-tire-characteristics"
   - title: "FMVSS No. 139, New Pneumatic Radial Tires for Light Vehicles (49 CFR 571.139)"
-    publisher: "NHTSA / Cornell LII"
-    url: "https://www.law.cornell.edu/cfr/text/49/571.139"
+    publisher: "NHTSA / eCFR"
+    url: "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-571/subpart-B/section-571.139"
 related:
   - /learn/basics/touring-vs-performance-tires
   - /learn/basics/parts-of-a-tire
