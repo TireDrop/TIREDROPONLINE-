@@ -36,6 +36,9 @@ sources:
   - title: "Tire Load Rating & Speed Rating Explained"
     publisher: "Michelin"
     url: "https://www.michelinman.com/auto/auto-tips-and-advice/tires-101/tire-load-rating-speed-rating"
+  - title: "FMVSS No. 110, Tire selection and rims (49 CFR 571.110)"
+    publisher: "NHTSA / eCFR"
+    url: "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-571/subpart-B/section-571.110"
 related:
   - /learn/sidewall/how-to-read-tire-size
   - /learn/fitment/wheel-offset-backspacing
