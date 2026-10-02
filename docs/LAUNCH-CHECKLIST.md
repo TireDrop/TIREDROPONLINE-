@@ -5,9 +5,10 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (SHIPPED: blog batch 4, 10 posts (Civic, Wrangler, Silverado towing, hybrids, small fleets, potholes, new-car tires, rotation and aging myths, Thanksgiving trip); earlier today: wave 2 (quote form, installed price, blog batch 3, a11y 0 issues, check:links), resources only + check:sources)_
+_Last updated: 2026-10-02 (check:forms 271s → 83s, same 113 checks, on preview/forms-split; SHIPPED: blog batch 4, 10 posts (Civic, Wrangler, Silverado towing, hybrids, small fleets, potholes, new-car tires, rotation and aging myths, Thanksgiving trip); earlier today: wave 2 (quote form, installed price, blog batch 3, a11y 0 issues, check:links), resources only + check:sources)_
 
 ## Site fixes (Claude)
+- [x] ~~check:forms 271s → 83s, same assertions (113 checks, 4 at a time; FORMS_SHARD=k/n to split)~~ (`31b614a`, branch preview/forms-split)
 - [x] ~~Resources only: every competitor citation/link replaced with maker, AAA or government sources~~ (`7754330`, shipped to main 2026-10-02)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
 - [x] ~~Privacy policy: newsletter, form storage in Shopify, GA disclosed~~ (`a6a5b0c`)
