@@ -36,12 +36,12 @@ _Last updated: 2026-10-02 (checklist wave 2 in one release: blog batch 3 (10 pos
 - [x] ~~Spanish tab labels overflow the home finder on phones (SearchPanel whitespace-nowrap) → let tabs wrap below md~~ (c05e3ac)
 - [x] ~~Compact mobile-first footer: contact row first, collapsible link groups, 62% shorter on phones (1621 → 608px), check:footer guards it~~ (a18b709, shipped to main 2026-10-02)
   - [ ] Footer link label "Tires Shipped Nationwide" → say 48 states + DC (Justin picks the wording) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D6)
-  - [x] ~~Footer link label "Tires Shipped Nationwide" → say 48 states + DC~~ (a04b749 on preview/a11y-pass2: "Shipping to 48 States + DC" in the footer, breadcrumbs and CTAs; home and hub SEO titles add "(48 states + DC)"; footer 927px at 390, unchanged)
+  - [x] ~~Footer link label "Tires Shipped Nationwide" → say 48 states + DC~~ (a04b749, shipped to main 2026-10-02: "Shipping to 48 States + DC" in the footer, breadcrumbs and CTAs; home and hub SEO titles add "(48 states + DC)"; footer 927px at 390, unchanged)
 - [x] ~~check:sources gate: competitor links, mentions and meta tags fail the build; required in every gate run~~ (`0b1172b`, shipped to main 2026-10-02)
   - [x] ~~Source decisions: Wheel Pros / KMC (wheel makers) and legalclarity.org kept as resources; cleanairforce.com (Georgia emissions program) added as a resource~~ (2026-10-02)
 
 ## Admin (Justin)
-- [x] ~~One prompt pack for every item only Justin can do~~ (`5fae72e`, preview/justin-prompts: docs/prompts/2026-10-02-justin-remaining.md)
+- [x] ~~One prompt pack for every item only Justin can do~~ (`5fae72e`, shipped to main 2026-10-02: docs/prompts/2026-10-02-justin-remaining.md)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
 - [x] ~~Search Console: domain verified, sitemap submitted, robots.txt re-fetched~~ (2026-09-29)
 - [x] ~~Business Profile: tiredroponline.com added as a booking link (main site kept)~~
@@ -103,9 +103,10 @@ _Last updated: 2026-10-02 (checklist wave 2 in one release: blog batch 3 (10 pos
 - [ ] Accessibility, second pass: heading order on the Learn hubs, /blog, /wheels and /compare, and a blank first column heading in the UTQG table (axe "moderate"/"minor"; `npm run check:a11y` covers 12 key routes)
 - [ ] Shopify theme copy still says "continental United States" (shop. redirects to the main site, so it does not render; update the draft theme only if the redirect ever comes off) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C10)
 - [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A9)
-- [x] ~~Accessibility, second pass: heading order on the Learn hubs, /blog, /wheels and /compare, and a blank first column heading in the UTQG table~~ (a04b749 on preview/a11y-pass2: 0 axe issues on 24 routes at 390 and 1280, down from 25; also named the compare tray landmark and four more blank table headings; `npm run check:a11y` now covers 22 routes at both widths plus 18 at 390)
+- [x] ~~Accessibility, second pass: heading order on the Learn hubs, /blog, /wheels and /compare, and a blank first column heading in the UTQG table~~ (a04b749, shipped to main 2026-10-02: 0 axe issues on 24 routes at 390 and 1280, down from 25; also named the compare tray landmark and four more blank table headings; `npm run check:a11y` now covers 22 routes at both widths plus 18 at 390)
 - [x] ~~CRO quick wins: hero to results, phone cart Checkout, install price shown, 48 states + DC on cards~~ (shipped to main 2026-10-02, release preview/release-2026-10-02)
-- [ ] CRO fixes 1 + 4: size quote form on zero results, compact /tires header, Cart in the /tires bottom bar (preview/cro-quote-compact baaf32c) → ship
+- [x] ~~CRO fixes 1 + 4: size quote form on zero results, compact /tires header, Cart in the /tires bottom bar; "free install" wording priced or dropped~~ (baaf32c, shipped to main 2026-10-02)
+  - [ ] Send one real size-quote lead and confirm it lands in Shopify (tag `lead-size-quote`) and reaches info@ through Flow
   - First tire card with a vehicle in the URL (2019 F-150): 1,199 → 742 px at 390x844, 1,066 → 701 px at 1440x900 (size URL 225/50R17: 1,080 → 684 and 1,046 → 681)
   - New lead type `size-quote` (tag `lead-size-quote`) goes through the same Shopify → Flow → info@ path; GA4 `view_search_results { results }` counts the zero-result searches
   - Free-install leftovers (fix 5): About, Wheels, Install, Commercial, product, checkout and home meta, the /tires shipping band, state/city/search copy and 7 articles now show the install price from the service catalog or drop the free claim
@@ -120,10 +121,10 @@ _Last updated: 2026-10-02 (checklist wave 2 in one release: blog batch 3 (10 pos
   - [x] ~~Model lists hold up: `/api/vehicles` asks NHTSA with a timeout and is cached at Vercel's edge for a day; the build saves a snapshot as the fallback; when nothing loads the finder says "Couldn't load models. Type your model or enter your door-jamb size."~~ (preview/remember e8f1d6f)
   - [x] ~~Production build log shows `[vpic-snapshot] wrote dist/data/vpic-models.json: 59 makes, 1506 models` (12 makes missed)~~ (checked 2026-10-02, deploy 22af9f9)
   - [ ] Shopify theme's `td-vehicles.js` still asks NHTSA straight from the browser and falls back to the 45-model table; point it at `/api/vehicles` (draft theme only) if the theme finder is ever shown again → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C11)
-  - [x] ~~A shared /tires link spells a model the size table doesn't know from the URL ("cx-5" shows as "Cx-5"); the saved pick keeps the right spelling~~ (preview/internal-links b823577: reads as CX-5, RAV4, 4Runner; NHTSA's spelling once the model list answers)
+  - [x] ~~A shared /tires link spells a model the size table doesn't know from the URL ("cx-5" shows as "Cx-5"); the saved pick keeps the right spelling~~ (b823577, shipped to main 2026-10-02: reads as CX-5, RAV4, 4Runner; NHTSA's spelling once the model list answers)
 - [ ] Book an install time at checkout → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C5)
 - [ ] Fitment by trim + staggered (logic + badge shipped in 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C3)
-- [x] ~~Installed-price toggle: "Show installed price (Miami-Dade, Broward, Palm Beach)" on /tires cards and tire pages, tire + installation = total for one tire and a set of 4, price from services.js, remembered, display only (cart unchanged), GA4 `installed_price_toggle`~~ (preview/installed-price 42d49d2)
+- [x] ~~Installed-price toggle: "Show installed price (Miami-Dade, Broward, Palm Beach)" on /tires cards and tire pages, tire + installation = total for one tire and a set of 4, price from services.js, remembered, display only (cart unchanged), GA4 `installed_price_toggle`~~ (42d49d2, shipped to main 2026-10-02)
 - [x] ~~Tire Size Finder scanner (door sticker / sidewall / VIN), one camera, Scan button in the home hero and /tires~~ (preview/scanner, shipped to main 2026-10-01; steps: docs/integrations/tire-size-finder.md)
   - [x] ~~Justin: Anthropic key `tiredrop-vercel-scanner` in Vercel (Sensitive, Production + Preview), $25 monthly spend limit, auto-reload on~~ (2026-10-01)
   - [x] ~~Guardrails: key read only server-side; per-IP limit 5 scans / 10 min; photo ≤3 MB (under Vercel's 4.5 MB body limit) and JPEG/PNG/WebP checked by bytes; 401/403/429/529 logged with a hint, never the key; "busy" and "isn't working" messages for shoppers~~ (preview/scanner)
@@ -148,10 +149,10 @@ _Last updated: 2026-10-02 (checklist wave 2 in one release: blog batch 3 (10 pos
 - [x] ~~Phase 1: keyword map, 90–100 titles, demo list → Justin approves~~ (b813381, plans approved)
 - [x] ~~Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves~~ (800247b, pilot approved + 5 demos)
 - [x] ~~Blog + Learn live: 20 articles, 5 demos, 98 prerendered routes~~ (be6a2a2)
-- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); blog batch 2 live (f776fc1); blog batch 3 on preview (below). Blog: 25 planned posts left (24 unwritten + #15 on hold) = 3 more batches. Learn: 33 guides live. Status table in `docs/content/blog-plan.md`. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
-- [ ] Blog batch 3: 10 posts (preview/blog-batch-3 9e4cc11) → ship
+- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); blog batch 2 live (f776fc1); blog batch 3 live (9e4cc11). Blog: 25 planned posts left (24 unwritten + #15 on hold) = 3 more batches. Learn: 33 guides live. Status table in `docs/content/blog-plan.md`. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
+- [x] ~~Blog batch 3: 10 posts~~ (9e4cc11, shipped to main 2026-10-02)
+  - [ ] 16 facts were snippet-only: confirm them → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A18)
   - 4/32 in Florida rain, best time to buy (by season), RAV4, used car after storm season, choosing between brands, Camry, F-150 P vs LT, EV tire wear, rideshare mileage math, CR-V
-  - [ ] Snippet-only facts (maker and government sites blocked here): confirm on the source pages before or soon after shipping: Toyota manual + tire warranty guide (AWD same brand/tread; replace all four or a pair), Honda CR-V manual (replacement rules; ABS/VSA/AWD warning), Ford tire replacement page, Tesla Model Y "replace at 4/32", AAA 2018 (86 ft light truck, 33% handling), NOAA AOML season dates, Michigan AG flood-car alert, NMVTIS and NICB VINCheck pages, NHTSA DOT HS 811 154 (10% rolling resistance ≈ 1.1% mpg), fueleconomy.gov 0.6%/3%, USTMA 5,000–8,000 mi rotation, Michelin EV pressure page, Consumer Reports test protocol, Bridgestone tire-types page
   - [ ] Justin: does Extreme Tires sell used tires? Plan post #49 waits on the answer
 - [x] ~~6 new tools with their own tool pages, embedded in 8 articles~~ (preview/tools 210b348, shipped 2026-10-01)
 - [x] ~~Wave 1 city pages + mobile hub: Sunrise, Plantation, Tamarac, Coral Springs, Davie, Fort Lauderdale, Weston~~ (preview/cities bb42574, shipped 2026-10-01)
@@ -162,7 +163,7 @@ _Last updated: 2026-10-02 (checklist wave 2 in one release: blog batch 3 (10 pos
 - [ ] City pages wave 2: Pompano Beach, Miramar, Oakland Park, Pembroke Pines, Hollywood, Lauderhill (after wave 1 is indexed) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C7)
 - [ ] Phase 4: internal links, Search Console submit, monthly refresh
 - [ ] Phase 4: Search Console submit, monthly refresh (internal links done, below)
-- [x] ~~Phase 4 internal links: check:links + fixes~~ (preview/internal-links b823577)
+- [x] ~~Phase 4 internal links: check:links + fixes~~ (b823577, shipped to main 2026-10-02)
   - `npm run check:links` reads the build: 154 pages, 50 articles; 0 broken links, 0 indexable orphans (only /search, noindex), 0 articles without a shop or tool link, so nothing needed fixing
   - Linked only from the nav, footer or /sitemap (not failing): /about, /financing, /gallery, /reviews
 - [x] ~~Article bundle split: each article loads only itself (article pages 312 → 176 KB gzipped JS)~~ (shipped to main 2026-10-02, release preview/release-2026-10-02)

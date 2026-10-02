@@ -589,6 +589,30 @@ it failed.
 
 ---
 
+### A18. Blog batch 3: confirm the snippet-only facts
+
+The 10 batch-3 posts were written from search snippets because the source sites are blocked from Claude's sandbox. Paste the HEADER, then:
+
+> Open each URL below. For each one, reply FOUND, NOT FOUND or PAGE MISSING, and quote the line you found. Read only; change nothing.
+> 1. https://www.toyota.com/owners/warranty-owners-manuals/ (RAV4 manual): replacement tires of the same size and construction, same or greater maximum load; on AWD, all four tires the same brand and tread pattern
+> 2. https://assets.sia.toyota.com/publications/en/omms-s/TL-MMS-20Tire/pdf/TL-MMS-20Tire.pdf: replace all four, or at least both front or both rear, as a set; replace at the 2/32 wear indicators
+> 3. https://techinfo.honda.com/rjanisis/pubs/om/ah/a3a02424iom/enu/details/131240047-14857.html: same size, load range, speed rating and max cold pressure; best to replace all four, otherwise pairs; other sizes can make ABS, VSA and AWD malfunction; TPMS-specified wheels only
+> 4. https://www.ford.com/support/how-tos/tires-and-wheels/tire-replacement-and-maintenance/tire-replacement/: same size, load index and speed rating as the originals
+> 5. https://www.tesla.com/ownersmanual/modely/en_us/GUID-94F63B13-EA2C-45D9-83AB-5DCA6295D587.html: replace at 4/32 in (3 mm) or less
+> 6. https://newsroom.aaa.com/2018/06/tread-lightly-worn-tires-drivers-risk/: light trucks needed 86 ft more to stop; passenger-car handling 33% lower
+> 7. https://www.aoml.noaa.gov/hrd-faq/: hurricane season June 1 to November 30
+> 8. https://www.michigan.gov/consumerprotection/protect-yourself/consumer-alerts/auto/beware-of-buying-a-flood-damaged-vehicle: flood cars shipped to other states; the warning signs; get an independent technician
+> 9. https://vehiclehistory.bja.ojp.gov/nmvtis_consumers: what a report covers (title, brand history, odometer, total loss, salvage)
+> 10. https://www.nicb.org/vincheck: free; participating insurers only; not a complete history
+> 11. https://downloads.regulations.gov/NHTSA-2025-0491-0088/attachment_36.pdf: a 10% cut in rolling resistance gives about 1.1% better fuel economy
+> 12. https://www.fueleconomy.gov/feg/maintain.jsp: correct pressure improves mileage 0.6% on average, up to 3%
+> 13. https://www.ustires.org/tire-care-safety/tire-care-essentials: rotate every 5,000 to 8,000 miles if the manual gives no interval
+> 14. https://www.michelinman.com/auto/auto-tips-and-advice/electric-mobility-guide/ev-tire-pressure-and-maintenance: check pressure monthly using the door-jamb number; smooth acceleration reduces wear
+> 15. https://data.consumerreports.org/test-protocols/tire-test-protocol/: the test categories, including hydroplaning, noise and tread life (also say whether this exact URL loads; the post links to it)
+> 16. https://www.bridgestoneamericas.com/en/company/safety/tires-101/tire-types: summer tires a little less comfortable, noisier, and can wear faster than all-season
+
+Reply with the list. Claude fixes or cuts any NOT FOUND line.
+
 ## B. Real-world tasks (calls and emails)
 
 ### B1. ATD: submit the connectivity form, then the call
