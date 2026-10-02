@@ -1,0 +1,302 @@
+--- ../dreamteam-v-1790910859.html	2026-10-02 04:03:09.788101906 +0000
++++ dreamteam.fast-v2.html	2026-10-02 04:09:57.380753180 +0000
+@@ -29,7 +29,7 @@
+ 
+ /* ---------- Floor ---------- */
+ .floor-box{position:absolute;inset:0;min-width:0}
+-#c{display:block;width:100%;height:100%;touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none}
++#c{position:relative;display:block;width:100%;height:100%;touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none}
+ #c.hot{cursor:pointer}
+ #c.drag{cursor:grabbing}
+ 
+@@ -350,7 +350,7 @@
+ .tdot{width:9px;height:9px;border-radius:50%;background:var(--tc);flex:none;display:inline-block}
+ /* 3D view */
+ #c3{position:absolute;inset:0;width:100%;height:100%;display:none;touch-action:none;cursor:grab}
+-.v3d #c3{display:block} .v3d #c{display:none}
++.v3d #c3{display:block} .v3d #c{display:none} .v3d #bgc{display:none}
+ .ov3d{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;display:none}
+ .v3d .ov3d{display:block}
+ .bub3{position:absolute;left:0;top:0;max-width:240px;padding:4px 10px;border-radius:11px;background:#fbfcff;color:#141b44;font:600 12px/1.3 var(--f-body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 3px 10px rgba(2,4,20,.45)}
+@@ -541,7 +541,7 @@
+ const COLORS = { research: '#b9a3ff', write: '#ff8fb8', build: '#5cc8ff', ops: '#7debc4', review: '#ffcf6e', store: '#ff9d5c', market: '#6fe3a5' };
+ const F = { body: '"Instrument Sans", system-ui, "Segoe UI", sans-serif', mono: '"JetBrains Mono", Consolas, ui-monospace, monospace', display: '"Big Shoulders Display", "Arial Narrow", sans-serif' };
+ const WS = 1, MGR_S = 1.35, BOSS_S = 1.6;      // size hierarchy: agents 1x, managers 1.35x, the Boss 1.6x
+-const WALK_SPEED = 130, FLY_MS = 1150, BURST_MS = 2300, FRAME_MS = 31, BG_RES = 0.5, Z_MAX = 2;
++const WALK_SPEED = 130, IDLE_FRAME_MS = 50, FLY_MS = 1150, BURST_MS = 2300, FRAME_MS = 31, BG_RES = 0.5, Z_MAX = 2;
+ const ACTIVE = (s) => s === 'working' || s === 'reviewing';
+ const QUAD_PREF = { research: 0, market: 0, write: 1, build: 2, ops: 2, store: 3, review: 3 };   // team zone nearest its district
+ const DEFAULT_ROOM = { research: 'lab', write: 'studio', build: 'forge', ops: 'deck', review: 'gate', store: 'shop', market: 'market' };
+@@ -666,6 +666,9 @@
+ const canvas = $('#c'), box = $('#floorBox'), mainCtx = canvas.getContext('2d');
+ let ctx = mainCtx;
+ const bg = document.createElement('canvas'), bgCtx = bg.getContext('2d');
++/* the backdrop is its own layer under the floor canvas: the compositor scales it up, so frames no longer re-blit it */
++bg.id = 'bgc'; bg.setAttribute('aria-hidden', 'true'); bg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none';
++box.insertBefore(bg, canvas);
+ let bgAt = -1e9, bgKey = '';
+ let cssW = 0, cssH = 0, dpr = 1, L = null;
+ let topCss = 90, botCss = 30, panelCss = 0, panelOffCss = 0;
+@@ -732,11 +735,21 @@
+ 
+ function rr(x, y, w, h, r) { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); }
+ function text(str, x, y, font, color, align) { ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align || 'left'; ctx.textBaseline = 'middle'; ctx.fillText(str, x, y); }
++const fitMemo = new Map(), mwMemo = new Map();
+ function fit(str, maxW, font) {
+   str = String(str || ''); ctx.font = font;
+-  if (ctx.measureText(str).width <= maxW) return str;
+-  while (str.length > 1 && ctx.measureText(str + '…').width > maxW) str = str.slice(0, -1);
+-  return str + '…';
++  const key = font + '\u0001' + maxW + '\u0001' + str, hit = fitMemo.get(key);
++  if (hit !== undefined) return hit;
++  let out = str;
++  if (ctx.measureText(str).width > maxW) { while (out.length > 1 && ctx.measureText(out + '…').width > maxW) out = out.slice(0, -1); out += '…'; }
++  if (fitMemo.size > 3000) fitMemo.clear();
++  fitMemo.set(key, out); return out;
++}
++/* width of a string in a font, memoized (cleared when web fonts finish loading) */
++function mw(str, font) {
++  const key = font + '\u0001' + str; let v = mwMemo.get(key);
++  if (v === undefined) { ctx.font = font; v = ctx.measureText(str).width; if (mwMemo.size > 3000) mwMemo.clear(); mwMemo.set(key, v); }
++  return v;
+ }
+ function wrapLines(str, maxW, font) {
+   ctx.font = font; const words = String(str).split(/\s+/), lines = []; let cur = '';
+@@ -909,7 +922,7 @@
+     }
+   }
+   let total = 0; for (const s0 of segs) { s0.at = total; total += s0.len; }
+-  return { segs, total, s: 0, i: 0, tx: tg.x, ty: tg.y, v: Math.max(170, Math.min(330, total / 10)), lx: 0, ly: 0 };
++  return { segs, total, s: 0, i: 0, tx: tg.x, ty: tg.y, v: Math.max(240, Math.min(520, total / 5)), lx: 0, ly: 0 };
+ }
+ function walkTo(p, tg, now, dt) {
+   if (rm) { if (p.x !== tg.x || p.y !== tg.y) { p.x = tg.x; p.y = tg.y; p.fade = Math.min(p.fade, 0.35); } p.route = null; p.walking = false; p.at = tg; return; }
+@@ -1067,7 +1080,7 @@
+   layoutDirty = true; dirty = true;
+ }
+ function applyLayout() {
+-  layoutDirty = false;
++  layoutDirty = false; layoutVer++;
+   const W = Math.max(200, box.clientWidth || 600), H = Math.max(200, box.clientHeight || 560);
+   const nd = Math.min(2, window.devicePixelRatio || 1);
+   const pt = W < H * 0.85, orient = pt !== portrait || !L;
+@@ -1084,6 +1097,7 @@
+   const msw = Math.round(mh * WW / WH) + 'px', msh = mh + 'px';
+   if (mini.style.width !== msw || mini.style.height !== msh) { mini.style.width = msw; mini.style.height = msh; miniAt = -1e9; }
+ }
++if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => { fitMemo.clear(); mwMemo.clear(); signCache.clear(); statKey = ''; sprites.clear(); dirty = true; });
+ if (window.ResizeObserver) { const ro = new ResizeObserver(() => measureBars()); ro.observe(box); ro.observe($('#top')); ro.observe($('#chiprow')); }
+ addEventListener('resize', () => measureBars());
+ 
+@@ -1117,15 +1131,25 @@
+   if (key !== bgKey) { bg.width = Math.ceil(canvas.width * BG_RES); bg.height = Math.ceil(canvas.height * BG_RES); bgKey = key; }
+   bgAt = now; ctx = bgCtx; ctx.setTransform(dpr * BG_RES, 0, 0, dpr * BG_RES, 0, 0); drawScene(now); ctx = mainCtx;
+ }
++/* a trail moves as one rigid strip of dots: paint the strip once per dpr, then it is one drawImage per trail */
++const trailStrips = new Map();
++function trailStrip(tr) {
++  const R = (0.5 + tr.s) * 2.6 + 2, hx = (tr.n - 1) * tr.gap + R, key = tr.fy + '@' + dpr;
++  let c = trailStrips.get(key); if (c) return c;
++  c = document.createElement('canvas'); c.width = Math.ceil((hx + R) * dpr); c.height = Math.ceil(2 * R * dpr);
++  const keep = ctx; ctx = c.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
++  for (let i = 0; i < tr.n; i++) {
++    const f = 1 - i / tr.n, x = hx - i * tr.gap, r = 0.5 + tr.s * f;
++    ctx.fillStyle = `rgba(61,232,196,${(0.04 + 0.08 * f).toFixed(3)})`; ctx.beginPath(); ctx.arc(x, R, r * 2.6, 0, TAU); ctx.fill();
++    ctx.fillStyle = `rgba(61,232,196,${(0.08 + 0.4 * f).toFixed(3)})`; ctx.beginPath(); ctx.arc(x, R, r, 0, TAU); ctx.fill();
++  }
++  ctx = keep; c.hx = hx; c.R = R; trailStrips.set(key, c); return c;
++}
+ function drawTrails(now) {
+   const t = rm ? 0 : now / 1000;
+   for (const tr of TRAILS) {
+-    const span = cssW + tr.n * tr.gap + 80, head = ((tr.fx * cssW + t * tr.v) % span) - 40, y = tr.fy * cssH;
+-    for (let i = 0; i < tr.n; i++) {
+-      const f = 1 - i / tr.n, x = head - i * tr.gap, r = 0.5 + tr.s * f;
+-      ctx.fillStyle = `rgba(61,232,196,${(0.04 + 0.08 * f).toFixed(3)})`; ctx.beginPath(); ctx.arc(x, y, r * 2.6, 0, TAU); ctx.fill();
+-      ctx.fillStyle = `rgba(61,232,196,${(0.08 + 0.4 * f).toFixed(3)})`; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+-    }
++    const span = cssW + tr.n * tr.gap + 80, head = ((tr.fx * cssW + t * tr.v) % span) - 40, y = tr.fy * cssH, c = trailStrip(tr);
++    ctx.drawImage(c, head - c.hx, y - c.R, c.width / dpr, c.height / dpr);
+   }
+ }
+ const haloCache = new Map();
+@@ -1835,16 +1859,36 @@
+ function roomSign(r, obstacles) {
+   const R = r.R;
+   const occTxt = R.kind === 'lunch' ? `${r.used}/${R.spots.length}${r.queued ? ` · ${r.queued} next up` : ''}` : R.kind === 'terminal' ? `${r.used}/${R.spots.length} running${r.extra > 0 ? ` +${r.extra}` : ''}` : `${r.used}/${R.spots.length} seats`;
+-  ctx.font = `700 12px ${F.body}`; const tw1 = ctx.measureText(R.label).width; ctx.font = `600 10.5px ${F.mono}`; const ow1 = ctx.measureText(occTxt).width;
++  const tw1 = mw(R.label, `700 12px ${F.body}`), ow1 = mw(occTxt, `600 10.5px ${F.mono}`);
+   const s = Math.max(1, Math.min(LS, 2.2, (r.w + 24) / (tw1 + ow1 + 57))), lf = `700 ${12 * s}px ${F.body}`, cf = `600 ${10.5 * s}px ${F.mono}`, tw = tw1 * s, ow = ow1 * s;
+   const ch = 22 * s, total = ch + 7 * s + tw + 10 * s + ow + 10 * s, x0 = r.cx - total / 2, y0 = r.y - 8 - ch;
++  obstacles.push({ x: x0 - 4 * s, y: y0 - 2 * s, w: total + 8 * s, h: ch + 4 * s });
++  if (viewStill) {   // copy a cached, pixel-aligned picture of this exact sign
++    const wf = `600 ${10 * s}px ${F.mono}`, ww = r.waiting ? mw(`+${r.waiting} waiting`, wf) : 0;
++    const bx = Math.min(x0 - 4 * s, r.cx - ww / 2) - 4, by = y0 - (r.waiting ? 18 * s : 2 * s) - 4, bx1 = Math.max(x0 + total + 4 * s, r.cx + ww / 2) + 4, by1 = y0 + ch + 2 * s + 4;
++    const dx = Math.floor(bx * WT + OX), dy = Math.floor(by * WT + OY), key = [r.id, occTxt, r.waiting, viewKey].join('|');
++    let c = signCache.get(key);
++    if (!c) {
++      c = document.createElement('canvas'); c.width = Math.ceil(bx1 * WT + OX) - dx + 1; c.height = Math.ceil(by1 * WT + OY) - dy + 1;
++      const keep = ctx; ctx = c.getContext('2d'); ctx.setTransform(WT, 0, 0, WT, OX - dx, OY - dy);
++      paintSign(r, occTxt, s, lf, cf, tw, ch, total, x0, y0); ctx = keep;
++      if (signCache.size > 64) signCache.clear();
++      signCache.set(key, c);
++    }
++    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(c, dx, dy); ctx.restore();
++    return;
++  }
++  paintSign(r, occTxt, s, lf, cf, tw, ch, total, x0, y0);
++}
++const signCache = new Map();
++function paintSign(r, occTxt, s, lf, cf, tw, ch, total, x0, y0) {
++  const R = r.R;
+   rr(x0 - 4 * s, y0 - 2 * s, total + 8 * s, ch + 4 * s, 7 * s); ctx.fillStyle = 'rgba(11,16,48,0.86)'; ctx.fill(); ctx.strokeStyle = `rgba(${hexRgb(R.color)},0.55)`; ctx.lineWidth = 1.2 * s; ctx.stroke();
+   rr(x0, y0, ch, ch, 6 * s); ctx.fillStyle = COL.navy; ctx.fill(); ctx.strokeStyle = R.color; ctx.lineWidth = 1.2 * s; ctx.stroke();
+   roomIcon(r.id, x0 + ch / 2, y0 + ch / 2, R.color, s);
+   text(R.label, x0 + ch + 7 * s, y0 + ch / 2 + 0.5, lf, '#e8f8f4');
+   text(occTxt, x0 + ch + 7 * s + tw + 10 * s, y0 + ch / 2 + 0.5, cf, r.used ? R.color : 'rgba(163,174,217,0.8)');
+   if (r.waiting) text(`+${r.waiting} waiting`, r.cx, y0 - 10 * s, `600 ${10 * s}px ${F.mono}`, '#ffcf6e', 'center');
+-  obstacles.push({ x: x0 - 4 * s, y: y0 - 2 * s, w: total + 8 * s, h: ch + 4 * s });
+ }
+ 
+ /* ---------- bubbles: activity (navy) and chatter (white) ---------- */
+@@ -1870,7 +1914,7 @@
+     if (!st || st.label !== label) { st = { label, since: now }; bubbleAnim.set(t.w.id, st); }
+     ctx.font = BF;
+     const sp = !rm && chat.get(t.w.id), talking = sp && now >= sp.t0 && now < sp.t0 + sp.dur;
+-    const shown = label && !forceCompact && !talking ? fit(label, 160 * s, BF) : '', tw = shown ? ctx.measureText(shown).width : 0;
++    const shown = label && !forceCompact && !talking ? fit(label, 160 * s, BF) : '', tw = shown ? mw(shown, BF) : 0;
+     let w = shown ? tw + 32 * s : 22 * s, bx = t.x - w / 2;
+     const by = t.top - 13 * s - H;
+     const hits = (r) => placed.concat(obstacles).some((q) => r.x < q.x + q.w + 4 && r.x + r.w + 4 > q.x && r.y < q.y + q.h + 2 && r.y + r.h + 2 > q.y);
+@@ -1900,7 +1944,7 @@
+     const age = now - c.t0; if (age < 0) continue;
+     if (age > c.dur) { chat.delete(t.w.id); continue; }
+     const a = Math.min(1, age / 200, (c.dur - age) / 400);
+-    const shown = fit(c.text, 190 * s, CF); ctx.font = CF; const w = ctx.measureText(shown).width + 20 * s;
++    const shown = fit(c.text, 190 * s, CF), w = mw(shown, CF) + 20 * s;
+     const top = t.bubbleTop != null ? t.bubbleTop : t.top - 10 * s;
+     const bx = t.x - w / 2; let by = top - 8 * s - H - (1 - a) * 5;
+     for (let k = 0; k < 4 && placed.some((q) => bx < q.x + q.w + 4 && bx + w + 4 > q.x && by < q.y + q.h + 3 && by + H + 3 > q.y); k++) by -= H + 5 * s;
+@@ -2043,7 +2087,7 @@
+   ctx.strokeStyle = `rgba(${rgb},0.95)`; ctx.lineWidth = 3; ctx.lineCap = 'round';
+   for (const [cx, cy, sx, sy] of [[z.x, z.y, 1, 1], [z.x + z.w, z.y, -1, 1], [z.x, z.y + z.h, 1, -1], [z.x + z.w, z.y + z.h, -1, -1]]) { ctx.beginPath(); ctx.moveTo(cx + sx * 5, cy + sy * 28); ctx.lineTo(cx + sx * 5, cy + sy * 5); ctx.lineTo(cx + sx * 28, cy + sy * 5); ctx.stroke(); }
+   const s = Math.min(LS, 1.7), f = `800 ${22 * s}px ${F.display}`, nf = `600 ${13 * s}px ${F.body}`, ty = z.y + 18 + 11 * s;
+-  const team = String(m.team || 'Team').toUpperCase(), who = `· ${m.name || 'Manager'}`; ctx.font = f; const tw = ctx.measureText(team).width; ctx.font = nf; const ww = ctx.measureText(who).width;
++  const team = String(m.team || 'Team').toUpperCase(), who = `· ${m.name || 'Manager'}`; const tw = mw(team, f), ww = mw(who, nf);
+   const total = 18 * s + tw + 8 * s + ww, x0 = z.x + z.w / 2 - total / 2;
+   ctx.beginPath(); ctx.arc(x0 + 6 * s, ty, 6 * Math.min(s, 1.4), 0, TAU); ctx.fillStyle = z.color; ctx.fill();
+   text(team, x0 + 18 * s, ty + 1, f, z.color);
+@@ -2185,6 +2229,8 @@
+     p.x = Math.max(bay.x + 14, Math.min(bay.x + bay.w - 14, p.x)); p.y = Math.max(bay.y + 14, Math.min(bay.y + bay.h - 14, p.y));
+   }
+   for (const id of Array.from(pos.keys())) if (!live.has(id)) pos.delete(id);
++  busyFrame = !viewStill || flights.length > 0 || bursts.size > 0 || dust.length > 0 || Math.abs(panelOffCss - panelCss) > 0.5;
++  if (!busyFrame) for (const p of pos.values()) if (p.walking || p.route || p.fade < 1) { busyFrame = true; break; }
+   if (workers.length) initialPlaced = true;
+ }
+ function draw(now) {
+@@ -2197,13 +2243,12 @@
+   LS = Math.min(2.4, Math.max(1, 0.85 / cam.z));
+   { const a = s2w(0, 0), b = s2w(cssW, cssH), m = 160; VW = { x0: a.x - m, y0: a.y - m, x1: b.x + m, y1: b.y + m }; }
+   background(now);
+-  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
++  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height);
+   ctx.setTransform(dpr, 0, 0, dpr, 0, 0); drawTrails(now);
+-  ctx.setTransform(WT, 0, 0, WT, OX, OY);
+-  drawWorldBase();
+   const B = L.boss, obstacles = [];
+-  { const rg = ctx.createRadialGradient(B.x, B.y + 30, 0, B.x, B.y + 30, 260); rg.addColorStop(0, 'rgba(61,232,196,0.10)'); rg.addColorStop(1, 'rgba(61,232,196,0)'); ctx.fillStyle = rg; ctx.fillRect(B.x - 260, B.y - 230, 520, 520); }
+-  for (const z of L.zones.values()) drawZone(z, obstacles);
++  { const vk = [canvas.width, canvas.height, WT, OX, OY, LS].join('|'); viewStill = vk === viewKey; viewKey = vk; }
++  staticWorld(B, obstacles);
++  ctx.setTransform(WT, 0, 0, WT, OX, OY);
+ 
+   stepMovement(now, dt, B);
+   const anyActive = workers.some((w) => ACTIVE(w.status));
+@@ -2292,7 +2337,7 @@
+     const by = B.y + (rm ? 0 : Math.sin(now / 900) * 2);
+     blit(sprite('boss', anyActive ? 'active' : 'idle', BOSS_S, anyActive ? COL.gold : null, 'boss'), B.x, by, 1);
+     const ps = Math.min(LS, 1.8), pf = `800 ${13.5 * ps}px ${F.body}`, label = `${bossName()} · Boss`;
+-    ctx.font = pf; const pw = ctx.measureText(label).width + 30 * ps, ph = 26 * ps, py = L.pillY;
++    const pw = mw(label, pf) + 30 * ps, ph = 26 * ps, py = L.pillY;
+     rr(B.x - pw / 2, py, pw, ph, ph / 2); ctx.fillStyle = COL.mint; ctx.fill(); ctx.strokeStyle = COL.gold; ctx.lineWidth = 2.4; ctx.stroke();
+     text(label, B.x, py + ph / 2 + 0.5, pf, COL.navy, 'center');
+     if (anyActive) { const t = rm ? 0 : now / 650; gear(B.x + pw / 2 + 13 * ps, py + ph / 2, 7 * ps, 8, t, COL.gold); gear(B.x + pw / 2 + 24 * ps, py + 5 * ps, 5 * ps, 6, -t * 1.4 + 0.3, COL.gold); }
+@@ -2377,7 +2422,7 @@
+     if (mgr) {
+       const atHub = tg && tg.st === 'hub', ps = Math.min(LS, atHub ? 1.7 : 1.2), pf = `800 ${12.5 * ps}px ${F.body}`;
+       const label = fit(atHub ? `${w.name || 'Manager'} · ${w.team || 'Team'}` : (w.name || 'Manager'), 190 * ps, pf);
+-      ctx.font = pf; const pw = ctx.measureText(label).width + 24 * ps, ph = 23 * ps, py = p.y + 33 * s + 6;
++      const pw = mw(label, pf) + 24 * ps, ph = 23 * ps, py = p.y + 33 * s + 6;
+       rr(p.x - pw / 2, py, pw, ph, ph / 2); ctx.fillStyle = COL.mint; ctx.fill(); ctx.strokeStyle = tc; ctx.lineWidth = 2.4; ctx.stroke();
+       text(label, p.x, py + ph / 2 + 0.5, pf, COL.navy, 'center');
+       if (thr) { ctx.beginPath(); ctx.arc(p.x - pw / 2 + 9 * ps, py + ph / 2, 4.5 * ps, 0, TAU); ctx.fillStyle = thr.color; ctx.fill(); ctx.strokeStyle = COL.navy; ctx.lineWidth = 1.2; ctx.stroke(); }
+@@ -2388,7 +2433,7 @@
+       obstacles.push({ x: p.x - pw / 2, y: py, w: pw, h: ph + 14 });
+     } else if (showNames) {
+       const nf = `600 ${12 * LS}px ${F.body}`, name = fit(w.name || 'Agent', 96, nf);
+-      ctx.font = nf; const nw = ctx.measureText(name).width;
++      const nw = mw(name, nf);
+       ctx.beginPath(); ctx.arc(x - nw / 2 - 7 * LS, ny + 2 * (LS - 1), 3 * LS, 0, TAU); ctx.fillStyle = tc; ctx.fill();
+       text(name, x + 2, ny + 2 * (LS - 1), nf, w.status === 'queued' || w.status === 'idle' ? 'rgba(201,247,236,0.7)' : COL.label, 'center');
+       if (thr) { rr(x + nw / 2 + 6 * LS, ny + 2 * (LS - 1) - 3.5 * LS, 7 * LS, 7 * LS, 2 * LS); ctx.fillStyle = thr.color; ctx.fill(); }
+@@ -2424,6 +2469,26 @@
+   chatterTick(now);
+ }
+ 
++/* everything under the rooms that only changes with the view or the data, painted once and copied 1:1 while the camera is still */
++const stat = document.createElement('canvas'), statCtx = stat.getContext('2d');
++let statKey = '', statObs = [], viewKey = '', viewStill = false, layoutVer = 0;
++function paintStatic(B, obstacles) {
++  ctx.setTransform(WT, 0, 0, WT, OX, OY);
++  drawWorldBase();
++  { const rg = ctx.createRadialGradient(B.x, B.y + 30, 0, B.x, B.y + 30, 260); rg.addColorStop(0, 'rgba(61,232,196,0.10)'); rg.addColorStop(1, 'rgba(61,232,196,0)'); ctx.fillStyle = rg; ctx.fillRect(B.x - 260, B.y - 230, 520, 520); }
++  for (const z of L.zones.values()) drawZone(z, obstacles);
++}
++function staticWorld(B, obstacles) {
++  if (!viewStill) { paintStatic(B, obstacles); return; }   // camera or size is changing: paint straight onto the frame
++  const key = viewKey + '|' + layoutVer;
++  if (key !== statKey) {
++    if (stat.width !== canvas.width || stat.height !== canvas.height) { stat.width = canvas.width; stat.height = canvas.height; }
++    ctx = statCtx; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, stat.width, stat.height);
++    statObs = []; paintStatic(B, statObs); ctx = mainCtx; statKey = key;
++  }
++  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(stat, 0, 0);
++  for (const o of statObs) obstacles.push(o);
++}
+ const stats = { n: 0, total: 0, max: 0, over: 0 };
+ window.__cwFloorStats = stats;      // read by tests; harmless
+ window.__cwDebug = () => ({ cam: { ...cam }, mode: camMode, selected: selectedId, portrait, world: [WW, WH], rooms: L ? Object.fromEntries(Object.values(L.rooms).map((r) => [r.id, { used: r.used, waiting: r.waiting, queued: r.queued, extra: r.extra || 0 }])) : {}, chat: Array.from(chat.entries()).map(([id, c]) => ({ id, tr: !!c.tr, text: c.text, live: performance.now() >= c.t0 && performance.now() < c.t0 + c.dur })) });
+@@ -2434,13 +2499,13 @@
+ window.__cwLookRoom = (id, z) => { const r = id === 'boss' ? L.boss : id === 'emblem' ? { cx: L.emblem.x + L.emblem.w / 2, cy: L.emblem.y + L.emblem.h / 2 } : L.rooms[id] || L.zones.get(id) && { cx: L.zones.get(id).hub.x, cy: L.zones.get(id).hub.y }; if (!r) return; window.__cwLook(r.cx != null ? r.cx : r.x, r.cy != null ? r.cy : r.y, z); };
+ window.__cwW2S = (id) => { const p = id === BOSS_ID ? L.boss : pos.get(id); return p ? toScreen(p.x, p.y, 40) : null; };
+ window.__cw3dLook = (id, dist, azDeg, elDeg) => { if (!T3) return false; const r = L.rooms[id] || (id === 'boss' ? { cx: L.boss.x, cy: L.boss.y } : null); if (!r) return false; c3Mode = 'free'; Object.assign(C3t, { tx: r.cx, tz: r.cy + 20, dist, az: (azDeg || 0) * Math.PI / 180, el: (elDeg || 55) * Math.PI / 180 }); dirty = true; return true; };
+-let visible = true, raf = 0;
++let visible = true, raf = 0, busyFrame = true;
+ if (window.IntersectionObserver) new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) dirty = true; }).observe(box);
+ function frame(now) {
+   raf = requestAnimationFrame(frame);
+-  if (!visible) return;
++  if (!visible || document.hidden) return;
+   if (rm) { if (!dirty && now - lastDraw < 1000) return; }
+-  else if (now - lastDraw < FRAME_MS && !dirty) return;
++  else if (now - lastDraw < (busyFrame || view3d ? FRAME_MS : IDLE_FRAME_MS) && !dirty) return;
+   lastDraw = now; dirty = false;
+   if (document.hidden) return;
+   const t0 = performance.now();
+@@ -2457,6 +2522,7 @@
+   drawMini(now);
+ }
+ raf = requestAnimationFrame(frame);
++document.addEventListener('visibilitychange', () => { if (!document.hidden) { dirty = true; tick(); } });
+ 
+ /* ---------- 3D view: a three.js renderer over the same world model (loaded lazily) ---------- */
+ const THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+@@ -3164,6 +3230,7 @@
+   if (h !== termHtml) { termHtml = h; $('#termList').innerHTML = h; }
+ }
+ function tick() {
++  if (document.hidden) return;
+   const now = Date.now();
+   document.querySelectorAll('[data-dur]').forEach((el) => {
+     const w = workers.find((x) => x.id === el.dataset.dur); if (!w) return;
