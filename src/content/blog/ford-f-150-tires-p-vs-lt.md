@@ -91,7 +91,7 @@ LT tires are built for heavier loads. Instead of XL or standard load, they carry
 
 What changes if you move from P-metric to LT:
 
-| | P-metric | LT |
+| Feature | P-metric | LT |
 |---|---|---|
 | Built for | Passenger loads, comfort | Heavier loads, tougher use |
 | Load marking | Standard or XL | Load range C, D, E and up |
