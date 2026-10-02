@@ -28,7 +28,7 @@ import HOME_READING from "virtual:home-reading";
 import { BUSINESS, YELP_PROFILE, googleReviewHref } from "../data/business.js";
 import { SERVICE_AREA_LABEL } from "../data/serviceArea.js";
 import ServiceAreaCounties from "../components/ui/ServiceAreaCounties.jsx";
-import { MOBILE_SERVICES, SHOP_SERVICES } from "../data/services.js";
+import { MOBILE_SERVICES, SHOP_SERVICES, getService } from "../data/services.js";
 import {
   TIRES,
   TIRE_BRAND_NAMES,
@@ -40,7 +40,7 @@ import ProductCard from "../components/shop/ProductCard.jsx";
 import ScanTireButton from "../components/shop/ScanTireButton.jsx";
 import SearchPanel from "../components/shop/SearchPanel.jsx";
 import { searchTires } from "../data/api.js";
-import { slug } from "../lib/tiresUrl.js";
+import { serializeTiresQuery, slug } from "../lib/tiresUrl.js";
 import { useScrollReveal } from "../lib/useScrollReveal.js";
 import { Seo, Section, SectionHead } from "../components/ui/index.jsx";
 
@@ -78,24 +78,27 @@ function Head(props) {
 
 /* ---------------------------------- Hero --------------------------------- */
 
+// Installation is not free: name the shop's published starting price,
+// from the service catalog, wherever free ship-to-store is offered.
+const INSTALL = getService("tire-installation");
+
 function Hero() {
   const navigate = useNavigate();
 
   // Shopping by vehicle or by sidewall size is the entry path on every
-  // competitor. The finder offers every make and model year 1981-2027, most
-  // of which the size table cannot size, so — like the theme's hero — a
-  // vehicle goes to Find My Tires: it fills the typical size when the table
-  // has one and otherwise asks for the size off the sidewall ("Other / not
-  // listed" lands on that size field). A size goes straight to the catalog
-  // with the query keys the tire listing reads back.
+  // competitor, and both go straight to the tire list. A vehicle lands on
+  // the same /tires address the finder there writes (SearchPanel has already
+  // remembered it). A model the size table cannot size still gets the whole
+  // list, each tire marked "Check fitment", with the door-jamb size prompt.
+  // The 5-question quiz stays one tap away under the Scan button. A size
+  // goes to the catalog with the query keys the tire listing reads back.
   const onSearch = (payload) => {
     if (payload.type === "vehicle") {
-      const query = new URLSearchParams({
-        vy: payload.year,
-        vmk: payload.make,
-        vmd: payload.model,
+      const { year, make, model } = payload;
+      const qs = serializeTiresQuery({
+        selection: { type: "vehicle", year, make, model },
       });
-      navigate(`/find-my-tires?${query.toString()}`);
+      navigate(`/tires?${qs}`);
       return;
     }
     const fields = { w: payload.width, a: payload.aspect, d: payload.diameter };
@@ -185,13 +188,27 @@ function Hero() {
           <p className="mt-2 text-center text-xs text-smoke">
             Door sticker, tire sidewall or VIN. We read the size for you.
           </p>
+          {/* For the shopper who knows the car but not the tire: the quiz
+              asks about roads, weather and priorities, and shortlists. */}
+          <p className="mt-3 border-t border-ink/10 pt-2 text-center">
+            <Link
+              to="/find-my-tires"
+              className="inline-flex min-h-[44px] items-center text-sm font-semibold text-drop hover:text-dive"
+            >
+              {/* On a phone it breaks after the question, not mid-phrase. */}
+              <span>
+                Not sure which tire?{" "}
+                <span className="whitespace-nowrap">Answer 5 quick questions →</span>
+              </span>
+            </Link>
+          </p>
         </div>
 
         <div className="order-3 lg:col-start-1 lg:row-start-2 lg:self-start">
           <p className="lede max-w-lg text-bone/70">
             An online tire and wheel store shipping to any address in{" "}
             {BUSINESS.shipping.area} — or free to our South Florida shop, where
-            we fit them for you.
+            we fit them from ${INSTALL.priceFrom} {INSTALL.priceUnit}.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">

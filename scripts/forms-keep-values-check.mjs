@@ -1025,7 +1025,7 @@ for (const width of [390, 1440]) {
   await check(`${width} /find-my-tires: vehicle hand-off and picks prefill the size; a silent size is kept`, async () => {
     const h = await open(width, { delay: 0 });
     const { page } = h;
-    // The hand-off from the hero's vehicle picker.
+    // A vehicle handed over in the address (the vy/vmk/vmd keys the quiz reads).
     await page.goto(`${BASE}/find-my-tires?vy=2020&vmk=Toyota&vmd=Camry`);
     await page.waitForSelector("#quiz-size");
     await h.afterStatus();
@@ -1202,7 +1202,8 @@ for (const width of [390, 1440]) {
     assert.equal(await page.inputValue("#finder-make"), "Toyota");
     await pickFinderModel(page, "Tacoma", "tac");
     await page.getByRole("button", { name: "Find Tires" }).click();
-    await page.waitForURL(/find-my-tires/);
+    // The hero goes straight to the tire list, at the address /tires writes.
+    await page.waitForURL(/\/tires\?year=2019&make=toyota&model=tacoma$/);
 
     await page.goto(`${BASE}/schedule?service=tire-installation`);
     await page.getByRole("button", { name: /^Next:/ }).click();
@@ -1928,7 +1929,8 @@ for (const width of [390, 1440]) {
     assert.equal(await page.locator('[data-testid="cart-fit-flag"]').count(), 0, "no won't-fit flag on a model-level guess");
     assert.equal(await page.getByText("Swap it for a tire that fits").count(), 0);
 
-    await page.getByRole("link", { name: "Checkout" }).click();
+    // The order summary's button (on a phone the bottom bar has one too).
+    await page.locator("main").getByRole("link", { name: "Checkout" }).click();
     await page.waitForSelector("#firstName");
     const cont = () => page.getByRole("button", { name: "Continue" }).click();
     await fill(page, "typing", [["#firstName", "Fit"], ["#lastName", "Check"], ["#email", "fit@example.com"], ["#phone", "9545550123"]]);
@@ -1964,7 +1966,8 @@ for (const width of [390, 1440]) {
     assert.equal(await flag.getByRole("link", { name: "Swap it for a tire that fits" }).getAttribute("href"), "/tires?w=265&a=70&d=17");
     await page.getByText("We check the fitment against your vehicle before").waitFor();
 
-    await page.getByRole("link", { name: "Checkout" }).click();
+    // The order summary's button (on a phone the bottom bar has one too).
+    await page.locator("main").getByRole("link", { name: "Checkout" }).click();
     await page.waitForSelector("#firstName");
     await page.getByText("We confirm fitment against your vehicle before your order is released.").waitFor();
     const cont = () => page.getByRole("button", { name: "Continue" }).click();

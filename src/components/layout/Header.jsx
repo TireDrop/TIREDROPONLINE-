@@ -12,12 +12,17 @@ import {
   X,
 } from "lucide-react";
 import { BUSINESS, NAV } from "../../data/business.js";
+import { getService } from "../../data/services.js";
 import { useCart } from "../../context/CartContext.jsx";
 import HeaderSearch from "./HeaderSearch.jsx";
 import Logo from "./Logo.jsx";
 import { LanguageControl, TranslationNotice } from "./LanguageControl.jsx";
 
 /** Thin utility strip above the masthead: phone, address, mobile-service pitch. */
+// Installation is not free: name the shop's published starting price,
+// from the service catalog, wherever free ship-to-store is offered.
+const INSTALL = getService("tire-installation");
+
 function UtilityBar() {
   return (
     <div className="bg-ink bg-steel-wash text-bone">
@@ -37,10 +42,14 @@ function UtilityBar() {
           Shipping across {BUSINESS.shipping.area}
         </span>
 
-        <span className="flex items-center gap-1.5 text-amber">
-          <Truck size={13} aria-hidden />
+        {/* Two phrases; on a phone the price wraps whole onto the second line. */}
+        <span className="flex items-start gap-1.5 text-amber">
+          <Truck size={13} aria-hidden className="mt-0.5 shrink-0" />
           <span className="font-display font-bold tracking-[-0.005em]">
-            Free ship-to-store &amp; install in South Florida
+            Free ship-to-store in South Florida ·{" "}
+            <span className="whitespace-nowrap">
+              install from ${INSTALL.priceFrom} {INSTALL.priceUnit}
+            </span>
           </span>
         </span>
       </div>

@@ -33,12 +33,18 @@ import {
   sizeSearch,
 } from "../../data/fitmentCheck.js";
 import { BUSINESS } from "../../data/business.js";
+import { getService } from "../../data/services.js";
 import { productHref } from "../../data/products.js";
 
 /* ------------------------------------------------------------------ */
 /*  Totals                                                             */
 /*  Shared with CheckoutPage (order review).                           */
 /* ------------------------------------------------------------------ */
+
+// Installation is not free: name the shop's published starting price,
+// from the service catalog, wherever free ship-to-store is offered.
+const INSTALL = getService("tire-installation");
+const INSTALL_FROM = `from $${INSTALL.priceFrom} ${INSTALL.priceUnit}`;
 
 const round2 = (n) => Math.round(n * 100) / 100;
 
@@ -339,7 +345,7 @@ export default function CartPage() {
     <>
       <Seo
         title="Your Cart"
-        description="Review your TireDrop order, choose shipping to your address or free ship-to-store install in South Florida, and check out."
+        description={`Review your TireDrop order, choose shipping to your address or free ship-to-store in South Florida (install ${INSTALL_FROM}), and check out.`}
       />
       <Breadcrumbs trail={[{ label: "Cart" }]} />
 
@@ -349,7 +355,7 @@ export default function CartPage() {
           <h1 className="h1">Your Cart</h1>
           <p className="lede mt-3 max-w-2xl">
             {count > 0
-              ? `${count} ${count === 1 ? "item" : "items"} ready to ship. Local to South Florida? Switch any line to free ship-to-store and we'll fit it for you.`
+              ? `${count} ${count === 1 ? "item" : "items"} ready to ship. Local to South Florida? Ship any line free to our Sunrise shop and we'll fit it there, ${INSTALL_FROM}.`
               : "Nothing in here yet."}
           </p>
         </header>
