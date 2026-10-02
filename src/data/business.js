@@ -224,6 +224,17 @@ export const FOOTER_COLUMNS = [
   },
   {
     title: "Tools & Guides",
+    // The footer shows only these, then `more`. /learn lists every tool and
+    // /sitemap lists every link below, so nothing trimmed goes unreachable.
+    footerShortlist: [
+      "/tire-size-finder",
+      "/find-my-tires",
+      "/tire-size",
+      "/tire-check",
+      "/plus-size-calculator",
+      "/blog",
+    ],
+    more: { label: "All tools & guides", to: "/learn" },
     links: [
       { label: "Tire Size Finder", to: "/tire-size-finder" },
       { label: "Find My Tires", to: "/find-my-tires" },
