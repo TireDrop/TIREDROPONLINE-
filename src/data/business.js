@@ -212,6 +212,7 @@ export const FOOTER_COLUMNS = [
     links: [
       { label: "How Shipping Works", to: "/shipping" },
       { label: "Shipping to 48 States + DC", to: "/tires-shipped" },
+      { label: "Local Delivery Zones", to: "/local-delivery" },
       { label: "Ship to Store", to: "/install" },
       { label: "Mobile Installation", to: "/mobile-service" },
       { label: "Book an Install", to: "/schedule" },

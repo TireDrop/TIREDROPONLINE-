@@ -333,6 +333,17 @@ export default function ShippingPage() {
               has state guides to tread laws, tire fees and the tire type each
               climate calls for.
             </p>
+            <p className="mt-4 text-sm leading-relaxed text-bone/60">
+              Local delivery is rolling out near our distribution partner&rsquo;s
+              hubs. See the{" "}
+              <Link
+                to="/local-delivery"
+                className="text-volt underline underline-offset-2 hover:text-bone"
+              >
+                local delivery zones
+              </Link>
+              .
+            </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Link to="/install" className="btn-primary">
                 Local? Ship to the store

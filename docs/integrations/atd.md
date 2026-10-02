@@ -99,6 +99,16 @@ Behaviour that is real and tested (`npm run test:api`):
 - Order submission and tracking. The code is built (the ATD forwarder,
   `atd-forwarder.md`) but every ATD order endpoint and field is a
   placeholder, so today paid orders are still placed in ATDOnline by hand.
+- **Local delivery from ATD's distribution centers** (built on preview as
+  `/local-delivery`, branch `preview/local-delivery`; the page never names
+  ATD or a hub location):
+  - Does local delivery go to consumers' homes, or only to installers and
+    dealers?
+  - The delivery radius for each hub (the page assumes 40 miles for all,
+    `LOCAL_DELIVERY_RADIUS_MILES` in `src/data/localDelivery.js`).
+  - Any fee for local delivery, per tire or per order.
+  - The go-live: when, and which hubs first.
+  - Re-run `npm run build:hubs` after any change to the hub list or radius.
 
 ## Questions for the ATD rep
 

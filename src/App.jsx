@@ -44,6 +44,11 @@ const StateShippingPage = lazyPage(
   "pages/shipping/StateShippingPage.jsx",
   () => import("./pages/shipping/StateShippingPage.jsx"),
 );
+// Local delivery zones around the distribution partner's hubs (rolling out).
+const LocalDeliveryPage = lazyPage(
+  "pages/shipping/LocalDeliveryPage.jsx",
+  () => import("./pages/shipping/LocalDeliveryPage.jsx"),
+);
 
 // Shop
 const TiresPage = lazyPage("pages/shop/TiresPage.jsx", () =>
@@ -232,6 +237,7 @@ export default function App() {
               path="/tires-shipped/:state"
               element={<StateShippingPage />}
             />
+            <Route path="/local-delivery" element={<LocalDeliveryPage />} />
 
             {/* Tires & wheels e-commerce */}
             <Route path="/tires" element={<TiresPage />} />

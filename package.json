@@ -10,6 +10,7 @@
     "dev": "vite",
     "build": "vite build && node scripts/prerender.mjs && node scripts/vpic-snapshot.mjs",
     "build:preview": "vite build --mode preview",
+    "build:hubs": "node scripts/build-delivery-hubs.mjs",
     "preview": "vite preview",
     "lint": "eslint .",
     "audit:mobile": "node scripts/mobile-audit.mjs",
@@ -27,6 +28,7 @@
     "check:footer": "node scripts/footer-check.mjs",
     "check:sources": "node scripts/sources-check.mjs",
     "check:links": "node scripts/links-check.mjs",
+    "check:local-delivery": "node scripts/local-delivery-check.mjs",
     "test:api": "node --test \"api/_lib/*.test.mjs\"",
     "test:content": "node --test \"src/content/*.test.mjs\"",
     "test:lib": "node --test \"src/lib/*.test.mjs\"",
@@ -49,12 +51,16 @@
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.17",
     "axe-core": "^4.13.0",
+    "d3-geo": "^3.1.1",
     "eslint": "^9.39.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.12.0",
     "playwright": "^1.47.0",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
-    "vite": "^5.1.4"
+    "topojson-client": "^3.1.0",
+    "us-atlas": "^3.0.1",
+    "vite": "^5.1.4",
+    "zipcodes": "^8.0.0"
   }
 }

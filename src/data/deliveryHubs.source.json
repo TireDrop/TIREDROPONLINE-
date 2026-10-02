@@ -1,0 +1,632 @@
+[
+  {
+    "city": "Birmingham",
+    "state": "AL",
+    "lat": 33.52,
+    "lng": -86.84
+  },
+  {
+    "city": "Huntsville",
+    "state": "AL",
+    "lat": 34.72,
+    "lng": -86.58
+  },
+  {
+    "city": "Montgomery",
+    "state": "AL",
+    "lat": 32.31,
+    "lng": -86.25
+  },
+  {
+    "city": "Little Rock",
+    "state": "AR",
+    "lat": 34.76,
+    "lng": -92.34
+  },
+  {
+    "city": "Texarkana",
+    "state": "AR",
+    "lat": 33.43,
+    "lng": -93.88
+  },
+  {
+    "city": "Phoenix",
+    "state": "AZ",
+    "lat": 33.49,
+    "lng": -112.08
+  },
+  {
+    "city": "Tucson",
+    "state": "AZ",
+    "lat": 32.23,
+    "lng": -110.94
+  },
+  {
+    "city": "Chula Vista",
+    "state": "CA",
+    "lat": 32.64,
+    "lng": -117.03
+  },
+  {
+    "city": "Compton",
+    "state": "CA",
+    "lat": 33.87,
+    "lng": -118.24
+  },
+  {
+    "city": "Fresno",
+    "state": "CA",
+    "lat": 36.76,
+    "lng": -119.69
+  },
+  {
+    "city": "Moorpark",
+    "state": "CA",
+    "lat": 34.28,
+    "lng": -118.88
+  },
+  {
+    "city": "Ontario",
+    "state": "CA",
+    "lat": 34.06,
+    "lng": -117.63
+  },
+  {
+    "city": "Richmond",
+    "state": "CA",
+    "lat": 37.94,
+    "lng": -122.34
+  },
+  {
+    "city": "Sacramento",
+    "state": "CA",
+    "lat": 38.58,
+    "lng": -121.47
+  },
+  {
+    "city": "San Jose",
+    "state": "CA",
+    "lat": 37.32,
+    "lng": -121.88
+  },
+  {
+    "city": "Santa Fe Springs",
+    "state": "CA",
+    "lat": 33.95,
+    "lng": -118.08
+  },
+  {
+    "city": "Shafter",
+    "state": "CA",
+    "lat": 35.5,
+    "lng": -119.28
+  },
+  {
+    "city": "Colorado Springs",
+    "state": "CO",
+    "lat": 38.84,
+    "lng": -104.77
+  },
+  {
+    "city": "Denver",
+    "state": "CO",
+    "lat": 39.74,
+    "lng": -104.98
+  },
+  {
+    "city": "Grand Junction",
+    "state": "CO",
+    "lat": 39.06,
+    "lng": -108.53
+  },
+  {
+    "city": "East Hartford",
+    "state": "CT",
+    "lat": 41.78,
+    "lng": -72.67
+  },
+  {
+    "city": "Fort Myers",
+    "state": "FL",
+    "lat": 26.57,
+    "lng": -81.85
+  },
+  {
+    "city": "Jacksonville",
+    "state": "FL",
+    "lat": 30.31,
+    "lng": -81.65
+  },
+  {
+    "city": "Miramar",
+    "state": "FL",
+    "lat": 25.98,
+    "lng": -80.23
+  },
+  {
+    "city": "Orlando",
+    "state": "FL",
+    "lat": 28.52,
+    "lng": -81.31
+  },
+  {
+    "city": "Pensacola",
+    "state": "FL",
+    "lat": 30.44,
+    "lng": -87.25
+  },
+  {
+    "city": "Royal Palm Beach",
+    "state": "FL",
+    "lat": 26.71,
+    "lng": -80.23
+  },
+  {
+    "city": "Tallahassee",
+    "state": "FL",
+    "lat": 30.45,
+    "lng": -84.28
+  },
+  {
+    "city": "Tampa",
+    "state": "FL",
+    "lat": 27.94,
+    "lng": -82.46
+  },
+  {
+    "city": "Byron",
+    "state": "GA",
+    "lat": 32.62,
+    "lng": -83.79
+  },
+  {
+    "city": "Kennesaw",
+    "state": "GA",
+    "lat": 34.02,
+    "lng": -84.62
+  },
+  {
+    "city": "Savannah",
+    "state": "GA",
+    "lat": 32.02,
+    "lng": -81.1
+  },
+  {
+    "city": "Tucker",
+    "state": "GA",
+    "lat": 33.86,
+    "lng": -84.22
+  },
+  {
+    "city": "Des Moines",
+    "state": "IA",
+    "lat": 41.65,
+    "lng": -93.59
+  },
+  {
+    "city": "Nampa",
+    "state": "ID",
+    "lat": 43.6,
+    "lng": -116.61
+  },
+  {
+    "city": "La Grange",
+    "state": "IL",
+    "lat": 41.78,
+    "lng": -87.87
+  },
+  {
+    "city": "Morton",
+    "state": "IL",
+    "lat": 40.61,
+    "lng": -89.46
+  },
+  {
+    "city": "Indianapolis",
+    "state": "IN",
+    "lat": 39.8,
+    "lng": -86.14
+  },
+  {
+    "city": "Wichita",
+    "state": "KS",
+    "lat": 37.69,
+    "lng": -97.34
+  },
+  {
+    "city": "Louisville",
+    "state": "KY",
+    "lat": 38.21,
+    "lng": -85.7
+  },
+  {
+    "city": "Baton Rouge",
+    "state": "LA",
+    "lat": 30.48,
+    "lng": -91.11
+  },
+  {
+    "city": "Slidell",
+    "state": "LA",
+    "lat": 30.31,
+    "lng": -89.8
+  },
+  {
+    "city": "East Taunton",
+    "state": "MA",
+    "lat": 41.87,
+    "lng": -71.02
+  },
+  {
+    "city": "Middle River",
+    "state": "MD",
+    "lat": 39.34,
+    "lng": -76.42
+  },
+  {
+    "city": "Salisbury",
+    "state": "MD",
+    "lat": 38.38,
+    "lng": -75.61
+  },
+  {
+    "city": "Portland",
+    "state": "ME",
+    "lat": 43.67,
+    "lng": -70.26
+  },
+  {
+    "city": "Novi",
+    "state": "MI",
+    "lat": 42.48,
+    "lng": -83.48
+  },
+  {
+    "city": "St Louis Park",
+    "state": "MN",
+    "lat": 44.95,
+    "lng": -93.35
+  },
+  {
+    "city": "Bridgeton",
+    "state": "MO",
+    "lat": 38.75,
+    "lng": -90.42
+  },
+  {
+    "city": "Kansas City",
+    "state": "MO",
+    "lat": 39.11,
+    "lng": -94.57
+  },
+  {
+    "city": "Springfield",
+    "state": "MO",
+    "lat": 37.22,
+    "lng": -93.3
+  },
+  {
+    "city": "Richland",
+    "state": "MS",
+    "lat": 32.23,
+    "lng": -90.16
+  },
+  {
+    "city": "Burlington",
+    "state": "NC",
+    "lat": 36.06,
+    "lng": -79.47
+  },
+  {
+    "city": "Charlotte",
+    "state": "NC",
+    "lat": 35.23,
+    "lng": -80.82
+  },
+  {
+    "city": "Lincolnton",
+    "state": "NC",
+    "lat": 35.48,
+    "lng": -81.21
+  },
+  {
+    "city": "Raleigh",
+    "state": "NC",
+    "lat": 35.81,
+    "lng": -78.63
+  },
+  {
+    "city": "Rural Hall",
+    "state": "NC",
+    "lat": 36.24,
+    "lng": -80.29
+  },
+  {
+    "city": "Wilmington",
+    "state": "NC",
+    "lat": 34.2,
+    "lng": -77.89
+  },
+  {
+    "city": "Wilson",
+    "state": "NC",
+    "lat": 35.73,
+    "lng": -77.93
+  },
+  {
+    "city": "Lincoln",
+    "state": "NE",
+    "lat": 40.82,
+    "lng": -96.69
+  },
+  {
+    "city": "Londonderry",
+    "state": "NH",
+    "lat": 42.87,
+    "lng": -71.38
+  },
+  {
+    "city": "Totowa",
+    "state": "NJ",
+    "lat": 40.96,
+    "lng": -74.26
+  },
+  {
+    "city": "Westampton",
+    "state": "NJ",
+    "lat": 40.02,
+    "lng": -74.82
+  },
+  {
+    "city": "Albuquerque",
+    "state": "NM",
+    "lat": 35.08,
+    "lng": -106.64
+  },
+  {
+    "city": "Las Vegas",
+    "state": "NV",
+    "lat": 36.16,
+    "lng": -115.19
+  },
+  {
+    "city": "Sparks",
+    "state": "NV",
+    "lat": 39.58,
+    "lng": -119.73
+  },
+  {
+    "city": "Albany",
+    "state": "NY",
+    "lat": 42.66,
+    "lng": -73.76
+  },
+  {
+    "city": "Edgewood",
+    "state": "NY",
+    "lat": 40.78,
+    "lng": -73.29
+  },
+  {
+    "city": "Rochester",
+    "state": "NY",
+    "lat": 43.19,
+    "lng": -77.63
+  },
+  {
+    "city": "Canton",
+    "state": "OH",
+    "lat": 40.81,
+    "lng": -81.38
+  },
+  {
+    "city": "Fairfield",
+    "state": "OH",
+    "lat": 39.38,
+    "lng": -84.56
+  },
+  {
+    "city": "Lewis Center",
+    "state": "OH",
+    "lat": 40.19,
+    "lng": -82.99
+  },
+  {
+    "city": "Oklahoma City",
+    "state": "OK",
+    "lat": 35.49,
+    "lng": -97.49
+  },
+  {
+    "city": "Tulsa",
+    "state": "OK",
+    "lat": 36.14,
+    "lng": -95.97
+  },
+  {
+    "city": "Portland",
+    "state": "OR",
+    "lat": 45.52,
+    "lng": -122.66
+  },
+  {
+    "city": "Clinton",
+    "state": "PA",
+    "lat": 40.51,
+    "lng": -80.34
+  },
+  {
+    "city": "Columbia",
+    "state": "SC",
+    "lat": 34.02,
+    "lng": -81.01
+  },
+  {
+    "city": "Mauldin",
+    "state": "SC",
+    "lat": 34.78,
+    "lng": -82.3
+  },
+  {
+    "city": "North Charleston",
+    "state": "SC",
+    "lat": 32.88,
+    "lng": -80.02
+  },
+  {
+    "city": "Sioux Falls",
+    "state": "SD",
+    "lat": 43.59,
+    "lng": -96.74
+  },
+  {
+    "city": "Chattanooga",
+    "state": "TN",
+    "lat": 35.04,
+    "lng": -85.28
+  },
+  {
+    "city": "Knoxville",
+    "state": "TN",
+    "lat": 35.97,
+    "lng": -83.96
+  },
+  {
+    "city": "Memphis",
+    "state": "TN",
+    "lat": 35.16,
+    "lng": -89.97
+  },
+  {
+    "city": "Nashville",
+    "state": "TN",
+    "lat": 36.17,
+    "lng": -86.79
+  },
+  {
+    "city": "Piney Flats",
+    "state": "TN",
+    "lat": 36.43,
+    "lng": -82.32
+  },
+  {
+    "city": "Amarillo",
+    "state": "TX",
+    "lat": 35.25,
+    "lng": -101.86
+  },
+  {
+    "city": "Austin",
+    "state": "TX",
+    "lat": 30.31,
+    "lng": -97.76
+  },
+  {
+    "city": "Beaumont",
+    "state": "TX",
+    "lat": 30.09,
+    "lng": -94.14
+  },
+  {
+    "city": "Carrollton",
+    "state": "TX",
+    "lat": 32.99,
+    "lng": -96.88
+  },
+  {
+    "city": "Corpus Christi",
+    "state": "TX",
+    "lat": 27.77,
+    "lng": -97.43
+  },
+  {
+    "city": "El Paso",
+    "state": "TX",
+    "lat": 31.72,
+    "lng": -106.34
+  },
+  {
+    "city": "Houston",
+    "state": "TX",
+    "lat": 29.79,
+    "lng": -95.42
+  },
+  {
+    "city": "Missouri City",
+    "state": "TX",
+    "lat": 29.58,
+    "lng": -95.53
+  },
+  {
+    "city": "San Angelo",
+    "state": "TX",
+    "lat": 31.46,
+    "lng": -100.44
+  },
+  {
+    "city": "San Antonio",
+    "state": "TX",
+    "lat": 29.46,
+    "lng": -98.5
+  },
+  {
+    "city": "Salt Lake City",
+    "state": "UT",
+    "lat": 40.71,
+    "lng": -111.89
+  },
+  {
+    "city": "Manassas",
+    "state": "VA",
+    "lat": 38.75,
+    "lng": -77.47
+  },
+  {
+    "city": "Norfolk",
+    "state": "VA",
+    "lat": 36.89,
+    "lng": -76.26
+  },
+  {
+    "city": "Richmond",
+    "state": "VA",
+    "lat": 37.53,
+    "lng": -77.47
+  },
+  {
+    "city": "Roanoke",
+    "state": "VA",
+    "lat": 37.28,
+    "lng": -79.96
+  },
+  {
+    "city": "Auburn",
+    "state": "WA",
+    "lat": 47.3,
+    "lng": -122.2
+  },
+  {
+    "city": "Spokane Valley",
+    "state": "WA",
+    "lat": 47.67,
+    "lng": -117.24
+  },
+  {
+    "city": "Oak Creek",
+    "state": "WI",
+    "lat": 42.89,
+    "lng": -87.9
+  },
+  {
+    "city": "Poca",
+    "state": "WV",
+    "lat": 38.48,
+    "lng": -81.78
+  },
+  {
+    "city": "Casper",
+    "state": "WY",
+    "lat": 42.85,
+    "lng": -106.33
+  }
+]
