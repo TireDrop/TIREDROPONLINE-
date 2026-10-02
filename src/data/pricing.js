@@ -30,4 +30,4 @@ export const DELIVERY_NOTE =
   "Free shipping to the 48 contiguous states and DC — the delivery estimate is shown at checkout.";
 
 /** The same promise where a card has one short line to spare. */
-export const DELIVERY_NOTE_SHORT = "Free shipping · estimate at checkout";
+export const DELIVERY_NOTE_SHORT = "Free shipping (48 states + DC) · estimate at checkout";

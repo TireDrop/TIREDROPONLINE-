@@ -31,6 +31,7 @@ import { makesFor } from "../../data/vehicles.js";
 import { ratingsFor } from "../../data/tireRatings.js";
 import { setPrice } from "../../data/pricing.js";
 import { BUSINESS } from "../../data/business.js";
+import { getService } from "../../data/services.js";
 import {
   fitSizeOf,
   readSize,
@@ -59,6 +60,10 @@ import { money } from "../../context/CartContext.jsx";
 // number the shopper is actually comparing between two sites. Warranty sorts
 // on the treadwear miles the tire's own warranty states; the last two sort on
 // its published grades (UTQG treadwear and traction).
+// Installation is not free: name the shop's published starting price,
+// from the service catalog, wherever free ship-to-store is offered.
+const INSTALL = getService("tire-installation");
+
 const SORTS = [
   { value: "best", label: "Recommended" },
   { value: "price-asc", label: "Price: set of 4, low to high" },
@@ -510,7 +515,7 @@ export default function TiresPage() {
       <PageHero
         eyebrow="Tires"
         title="Shop Tires"
-        lede="Find your size, pick your set, then choose where it lands at checkout — your address in the 48 contiguous states or DC, or free to our South Florida shop where we fit them for you."
+        lede={`Find your size, pick your set, then choose where it lands at checkout — your address in the 48 contiguous states or DC, or free to our South Florida shop, where we fit them from $${INSTALL.priceFrom} ${INSTALL.priceUnit}.`}
       />
       <Breadcrumbs trail={[{ label: "Tires" }]} />
 

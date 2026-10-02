@@ -3,8 +3,8 @@
  *
  *   npm run build && npm run check:home
  *
- * 1. Prerendered HTML: every section in story order, the hero's scan button,
- *    3-6 Learn cards linking real guides or posts, and no hidden reveal
+ * 1. Prerendered HTML: every section in story order, the hero's scan button
+ *    and its link to the 5-question quiz, 3-6 Learn cards linking real guides or posts, and no hidden reveal
  *    state baked into the markup.
  * 2. JavaScript off: every reveal target is fully visible.
  * 3. Reduced motion: hydrated, scrolled top to bottom, nothing is ever hidden.
@@ -60,6 +60,12 @@ check(
   `prerendered sections in order: ${found.join(" > ")}`,
 );
 check(html.includes('data-testid="hero-scan"'), "prerendered hero has the scan button");
+const heroHtml = /data-home-section="hero"[\s\S]*?data-home-section="trust"/.exec(html)?.[0] ?? "";
+const quizLink = /href="\/find-my-tires"[^>]*>([\s\S]*?)<\/a>/.exec(heroHtml)?.[1] ?? "";
+check(
+  quizLink.replace(/<[^>]*>/g, "") === "Not sure which tire? Answer 5 quick questions →",
+  "prerendered hero links the quiz under the scan button",
+);
 check(!/data-rv=/.test(html), "no reveal state in the prerendered markup");
 const learnHtml = /data-home-section="learn"[\s\S]*?data-home-section="nationwide"/.exec(html)?.[0] ?? "";
 const cards = [...learnHtml.matchAll(/href="(\/(?:learn\/[^/"]+|blog)\/[^"]+)"/g)].map((m) => m[1]);

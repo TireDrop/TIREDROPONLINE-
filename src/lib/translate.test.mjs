@@ -202,7 +202,7 @@ test("ordinary words and sentences that contain a price are not", () => {
   for (const t of [
     "Shop Tires",
     "From $95.00 each",
-    "Free shipping · estimate at checkout",
+    "Free shipping (48 states + DC) · estimate at checkout",
     "Set of 4",
     "Track Order",
     "",

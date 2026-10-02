@@ -26,6 +26,11 @@ import {
   Seo,
 } from "../components/ui/index.jsx";
 import { BUSINESS } from "../data/business.js";
+import { getService } from "../data/services.js";
+
+// Installation is not free: name the shop's published starting price,
+// from the service catalog, wherever free ship-to-store is offered.
+const INSTALL = getService("tire-installation");
 
 const STEPS = [
   {
@@ -461,7 +466,8 @@ export default function ShippingPage() {
             <p className="lede mt-3 text-bone/70">
               Shop by vehicle or by tire size, and choose at checkout whether it
               comes to you or to the shop. In Miami-Dade, Broward or Palm Beach?
-              Ship-to-store is free and we will fit them.
+              Ship-to-store is free, and we fit them from $
+              {INSTALL.priceFrom} {INSTALL.priceUnit}.
             </p>
             <p className="mt-4 flex items-center gap-2 text-xs text-bone/60">
               <MapPin size={14} aria-hidden />

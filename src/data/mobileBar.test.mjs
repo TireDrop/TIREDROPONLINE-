@@ -44,8 +44,15 @@ test("articles shop tires; checkout and track show only Call", () => {
   assert.deepEqual(mobileBarFor("/track"), { action: null });
 });
 
+test("the cart's bar goes to checkout", () => {
+  assert.deepEqual(action("/cart"), { to: "/checkout", label: "Checkout", icon: "cart" });
+  assert.deepEqual(action("/cart/"), action("/cart"));
+  // Only the cart page itself: checkout still shows only Call.
+  assert.deepEqual(mobileBarFor("/checkout"), { action: null });
+});
+
 test("everything else keeps the default", () => {
-  for (const p of ["/", "/cart", "/contact", "/learn", "/learn/tire-sizes", "/blog", "/schedule"]) {
+  for (const p of ["/", "/contact", "/learn", "/learn/tire-sizes", "/blog", "/schedule"]) {
     assert.deepEqual(action(p), DEFAULT_ACTION, p);
   }
 });

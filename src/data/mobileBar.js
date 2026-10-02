@@ -29,6 +29,14 @@ export function mobileBarFor(pathname = "/") {
   // a question is a phone call.
   if (path === "/checkout" || path === "/track") return { action: null };
 
+  // The cart's own Checkout button sits below the line items and the
+  // vehicle box, well under the fold on a phone. An empty cart's /checkout
+  // says so and offers Shop Tires, so this needs no cart state and the
+  // prerendered bar still matches the hydrated one.
+  if (path === "/cart") {
+    return { action: { to: "/checkout", label: "Checkout", icon: "cart" } };
+  }
+
   if (path === "/tires") {
     return {
       action: { to: "/find-my-tires", label: "Find my size", icon: "search" },

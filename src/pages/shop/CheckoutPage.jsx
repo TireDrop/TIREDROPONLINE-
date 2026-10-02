@@ -188,7 +188,9 @@ const FULFILLMENT = [
     value: "pickup",
     icon: Building2,
     title: `Free ship-to-store at ${BUSINESS.parent}, ${BUSINESS.shop.city}`,
-    copy: `Free delivery to ${BUSINESS.shop.full}, where we can fit them in the bay. South Florida.`,
+    copy: `Free delivery to ${BUSINESS.shop.full}, where we can fit them in the bay${
+      MOBILE_INSTALL ? ` from $${MOBILE_INSTALL.priceFrom} ${MOBILE_INSTALL.priceUnit}` : ""
+    }. South Florida.`,
   },
   {
     value: "mobile",

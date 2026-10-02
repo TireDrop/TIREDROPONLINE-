@@ -1025,7 +1025,7 @@ for (const width of [390, 1440]) {
   await check(`${width} /find-my-tires: vehicle hand-off and picks prefill the size; a silent size is kept`, async () => {
     const h = await open(width, { delay: 0 });
     const { page } = h;
-    // The hand-off from the hero's vehicle picker.
+    // A vehicle handed over in the address (the vy/vmk/vmd keys the quiz reads).
     await page.goto(`${BASE}/find-my-tires?vy=2020&vmk=Toyota&vmd=Camry`);
     await page.waitForSelector("#quiz-size");
     await h.afterStatus();
@@ -1202,7 +1202,8 @@ for (const width of [390, 1440]) {
     assert.equal(await page.inputValue("#finder-make"), "Toyota");
     await pickFinderModel(page, "Tacoma", "tac");
     await page.getByRole("button", { name: "Find Tires" }).click();
-    await page.waitForURL(/find-my-tires/);
+    // The hero goes straight to the tire list, at the address /tires writes.
+    await page.waitForURL(/\/tires\?year=2019&make=toyota&model=tacoma$/);
 
     await page.goto(`${BASE}/schedule?service=tire-installation`);
     await page.getByRole("button", { name: /^Next:/ }).click();
