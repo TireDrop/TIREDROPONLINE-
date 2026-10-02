@@ -72,6 +72,9 @@
  * It starts `vite preview` itself on FORMS_PORT (default 4181), or tests
  * FORMS_BASE when that is set to an already running server. FORMS_ONLY=<regex>
  * runs only the checks whose name matches, e.g. FORMS_ONLY=/track.
+ * FORMS_CONCURRENCY (default 4) is how many checks run at once, each in its
+ * own browser context; results still print in declaration order.
+ * FORMS_SHARD=k/n runs only every n-th check from the k-th (e.g. 1/3).
  */
 import { chromium } from "playwright";
 import { spawn } from "node:child_process";
@@ -105,6 +108,20 @@ const CHROME =
   process.env.AUDIT_CHROME ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 const PORT = Number(process.env.FORMS_PORT ?? 4181);
 const STATUS_DELAY_MS = 1500;
+// FORMS_SHARD=k/n runs every n-th check starting at the k-th (1-based), so
+// a CI can split the suite across machines; unset runs them all. Read before
+// the preview server starts, so a bad value cannot leave one running.
+const SHARD = (() => {
+  const raw = process.env.FORMS_SHARD;
+  if (!raw) return null;
+  const m = /^(\d+)\/(\d+)$/.exec(raw);
+  const [k, n] = m ? [Number(m[1]), Number(m[2])] : [0, 0];
+  if (!(n >= 1 && k >= 1 && k <= n)) {
+    console.error(`FORMS_SHARD=${raw}: want k/n with 1 <= k <= n, e.g. 1/3`);
+    process.exit(2);
+  }
+  return { k, n };
+})();
 
 /* ------------------------------ preview ------------------------------ */
 
@@ -164,16 +181,64 @@ let failures = 0;
 let passes = 0;
 // FORMS_ONLY=<regex> runs just the checks whose name matches.
 const ONLY = process.env.FORMS_ONLY ? new RegExp(process.env.FORMS_ONLY) : null;
-async function check(name, fn) {
-  if (ONLY && !ONLY.test(name)) return;
+// Why a pool: every check owns its own browser context and mocks, and most of
+// a check is waiting (the 1.5 s late /api/status, slow mocked answers), so
+// several run side by side; serially they were ~280 s, the slowest gate.
+const CONCURRENCY = Math.max(1, Number(process.env.FORMS_CONCURRENCY ?? 4) || 4);
+
+async function runCheck(name, fn) {
+  const t0 = Date.now();
   try {
     await fn();
+    return { ok: true, name, ms: Date.now() - t0 };
+  } catch (err) {
+    return { ok: false, name, ms: Date.now() - t0, err };
+  }
+}
+function report({ ok, name, err }) {
+  if (ok) {
     passes += 1;
     console.log(`ok   ${name}`);
-  } catch (err) {
+  } else {
     failures += 1;
     console.log(`FAIL ${name}\n     ${String(err.message).split("\n").join("\n     ")}`);
   }
+}
+
+/** Checks are queued here as they are declared and run by runQueued(). */
+const queued = [];
+function check(name, fn) {
+  if (ONLY && !ONLY.test(name)) return;
+  queued.push({ name, fn });
+}
+
+/**
+ * Runs the queued checks CONCURRENCY at a time and prints each result in
+ * declaration order (a result waits for the ones above it), so the log reads
+ * the same as a serial run.
+ */
+async function runQueued() {
+  const mine = SHARD ? queued.filter((_, i) => i % SHARD.n === SHARD.k - 1) : queued;
+  const results = new Array(mine.length);
+  const timings = [];
+  let next = 0;
+  let printed = 0;
+  const worker = async () => {
+    while (next < mine.length) {
+      const i = next++;
+      results[i] = await runCheck(mine[i].name, mine[i].fn);
+      timings.push(results[i]);
+      while (printed < mine.length && results[printed]) report(results[printed++]);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, mine.length) }, worker));
+  const slow = timings.sort((a, b) => b.ms - a.ms).slice(0, 5);
+  const sum = timings.reduce((s, r) => s + r.ms, 0);
+  console.log(
+    `     ${mine.length} checks${SHARD ? ` (shard ${SHARD.k}/${SHARD.n})` : ""}, ${CONCURRENCY} at a time; ` +
+      `${(sum / 1000).toFixed(0)} s of check time. Slowest: ` +
+      slow.map((r) => `${(r.ms / 1000).toFixed(1)} s ${r.name.slice(0, 60)}`).join("; "),
+  );
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -560,7 +625,8 @@ for (const width of [390, 1440]) {
     await page.getByRole("button", { name: "Send Message" }).click();
     await waitFor(() => h.sent.forms.length === 1, "/api/forms");
     assert.equal(h.sent.forms[0].website, "http://spam.example", "honeypot value sent");
-    assert.equal(judged.at(-1).reason, "honeypot", "the server's guard catches it");
+    // This send's own verdict: other checks run alongside and judge theirs too.
+    assert.equal(judged.find((j) => j.body === h.sent.forms[0])?.reason, "honeypot", "the server's guard catches it");
     assert.equal(h.sent.forms[0].name, "Al");
     noErrors(h.errors);
     await h.context.close();
@@ -2083,10 +2149,14 @@ for (const width of [390, 1440]) {
 
 }
 
+await runQueued();
+
 // Every real submission above passes the server's spam guard (with only the
 // minimum fill time switched off); the honeypot one is the only block.
-await check("spam guard: every real submission carries a valid token and passes; the honeypot bot is caught", async () => {
-  if (ONLY && !judged.length) return;
+// It reads what every other check sent, so it runs last, on its own.
+const GUARD_CHECK = "spam guard: every real submission carries a valid token and passes; the honeypot bot is caught";
+if (!ONLY || ONLY.test(GUARD_CHECK)) report(await runCheck(GUARD_CHECK, async () => {
+  if ((ONLY || SHARD) && !judged.length) return;
   assert.ok(judged.length > 0, "no write was sent");
   const bots = judged.filter((j) => String(j.body?.website ?? "").trim());
   const people = judged.filter((j) => !String(j.body?.website ?? "").trim());
@@ -2103,7 +2173,7 @@ await check("spam guard: every real submission carries a valid token and passes;
     `     guard: ${people.length} real submissions passed (${Object.entries(by).map(([e, l]) => `${e} ${l.length}`).join(", ")}), ` +
       `${bots.length} honeypot caught; shortest fill ${Math.min(...people.map((j) => j.elapsedMs))} ms`,
   );
-});
+}));
 
 await browser.close();
 stopServer();
