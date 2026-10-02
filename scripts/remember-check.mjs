@@ -26,6 +26,15 @@
  *     remove one, Clear all removes all, and zero results offers Clear
  *     filters and the phone number;
  *   - a hard load of a filtered URL hydrates with no mismatch.
+ *   Installed-price toggle (src/lib/installedPrice.js)
+ *   - /tires and a tire page arrive with it off (aria-pressed="false", no
+ *     installed lines); Enter turns it on: every tire card shows one tire and
+ *     a set of four as "tire + installation = total", "Installed from", with
+ *     the install price from services.js; a 44px target, no sideways scroll;
+ *   - remembered (tiredrop.installed.v1) through a reload, which hydrates
+ *     with no warning, and onto the tire page; Space turns it off there;
+ *   - the cart is not changed: a set added with it on has no installation;
+ *   - GA4 gets installed_price_toggle with toggle_state and placement.
  *   No console errors anywhere (the /api/tires 404 the harness answers
  *   aside), and no hydration warnings.
  *
@@ -540,6 +549,85 @@ await check("hard loads: bare /tires hydrates in place with a saved vehicle, fil
     "https://tiredroponline.com/tires",
   );
   await context.close();
+});
+
+await check("installed-price toggle: off in the HTML, keyboard, remembered, cart untouched, GA4", async () => {
+  // services.js is the one source of the install price.
+  const { getService } = await import("../src/data/services.js");
+  const fee = getService("tire-installation").priceFrom;
+  const usd = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+
+  // Off in the prerendered HTML, on the results and on a tire page.
+  for (const path of ["/tires", "/tires/continental-crosscontact-lx25-235-65r17"]) {
+    const html = await (await fetch(`${BASE}${path}`)).text();
+    assert.match(html, /aria-pressed="false"[^>]*>(?:(?!<\/button>).)*Show installed price/s, path);
+    assert.ok(!html.includes('data-testid="installed-lines"'), `${path}: no installed lines before the toggle`);
+  }
+
+  const ga = (page) =>
+    page.evaluate(() =>
+      (window.dataLayer ?? [])
+        .map((a) => Array.from(a))
+        .filter((a) => a[0] === "event" && a[1] === "installed_price_toggle")
+        .map((a) => a[2]),
+    );
+
+  for (const width of [390, 1440]) {
+    const { context, page, errors } = await open(width);
+    await page.goto(`${BASE}/tires`);
+    await page.waitForFunction(mounted);
+    const toggle = page.locator('[data-testid="installed-toggle"] button');
+    assert.equal(await toggle.getAttribute("aria-pressed"), "false");
+    assert.equal(await page.locator('[data-testid="installed-lines"]').count(), 0);
+    assert.ok((await toggle.boundingBox()).height >= 44, "44px target");
+
+    // Keyboard: focus and Enter.
+    await toggle.focus();
+    await page.keyboard.press("Enter");
+    await page.waitForFunction(() => document.querySelector('[data-testid="installed-toggle"] button')?.getAttribute("aria-pressed") === "true");
+    const cards = page.locator("article");
+    const n = await cards.count();
+    assert.equal(await page.locator('article [data-testid="installed-lines"]').count(), n, "every tire card");
+    const first = cards.first();
+    const each = Number((await first.locator("p.tnum").last().innerText()).match(/\$([\d,.]+)/)[1].replace(/,/g, ""));
+    const text = await first.locator('[data-testid="installed-lines"]').innerText();
+    assert.match(text, /Installed from/);
+    const round = (x) => Math.round(x * 100) / 100;
+    assert.ok(text.includes(`${usd(each)} + ${usd(fee)} = ${usd(round(each + fee))}`), `one tire: ${text}`);
+    assert.ok(text.includes(`${usd(round(each * 4))} + ${usd(fee * 4)} = ${usd(round(each * 4 + fee * 4))}`), `set of 4: ${text}`);
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "no sideways scroll");
+    assert.deepEqual(await ga(page), [{ toggle_state: "on", placement: "results" }]);
+
+    // The cart is not changed: a set added with it on carries no install.
+    await first.getByRole("button", { name: /^Add a set of 4/ }).click();
+    const cart = await page.evaluate(() => JSON.parse(localStorage.getItem("tiredrop.cart.v1") || "null"));
+    const lines = JSON.stringify(cart);
+    assert.ok(/"install":false/.test(lines) && !/"install":true/.test(lines), `cart: ${lines}`);
+
+    // Remembered through a reload (hydration warnings are caught in errors).
+    await page.reload();
+    await page.waitForFunction(mounted);
+    await page.waitForFunction(() => document.querySelector('[data-testid="installed-toggle"] button')?.getAttribute("aria-pressed") === "true");
+    assert.equal(await page.locator('article [data-testid="installed-lines"]').count(), n);
+
+    // And onto a tire page, where Space turns it off.
+    await page.goto(`${BASE}/tires/continental-crosscontact-lx25-235-65r17`);
+    await page.waitForFunction(mounted);
+    await page.locator('[data-testid="installed-lines"]').first().waitFor();
+    const pd = await page.locator('[data-testid="installed-lines"]').first().innerText();
+    assert.match(pd, /Installed from/);
+    assert.match(pd, /Set of 4/);
+    const pt = page.locator('[data-testid="installed-toggle"] button');
+    await pt.focus();
+    await page.keyboard.press("Space");
+    await page.waitForFunction(() => !document.querySelector('[data-testid="installed-lines"]'));
+    assert.equal(await pt.getAttribute("aria-pressed"), "false");
+    assert.deepEqual(await ga(page), [{ toggle_state: "off", placement: "product" }]);
+    assert.equal(await page.evaluate(() => localStorage.getItem("tiredrop.installed.v1")), null);
+    assert.ok(await page.locator('[data-testid="installed-toggle"] a[href="/install"]').count() === 1, "/install link");
+    assert.deepEqual(real(errors), [], `${width}`);
+    await context.close();
+  }
 });
 
 await browser.close();

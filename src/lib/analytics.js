@@ -95,8 +95,9 @@ export function trackPageView(key, path = key) {
 /*  Conversion events                                                  */
 /* ------------------------------------------------------------------ */
 //
-// GA4's recommended ecommerce and lead events, plus four custom ones
-// (order_request, install_booking, tool_use, search_suggestion). Every event
+// GA4's recommended ecommerce and lead events, plus five custom ones
+// (order_request, install_booking, tool_use, search_suggestion,
+// installed_price_toggle). Every event
 // goes through trackEvent(), which keeps only the parameter names listed below and drops
 // any value that looks like an email address or a phone number, so nothing
 // a visitor typed about themselves (name, email, phone, address, notes,
@@ -119,6 +120,8 @@ export function trackPageView(key, path = key) {
 //                      suggestion picked         vehicles, brands, products, pages),
 //                                                suggestion_path
 //   tool_use           first touch of a demo     tool_id (once per page view)
+//   installed_price_toggle  "Show installed      toggle_state ("on" / "off"),
+//                      price" pressed            placement ("results" / "product")
 //
 // `purchase` is NOT sent. Checkout is request-only today: no money changes
 // hands on this site. When online payment is switched on, the purchase is
@@ -146,6 +149,8 @@ const EVENT_KEYS = new Set([
   "tool_id",
   "install_type",
   "method",
+  "toggle_state",
+  "placement",
 ]);
 const ITEM_KEYS = new Set([
   "item_id",
@@ -258,5 +263,13 @@ export function trackViewItem(product) {
   oncePerPage(`item:${product.sku ?? product.id}`, () => {
     const item = toGaItem(product, 1);
     trackEvent("view_item", { currency: CURRENCY, value: item.price, items: [item] });
+  });
+}
+
+/** The installed-price toggle on /tires ("results") or a tire page ("product"). */
+export function trackInstalledPriceToggle(on, placement) {
+  trackEvent("installed_price_toggle", {
+    toggle_state: on ? "on" : "off",
+    placement,
   });
 }

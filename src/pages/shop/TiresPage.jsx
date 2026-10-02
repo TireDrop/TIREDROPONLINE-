@@ -18,6 +18,7 @@ import ScanTireButton from "../../components/shop/ScanTireButton.jsx";
 import SearchPanel from "../../components/shop/SearchPanel.jsx";
 import { ShoppingForBar } from "../../components/shop/Fitment.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
+import { InstalledPriceToggle } from "../../components/shop/InstalledPrice.jsx";
 import { TireArt } from "../../components/shop/ProductArt.jsx";
 import {
   TIRES,
@@ -648,6 +649,13 @@ export default function TiresPage() {
               </div>
             </div>
 
+            {/* "What will I actually pay?" for a local shopper: tire +
+                installation on every card. Off by default and remembered;
+                a display aid only, the cart is not changed. */}
+            {results.length > 0 && (
+              <InstalledPriceToggle placement="results" className="mb-5" />
+            )}
+
             {chips.length > 0 && (
               <div className="mb-5 flex flex-wrap items-center gap-2">
                 {chips.map((chip) => (
@@ -707,7 +715,7 @@ export default function TiresPage() {
                   {fitting.length > 0 ? (
                     <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
                       {fitting.map((tire) => (
-                        <ProductCard key={tire.id} product={tire} />
+                        <ProductCard key={tire.id} product={tire} installed />
                       ))}
                     </div>
                   ) : activeFilterCount > 0 || hasSize ? (
@@ -765,7 +773,7 @@ export default function TiresPage() {
                     </p>
                     <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
                       {others.map((tire) => (
-                        <ProductCard key={tire.id} product={tire} />
+                        <ProductCard key={tire.id} product={tire} installed />
                       ))}
                     </div>
                   </section>
@@ -778,7 +786,7 @@ export default function TiresPage() {
                 <h2 className="sr-only">Tires</h2>
                 <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
                   {results.map((tire) => (
-                    <ProductCard key={tire.id} product={tire} />
+                    <ProductCard key={tire.id} product={tire} installed />
                   ))}
                 </div>
               </>

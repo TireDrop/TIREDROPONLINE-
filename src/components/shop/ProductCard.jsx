@@ -12,6 +12,7 @@ import {
 } from "../../data/pricing.js";
 import { productHref } from "../../data/products.js";
 import ProductArt from "./ProductArt.jsx";
+import { InstalledPriceLines } from "./InstalledPrice.jsx";
 import { ChangeButton, FitBadge, NoFitActions } from "./Fitment.jsx";
 
 // Sizes, load/speed codes, prices and brand or model names are never put
@@ -43,7 +44,9 @@ function specLine(product) {
   );
 }
 
-export default function ProductCard({ product }) {
+// `installed`: the page has the installed-price toggle (/tires), so a tire
+// card shows tire + installation = total while it is on.
+export default function ProductCard({ product, installed = false }) {
   // Catalog products link to their /tires/:slug page. A live distributor tire
   // has no slug (it must not land on a sample page quoting a sample price),
   // so it links to its own /tires/p/:sku page instead. It still gets no
@@ -208,6 +211,10 @@ export default function ProductCard({ product }) {
               /tire
             </span>
           </p>
+
+          {installed && isTire && (
+            <InstalledPriceLines price={product.price} compact className="mt-2" />
+          )}
 
           <p className="mt-2.5 hidden items-start gap-1.5 text-[11px] leading-snug text-smoke sm:flex">
             <Truck size={13} aria-hidden className="mt-px shrink-0" />

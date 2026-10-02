@@ -481,6 +481,7 @@ Google. No-ops in the prerender and wherever `gtag` is missing.
 | `install_booking` | `/track` booking panel: booked inline, or the external booking link clicked | `install_type`, `method` (`inline` / `external`) |
 | `search` | the tire/wheel finder is submitted | `search_type`, `search_term` (a size like `225/45R17` or "year make model" from the dropdowns) |
 | `tool_use` | first touch of a Learn demo / free tool (once per page view) | `tool_id` |
+| `installed_price_toggle` | "Show installed price" pressed on `/tires` or a tire page | `toggle_state` (`on` / `off`), `placement` (`results` / `product`) |
 
 Items carry `item_id` (the SKU), `item_name`, `item_brand`,
 `item_category` (tire/wheel), `item_variant` (size), `price` (per unit,
