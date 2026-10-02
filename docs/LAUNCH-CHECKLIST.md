@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (SHIPPED in one release: Learn gap fill A (5 guides) + B (4 research guides), competitor citations swapped for maker sources, CRO quick wins (hero to results, phone cart Checkout, install price shown, 48 states + DC on cards), article bundle split (article pages download 40–46% less JS); earlier today: compact mobile footer, checklist tidy + Chrome prompts, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
+_Last updated: 2026-10-02 (check:sources gate built on preview/check-sources: competitor links/mentions fail the build, enabled with preview/resources-only; SHIPPED in one release: Learn gap fill A (5 guides) + B (4 research guides), competitor citations swapped for maker sources, CRO quick wins (hero to results, phone cart Checkout, install price shown, 48 states + DC on cards), article bundle split (article pages download 40–46% less JS); earlier today: compact mobile footer, checklist tidy + Chrome prompts, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -35,6 +35,7 @@ _Last updated: 2026-10-02 (SHIPPED in one release: Learn gap fill A (5 guides) +
 - [x] ~~Spanish tab labels overflow the home finder on phones (SearchPanel whitespace-nowrap) → let tabs wrap below md~~ (c05e3ac)
 - [x] ~~Compact mobile-first footer: contact row first, collapsible link groups, 62% shorter on phones (1621 → 608px), check:footer guards it~~ (a18b709, shipped to main 2026-10-02)
   - [ ] Footer link label "Tires Shipped Nationwide" → say 48 states + DC (Justin picks the wording)
+- [ ] check:sources gate: competitor links/mentions fail the build (preview/check-sources 0b1172b) → ships with preview/resources-only
 
 ## Admin (Justin)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
