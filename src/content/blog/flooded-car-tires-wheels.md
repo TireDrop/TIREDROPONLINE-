@@ -125,4 +125,4 @@ If the inspection says one or more tires need replacing, match them to your door
 | 6 | Have brakes, bearings and suspension checked | They sat in the same water |
 | 7 | Coverage questions go to your insurer | Not something this post covers |
 
-And the best flood advice is the oldest: if a street is under water, turn around. Our [hurricane car prep checklist](/blog/hurricane-season-tire-check) covers what to do before the next storm.
+And the best flood advice is the oldest: if a street is under water, turn around. Our [hurricane car prep checklist](/blog/hurricane-season-tire-check) covers what to do before the next storm, and if you're shopping for a used car after the season, see [the tire clues that flag a flooded car](/blog/used-car-after-storm-season-tires).

@@ -137,6 +137,6 @@ If your placard or current tires show HL, the replacement needs to be HL. An XL 
 
 1. Read the size, load index and any XL or HL marking from your door placard or current tires. The [Tire Size Finder](/tire-size-finder) can read the door-jamb sticker for you, and our guide on [how to read tire size](/learn/sidewall/how-to-read-tire-size) explains each piece.
 2. Compare the candidate tire with the [load and speed rating check](/load-speed-check).
-3. Set pressure to the placard, cold, once the tires are on, unless your installer has calculated a different figure for a changed tire type or size.
+3. Set pressure to the placard, cold, once the tires are on (our [Honda CR-V guide](/blog/honda-cr-v-tires-guide) shows how load matters on a family crossover), unless your installer has calculated a different figure for a changed tire type or size.
 
 Then [shop tires by size](/tires). Extreme Tires installs at the Sunrise shop or by mobile van in Miami-Dade, Broward and Palm Beach counties; elsewhere in the 48 states and DC, your order ships to your address. See [how installation works](/install), or call (954) 773-1896.

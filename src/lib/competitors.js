@@ -127,6 +127,9 @@ export const RESOURCE_DOMAINS = [
   "wheelpros.com",
   "tesla.com",
   "subaru.com",
+  "toyota.com",
+  "honda.com",
+  "ford.com",
   // Own properties, listings and site infrastructure
   "tiredroponline.com",
   "yelp.com",

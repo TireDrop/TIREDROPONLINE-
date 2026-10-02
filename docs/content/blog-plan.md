@@ -11,6 +11,20 @@ Planning only: no code, no copy. Byline for every post: "TireDrop Team, Extreme 
 - Part 5 lists the risks.
 - Part 6 lists the sources.
 
+**Publishing status (updated 2 October 2026)**
+
+| Status | Posts | Count |
+|---|---|---|
+| Live: Batch 1 | #1–#10 | 10 |
+| Live: Batch 2 | #16, #17, #22, #24, #25, plus two off-plan posts (`how-old-are-tires-bought-online`, `get-tires-installed-after-buying-online`) | 5 planned + 2 |
+| Batch 3, on `preview/blog-batch-3` (ships with the next release) | #13, #14, #18, #21, #23, #26, #27, #28, #29, #36 | 10 |
+| On hold | #15 (waiting on the accountant's answer about the Florida tire fee and sales tax) | 1 |
+| Not yet written | #11, #12, #19, #20, #30, #31–#35, #37–#50 | 24 |
+
+- **How Batch 3 was chosen.** Highest search intent first: every unpublished "Commercial investigation" post with High demand, then the "Informational / commercial" posts. Two High-demand vehicle guides, #35 Civic and #45 Wrangler, move to Batch 4. That keeps it to four vehicle guides per batch, because of the near-duplicate risk in Part 5. #49 (used tires) waits until Justin confirms whether Extreme Tires sells used tires, as its Risk note requires.
+- **Remaining.** 25 posts are left: 24 unwritten plus #15. That is 3 more batches of up to 10.
+- **Dates.** Batch 3 posts are dated 2 October 2026, as Batch 2 was, instead of the calendar's 19 October.
+
 ---
 
 ## 0. Research method and what was blocked

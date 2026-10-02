@@ -138,4 +138,6 @@ A longer warranty isn't a promise of a longer life on your car. It does tell you
 
 Same-size tires cost different amounts because they aren't the same tire. Once the non-negotiables are met, the price differences buy you choices: a different type, more load capacity, a higher speed rating, special construction, different rubber, or a different warranty. Decide which of those your driving actually uses, and pay for those.
 
+Comparing brands too? Our guide to [choosing between tire brands](/blog/choosing-between-tire-brands) shows how to judge them without the hype.
+
 Not sure your size is right? Decode it with our [tire size tool](/tire-size). Then [browse tires in your size](/tires) and compare a few before you choose.

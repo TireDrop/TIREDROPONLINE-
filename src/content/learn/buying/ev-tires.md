@@ -142,4 +142,6 @@ Many EVs carry no spare. Teslas generally don't come with one; Tesla sells an op
 2. Decide whether you want a carmaker-marked tire, foam inside, or both.
 3. Check whether your car is **staggered**, with different front and rear sizes.
 
+Planning for faster wear? Our post on [budgeting for EV tire wear](/blog/ev-tire-wear-budget) shows how to forecast your next set from your own tread readings.
+
 Then [shop tires by size](/tires). Extreme Tires installs at the Sunrise shop or by mobile van in Miami-Dade, Broward and Palm Beach counties. Anywhere else in the 48 contiguous states and DC, we ship to your address for a local installer. See [how installation works](/install), or call (954) 773-1896 to talk through tires for your EV.
