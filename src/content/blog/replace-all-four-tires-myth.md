@@ -51,6 +51,7 @@ related:
   - /tire-rotation-pattern
   - /tire-check
   - /tires
+  - /blog/tire-rotation-upsell-myth
 cta:
   label: "Check your tread"
   href: /tire-check

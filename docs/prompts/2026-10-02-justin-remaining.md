@@ -613,6 +613,26 @@ The 10 batch-3 posts were written from search snippets because the source sites 
 
 Reply with the list. Claude fixes or cuts any NOT FOUND line.
 
+### A19. Blog batch 4: confirm the snippet-only facts
+
+Same as A18, for the 10 batch-4 posts. Paste the HEADER, then:
+
+> Open each source below. For each one, reply FOUND, NOT FOUND or PAGE MISSING, and quote the line you found. Read only; change nothing.
+> 1. techinfo.honda.com, Civic owner's manual, "Tire and Wheel Replacement" and "Winter Tires": same size, load, speed and pressure rating; ABS/VSA warning; replace all four or in pairs; summer tires not for winter
+> 2. Honda "Tire Rotation" (AT402626IOM): Maintenance Minder line; directional tires front-to-back only; TPMS calibration after rotation
+> 3. Toyota TL-MMS-20Tire.pdf: rotation is a condition of the treadwear warranty
+> 4. 2022 Jeep Wrangler owner's manual PDF and Mopar's tire-rotation article: specified size, load and speed; a different size gives false speedometer and odometer readings; the spare can join the rotation; rearward cross
+> 5. Chevrolet 2024 Trailering Guide and the 2019 Silverado 1500 owner's manual: tongue weight 10-15%; where the tire label is; the label pressure is the minimum cold pressure for maximum load
+> 6. eCFR 49 CFR 393.75, 390.5 and 396.13: 4/32 on steer tires and 2/32 on others; the 10,001 lb definition; the pre-trip inspection rule
+> 7. https://www.fueleconomy.gov/feg/maintain.jsp: 0.6% average, up to 3%; 0.2% per psi
+> 8. Consumer Reports' article on low rolling resistance tires: rolling resistance as the tie-breaker
+> 9. AAA pothole tips and the AAA pothole survey: one in 10 drivers; alignment, noise and vibration advice
+> 10. AAA Thanksgiving 2025 travel forecast: 81.8 million travelers, about 73 million by car
+> 11. Michelin tire-rotation and storing-tires pages: follow the vehicle maker; front tires on front-wheel-drive cars; cool, dry, dark storage away from ozone
+> 12. NHTSA Summer Driving Tips: check pressure before trips, heavy loads and towing
+
+Reply with the list. Claude fixes or cuts any NOT FOUND line. Note: the Thanksgiving post uses AAA's 2025 figures; Claude updates it when AAA publishes the 2026 forecast (mid-November).
+
 ## B. Real-world tasks (calls and emails)
 
 ### B1. ATD: submit the connectivity form, then the call

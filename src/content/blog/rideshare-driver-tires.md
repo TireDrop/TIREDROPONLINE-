@@ -51,6 +51,7 @@ related:
   - /blog/worn-tires-florida-rain-4-32
   - /mobile-service
   - /tires
+  - /blog/small-fleet-tire-checklist
 cta:
   label: "Book mobile tire service"
   href: /mobile-service

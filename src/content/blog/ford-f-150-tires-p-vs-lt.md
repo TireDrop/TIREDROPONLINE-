@@ -51,6 +51,7 @@ related:
   - /learn/sidewall/load-index
   - /commercial-tires
   - /tires
+  - /blog/silverado-boat-towing-tires
 cta:
   label: "Find tires for your F-150"
   href: /find-my-tires

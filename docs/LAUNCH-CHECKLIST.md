@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (checklist wave 2 in one release: blog batch 3 (10 posts), CRO quote form + compact /tires header, installed-price toggle, footer "Shipping to 48 States + DC", accessibility pass 2 (25 issues to 0), check:links + CX-5 spelling, free-install wording priced, prompt pack for every item only Justin can do; earlier today: resources only + check:sources shipped)_
+_Last updated: 2026-10-02 (SHIPPED: blog batch 4, 10 posts (Civic, Wrangler, Silverado towing, hybrids, small fleets, potholes, new-car tires, rotation and aging myths, Thanksgiving trip); earlier today: wave 2 (quote form, installed price, blog batch 3, a11y 0 issues, check:links), resources only + check:sources)_
 
 ## Site fixes (Claude)
 - [x] ~~Resources only: every competitor citation/link replaced with maker, AAA or government sources~~ (`7754330`, shipped to main 2026-10-02)
@@ -148,11 +148,16 @@ _Last updated: 2026-10-02 (checklist wave 2 in one release: blog batch 3 (10 pos
 - [x] ~~Phase 1: keyword map, 90–100 titles, demo list → Justin approves~~ (b813381, plans approved)
 - [x] ~~Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves~~ (800247b, pilot approved + 5 demos)
 - [x] ~~Blog + Learn live: 20 articles, 5 demos, 98 prerendered routes~~ (be6a2a2)
-- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); blog batch 2 live (f776fc1); blog batch 3 live (9e4cc11). Blog: 25 planned posts left (24 unwritten + #15 on hold) = 3 more batches. Learn: 33 guides live. Status table in `docs/content/blog-plan.md`. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
+- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); blog batch 2 live (f776fc1); blog batch 3 live (9e4cc11); blog batch 4 live (ecfd2af)). Blog: 15 planned posts left (13 unwritten + #15 and #49 on hold) = 2 more batches. Learn: 33 guides live. Status table in `docs/content/blog-plan.md`. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
 - [x] ~~Blog batch 3: 10 posts~~ (9e4cc11, shipped to main 2026-10-02)
   - [ ] 16 facts were snippet-only: confirm them → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A18)
   - 4/32 in Florida rain, best time to buy (by season), RAV4, used car after storm season, choosing between brands, Camry, F-150 P vs LT, EV tire wear, rideshare mileage math, CR-V
   - [ ] Justin: does Extreme Tires sell used tires? Plan post #49 waits on the answer
+- [x] ~~Blog batch 4: 10 posts~~ (ecfd2af, shipped to main 2026-10-02)
+  - Civic, Wrangler, Silverado boat towing, low rolling resistance for hybrids, small fleet checklist, new-car tires wearing early, curb/pothole signs, rotation upsell myth, unused tires still age, Thanksgiving road trip check
+  - #37 (Tesla Model 3 flat) skipped: the Learn guide /learn/tesla/tesla-flat-tire-no-spare already targets the same search. Rework with a new angle or drop
+  - #11 (Thanksgiving) quotes AAA's 2025 forecast: update with the 2026 numbers when AAA publishes them in mid-November
+  - [ ] 12 facts were snippet-only: confirm them → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A19)
 - [x] ~~6 new tools with their own tool pages, embedded in 8 articles~~ (preview/tools 210b348, shipped 2026-10-01)
 - [x] ~~Wave 1 city pages + mobile hub: Sunrise, Plantation, Tamarac, Coral Springs, Davie, Fort Lauderdale, Weston~~ (preview/cities bb42574, shipped 2026-10-01)
 - [ ] Justin: Google Business Profile link + map pin (for geo schema) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A9)

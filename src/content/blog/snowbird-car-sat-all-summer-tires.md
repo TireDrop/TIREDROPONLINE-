@@ -51,6 +51,7 @@ related:
   - /learn/pressure/tire-pressure-temperature
   - /blog/mobile-tire-install-condo-office
   - /mobile-service
+  - /blog/thanksgiving-road-trip-tire-check
 cta:
   label: "See mobile service"
   href: /mobile-service

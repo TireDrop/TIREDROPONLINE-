@@ -17,13 +17,18 @@ Planning only: no code, no copy. Byline for every post: "TireDrop Team, Extreme 
 |---|---|---|
 | Live: Batch 1 | #1–#10 | 10 |
 | Live: Batch 2 | #16, #17, #22, #24, #25, plus two off-plan posts (`how-old-are-tires-bought-online`, `get-tires-installed-after-buying-online`) | 5 planned + 2 |
-| Batch 3, on `preview/blog-batch-3` (ships with the next release) | #13, #14, #18, #21, #23, #26, #27, #28, #29, #36 | 10 |
-| On hold | #15 (waiting on the accountant's answer about the Florida tire fee and sales tax) | 1 |
-| Not yet written | #11, #12, #19, #20, #30, #31–#35, #37–#50 | 24 |
+| Live: Batch 3 | #13, #14, #18, #21, #23, #26, #27, #28, #29, #36 | 10 |
+| Batch 4, on `preview/blog-batch-4` (ships with the next release) | #11, #33, #34, #35, #38, #44, #45, #47, #48, #50 | 10 |
+| On hold | #15 (waiting on the accountant's answer about the Florida tire fee and sales tax); #49 (waiting on Justin: does Extreme Tires sell used tires?) | 2 |
+| Not yet written | #12, #19, #20, #30, #31, #32, #37, #39, #40, #41, #42, #43, #46 | 13 |
 
-- **How Batch 3 was chosen.** Highest search intent first: every unpublished "Commercial investigation" post with High demand, then the "Informational / commercial" posts. Two High-demand vehicle guides, #35 Civic and #45 Wrangler, move to Batch 4. That keeps it to four vehicle guides per batch, because of the near-duplicate risk in Part 5. #49 (used tires) waits until Justin confirms whether Extreme Tires sells used tires, as its Risk note requires.
-- **Remaining.** 25 posts are left: 24 unwritten plus #15. That is 3 more batches of up to 10.
-- **Dates.** Batch 3 posts are dated 2 October 2026, as Batch 2 was, instead of the calendar's 19 October.
+- **How Batch 3 was chosen.** Highest search intent first: every unpublished "Commercial investigation" post with High demand, then the "Informational / commercial" posts. Two High-demand vehicle guides, #35 Civic and #45 Wrangler, moved to Batch 4. That keeps it to four vehicle guides per batch, because of the near-duplicate risk in Part 5. #49 (used tires) waits until Justin confirms whether Extreme Tires sells used tires, as its Risk note requires.
+- **How Batch 4 was chosen.** The same rule. First the "Commercial investigation" posts: #35 Civic and #45 Wrangler (High), then #44 Silverado towing and #48 low rolling resistance (Med), and #38 small fleet (Commercial). Then the "Informational / commercial" posts, #50 and #47. Then the informational posts by demand: #34 (High) and #33 (Med–High). Three vehicle guides, under the cap of four.
+  - **#37 (Tesla Model 3 flat) was skipped on purpose.** The Learn guide `/learn/tesla/tesla-flat-tire-no-spare` already targets "tesla flat tire", so a blog post on the same query would compete with it (Part 5's near-duplicate risk). Rework #37 with a distinct angle, or drop it.
+  - **#11 (Thanksgiving) took the last slot** because it is the only remaining post with a hard date (publish by Mon 9 Nov). Update it with AAA's 2026 forecast when that comes out in November; it quotes AAA's 2025 figures, labeled as 2025.
+  - **New allowlisted makers.** `chevrolet.com` (Silverado manual and trailering guide) and `mopar.com` (Jeep owner's manuals and Mopar's tire guide) join the resource list in `src/lib/competitors.js`.
+- **Remaining.** 15 posts are left: 13 unwritten plus #15 and #49 on hold. That is 2 more batches of up to 10, the second one small. Watch for Learn overlap before writing #20 (TPMS vs gauge), #31 (cold-front TPMS), #32 (registration and recalls, close to `/learn/age/tire-recalls-registration`) and #41/#42 (close to `/learn/florida/florida-heat-tires`).
+- **Dates.** Batch 3 and Batch 4 posts are dated 2 October 2026, as Batch 2 was, instead of the calendar's 19 and 26 October.
 
 ---
 

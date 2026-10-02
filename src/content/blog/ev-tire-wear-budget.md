@@ -51,6 +51,7 @@ related:
   - /blog/tesla-model-y-tires-guide
   - /tire-rotation-pattern
   - /tires
+  - /blog/low-rolling-resistance-hybrids
 cta:
   label: "See your rotation pattern"
   href: /tire-rotation-pattern

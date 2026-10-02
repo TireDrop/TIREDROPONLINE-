@@ -58,6 +58,7 @@ related:
   - /learn/florida/florida-heat-tires
   - /tire-check
   - /tires
+  - /blog/new-car-tires-wear-out-early
 cta:
   label: "Check your tires"
   href: /tire-check
