@@ -31,6 +31,10 @@ import {
 import ProductArt from "../../components/shop/ProductArt.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
 import {
+  InstalledPriceLines,
+  InstalledPriceToggle,
+} from "../../components/shop/InstalledPrice.jsx";
+import {
   FitPanel,
   ShoppingForBar,
 } from "../../components/shop/Fitment.jsx";
@@ -349,6 +353,16 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                 <p className="mt-2 text-sm text-smoke">Available to order.</p>
               )}
             </div>
+
+            {/* Installed price, one tire and a set of four, for a local
+                shopper. Display only: the Delivery choice below is what
+                adds installation to the cart. */}
+            {isTire && (
+              <div className="mt-5">
+                <InstalledPriceToggle placement="product" />
+                <InstalledPriceLines price={product.price} className="mt-3" />
+              </div>
+            )}
 
             {isTire && <FitPanel fit={fit} />}
 

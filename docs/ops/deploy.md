@@ -482,6 +482,7 @@ Google. No-ops in the prerender and wherever `gtag` is missing.
 | `search` | the tire/wheel finder is submitted | `search_type`, `search_term` (a size like `225/45R17` or "year make model" from the dropdowns) |
 | `view_search_results` | `/tires` with a vehicle or size, once per search after it answers | `search_type` (`vehicle`, `tire_size`), `search_term`, `results` (tires in the size; `0` is the dead end the size-quote form answers) |
 | `tool_use` | first touch of a Learn demo / free tool (once per page view) | `tool_id` |
+| `installed_price_toggle` | "Show installed price" pressed on `/tires` or a tire page | `toggle_state` (`on` / `off`), `placement` (`results` / `product`) |
 
 Items carry `item_id` (the SKU), `item_name`, `item_brand`,
 `item_category` (tire/wheel), `item_variant` (size), `price` (per unit,

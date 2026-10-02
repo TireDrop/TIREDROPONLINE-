@@ -9,6 +9,7 @@ _Last updated: 2026-10-02 (prompt pack for every item only Justin can do: docs/p
 _Last updated: 2026-10-02 (preview/a11y-pass2: footer label "Shipping to 48 States + DC" and the accessibility second pass; earlier: SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
 _Last updated: 2026-10-02 (CRO fixes 1 + 4 on preview/cro-quote-compact, ready to ship; SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
 _Last updated: 2026-10-02 (internal links: check:links, all clear; shared /tires links spell models like CX-5 right; earlier: SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
+_Last updated: 2026-10-02 (installed-price toggle on preview/installed-price; SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
 
 ## Site fixes (Claude)
 - [x] ~~Resources only: every competitor citation/link replaced with maker, AAA or government sources~~ (`7754330`, shipped to main 2026-10-02)
@@ -132,6 +133,10 @@ _Last updated: 2026-10-02 (internal links: check:links, all clear; shared /tires
 - [ ] Installed-price toggle
 - [ ] Book an install time at checkout → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C5)
 - [ ] Fitment by trim + staggered (logic + badge shipped in 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C3)
+  - [ ] A shared /tires link spells a model the size table doesn't know from the URL ("cx-5" shows as "Cx-5"); the saved pick keeps the right spelling
+- [x] ~~Installed-price toggle: "Show installed price (Miami-Dade, Broward, Palm Beach)" on /tires cards and tire pages, tire + installation = total for one tire and a set of 4, price from services.js, remembered, display only (cart unchanged), GA4 `installed_price_toggle`~~ (preview/installed-price 42d49d2)
+- [ ] Book an install time at checkout
+- [ ] Fitment by trim + staggered (logic + badge shipped in 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API)
 - [x] ~~Tire Size Finder scanner (door sticker / sidewall / VIN), one camera, Scan button in the home hero and /tires~~ (preview/scanner, shipped to main 2026-10-01; steps: docs/integrations/tire-size-finder.md)
   - [x] ~~Justin: Anthropic key `tiredrop-vercel-scanner` in Vercel (Sensitive, Production + Preview), $25 monthly spend limit, auto-reload on~~ (2026-10-01)
   - [x] ~~Guardrails: key read only server-side; per-IP limit 5 scans / 10 min; photo ≤3 MB (under Vercel's 4.5 MB body limit) and JPEG/PNG/WebP checked by bytes; 401/403/429/529 logged with a hint, never the key; "busy" and "isn't working" messages for shoppers~~ (preview/scanner)

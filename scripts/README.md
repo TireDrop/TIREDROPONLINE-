@@ -25,6 +25,7 @@ header comment, and `shopify/assets/td-tiremath.js` names
 | `translate-check.mjs` | `check:translate` | The header's Language control: nothing loads from Google until it is opened, keyboard and 320px use, translating in place with a stand-in for Google's element (routes, cart and a form throw nothing; prices and sizes stay as written), the translate.google.com fallback, and the site served from Google's translate.goog proxy. `TRANSLATE_SHOTS=<dir>` saves screenshots. |
 | `docs-links-check.mjs` | `check:docs` | Every relative Markdown link and every `docs/...` path in the docs resolves to a real file. |
 | `ga-events-check.mjs` | `check:ga` | GA4 conversion events through a real funnel (view_item, add_to_cart, view_cart, begin_checkout, add_shipping_info, generate_lead, and /tires view_search_results with its result count) with the expected shape, and nothing typed into a form in any GA call. |
+| `remember-check.mjs` | `check:remember` | Shop Tires remembers the vehicle or size (finder once, Change, Clear, blocked storage), `/tires` filters in the URL, and the installed-price toggle (off in the HTML, keyboard, remembered, cart untouched, GA4 event), at 390px and 1440px. |
 | `a11y-check.mjs` | `check:a11y` | axe-core (WCAG 2.1 A/AA plus best practice) on 22 key routes at 390px and 1280px (Learn and Blog indexes, /wheels, /compare empty and filled, the UTQG article among them) plus 18 more at 390px (the other Learn hubs, a blog post, a wheel, /about, /shipping, /install, /find-my-tires, /financing, /locations, /auto-service, /load-speed-check): fails on serious or critical issues. Also checks the skip link is the first Tab stop and moves focus to `<main>`. |
 | `search-check.mjs` | `check:search` | The header's store-wide search: size, brand and page suggestions as you type, the ARIA combobox (arrow keys, Enter, Escape, Tab, click outside), Enter and "See all results" to `/search?q=`, the `search` and `search_suggestion` GA4 events, 44px rows and no sideways scroll at 390px, axe with the list open, `/search` noindex and hydrating. `SEARCH_SHOTS=<dir>` sets where screenshots go. |
 | `home-check.mjs` | `check:home` | The home page: sections in story order in the prerendered HTML, 3-6 real Learn cards, no hidden reveal state in the markup; every scroll-reveal target visible with JavaScript off and with reduced motion; at 390px and 1440px the hero never hidden, everything revealed by scrolling, no sideways scroll, CLS under 0.1, no console errors. |
@@ -38,7 +39,7 @@ So do the Chromium checks. They start
 Shopify. `test:api`, `test:content`, `test:data` and `test:lib` are `node --test`
 suites in `api/_lib/`, `src/content/`, `src/data/` (the mobile city pages:
 ZIPs, copy rules and the text-overlap check) and `src/lib/` (the GA4 event
-parameter filter, the translate helpers, the store search's matching, the sources rule's matchers and the internal-link rules), not scripts here.
+parameter filter, the translate helpers, the store search's matching, the installed-price math, the sources rule's matchers and the internal-link rules), not scripts here.
 `test:sources` is `src/sourcesRule.test.mjs`: the sources rule over the source tree.
 
 ## Run by hand
