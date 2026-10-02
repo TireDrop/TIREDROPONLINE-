@@ -90,7 +90,7 @@ In South Florida, that's how TireDrop is built. It's the online store of Extreme
 - choose **free ship-to-store** at checkout and have the tires fitted at the Sunrise shop, or
 - have a **mobile van** fit them at your home or office inside the local install area.
 
-Outside South Florida, the order ships to you and you take the tires to an installer you trust. Call that installer first and ask two things: whether they fit tires the customer brings in, and what they charge to do it. Our post on [getting tires installed after buying online](/blog/bought-tires-online-install-broward) walks through each route.
+Outside South Florida, the order ships to you and you take the tires to an installer you trust. Call that installer first and ask two things: whether they fit tires the customer brings in, and what they charge to do it. Our post on [getting tires installed after buying online](/blog/bought-tires-online-install-broward) walks through each South Florida route, and our [nationwide installation guide](/blog/get-tires-installed-after-buying-online) covers finding an installer anywhere else.
 
 ## Get the size right before anything else
 

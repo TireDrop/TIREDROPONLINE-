@@ -138,6 +138,6 @@ If the tread looks deep but the date is old, don't let the tread talk you out of
 4. Run the full TIN through the USTMA lookup.
 5. Enter the dates in the [Do I Need Tires Yet?](/tire-check) check, alongside your tread depth.
 
-Buying tires online? Check the dates when the set arrives, before anything gets mounted. Our post on [getting online tires installed in Broward](/blog/bought-tires-online-install-broward) covers that handoff.
+Buying tires online? Check the dates when the set arrives, before anything gets mounted. Our post on [how old tires are when you buy online](/blog/how-old-are-tires-bought-online) covers what to look for, and our post on [getting online tires installed in Broward](/blog/bought-tires-online-install-broward) covers that handoff.
 
 Questions about a code you can't read? Call Extreme Tires in Sunrise at (954) 773-1896 and ask.
