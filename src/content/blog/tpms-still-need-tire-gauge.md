@@ -70,7 +70,7 @@ TPMS comes from the TREAD Act. NHTSA's standard, FMVSS No. 138, phased it in so 
 - It must come on after no more than **20 minutes** of driving at normal road speeds.
 - A separate malfunction signal has to tell you when the system itself isn't working.
 
-Automakers can set their systems to warn sooner, but 25 percent is the line the law draws. Here's what that looks like on a few common placard numbers:
+Automakers can set their systems to warn sooner, but 25 percent is the line the law draws. The same standard requires owner's manuals to say that TPMS is not a substitute for proper tire maintenance, and that keeping the correct pressure is the driver's responsibility even when the warning hasn't come on. NHTSA's tire page puts it plainly too: these systems only warn when a tire is significantly underinflated. Here's what that looks like on a few common placard numbers:
 
 | Placard pressure (cold) | 25% below | A tire this low can leave the light off |
 |---|---|---|
@@ -99,7 +99,7 @@ NHTSA's report describes two kinds of TPMS:
 - **Direct systems** put a pressure sensor inside each wheel, usually on the valve stem, with a battery-powered transmitter. Some show each tire's pressure on the dash. NHTSA found cars with tire-specific pressure displays had the lowest rate of severe underinflation in the survey.
 - **Indirect systems** don't measure pressure. They use the anti-lock brake wheel-speed sensors and look for a wheel turning faster than the others, a sign its tire is smaller and may be low. NHTSA notes early indirect systems had trouble spotting low tires when several were low at once.
 
-If your car has an indirect system, there's no number anywhere on the dash. The gauge is the only way to know the pressure.
+Indirect systems were rare by the time of the survey, fewer than 3 percent of the vehicles observed, but if your car has one, there's no number anywhere on the dash. The gauge is the only way to know the pressure.
 
 ## Even a pressure readout isn't the whole story
 

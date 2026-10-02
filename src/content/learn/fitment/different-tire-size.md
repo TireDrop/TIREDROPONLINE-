@@ -46,6 +46,7 @@ related:
   - /learn/buying/xl-vs-sl-tires
   - /plus-size-calculator
   - /load-speed-check
+  - /blog/bigger-wheels-myth
 cta:
   label: "Compare two tire sizes"
   href: /plus-size-calculator
