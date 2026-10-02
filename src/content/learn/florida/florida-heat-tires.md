@@ -52,6 +52,7 @@ related:
   - /learn/buying/all-season-vs-all-weather-tires
   - /blog/snowbird-car-sat-all-summer-tires
   - /tire-check
+  - /blog/florida-sun-dry-rot-tires
 cta:
   label: "Check your tires"
   href: /tire-check

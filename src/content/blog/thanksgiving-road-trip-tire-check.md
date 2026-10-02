@@ -55,6 +55,7 @@ related:
   - /blog/hydroplaning-broward-downpours
   - /tire-check
   - /tires
+  - /blog/flat-tire-on-i-95
 cta:
   label: "Do I need tires yet?"
   href: /tire-check
