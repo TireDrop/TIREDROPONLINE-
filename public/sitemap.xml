@@ -277,6 +277,26 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://tiredroponline.com/learn/basics</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/basics/parts-of-a-tire</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/basics/tire-types</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/basics/touring-vs-performance-tires</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://tiredroponline.com/learn/buying</loc>
     <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
@@ -317,8 +337,18 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://tiredroponline.com/learn/damage/flat-tire-nail</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://tiredroponline.com/learn/damage/patch-vs-plug</loc>
     <lastmod>2026-09-30</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/damage/pothole-curb-damage</loc>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -392,6 +422,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://tiredroponline.com/learn/pressure/tpms-sensors</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://tiredroponline.com/learn/sidewall</loc>
     <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
@@ -408,6 +443,16 @@
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/sidewall/load-index</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/sidewall/sidewall-markings</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/sidewall/speed-rating</loc>
     <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>

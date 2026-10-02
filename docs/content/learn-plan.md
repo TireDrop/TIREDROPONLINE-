@@ -2,8 +2,8 @@
 
 Keyword research, hub structure, a 50-guide plan and a 14-demo component list for the LEARN hub on tiredroponline.com, the online store of Extreme Tires in Sunrise, FL.
 
-Status: planning only. Nothing here is written or built yet.
-Prepared: 2026-09-29.
+Status: in production. 30 of the 50 planned guides are live or on preview, plus 5 off-plan Buying/Fitment guides and the 6-guide Tesla hub; see §3.0.
+Prepared: 2026-09-29. Status updated: 2026-10-02.
 
 ---
 
@@ -185,6 +185,31 @@ These are PAA-style questions surfaced in result titles and snippets:
 ---
 
 ## 3. Guide list
+
+### 3.0 Writing status (updated 2026-10-02)
+
+**Written (30 of 50):** G1, G2, G4, G5, G6, G7, G8, G9, G10, G11, G12, G14, G16, G17, G18, G19, G21, G22, G23, G24, G25, G26, G27, G33, G34, G35, G39, G40, G47, G50.
+
+**Written 2026-10-02 by ATLAS (preview/atlas-2026-10-02), 8 guides:**
+
+| # | Path | Notes |
+|---|---|---|
+| G23 | /learn/damage/flat-tire-nail | Was linked from patch-vs-plug and the storm-cleanup blog post |
+| G24 | /learn/damage/pothole-curb-damage | Was linked from tire-bubble-sidewall. Re-angled to "bent rim symptoms" and hidden damage, because the blog post /blog/curb-pothole-tire-alignment-signs already targets "hit a pothole tire damage" |
+| G19 | /learn/pressure/tpms-sensors | Was linked from tpms-light. Battery life (5–10 years) is Pirelli's figure, a tire maker, not a sensor maker |
+| G4 | /learn/basics/touring-vs-performance-tires | Was linked from utqg-ratings. First guide in the Basics hub |
+| G1 | /learn/basics/tire-types | |
+| G2 | /learn/basics/parts-of-a-tire | |
+| G8 | /learn/sidewall/speed-rating | |
+| G10 | /learn/sidewall/sidewall-markings | Doesn't target "what does XL mean", which /learn/buying/xl-vs-sl-tires owns |
+
+**Off-plan guides also live:** /learn/buying/all-season-vs-all-weather-tires, all-terrain-vs-highway-tires, xl-vs-sl-tires; /learn/fitment/bolt-pattern, wheel-offset-backspacing; the /learn/tesla hub (6).
+
+**Skipped on purpose:**
+- **G3 all-season-vs-all-terrain:** near-duplicate of the live /learn/buying/all-terrain-vs-highway-tires (same Florida truck/SUV reader, same "all terrain tires on highway" query). Rework with a new angle or drop.
+- **G29 Florida tire laws:** ranked #9 in §5 but still needs the statute and FAC 14-61.0019 read directly and a legal review (§0.2 item 5).
+
+**Not yet written (20):** G3, G13, G15, G20, G28, G29, G30, G31, G32, G36, G37, G38, G41, G42, G43, G44, G45, G46, G48, G49.
 
 **Column key:**
 - **Vol/Diff** is estimated search volume and ranking difficulty.

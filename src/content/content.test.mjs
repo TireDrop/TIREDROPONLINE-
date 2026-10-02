@@ -649,6 +649,68 @@ test("the Buying and Fitment hubs: eight sourced guides that follow the copy rul
   assert.deepEqual(problems, [], "no content warnings for the new guides");
 });
 
+/* ------------- Learn gap fill C: linked guides + Basics hub ------------- */
+
+test("Learn gap fill C: eight sourced guides that follow the copy rules", () => {
+  const store = loadContent({ checkLinks: true });
+  const paths = [
+    "/learn/damage/flat-tire-nail",
+    "/learn/damage/pothole-curb-damage",
+    "/learn/pressure/tpms-sensors",
+    "/learn/basics/touring-vs-performance-tires",
+    "/learn/basics/tire-types",
+    "/learn/basics/parts-of-a-tire",
+    "/learn/sidewall/speed-rating",
+    "/learn/sidewall/sidewall-markings",
+  ];
+  const routes = new Set(store.contentRoutes());
+  const BANNED = /\b(safe|safer|safely|fine|guaranteed?|OK|A[P]R)\b/i;
+  const all = store.getLearnArticles();
+
+  const basics = readHubs().find((h) => h.slug === "basics");
+  assert.ok(routes.has("/learn/basics"), "/learn/basics is published");
+  assert.ok(basics.links.length >= 2, "basics: hub links to tools");
+
+  for (const p of paths) {
+    const a = all.find((o) => o.path === p);
+    assert.ok(a, `${p} is published`);
+    const text = [
+      a.title,
+      a.description,
+      a.body,
+      ...a.takeaways,
+      ...a.faq.flatMap((f) => [f.q, f.a]),
+    ].join("\n");
+    assert.ok(!BANNED.test(text), `${p}: "${text.match(BANNED)?.[0]}"`);
+    assert.doesNotMatch(text, /\$\d|disc[o]unt|coup[o]n|reb[a]te|% off|\bdeals?\b|\bsale\b/i, p);
+    assert.doesNotMatch(text, /within \d+ (minutes|hours|days)|same[- ]day/i, p);
+    assert.ok(a.title.length <= 60, `${p}: title ${a.title.length}`);
+    assert.ok(a.description.length <= 155, `${p}: description`);
+    assert.ok(a.takeaways.length >= 4, `${p}: takeaways`);
+    assert.ok(a.faq.length >= 3, `${p}: faq`);
+    assert.ok(a.sources.length >= 4, `${p}: sources`);
+    for (const s of a.sources) {
+      assert.ok(isResourceHost(hostOf(s.url)), `${p}: source ${s.url}`);
+    }
+    // Installs are South Florida only; shipping is the 48 states + DC.
+    assert.match(a.body, /Miami-Dade, Broward and Palm Beach/, `${p}: install area`);
+    assert.match(a.body, /48 (contiguous )?states and DC/, `${p}: shipping area`);
+    const words = a.body
+      .replace(/\[\[demo:[^\]]*\]\]/g, " ")
+      .split(/\s+/)
+      .filter((w) => /[a-z0-9]/i.test(w)).length;
+    assert.ok(words >= 850 && words <= 1500, `${p}: ${words} words`);
+    const inbound = all
+      .filter((o) => o.path !== p)
+      .some((o) => o.body.includes(`](${p})`) || o.related.includes(p));
+    assert.ok(inbound, `${p}: no other guide links to it`);
+  }
+  const problems = store.problems.filter((pr) =>
+    paths.some((p) => pr.file === `.${p.replace(/^\/learn/, "/learn")}.md` || pr.message.includes(p)),
+  );
+  assert.deepEqual(problems, [], "no content warnings for or about the new guides");
+});
+
 /* ------------------------- blog batch 3 ------------------------- */
 
 test("blog batch 3: ten posts follow the house rules and the post format", () => {
