@@ -386,25 +386,24 @@ for (const url of ["/tires?size=225/45R18", "/tire-size?size=225/45R17", "/no-su
     }))
     .filter((m) => m.text);
   const { context, page, errors } = await newPage();
+  // The scripts the page requested, read back from the server here: the
+  // browser's copy of a preloaded module's body is not reliably readable.
   let fetched = new Set();
-  const reading = [];
-  page.on("response", (res) => {
-    const url = new URL(res.url());
-    if (url.host !== local || !url.pathname.endsWith(".js")) return;
-    reading.push(
-      res
-        .text()
-        .catch(() => "")
-        .then((text) => {
-          for (const m of markers)
-            if (text.includes(m.text)) fetched.add(m.path);
-        }),
-    );
+  const requested = [];
+  const texts = new Map();
+  page.on("request", (req) => {
+    const url = new URL(req.url());
+    if (url.host === local && url.pathname.endsWith(".js"))
+      requested.push(url.href);
   });
   const settle = async () => {
     await page.waitForFunction(isMounted);
     await page.waitForLoadState("networkidle");
-    await Promise.all(reading.splice(0));
+    for (const href of requested.splice(0)) {
+      if (!texts.has(href)) texts.set(href, await (await fetch(href)).text());
+      for (const m of markers)
+        if (texts.get(href).includes(m.text)) fetched.add(m.path);
+    }
   };
 
   const only = (path) => fetched.size === 1 && fetched.has(path);
@@ -418,6 +417,7 @@ for (const url of ["/tires?size=225/45R18", "/tire-size?size=225/45R17", "/no-su
 
   for (const route of ["/blog", "/learn", "/learn/buying"]) {
     fetched = new Set();
+    requested.length = 0;
     await page.goto(BASE + route, { waitUntil: "load" });
     await settle();
     (fetched.size === 0 ? ok : bad)(`${route} downloaded ${list()}`);
@@ -425,6 +425,7 @@ for (const url of ["/tires?size=225/45R18", "/tire-size?size=225/45R17", "/no-su
 
   const from = "/learn/buying/run-flat-tires";
   fetched = new Set();
+  requested.length = 0;
   errors.length = 0;
   await page.goto(BASE + from, { waitUntil: "load" });
   await settle();
@@ -444,6 +445,7 @@ for (const url of ["/tires?size=225/45R18", "/tire-size?size=225/45R17", "/no-su
   if (!to) bad(`${from}: no related article link to follow`);
   else {
     fetched = new Set();
+    requested.length = 0;
     await page.locator(`section[aria-labelledby="related"] a[href="${to}"]`).first().click();
     await page.waitForURL(BASE + to);
     await page.waitForFunction(
@@ -452,8 +454,7 @@ for (const url of ["/tires?size=225/45R18", "/tire-size?size=225/45R17", "/no-su
         (document.querySelector(".prose-article")?.textContent.length ?? 0) > 500,
       to,
     );
-    await page.waitForLoadState("networkidle");
-    await Promise.all(reading.splice(0));
+    await settle();
     const same = await page.evaluate(() => window.__sameDocument === true);
     (same && only(to) && errors.length === 0 ? ok : bad)(
       `client nav ${from} -> ${to}: same document ${same}, body rendered, ` +
