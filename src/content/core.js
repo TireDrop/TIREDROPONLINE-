@@ -1,63 +1,47 @@
 /**
- * The content system's pure core: frontmatter parsing, validation, the demo
- * marker split, Markdown rendering and the route list.
+ * The content system's parser: frontmatter parsing, validation, the demo
+ * marker split and Markdown rendering. The queries over the parsed articles
+ * (hubs, lists, routes, lastmod) live in ./store.js.
  *
- * Nothing in here touches the file system or Vite. Two thin loaders feed it:
- *   - src/content/index.js, in the app, reads every .md with import.meta.glob;
- *   - src/content/node.js, in Node (sitemap, prerender, tests), reads them
- *     with fs.
- * Both hand the same `{ "./learn/<hub>/<slug>.md": raw }` map to
- * buildContent(), so the site and the sitemap cannot disagree about which
- * articles exist, what their paths are or when they last changed.
+ * Nothing in here touches the file system or Vite, and none of it reaches
+ * the browser: it runs in Node only.
+ *   - src/content/node.js (sitemap, prerender, tests) reads every .md with
+ *     fs and hands it to buildContent();
+ *   - the tiredrop-content plugin in vite.config.js uses that same store to
+ *     give the app article summaries and one pre-rendered chunk per article
+ *     (src/content/index.js, src/content/details.js).
+ * So the site and the sitemap cannot disagree about which articles exist,
+ * what their paths are or when they last changed.
  *
  * The file and frontmatter contract lives in docs/prompts/blog-learn-build.md
  * and is summarised on buildContent() below.
  */
 import { CORE_SCHEMA, load as loadYaml } from "js-yaml";
 import { Marked } from "marked";
-import { TOOL_PAGE_ALIASES } from "../components/demos/toolPages.js";
+import {
+  AUTHOR,
+  BLOG_CATEGORIES,
+  DEFAULT_CTA,
+  LIST_FIELDS,
+  asString,
+  canonicalSitePath,
+  createStore,
+  isContentPath,
+  isExternalUrl,
+  normalizeHubs,
+} from "./store.js";
 
-export const ORIGIN = "https://tiredroponline.com";
-
-/** The byline on every article. Fixed: no personal names, no credentials. */
-export const AUTHOR = "TireDrop Team, Extreme Tires, Sunrise FL";
-
-/** Used when an article has no `cta` of its own. */
-export const DEFAULT_CTA = { label: "Shop tires", href: "/tires" };
-
-/**
- * Blog categories. The plan (docs/content/blog-plan.md) names them by code
- * (HUR, WX, ...); frontmatter may use the code, the slug or the label, in any
- * case, and they all land on the same category. Anything else is shown as
- * written rather than dropped.
- */
-export const BLOG_CATEGORIES = [
-  { slug: "hurricane", label: "Hurricanes & Flooding", aliases: ["hur"] },
-  { slug: "weather", label: "Rain, Heat & Weather", aliases: ["wx"] },
-  { slug: "travel", label: "Travel & Roadside", aliases: ["trv"] },
-  { slug: "local", label: "Local Buying & Service", aliases: ["loc"] },
-  { slug: "buying", label: "Buying & Price", aliases: ["buy"] },
-  { slug: "myths", label: "Myth-Busting", aliases: ["myth"] },
-  { slug: "vehicles", label: "Vehicle Guides", aliases: ["veh", "vehicle"] },
-  { slug: "ev-fleet", label: "EV, Truck & Fleet", aliases: ["seg"] },
-];
-
-/**
- * Old or planned paths that are not routes, mapped to the page that is.
- * The plans link /tools/tire-check and friends; the tools live at the root.
- */
-const PATH_ALIASES = {
-  "/tools/tire-size": "/tire-size",
-  "/tools/tire-check": "/tire-check",
-  "/tools/tread-gauge": "/tire-check",
-  "/tools/find-my-tires": "/find-my-tires",
-  "/tools/tire-size-finder": "/tire-size-finder",
-  // The demo tool pages: /tools/<demo id or planned alias> -> their page.
-  ...Object.fromEntries(
-    Object.entries(TOOL_PAGE_ALIASES).map(([a, path]) => [`/tools/${a}`, path]),
-  ),
-  "/tire-care": "/learn",
-};
+export {
+  AUTHOR,
+  BLOG_CATEGORIES,
+  DEFAULT_CTA,
+  LIST_FIELDS,
+  ORIGIN,
+  articleSummary,
+  canonicalSitePath,
+  createStore,
+  isExternalUrl,
+} from "./store.js";
 
 const TITLE_MAX = 60;
 const DESCRIPTION_MAX = 155;
@@ -100,37 +84,6 @@ function isValidDate(text) {
   if (!DATE.test(text)) return false;
   const d = new Date(`${text}T00:00:00Z`);
   return !Number.isNaN(d.getTime()) && d.toISOString().startsWith(text);
-}
-
-/** YAML may hand back a number or a Date for an unquoted value; keep strings. */
-function asString(value) {
-  if (value == null) return "";
-  if (value instanceof Date) return value.toISOString().slice(0, 10);
-  return String(value).trim();
-}
-
-/**
- * Canonical in-site path for a link. Drops our own origin, maps aliases
- * (/tools/tire-check -> /tire-check) and trims a trailing slash. Returns null
- * for anything that is not an in-site path.
- */
-export function canonicalSitePath(href) {
-  let text = String(href ?? "").trim();
-  if (text.startsWith(ORIGIN)) text = text.slice(ORIGIN.length) || "/";
-  if (text.startsWith("//")) return null;
-  if (!text.startsWith("/")) return null;
-  const cut = text.search(/[?#]/);
-  const pathPart = cut === -1 ? text : text.slice(0, cut);
-  const rest = cut === -1 ? "" : text.slice(cut);
-  let path = pathPart.length > 1 ? pathPart.replace(/\/+$/, "") : pathPart;
-  path = PATH_ALIASES[path] ?? path;
-  return path + rest;
-}
-
-export function isExternalUrl(href) {
-  return (
-    /^https?:\/\//i.test(String(href ?? "")) && !String(href).startsWith(ORIGIN)
-  );
 }
 
 /** Maps a frontmatter category to `{ slug, label }`, or null when missing. */
@@ -291,9 +244,6 @@ function renderMarkdown(text) {
     return `<div class="table-scroll" tabindex="0" role="region" aria-label="${label}"><table>${body}</table></div>`;
   });
 }
-
-const CONTENT_PATH = /^\/(learn|blog)(\/|$)/;
-const isContentPath = (path) => CONTENT_PATH.test(path);
 
 /**
  * Renders an article body into `{ segments, toc, demos }`:
@@ -508,15 +458,24 @@ function toArticle(key, raw, hubSlugs) {
   return { article, problems };
 }
 
-const byLearnOrder = (hubOrder) => (a, b) =>
-  (hubOrder.get(a.hub) ?? 99) - (hubOrder.get(b.hub) ?? 99) ||
-  a.date.localeCompare(b.date) ||
-  a.title.localeCompare(b.title);
-
-const byNewest = (a, b) =>
-  b.date.localeCompare(a.date) || a.title.localeCompare(b.title);
-
-const maxDate = (dates) => dates.filter(Boolean).sort().at(-1) ?? null;
+/**
+ * What one article page needs on top of its summary: the rest of the
+ * frontmatter (minus the raw body) and the rendered body
+ * (`segments`, `toc`, `demos`). `rendered` is renderBody()'s result.
+ */
+export function articleDetail(article, rendered) {
+  const detail = {};
+  for (const [k, v] of Object.entries(article))
+    if (k !== "body" && !LIST_FIELDS.includes(k)) detail[k] = v;
+  return {
+    ...detail,
+    rendered: {
+      segments: rendered.segments,
+      toc: rendered.toc,
+      demos: rendered.demos,
+    },
+  };
+}
 
 /**
  * Builds the content store.
@@ -535,27 +494,7 @@ export function buildContent({
   includeDrafts = false,
   checkLinks = false,
 }) {
-  const hubList = [...(hubs ?? [])]
-    .map((h) => ({
-      slug: asString(h.slug),
-      title: asString(h.title),
-      description: asString(h.description),
-      order: Number(h.order) || 0,
-      // Optional, shown on the hub page only: a longer intro, a one-line
-      // note (e.g. a no-affiliation disclaimer) and in-site links.
-      intro: asString(h.intro) || null,
-      note: asString(h.note) || null,
-      links: (Array.isArray(h.links) ? h.links : [])
-        .map((l) => ({
-          label: asString(l?.label),
-          text: asString(l?.text) || null,
-          href: canonicalSitePath(asString(l?.href)),
-        }))
-        .filter((l) => l.label && l.href),
-    }))
-    .sort((a, b) => a.order - b.order);
-  const hubSlugs = new Set(hubList.map((h) => h.slug));
-  const hubOrder = new Map(hubList.map((h) => [h.slug, h.order]));
+  const hubSlugs = new Set(normalizeHubs(hubs).map((h) => h.slug));
 
   const problems = [];
   const all = [];
@@ -578,36 +517,13 @@ export function buildContent({
     all.push(result.article);
   }
 
-  const visible = all.filter((a) => includeDrafts || a.public);
-  const published = all.filter((a) => a.public);
-
-  const learn = visible
-    .filter((a) => a.section === "learn")
-    .sort(byLearnOrder(hubOrder));
-  const blog = visible.filter((a) => a.section === "blog").sort(byNewest);
-  const byPath = new Map(visible.map((a) => [a.path, a]));
-  const liveHubPaths = new Set(learn.map((a) => `/learn/${a.hub}`));
-
-  /**
-   * Whether an in-site Learn or Blog path leads somewhere in this build:
-   * /learn, /blog, a hub with a visible guide, or a visible article. Other
-   * paths are not this system's to judge and always count as live.
-   */
-  const isLive = (href) => {
-    const path = (canonicalSitePath(href) ?? href).replace(/[?#].*$/, "");
-    if (!isContentPath(path)) return true;
-    return (
-      path === "/learn" ||
-      path === "/blog" ||
-      liveHubPaths.has(path) ||
-      byPath.has(path)
-    );
-  };
+  const store = createStore({ articles: all, hubs, includeDrafts });
+  const { isLive } = store;
 
   // In Node (sitemap, tests) every published body is checked, so a link to
   // an unwritten article shows up as a build warning.
   if (checkLinks) {
-    for (const a of visible) {
+    for (const a of all.filter((x) => includeDrafts || x.public)) {
       for (const dead of renderBody(a.body, { isLive }).deadLinks) {
         problems.push({
           level: "warn",
@@ -625,111 +541,11 @@ export function buildContent({
     }
   }
 
-  // Routes and lastmod: published articles only, whatever the build shows.
-  const pubLearn = published
-    .filter((a) => a.section === "learn")
-    .sort(byLearnOrder(hubOrder));
-  const pubBlog = published.filter((a) => a.section === "blog").sort(byNewest);
-  const lastmod = new Map();
-  for (const a of published) lastmod.set(a.path, a.updated);
-  const liveHubs = hubList.filter((h) =>
-    pubLearn.some((a) => a.hub === h.slug),
-  );
-  for (const h of liveHubs)
-    lastmod.set(
-      `/learn/${h.slug}`,
-      maxDate(pubLearn.filter((a) => a.hub === h.slug).map((a) => a.updated)),
-    );
-  lastmod.set("/learn", maxDate(pubLearn.map((a) => a.updated)));
-  lastmod.set("/blog", maxDate(pubBlog.map((a) => a.updated)));
-
-  const routes = [
-    "/learn",
-    ...liveHubs.map((h) => `/learn/${h.slug}`),
-    ...pubLearn.map((a) => a.path),
-    "/blog",
-    ...pubBlog.map((a) => a.path),
-  ];
-
   const rendered = new Map();
 
-  /** Hubs in order, each with `path`, `count` (visible articles) and `lastmod`. */
-  const getLearnHubs = () =>
-    hubList.map((h) => {
-      const articles = learn.filter((a) => a.hub === h.slug);
-      return {
-        ...h,
-        path: `/learn/${h.slug}`,
-        count: articles.length,
-        lastmod: maxDate(articles.map((a) => a.updated)),
-      };
-    });
-
   return {
+    ...store,
     problems,
-
-    getLearnHubs,
-
-    getHub(slug) {
-      return getLearnHubs().find((h) => h.slug === slug) ?? null;
-    },
-
-    getLearnArticles({ hub } = {}) {
-      return hub ? learn.filter((a) => a.hub === hub) : [...learn];
-    },
-
-    /** `getArticle("learn", "tread", "tread-depth")`, `getArticle("blog", null, slug)`. */
-    getArticle(section, hub, slug) {
-      const path =
-        section === "learn" ? `/learn/${hub}/${slug}` : `/blog/${slug}`;
-      return byPath.get(path) ?? null;
-    },
-
-    isLive,
-
-    getArticleByPath(path) {
-      return byPath.get(canonicalSitePath(path) ?? path) ?? null;
-    },
-
-    getBlogPosts({ category } = {}) {
-      return category
-        ? blog.filter((a) => a.category?.slug === category)
-        : [...blog];
-    },
-
-    /** Categories that have at least one visible post, with counts. */
-    getBlogCategories() {
-      const counts = new Map();
-      for (const post of blog) {
-        if (!post.category) continue;
-        const entry = counts.get(post.category.slug) ?? {
-          ...post.category,
-          count: 0,
-        };
-        entry.count += 1;
-        counts.set(entry.slug, entry);
-      }
-      const order = BLOG_CATEGORIES.map((c) => c.slug);
-      return [...counts.values()].sort(
-        (a, b) =>
-          (order.indexOf(a.slug) + 1 || 99) -
-            (order.indexOf(b.slug) + 1 || 99) || a.label.localeCompare(b.label),
-      );
-    },
-
-    /**
-     * Every public content path: /learn, each hub with a published guide,
-     * each published guide, /blog and each published post. A hub with no
-     * published guide is a page with nothing on it, so it is left out.
-     */
-    contentRoutes() {
-      return [...routes];
-    },
-
-    /** The YYYY-MM-DD a content path last changed, or null. */
-    contentLastmod(path) {
-      return lastmod.get(path) ?? null;
-    },
 
     /** Rendered body for an article (cached). See renderBody(). */
     renderArticle(article) {

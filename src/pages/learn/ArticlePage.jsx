@@ -19,8 +19,8 @@ import {
   getBlogPosts,
   getHub,
   getLearnArticles,
-  renderArticle,
 } from "../../content/index.js";
+import { ArticleDetail } from "../../content/details.js";
 import NotFoundPage from "../NotFoundPage.jsx";
 
 /** Up to four others from the same hub (or category), for "Related reading". */
@@ -40,15 +40,31 @@ function siblings(article) {
  */
 export default function ArticlePage({ section }) {
   const { hub: hubSlug, slug } = useParams();
-  const article = getArticle(
+  const summary = getArticle(
     section,
     section === "learn" ? hubSlug : null,
     slug,
   );
 
-  if (!article) return <NotFoundPage />;
+  if (!summary) return <NotFoundPage />;
 
-  const rendered = renderArticle(article);
+  // The list fields come with every page; the body and the rest of the
+  // frontmatter load here, from this article's own chunk only.
+  return (
+    <ArticleDetail article={summary}>
+      {(detail) =>
+        detail ? (
+          <ArticleView article={{ ...summary, ...detail }} />
+        ) : (
+          <NotFoundPage />
+        )
+      }
+    </ArticleDetail>
+  );
+}
+
+function ArticleView({ article }) {
+  const { rendered } = article;
 
   // Visible breadcrumbs, and the BreadcrumbList pages between Home and this
   // one (Seo adds both ends).

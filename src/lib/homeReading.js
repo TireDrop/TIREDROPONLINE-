@@ -3,8 +3,8 @@
  * Node at build time and served to the browser as the small
  * "virtual:home-reading" module (vite.config.js). The home page is in the
  * main bundle, so it must never import src/content/index.js, which carries
- * every article's Markdown; this hands it titles, paths and reading times
- * only.
+ * a summary of every article; this hands it titles, paths and reading times
+ * for the few it shows only.
  *
  * Picks the most recently updated published Learn guides (one per hub, so the
  * row shows range) and blog posts (one per category where it can), then

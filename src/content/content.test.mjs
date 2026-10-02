@@ -5,9 +5,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
+import { readFileSync } from "node:fs";
 import {
   AUTHOR,
+  LIST_FIELDS,
+  articleDetail,
+  articleSummary,
   buildContent,
+  createStore,
   canonicalSitePath,
   locateFile,
   normalizeCategory,
@@ -641,3 +646,93 @@ test("the Buying and Fitment hubs: eight sourced guides that follow the copy rul
   );
   assert.deepEqual(problems, [], "no content warnings for the new guides");
 });
+
+/* --------------- the browser's split: summaries + details --------------- */
+
+// The app gets articleSummary()s in one module and articleDetail() per
+// article in its own chunk (vite.config.js); this is what keeps one article
+// page from downloading every article's text.
+function browserStore(full, includeDrafts) {
+  const visible = [...full.getLearnArticles(), ...full.getBlogPosts()];
+  return createStore({
+    articles: visible.map(articleSummary),
+    hubs: HUBS,
+    includeDrafts,
+  });
+}
+
+for (const includeDrafts of [false, true]) {
+  test(`a store of summaries answers like the full store (drafts ${includeDrafts ? "shown" : "hidden"})`, () => {
+    const full = buildContent({ files: FILES, hubs: HUBS, includeDrafts });
+    const lite = browserStore(full, includeDrafts);
+    const paths = (list) => list.map((a) => a.path);
+
+    assert.deepEqual(lite.contentRoutes(), full.contentRoutes());
+    for (const route of full.contentRoutes())
+      assert.equal(lite.contentLastmod(route), full.contentLastmod(route), route);
+    assert.deepEqual(lite.getLearnHubs(), full.getLearnHubs());
+    assert.deepEqual(lite.getBlogCategories(), full.getBlogCategories());
+    assert.deepEqual(paths(lite.getLearnArticles()), paths(full.getLearnArticles()));
+    assert.deepEqual(paths(lite.getBlogPosts()), paths(full.getBlogPosts()));
+    for (const path of [
+      "/learn",
+      "/learn/tread",
+      "/learn/basics",
+      "/learn/tread/tread-depth",
+      "/learn/basics/tire-types",
+      "/blog/hurricane-check",
+      "/blog/sample-post",
+      "/blog/nope",
+      "/tires",
+    ])
+      assert.equal(lite.isLive(path), full.isLive(path), path);
+  });
+}
+
+test("a summary holds list fields only; summary + detail rebuild the article", () => {
+  const full = buildContent({ files: FILES, hubs: HUBS, includeDrafts: true });
+  for (const article of [...full.getLearnArticles(), ...full.getBlogPosts()]) {
+    const summary = articleSummary(article);
+    assert.deepEqual(Object.keys(summary), LIST_FIELDS);
+    for (const heavy of ["body", "faq", "takeaways", "sources"])
+      assert.ok(!(heavy in summary), `${article.path}: summary has ${heavy}`);
+
+    const rendered = full.renderArticle(article);
+    const { rendered: shipped, ...rest } = articleDetail(article, rendered);
+    assert.ok(!("body" in rest), `${article.path}: detail ships the Markdown`);
+    const { body, ...withoutBody } = article;
+    assert.ok(body);
+    assert.deepEqual({ ...summary, ...rest }, withoutBody);
+    assert.deepEqual(shipped, {
+      segments: rendered.segments,
+      toc: rendered.toc,
+      demos: rendered.demos,
+    });
+  }
+});
+
+test("every real article splits cleanly, and the summaries carry no body text", () => {
+  const full = loadContent();
+  const articles = [...full.getLearnArticles(), ...full.getBlogPosts()];
+  assert.ok(articles.length > 0);
+  const summaries = JSON.stringify(articles.map(articleSummary));
+  for (const a of articles) {
+    const detail = articleDetail(a, full.renderArticle(a));
+    assert.ok(detail.rendered.segments.length > 0, `${a.path}: empty body`);
+    // A line from deep in the body never reaches the summaries module.
+    const line = a.body.split("\n").find((l) => l.trim().length > 60);
+    if (line) assert.ok(!summaries.includes(line.trim()), `${a.path}: body leaked`);
+  }
+});
+
+test("the browser-side modules never import the parsers", () => {
+  for (const file of ["store.js", "index.js", "details.js"]) {
+    const src = readFileSync(new URL(`./${file}`, import.meta.url), "utf8");
+    const imports = [...src.matchAll(/^import[\s\S]*?from\s+"([^"]+)"/gm)].map(
+      (m) => m[1],
+    );
+    for (const banned of ["js-yaml", "marked", "./core.js", "./node.js"])
+      assert.ok(!imports.includes(banned), `${file} imports ${banned}`);
+  }
+});
+
