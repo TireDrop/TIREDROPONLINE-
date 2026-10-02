@@ -25,9 +25,11 @@
     "check:scanner": "node scripts/scanner-check.mjs",
     "check:home": "node scripts/home-check.mjs",
     "check:footer": "node scripts/footer-check.mjs",
+    "check:sources": "node scripts/sources-check.mjs",
     "test:api": "node --test \"api/_lib/*.test.mjs\"",
     "test:content": "node --test \"src/content/*.test.mjs\"",
     "test:lib": "node --test \"src/lib/*.test.mjs\"",
+    "test:sources": "node --test src/sourcesRule.test.mjs",
     "check:translate": "node scripts/translate-check.mjs",
     "test:data": "node --test \"src/data/*.test.mjs\"",
     "test:fitment": "node --test \"src/data/fitment*.test.mjs\""
