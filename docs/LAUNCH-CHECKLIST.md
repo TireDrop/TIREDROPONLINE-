@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-01 (SHIPPED: orders carry vehicle, sizes, size source and a server-checked Fitment (attributes + tags; Flow = admin prompt 26); nationwide hub + 7 pilot state pages, all 40 facts checked against their official sources (13 corrected); one-camera Tire Size Finder scanner + hero Scan button (all 18 gates pass); store-wide search with typeahead + /search results (1214d45, all 17 gates pass); remember vehicle + shareable /tires filters + full NHTSA year/make/model lists with a searchable Model box, cached /api/vehicles (preview/remember 519e321, all 16 gates pass); fitment no longer blocks on a model-level guess, door-jamb size entry front/rear (dee5157); Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
+_Last updated: 2026-10-02 (PREVIEW: home page redesign, flow + scroll transitions on preview/home 037b6d6 for Justin to review; SHIPPED: orders carry vehicle, sizes, size source and a server-checked Fitment (attributes + tags; Flow = admin prompt 26); nationwide hub + 7 pilot state pages, all 40 facts checked against their official sources (13 corrected); one-camera Tire Size Finder scanner + hero Scan button (all 18 gates pass); store-wide search with typeahead + /search results (1214d45, all 17 gates pass); remember vehicle + shareable /tires filters + full NHTSA year/make/model lists with a searchable Model box, cached /api/vehicles (preview/remember 519e321, all 16 gates pass); fitment no longer blocks on a model-level guess, door-jamb size entry front/rear (dee5157); Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -98,6 +98,7 @@ _Last updated: 2026-10-01 (SHIPPED: orders carry vehicle, sizes, size source and
 - [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search)
 
 ## Big upgrades (Claude)
+- [ ] Home page redesign: flow + scroll transitions (preview/home 037b6d6) → Justin reviews → ship
 - [x] ~~Prerender pages for Google (covered by Blog + Learn Phase 0)~~ (be6a2a2)
 - [ ] Hero finder goes straight to results
 - [x] ~~Remember vehicle (no pop-up after first entry) + shareable /tires URL filters~~ (preview/remember 9be62b0, shipped to main 2026-10-01)
