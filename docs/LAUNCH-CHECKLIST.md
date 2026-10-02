@@ -149,7 +149,7 @@ _Last updated: 2026-10-02 (checklist tidy: every shipped item struck through; Ch
   - [ ] Two Bridgestone quote attributions (rear-axle placement, sipes/silica) were search-verified only: confirm on the source pages (prompt B in `docs/prompts/2026-10-02-verify-and-index.md`)
 - [x] ~~Learn: Buying + Fitment hubs, 8 guides~~ (2674d06, shipped to main 2026-10-02)
   - [ ] Facts were search-verified only (source sites blocked): ply ratings, XL pressures, run-flat limits; wheel guides lean on retailer sources. Prompt B in `docs/prompts/2026-10-02-verify-and-index.md` checks the ply ratings and XL pressures; run-flat limits and the wheel guides still need a pass
-- [ ] Search Console: request indexing for the 17 URLs shipped 2026-10-02 + the home page (prompt A in `docs/prompts/2026-10-02-verify-and-index.md`; branch preview/checklist-tidy)
+- [ ] Search Console: request indexing for the 17 URLs shipped 2026-10-02 + the home page (prompt A in `docs/prompts/2026-10-02-verify-and-index.md`; preview/checklist-tidy 788d1f4)
 
 ## ATD and business (Justin)
 - [ ] Submit the ATD connectivity form
