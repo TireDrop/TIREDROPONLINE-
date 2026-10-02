@@ -56,6 +56,7 @@ related:
   - /tire-check
   - /tires
   - /blog/flat-tire-on-i-95
+  - /blog/turnpike-orlando-drive-tires
 cta:
   label: "Do I need tires yet?"
   href: /tire-check
