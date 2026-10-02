@@ -5,11 +5,10 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (preview/resources-only: every competitor citation/link replaced with maker, AAA or government sources, waiting on Justin's review; earlier: SHIPPED in one release: Learn gap fill A (5 guides) + B (4 research guides), competitor citations swapped for maker sources, CRO quick wins (hero to results, phone cart Checkout, install price shown, 48 states + DC on cards), article bundle split (article pages download 40–46% less JS); earlier today: compact mobile footer, checklist tidy + Chrome prompts, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
-_Last updated: 2026-10-02 (check:sources gate built on preview/check-sources: competitor links/mentions fail the build, enabled with preview/resources-only; SHIPPED in one release: Learn gap fill A (5 guides) + B (4 research guides), competitor citations swapped for maker sources, CRO quick wins (hero to results, phone cart Checkout, install price shown, 48 states + DC on cards), article bundle split (article pages download 40–46% less JS); earlier today: compact mobile footer, checklist tidy + Chrome prompts, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
+_Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
 
 ## Site fixes (Claude)
-- [ ] Resources only: every competitor citation/link replaced with maker or government sources (preview/resources-only `7754330`) → Justin reviews → ship
+- [x] ~~Resources only: every competitor citation/link replaced with maker, AAA or government sources~~ (`7754330`, shipped to main 2026-10-02)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
 - [x] ~~Privacy policy: newsletter, form storage in Shopify, GA disclosed~~ (`a6a5b0c`)
 - [x] ~~Docs: "no cookies / no analytics" claims fixed~~ (`cef543a`)
@@ -37,7 +36,8 @@ _Last updated: 2026-10-02 (check:sources gate built on preview/check-sources: co
 - [x] ~~Spanish tab labels overflow the home finder on phones (SearchPanel whitespace-nowrap) → let tabs wrap below md~~ (c05e3ac)
 - [x] ~~Compact mobile-first footer: contact row first, collapsible link groups, 62% shorter on phones (1621 → 608px), check:footer guards it~~ (a18b709, shipped to main 2026-10-02)
   - [ ] Footer link label "Tires Shipped Nationwide" → say 48 states + DC (Justin picks the wording)
-- [ ] check:sources gate: competitor links/mentions fail the build (preview/check-sources 0b1172b) → ships with preview/resources-only
+- [x] ~~check:sources gate: competitor links, mentions and meta tags fail the build; required in every gate run~~ (`0b1172b`, shipped to main 2026-10-02)
+  - [x] ~~Source decisions: Wheel Pros / KMC (wheel makers) and legalclarity.org kept as resources; cleanairforce.com (Georgia emissions program) added as a resource~~ (2026-10-02)
 
 ## Admin (Justin)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
@@ -158,7 +158,7 @@ _Last updated: 2026-10-02 (check:sources gate built on preview/check-sources: co
 - [x] ~~Learn: Buying + Fitment hubs, 8 guides~~ (2674d06, shipped to main 2026-10-02)
   - [ ] Facts were search-verified only (source sites blocked): ply ratings, XL pressures, run-flat limits; wheel guides lean on retailer sources. Prompt B in `docs/prompts/2026-10-02-verify-and-index.md` checks the ply ratings and XL pressures; run-flat limits and the wheel guides still need a pass
 - [x] ~~Learn sources: competitor retailer citations replaced with maker sources (7 guides)~~ (shipped to main 2026-10-02, release preview/release-2026-10-02)
-  - [ ] All new sources are search-snippet only (maker sites blocked here): confirm the quoted lines with the Chrome prompt in the ATLAS report. Demo source lines (rotation, tread gauge, pressure-temp, plus-size) still cite Tire Rack / Discount Tire in `src/components/demos/sources.js`
+  - [ ] All new sources are search-snippet only (maker sites blocked here): confirm the quoted lines with the Chrome prompt in the ATLAS report. Demo source lines now cite Bridgestone, AAA, Goodyear and BFGoodrich (`7754330`)
 - [ ] Search Console: request indexing for the 17 URLs shipped 2026-10-02 + the home page (prompt A in `docs/prompts/2026-10-02-verify-and-index.md`; preview/checklist-tidy 788d1f4)
 - [x] Blog batch 2: 7 buying-decision + myth posts (f776fc1), shipped to main 2026-10-02. Two Bridgestone quote attributions (rear-axle placement, sipes/silica) were search-verified only: confirm on the source pages
 - [x] Learn: Buying + Fitment hubs, 8 guides (2674d06), shipped to main 2026-10-02. Facts were search-verified only (source sites blocked): ply ratings, XL pressures, run-flat limits; wheel guides lean on retailer sources

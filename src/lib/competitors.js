@@ -94,6 +94,7 @@ export const RESOURCE_DOMAINS = [
   // Government: federal and state (.gov), plus state sites off .gov
   /(^|\.)gov$/,
   "floridadisaster.org",
+  "cleanairforce.com", // Georgia's state vehicle-emissions program
   // Safety, standards and trade bodies, consumer and motoring groups
   "ustires.org",
   "tireindustry.org",
