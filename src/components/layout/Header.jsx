@@ -59,6 +59,9 @@ function UtilityBar() {
 
 function DesktopNav() {
   const [openIdx, setOpenIdx] = useState(null);
+  // Set while Escape hands focus back to a menu's own link, so that focus
+  // does not reopen the menu it just closed.
+  const escaping = useRef(false);
 
   return (
     <nav aria-label="Main" className="hidden lg:block">
@@ -71,6 +74,20 @@ function DesktopNav() {
               className="relative"
               onMouseEnter={() => hasMenu && setOpenIdx(i)}
               onMouseLeave={() => hasMenu && setOpenIdx(null)}
+              // Focus opens a menu, so focus leaving it has to close it:
+              // otherwise tabbing on past the last item leaves it hanging
+              // over the page. Escape closes it and returns to its link.
+              onBlur={(e) => {
+                if (hasMenu && !e.currentTarget.contains(e.relatedTarget))
+                  setOpenIdx((open) => (open === i ? null : open));
+              }}
+              onKeyDown={(e) => {
+                if (e.key !== "Escape" || !hasMenu || openIdx !== i) return;
+                setOpenIdx(null);
+                escaping.current = true;
+                e.currentTarget.querySelector("a")?.focus({ preventScroll: true });
+                escaping.current = false;
+              }}
             >
               <NavLink
                 to={item.to}
@@ -82,7 +99,7 @@ function DesktopNav() {
                       : "text-ink after:bg-transparent hover:text-drop hover:after:bg-drop/30"
                   }`
                 }
-                onFocus={() => hasMenu && setOpenIdx(i)}
+                onFocus={() => hasMenu && !escaping.current && setOpenIdx(i)}
                 aria-expanded={hasMenu ? openIdx === i : undefined}
               >
                 {item.label}
