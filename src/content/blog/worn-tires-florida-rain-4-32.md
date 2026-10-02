@@ -73,7 +73,7 @@ In 2018, AAA worked with the Automobile Club of Southern California's Automotive
 
 The results, as AAA reported them:
 
-| Measure | New tires vs tires worn to 4/32 |
+| Measure | Worn to 4/32 vs new |
 |---|---|
 | Wet stopping distance, passenger car | 87 feet longer on average |
 | Wet stopping distance, light truck | 86 feet longer on average |
