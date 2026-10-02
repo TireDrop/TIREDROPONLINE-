@@ -123,7 +123,7 @@ Once the new tires are on, two Tesla rules keep them lasting.
 
 [[demo:rotation-pattern]]
 
-**Replacing in pairs.** Tesla says to replace all four tires at once when a set is worn. If a tire has to be replaced early, say after a sidewall puncture, Tesla recommends replacing in pairs unless the other tires are within **2/32 in (1.5 mm)** of the new tire's tread depth.
+**Replacing in pairs.** Tesla says to replace all four tires at once when a set is worn. If a tire has to be replaced early, say after a sidewall puncture, Tesla recommends replacing in pairs unless the other tires are within **2/32 in (1.5 mm)** of the new tire's tread depth. Our myth check on [replacing all four tires](/blog/replace-all-four-tires-myth) compares this with what tire makers and other vehicle makers say.
 
 **Flats.** Tesla offers an optional tire repair kit that can temporarily fix small punctures under 6 mm, enough to drive slowly to Tesla or a tire repair shop.
 

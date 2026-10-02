@@ -115,7 +115,7 @@ That's why NHTSA defines **cold** as parked for at least three hours, and why it
 ## How to set pressure so the number means something
 
 1. **Check cold.** First thing in the morning, before the car moves, is easiest.
-2. **Use the door placard, not the sidewall.** The number on the tire is a maximum, not the target.
+2. **Use the door placard, not the sidewall.** The number on the tire is a maximum, not the target. [Here's why](/blog/sidewall-max-psi-myth).
 3. **Use a gauge.** TPMS is designed to warn at a large loss, not a small one.
 4. **Set all four and the spare.** NHTSA's guidance is to check monthly, spare included.
 5. **Recheck after a big temperature swing.** A new season or a front is a good reminder.
@@ -124,7 +124,7 @@ Our guide to [checking tire pressure](/learn/pressure/how-to-check-tire-pressure
 
 ## When temperature isn't the explanation
 
-Temperature moves all four tires by roughly the same amount at the same time. Tires also lose some air naturally: Bridgestone says about 1 psi a month on average, which is one more reason for the monthly check.
+Temperature moves all four tires by roughly the same amount at the same time. Tires also lose some air naturally: Bridgestone says about 1 psi a month on average, which is one more reason for the monthly check. Nitrogen fill slows that seepage a little but doesn't replace the check; see our [nitrogen myth check](/blog/nitrogen-in-tires-myth).
 
 What temperature doesn't explain:
 

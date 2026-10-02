@@ -90,7 +90,7 @@ Mobile work covers installation, balancing, puncture repair, rotation and TPMS s
 
 Outside the South Florida install area, this is the route. TireDrop ships free to addresses in the 48 contiguous states and DC, but installation is a South Florida service. Anywhere else, your order ships to you and you take it to an installer you trust.
 
-Before you order, call that installer and ask two things: whether they fit tires the customer brings in, and what they charge to do it. Better to find out before four tires are sitting in your hallway.
+Before you order, call that installer and ask two things: whether they fit tires the customer brings in, and what they charge to do it. Better to find out before four tires are sitting in your hallway. Our [nationwide guide to getting online tires installed](/blog/get-tires-installed-after-buying-online) covers the full list of questions.
 
 ## Questions to ask any installer
 

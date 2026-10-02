@@ -92,9 +92,9 @@ You can't control the weather. You can control what's touching the road.
 
 **Quarter test.** Put a quarter upside down in a groove. If you can see all of Washington's head, you're at about 4/32.
 
-**Pressure.** Set tires to the pressure on your door placard, checked cold. Don't go by the number on the sidewall; that's a maximum, not a target.
+**Pressure.** Set tires to the pressure on your door placard, checked cold. Don't go by the number on the sidewall; that's a maximum, not a target. Our [max PSI myth check](/blog/sidewall-max-psi-myth) explains the difference.
 
-If your readings are close to 4/32, run them through [Do I Need Tires Yet?](/tire-check) before the next storm rather than after it.
+If your readings are close to 4/32, run them through [Do I Need Tires Yet?](/tire-check) before the next storm rather than after it. Replacing only two? The new pair goes on the rear axle for wet grip; here's [why the back, not the front](/blog/new-tires-front-or-back).
 
 ## In the storm: how to avoid hydroplaning
 

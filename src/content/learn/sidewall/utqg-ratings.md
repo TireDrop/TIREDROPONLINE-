@@ -142,6 +142,6 @@ A quick way to put the grades to work:
 2. **Compare treadwear inside a brand.** Use it to rank models from the same manufacturer, not to settle a contest between two brands.
 3. **Read traction as a wet-braking signal.** Useful in a rainy climate, but it isn't a hydroplaning score.
 4. **Treat temperature as a floor check.** Every passenger tire meets C; A and B show more heat margin in the lab test.
-5. **Don't let one grade decide.** UTQG is three narrow tests. Tread design, size and how you drive fill in the rest.
+5. **Don't let one grade decide.** UTQG is three narrow tests. Tread design, size and how you drive fill in the rest. Our post on [why same-size tires cost different amounts](/blog/same-size-tires-different-prices) covers the other differences.
 
 When you're ready, [browse tires](/tires), then line up two to four models on the [compare page](/compare), where each tire's full spec sheet sits in the same columns. Questions about a specific tire? Call (954) 773-1896 and ask.
