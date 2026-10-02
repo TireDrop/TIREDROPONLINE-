@@ -36,12 +36,6 @@ sources:
   - title: "Tire Load Rating & Speed Rating Explained"
     publisher: "Michelin"
     url: "https://www.michelinman.com/auto/auto-tips-and-advice/tires-101/tire-load-rating-speed-rating"
-  - title: "What Are Plus Size Wheels & Tires?"
-    publisher: "Tire Rack"
-    url: "https://www.tirerack.com/upgrade-garage/what-are-plus-size-wheels-tires"
-  - title: "How Do I Check Speedometer Accuracy?"
-    publisher: "Tire Rack"
-    url: "https://www.tirerack.com/upgrade-garage/how-do-i-check-speedometer-accuracy"
 related:
   - /learn/sidewall/how-to-read-tire-size
   - /learn/fitment/wheel-offset-backspacing
@@ -70,7 +64,7 @@ Here's what has to stay the same, and what to check.
 
 **Overall diameter** is how tall the tire stands, rim plus two sidewalls. It's the number that matters most when you change size, because the car's systems are calibrated to it.
 
-Michelin says altering overall diameter affects **speedometer accuracy**, the **clearance** between the tire and the wheel well, and potentially how the **ABS and stability control** systems behave. Tire Rack's plus-size guidance keeps overall diameter the same for ground clearance, driveline gearing and accurate speedometer readings.
+Michelin says altering overall diameter affects **speedometer accuracy**, the **clearance** between the tire and the wheel well, and potentially how the **ABS and stability control** systems behave.
 
 You can work it out from the size. Our guide on [how to read tire size](/learn/sidewall/how-to-read-tire-size) walks through the math. Using **225/65R17** as the original, about 28.5 inches tall:
 
@@ -92,7 +86,7 @@ Most size changes are **plus sizing**: a larger wheel with a lower-profile tire.
 
 Michelin explains it with a simple example: going from a 14-inch to a 15-inch wheel is **plus 1**. The tire's aspect ratio drops as the wheel grows, so the overall diameter stays about where it was. Michelin also describes the other route: keeping the same wheel and going wider, such as P195/75R14 to P215/65R14.
 
-Tire Rack's rule of thumb for each 1-inch increase in wheel diameter is to add about **10 mm of width** and drop the aspect ratio by **5 to 10 percent**. Done well, Tire Rack says the diameter change is only a few tenths of an inch.
+The right width and aspect ratio depend on the exact sizes, so compare the overall diameter of the old and new size before you buy. The [plus-size calculator](/plus-size-calculator) does the math for any two sizes.
 
 Plus sizing usually means new wheels too. The width, offset and bolt pattern of those wheels have to suit the car; our guide to [wheel offset and backspacing](/learn/fitment/wheel-offset-backspacing) explains what changes.
 
@@ -107,7 +101,7 @@ The [load and speed checker](/load-speed-check) compares a new tire's ratings ag
 
 ## 4. The speedometer effect
 
-Your speedometer counts wheel turns and assumes the original tire size. Tire Rack explains the result:
+Your speedometer counts wheel turns and assumes the original tire size. The result:
 
 - A **taller** tire covers more ground per turn, so the speedometer reads **slower** than your actual speed.
 - A **shorter** tire covers less ground per turn, so it reads **faster**.
