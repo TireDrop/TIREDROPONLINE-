@@ -103,6 +103,9 @@
 
   .section {
     @apply py-14 md:py-20;
+    /* A jump to a section (#hubs, #apply, #decoder) stops below the sticky
+       masthead; the section's own top padding is the gap. */
+    scroll-margin-top: var(--header-h);
   }
 
   /* ---------- Buttons ---------- */
@@ -226,15 +229,15 @@
   }
 
   .prose-article h2 {
-    @apply mt-12 scroll-mt-28 font-display text-[1.55rem] leading-[1.12] text-ink md:text-[1.9rem];
+    @apply mt-12 scroll-mt-[calc(var(--header-h)+1rem)] font-display text-[1.55rem] leading-[1.12] text-ink md:text-[1.9rem];
   }
 
   .prose-article h3 {
-    @apply mt-9 scroll-mt-28 font-display text-[1.2rem] leading-[1.2] text-ink md:text-[1.35rem];
+    @apply mt-9 scroll-mt-[calc(var(--header-h)+1rem)] font-display text-[1.2rem] leading-[1.2] text-ink md:text-[1.35rem];
   }
 
   .prose-article h4 {
-    @apply mt-7 scroll-mt-28 font-display text-[1.05rem] text-ink;
+    @apply mt-7 scroll-mt-[calc(var(--header-h)+1rem)] font-display text-[1.05rem] text-ink;
   }
 
   .prose-article h2 + *,
