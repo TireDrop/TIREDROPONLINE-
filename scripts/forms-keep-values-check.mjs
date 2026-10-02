@@ -1289,6 +1289,47 @@ for (const width of [390, 1440]) {
     await h.context.close();
   });
 
+  await check(`${width} /checkout: an order request that doesn't reach the shop keeps the cart and says so, and a retry sends it`, async () => {
+    const h = await open(width, { cart: CART, delay: 0 });
+    const { page } = h;
+    // The shop's API is unreachable for the first send (registered after
+    // the harness's handler, so it answers first), then back.
+    let down = true;
+    await page.route("**/api/checkout", async (route) => {
+      if (!down) return route.fallback();
+      h.sent.checkout.push(JSON.parse(route.request().postData() || "{}"));
+      await route.abort("connectionrefused");
+    });
+    await checkoutToVehicle(h);
+    await page.selectOption("#year", "2019");
+    await page.selectOption("#make", "Toyota");
+    await page.locator('#model option[value="Tacoma"]').waitFor({ state: "attached" });
+    await page.selectOption("#model", "Tacoma");
+    await page.getByRole("button", { name: "Continue" }).click();
+    await placeCheckout(h);
+
+    const alert = page.getByRole("alert").filter({ hasText: "didn't reach the shop" });
+    await alert.waitFor();
+    assert.match(await alert.innerText(), /nothing has been charged/);
+    assert.ok(await alert.locator('a[href^="tel:"]').count() === 1, "the phone number");
+    assert.equal(await page.getByText("Finish this by phone").count(), 0, "no confirmation screen");
+    const kept = JSON.parse(await page.evaluate(() => localStorage.getItem("tiredrop.cart.v1")));
+    assert.equal(kept?.lines?.length, CART.lines.length, "the cart is kept");
+    assert.equal(await page.locator("#agree").count(), 1, "still on the review step");
+
+    // Back up: the same button sends it, and only then is the cart emptied.
+    down = false;
+    await page.getByRole("button", { name: "Place Order Request" }).click();
+    await waitFor(() => h.sent.checkout.length === 2, "/api/checkout retry");
+    await page.getByText("Your order request is in").waitFor();
+    await page.waitForFunction(() => {
+      const c = JSON.parse(localStorage.getItem("tiredrop.cart.v1") || "null");
+      return Array.isArray(c?.lines) && c.lines.length === 0;
+    });
+    noErrors(h.errors.filter((e) => !/ERR_CONNECTION_REFUSED|Failed to load resource/.test(e)));
+    await h.context.close();
+  });
+
   await check(`${width} /checkout vehicle: silent picks of "Other" (year and make) and silent text are kept and sent`, async () => {
     const h = await open(width, { cart: CART, delay: 0 });
     const { page } = h;

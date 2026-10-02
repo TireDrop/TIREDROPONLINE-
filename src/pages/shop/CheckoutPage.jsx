@@ -753,6 +753,20 @@ export default function CheckoutPage() {
     }
 
     setSending(false);
+
+    // The request did not reach the shop (no API, a timeout, or the server
+    // could not pass it on). Nothing was placed, so nothing is cleared: the
+    // cart and everything typed stay put, and the shopper can send it again
+    // or call. Only an order the shop actually received empties the cart.
+    if (!outcome.delivered) {
+      setServerError(
+        `Your order request didn't reach the shop${
+          outcome.orderRef ? ` (reference ${outcome.orderRef})` : ""
+        }, and nothing has been charged. Your cart and details are still here, so you can send it again in a moment.`,
+      );
+      return;
+    }
+
     // A request, not a sale: no payment was taken (see src/lib/analytics.js
     // on why `purchase` is not sent from here).
     trackEvent("order_request", {
