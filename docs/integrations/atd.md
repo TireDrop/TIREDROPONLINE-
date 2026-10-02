@@ -85,6 +85,8 @@ Behaviour that is real and tested (`npm run test:api`):
 
 ## Still unconfirmed
 
+**Status 2026-10-02:** call held with ATD. ATD is reviewing tiredroponline.com for approval; API credentials come after approval. Nothing below is confirmed yet.
+
 - Whether TireDrop's ATD account includes **Ship to Home API** access at all,
   or only ATDOnline (the web portal).
 - The auth scheme, base URLs, sandbox vs. production, and rate limits.

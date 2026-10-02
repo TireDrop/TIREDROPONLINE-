@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (check:forms 271s → 83s, same 113 checks, on preview/forms-split; SHIPPED: blog batch 4, 10 posts (Civic, Wrangler, Silverado towing, hybrids, small fleets, potholes, new-car tires, rotation and aging myths, Thanksgiving trip); earlier today: wave 2 (quote form, installed price, blog batch 3, a11y 0 issues, check:links), resources only + check:sources)_
+_Last updated: 2026-10-02 (ATD call held: site approval and API credentials pending at ATD; SHIPPED today: resources only + check:sources, wave 2 (quote form, installed price, blog batch 3, a11y 0 issues, check:links), blog batch 4, check:forms 271s → 83s)_
 
 ## Site fixes (Claude)
 - [x] ~~check:forms 271s → 83s, same assertions (113 checks, 4 at a time; FORMS_SHARD=k/n to split)~~ (`31b614a`, branch preview/forms-split)
@@ -189,7 +189,9 @@ _Last updated: 2026-10-02 (check:forms 271s → 83s, same 113 checks, on preview
 
 ## ATD and business (Justin)
 - [ ] Submit the ATD connectivity form → prompt in docs/prompts/2026-10-02-justin-remaining.md (#B1)
-- [ ] ATD call: API access, brands, sandbox, fees → prompt in docs/prompts/2026-10-02-justin-remaining.md (#B1)
+- [x] ~~ATD call: API access, brands, sandbox, fees~~ (call held 2026-10-02; not recorded on Fathom)
+  - [ ] ATD is reviewing the site for approval; API credentials come after approval (waiting on ATD, 2026-10-02)
+  - [ ] Still to confirm with ATD once credentials arrive: sandbox + test order, freight per tire/order, cutoff time, MAP/UMAP brands, drop-ship brand list, fitment endpoint, returns on Ship to Home → questions in docs/prompts/2026-10-02-justin-remaining.md (#B1)
 - [ ] Second distributor: TireHub / US AutoForce / Wheel Pros → prompt in docs/prompts/2026-10-02-justin-remaining.md (#B3)
 - [ ] Accountant: FL $1/tire fee + out-of-state sales tax → prompt in docs/prompts/2026-10-02-justin-remaining.md (#B4)
 - [ ] Brand pricing rules: minimum advertised prices, online-sale limits → prompt in docs/prompts/2026-10-02-justin-remaining.md (#B5)
