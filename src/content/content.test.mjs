@@ -566,8 +566,14 @@ test("the Buying and Fitment hubs: eight sourced guides that follow the copy rul
       "lt-vs-p-metric",
       "xl-vs-sl-tires",
       "run-flat-tires",
+      "ev-tires",
     ],
-    fitment: ["bolt-pattern", "wheel-offset-backspacing", "staggered-tires"],
+    fitment: [
+      "bolt-pattern",
+      "wheel-offset-backspacing",
+      "staggered-tires",
+      "different-tire-size",
+    ],
   };
   const routes = new Set(store.contentRoutes());
   const BANNED = /\b(safe|safer|safely|fine|guaranteed?|OK)\b/i;
