@@ -571,7 +571,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                 a date: the delivery estimate depends on the address, so it is
                 shown at checkout. */}
             <fieldset className="mt-6">
-              <legend className="label">Delivery</legend>
+              <legend className="label">Shipping or installation</legend>
               <div className="grid gap-3">
                 <label
                   htmlFor="fulfil-ship"
@@ -600,8 +600,8 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                       <span className="min-w-0">{DELIVERY_NOTE}</span>
                     </span>
                     <span className="mt-1 block text-sm text-smoke">
-                      Delivered to your address anywhere in{" "}
-                      {BUSINESS.shipping.area}.
+                      Delivered to your address, ready for any tire shop to
+                      fit.
                     </span>
                   </span>
                 </label>
@@ -621,9 +621,19 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                     className="mt-0.5 h-4 w-4 shrink-0 accent-drop"
                   />
                   <span className="min-w-0">
+                    <span className="mb-1 inline-block rounded-sm bg-ink/5 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink">
+                      South Florida only
+                    </span>
                     <span className="block font-display text-base font-bold">
                       Ship to the shop and we&apos;ll fit them (+
                       {money(product.installPrice)} per {unit})
+                    </span>
+                    {/* The installation figure for the quantity picked, so
+                        the choice is made against the number that will be
+                        added, not a per-tire price to multiply. */}
+                    <span className="tnum mt-0.5 block text-sm font-semibold text-ink">
+                      +{money(bill.install)} installation for {qty}{" "}
+                      {plural(qty)}
                     </span>
                     <span className="mt-1 flex items-start gap-2 text-sm font-medium text-ink">
                       <Store
@@ -665,7 +675,12 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                   </dd>
                 </div>
                 <div className="flex justify-between gap-4 border-t border-ink/10 pt-2 font-display text-lg font-bold">
-                  <dt>Estimated total</dt>
+                  <dt>
+                    Estimated total{" "}
+                    <span className="font-sans text-xs font-normal text-smoke">
+                      (before tax)
+                    </span>
+                  </dt>
                   <dd>{money(orderTotal)}</dd>
                 </div>
               </dl>
