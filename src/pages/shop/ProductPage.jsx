@@ -46,6 +46,7 @@ import { useCart, money } from "../../context/CartContext.jsx";
 import { useCompare } from "../../context/CompareContext.jsx";
 import { useFit } from "../../context/VehicleContext.jsx";
 import { trackViewItem } from "../../lib/analytics.js";
+import { loadLbs, speedSymbol } from "../../data/loadSpeedTables.js";
 import {
   DELIVERY_NOTE,
   SET_SIZE,
@@ -92,18 +93,88 @@ export function stockLabel(product) {
   return null;
 }
 
+/** "95" -> "95 (1,521 lbs)", from the standard load-index table. */
+function loadText(index) {
+  const s = String(index ?? "").trim();
+  // A dual index (LT: "120/116") is rated by its single-tire figure.
+  const single = s.split("/")[0];
+  const lbs = loadLbs(single);
+  return lbs ? `${s} (${lbs.toLocaleString("en-US")} lbs)` : s;
+}
+
+/** "H" -> "H (130 mph)", from the standard speed-symbol table. */
+function speedText(symbol) {
+  const s = String(symbol ?? "").trim();
+  const entry = speedSymbol(s);
+  return entry ? `${s} (${entry.mph} mph)` : s;
+}
+
+/**
+ * A bare load index or speed symbol (what a distributor listing carries)
+ * gets its meaning from the standard tables; the catalog's rows already
+ * spell it out and are left as they are.
+ */
+function explainSpec([key, val]) {
+  const v = String(val).trim();
+  if (key === "Load Index" && /^\d{2,3}(\/\d{2,3})?$/.test(v)) return [key, loadText(v)];
+  if (key === "Speed Rating" && /^[A-Za-z]$/.test(v)) return [key, speedText(v)];
+  return [key, val];
+}
+
 /** The spec table rows: the catalog's own, else what the listing carries. */
 function specRows(product, isTire) {
   const rows = Object.entries(product.specs ?? {}).filter(
     ([, v]) => v !== null && v !== undefined && String(v).trim() !== "",
   );
-  if (rows.length || !isTire) return rows;
+  if (rows.length || !isTire) return isTire ? rows.map(explainSpec) : rows;
   return [
     ["Tire Size", product.size],
     ["Load Index", product.loadIndex],
     ["Speed Rating", product.speedRating],
     ["SKU", product.sku],
-  ].filter(([, v]) => v !== null && v !== undefined && String(v).trim() !== "");
+  ]
+    .filter(([, v]) => v !== null && v !== undefined && String(v).trim() !== "")
+    .map(explainSpec);
+}
+
+/**
+ * The four numbers a tire shopper scans for, under the fitment answer:
+ * load, speed, UTQG and the treadwear warranty. Only what the product
+ * carries is shown; the meaning of load and speed comes from the standard
+ * tables, never from the listing.
+ */
+function keySpecs(product) {
+  const out = [];
+  const load = String(product.loadIndex ?? "").trim();
+  if (load) {
+    const lbs = loadLbs(load.split("/")[0]);
+    out.push({
+      label: "Load index",
+      value: load,
+      note: lbs ? `${lbs.toLocaleString("en-US")} lbs per tire` : null,
+    });
+  }
+  const speed = String(product.speedRating ?? "").trim();
+  if (speed) {
+    const entry = speedSymbol(speed);
+    out.push({
+      label: "Speed rating",
+      value: speed,
+      note: entry ? `${entry.mph} mph rated` : null,
+    });
+  }
+  const utqg = String(product.specs?.UTQG ?? "").trim();
+  if (utqg) out.push({ label: "UTQG", value: utqg, note: "Treadwear, traction, temp." });
+  const warranty = String(product.warranty ?? "").trim();
+  if (warranty) {
+    const miles = warranty.match(/^([\d,]+)\s*mile/i);
+    out.push({
+      label: "Warranty",
+      value: miles ? `${miles[1]} mi` : warranty,
+      note: miles ? "Treadwear" : null,
+    });
+  }
+  return out;
 }
 
 export default function ProductPage({ kind = "tire" }) {
@@ -230,6 +301,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
   const stock = reportStock ? stockLabel(product) : null;
   const soldOut = stock?.level === "out";
   const specs = specRows(product, isTire);
+  const glance = isTire ? keySpecs(product) : [];
   const features = Array.isArray(product.features) ? product.features : [];
   const photo =
     typeof product.image === "string" && /^https:\/\//i.test(product.image)
@@ -289,7 +361,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
       )}
 
       <Section>
-        <div className="grid items-start gap-10 lg:grid-cols-2">
+        <div className="grid items-start gap-6 sm:gap-10 lg:grid-cols-2">
           {/* Product art. It sticks on a desktop so the tire stays in view
               while the buy box and spec table scroll past it — the
               column is far taller than the art, and stretching the panel to
@@ -304,7 +376,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                 alt={`${name}, ${sizeLabel}`}
                 width={420}
                 height={420}
-                className="h-auto w-full max-w-[180px] object-contain sm:max-w-[420px]"
+                className="h-auto w-full max-w-[150px] object-contain sm:max-w-[420px]"
               />
             ) : (
               <ProductArt
@@ -312,7 +384,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                 accent={product.accent}
                 size={420}
                 label={`${name}, ${sizeLabel}`}
-                className="h-auto w-full max-w-[180px] sm:max-w-[420px]"
+                className="h-auto w-full max-w-[150px] sm:max-w-[420px]"
               />
             )}
           </div>
@@ -360,6 +432,55 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
             {/* Does it fit, straight under the price: the question a shopper
                 answers before quantity or delivery matter. */}
             {isTire && <FitPanel fit={fit} />}
+
+            {/* Key specs at a glance: what a shopper checks against the
+                old tires' sidewall, before choosing how many. */}
+            {glance.length > 0 && (
+              <div className="mt-5">
+                <dl
+                  data-testid="key-specs"
+                  className="tnum grid grid-cols-2 gap-2 sm:grid-cols-4"
+                >
+                  {glance.map((g) => (
+                    <div
+                      key={g.label}
+                      className="rounded-sm border border-ink/10 bg-bone px-3 py-2"
+                    >
+                      <dt className="text-[11px] font-semibold uppercase tracking-[0.06em] text-smoke">
+                        {g.label}
+                      </dt>
+                      <dd className="mt-0.5 font-display text-base font-bold leading-tight text-ink">
+                        {g.value}
+                      </dd>
+                      {g.note && (
+                        <dd className="text-[11px] leading-snug text-smoke">
+                          {g.note}
+                        </dd>
+                      )}
+                    </div>
+                  ))}
+                </dl>
+                <p className="mt-1.5 text-xs text-smoke">
+                  <Link
+                    to="/load-speed-check"
+                    className="inline-flex min-h-[24px] items-center underline underline-offset-2 hover:text-drop"
+                  >
+                    Check load and speed against your old tires
+                  </Link>
+                  {glance.some((g) => g.label === "UTQG") && (
+                    <>
+                      {" · "}
+                      <Link
+                        to="/learn/sidewall/utqg-ratings"
+                        className="inline-flex min-h-[24px] items-center underline underline-offset-2 hover:text-drop"
+                      >
+                        What UTQG means
+                      </Link>
+                    </>
+                  )}
+                </p>
+              </div>
+            )}
 
             {/* Quantity. Presets first, because tapping "4" is faster than
                 four taps on a plus button, with free entry for oddities. */}
