@@ -51,6 +51,7 @@ related:
   - /learn/sidewall/utqg-ratings
   - /learn/buying/all-season-vs-all-weather-tires
   - /blog/snowbird-car-sat-all-summer-tires
+  - /blog/packed-car-weight-limit
   - /tire-check
   - /blog/florida-sun-dry-rot-tires
 cta:
@@ -95,7 +96,7 @@ Summer is road-trip, beach-gear and moving-day season, and every extra pound is 
 
 Your Tire and Loading Information placard, on the driver's door edge or door post, lists the vehicle's capacity in plain words. Under the federal placard rule, it reads: *"The combined weight of occupants and cargo should never exceed"* a stated number of pounds. That line includes people, luggage and anything on a roof rack or hitch.
 
-A loaded car on underinflated tires at highway speed is all three of NHTSA's heat conditions at once. If the trip is long and the car is full, set the pressure cold before you leave.
+A loaded car on underinflated tires at highway speed is all three of NHTSA's heat conditions at once. If the trip is long and the car is full, set the pressure cold before you leave. Our post on [finding your car's real weight limit](/blog/packed-car-weight-limit) walks through the placard math.
 
 ## Aging: what NHTSA found about the Sun Belt
 

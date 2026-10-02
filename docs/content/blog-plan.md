@@ -21,7 +21,8 @@ Planning only: no code, no copy. Byline for every post: "TireDrop Team, Extreme 
 | Batch 4, on `preview/blog-batch-4` (ships with the next release) | #11, #33, #34, #35, #38, #44, #45, #47, #48, #50 | 10 |
 | Batch 5, on `preview/scribe-2026-10-02` (ships with the next release) | #12, #19, #20, #30, #31, #39, #40, #41, #43, #46 | 10 |
 | On hold | #15 (waiting on the accountant's answer about the Florida tire fee and sales tax); #49 (waiting on Justin: does Extreme Tires sell used tires?) | 2 |
-| Skipped for Learn overlap (rework or drop) | #32 (registration and recalls: `/learn/age/tire-recalls-registration` already targets "tire registration" and covers the same steps); #37 (Tesla flat: see Batch 4); #42 (heat and pressure routine: `/learn/florida/florida-heat-tires` already has "A South Florida summer routine" and targets "hot weather tire pressure Florida") | 3 |
+| Reworked for Learn overlap, on `preview/blog-rework` (ships with the next release) | #32 as `/blog/tire-recall-notice-what-to-do` ("tire recall notice"; the Learn guide owns "tire recall check"); #42 as `/blog/packed-car-weight-limit` ("how much weight can my car carry"; the Learn guide owns "heat and tires") | 2 |
+| Dropped for Learn overlap | #37 (Tesla Model 3 flat): no distinct angle left; see the rework note below | 1 |
 | Not yet written | none | 0 |
 
 - **How Batch 3 was chosen.** Highest search intent first: every unpublished "Commercial investigation" post with High demand, then the "Informational / commercial" posts. Two High-demand vehicle guides, #35 Civic and #45 Wrangler, moved to Batch 4. That keeps it to four vehicle guides per batch, because of the near-duplicate risk in Part 5. #49 (used tires) waits until Justin confirms whether Extreme Tires sells used tires, as its Risk note requires.
@@ -33,7 +34,23 @@ Planning only: no code, no copy. Byline for every post: "TireDrop Team, Extreme 
   - **Overlap guards used.** #20 and #31 link to `/learn/pressure/tpms-light` as the canonical "TPMS light" page and take distinct angles: #20 is the gauge myth built on NHTSA's TPMS field study (DOT HS 811 681); #31 is the cold-front arithmetic (25% threshold vs 1–2 psi per 10°F) and does not target "tire pressure light cold morning". #41 is about recognizing cracks and dry rot, not climate aging in general, and links to `/learn/florida/florida-heat-tires`. #46 is the myth angle and links to `/learn/fitment/different-tire-size` for plus sizing.
   - **New allowlisted sources.** `floridasturnpike.com` (Florida's Turnpike Enterprise, part of FDOT) and `browardschools.com` (the county school district) join the resource list in `src/lib/competitors.js`.
   - **Facts to confirm (snippet-only or second-hand; for Justin's next prompt pack):** (1) #30: the Miccosukee Service Plaza at Exit 49 sells fuel and is the one service plaza on Alligator Alley (miccosukee.com returned 403); (2) #30: Collier County (FDOT District One) Road Ranger coverage of I-75 west of mile marker 50 is only in a District One road-report PDF snippet, so the post only says District One covers the Collier side; (3) #19: the Turnpike plaza page's WheelRight line at Turkey Lake ("only the second location in the United States"); (4) #41: Goodyear's dry-rot page listing low pressure and long storage as causes (UV, ozone, monthly inspection and the petroleum-cleaner warning were page-read); (5) #40: AAA Newsroom 2017's four- to eight-year shelf life for inflator kits, and the Honda CR-V Hybrid manual's 3/16-inch and 50 mph limits (both read by a research helper, not re-read by the writer). Everything else in Batch 5 was read on the source page.
-- **Remaining.** 5 posts: #15 and #49 on hold, and #32, #37 and #42 skipped for Learn overlap. Rework those three with new angles or fold their best points into the Learn guides.
+- **Remaining.** 2 posts, both on hold: #15 (accountant's answer on the Florida tire fee and sales tax) and #49 (Justin: does Extreme Tires sell used tires?).
+- **Rework of #32, #37 and #42 (2 October 2026).** Each post needed a primary keyword and a buyer-moment or situational angle that its Learn guide doesn't target. Each new post links to its Learn guide as the deep dive, and the Learn guide links back.
+
+  | Post | Blog primary keyword | Learn guide and its primary keyword | Result |
+  |---|---|---|---|
+  | #32 | "tire recall notice" (the letter has arrived: match the TINs, the free remedy, the 180-day tire window, reimbursement) | `/learn/age/tire-recalls-registration`: "tire recall check" (lookup and registration) | Published as `/blog/tire-recall-notice-what-to-do` |
+  | #42 | "how much weight can my car carry" (the placard math for a packed summer, beach or evacuation car) | `/learn/florida/florida-heat-tires`: "heat and tires" (pressure, aging, the summer routine) | Published as `/blog/packed-car-weight-limit` |
+  | #37 | (none found) | `/learn/tesla/tesla-flat-tire-no-spare`: "tesla flat tire" | Dropped |
+
+  - **Why #37 was dropped.** The site already has six Tesla Learn guides, the Model Y buying post, the glovebox kit post and the replace-all-four myth post. Between them they cover the flat itself, the kit and its sealant warning, foam repair, replacing in pairs (the 2/32 in rule), Model 3 sizes and mobile help. Every angle tried (replacing one tire after a flat, a flat in a parking garage, a Model 3 buying guide) repeated one of those pages or would be a template twin of the Model Y post (Part 5, risk 6).
+  - **Why #42 changed topic.** The heat-and-pressure routine is fully covered by `/learn/florida/florida-heat-tires`, `/learn/pressure/tire-pressure-temperature` and `/learn/pressure/how-to-check-tire-pressure`. Excessive loading, the third of NHTSA's heat conditions, had only a paragraph on the Learn guide, so the rework takes that angle.
+  - **Snippet-only facts (the sources were blocked to WebFetch; confirm each one):**
+    - Open https://www.govinfo.gov/content/pkg/USCODE-2024-title49/html/USCODE-2024-title49-subtitleVI-partA-chap301-subchapII-sec30120.htm and confirm: a tire maker must remedy a recalled tire presented no later than 180 days after the later of the owner's notice or the notice that a replacement is available; and replacement equipment is remedied by repair or replacement with identical or reasonably equivalent equipment, without charge.
+    - Open https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-577 and confirm: the envelope must say "SAFETY RECALL NOTICE" and the letter must open with "IMPORTANT SAFETY RECALL", both in capitals.
+    - Open https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-573/section-573.13 and confirm: makers must have a plan to reimburse owners who paid for a remedy before the notice, and it may ask for a receipt and the tire's model and size.
+    - Open https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-575/subpart-A/section-575.6 and confirm: owner's manuals must carry the load-limit steps, including the 1,400 lb, five 150 lb passengers, 650 lb example and the trailer step.
+    - Open https://www.ecfr.gov/current/title-49/subtitle-B/chapter-V/part-571/subpart-B/section-571.110 and confirm: the placard's cold pressure is the maker's recommendation for the vehicle at its maximum loaded weight.
 - **Refresh dates for Batch 5.** #43 back-to-school: mid-July 2027, with the 2027/28 BCPS first day. #19 and #30: re-check plaza amenities and Road Ranger coverage before each holiday season. #31: re-promote in December.
 - **Dates.** Batch 3, 4 and 5 posts are dated 2 October 2026, as Batch 2 was, instead of the calendar's 19 and 26 October and 2 November.
 
@@ -891,6 +908,7 @@ Legend for each post:
 
 **32. Registered Your New Tires? How Recalls Reach You**
 `/blog/tire-registration-recalls`
+- **Reworked (2 Oct 2026):** published as `/blog/tire-recall-notice-what-to-do`, "Got a Tire Recall Notice? What to Do Next", primary keyword "tire recall notice". The brief below is the original, held back for overlap.
 - **KW:**
   - Primary: tire registration
   - Secondary: tire recall check; tire recall lookup by DOT number; are my tires recalled
@@ -994,6 +1012,7 @@ Legend for each post:
 
 **37. Tesla Model 3 Flat: Foam Tires, No Spare, What Now**
 `/blog/tesla-model-3-flat-foam-tires`
+- **Dropped (2 Oct 2026):** no angle left that the Tesla Learn guides and existing posts don't already cover. See the rework note at the top.
 - **KW:**
   - Primary: Tesla Model 3 flat tire
   - Secondary: Tesla acoustic foam tire repair; Model 3 no spare; Tesla tire repair kit
@@ -1104,6 +1123,7 @@ Legend for each post:
 
 **42. Florida Heat and Tire Pressure: A Monthly Routine**
 `/blog/florida-heat-tire-pressure`
+- **Reworked (2 Oct 2026):** published as `/blog/packed-car-weight-limit`, "Packing the Car? How to Find Your Real Weight Limit", primary keyword "how much weight can my car carry". The brief below is the original, held back for overlap.
 - **KW:**
   - Primary: tire pressure in hot weather
   - Secondary: should I let air out of tires in heat; tire blowout summer; check tire pressure cold

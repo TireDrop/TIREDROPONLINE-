@@ -57,6 +57,7 @@ related:
   - /learn/age/how-old-is-too-old
   - /blog/bought-tires-online-install-broward
   - /blog/how-old-are-tires-bought-online
+  - /blog/tire-recall-notice-what-to-do
   - /install
   - /tire-check
 cta:
@@ -98,7 +99,7 @@ Our guide to [reading the tire date code](/learn/sidewall/dot-date-code) breaks 
 2. **Copy the full TIN** for each tire, or take a clear photo of it.
 3. **Enter it in the USTMA Tire Recall Lookup.** The U.S. Tire Manufacturers Association's free lookup takes the full TIN and covers recalls on tires made by its members from 2000 on. If a tire matches, it gives you the maker's contact for the remedy.
 4. **Search NHTSA's recall site** at nhtsa.gov/recalls. For tires, it returns recalls, investigations and complaints by **tire brand and tire line**. Use it for brands outside USTMA's membership, or when you're not sure who made the tire.
-5. **If a tire is recalled**, contact the tire maker and follow its instructions for the remedy.
+5. **If a tire is recalled**, contact the tire maker and follow its instructions for the remedy. Our post on [what to do with a tire recall notice](/blog/tire-recall-notice-what-to-do) covers the free remedy and its deadline.
 6. **Repeat for every tire.** A set that has been partly replaced can mix makers and dates.
 
 A TIN that won't read clearly is a reason to have an installer look, not to skip the check.
