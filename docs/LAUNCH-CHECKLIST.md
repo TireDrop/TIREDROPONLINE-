@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02, evening (ATD call held: site approval and API credentials pending at ATD. SHIPPED to main today: team build d2ba501 (blog batch 5, Learn gap fill C, tire page + cart, page speed, QA, search, Windows dev); resources only + check:sources; wave 2 (quote form, installed price, blog batch 3, a11y 0 issues, check:links); blog batch 4; check:forms 271s → 83s)_
+_Last updated: 2026-10-02, evening (blog reworks #32/#42 on preview/blog-rework, #37 dropped; ATD call held: site approval and API credentials pending at ATD. SHIPPED to main today: team build d2ba501 (blog batch 5, Learn gap fill C, tire page + cart, page speed, QA, search, Windows dev); resources only + check:sources; wave 2 (quote form, installed price, blog batch 3, a11y 0 issues, check:links); blog batch 4; check:forms 271s → 83s)_
 
 ## Site fixes (Claude)
 - [x] ~~Ship the 2026-10-02 team build to main (all 22 gates pass on the merged build; Justin said "ship it")~~ (`d2ba501`, shipped to main 2026-10-02)
@@ -157,7 +157,7 @@ _Last updated: 2026-10-02, evening (ATD call held: site approval and API credent
 
 ## Content & SEO: Blog + Learn (Claude; plan in docs/prompts/blog-learn-build.md)
 - [x] ~~Blog batch 5: 10 posts (Florida sun and dry rot, flat on I-95, TPMS vs a gauge, cold-front TPMS light, moving to Florida, glovebox tire kit, back-to-school check, bigger wheels myth, Turnpike to Orlando, Alligator Alley)~~ (`aca62b5`…`e56433c`, shipped to main 2026-10-02)
-  - #32 (registration) and #42 (heat and pressure routine) held back: each would compete with a live Learn guide; #15, #37, #42, #49, #32 remain
+  - #32 (registration) and #42 (heat and pressure routine) held back: each would compete with a live Learn guide (reworked below)
   - [ ] 5 facts were snippet-only or helper-read: Miccosukee plaza fuel at Exit 49, Road Ranger on the Collier side, Turkey Lake WheelRight, Goodyear dry-rot causes, AAA sealant shelf life + CR-V Hybrid kit limits (listed in blog-plan.md)
 - [x] ~~Learn gap fill C: 8 guides (nail in a tire, pothole and rim damage, TPMS sensors, touring vs performance, tire types, parts of a tire, speed rating, sidewall markings); new Basics hub; the build's "not published" warnings are gone; 30 of 50 planned guides~~ (`aafca79`, `d076749`, `b5be83d`, `e0b8cc7`, shipped to main 2026-10-02)
   - G3 (all-season vs all-terrain) skipped as a near duplicate; G29 (Florida tire laws) waits on reading the statute + a legal review
@@ -166,7 +166,9 @@ _Last updated: 2026-10-02, evening (ATD call held: site approval and API credent
 - [x] ~~Phase 1: keyword map, 90–100 titles, demo list → Justin approves~~ (b813381, plans approved)
 - [x] ~~Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves~~ (800247b, pilot approved + 5 demos)
 - [x] ~~Blog + Learn live: 20 articles, 5 demos, 98 prerendered routes~~ (be6a2a2)
-- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); blog batch 2 live (f776fc1); blog batch 3 live (9e4cc11); blog batch 4 live (ecfd2af). Blog: 15 planned posts left (13 unwritten + #15 and #49 on hold) = 2 more batches. Learn: 33 guides live. Status table in `docs/content/blog-plan.md`. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
+- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); blog batch 2 live (f776fc1); blog batch 3 live (9e4cc11); blog batch 4 live (ecfd2af); blog batch 5 live (d2ba501). Blog: 2 planned posts left, both waiting on answers: #15 (accountant: Florida tire fee and sales tax) and #49 (Justin: used tires?). #32 and #42 reworked (below); #37 dropped as a Learn near-duplicate. Learn: 33 guides live. Status table in `docs/content/blog-plan.md`. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
+- [ ] Blog reworks #32/#37/#42 (preview/blog-rework 9eb9c44) → ship: #32 as /blog/tire-recall-notice-what-to-do, #42 as /blog/packed-car-weight-limit, #37 dropped (no distinct angle from the Tesla Learn guides)
+  - [ ] 5 facts were snippet-only (federal recall and load-limit rules: 30120, Parts 577, 573.13, 575.6, 571.110): confirm them (listed in blog-plan.md)
 - [x] ~~Blog batch 3: 10 posts~~ (9e4cc11, shipped to main 2026-10-02)
   - [ ] 16 facts were snippet-only: confirm them → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A18)
   - 4/32 in Florida rain, best time to buy (by season), RAV4, used car after storm season, choosing between brands, Camry, F-150 P vs LT, EV tire wear, rideshare mileage math, CR-V
