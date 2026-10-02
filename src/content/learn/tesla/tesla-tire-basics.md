@@ -9,7 +9,7 @@ secondaryKeywords:
   - "hl load index"
 hub: tesla
 date: 2026-10-01
-updated: 2026-10-01
+updated: 2026-10-02
 demo: load-speed-check
 takeaways:
   - "Michelin says EVs are heavier than comparable gas cars, and more weight means faster tire wear."
@@ -82,7 +82,7 @@ Each of those pulls a tire in a slightly different direction. Here's what each o
 
 Battery packs are heavy. Hankook says battery weight can make an EV up to 30% heavier than a comparable gas vehicle. Michelin puts it simply: vehicle weight is a critical factor in how fast a tire wears, and more weight means faster wear.
 
-Weight also decides which tires can go on the car at all. Every tire has a **load index**, the number after the size, that says how much weight it's built to carry at its maximum pressure. Some EV tires also carry an **XL** (extra load) or **HL** (high load) marking. Michelin explains that an HL tire carries more load than an XL tire of the same size at the same inflation pressure.
+Weight also decides which tires can go on the car at all. Every tire has a **load index**, the number after the size, that says how much weight it's built to carry at its maximum pressure. Some EV tires also carry an **XL** (extra load) or **HL** (high load) marking. Michelin explains that an HL tire carries more load than an XL tire of the same size at the same inflation pressure. Our [XL vs SL guide](/learn/buying/xl-vs-sl-tires) explains how load markings and pressure work together.
 
 The rule for replacements is the same on every car: match or exceed the load index your vehicle was specified with. Tesla's manual says to use tires that match the original specification. You'll find yours on the Tire and Loading Information placard on the door pillar and in the owner's manual.
 

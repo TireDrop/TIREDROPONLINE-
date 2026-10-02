@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (SHIPPED: blog batch 2, 7 buying-decision + myth posts (f776fc1); orders carry vehicle, sizes, size source and a server-checked Fitment (attributes + tags; Flow = admin prompt 26); nationwide hub + 7 pilot state pages, all 40 facts checked against their official sources (13 corrected); one-camera Tire Size Finder scanner + hero Scan button (all 18 gates pass); store-wide search with typeahead + /search results (1214d45, all 17 gates pass); remember vehicle + shareable /tires filters + full NHTSA year/make/model lists with a searchable Model box, cached /api/vehicles (preview/remember 519e321, all 16 gates pass); fitment no longer blocks on a model-level guess, door-jamb size entry front/rear (dee5157); Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
+_Last updated: 2026-10-02 (SHIPPED: Learn Buying + Fitment hubs, 8 guides (2674d06); blog batch 2, 7 buying-decision + myth posts (f776fc1); orders carry vehicle, sizes, size source and a server-checked Fitment (attributes + tags; Flow = admin prompt 26); nationwide hub + 7 pilot state pages, all 40 facts checked against their official sources (13 corrected); one-camera Tire Size Finder scanner + hero Scan button (all 18 gates pass); store-wide search with typeahead + /search results (1214d45, all 17 gates pass); remember vehicle + shareable /tires filters + full NHTSA year/make/model lists with a searchable Model box, cached /api/vehicles (preview/remember 519e321, all 16 gates pass); fitment no longer blocks on a model-level guess, door-jamb size entry front/rear (dee5157); Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -146,6 +146,7 @@ _Last updated: 2026-10-02 (SHIPPED: blog batch 2, 7 buying-decision + myth posts
 - [ ] Phase 4: internal links, Search Console submit, monthly refresh
 - [x] ~~Tesla tires Learn hub (6 guides) at /learn/tesla~~ (c42e16d, shipped 2026-10-01)
 - [x] Blog batch 2: 7 buying-decision + myth posts (f776fc1), shipped to main 2026-10-02. Two Bridgestone quote attributions (rear-axle placement, sipes/silica) were search-verified only: confirm on the source pages
+- [x] Learn: Buying + Fitment hubs, 8 guides (2674d06), shipped to main 2026-10-02. Facts were search-verified only (source sites blocked): ply ratings, XL pressures, run-flat limits; wheel guides lean on retailer sources
 
 ## ATD and business (Justin)
 - [ ] Submit the ATD connectivity form

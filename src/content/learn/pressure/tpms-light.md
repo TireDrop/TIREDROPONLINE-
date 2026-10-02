@@ -9,7 +9,7 @@ secondaryKeywords:
   - "tire pressure light cold morning"
 hub: pressure
 date: 2026-09-30
-updated: 2026-09-30
+updated: 2026-10-02
 demo: tpms-light
 takeaways:
   - "Under the federal standard, the low-pressure warning comes on when a tire is 25% or more below the placard pressure."
@@ -47,6 +47,7 @@ related:
   - /learn/pressure/tire-pressure-temperature
   - /learn/pressure/how-to-check-tire-pressure
   - /learn/tread/tread-depth
+  - /learn/buying/run-flat-tires
   - /mobile-service
   - /tire-check
 cta:
@@ -117,6 +118,8 @@ A tire installation at Extreme Tires includes a TPMS reset where the vehicle has
 Here's the part most drivers miss. The TPMS warning is designed to come on at a significant pressure loss, not a small one. A tire can be 15 or 20 percent low with the dash completely dark.
 
 The regulation itself says it: TPMS is not a substitute for proper tire maintenance, and keeping correct pressure is the driver's job even when the light hasn't come on. NHTSA's guidance is to check pressure with a gauge at least once a month, **spare included**, with the tires cold.
+
+On run-flat tires a working TPMS matters even more, because the car can sit level with a tire at zero pressure. Our [run-flat tire guide](/learn/buying/run-flat-tires) explains why.
 
 ## Quick reference
 

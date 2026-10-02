@@ -554,3 +554,84 @@ test("the Tesla hub: six publishable guides that follow the copy rules", () => {
   );
   assert.deepEqual(problems, [], "no content warnings for the Tesla guides");
 });
+
+/* ------------------------ Buying + Fitment hubs ------------------------ */
+
+test("the Buying and Fitment hubs: eight sourced guides that follow the copy rules", () => {
+  const store = loadContent({ checkLinks: true });
+  const expected = {
+    buying: [
+      "all-season-vs-all-weather-tires",
+      "all-terrain-vs-highway-tires",
+      "lt-vs-p-metric",
+      "xl-vs-sl-tires",
+      "run-flat-tires",
+    ],
+    fitment: ["bolt-pattern", "wheel-offset-backspacing", "staggered-tires"],
+  };
+  const routes = new Set(store.contentRoutes());
+  const BANNED = /\b(safe|safer|safely|fine|guaranteed?|OK)\b/i;
+  // Real, non-content pages a guide may link out to.
+  const SITE_PAGES = new Set([
+    "/tires",
+    "/wheels",
+    "/install",
+    "/tire-size-finder",
+    "/load-speed-check",
+    "/plus-size-calculator",
+    "/tire-rotation-pattern",
+    "/can-my-tire-be-repaired",
+  ]);
+
+  for (const [hub, slugs] of Object.entries(expected)) {
+    const hubEntry = readHubs().find((h) => h.slug === hub);
+    assert.ok(routes.has(`/learn/${hub}`), `/learn/${hub} is published`);
+    assert.ok(hubEntry.links.length >= 2, `${hub}: hub links to tools`);
+    const hubText = [hubEntry.title, hubEntry.description, hubEntry.intro].join(" ");
+    assert.ok(!BANNED.test(hubText), `${hub} hub copy: ${hubText.match(BANNED)?.[0]}`);
+
+    const guides = store.getLearnArticles({ hub });
+    assert.deepEqual(guides.map((g) => g.slug).sort(), [...slugs].sort());
+    for (const a of guides) {
+      const text = [
+        a.title,
+        a.description,
+        a.body,
+        ...a.takeaways,
+        ...a.faq.flatMap((f) => [f.q, f.a]),
+      ].join("\n");
+      assert.ok(!BANNED.test(text), `${a.path}: "${text.match(BANNED)?.[0]}"`);
+      assert.doesNotMatch(text, /\$\d|discount|coupon|% off|\bdeals?\b|\bsale\b/i, a.path);
+      assert.doesNotMatch(text, /within \d+ (minutes|hours|days)|same[- ]day/i, a.path);
+      assert.ok(a.keyword, `${a.path}: keyword`);
+      assert.ok(a.takeaways.length >= 4, `${a.path}: takeaways`);
+      assert.ok(a.faq.length >= 3, `${a.path}: faq`);
+      assert.ok(a.sources.length >= 4, `${a.path}: sources`);
+      // Installs are South Florida only, and every guide says so plainly.
+      assert.match(a.body, /Miami-Dade, Broward and Palm Beach/, `${a.path}: install area`);
+      assert.match(a.body, /48 (contiguous )?states and DC/, `${a.path}: shipping area`);
+      // At least three links out to real, non-content pages.
+      const out = new Set(
+        [...a.body.matchAll(/\]\((\/[^)\s#?]*)/g)]
+          .map((m) => m[1])
+          .filter((p) => SITE_PAGES.has(p)),
+      );
+      assert.ok(out.size >= 3, `${a.path}: ${out.size} site-page links`);
+      const words = a.body
+        .replace(/\[\[demo:[^\]]*\]\]/g, " ")
+        .split(/\s+/)
+        .filter((w) => /[a-z0-9]/i.test(w)).length;
+      assert.ok(words >= 900 && words <= 1500, `${a.path}: ${words} words`);
+      // Linked in from at least one other published page.
+      const inbound = store
+        .getLearnArticles()
+        .filter((o) => o.path !== a.path)
+        .some((o) => o.body.includes(`](${a.path})`) || o.related.includes(a.path));
+      assert.ok(inbound, `${a.path}: no other guide links to it`);
+    }
+  }
+  const problems = store.problems.filter((p) =>
+    /\/learn\/(buying|fitment)\//.test(p.file),
+  );
+  assert.deepEqual(problems, [], "no content warnings for the new guides");
+});
