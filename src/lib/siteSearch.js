@@ -507,6 +507,9 @@ function pageScore(page, tokens, phrase) {
   const title = normalizeText(page.title);
   if (phrase && title.startsWith(phrase)) score += 4;
   else if (phrase && title.includes(phrase)) score += 2;
+  // A page's keywords are the words people use for it, so typing one of its
+  // phrases ("flat tire" for Tire Repair) counts like the phrase in its title.
+  else if (phrase.includes(" ") && normalizeText(page.keywords ?? "").includes(phrase)) score += 4;
   return score + (page.boost ?? 0);
 }
 
