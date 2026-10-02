@@ -51,6 +51,7 @@ related:
   - /learn/age/how-old-is-too-old
   - /tire-check
   - /tires
+  - /blog/back-to-school-car-check-broward
 cta:
   label: "Check the tires"
   href: /tire-check

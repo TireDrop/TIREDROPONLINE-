@@ -17,6 +17,7 @@ import { useCart } from "../../context/CartContext.jsx";
 import HeaderSearch from "./HeaderSearch.jsx";
 import Logo from "./Logo.jsx";
 import { LanguageControl, TranslationNotice } from "./LanguageControl.jsx";
+import { trapTab } from "../../lib/trapFocus.js";
 
 /** Thin utility strip above the masthead: phone, address, mobile-service pitch. */
 // Installation is not free: name the shop's published starting price,
@@ -59,6 +60,9 @@ function UtilityBar() {
 
 function DesktopNav() {
   const [openIdx, setOpenIdx] = useState(null);
+  // Set while Escape hands focus back to a menu's own link, so that focus
+  // does not reopen the menu it just closed.
+  const escaping = useRef(false);
 
   return (
     <nav aria-label="Main" className="hidden lg:block">
@@ -71,6 +75,20 @@ function DesktopNav() {
               className="relative"
               onMouseEnter={() => hasMenu && setOpenIdx(i)}
               onMouseLeave={() => hasMenu && setOpenIdx(null)}
+              // Focus opens a menu, so focus leaving it has to close it:
+              // otherwise tabbing on past the last item leaves it hanging
+              // over the page. Escape closes it and returns to its link.
+              onBlur={(e) => {
+                if (hasMenu && !e.currentTarget.contains(e.relatedTarget))
+                  setOpenIdx((open) => (open === i ? null : open));
+              }}
+              onKeyDown={(e) => {
+                if (e.key !== "Escape" || !hasMenu || openIdx !== i) return;
+                setOpenIdx(null);
+                escaping.current = true;
+                e.currentTarget.querySelector("a")?.focus({ preventScroll: true });
+                escaping.current = false;
+              }}
             >
               <NavLink
                 to={item.to}
@@ -82,7 +100,7 @@ function DesktopNav() {
                       : "text-ink after:bg-transparent hover:text-drop hover:after:bg-drop/30"
                   }`
                 }
-                onFocus={() => hasMenu && setOpenIdx(i)}
+                onFocus={() => hasMenu && !escaping.current && setOpenIdx(i)}
                 aria-expanded={hasMenu ? openIdx === i : undefined}
               >
                 {item.label}
@@ -116,6 +134,7 @@ function DesktopNav() {
 
 function MobileDrawer({ open, onClose }) {
   const closeButtonRef = useRef(null);
+  const panelRef = useRef(null);
 
   // Lock body scroll while the drawer is open, and let Escape dismiss it —
   // the filter drawer already does both, and a panel that covers the screen
@@ -133,6 +152,7 @@ function MobileDrawer({ open, onClose }) {
 
     const onKey = (e) => {
       if (e.key === "Escape") onClose();
+      else trapTab(e, panelRef.current);
     };
     document.addEventListener("keydown", onKey);
     return () => {
@@ -146,12 +166,15 @@ function MobileDrawer({ open, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
+      {/* The backdrop closes on a tap; the keyboard has the X and Escape. */}
       <button
         aria-label="Close menu"
+        tabIndex={-1}
         className="absolute inset-0 bg-ink/60"
         onClick={onClose}
       />
       <div
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label="Site menu"

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { X } from "lucide-react";
+import { trapTab } from "../../lib/trapFocus.js";
 
 // Controlled filter panel shared by the tire and wheel catalogs.
 // `value` is the full filter state, `onChange` receives the next state,
@@ -232,6 +233,7 @@ export default function Filters({
   const clearAll = () => onChange({ ...EMPTY_FILTERS });
 
   const closeButtonRef = useRef(null);
+  const sheetRef = useRef(null);
 
   // While the drawer is up it owns the screen: the page behind it must not
   // scroll away underneath, and Escape has to dismiss it. It also declares
@@ -246,6 +248,7 @@ export default function Filters({
     closeButtonRef.current?.focus();
     const onKey = (e) => {
       if (e.key === "Escape") onOpenChange?.(false);
+      else trapTab(e, sheetRef.current);
     };
     document.addEventListener("keydown", onKey);
     return () => {
@@ -292,10 +295,12 @@ export default function Filters({
           <button
             type="button"
             aria-label="Close filters"
+            tabIndex={-1}
             onClick={close}
             className="absolute inset-0 h-full w-full bg-ink/50"
           />
           <div
+            ref={sheetRef}
             role="dialog"
             aria-modal="true"
             aria-label="Filter results"

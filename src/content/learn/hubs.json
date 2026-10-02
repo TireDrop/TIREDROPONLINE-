@@ -2,8 +2,21 @@
   {
     "slug": "basics",
     "title": "Tire Basics",
-    "description": "What a tire is made of, the main tire types, and how all-season, all-terrain, touring and performance tires differ.",
-    "order": 1
+    "description": "What a tire is made of, the main tire types, and how touring and performance tires differ.",
+    "order": 1,
+    "intro": "Before you compare brands, it helps to know what you're comparing. These guides explain how a tire is built and how the main types differ, in the tire makers' and regulators' own terms.",
+    "links": [
+      {
+        "text": "Know your size?",
+        "label": "Read it off your door-jamb sticker with the Tire Size Finder",
+        "href": "/tire-size-finder"
+      },
+      {
+        "text": "Comparing two tires?",
+        "label": "Line up speed ratings and UTQG grades side by side",
+        "href": "/compare"
+      }
+    ]
   },
   {
     "slug": "sidewall",

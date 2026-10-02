@@ -21,7 +21,7 @@
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, resolve } from "node:path";
 import {
   contentLastmod,
@@ -194,10 +194,10 @@ function redirectedPaths() {
  * come from the same parser, so they agree.
  */
 export async function allRoutes({ extra = [] } = {}) {
-  const { TIRES, WHEELS } = await import(resolve(ROOT, "src/data/products.js"));
-  const { SERVICES } = await import(resolve(ROOT, "src/data/services.js"));
-  const { CITY_PAGES } = await import(resolve(ROOT, "src/data/cityPages.js"));
-  const { STATE_PAGES_LIVE } = await import(resolve(ROOT, "src/data/stateList.js"));
+  const { TIRES, WHEELS } = await import(pathToFileURL(resolve(ROOT, "src/data/products.js")).href);
+  const { SERVICES } = await import(pathToFileURL(resolve(ROOT, "src/data/services.js")).href);
+  const { CITY_PAGES } = await import(pathToFileURL(resolve(ROOT, "src/data/cityPages.js")).href);
+  const { STATE_PAGES_LIVE } = await import(pathToFileURL(resolve(ROOT, "src/data/stateList.js")).href);
   const { files } = parseRouter();
   const productFiles = [files.get("ProductPage"), "src/data/products.js"];
   const serviceFiles = [files.get("ServiceDetailPage"), "src/data/services.js"];

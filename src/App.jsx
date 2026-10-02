@@ -1,11 +1,5 @@
 import React, { Suspense, useEffect } from "react";
-import {
-  Navigate,
-  Route,
-  Routes,
-  useLocation,
-  useParams,
-} from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import Header from "./components/layout/Header.jsx";
 import Footer from "./components/layout/Footer.jsx";
@@ -14,7 +8,6 @@ import CompareTray from "./components/shop/CompareTray.jsx";
 import { InPageAnchors, ScrollToTop } from "./components/ui/index.jsx";
 import { trackPageView } from "./lib/analytics.js";
 import { lazyPage } from "./lib/lazyPage.js";
-import { TOOL_PAGE_ALIASES } from "./components/demos/toolPages.js";
 import { isProductPath } from "./data/mobileBar.js";
 
 // Every route except the home page is loaded on demand.
@@ -25,10 +18,16 @@ import { isProductPath } from "./data/mobileBar.js";
 // 290 kB over the wire, and the JS from 209 kB to 91 kB, with no extra requests
 // on the home page. Measurements and method are in docs/audits/2026-09-24-technical-audit.md.
 //
-// HomePage stays a static import on purpose: it is the first paint for most
-// visitors, and making it wait on a second round trip would trade the win away
-// at exactly the moment it matters.
-import HomePage from "./pages/HomePage.jsx";
+// The home page is split out too. It used to stay in the main bundle so its
+// first paint would not wait on a second round trip, but every prerendered
+// page now lists its chunks as <link rel="modulepreload"> in the head
+// (scripts/prerender.mjs), so the home page's chunk downloads alongside the
+// main bundle instead of after it. Splitting it keeps the home page's own
+// code and data (the vehicle and size search, the featured tires, the tool
+// list) out of every other page's download.
+const HomePage = lazyPage("pages/HomePage.jsx", () =>
+  import("./pages/HomePage.jsx"),
+);
 const ShippingPage = lazyPage("pages/ShippingPage.jsx", () =>
   import("./pages/ShippingPage.jsx"),
 );
@@ -91,6 +90,10 @@ const TireSizeFinderPage = lazyPage("pages/tools/TireSizeFinderPage.jsx", () =>
 // each (copy in src/components/demos/toolPages.js).
 const DemoToolPage = lazyPage("pages/tools/DemoToolPage.jsx", () =>
   import("./pages/tools/DemoToolPage.jsx"),
+);
+// /tools/<tool> -> the tool's own path (in-app links; vercel.json 301s them).
+const ToolRedirect = lazyPage("pages/tools/ToolRedirect.jsx", () =>
+  import("./pages/tools/ToolRedirect.jsx"),
 );
 
 // Services
@@ -165,27 +168,6 @@ const BlogIndexPage = lazyPage(
   "pages/blog/BlogIndexPage.jsx",
   () => import("./pages/blog/BlogIndexPage.jsx"),
 );
-
-/**
- * /tools/<tool> is how the content plans link the free tools, which live at
- * the root. vercel.json 301s these on the server; this covers in-app links.
- */
-const TOOL_PATHS = {
-  "tire-size": "/tire-size",
-  "tire-check": "/tire-check",
-  "tread-gauge": "/tire-check",
-  "find-my-tires": "/find-my-tires",
-  "tire-size-finder": "/tire-size-finder",
-  // load-speed-check, pressure-temp, damage-map... and the planned aliases.
-  ...TOOL_PAGE_ALIASES,
-};
-
-function ToolRedirect() {
-  const { tool } = useParams();
-  const { search } = useLocation();
-  const to = TOOL_PATHS[tool];
-  return to ? <Navigate to={to + search} replace /> : <NotFoundPage />;
-}
 
 /**
  * Sends the GA4 page_view for each route change (src/lib/analytics.js).

@@ -447,8 +447,12 @@ export function serializeTiresQuery(state = {}) {
  * the full hero (src/pages/shop/TiresPage.jsx). Pass the URL's selection:
  * only a bare /tires hydrates the prerendered page (src/main.jsx), so the
  * header the server rendered and the one the browser renders always agree.
+ *
+ * With no vehicle or size, a partial size with at least a width and an
+ * aspect ratio (the header search's /tires?w=245&a=40) titles the page
+ * too: "245/40 tires", "245/40R18 tires". A width alone keeps the hero.
  */
-export function searchTitle(selection) {
+export function searchTitle(selection, partial = null) {
   if (selection?.type === "vehicle") return `Tires for your ${vehicleLabel(selection)}`;
   if (selection?.type === "size") {
     const front = readSize(selection.size)?.display;
@@ -456,5 +460,33 @@ export function searchTitle(selection) {
     if (!front) return null;
     return rear ? `${front} and ${rear} tires` : `${front} tires`;
   }
+  if (!selection && partial?.width && partial?.aspect) {
+    return `${partial.width}/${partial.aspect}${partial.diameter ? `R${partial.diameter}` : ""} tires`;
+  }
   return null;
+}
+
+/**
+ * True when a partial size from the address bar (`{ width, aspect,
+ * diameter }`, any of them "") contradicts a size being shopped for: some
+ * part it gives differs from that size, front and rear alike. Then the
+ * partial is the newer search (typed into the header, or picked in the
+ * finder) and the old size gives way to it. No parts, or a size that is
+ * not a size, is never a contradiction.
+ */
+export function partialConflicts(partial, size, rear = null) {
+  const p = partial ?? {};
+  if (!p.width && !p.aspect && !p.diameter) return false;
+  const fits = (marking) => {
+    const r = readSize(marking);
+    if (!r) return null;
+    return (
+      (!p.width || String(r.width) === String(p.width)) &&
+      (!p.aspect || String(r.aspect) === String(p.aspect)) &&
+      (!p.diameter || String(r.rimDiameter) === String(p.diameter))
+    );
+  };
+  const front = fits(size);
+  if (front === null) return false;
+  return !front && !(rear && fits(rear));
 }

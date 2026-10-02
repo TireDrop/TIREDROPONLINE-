@@ -125,6 +125,11 @@ const SHARD = (() => {
 
 /* ------------------------------ preview ------------------------------ */
 
+// vite preview runs as its own process group so the whole tree can be
+// stopped; Windows has no process groups, and there the server is the
+// child itself (node runs vite directly rather than through npx).
+const stopPreview = (child) =>
+  process.platform === "win32" ? child.kill() : process.kill(-child.pid);
 let server = null;
 let BASE = process.env.FORMS_BASE;
 if (!BASE) {
@@ -133,7 +138,7 @@ if (!BASE) {
     process.exit(1);
   }
   BASE = `http://localhost:${PORT}`;
-  server = spawn("npx", ["vite", "preview", "--port", String(PORT), "--strictPort"], {
+  server = spawn(process.execPath, ["node_modules/vite/bin/vite.js", "preview", "--port", String(PORT), "--strictPort"], {
     stdio: "ignore",
     detached: true,
   });
@@ -146,7 +151,7 @@ if (!BASE) {
     }
     if (Date.now() > deadline) {
       console.error(`vite preview did not come up on ${BASE}`);
-      process.kill(-server.pid);
+      stopPreview(server);
       process.exit(1);
     }
     await new Promise((r) => setTimeout(r, 200));
@@ -155,7 +160,7 @@ if (!BASE) {
 function stopServer() {
   if (server) {
     try {
-      process.kill(-server.pid);
+      stopPreview(server);
     } catch {
       /* already gone */
     }
@@ -1286,6 +1291,47 @@ for (const width of [390, 1440]) {
     const order = await placeCheckout(h);
     assert.match(order.notes, /^Vehicle: 2019 Toyota Land Cruiser 70$/m);
     noErrors(h.errors);
+    await h.context.close();
+  });
+
+  await check(`${width} /checkout: an order request that doesn't reach the shop keeps the cart and says so, and a retry sends it`, async () => {
+    const h = await open(width, { cart: CART, delay: 0 });
+    const { page } = h;
+    // The shop's API is unreachable for the first send (registered after
+    // the harness's handler, so it answers first), then back.
+    let down = true;
+    await page.route("**/api/checkout", async (route) => {
+      if (!down) return route.fallback();
+      h.sent.checkout.push(JSON.parse(route.request().postData() || "{}"));
+      await route.abort("connectionrefused");
+    });
+    await checkoutToVehicle(h);
+    await page.selectOption("#year", "2019");
+    await page.selectOption("#make", "Toyota");
+    await page.locator('#model option[value="Tacoma"]').waitFor({ state: "attached" });
+    await page.selectOption("#model", "Tacoma");
+    await page.getByRole("button", { name: "Continue" }).click();
+    await placeCheckout(h);
+
+    const alert = page.getByRole("alert").filter({ hasText: "didn't reach the shop" });
+    await alert.waitFor();
+    assert.match(await alert.innerText(), /nothing has been charged/);
+    assert.ok(await alert.locator('a[href^="tel:"]').count() === 1, "the phone number");
+    assert.equal(await page.getByText("Finish this by phone").count(), 0, "no confirmation screen");
+    const kept = JSON.parse(await page.evaluate(() => localStorage.getItem("tiredrop.cart.v1")));
+    assert.equal(kept?.lines?.length, CART.lines.length, "the cart is kept");
+    assert.equal(await page.locator("#agree").count(), 1, "still on the review step");
+
+    // Back up: the same button sends it, and only then is the cart emptied.
+    down = false;
+    await page.getByRole("button", { name: "Place Order Request" }).click();
+    await waitFor(() => h.sent.checkout.length === 2, "/api/checkout retry");
+    await page.getByText("Your order request is in").waitFor();
+    await page.waitForFunction(() => {
+      const c = JSON.parse(localStorage.getItem("tiredrop.cart.v1") || "null");
+      return Array.isArray(c?.lines) && c.lines.length === 0;
+    });
+    noErrors(h.errors.filter((e) => !/ERR_CONNECTION_REFUSED|Failed to load resource/.test(e)));
     await h.context.close();
   });
 
