@@ -47,6 +47,7 @@ import { useCompare } from "../../context/CompareContext.jsx";
 import { useFit } from "../../context/VehicleContext.jsx";
 import { trackViewItem } from "../../lib/analytics.js";
 import { loadLbs, speedSymbol } from "../../data/loadSpeedTables.js";
+import { sizeSearch } from "../../data/fitmentCheck.js";
 import {
   DELIVERY_NOTE,
   SET_SIZE,
@@ -255,20 +256,25 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
   const unit = isTire ? "tire" : "wheel";
   const [qty, setQty] = useState(SET_SIZE);
   const [install, setInstall] = useState(false);
-  const [added, setAdded] = useState(false);
+  // What was last added ("qty:install"), so the confirmation and the phone
+  // bar's View cart describe that order, not whatever is picked now.
+  const [added, setAdded] = useState(null);
 
   useEffect(() => trackViewItem(product), [product]);
 
-  // The sticky bar only earns its place once the real buy box has scrolled
-  // away; before that it would cover the page for no reason.
-  const buyBoxRef = useRef(null);
-  const [buyBoxGone, setBuyBoxGone] = useState(false);
+  // The phone's sticky bar shows whenever the real total and Add to Cart
+  // button are off screen, so the way to buy is always one thumb away: on
+  // arrival (they sit below the fold on a phone), while choosing quantity
+  // and delivery, and after scrolling on to the specs. It steps aside
+  // while the real button is in view, rather than doubling it.
+  const ctaRef = useRef(null);
+  const [ctaGone, setCtaGone] = useState(false);
 
   useEffect(() => {
-    const el = buyBoxRef.current;
+    const el = ctaRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return undefined;
     const observer = new IntersectionObserver(
-      ([entry]) => setBuyBoxGone(!entry.isIntersecting),
+      ([entry]) => setCtaGone(!entry.isIntersecting),
       { threshold: 0 },
     );
     observer.observe(el);
@@ -298,6 +304,11 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
   const inCompare = canCompare && compare.has(product.slug);
   const compareLocked = !inCompare && compare.isFull;
   const plural = (n) => (n === 1 ? unit : `${unit}s`);
+  const addedQty = added ? Number(added.split(":")[0]) : 0;
+  const justAdded = added === `${qty}:${install ? "i" : "n"}`;
+  const fitHref = noFit
+    ? (fit.sizes ?? []).map(sizeSearch).find(Boolean) ?? "/tires"
+    : null;
   const stock = reportStock ? stockLabel(product) : null;
   const soldOut = stock?.level === "out";
   const specs = specRows(product, isTire);
@@ -331,7 +342,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
       },
       qty,
     );
-    setAdded(true);
+    setAdded(`${qty}:${install ? "i" : "n"}`);
   };
 
   return (
@@ -390,7 +401,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
           </div>
 
           {/* Buy box */}
-          <div ref={buyBoxRef}>
+          <div>
             <p className="eyebrow">{product.brand}</p>
             <h1 className="h1 mt-1">{product.model}</h1>
             <p className="tnum mt-2 font-display text-lg text-smoke">
@@ -637,75 +648,78 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
               </div>
             </fieldset>
 
-            {/* Price breakdown: what we charge, and install. */}
-            <dl className="tnum mt-6 space-y-1.5 text-sm">
-              <div className="flex justify-between gap-4">
-                <dt className="text-smoke">
-                  Price, {qty} {plural(qty)}
-                </dt>
-                <dd className="font-medium">{money(bill.price)}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-smoke">Installation at the shop</dt>
-                <dd className="font-medium">
-                  {install ? money(installTotal) : "Not added"}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-4 border-t border-ink/10 pt-2 font-display text-lg font-bold">
-                <dt>Estimated total</dt>
-                <dd>{money(orderTotal)}</dd>
-              </div>
-            </dl>
-
-            <p className="mt-2 text-xs text-smoke">
-              Shipping is free. Taxes are calculated at checkout.
-            </p>
-
-            {noFit ? (
-              <p
-                data-testid="no-add"
-                className="mt-5 rounded-sm border border-ink/15 bg-fog p-3 text-sm text-ink"
-              >
-                <span className="font-semibold">{fit.title}.</span> To keep
-                the wrong size out of your cart, it can&rsquo;t be added. The
-                tires that fit are one tap away, above.
-              </p>
-            ) : (
-              <button
-                type="button"
-                onClick={handleAdd}
-                disabled={soldOut}
-                className="btn-primary mt-5 w-full disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <ShoppingCart size={18} aria-hidden />
-                Add to Cart
-              </button>
-            )}
-            {soldOut && (
-              <p className="mt-2 text-sm text-smoke">
-                Call{" "}
-                <a
-                  href={BUSINESS.phoneHref}
-                  className="whitespace-nowrap text-ink underline underline-offset-4 hover:text-drop"
-                >
-                  {BUSINESS.phone}
-                </a>{" "}
-                and we&rsquo;ll find this size from another source.
-              </p>
-            )}
-
-            <div aria-live="polite">
-              {added && (
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-ink/15 bg-fog p-3 text-sm">
-                  <span className="flex items-center gap-2 text-ink">
-                    <Check size={16} aria-hidden className="text-drop" />
-                    Added {qty} {plural(qty)} to your cart.
-                  </span>
-                  <Link to="/cart" className="btn-dark btn-sm">
-                    View cart
-                  </Link>
+            {/* Price breakdown, then the button: the stretch the phone's
+                sticky bar stands in for while it is off screen. */}
+            <div ref={ctaRef}>
+              <dl className="tnum mt-6 space-y-1.5 text-sm">
+                <div className="flex justify-between gap-4">
+                  <dt className="text-smoke">
+                    Price, {qty} {plural(qty)}
+                  </dt>
+                  <dd className="font-medium">{money(bill.price)}</dd>
                 </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-smoke">Installation at the shop</dt>
+                  <dd className="font-medium">
+                    {install ? money(installTotal) : "Not added"}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-4 border-t border-ink/10 pt-2 font-display text-lg font-bold">
+                  <dt>Estimated total</dt>
+                  <dd>{money(orderTotal)}</dd>
+                </div>
+              </dl>
+
+              <p className="mt-2 text-xs text-smoke">
+                Shipping is free. Taxes are calculated at checkout.
+              </p>
+
+              {noFit ? (
+                <p
+                  data-testid="no-add"
+                  className="mt-5 rounded-sm border border-ink/15 bg-fog p-3 text-sm text-ink"
+                >
+                  <span className="font-semibold">{fit.title}.</span> To keep
+                  the wrong size out of your cart, it can&rsquo;t be added. The
+                  tires that fit are one tap away, above.
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleAdd}
+                  disabled={soldOut}
+                  className="btn-primary mt-5 w-full disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <ShoppingCart size={18} aria-hidden />
+                  Add to Cart
+                </button>
               )}
+              {soldOut && (
+                <p className="mt-2 text-sm text-smoke">
+                  Call{" "}
+                  <a
+                    href={BUSINESS.phoneHref}
+                    className="whitespace-nowrap text-ink underline underline-offset-4 hover:text-drop"
+                  >
+                    {BUSINESS.phone}
+                  </a>{" "}
+                  and we&rsquo;ll find this size from another source.
+                </p>
+              )}
+
+              <div aria-live="polite">
+                {added && (
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-ink/15 bg-fog p-3 text-sm">
+                    <span className="flex items-center gap-2 text-ink">
+                      <Check size={16} aria-hidden className="text-drop" />
+                      Added {addedQty} {plural(addedQty)} to your cart.
+                    </span>
+                    <Link to="/cart" className="btn-dark btn-sm">
+                      View cart
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Installed price, one tire and a set of four, for a local
@@ -892,22 +906,54 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
       )}
 
       {/* Sticky phone buy bar. It sits on top of the global MobileCallBar
-          (fixed, `--call-bar-h` tall) rather than over it, so both stay tappable. */}
-      {buyBoxGone && (
-        <div className="fixed inset-x-0 bottom-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] z-30 border-t border-ink/10 bg-bone/95 backdrop-blur lg:hidden">
+          (fixed, `--call-bar-h` tall) rather than over it, so both stay
+          tappable. Its figure is the same estimated total as the buy box,
+          installation included when it is chosen. */}
+      {ctaGone && (
+        <div
+          data-testid="buy-bar"
+          className="fixed inset-x-0 bottom-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] z-30 border-t border-ink/10 bg-bone/95 backdrop-blur lg:hidden"
+        >
           <div className="flex items-center gap-3 px-4 py-2.5">
             <div className="min-w-0">
-              <p className="tnum font-display text-xl leading-none">
-                {money(bill.price)}
-              </p>
-              <p className="mt-1 truncate text-[11px] text-smoke">
-                {qty} {plural(qty)} · {money(product.price)} each
-              </p>
+              {noFit ? (
+                <>
+                  <p className="truncate text-xs font-semibold text-ink">
+                    {fit.title}
+                  </p>
+                  <p className="tnum mt-1 truncate text-[11px] text-smoke">
+                    {money(orderTotal)} for {qty} {plural(qty)}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="tnum font-display text-xl leading-none">
+                    {money(orderTotal)}
+                  </p>
+                  <p className="mt-1 truncate text-[11px] text-smoke">
+                    {qty} {plural(qty)}
+                    {install ? " + installation" : " · free shipping"}
+                    {" · "}
+                    {money(product.price)} each
+                  </p>
+                </>
+              )}
             </div>
             {noFit ? (
-              <p className="ml-auto shrink-0 text-right text-xs font-semibold text-ink">
-                {fit.title}
-              </p>
+              <Link
+                to={fitHref}
+                className="btn-outline btn-sm ml-auto min-h-[44px] shrink-0"
+              >
+                See tires that fit
+              </Link>
+            ) : justAdded ? (
+              <Link
+                to="/cart"
+                className="btn-dark btn-sm ml-auto min-h-[44px] shrink-0"
+              >
+                <Check size={16} aria-hidden />
+                Added · View cart
+              </Link>
             ) : (
               <button
                 type="button"
