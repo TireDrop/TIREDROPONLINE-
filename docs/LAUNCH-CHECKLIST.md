@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (SHIPPED: home page redesign, flow + scroll transitions (037b6d6); Learn Buying + Fitment hubs, 8 guides (2674d06); blog batch 2, 7 buying-decision + myth posts (f776fc1); orders carry vehicle, sizes, size source and a server-checked Fitment (attributes + tags; Flow = admin prompt 26); nationwide hub + 7 pilot state pages, all 40 facts checked against their official sources (13 corrected); one-camera Tire Size Finder scanner + hero Scan button (all 18 gates pass); store-wide search with typeahead + /search results (1214d45, all 17 gates pass); remember vehicle + shareable /tires filters + full NHTSA year/make/model lists with a searchable Model box, cached /api/vehicles (preview/remember 519e321, all 16 gates pass); fitment no longer blocks on a model-level guess, door-jamb size entry front/rear (dee5157); Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
+_Last updated: 2026-10-02 (OPEN: compact mobile-first footer on preview/footer-compact, 1621px → 608px tall on a phone, waiting on Justin's review; SHIPPED: home page redesign, flow + scroll transitions (037b6d6); Learn Buying + Fitment hubs, 8 guides (2674d06); blog batch 2, 7 buying-decision + myth posts (f776fc1); orders carry vehicle, sizes, size source and a server-checked Fitment (attributes + tags; Flow = admin prompt 26); nationwide hub + 7 pilot state pages, all 40 facts checked against their official sources (13 corrected); one-camera Tire Size Finder scanner + hero Scan button (all 18 gates pass); store-wide search with typeahead + /search results (1214d45, all 17 gates pass); remember vehicle + shareable /tires filters + full NHTSA year/make/model lists with a searchable Model box, cached /api/vehicles (preview/remember 519e321, all 16 gates pass); fitment no longer blocks on a model-level guess, door-jamb size entry front/rear (dee5157); Tesla tires Learn hub with 6 guides; language button (c05e3ac); phone bar, accessibility, 48 states + DC wording, NHTSA timeout (c541339))_
 
 ## Site fixes (Claude)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
@@ -33,6 +33,7 @@ _Last updated: 2026-10-02 (SHIPPED: home page redesign, flow + scroll transition
 - [x] ~~6 new tools (load/speed, plus-size, pressure-temp, repair check, shaking checker, rotation) with their own pages + article embeds~~ (shipped 2026-10-01)
 - [x] ~~Language button: translate any page (Google element + translate.google.com fallback)~~ (c05e3ac)
 - [x] ~~Spanish tab labels overflow the home finder on phones (SearchPanel whitespace-nowrap) → let tabs wrap below md~~ (c05e3ac)
+- [ ] Compact mobile-first footer (preview/footer-compact a18b709) → Justin reviews → ship
 
 ## Admin (Justin)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
