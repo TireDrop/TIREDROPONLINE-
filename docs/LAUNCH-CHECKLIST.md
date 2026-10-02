@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
+_Last updated: 2026-10-02 (CRO fixes 1 + 4 on preview/cro-quote-compact, ready to ship; SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
 
 ## Site fixes (Claude)
 - [x] ~~Resources only: every competitor citation/link replaced with maker, AAA or government sources~~ (`7754330`, shipped to main 2026-10-02)
@@ -102,6 +102,10 @@ _Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citati
 - [ ] Shopify theme copy still says "continental United States" (shop. redirects to the main site, so it does not render; update the draft theme only if the redirect ever comes off)
 - [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search)
 - [x] ~~CRO quick wins: hero to results, phone cart Checkout, install price shown, 48 states + DC on cards~~ (shipped to main 2026-10-02, release preview/release-2026-10-02)
+- [ ] CRO fixes 1 + 4: size quote form on zero results, compact /tires header, Cart in the /tires bottom bar (preview/cro-quote-compact baaf32c) → ship
+  - First tire card with a vehicle in the URL (2019 F-150): 1,199 → 742 px at 390x844, 1,066 → 701 px at 1440x900 (size URL 225/50R17: 1,080 → 684 and 1,046 → 681)
+  - New lead type `size-quote` (tag `lead-size-quote`) goes through the same Shopify → Flow → info@ path; GA4 `view_search_results { results }` counts the zero-result searches
+  - Free-install leftovers (fix 5): About, Wheels, Install, Commercial, product, checkout and home meta, the /tires shipping band, state/city/search copy and 7 articles now show the install price from the service catalog or drop the free claim
 
 ## Big upgrades (Claude)
 - [x] ~~Home page redesign: flow + scroll transitions, with check:home guarding section order, no-JS and reduced-motion visibility~~ (037b6d6, shipped to main 2026-10-02)
