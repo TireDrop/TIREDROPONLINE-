@@ -5,8 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (ATD call held: site approval and API credentials pending at ATD; SHIPPED today: resources only + check:sources, wave 2 (quote form, installed price, blog batch 3, a11y 0 issues, check:links), blog batch 4, check:forms 271s → 83s)_
-_Last updated: 2026-10-02, evening (SHIPPED to main: 2026-10-02 team build (d2ba501), all 22 gates pass: blog batch 5 (10 posts), Learn gap fill C (8 guides), tire page + cart upgrades, page speed (main JS 158 → 113 KB), QA fixes, search fix, Windows dev fixes; earlier: check:forms 271s → 83s, same 113 checks, on preview/forms-split; SHIPPED: blog batch 4, 10 posts (Civic, Wrangler, Silverado towing, hybrids, small fleets, potholes, new-car tires, rotation and aging myths, Thanksgiving trip); earlier today: wave 2 (quote form, installed price, blog batch 3, a11y 0 issues, check:links), resources only + check:sources)_
+_Last updated: 2026-10-02, evening (ATD call held: site approval and API credentials pending at ATD. SHIPPED to main today: team build d2ba501 (blog batch 5, Learn gap fill C, tire page + cart, page speed, QA, search, Windows dev); resources only + check:sources; wave 2 (quote form, installed price, blog batch 3, a11y 0 issues, check:links); blog batch 4; check:forms 271s → 83s)_
 
 ## Site fixes (Claude)
 - [x] ~~Ship the 2026-10-02 team build to main (all 22 gates pass on the merged build; Justin said "ship it")~~ (`d2ba501`, shipped to main 2026-10-02)
