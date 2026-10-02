@@ -162,7 +162,9 @@ test("the CSP is report-only and allows the inline gtag snippet by hash", () => 
   // Every executable inline script in the page template must have its hash
   // in script-src (the prerender copies the snippet byte for byte). Edit the
   // snippet in index.html and this fails until vercel.json is updated.
-  const html = read("../../index.html");
+  // As the repo stores it (LF): a Windows checkout with core.autocrlf has
+  // CRLF on disk, which hashes differently from what Vercel serves.
+  const html = read("../../index.html").replace(/\r\n/g, "\n");
   const inline = [...html.matchAll(/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/g)].filter(
     ([, attrs]) => !/application\/ld\+json/.test(attrs),
   );

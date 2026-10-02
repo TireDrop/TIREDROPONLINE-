@@ -39,6 +39,11 @@ const KEY_ROUTES = ["/", "/tires", "/install", "/tire-size", "/contact"];
 
 /* ------------------------------ preview ------------------------------ */
 
+// vite preview runs as its own process group so the whole tree can be
+// stopped; Windows has no process groups, and there the server is the
+// child itself (node runs vite directly rather than through npx).
+const stopPreview = (child) =>
+  process.platform === "win32" ? child.kill() : process.kill(-child.pid);
 let server = null;
 let BASE = process.env.PRERENDER_BASE;
 if (!BASE) {
@@ -48,8 +53,8 @@ if (!BASE) {
   }
   BASE = `http://localhost:${PORT}`;
   server = spawn(
-    "npx",
-    ["vite", "preview", "--port", String(PORT), "--strictPort"],
+    process.execPath,
+    ["node_modules/vite/bin/vite.js", "preview", "--port", String(PORT), "--strictPort"],
     { stdio: "ignore", detached: true },
   );
   const deadline = Date.now() + 20000;
@@ -61,7 +66,7 @@ if (!BASE) {
     }
     if (Date.now() > deadline) {
       console.error(`vite preview did not come up on ${BASE}`);
-      process.kill(-server.pid);
+      stopPreview(server);
       process.exit(1);
     }
     await new Promise((r) => setTimeout(r, 200));
@@ -69,7 +74,7 @@ if (!BASE) {
 }
 const stopServer = () => {
   try {
-    if (server) process.kill(-server.pid);
+    if (server) stopPreview(server);
   } catch {
     /* already gone */
   }
