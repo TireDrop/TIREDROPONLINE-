@@ -43,8 +43,8 @@ test("routeOfFile maps dist files to routes", () => {
 });
 
 test("vercelSourceRegex covers the vercel.json forms", () => {
-  assert.ok(vercelSourceRegex("/coupons").test("/coupons"));
-  assert.ok(!vercelSourceRegex("/coupons").test("/coupons/x"));
+  assert.ok(vercelSourceRegex("/track-order").test("/track-order"));
+  assert.ok(!vercelSourceRegex("/track-order").test("/track-order/x"));
   assert.ok(vercelSourceRegex("/tires/p/:sku").test("/tires/p/ABC123"));
   assert.ok(!vercelSourceRegex("/tires/p/:sku").test("/tires/p"));
   const tool = vercelSourceRegex("/tools/:tool(tire-size|tire-check)");
