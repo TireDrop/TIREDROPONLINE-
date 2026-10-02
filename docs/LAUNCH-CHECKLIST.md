@@ -5,8 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (checklist wave 2 in one release: CRO quote form + compact /tires header, installed-price toggle, footer "Shipping to 48 States + DC", accessibility pass 2 (25 issues to 0), check:links + CX-5 spelling, free-install wording priced, prompt pack for every item only Justin can do; earlier today: resources only + check:sources shipped)_
-_Last updated: 2026-10-02 (blog batch 3: 10 posts on preview/blog-batch-3, ready to ship; earlier today: SHIPPED resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
+_Last updated: 2026-10-02 (checklist wave 2 in one release: blog batch 3 (10 posts), CRO quote form + compact /tires header, installed-price toggle, footer "Shipping to 48 States + DC", accessibility pass 2 (25 issues to 0), check:links + CX-5 spelling, free-install wording priced, prompt pack for every item only Justin can do; earlier today: resources only + check:sources shipped)_
 
 ## Site fixes (Claude)
 - [x] ~~Resources only: every competitor citation/link replaced with maker, AAA or government sources~~ (`7754330`, shipped to main 2026-10-02)

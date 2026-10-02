@@ -32,7 +32,7 @@ sources:
     url: "https://www.nhtsa.gov/sites/nhtsa.gov/files/documents/2015uniformtirequalitygrading.pdf"
   - title: "Tires Test Protocol"
     publisher: "Consumer Reports"
-    url: "https://data.consumerreports.org/test-protocols/tires-test-protocol/"
+    url: "https://data.consumerreports.org/test-protocols/tire-test-protocol/"
   - title: "How to Choose the Right Type of Tire"
     publisher: "Bridgestone Americas"
     url: "https://www.bridgestoneamericas.com/en/company/safety/tires-101/tire-types"
