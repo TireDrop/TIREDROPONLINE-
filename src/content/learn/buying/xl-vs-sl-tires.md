@@ -15,7 +15,7 @@ demo: load-speed-check
 takeaways:
   - "XL (extra load) tires are built to carry more weight than a standard load (SL) tire of the same size, at a higher inflation pressure."
   - "In the load tables for P-metric tires, 35 psi is the reference pressure for standard load and 41 psi for extra load."
-  - "At the same pressure, an XL tire carries about what an SL tire of the same size does. The extra capacity comes with the extra pressure."
+  - "XL capacity depends on pressure. The extra load an XL tire is rated for comes with the higher inflation pressure."
   - "If your car came on XL tires, replace them with XL (or whatever load marking the placard shows). Never go below the original load index."
   - "Some heavy EVs specify HL (high load) tires, which Michelin says carry more than XL tires of the same size at the same pressure."
 faq:
@@ -49,9 +49,6 @@ sources:
   - title: "Replacing Tires"
     publisher: "U.S. Tire Manufacturers Association"
     url: "https://www.ustires.org/tire-care-safety/replacing-tires"
-  - title: "What Is Maximum Load For A Tire?"
-    publisher: "Tire Rack"
-    url: "https://www.tirerack.com/upgrade-garage/what-is-maximum-load-for-a-tire"
 related:
   - /learn/buying/lt-vs-p-metric
   - /learn/tesla/tesla-tire-basics
@@ -78,14 +75,14 @@ That second half of the sentence, *at a higher inflation pressure*, is the part 
 
 An XL tire isn't simply a tougher version of the same tire. Its construction is reinforced so that it can **run at higher pressure**, and the higher pressure is what lets it carry more weight.
 
-Toyo's guidelines for using load and inflation tables, and Tire Rack's explanation of tire load ratings, use the same reference points for P-metric passenger tires:
+Toyo's guidelines for using load and inflation tables give these reference points for P-metric passenger tires:
 
 | | Reference pressure for maximum load |
 |---|---|
 | Standard load (SL) | 35 psi |
 | Extra load (XL) | 41 psi |
 
-Tire Rack spells out the consequence: at the **same** pressure, an XL tire carries about the **same** load as a standard load tire of the same size. The extra capacity only shows up at the higher pressure.
+The consequence: an XL tire's extra capacity is tied to that **higher** pressure. Toyo describes XL tires as carrying additional load at a higher inflation pressure, and Continental notes that reinforced tires are designed to run at higher pressure than standard load tires. Run an XL tire at a standard load pressure and you aren't using the capacity it's rated for.
 
 So a car specified with XL tires at its placard pressure is relying on that construction. Swap in standard load tires of the same size and the load capacity can fall short of what the vehicle maker designed for.
 
@@ -123,7 +120,7 @@ If your placard or current tires show HL, the replacement needs to be HL. An XL 
 
 **From XL to SL.** If your vehicle maker specifies XL, don't. The load index drops below the original.
 
-**From SL to XL.** Usually possible, but it isn't automatic. An XL tire at the old SL pressure carries about the same as the SL tire, so you're not gaining capacity unless the pressure changes, and a higher pressure changes how the car rides. Continental notes that reinforced tires are designed to run at higher pressure than standard load tires. Toyo's replacement bulletin warns about the opposite risk: fitting tires that carry less than the originals, or failing to adjust pressure so the new tires carry the original load. The answer for any change is the same: the installer looks up the right pressure in the tire maker's load and inflation table.
+**From SL to XL.** Usually possible, but it isn't automatic. The XL tire's extra capacity comes with its higher pressure, so you're not gaining capacity unless the pressure changes, and a higher pressure changes how the car rides. Toyo's replacement bulletin warns about the opposite risk: fitting tires that carry less than the originals, or failing to adjust pressure so the new tires carry the original load. The answer for any change is the same: the installer looks up the right pressure in the tire maker's load and inflation table.
 
 **Different size at the same time.** If you're also plus-sizing, run the numbers first with the [plus size calculator](/plus-size-calculator), then match the load.
 

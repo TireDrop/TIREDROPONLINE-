@@ -9,7 +9,7 @@ secondaryKeywords:
   - "what does 500 AA A mean"
 hub: sidewall
 date: 2026-09-30
-updated: 2026-09-30
+updated: 2026-10-02
 demo: utqg-explainer
 takeaways:
   - "UTQG has three grades: treadwear (a number), traction (AA, A, B or C) and temperature (A, B or C)."
@@ -36,9 +36,9 @@ sources:
   - title: "UTQG: Uniform Tire Quality Grading"
     publisher: "Cooper Tire"
     url: "https://www.coopertire.com/en_US/tire-education/tire-sidewall-information/UTQG.html"
-  - title: "What Are the Uniform Tire Quality Grade (UTQG) Standards?"
-    publisher: "Tire Rack"
-    url: "https://www.tirerack.com/upgrade-garage/what-are-the-uniform-tire-quality-grade-utqg-standards"
+  - title: "Tire Speed Rating: What You Need to Know"
+    publisher: "Bridgestone"
+    url: "https://tires.bridgestone.com/en-us/learn/shopping-for-tires/tire-specs"
 related:
   - /learn/tread/how-long-do-tires-last
   - /learn/basics/touring-vs-performance-tires
@@ -85,7 +85,7 @@ If you want to know how long tires really last, a mileage warranty or long-term 
 
 This is the detail that changes how you use UTQG. **The tire manufacturer assigns the grades**, based on tests it runs or hires an independent lab to run under the government's procedures. NHTSA doesn't grade tires itself. It can audit the grades manufacturers put on their tires.
 
-The practical upshot: treadwear grades are most useful for comparing tires **within one manufacturer's lineup**. Tire Rack cautions against comparing treadwear grades across brands, since each maker is grading its own tires. A 500 from one brand and a 500 from another don't necessarily mean the same thing.
+The practical upshot: treadwear grades are most useful for comparing tires **within one manufacturer's lineup**. Bridgestone says the grades may be used to compare tires within one maker's product line, but because testing procedures vary, they shouldn't be used to compare one company's tires with another's. A 500 from one brand and a 500 from another don't necessarily mean the same thing.
 
 ## Traction: wet, straight-line braking only
 

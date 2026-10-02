@@ -22,7 +22,7 @@ faq:
   - q: "What does staggered fitment mean?"
     a: "It means the front and rear tires are different sizes, and often the wheels too. The rear is usually wider. Michelin notes staggered fitments are common on rear-wheel-drive performance cars and some sports models."
   - q: "Can you rotate staggered tires?"
-    a: "Not front to back, because the sizes differ. If the tires are non-directional, they can usually be swapped side to side on the same axle. If they're directional, Tire Rack notes they typically can't be rotated at all without remounting. Your owner's manual comes first."
+    a: "Not front to back, because the sizes differ. If the tires are non-directional, they can usually be swapped side to side on the same axle. If they're directional, Goodyear notes they can't be moved from one side to the other either, so they typically can't be rotated at all without remounting. Your owner's manual comes first."
   - q: "Do I have to replace all four staggered tires at once?"
     a: "Not necessarily. Because the axles can wear at different rates, many owners replace front and rear pairs at different times. Replace at least the pair on an axle together, and on an all-wheel-drive car check the owner's manual for its rules on matching tires."
   - q: "Can I put the same size tire on all four corners of a staggered car?"
@@ -34,12 +34,12 @@ sources:
   - title: "Mixing Tires: Safety, Winter Tires & AWD"
     publisher: "Michelin"
     url: "https://www.michelinman.com/auto/auto-tips-and-advice/tire-buying-guide/mixing-tire-brands"
-  - title: "Tire Rotation Patterns: Which One Is Right for Your Car?"
-    publisher: "Tire Rack"
-    url: "https://www.tirerack.com/upgrade-garage/tire-rotation-patterns-which-one-is-right-for-your-car"
-  - title: "Staggered Fitment Pros and Cons"
-    publisher: "Discount Tire"
-    url: "https://www.discounttire.com/blog/staggered-fitment-pros-cons"
+  - title: "What Is a Tire Rotation and How Often Should You Get One?"
+    publisher: "Goodyear"
+    url: "https://www.goodyear.com/en-us/learn/what-is-a-tire-rotation"
+  - title: "What is a staggered fitment?"
+    publisher: "Wheel Pros"
+    url: "https://helpcenter.wheelpros.com/hc/en-us/articles/43489279775629-What-is-a-staggered-fitment"
   - title: "Pirelli Limited Warranty (U.S.)"
     publisher: "Pirelli"
     url: "https://tyre-assets.pirelli.com/staticfolder/Tyre/resources/gfx/v2/Consumer_Warranty_2023-05-01_C90-CD-QA-018-K_12-11-23_Update.pdf"
@@ -84,13 +84,13 @@ The [Tire Size Finder](/tire-size-finder) reads both sizes straight off the door
 
 ## Rotation: what you can and can't do
 
-This is the biggest practical difference from a square car. Michelin, Tire Rack and other tire retailers' fitment guides describe the same limits.
+This is the biggest practical difference from a square car. Michelin's and Goodyear's rotation guides describe the same limits.
 
 **No axle-to-axle rotation.** The front and rear tires are different sizes, so they can't swap axles.
 
 **Side-to-side, if non-directional.** If the tires don't have a rotation arrow, they can usually swap from left to right on the same axle.
 
-**No rotation, if directional.** Directional tires have to keep rolling the way the arrow points. Swap them side to side and they'd roll backwards, unless they're dismounted and remounted on the wheels. Tire Rack notes that on a staggered car with directional tires, each tire's position is effectively fixed.
+**No rotation, if directional.** Directional tires have to keep rolling the way the arrow points. Swap them side to side and they'd roll backwards, unless they're dismounted and remounted on the wheels. Goodyear notes that directional tires on a staggered car can't be moved from one side to the other, so each tire's position is effectively fixed.
 
 Michelin's advice applies to every car, staggered or not: **check the vehicle and tire maker's recommendations before rotating.** Pick your setup here to see the pattern:
 
@@ -100,7 +100,7 @@ Michelin's advice applies to every car, staggered or not: **check the vehicle an
 
 On a square car, rotation spreads wear across all four tires. On a staggered car, the front and rear pairs stay on their own axles for life.
 
-Retailers' staggered fitment guides spell out the result: because staggered tires can't be rotated front to back, wear can be less even, and you may replace them sooner, depending on your drivetrain, alignment and driving. In practice that means:
+Wheel Pros spells out the result: because of the front and rear size difference, the tires can't be rotated, which can lead to premature wear. In practice that means:
 
 - **Check tread depth per axle.** Don't assume the fronts and rears wear together. Our guide to [tread depth](/learn/tread/tread-depth) shows how to measure it.
 - **Expect to replace pairs at different times.** The rears and fronts can reach the end of their tread at different mileages.

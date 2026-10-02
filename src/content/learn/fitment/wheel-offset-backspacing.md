@@ -30,18 +30,18 @@ sources:
   - title: "Wheel Backspacing and Offset Explained"
     publisher: "Firestone Complete Auto Care"
     url: "https://www.firestonecompleteautocare.com/blog/tires/wheel-backspacing-and-offset-explained/"
-  - title: "What Is Wheel Offset?"
-    publisher: "Tire Rack"
-    url: "https://www.tirerack.com/upgrade-garage/what-is-wheel-offset"
+  - title: "Wheel Offsets Explained"
+    publisher: "Konig Wheels"
+    url: "https://news.konigwheels.com/wheel-info-tech/wheel-offsets-explained/"
   - title: "Offset vs Backspace"
     publisher: "Konig Wheels"
     url: "https://news.konigwheels.com/blog/offset-vs-backspacing/"
   - title: "How can I find wheel specifications on the website?"
     publisher: "Wheel Pros"
     url: "https://helpcenter.wheelpros.com/hc/en-us/articles/43488701614605-How-can-I-find-wheel-specifications-on-the-website"
-  - title: "Wheel Offset & Backspacing"
-    publisher: "Discount Tire"
-    url: "https://www.discounttire.com/learn/offset-backspace"
+  - title: "What is Wheel Offset?"
+    publisher: "Method Race Wheels"
+    url: "https://www.methodracewheels.com/pages/what-is-offset"
 related:
   - /learn/fitment/bolt-pattern
   - /learn/fitment/staggered-tires
@@ -59,7 +59,7 @@ author: "TireDrop Team, Extreme Tires, Sunrise FL"
 
 Two wheels can share a diameter, width and bolt pattern and still sit in completely different places on the car. One tucks neatly under the fender. The other sticks out past it, or rubs the suspension. The difference is **offset**.
 
-Wheel Pros, Tire Rack and Firestone Complete Auto Care define it the same way:
+Wheel Pros, Konig, Method Race Wheels and Firestone Complete Auto Care define it the same way:
 
 > **Offset** is the distance from the wheel's **centerline** to its **mounting surface**, the flat face that bolts against the hub. It's measured in millimeters.
 
@@ -73,7 +73,7 @@ Picture a line around the middle of the wheel barrel, halfway between the inner 
 | **Zero** (ET0) | Right on the centerline | Wheel is centered on the mounting surface |
 | **Negative** (ET-12) | Toward the back of the wheel | Pushes the wheel out, away from the suspension |
 
-Tire Rack and other wheel guides note that **positive offset** is what you'll generally find on front-wheel-drive cars and newer rear-wheel-drive cars. Truck wheels built to sit out past the fenders often use zero or negative offset.
+Konig notes that most **front-wheel-drive** cars have positive offset wheels, and Method Race Wheels says positive offset is common on modern AWD and 4WD vehicles. Method describes **negative offset** as the choice for off-road builds and vehicles that need a wider track.
 
 ## Reading ET on the wheel
 
