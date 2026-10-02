@@ -1,5 +1,5 @@
 ---
-title: "Spare Tire Types: Full-Size, Donut, Run-Flat or Kit"
+title: "Spare Tire Types: Full-Size, Donut, Repair Kit and More"
 description: "Full-size spare, compact donut, run-flat tires or a repair kit: how each handles a flat, the limits printed on temporaries, and checking spare pressure."
 keyword: "spare tire types"
 secondaryKeywords:
