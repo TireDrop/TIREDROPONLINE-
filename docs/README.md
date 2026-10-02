@@ -35,9 +35,10 @@ the code fits together is in the root [README](../README.md).
 - [blog-plan.md](content/blog-plan.md): keyword research, the 50-post plan and the publishing calendar for `/blog`.
 - [pilot-verification.md](content/pilot-verification.md): source check of every claim in the 10 pilot articles. Follow its method when verifying new articles.
 
-## prompts/: queued build plans
+## prompts/: queued build plans and Chrome prompt packs
 
 - [blog-learn-build.md](prompts/blog-learn-build.md): the approved phased plan (prerender, research, pilot, batches) for the Blog + Learn build.
+- [2026-10-02-verify-and-index.md](prompts/2026-10-02-verify-and-index.md): Chrome prompts for the 2026-10-02 content: request indexing for the 17 new URLs + home page, check five snippet-only claims on their source pages, and read the Business Profile pin, Place ID and review link. Use it after a content release.
 
 ## audits/: findings, newest last
 
