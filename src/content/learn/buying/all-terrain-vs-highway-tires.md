@@ -51,6 +51,7 @@ related:
   - /learn/sidewall/how-to-read-tire-size
   - /load-speed-check
   - /tire-size-finder
+  - /blog/jeep-wrangler-tires-guide
 cta:
   label: "Shop truck and SUV tires"
   href: /tires

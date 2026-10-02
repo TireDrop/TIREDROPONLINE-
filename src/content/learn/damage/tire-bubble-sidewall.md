@@ -48,6 +48,7 @@ related:
   - /learn/damage/spare-tire-types
   - /mobile-service
   - /tires
+  - /blog/curb-pothole-tire-alignment-signs
 cta:
   label: "See mobile service"
   href: /mobile-service

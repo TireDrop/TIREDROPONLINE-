@@ -51,6 +51,7 @@ related:
   - /learn/sidewall/utqg-ratings
   - /find-my-tires
   - /tires
+  - /blog/honda-civic-tires-guide
 cta:
   label: "Find tires for your Camry"
   href: /find-my-tires

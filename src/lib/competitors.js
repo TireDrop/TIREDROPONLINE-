@@ -130,6 +130,8 @@ export const RESOURCE_DOMAINS = [
   "toyota.com",
   "honda.com",
   "ford.com",
+  "chevrolet.com",
+  "mopar.com", // Jeep/Stellantis owner's manuals and Mopar's own tire guides (store.mopar.com is never cited)
   // Own properties, listings and site infrastructure
   "tiredroponline.com",
   "yelp.com",

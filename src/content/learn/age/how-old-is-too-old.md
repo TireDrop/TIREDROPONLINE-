@@ -49,6 +49,7 @@ related:
   - /learn/tread/tread-depth
   - /blog/snowbird-car-sat-all-summer-tires
   - /tire-check
+  - /blog/unused-tires-still-age-myth
 cta:
   label: "Check your tires"
   href: /tire-check
