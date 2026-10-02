@@ -68,7 +68,11 @@ const HOURS = BUSINESS.hours.map(
   (h) => `${shortDays(h.days)} ${shortTime(h.time)}`,
 );
 
-/** The link groups, with Tools & Guides cut to its shortlist. */
+/**
+ * The link groups, with Tools & Guides cut to its shortlist. Labels come from
+ * FOOTER_COLUMNS; the /tires-shipped one reads "Shipping to 48 States + DC",
+ * never "nationwide", because free shipping covers only those.
+ */
 const GROUPS = FOOTER_COLUMNS.map((col) => {
   if (!col.footerShortlist) return col;
   const keep = col.footerShortlist
@@ -77,8 +81,10 @@ const GROUPS = FOOTER_COLUMNS.map((col) => {
   return { ...col, links: keep };
 });
 
+// text-balance: a label that wraps in the two-column phone grid splits evenly
+// ("Shipping to 48 / States + DC") instead of leaving "+ DC" alone.
 const linkClass =
-  "flex min-h-[44px] items-center text-[15px] text-bone/70 transition-colors hover:text-bone lg:min-h-[30px] lg:text-sm lg:text-bone/65";
+  "flex min-h-[44px] items-center text-balance text-[15px] text-bone/70 transition-colors hover:text-bone lg:min-h-[30px] lg:text-sm lg:text-bone/65";
 
 function FooterLink({ link }) {
   return link.href ? (

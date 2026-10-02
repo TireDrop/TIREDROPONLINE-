@@ -68,9 +68,11 @@ export default function CompareTray() {
 
   // `invisible` rather than unmounting: it keeps the chips and buttons out of
   // the tab order while the bar is away, and CSS holds visibility for the
-  // length of the transition, so the slide-down still plays.
+  // length of the transition, so the slide-down still plays. An <aside> so
+  // its chips sit in a named landmark, like the call bar's <nav>.
   return (
-    <div
+    <aside
+      aria-label="Tire comparison"
       ref={barRef}
       className={`fixed inset-x-0 bottom-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] z-40 border-t border-graphite bg-steel bg-steel-wash text-bone shadow-[0_-12px_32px_-16px_rgba(7,14,26,.7)] transition-[transform,opacity,visibility] duration-300 lg:bottom-0 ${
         open
@@ -147,6 +149,6 @@ export default function CompareTray() {
           Pick at least 2 tires to compare them side by side
         </p>
       )}
-    </div>
+    </aside>
   );
 }

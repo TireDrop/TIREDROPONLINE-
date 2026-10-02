@@ -219,6 +219,7 @@ export default function ComparePage() {
         {hero}
         <Section className="bg-fog">
           <EmptyState
+            as="h2"
             icon={Scale}
             title="Pick at least two tires"
             lede="Tick the compare box on any tire card or product page — up to four — and they land here side by side."

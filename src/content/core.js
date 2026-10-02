@@ -235,8 +235,10 @@ const markdown = new Marked({
 
 function renderMarkdown(text) {
   // A keyboard user can only scroll a box they can focus, and each such
-  // region needs a name of its own: the table's column headings.
-  return markdown.parse(text).replace(/<table>([\s\S]*?)<\/table>/g, (_, body) => {
+  // region needs a name of its own: the table's column headings. GFM header
+  // cells are all column headings, so they say so (scope="col").
+  return markdown.parse(text).replace(/<table>([\s\S]*?)<\/table>/g, (_, raw) => {
+    const body = raw.replace(/<th(?=[\s>])(?![^>]*\bscope=)/g, '<th scope="col"');
     const heads = [...body.matchAll(/<th(?:\s[^>]*)?>([\s\S]*?)<\/th>/g)]
       .map((m) => m[1].replace(/<[^>]+>/g, "").replace(/"/g, "&quot;").trim())
       .filter(Boolean);

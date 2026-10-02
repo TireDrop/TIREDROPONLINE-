@@ -37,7 +37,7 @@ import {
 } from "../../data/stateList.js";
 import { CITY_PAGES, cityPath } from "../../data/cityPages.js";
 
-const HUB = { name: "Tires Shipped Nationwide", path: "/tires-shipped" };
+const HUB = { name: "Shipping to 48 States + DC", path: "/tires-shipped" };
 
 function NotFoundPanel() {
   return (
@@ -58,7 +58,7 @@ function NotFoundPanel() {
           lede="Tires still ship free to every address in the 48 contiguous states and DC. The nationwide shipping page lists the state guides we have."
           action={
             <Link to={HUB.path} className="btn-primary btn-sm">
-              Tires shipped nationwide
+              Shipping to 48 states + DC
               <ArrowRight size={16} aria-hidden />
             </Link>
           }
@@ -94,7 +94,7 @@ function Sources({ sources }) {
  * tire rules and climate (src/data/statePages.js). Only the states in
  * STATE_PAGES_LIVE (src/data/stateList.js) render; any other slug is the
  * not-found panel, noindexed, and is never prerendered. Seo adds a Service
- * with the state as areaServed and Home > Tires Shipped Nationwide > State.
+ * with the state as areaServed and Home > Shipping to 48 States + DC > State.
  */
 export default function StateShippingPage() {
   const { state: slug } = useParams();

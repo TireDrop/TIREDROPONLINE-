@@ -284,6 +284,14 @@ test("wiring: routed, in the sitemap, linked from the footer and /shipping", () 
   assert.match(SEO_FILES, /STATE_PAGES_LIVE\.map\(\(slug\) => \(\{ path: `\/tires-shipped\/\$\{slug\}`/);
   const shipCol = FOOTER_COLUMNS.find((c) => c.title === "Shipping & Install");
   assert.ok(shipCol.links.some((l) => l.to === "/tires-shipped"), "footer link");
+  // Free shipping covers the 48 contiguous states + DC, so the link says so
+  // instead of "nationwide" (and the breadcrumbs use the same words).
+  assert.equal(
+    shipCol.links.find((l) => l.to === "/tires-shipped").label,
+    "Shipping to 48 States + DC",
+  );
+  assert.match(HUB, /label: "Shipping to 48 States \+ DC"/, "hub breadcrumb");
+  assert.match(TEMPLATE, /name: "Shipping to 48 States \+ DC", path: "\/tires-shipped"/, "state breadcrumb");
   assert.match(SHIPPING, /to="\/tires-shipped"/);
   assert.match(HUB, /STATES\.map\(/, "the hub lists every state");
   assert.match(HUB, /live\.has\(s\.slug\)/, "and links only the live ones");
@@ -341,7 +349,7 @@ export function pageText(p) {
     (s) => s !== p.slug && !p.neighbors.includes(s),
   ).map(getLiveState);
   return [
-    "Home", "Tires Shipped Nationwide", p.name,
+    "Home", "Shipping to 48 States + DC", p.name,
     `Free shipping · ${p.abbr}`, `Tires Shipped Free to ${p.name}`, p.intro,
     "Shop Tires", "Find My Tires",
     "State rules", `${p.name} tire rules, with sources`,

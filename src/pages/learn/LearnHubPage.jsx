@@ -83,6 +83,7 @@ export default function LearnHubPage() {
                 key={article.path}
                 article={article}
                 showSection={false}
+                headingAs="h2"
               />
             ))}
           </ul>

@@ -106,7 +106,7 @@ They're also open about the cost. BFGoodrich notes that the big, widely spaced b
 
 ## Side by side
 
-| | H/T highway | A/T all-terrain | M/T mud-terrain |
+| Feature | H/T highway | A/T all-terrain | M/T mud-terrain |
 |---|---|---|---|
 | Built for | Paved roads | Pavement plus dirt, gravel, grass | Mud, rock, soft ground |
 | Tread pattern | Shallower tread, narrower grooves, smaller blocks than A/T | Deeper tread, wider grooves, larger blocks | Large blocks, wide open voids |

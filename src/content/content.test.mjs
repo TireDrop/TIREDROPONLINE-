@@ -366,6 +366,7 @@ test("renderBody marks internal links and opens external ones safely", () => {
   );
   assert.match(html, /<a href="\/install" data-internal="">us<\/a>/);
   assert.match(html, /<div class="table-scroll" tabindex="0" role="region" aria-label="[^"]+"><table>/);
+  assert.match(html, /<thead>\s*<tr>\s*<th scope="col">a<\/th>\s*<th scope="col">b<\/th>/);
 });
 
 test("links to unpublished Learn/Blog pages render as text and warn", () => {
@@ -722,6 +723,23 @@ test("every real article splits cleanly, and the summaries carry no body text", 
     // A line from deep in the body never reaches the summaries module.
     const line = a.body.split("\n").find((l) => l.trim().length > 60);
     if (line) assert.ok(!summaries.includes(line.trim()), `${a.path}: body leaked`);
+  }
+});
+
+test("every table in every article has named column headings", () => {
+  // A blank top-left cell reads as an unnamed column to a screen reader
+  // (axe: empty-table-header), so the first column says what its rows are.
+  const full = loadContent({ includeDrafts: true });
+  for (const a of [...full.getLearnArticles(), ...full.getBlogPosts()]) {
+    const html = full
+      .renderArticle(a)
+      .segments.filter((s) => s.type === "html")
+      .map((s) => s.html)
+      .join("");
+    for (const [cell, attrs, text] of html.matchAll(/<th(\s[^>]*)?>([\s\S]*?)<\/th>/g)) {
+      assert.ok(text.replace(/<[^>]+>/g, "").trim(), `${a.path}: empty header cell ${cell}`);
+      assert.match(attrs ?? "", /scope="col"/, `${a.path}: ${cell} without scope="col"`);
+    }
   }
 });
 
