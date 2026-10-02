@@ -249,7 +249,7 @@ export const STATIC_PAGES = [
 const SERVICE_WORDS = {
   "tire-installation": "install mount new tires fit",
   "tire-balancing": "balance wheel balancing vibration shaking shimmy",
-  "tire-repair": "flat puncture nail screw plug patch leak slow leak",
+  "tire-repair": "flat tire flat puncture nail screw plug patch leak slow leak",
   "tire-rotation": "rotate rotation",
   "wheel-installation": "rims mount wheels",
   "oil-change": "oil filter",

@@ -83,7 +83,7 @@ function QtyStepper({ line, setQty }) {
           onClick={() => setQty(line.key, clamp(line.qty - 1))}
           disabled={line.qty <= 1}
           aria-label={`Decrease quantity of ${line.brand} ${line.name}`}
-          className="grid h-9 w-9 place-items-center text-ink transition-colors hover:bg-fog disabled:opacity-35"
+          className="grid h-11 w-11 place-items-center text-ink transition-colors hover:bg-fog disabled:opacity-35"
         >
           <Minus size={15} aria-hidden />
         </button>
@@ -98,14 +98,14 @@ function QtyStepper({ line, setQty }) {
             const next = parseInt(e.target.value, 10);
             if (!Number.isNaN(next)) setQty(line.key, clamp(next));
           }}
-          className="h-9 w-12 border-x border-ink/15 bg-bone text-center font-display text-base text-ink focus:border-drop"
+          className="h-11 w-12 border-x border-ink/15 bg-bone text-center font-display text-base text-ink focus:border-drop"
         />
         <button
           type="button"
           onClick={() => setQty(line.key, clamp(line.qty + 1))}
           disabled={line.qty >= 99}
           aria-label={`Increase quantity of ${line.brand} ${line.name}`}
-          className="grid h-9 w-9 place-items-center text-ink transition-colors hover:bg-fog disabled:opacity-35"
+          className="grid h-11 w-11 place-items-center text-ink transition-colors hover:bg-fog disabled:opacity-35"
         >
           <Plus size={15} aria-hidden />
         </button>
@@ -254,12 +254,31 @@ function CartLine({ line, setQty, remove, addItem }) {
 
         <FitFlag fit={fit} />
 
+        {/* Where this line goes, in words, so a shopper never has to work
+            it out from the state of a checkbox further down. */}
+        <p
+          data-testid="cart-line-delivery"
+          className="mt-3 flex items-start gap-2 text-sm text-ink"
+        >
+          {line.install ? (
+            <Wrench size={15} aria-hidden className="mt-0.5 shrink-0 text-drop" />
+          ) : (
+            <Truck size={15} aria-hidden className="mt-0.5 shrink-0 text-drop" />
+          )}
+          <span className="min-w-0">
+            {line.install
+              ? `Ships free to our ${BUSINESS.shop.city} shop, where we fit ${line.qty === 1 ? "it" : "them"} (South Florida).`
+              : `Ships free to your address (${BUSINESS.shipping.area}).`}
+          </span>
+        </p>
+
         <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
           <QtyStepper line={line} setQty={setQty} />
           <button
             type="button"
             onClick={() => remove(line.key)}
-            className="inline-flex items-center gap-1.5 text-sm text-smoke transition-colors hover:text-drop"
+            aria-label={`Remove ${line.brand} ${line.name} from your cart`}
+            className="inline-flex min-h-[44px] items-center gap-1.5 text-sm text-smoke transition-colors hover:text-drop"
           >
             <Trash2 size={15} aria-hidden />
             Remove
@@ -293,8 +312,13 @@ function CartLine({ line, setQty, remove, addItem }) {
               </label>
             </div>
             {line.install && (
-              <span className="font-display text-base text-ink">
-                {money(line.installPrice * line.qty)}
+              <span className="tnum text-sm text-ink">
+                Installation, {line.qty}{" "}
+                {line.kind === "wheel" ? "wheel" : "tire"}
+                {line.qty === 1 ? "" : "s"}:{" "}
+                <span className="font-display text-base">
+                  {money(line.installPrice * line.qty)}
+                </span>
               </span>
             )}
           </div>
@@ -378,9 +402,15 @@ export default function CartPage() {
             }
           />
         ) : (
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
+          // On a phone the summary (total and Checkout) follows the line
+          // items straight away; the keep-shopping links and the trust cards
+          // come after it. On a desktop it is the right-hand rail, as before.
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-x-12 lg:gap-y-6">
             {/* Line items */}
-            <section aria-label="Cart items" className="min-w-0">
+            <section
+              aria-label="Cart items"
+              className="min-w-0 lg:col-start-1 lg:row-start-1"
+            >
               <ShoppingForBar className="mb-6" />
               <ul className="divide-y divide-ink/10 border-y border-ink/10">
                 {safeLines.map((line) => (
@@ -393,36 +423,13 @@ export default function CartPage() {
                   />
                 ))}
               </ul>
-
-              <div className="mt-6 flex flex-wrap items-center gap-3">
-                <Link to="/tires" className="btn-outline btn-sm">
-                  Keep Shopping
-                </Link>
-                <Link
-                  to="/install"
-                  className="text-sm text-smoke underline underline-offset-4 transition-colors hover:text-drop"
-                >
-                  How ship-to-store install works
-                </Link>
-              </div>
-
-              <div className="mt-10 grid gap-4 sm:grid-cols-3">
-                {TRUST.map(({ icon: Icon, title, copy }) => (
-                  <div key={title} className="card p-4">
-                    <Icon size={20} aria-hidden className="text-drop" />
-                    <p className="mt-3 font-display text-base font-bold leading-tight">
-                      {title}
-                    </p>
-                    <p className="mt-1 text-xs leading-relaxed text-smoke">
-                      {copy}
-                    </p>
-                  </div>
-                ))}
-              </div>
             </section>
 
             {/* Summary rail */}
-            <aside aria-label="Order summary" className="min-w-0">
+            <aside
+              aria-label="Order summary"
+              className="min-w-0 lg:col-start-2 lg:row-span-2 lg:row-start-1"
+            >
               <div className="card p-6 lg:sticky lg:top-24">
                 <h2 className="h3">Order Summary</h2>
 
@@ -512,6 +519,36 @@ export default function CartPage() {
                 </div>
               </div>
             </aside>
+
+            {/* Keep shopping and the trust cards: after the summary on a
+                phone, under the line items on a desktop. */}
+            <div className="min-w-0 lg:col-start-1 lg:row-start-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <Link to="/tires" className="btn-outline btn-sm">
+                  Keep Shopping
+                </Link>
+                <Link
+                  to="/install"
+                  className="text-sm text-smoke underline underline-offset-4 transition-colors hover:text-drop"
+                >
+                  How ship-to-store install works
+                </Link>
+              </div>
+
+              <div className="mt-10 grid gap-4 sm:grid-cols-3">
+                {TRUST.map(({ icon: Icon, title, copy }) => (
+                  <div key={title} className="card p-4">
+                    <Icon size={20} aria-hidden className="text-drop" />
+                    <p className="mt-3 font-display text-base font-bold leading-tight">
+                      {title}
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-smoke">
+                      {copy}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>

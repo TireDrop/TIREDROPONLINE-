@@ -3,7 +3,15 @@ import { Link } from "react-router-dom";
 import { MapPin } from "lucide-react";
 
 import { SERVICE_AREA_EXAMPLES } from "../../data/serviceArea.js";
-import { CITY_PAGE_PATH_BY_NAME } from "../../data/cityPages.js";
+// Slug and name of each city page, not the pages' copy (cityIndex() in
+// vite.config.js): the home page shows these chips, and importing anything
+// from cityPages.js would download every city page's text with them.
+import CITY_INDEX from "virtual:city-index";
+
+/** City name -> its page path (cityPath in cityPages.js), for the chips. */
+const CITY_PAGE_PATH_BY_NAME = Object.fromEntries(
+  CITY_INDEX.map((c) => [c.name, `/mobile-service/${c.slug}`]),
+);
 
 const CHIP =
   "rounded-sm border px-2.5 py-1 font-display text-[13px] font-semibold";

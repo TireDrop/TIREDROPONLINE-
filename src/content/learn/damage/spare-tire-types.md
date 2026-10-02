@@ -59,6 +59,7 @@ related:
   - /learn/tesla/tesla-flat-tire-no-spare
   - /learn/buying/ev-tires
   - /can-my-tire-be-repaired
+  - /blog/alligator-alley-drive-tires
 cta:
   label: "Can my tire be repaired?"
   href: /can-my-tire-be-repaired

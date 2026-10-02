@@ -507,6 +507,9 @@ function pageScore(page, tokens, phrase) {
   const title = normalizeText(page.title);
   if (phrase && title.startsWith(phrase)) score += 4;
   else if (phrase && title.includes(phrase)) score += 2;
+  // A page's keywords are the words people use for it, so typing one of its
+  // phrases ("flat tire" for Tire Repair) counts like the phrase in its title.
+  else if (phrase.includes(" ") && normalizeText(page.keywords ?? "").includes(phrase)) score += 4;
   return score + (page.boost ?? 0);
 }
 
@@ -541,11 +544,12 @@ export const GROUP_LABEL = {
 /** Per-group caps in the typeahead. */
 const CAPS = { sizes: 3, vehicles: 1, brands: 2, products: 3, pages: 4 };
 
-/** The fewest characters worth searching. */
-export const MIN_QUERY = 2;
+// MIN_QUERY (the fewest characters worth searching) and searchPath (the
+// /search address for a query) live in ./searchPath.js, so the masthead can
+// use them before this file has loaded.
+import { MIN_QUERY, searchPath } from "./searchPath.js";
 
-/** The /search address for a query. */
-export const searchPath = (q) => `/search?q=${encodeURIComponent(String(q ?? "").trim())}`;
+export { MIN_QUERY, searchPath };
 
 /**
  * `{ query, size, vehicle, groups: [{ id, label, items }], count }` for what

@@ -2,6 +2,7 @@ import React, { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown, X } from "lucide-react";
 
 import { EMPTY_TIRE_FILTERS } from "../../lib/tiresUrl.js";
+import { trapTab } from "../../lib/trapFocus.js";
 
 // The /tires filters: a sidebar of collapsible groups above `lg`, and below
 // it a full-height sheet the page's "Filters (n)" button opens, with "Show N
@@ -447,6 +448,7 @@ export default function TireFilters({
   const noun = resultCount === 1 ? "tire" : "tires";
   const titleId = useId();
   const closeButtonRef = useRef(null);
+  const sheetRef = useRef(null);
 
   // While the sheet is up it owns the screen: the page behind it does not
   // scroll, Escape closes it, and focus moves in (it is aria-modal) and
@@ -459,6 +461,7 @@ export default function TireFilters({
     closeButtonRef.current?.focus();
     const onKey = (e) => {
       if (e.key === "Escape") onOpenChange?.(false);
+      else trapTab(e, sheetRef.current);
     };
     document.addEventListener("keydown", onKey);
     return () => {
@@ -506,6 +509,7 @@ export default function TireFilters({
             className="absolute inset-0 h-full w-full bg-ink/50"
           />
           <div
+            ref={sheetRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}

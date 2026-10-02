@@ -48,6 +48,7 @@ related:
   - /learn/pressure/how-to-check-tire-pressure
   - /blog/snowbird-car-sat-all-summer-tires
   - /tire-check
+  - /blog/cold-front-tpms-light-florida
 cta:
   label: "Check your tires"
   href: /tire-check

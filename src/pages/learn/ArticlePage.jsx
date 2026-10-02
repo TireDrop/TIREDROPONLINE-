@@ -148,7 +148,7 @@ function ArticleView({ article }) {
 
               {article.faq.length > 0 && (
                 <section aria-labelledby="faq" className="mt-12">
-                  <h2 id="faq" className="h3 mb-4 scroll-mt-28">
+                  <h2 id="faq" className="h3 mb-4 scroll-mt-[calc(var(--header-h)+1rem)]">
                     Questions people ask
                   </h2>
                   <Accordion items={article.faq} />

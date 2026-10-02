@@ -20,6 +20,15 @@ const SOURCES = {
   wordmark: [`${BASE}brand/tiredrop.webp`, `${BASE}brand/tiredrop.png`],
 };
 
+// The full badge is never drawn wider than about 80 CSS px (the masthead's
+// lg:h-20), so a 240px copy covers every screen up to 3x; the 440px original
+// stays in the srcset for anything denser. Same artwork, resized, at about
+// half the bytes, and the first image every page downloads.
+const SRCSETS = {
+  full: `${BASE}brand/tiredrop-full-240.webp 240w, ${BASE}brand/tiredrop-full.webp 440w`,
+};
+const SIZES = { full: "80px" };
+
 const DIMENSIONS = {
   full: { width: 440, height: 444 },
   wordmark: { width: 400, height: 207 },
@@ -63,10 +72,14 @@ export default function Logo({
   const sources = SOURCES[variant] ?? SOURCES.wordmark;
   const size = DIMENSIONS[variant] ?? DIMENSIONS.wordmark;
   const hasArtwork = srcIndex < sources.length;
+  // Only the WebP has resized copies; the PNG fallback is a single file.
+  const srcSet = srcIndex === 0 ? SRCSETS[variant] : undefined;
 
   const mark = hasArtwork ? (
     <img
       src={sources[srcIndex]}
+      srcSet={srcSet}
+      sizes={srcSet ? SIZES[variant] : undefined}
       alt="TireDrop"
       translate="no"
       width={size.width}

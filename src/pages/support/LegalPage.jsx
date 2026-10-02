@@ -561,7 +561,7 @@ export default function LegalPage({ doc = "terms" }) {
                 <section
                   key={section.id}
                   id={section.id}
-                  className="scroll-mt-24"
+                  className="scroll-mt-[calc(var(--header-h)+1rem)]"
                 >
                   <h2 className="h3 mb-4">{section.heading}</h2>
 

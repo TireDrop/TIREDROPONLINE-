@@ -51,6 +51,7 @@ related:
   - /learn/sidewall/utqg-ratings
   - /learn/florida/florida-heat-tires
   - /tire-size-finder
+  - /blog/moving-to-florida-tire-tips
 cta:
   label: "Find your tire size"
   href: /tire-size-finder

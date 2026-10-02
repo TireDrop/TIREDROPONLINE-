@@ -17,13 +17,32 @@ import {
 import { searchTires } from "../../data/api.js";
 import { trackEvent } from "../../lib/analytics.js";
 import { SEARCH_DATA, loadSitePages, sitePagesNow } from "../../lib/searchData.js";
-import {
-  MIN_QUERY,
-  extractSize,
-  searchPath,
-  searchSite,
-  submitPath,
-} from "../../lib/siteSearch.js";
+import { MIN_QUERY, searchPath } from "../../lib/searchPath.js";
+
+/**
+ * The matching itself (src/lib/siteSearch.js) is loaded the first time the
+ * box is focused or typed in, like the page index, rather than shipped in
+ * every page's bundle. Until it is in, there are no suggestions to show; a
+ * search submitted before then waits for it.
+ */
+let engine = null;
+let enginePending = null;
+function loadEngine() {
+  if (engine) return Promise.resolve(engine);
+  if (!enginePending) {
+    enginePending = import("../../lib/siteSearch.js")
+      .then((m) => {
+        engine = m;
+        return m;
+      })
+      .catch((error) => {
+        enginePending = null; // try again on the next focus
+        throw error;
+      });
+  }
+  return enginePending;
+}
+const NO_RESULTS = Object.freeze({ groups: [] });
 
 /** How long typing has to pause before the suggestions update. */
 const DEBOUNCE_MS = 150;
@@ -95,6 +114,7 @@ export default function HeaderSearch({
   // suggestions starts with nothing highlighted.
   const [active, setActive] = useState({ query: "", index: -1 });
   const [pages, setPages] = useState(sitePagesNow);
+  const [search, setSearch] = useState(() => engine);
   const [live, setLive] = useState({ key: "", items: null });
 
   useEffect(() => {
@@ -104,10 +124,17 @@ export default function HeaderSearch({
 
   const loadPages = () => {
     if (!pages) loadSitePages().then((loaded) => setPages(loaded));
+    if (!search)
+      loadEngine().then(setSearch, () => {
+        /* no suggestions; a submit still reaches /search */
+      });
   };
 
   // A complete size: what the tire search API has in it.
-  const typedSize = useMemo(() => extractSize(query).size, [query]);
+  const typedSize = useMemo(
+    () => (search ? search.extractSize(query).size : null),
+    [search, query],
+  );
   const sizeKey =
     typedSize?.complete && !typedSize.flotation ? typedSize.display : "";
   useEffect(() => {
@@ -125,19 +152,18 @@ export default function HeaderSearch({
     };
   }, [sizeKey]);
 
-  const results = useMemo(
-    () =>
-      searchSite(
-        query,
-        {
-          ...SEARCH_DATA,
-          pages: pages ?? [],
-          sizeProducts: sizeKey && live.key === sizeKey ? live.items : undefined,
-        },
-        { limit: LIMIT },
-      ),
-    [query, pages, sizeKey, live],
-  );
+  const results = useMemo(() => {
+    if (!search) return NO_RESULTS;
+    return search.searchSite(
+      query,
+      {
+        ...SEARCH_DATA,
+        pages: pages ?? [],
+        sizeProducts: sizeKey && live.key === sizeKey ? live.items : undefined,
+      },
+      { limit: LIMIT },
+    );
+  }, [search, query, pages, sizeKey, live]);
 
   const text = query.trim();
   const options = useMemo(() => {
@@ -213,7 +239,10 @@ export default function HeaderSearch({
       return;
     }
     trackEvent("search", { search_term: typed, search_type: "site" });
-    finish(submitPath(typed, SEARCH_DATA));
+    loadEngine().then(
+      (m) => finish(m.submitPath(typed, SEARCH_DATA)),
+      () => finish(searchPath(typed)),
+    );
   };
 
   const onKeyDown = (e) => {

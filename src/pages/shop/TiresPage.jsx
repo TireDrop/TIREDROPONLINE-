@@ -50,6 +50,7 @@ import {
 import {
   EMPTY_TIRE_FILTERS,
   parseTiresQuery,
+  partialConflicts,
   searchTitle,
   selectionKey,
   slug,
@@ -172,7 +173,7 @@ export default function TiresPage() {
   );
   const { filters, partial, sort, view } = state;
   // The search in the address bar, as the one-line header (null: bare /tires).
-  const compactTitle = searchTitle(state.selection);
+  const compactTitle = searchTitle(state.selection, partial);
 
   const fitment = useVehicle();
   const {
@@ -181,6 +182,7 @@ export default function TiresPage() {
     resolved,
     selectVehicle,
     selectSize,
+    clear,
     openChanger,
     closeChanger,
     changer,
@@ -222,10 +224,26 @@ export default function TiresPage() {
   //    written in, replacing the entry;
   //  - otherwise the address is rewritten in its canonical spelling (older
   //    keys, slugs), replacing the entry.
+  //
+  // Before all that: a partial size in the address (the header search's
+  // /tires?w=245&a=40, or a partial picked in the finder) is the newest
+  // search, so a size it contradicts gives way. A remembered 225/45R17 is
+  // forgotten, and one in the address is dropped from it, so the title,
+  // the fitment answers and the results all follow 245/40 instead of
+  // titling the page "225/45R17 tires" and calling every 245/40 tire "Not
+  // your size". A remembered vehicle stays: a partial size filters within it.
+  const stale = (sel) =>
+    sel?.type === "size" && partialConflicts(partial, sel.size, sel.rear);
   const urlKey = selectionKey(state.selection);
   const ctxKey = ready ? selectionKey(selection) : null;
   const synced = useRef(undefined);
   useEffect(() => {
+    if (stale(state.selection) || (ready && stale(selection))) {
+      if (ready && stale(selection)) clear();
+      synced.current = "";
+      write({ ...state, selection: stale(state.selection) ? null : state.selection });
+      return;
+    }
     if (state.selection && urlKey !== synced.current) {
       synced.current = urlKey;
       if (urlKey !== ctxKey) {

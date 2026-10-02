@@ -238,7 +238,7 @@ export function SourcesList({ sources }) {
   if (!sources?.length) return null;
   return (
     <section aria-labelledby="sources" className="mt-12">
-      <h2 id="sources" className="h3 mb-4 scroll-mt-28">
+      <h2 id="sources" className="h3 mb-4 scroll-mt-[calc(var(--header-h)+1rem)]">
         Sources
       </h2>
       <ol className="space-y-2.5 text-sm">
@@ -326,7 +326,7 @@ export function RelatedLinks({ paths, resolve, fallback = [] }) {
 
   return (
     <section aria-labelledby="related" className="mt-14">
-      <h2 id="related" className="h3 mb-5 scroll-mt-28">
+      <h2 id="related" className="h3 mb-5 scroll-mt-[calc(var(--header-h)+1rem)]">
         Related reading
       </h2>
       {cards.length > 0 && (

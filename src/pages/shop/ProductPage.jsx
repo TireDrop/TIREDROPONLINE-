@@ -46,6 +46,8 @@ import { useCart, money } from "../../context/CartContext.jsx";
 import { useCompare } from "../../context/CompareContext.jsx";
 import { useFit } from "../../context/VehicleContext.jsx";
 import { trackViewItem } from "../../lib/analytics.js";
+import { loadLbs, speedSymbol } from "../../data/loadSpeedTables.js";
+import { sizeSearch } from "../../data/fitmentCheck.js";
 import {
   DELIVERY_NOTE,
   SET_SIZE,
@@ -92,18 +94,88 @@ export function stockLabel(product) {
   return null;
 }
 
+/** "95" -> "95 (1,521 lbs)", from the standard load-index table. */
+function loadText(index) {
+  const s = String(index ?? "").trim();
+  // A dual index (LT: "120/116") is rated by its single-tire figure.
+  const single = s.split("/")[0];
+  const lbs = loadLbs(single);
+  return lbs ? `${s} (${lbs.toLocaleString("en-US")} lbs)` : s;
+}
+
+/** "H" -> "H (130 mph)", from the standard speed-symbol table. */
+function speedText(symbol) {
+  const s = String(symbol ?? "").trim();
+  const entry = speedSymbol(s);
+  return entry ? `${s} (${entry.mph} mph)` : s;
+}
+
+/**
+ * A bare load index or speed symbol (what a distributor listing carries)
+ * gets its meaning from the standard tables; the catalog's rows already
+ * spell it out and are left as they are.
+ */
+function explainSpec([key, val]) {
+  const v = String(val).trim();
+  if (key === "Load Index" && /^\d{2,3}(\/\d{2,3})?$/.test(v)) return [key, loadText(v)];
+  if (key === "Speed Rating" && /^[A-Za-z]$/.test(v)) return [key, speedText(v)];
+  return [key, val];
+}
+
 /** The spec table rows: the catalog's own, else what the listing carries. */
 function specRows(product, isTire) {
   const rows = Object.entries(product.specs ?? {}).filter(
     ([, v]) => v !== null && v !== undefined && String(v).trim() !== "",
   );
-  if (rows.length || !isTire) return rows;
+  if (rows.length || !isTire) return isTire ? rows.map(explainSpec) : rows;
   return [
     ["Tire Size", product.size],
     ["Load Index", product.loadIndex],
     ["Speed Rating", product.speedRating],
     ["SKU", product.sku],
-  ].filter(([, v]) => v !== null && v !== undefined && String(v).trim() !== "");
+  ]
+    .filter(([, v]) => v !== null && v !== undefined && String(v).trim() !== "")
+    .map(explainSpec);
+}
+
+/**
+ * The four numbers a tire shopper scans for, under the fitment answer:
+ * load, speed, UTQG and the treadwear warranty. Only what the product
+ * carries is shown; the meaning of load and speed comes from the standard
+ * tables, never from the listing.
+ */
+function keySpecs(product) {
+  const out = [];
+  const load = String(product.loadIndex ?? "").trim();
+  if (load) {
+    const lbs = loadLbs(load.split("/")[0]);
+    out.push({
+      label: "Load index",
+      value: load,
+      note: lbs ? `${lbs.toLocaleString("en-US")} lbs per tire` : null,
+    });
+  }
+  const speed = String(product.speedRating ?? "").trim();
+  if (speed) {
+    const entry = speedSymbol(speed);
+    out.push({
+      label: "Speed rating",
+      value: speed,
+      note: entry ? `${entry.mph} mph rated` : null,
+    });
+  }
+  const utqg = String(product.specs?.UTQG ?? "").trim();
+  if (utqg) out.push({ label: "UTQG", value: utqg, note: "Treadwear, traction, temp." });
+  const warranty = String(product.warranty ?? "").trim();
+  if (warranty) {
+    const miles = warranty.match(/^([\d,]+)\s*mile/i);
+    out.push({
+      label: "Warranty",
+      value: miles ? `${miles[1]} mi` : warranty,
+      note: miles ? "Treadwear" : null,
+    });
+  }
+  return out;
 }
 
 export default function ProductPage({ kind = "tire" }) {
@@ -184,20 +256,25 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
   const unit = isTire ? "tire" : "wheel";
   const [qty, setQty] = useState(SET_SIZE);
   const [install, setInstall] = useState(false);
-  const [added, setAdded] = useState(false);
+  // What was last added ("qty:install"), so the confirmation and the phone
+  // bar's View cart describe that order, not whatever is picked now.
+  const [added, setAdded] = useState(null);
 
   useEffect(() => trackViewItem(product), [product]);
 
-  // The sticky bar only earns its place once the real buy box has scrolled
-  // away; before that it would cover the page for no reason.
-  const buyBoxRef = useRef(null);
-  const [buyBoxGone, setBuyBoxGone] = useState(false);
+  // The phone's sticky bar shows whenever the real total and Add to Cart
+  // button are off screen, so the way to buy is always one thumb away: on
+  // arrival (they sit below the fold on a phone), while choosing quantity
+  // and delivery, and after scrolling on to the specs. It steps aside
+  // while the real button is in view, rather than doubling it.
+  const ctaRef = useRef(null);
+  const [ctaGone, setCtaGone] = useState(false);
 
   useEffect(() => {
-    const el = buyBoxRef.current;
+    const el = ctaRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return undefined;
     const observer = new IntersectionObserver(
-      ([entry]) => setBuyBoxGone(!entry.isIntersecting),
+      ([entry]) => setCtaGone(!entry.isIntersecting),
       { threshold: 0 },
     );
     observer.observe(el);
@@ -227,9 +304,15 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
   const inCompare = canCompare && compare.has(product.slug);
   const compareLocked = !inCompare && compare.isFull;
   const plural = (n) => (n === 1 ? unit : `${unit}s`);
+  const addedQty = added ? Number(added.split(":")[0]) : 0;
+  const justAdded = added === `${qty}:${install ? "i" : "n"}`;
+  const fitHref = noFit
+    ? (fit.sizes ?? []).map(sizeSearch).find(Boolean) ?? "/tires"
+    : null;
   const stock = reportStock ? stockLabel(product) : null;
   const soldOut = stock?.level === "out";
   const specs = specRows(product, isTire);
+  const glance = isTire ? keySpecs(product) : [];
   const features = Array.isArray(product.features) ? product.features : [];
   const photo =
     typeof product.image === "string" && /^https:\/\//i.test(product.image)
@@ -259,7 +342,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
       },
       qty,
     );
-    setAdded(true);
+    setAdded(`${qty}:${install ? "i" : "n"}`);
   };
 
   return (
@@ -289,19 +372,22 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
       )}
 
       <Section>
-        <div className="grid items-start gap-10 lg:grid-cols-2">
+        <div className="grid items-start gap-6 sm:gap-10 lg:grid-cols-2">
           {/* Product art. It sticks on a desktop so the tire stays in view
               while the buy box and spec table scroll past it — the
               column is far taller than the art, and stretching the panel to
               match just floats the product in an empty box. */}
-          <div className="card flex items-center justify-center bg-fog p-8 lg:sticky lg:top-[calc(var(--header-h)+1.5rem)]">
+          {/* On a phone the art is kept small, so the name, the price for a
+              set and the fitment answer reach the first screen instead of a
+              full-width picture of a tire. */}
+          <div className="card flex items-center justify-center bg-fog p-4 sm:p-8 lg:sticky lg:top-[calc(var(--header-h)+1.5rem)]">
             {photo ? (
               <img
                 src={photo}
                 alt={`${name}, ${sizeLabel}`}
                 width={420}
                 height={420}
-                className="h-auto w-full max-w-[420px] object-contain"
+                className="h-auto w-full max-w-[150px] object-contain sm:max-w-[420px]"
               />
             ) : (
               <ProductArt
@@ -309,13 +395,13 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                 accent={product.accent}
                 size={420}
                 label={`${name}, ${sizeLabel}`}
-                className="h-auto w-full max-w-[420px]"
+                className="h-auto w-full max-w-[150px] sm:max-w-[420px]"
               />
             )}
           </div>
 
           {/* Buy box */}
-          <div ref={buyBoxRef}>
+          <div>
             <p className="eyebrow">{product.brand}</p>
             <h1 className="h1 mt-1">{product.model}</h1>
             <p className="tnum mt-2 font-display text-lg text-smoke">
@@ -354,17 +440,58 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
               )}
             </div>
 
-            {/* Installed price, one tire and a set of four, for a local
-                shopper. Display only: the Delivery choice below is what
-                adds installation to the cart. */}
-            {isTire && (
+            {/* Does it fit, straight under the price: the question a shopper
+                answers before quantity or delivery matter. */}
+            {isTire && <FitPanel fit={fit} />}
+
+            {/* Key specs at a glance: what a shopper checks against the
+                old tires' sidewall, before choosing how many. */}
+            {glance.length > 0 && (
               <div className="mt-5">
-                <InstalledPriceToggle placement="product" />
-                <InstalledPriceLines price={product.price} className="mt-3" />
+                <dl
+                  data-testid="key-specs"
+                  className="tnum grid grid-cols-2 gap-2 sm:grid-cols-4"
+                >
+                  {glance.map((g) => (
+                    <div
+                      key={g.label}
+                      className="rounded-sm border border-ink/10 bg-bone px-3 py-2"
+                    >
+                      <dt className="text-[11px] font-semibold uppercase tracking-[0.06em] text-smoke">
+                        {g.label}
+                      </dt>
+                      <dd className="mt-0.5 font-display text-base font-bold leading-tight text-ink">
+                        {g.value}
+                      </dd>
+                      {g.note && (
+                        <dd className="text-[11px] leading-snug text-smoke">
+                          {g.note}
+                        </dd>
+                      )}
+                    </div>
+                  ))}
+                </dl>
+                <p className="mt-1.5 text-xs text-smoke">
+                  <Link
+                    to="/load-speed-check"
+                    className="inline-flex min-h-[24px] items-center underline underline-offset-2 hover:text-drop"
+                  >
+                    Check load and speed against your old tires
+                  </Link>
+                  {glance.some((g) => g.label === "UTQG") && (
+                    <>
+                      {" · "}
+                      <Link
+                        to="/learn/sidewall/utqg-ratings"
+                        className="inline-flex min-h-[24px] items-center underline underline-offset-2 hover:text-drop"
+                      >
+                        What UTQG means
+                      </Link>
+                    </>
+                  )}
+                </p>
               </div>
             )}
-
-            {isTire && <FitPanel fit={fit} />}
 
             {/* Quantity. Presets first, because tapping "4" is faster than
                 four taps on a plus button, with free entry for oddities. */}
@@ -444,7 +571,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                 a date: the delivery estimate depends on the address, so it is
                 shown at checkout. */}
             <fieldset className="mt-6">
-              <legend className="label">Delivery</legend>
+              <legend className="label">Shipping or installation</legend>
               <div className="grid gap-3">
                 <label
                   htmlFor="fulfil-ship"
@@ -473,8 +600,8 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                       <span className="min-w-0">{DELIVERY_NOTE}</span>
                     </span>
                     <span className="mt-1 block text-sm text-smoke">
-                      Delivered to your address anywhere in{" "}
-                      {BUSINESS.shipping.area}.
+                      Delivered to your address, ready for any tire shop to
+                      fit.
                     </span>
                   </span>
                 </label>
@@ -494,9 +621,19 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
                     className="mt-0.5 h-4 w-4 shrink-0 accent-drop"
                   />
                   <span className="min-w-0">
+                    <span className="mb-1 inline-block rounded-sm bg-ink/5 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink">
+                      South Florida only
+                    </span>
                     <span className="block font-display text-base font-bold">
                       Ship to the shop and we&apos;ll fit them (+
                       {money(product.installPrice)} per {unit})
+                    </span>
+                    {/* The installation figure for the quantity picked, so
+                        the choice is made against the number that will be
+                        added, not a per-tire price to multiply. */}
+                    <span className="tnum mt-0.5 block text-sm font-semibold text-ink">
+                      +{money(bill.install)} installation for {qty}{" "}
+                      {plural(qty)}
                     </span>
                     <span className="mt-1 flex items-start gap-2 text-sm font-medium text-ink">
                       <Store
@@ -521,76 +658,95 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
               </div>
             </fieldset>
 
-            {/* Price breakdown: what we charge, and install. */}
-            <dl className="tnum mt-6 space-y-1.5 text-sm">
-              <div className="flex justify-between gap-4">
-                <dt className="text-smoke">
-                  Price, {qty} {plural(qty)}
-                </dt>
-                <dd className="font-medium">{money(bill.price)}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-smoke">Installation at the shop</dt>
-                <dd className="font-medium">
-                  {install ? money(installTotal) : "Not added"}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-4 border-t border-ink/10 pt-2 font-display text-lg font-bold">
-                <dt>Estimated total</dt>
-                <dd>{money(orderTotal)}</dd>
-              </div>
-            </dl>
-
-            <p className="mt-2 text-xs text-smoke">
-              Shipping is free. Taxes are calculated at checkout.
-            </p>
-
-            {noFit ? (
-              <p
-                data-testid="no-add"
-                className="mt-5 rounded-sm border border-ink/15 bg-fog p-3 text-sm text-ink"
-              >
-                <span className="font-semibold">{fit.title}.</span> To keep
-                the wrong size out of your cart, it can&rsquo;t be added. The
-                tires that fit are one tap away, above.
-              </p>
-            ) : (
-              <button
-                type="button"
-                onClick={handleAdd}
-                disabled={soldOut}
-                className="btn-primary mt-5 w-full disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <ShoppingCart size={18} aria-hidden />
-                Add to Cart
-              </button>
-            )}
-            {soldOut && (
-              <p className="mt-2 text-sm text-smoke">
-                Call{" "}
-                <a
-                  href={BUSINESS.phoneHref}
-                  className="whitespace-nowrap text-ink underline underline-offset-4 hover:text-drop"
-                >
-                  {BUSINESS.phone}
-                </a>{" "}
-                and we&rsquo;ll find this size from another source.
-              </p>
-            )}
-
-            <div aria-live="polite">
-              {added && (
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-ink/15 bg-fog p-3 text-sm">
-                  <span className="flex items-center gap-2 text-ink">
-                    <Check size={16} aria-hidden className="text-drop" />
-                    Added {qty} {plural(qty)} to your cart.
-                  </span>
-                  <Link to="/cart" className="btn-dark btn-sm">
-                    View cart
-                  </Link>
+            {/* Price breakdown, then the button: the stretch the phone's
+                sticky bar stands in for while it is off screen. */}
+            <div ref={ctaRef}>
+              <dl className="tnum mt-6 space-y-1.5 text-sm">
+                <div className="flex justify-between gap-4">
+                  <dt className="text-smoke">
+                    Price, {qty} {plural(qty)}
+                  </dt>
+                  <dd className="font-medium">{money(bill.price)}</dd>
                 </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-smoke">Installation at the shop</dt>
+                  <dd className="font-medium">
+                    {install ? money(installTotal) : "Not added"}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-4 border-t border-ink/10 pt-2 font-display text-lg font-bold">
+                  <dt>
+                    Estimated total{" "}
+                    <span className="font-sans text-xs font-normal text-smoke">
+                      (before tax)
+                    </span>
+                  </dt>
+                  <dd>{money(orderTotal)}</dd>
+                </div>
+              </dl>
+
+              <p className="mt-2 text-xs text-smoke">
+                Shipping is free. Taxes are calculated at checkout.
+              </p>
+
+              {noFit ? (
+                <p
+                  data-testid="no-add"
+                  className="mt-5 rounded-sm border border-ink/15 bg-fog p-3 text-sm text-ink"
+                >
+                  <span className="font-semibold">{fit.title}.</span> To keep
+                  the wrong size out of your cart, it can&rsquo;t be added. The
+                  tires that fit are one tap away, above.
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleAdd}
+                  disabled={soldOut}
+                  className="btn-primary mt-5 w-full disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <ShoppingCart size={18} aria-hidden />
+                  Add to Cart
+                </button>
               )}
+              {soldOut && (
+                <p className="mt-2 text-sm text-smoke">
+                  Call{" "}
+                  <a
+                    href={BUSINESS.phoneHref}
+                    className="whitespace-nowrap text-ink underline underline-offset-4 hover:text-drop"
+                  >
+                    {BUSINESS.phone}
+                  </a>{" "}
+                  and we&rsquo;ll find this size from another source.
+                </p>
+              )}
+
+              <div aria-live="polite">
+                {added && (
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-ink/15 bg-fog p-3 text-sm">
+                    <span className="flex items-center gap-2 text-ink">
+                      <Check size={16} aria-hidden className="text-drop" />
+                      Added {addedQty} {plural(addedQty)} to your cart.
+                    </span>
+                    <Link to="/cart" className="btn-dark btn-sm">
+                      View cart
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
+
+            {/* Installed price, one tire and a set of four, for a local
+                shopper. Display only: the Delivery choice above is what adds
+                installation to the cart, so this sits after the button
+                rather than between the price and it. */}
+            {isTire && (
+              <div className="mt-5">
+                <InstalledPriceToggle placement="product" />
+                <InstalledPriceLines price={product.price} className="mt-3" />
+              </div>
+            )}
 
             {canCompare && (
               <div className="mt-3">
@@ -765,22 +921,54 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
       )}
 
       {/* Sticky phone buy bar. It sits on top of the global MobileCallBar
-          (fixed, `--call-bar-h` tall) rather than over it, so both stay tappable. */}
-      {buyBoxGone && (
-        <div className="fixed inset-x-0 bottom-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] z-30 border-t border-ink/10 bg-bone/95 backdrop-blur lg:hidden">
+          (fixed, `--call-bar-h` tall) rather than over it, so both stay
+          tappable. Its figure is the same estimated total as the buy box,
+          installation included when it is chosen. */}
+      {ctaGone && (
+        <div
+          data-testid="buy-bar"
+          className="fixed inset-x-0 bottom-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] z-30 border-t border-ink/10 bg-bone/95 backdrop-blur lg:hidden"
+        >
           <div className="flex items-center gap-3 px-4 py-2.5">
             <div className="min-w-0">
-              <p className="tnum font-display text-xl leading-none">
-                {money(bill.price)}
-              </p>
-              <p className="mt-1 truncate text-[11px] text-smoke">
-                {qty} {plural(qty)} · {money(product.price)} each
-              </p>
+              {noFit ? (
+                <>
+                  <p className="truncate text-xs font-semibold text-ink">
+                    {fit.title}
+                  </p>
+                  <p className="tnum mt-1 truncate text-[11px] text-smoke">
+                    {money(orderTotal)} for {qty} {plural(qty)}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="tnum font-display text-xl leading-none">
+                    {money(orderTotal)}
+                  </p>
+                  <p className="mt-1 truncate text-[11px] text-smoke">
+                    {qty} {plural(qty)}
+                    {install ? " + installation" : " · free shipping"}
+                    {" · "}
+                    {money(product.price)} each
+                  </p>
+                </>
+              )}
             </div>
             {noFit ? (
-              <p className="ml-auto shrink-0 text-right text-xs font-semibold text-ink">
-                {fit.title}
-              </p>
+              <Link
+                to={fitHref}
+                className="btn-outline btn-sm ml-auto min-h-[44px] shrink-0"
+              >
+                See tires that fit
+              </Link>
+            ) : justAdded ? (
+              <Link
+                to="/cart"
+                className="btn-dark btn-sm ml-auto min-h-[44px] shrink-0"
+              >
+                <Check size={16} aria-hidden />
+                Added · View cart
+              </Link>
             ) : (
               <button
                 type="button"
