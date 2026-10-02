@@ -17,6 +17,7 @@ import { useCart } from "../../context/CartContext.jsx";
 import HeaderSearch from "./HeaderSearch.jsx";
 import Logo from "./Logo.jsx";
 import { LanguageControl, TranslationNotice } from "./LanguageControl.jsx";
+import { trapTab } from "../../lib/trapFocus.js";
 
 /** Thin utility strip above the masthead: phone, address, mobile-service pitch. */
 // Installation is not free: name the shop's published starting price,
@@ -133,6 +134,7 @@ function DesktopNav() {
 
 function MobileDrawer({ open, onClose }) {
   const closeButtonRef = useRef(null);
+  const panelRef = useRef(null);
 
   // Lock body scroll while the drawer is open, and let Escape dismiss it —
   // the filter drawer already does both, and a panel that covers the screen
@@ -150,6 +152,7 @@ function MobileDrawer({ open, onClose }) {
 
     const onKey = (e) => {
       if (e.key === "Escape") onClose();
+      else trapTab(e, panelRef.current);
     };
     document.addEventListener("keydown", onKey);
     return () => {
@@ -163,12 +166,15 @@ function MobileDrawer({ open, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
+      {/* The backdrop closes on a tap; the keyboard has the X and Escape. */}
       <button
         aria-label="Close menu"
+        tabIndex={-1}
         className="absolute inset-0 bg-ink/60"
         onClick={onClose}
       />
       <div
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label="Site menu"
