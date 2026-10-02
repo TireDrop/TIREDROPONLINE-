@@ -1,20 +1,30 @@
 /**
  * The content system, as the app sees it.
  *
- * Every Markdown file under src/content is read at build time with
- * import.meta.glob (raw text) and parsed by ./core.js — the same parser the
- * sitemap uses in Node through ./node.js, so the two can never disagree.
+ * Every Markdown file under src/content is parsed at build time, in Node, by
+ * ./core.js: the same parser the sitemap uses through ./node.js, so the two
+ * can never disagree. The browser never gets the Markdown or the parser
+ * (only ./store.js's queries). It gets:
+ *
+ *   - here, "virtual:content-summaries": each article's list fields (title,
+ *     description, hub, category, dates, reading time), enough for every
+ *     card, hub, index and route, and no bodies;
+ *   - in ./details.js, one chunk per article with the rest of its
+ *     frontmatter and its body already rendered to HTML, loaded only by that
+ *     article's page.
+ * Both come from the tiredrop-content plugin in vite.config.js.
  *
  *   src/content/learn/<hub>/<slug>.md  ->  /learn/<hub>/<slug>
  *   src/content/blog/<slug>.md         ->  /blog/<slug>
  *   src/content/learn/hubs.json        ->  the hub list
  *
  * Drafts (`draft: true`) and `_`-prefixed sample files render only in dev and
- * in `--mode preview` builds. The production build leaves `_` files out of the
+ * in `--mode preview` builds. The production build leaves them out of the
  * bundle altogether, and neither ever reaches the routes or the sitemap.
  */
 import hubs from "./learn/hubs.json";
-import { buildContent } from "./core.js";
+import summaries from "virtual:content-summaries";
+import { createStore } from "./store.js";
 
 export {
   AUTHOR,
@@ -22,41 +32,19 @@ export {
   DEFAULT_CTA,
   canonicalSitePath,
   isExternalUrl,
-} from "./core.js";
+} from "./store.js";
 
 /** True in `vite` dev and in `vite build --mode preview`. */
 export const SHOW_DRAFTS =
   import.meta.env.DEV || import.meta.env.MODE === "preview";
 
-// Vite needs the glob options written out as literals, so they repeat.
-const PUBLISHED = import.meta.glob(
-  ["./learn/*/*.md", "./blog/*.md", "!./learn/*/_*.md", "!./blog/_*.md"],
-  { query: "?raw", import: "default", eager: true },
-);
-
-// Only referenced when drafts show, so a production build drops these
-// modules (and their text) from the bundle.
-const SAMPLES = SHOW_DRAFTS
-  ? import.meta.glob(["./learn/*/_*.md", "./blog/_*.md"], {
-      query: "?raw",
-      import: "default",
-      eager: true,
-    })
-  : {};
-
-const store = buildContent({
-  files: { ...PUBLISHED, ...SAMPLES },
+// The summaries are already only what this build shows (the plugin filters
+// by the same rule), so includeDrafts just keeps dev drafts in.
+const store = createStore({
+  articles: summaries,
   hubs,
   includeDrafts: SHOW_DRAFTS,
 });
-
-if (SHOW_DRAFTS && typeof console !== "undefined") {
-  for (const p of store.problems) {
-    console[p.level === "error" ? "error" : "warn"](
-      `[content] ${p.file}: ${p.message}`,
-    );
-  }
-}
 
 /** Hubs in order: `{ slug, title, description, order, path, count, lastmod }`. */
 export const getLearnHubs = () => store.getLearnHubs();
@@ -88,6 +76,3 @@ export const contentRoutes = () => store.contentRoutes();
 
 /** YYYY-MM-DD a content path last changed, or null. */
 export const contentLastmod = (path) => store.contentLastmod(path);
-
-/** `{ segments, toc, demos }` for an article's body (cached). */
-export const renderArticle = (article) => store.renderArticle(article);

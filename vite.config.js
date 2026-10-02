@@ -1,7 +1,9 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { generateSeoFiles } from "./scripts/generate-seo-files.mjs";
-import { loadContent } from "./src/content/node.js";
+import { relative, sep } from "node:path";
+import { CONTENT_DIR, loadContent } from "./src/content/node.js";
+import { articleDetail, articleSummary } from "./src/content/core.js";
 import { buildPageIndex, pageIndexContent } from "./src/lib/sitePages.js";
 import { pickHomeReading } from "./src/lib/homeReading.js";
 
@@ -48,6 +50,70 @@ const homeReading = () => ({
   },
 });
 
+// Learn and Blog content for the browser, split so no page downloads an
+// article it does not show (src/content/index.js, src/content/details.js):
+//   "virtual:content-summaries"  every visible article's list fields (title,
+//                                description, hub, dates, minutes), no body;
+//   "<file>.md?article"           one article's remaining frontmatter and its
+//                                body rendered to HTML, one chunk each.
+// Both read one store per build, with drafts shown exactly when
+// src/content/index.js shows them (dev and --mode preview).
+const CONTENT_SUMMARIES = "virtual:content-summaries";
+const contentModules = () => {
+  let showDrafts = false;
+  let logger = null;
+  let store = null;
+  const getStore = () => {
+    if (store) return store;
+    store = loadContent({ includeDrafts: showDrafts });
+    if (showDrafts)
+      for (const p of store.problems)
+        logger?.[p.level === "error" ? "error" : "warn"](
+          `[content] ${p.file}: ${p.message}`,
+        );
+    return store;
+  };
+  const visible = () => [
+    ...getStore().getLearnArticles(),
+    ...getStore().getBlogPosts(),
+  ];
+  return {
+    name: "tiredrop-content",
+    configResolved(config) {
+      showDrafts = config.command === "serve" || config.mode === "preview";
+      logger = config.logger;
+    },
+    buildStart() {
+      store = null;
+    },
+    resolveId: (id) =>
+      id === CONTENT_SUMMARIES ? `\0${CONTENT_SUMMARIES}` : null,
+    load(id) {
+      if (id === `\0${CONTENT_SUMMARIES}`)
+        return `export default ${JSON.stringify(visible().map(articleSummary))};`;
+      const [file, query = ""] = id.split("?");
+      if (!new URLSearchParams(query).has("article")) return null;
+      const key = `./${relative(CONTENT_DIR, file).split(sep).join("/")}`;
+      const article = visible().find((a) => a.file === key);
+      // null for a draft in a production build, or a file with errors: the
+      // summaries never list it, so nothing asks for it.
+      const detail = article
+        ? articleDetail(article, getStore().renderArticle(article))
+        : null;
+      return `export default ${JSON.stringify(detail)};`;
+    },
+    // A content edit in dev can change any page (links, hubs, lists), so
+    // rebuild the store and reload.
+    handleHotUpdate({ file, server }) {
+      if (!file.startsWith(CONTENT_DIR)) return;
+      store = null;
+      server.moduleGraph.invalidateAll();
+      server.ws.send({ type: "full-reload" });
+      return [];
+    },
+  };
+};
+
 // `--mode preview` produces a build that runs from any static host without
 // SPA rewrites: relative asset paths plus hash routing (see src/main.jsx).
 //
@@ -56,7 +122,7 @@ const homeReading = () => ({
 // once it is done. VITE_BUILD_YEAR is the footer's year in prerendered HTML
 // (see Footer.jsx).
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), seoFiles(), sitePages(), homeReading()],
+  plugins: [react(), seoFiles(), sitePages(), homeReading(), contentModules()],
   base: mode === "preview" ? "./" : "/",
   define: {
     "import.meta.env.VITE_BUILD_YEAR": JSON.stringify(

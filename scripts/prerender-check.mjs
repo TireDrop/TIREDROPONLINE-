@@ -12,6 +12,9 @@
  *      in the served HTML.
  *   4. Client-side navigation still works after hydration: a header link
  *      changes the page, title and canonical without a full page load.
+ *   5. Article bodies load one at a time: index and hub pages fetch none,
+ *      an article page only its own, and a link to another article fetches
+ *      and renders that one in the same document.
  *
  * Every /api request is answered by a mock, and third-party hosts are
  * answered empty.
@@ -26,6 +29,7 @@ import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 
 import { EXCLUDE } from "./generate-seo-files.mjs";
+import { loadContent } from "../src/content/node.js";
 
 const CHROME =
   process.env.AUDIT_CHROME ??
@@ -357,6 +361,105 @@ for (const url of ["/tires?size=225/45R18", "/tire-size?size=225/45R17", "/no-su
     `client nav / -> /tires: same document ${state.same}, canonical ${state.canonical}, ` +
       `h1 "${state.h1}", ${state.lds} JSON-LD block(s) ${errors.join(" | ")}`,
   );
+  await context.close();
+}
+
+/* --------------------- 5. one article, one chunk --------------------- */
+
+// Each article's body ships in a chunk of its own (src/content/details.js):
+// an index or hub page downloads no article's text, an article page only its
+// own, and following a link to another article fetches that one and renders
+// it. An article counts as downloaded when a plain sentence from its body
+// turns up in any script the page fetched, whether as Markdown or as HTML.
+{
+  const content = loadContent();
+  const markers = [...content.getLearnArticles(), ...content.getBlogPosts()]
+    .map((a) => ({
+      path: a.path,
+      text: a.body
+        .split("\n")
+        .map((l) => l.trim())
+        // A plain paragraph line: no list marker or inline Markdown, and no
+        // character the HTML would escape.
+        .find((l) => l.length > 60 && /^[A-Z]/.test(l) && !/[[\]*_`<>|#&"'’]/.test(l))
+        ?.slice(0, 60),
+    }))
+    .filter((m) => m.text);
+  const { context, page, errors } = await newPage();
+  let fetched = new Set();
+  const reading = [];
+  page.on("response", (res) => {
+    const url = new URL(res.url());
+    if (url.host !== local || !url.pathname.endsWith(".js")) return;
+    reading.push(
+      res
+        .text()
+        .catch(() => "")
+        .then((text) => {
+          for (const m of markers)
+            if (text.includes(m.text)) fetched.add(m.path);
+        }),
+    );
+  });
+  const settle = async () => {
+    await page.waitForFunction(isMounted);
+    await page.waitForLoadState("networkidle");
+    await Promise.all(reading.splice(0));
+  };
+
+  const only = (path) => fetched.size === 1 && fetched.has(path);
+  const list = () => {
+    const paths = [...fetched];
+    const more = paths.length > 3 ? ", ..." : "";
+    return paths.length
+      ? `${paths.length} articles' text (${paths.slice(0, 3).join(", ")}${more})`
+      : "no article's text";
+  };
+
+  for (const route of ["/blog", "/learn", "/learn/buying"]) {
+    fetched = new Set();
+    await page.goto(BASE + route, { waitUntil: "load" });
+    await settle();
+    (fetched.size === 0 ? ok : bad)(`${route} downloaded ${list()}`);
+  }
+
+  const from = "/learn/buying/run-flat-tires";
+  fetched = new Set();
+  errors.length = 0;
+  await page.goto(BASE + from, { waitUntil: "load" });
+  await settle();
+  (only(from) && errors.length === 0 ? ok : bad)(
+    `${from} downloaded ${list()} ${errors.join(" | ")}`,
+  );
+
+  await page.evaluate(() => {
+    window.__sameDocument = true;
+  });
+  const to = await page.evaluate(
+    () =>
+      [...document.querySelectorAll('section[aria-labelledby="related"] a')]
+        .map((a) => a.getAttribute("href"))
+        .find((href) => /^\/(learn\/[^/]+|blog)\/[^/]+$/.test(href)) ?? null,
+  );
+  if (!to) bad(`${from}: no related article link to follow`);
+  else {
+    fetched = new Set();
+    await page.locator(`section[aria-labelledby="related"] a[href="${to}"]`).first().click();
+    await page.waitForURL(BASE + to);
+    await page.waitForFunction(
+      (path) =>
+        document.querySelector('link[rel="canonical"]')?.href.endsWith(path) &&
+        (document.querySelector(".prose-article")?.textContent.length ?? 0) > 500,
+      to,
+    );
+    await page.waitForLoadState("networkidle");
+    await Promise.all(reading.splice(0));
+    const same = await page.evaluate(() => window.__sameDocument === true);
+    (same && only(to) && errors.length === 0 ? ok : bad)(
+      `client nav ${from} -> ${to}: same document ${same}, body rendered, ` +
+        `downloaded ${list()} ${errors.join(" | ")}`,
+    );
+  }
   await context.close();
 }
 
