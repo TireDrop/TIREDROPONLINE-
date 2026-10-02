@@ -61,6 +61,7 @@ export const TOOL_PAGES = [
     ],
     related: [
       "/learn/sidewall/how-to-read-tire-size",
+      "/learn/buying/xl-vs-sl-tires",
       "/blog/tesla-model-y-tires-guide",
       "/tire-size",
     ],
@@ -103,7 +104,11 @@ export const TOOL_PAGES = [
         a: "If the wheel diameter in the size changes, such as R17 to R18, yes, and the tool says so. A much wider tire can also need a wider wheel, so check the rim widths the tire maker lists for that size.",
       },
     ],
-    related: ["/learn/sidewall/how-to-read-tire-size", "/tire-size"],
+    related: [
+      "/learn/sidewall/how-to-read-tire-size",
+      "/learn/fitment/wheel-offset-backspacing",
+      "/tire-size",
+    ],
     services: ["wheel-installation", "tire-installation"],
   },
   {
@@ -270,7 +275,11 @@ export const TOOL_PAGES = [
         a: "Tires in different positions wear at different rates. Rotating on a regular schedule spreads that wear across the set, so the four wear more evenly.",
       },
     ],
-    related: ["/learn/tread/tread-depth", "/blog/tesla-model-y-tires-guide"],
+    related: [
+      "/learn/fitment/staggered-tires",
+      "/learn/tread/tread-depth",
+      "/blog/tesla-model-y-tires-guide",
+    ],
     services: ["tire-rotation"],
   },
 ];

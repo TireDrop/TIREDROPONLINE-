@@ -38,14 +38,45 @@
   {
     "slug": "buying",
     "title": "Buying Guides",
-    "description": "When to replace tires, two or four, LT vs P-metric, EV and run-flat tires, trailer tires and buying tires online.",
-    "order": 7
+    "description": "Choosing tires: all-season vs all-weather, all-terrain vs highway, LT vs P-metric and load range, XL vs SL, and run-flat tires.",
+    "order": 7,
+    "intro": "The letters and symbols on a tire listing decide what it can do and what it can carry. These guides explain them in the tire makers' and regulators' own terms, so you can compare tires on what matters for where you drive. Start from the size, load index and speed rating on your door placard.",
+    "links": [
+      {
+        "text": "Know your size?",
+        "label": "Read it off your door-jamb sticker with the Tire Size Finder",
+        "href": "/tire-size-finder"
+      },
+      {
+        "text": "Comparing two tires?",
+        "label": "Check load index and speed rating side by side",
+        "href": "/load-speed-check"
+      }
+    ]
   },
   {
     "slug": "fitment",
     "title": "Wheels & Fitment",
-    "description": "Plus sizing, using a different tire size, staggered setups, wheel offset, bolt pattern and center bore.",
-    "order": 8
+    "description": "Wheels and fitment: bolt patterns and PCD, wheel offset and backspacing, staggered setups, and changing tire or wheel size.",
+    "order": 8,
+    "intro": "A wheel that bolts on isn't always a wheel that fits. These guides cover the numbers that decide fit, from bolt pattern and center bore to offset and staggered sizes, so you know what to check before you order wheels or tires.",
+    "links": [
+      {
+        "text": "Changing wheel or tire size?",
+        "label": "Compare overall diameter with the plus size calculator",
+        "href": "/plus-size-calculator"
+      },
+      {
+        "text": "Staggered car?",
+        "label": "See which rotation pattern your setup allows",
+        "href": "/tire-rotation-pattern"
+      },
+      {
+        "text": "Shopping for wheels?",
+        "label": "Read our wheel fitment guidance",
+        "href": "/wheels?view=fitment"
+      }
+    ]
   },
   {
     "slug": "maintenance",

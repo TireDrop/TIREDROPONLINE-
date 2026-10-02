@@ -10,7 +10,7 @@ secondaryKeywords:
   - "flotation tire size"
 hub: sidewall
 date: 2026-09-30
-updated: 2026-09-30
+updated: 2026-10-02
 demo: size-decoder
 takeaways:
   - "Start from the size on your door placard, not the size on the tires the last owner put on."
@@ -48,6 +48,8 @@ related:
   - /learn/sidewall/load-index
   - /learn/fitment/different-tire-size
   - /learn/sidewall/utqg-ratings
+  - /learn/buying/lt-vs-p-metric
+  - /learn/buying/xl-vs-sl-tires
   - /find-my-tires
 cta:
   label: "Decode your size"
@@ -93,7 +95,7 @@ Some sizes start with a letter. NHTSA's tire safety material lists what they mea
 
 And if there's no letter at all? Michelin explains that a leading P means the tire's loads follow U.S. Tire and Rim Association standards, while no letter means the tire conforms to the European ETRTO standards. You'll see both on cars in the same Doral parking lot.
 
-Don't swap between P, LT and ST types on your own. They're different service types for different vehicles, so treat a change of type as a fitment question for a technician.
+Don't swap between P, LT and ST types on your own. They're different service types for different vehicles, so treat a change of type as a fitment question for a technician. Our guide to [LT vs P-metric tires](/learn/buying/lt-vs-p-metric) explains what changes.
 
 ## Doing the math: how tall is the sidewall?
 
@@ -118,7 +120,7 @@ The [tire size tool](/tire-size) does this math for you and can compare two size
 
 The two characters after the size are easy to skip and important not to.
 
-**Load index.** A number that maps to how much weight one tire can carry at proper inflation. Michelin's chart lists load index 94, for example, as 670 kg, or about 1,477 lb, per tire. USTMA says to always use a load index equal to or above what your vehicle placard requires. Never go lower. You'll sometimes see **XL** after it, which marks an extra-load version of the size. The [load index guide](/learn/sidewall/load-index) has the full chart.
+**Load index.** A number that maps to how much weight one tire can carry at proper inflation. Michelin's chart lists load index 94, for example, as 670 kg, or about 1,477 lb, per tire. USTMA says to always use a load index equal to or above what your vehicle placard requires. Never go lower. You'll sometimes see **XL** after it, which marks an extra-load version of the size; our [XL vs SL guide](/learn/buying/xl-vs-sl-tires) explains how it ties to pressure. The [load index guide](/learn/sidewall/load-index) has the full chart.
 
 **Speed symbol.** A letter for the maximum sustained speed the tire is rated to carry its load at. From Michelin's chart:
 

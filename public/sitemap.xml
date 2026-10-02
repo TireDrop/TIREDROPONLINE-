@@ -123,7 +123,7 @@
   </url>
   <url>
     <loc>https://tiredroponline.com/learn</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
@@ -134,6 +134,36 @@
   <url>
     <loc>https://tiredroponline.com/learn/age/how-old-is-too-old</loc>
     <lastmod>2026-09-30</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/buying</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/buying/all-season-vs-all-weather-tires</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/buying/all-terrain-vs-highway-tires</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/buying/lt-vs-p-metric</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/buying/run-flat-tires</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/buying/xl-vs-sl-tires</loc>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -152,18 +182,38 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://tiredroponline.com/learn/fitment</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/fitment/bolt-pattern</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/fitment/staggered-tires</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tiredroponline.com/learn/fitment/wheel-offset-backspacing</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://tiredroponline.com/learn/florida</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/florida/florida-heat-tires</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/pressure</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -173,12 +223,12 @@
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/pressure/tpms-light</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/sidewall</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -188,7 +238,7 @@
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/sidewall/how-to-read-tire-size</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -198,7 +248,7 @@
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/tesla</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -208,7 +258,7 @@
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/tesla/tesla-rotation-alignment-tpms</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -218,7 +268,7 @@
   </url>
   <url>
     <loc>https://tiredroponline.com/learn/tesla/tesla-tire-basics</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>

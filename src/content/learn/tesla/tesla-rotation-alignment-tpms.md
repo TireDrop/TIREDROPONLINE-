@@ -9,7 +9,7 @@ secondaryKeywords:
   - "tesla jack points"
 hub: tesla
 date: 2026-10-01
-updated: 2026-10-01
+updated: 2026-10-02
 demo: rotation-pattern
 takeaways:
   - "Tesla's owner's manuals say to rotate every 6,250 miles (10,000 km), or sooner if tread depths differ by 2/32 inch or more."
@@ -98,6 +98,8 @@ Several Tesla wheel packages use wider tires on the rear than the front. Our [fa
 - Front and rear tires are different sizes, so they **can't swap axles**.
 - Whether side-to-side moves are possible depends on the tires. A tire with a directional tread can't simply move to the other side of the car.
 - Without front-to-back rotation, the two axles can wear at different rates. Check tread depth on both at every service. You may end up replacing fronts and rears at different times.
+
+Our guide to [staggered tires](/learn/fitment/staggered-tires) covers rotation, wear and buying two front and two rear on any staggered car.
 
 Ask your installer what applies to your exact tires before the work starts.
 

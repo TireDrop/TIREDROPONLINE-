@@ -9,7 +9,7 @@ secondaryKeywords:
   - "summer tire check Florida"
 hub: florida
 date: 2026-09-30
-updated: 2026-09-30
+updated: 2026-10-02
 demo: utqg-explainer
 takeaways:
   - "NHTSA lists excessive speed, underinflation and excessive loading as the conditions that can cause heat build-up and possible tire failure."
@@ -49,6 +49,7 @@ related:
   - /learn/pressure/tire-pressure-temperature
   - /learn/age/how-old-is-too-old
   - /learn/sidewall/utqg-ratings
+  - /learn/buying/all-season-vs-all-weather-tires
   - /blog/snowbird-car-sat-all-summer-tires
   - /tire-check
 cta:
