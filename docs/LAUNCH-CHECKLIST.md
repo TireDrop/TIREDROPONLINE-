@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
+_Last updated: 2026-10-02 (preview/a11y-pass2: footer label "Shipping to 48 States + DC" and the accessibility second pass; earlier: SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
 
 ## Site fixes (Claude)
 - [x] ~~Resources only: every competitor citation/link replaced with maker, AAA or government sources~~ (`7754330`, shipped to main 2026-10-02)
@@ -35,7 +35,7 @@ _Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citati
 - [x] ~~Language button: translate any page (Google element + translate.google.com fallback)~~ (c05e3ac)
 - [x] ~~Spanish tab labels overflow the home finder on phones (SearchPanel whitespace-nowrap) → let tabs wrap below md~~ (c05e3ac)
 - [x] ~~Compact mobile-first footer: contact row first, collapsible link groups, 62% shorter on phones (1621 → 608px), check:footer guards it~~ (a18b709, shipped to main 2026-10-02)
-  - [ ] Footer link label "Tires Shipped Nationwide" → say 48 states + DC (Justin picks the wording)
+  - [x] ~~Footer link label "Tires Shipped Nationwide" → say 48 states + DC~~ (a04b749 on preview/a11y-pass2: "Shipping to 48 States + DC" in the footer, breadcrumbs and CTAs; home and hub SEO titles add "(48 states + DC)"; footer 927px at 390, unchanged)
 - [x] ~~check:sources gate: competitor links, mentions and meta tags fail the build; required in every gate run~~ (`0b1172b`, shipped to main 2026-10-02)
   - [x] ~~Source decisions: Wheel Pros / KMC (wheel makers) and legalclarity.org kept as resources; cleanairforce.com (Georgia emissions program) added as a resource~~ (2026-10-02)
 
@@ -98,7 +98,7 @@ _Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citati
 - [x] ~~NHTSA lookup timeout~~ (c541339)
 - [ ] Returns window + warranty/road-hazard links
 - [x] ~~"Continental US" wording (~40 places) → "48 contiguous states + DC"~~ (c541339)
-- [ ] Accessibility, second pass: heading order on the Learn hubs, /blog, /wheels and /compare, and a blank first column heading in the UTQG table (axe "moderate"/"minor"; `npm run check:a11y` covers 12 key routes)
+- [x] ~~Accessibility, second pass: heading order on the Learn hubs, /blog, /wheels and /compare, and a blank first column heading in the UTQG table~~ (a04b749 on preview/a11y-pass2: 0 axe issues on 24 routes at 390 and 1280, down from 25; also named the compare tray landmark and four more blank table headings; `npm run check:a11y` now covers 22 routes at both widths plus 18 at 390)
 - [ ] Shopify theme copy still says "continental United States" (shop. redirects to the main site, so it does not render; update the draft theme only if the redirect ever comes off)
 - [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search)
 - [x] ~~CRO quick wins: hero to results, phone cart Checkout, install price shown, 48 states + DC on cards~~ (shipped to main 2026-10-02, release preview/release-2026-10-02)
