@@ -922,28 +922,41 @@ export function SectionHead({
  * to set the feel: a lit gradient rather than a flat rectangle, the mark's cyan
  * for the eyebrow (8.2:1 here, where `drop` would be muddy), and a deliberate
  * step down in weight and colour from title to lede so the stack has a shape.
+ *
+ * `compact`: one H1 line, no eyebrow or lede, a third of the padding, for a
+ * page whose results should open in the first screen (/tires with a search).
+ * The element tree is the same either way, so switching it keeps the H1 node
+ * (a hydrated page that turns compact is updated in place, not replaced).
  */
-export function PageHero({ eyebrow, title, lede, children }) {
+export function PageHero({ eyebrow, title, lede, children, compact = false }) {
   return (
     <header className="relative overflow-hidden bg-ink bg-ink-wash text-bone">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-volt/35 to-transparent"
       />
-      <div className="wrap relative py-14 md:py-20">
-        {eyebrow && (
+      <div className={`wrap relative ${compact ? "py-4 md:py-7" : "py-14 md:py-20"}`}>
+        {eyebrow && !compact && (
           <p className="eyebrow mb-3 flex items-center gap-2.5 text-volt">
             <span aria-hidden className="h-px w-6 bg-volt/55" />
             {eyebrow}
           </p>
         )}
-        <h1 className="h1 max-w-4xl text-balance">{title}</h1>
-        {lede && (
+        <h1
+          className={
+            compact
+              ? "max-w-4xl text-balance font-display text-[1.5rem] leading-[1.1] md:text-[2.25rem]"
+              : "h1 max-w-4xl text-balance"
+          }
+        >
+          {title}
+        </h1>
+        {lede && !compact && (
           <p className="lede mt-5 max-w-2xl text-bone/70 md:text-[1.25rem]">
             {lede}
           </p>
         )}
-        {children && <div className="mt-8">{children}</div>}
+        {children && !compact && <div className="mt-8">{children}</div>}
       </div>
     </header>
   );

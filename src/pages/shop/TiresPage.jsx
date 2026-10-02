@@ -538,28 +538,12 @@ export default function TiresPage() {
       {/* With a vehicle or size in the address the results are the point,
           so the header is one line and the first tires land in the first
           screen. A bare /tires keeps the full hero. */}
-      {compactTitle ? (
-        <header className="relative overflow-hidden bg-ink bg-ink-wash text-bone">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-volt/35 to-transparent"
-          />
-          <div className="wrap relative py-4 md:py-7">
-            <h1
-              className="text-balance font-display text-[1.5rem] leading-[1.1] md:text-[2.25rem]"
-              data-testid="tires-compact-title"
-            >
-              {compactTitle}
-            </h1>
-          </div>
-        </header>
-      ) : (
-        <PageHero
-          eyebrow="Tires"
-          title="Shop Tires"
-          lede={`Find your size, pick your set, then choose where it lands at checkout — your address in the 48 contiguous states or DC, or free to our South Florida shop, where we fit them from $${INSTALL.priceFrom} ${INSTALL.priceUnit}.`}
-        />
-      )}
+      <PageHero
+        compact={Boolean(compactTitle)}
+        eyebrow="Tires"
+        title={compactTitle || "Shop Tires"}
+        lede={`Find your size, pick your set, then choose where it lands at checkout — your address in the 48 contiguous states or DC, or free to our South Florida shop, where we fit them from $${INSTALL.priceFrom} ${INSTALL.priceUnit}.`}
+      />
       <Breadcrumbs trail={[{ label: "Tires" }]} />
 
       {showFinder && (

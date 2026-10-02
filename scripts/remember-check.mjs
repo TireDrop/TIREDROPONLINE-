@@ -519,6 +519,10 @@ await check("hard loads: bare /tires hydrates in place with a saved vehicle, fil
     await waitBar(page, /2019 Ford F-150/);
     assert.ok(await page.evaluate(() => window.__servedH1 === document.querySelector("h1")), `hydrated in place: /tires${q}`);
     assert.equal(query(page), `?year=2019&make=ford&model=f-150${q ? "&utm_source=mail" : ""}`);
+    // With the vehicle in the URL the header turns compact: the same H1
+    // node, now one line naming the vehicle, and no lede.
+    await page.locator("h1", { hasText: "Tires for your 2019 Ford F-150" }).waitFor();
+    assert.equal(await page.locator("header p.lede").count(), 0, `no hero lede: /tires${q}`);
     assert.deepEqual(real(errors), [], q);
   }
   // A page query renders fresh (src/main.jsx), so it can never mismatch.
@@ -532,6 +536,10 @@ await check("hard loads: bare /tires hydrates in place with a saved vehicle, fil
     await page.waitForFunction(mounted);
     await page.waitForLoadState("networkidle");
     await page.locator('[data-testid="shopping-for-text"]').waitFor();
+    // A vehicle or size in the URL: the compact one-line header.
+    if (!q.startsWith("?season")) {
+      assert.match(await page.locator("h1").innerText(), /^(Tires for your 2019 Ford F-150|265\/70R17 tires)$/, q);
+    }
     assert.deepEqual(real(errors), [], q);
   }
   // The canonical stays /tires, whatever the query.
