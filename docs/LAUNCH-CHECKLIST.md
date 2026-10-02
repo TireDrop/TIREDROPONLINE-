@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
+_Last updated: 2026-10-02 (prompt pack for every item only Justin can do: docs/prompts/2026-10-02-justin-remaining.md, branch preview/justin-prompts `5fae72e`; each open item now points to its prompt, script or question. Earlier today: resources only + the check:sources gate, Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
 
 ## Site fixes (Claude)
 - [x] ~~Resources only: every competitor citation/link replaced with maker, AAA or government sources~~ (`7754330`, shipped to main 2026-10-02)
@@ -40,6 +40,7 @@ _Last updated: 2026-10-02 (SHIPPED: resources only, with every competitor citati
   - [x] ~~Source decisions: Wheel Pros / KMC (wheel makers) and legalclarity.org kept as resources; cleanairforce.com (Georgia emissions program) added as a resource~~ (2026-10-02)
 
 ## Admin (Justin)
+- [x] ~~One prompt pack for every item only Justin can do~~ (`5fae72e`, preview/justin-prompts: docs/prompts/2026-10-02-justin-remaining.md)
 - [x] ~~GA: "Page changes based on browser history events" OFF~~ (2026-09-29)
 - [x] ~~Search Console: domain verified, sitemap submitted, robots.txt re-fetched~~ (2026-09-29)
 - [x] ~~Business Profile: tiredroponline.com added as a booking link (main site kept)~~
