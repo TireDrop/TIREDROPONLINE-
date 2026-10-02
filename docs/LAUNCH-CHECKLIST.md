@@ -36,7 +36,6 @@ _Last updated: 2026-10-02 (ATD call held: site approval and API credentials pend
 - [x] ~~Language button: translate any page (Google element + translate.google.com fallback)~~ (c05e3ac)
 - [x] ~~Spanish tab labels overflow the home finder on phones (SearchPanel whitespace-nowrap) → let tabs wrap below md~~ (c05e3ac)
 - [x] ~~Compact mobile-first footer: contact row first, collapsible link groups, 62% shorter on phones (1621 → 608px), check:footer guards it~~ (a18b709, shipped to main 2026-10-02)
-  - [ ] Footer link label "Tires Shipped Nationwide" → say 48 states + DC (Justin picks the wording) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D6)
   - [x] ~~Footer link label "Tires Shipped Nationwide" → say 48 states + DC~~ (a04b749, shipped to main 2026-10-02: "Shipping to 48 States + DC" in the footer, breadcrumbs and CTAs; home and hub SEO titles add "(48 states + DC)"; footer 927px at 390, unchanged)
 - [x] ~~check:sources gate: competitor links, mentions and meta tags fail the build; required in every gate run~~ (`0b1172b`, shipped to main 2026-10-02)
   - [x] ~~Source decisions: Wheel Pros / KMC (wheel makers) and legalclarity.org kept as resources; cleanairforce.com (Georgia emissions program) added as a resource~~ (2026-10-02)
@@ -149,7 +148,7 @@ _Last updated: 2026-10-02 (ATD call held: site approval and API credentials pend
 - [x] ~~Phase 1: keyword map, 90–100 titles, demo list → Justin approves~~ (b813381, plans approved)
 - [x] ~~Phase 2: templates + interactive demos + pilot of 10 articles → Justin approves~~ (800247b, pilot approved + 5 demos)
 - [x] ~~Blog + Learn live: 20 articles, 5 demos, 98 prerendered routes~~ (be6a2a2)
-- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); blog batch 2 live (f776fc1); blog batch 3 live (9e4cc11); blog batch 4 live (ecfd2af)). Blog: 15 planned posts left (13 unwritten + #15 and #49 on hold) = 2 more batches. Learn: 33 guides live. Status table in `docs/content/blog-plan.md`. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
+- [ ] Phase 3: publish in batches of 10 — Batch 1 live (20 articles total, be6a2a2); blog batch 2 live (f776fc1); blog batch 3 live (9e4cc11); blog batch 4 live (ecfd2af). Blog: 15 planned posts left (13 unwritten + #15 and #49 on hold) = 2 more batches. Learn: 33 guides live. Status table in `docs/content/blog-plan.md`. Demos: 6 more built and live; D7, D9, D12 cut by Justin ("only useful tools")
 - [x] ~~Blog batch 3: 10 posts~~ (9e4cc11, shipped to main 2026-10-02)
   - [ ] 16 facts were snippet-only: confirm them → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A18)
   - 4/32 in Florida rain, best time to buy (by season), RAV4, used car after storm season, choosing between brands, Camry, F-150 P vs LT, EV tire wear, rideshare mileage math, CR-V
