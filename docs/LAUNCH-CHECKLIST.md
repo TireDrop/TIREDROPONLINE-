@@ -5,11 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02 (prompt pack for every item only Justin can do: docs/prompts/2026-10-02-justin-remaining.md, branch preview/justin-prompts `5fae72e`; each open item now points to its prompt, script or question. Earlier today: resources only + the check:sources gate, Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
-_Last updated: 2026-10-02 (preview/a11y-pass2: footer label "Shipping to 48 States + DC" and the accessibility second pass; earlier: SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
-_Last updated: 2026-10-02 (CRO fixes 1 + 4 on preview/cro-quote-compact, ready to ship; SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
-_Last updated: 2026-10-02 (internal links: check:links, all clear; shared /tires links spell models like CX-5 right; earlier: SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
-_Last updated: 2026-10-02 (installed-price toggle on preview/installed-price; SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
+_Last updated: 2026-10-02 (checklist wave 2 in one release: CRO quote form + compact /tires header, installed-price toggle, footer "Shipping to 48 States + DC", accessibility pass 2 (25 issues to 0), check:links + CX-5 spelling, free-install wording priced, prompt pack for every item only Justin can do; earlier today: resources only + check:sources shipped)_
 
 ## Site fixes (Claude)
 - [x] ~~Resources only: every competitor citation/link replaced with maker, AAA or government sources~~ (`7754330`, shipped to main 2026-10-02)
@@ -108,8 +104,6 @@ _Last updated: 2026-10-02 (installed-price toggle on preview/installed-price; SH
 - [ ] Shopify theme copy still says "continental United States" (shop. redirects to the main site, so it does not render; update the draft theme only if the redirect ever comes off) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C10)
 - [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A9)
 - [x] ~~Accessibility, second pass: heading order on the Learn hubs, /blog, /wheels and /compare, and a blank first column heading in the UTQG table~~ (a04b749 on preview/a11y-pass2: 0 axe issues on 24 routes at 390 and 1280, down from 25; also named the compare tray landmark and four more blank table headings; `npm run check:a11y` now covers 22 routes at both widths plus 18 at 390)
-- [ ] Shopify theme copy still says "continental United States" (shop. redirects to the main site, so it does not render; update the draft theme only if the redirect ever comes off)
-- [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search)
 - [x] ~~CRO quick wins: hero to results, phone cart Checkout, install price shown, 48 states + DC on cards~~ (shipped to main 2026-10-02, release preview/release-2026-10-02)
 - [ ] CRO fixes 1 + 4: size quote form on zero results, compact /tires header, Cart in the /tires bottom bar (preview/cro-quote-compact baaf32c) → ship
   - First tire card with a vehicle in the URL (2019 F-150): 1,199 → 742 px at 390x844, 1,066 → 701 px at 1440x900 (size URL 225/50R17: 1,080 → 684 and 1,046 → 681)
@@ -124,19 +118,12 @@ _Last updated: 2026-10-02 (installed-price toggle on preview/installed-price; SH
   - Filters: season, tire type, brand, price per tire, speed rating, load index, load range, treadwear warranty, sort by warranty / brand. Skipped for lack of data: EV-ready, XL on passenger tires, run-flat (appears automatically once a run-flat tire is listed)
   - [x] ~~/tires Shop by Vehicle (and its Change) use the full lists, not the catalog's 10 makes / 45 models: years 1981-2027, every make sold that year, every model NHTSA lists (BMW: 3 Series, 4 Series, M3, X5, X7…); Model box filters as you type and takes a typed model~~ (preview/remember e8f1d6f)
   - [x] ~~Model lists hold up: `/api/vehicles` asks NHTSA with a timeout and is cached at Vercel's edge for a day; the build saves a snapshot as the fallback; when nothing loads the finder says "Couldn't load models. Type your model or enter your door-jamb size."~~ (preview/remember e8f1d6f)
-  - [ ] After the preview deploys, check its Vercel build log for `[vpic-snapshot] wrote dist/data/vpic-models.json` (this sandbox can't reach NHTSA, so the snapshot was never generated here) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A17)
+  - [x] ~~Production build log shows `[vpic-snapshot] wrote dist/data/vpic-models.json: 59 makes, 1506 models` (12 makes missed)~~ (checked 2026-10-02, deploy 22af9f9)
   - [ ] Shopify theme's `td-vehicles.js` still asks NHTSA straight from the browser and falls back to the 45-model table; point it at `/api/vehicles` (draft theme only) if the theme finder is ever shown again → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C11)
-  - [ ] A shared /tires link spells a model the size table doesn't know from the URL ("cx-5" shows as "Cx-5"); the saved pick keeps the right spelling
-  - [ ] After the preview deploys, check its Vercel build log for `[vpic-snapshot] wrote dist/data/vpic-models.json` (this sandbox can't reach NHTSA, so the snapshot was never generated here)
-  - [ ] Shopify theme's `td-vehicles.js` still asks NHTSA straight from the browser and falls back to the 45-model table; point it at `/api/vehicles` (draft theme only) if the theme finder is ever shown again
   - [x] ~~A shared /tires link spells a model the size table doesn't know from the URL ("cx-5" shows as "Cx-5"); the saved pick keeps the right spelling~~ (preview/internal-links b823577: reads as CX-5, RAV4, 4Runner; NHTSA's spelling once the model list answers)
-- [ ] Installed-price toggle
 - [ ] Book an install time at checkout → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C5)
 - [ ] Fitment by trim + staggered (logic + badge shipped in 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C3)
-  - [ ] A shared /tires link spells a model the size table doesn't know from the URL ("cx-5" shows as "Cx-5"); the saved pick keeps the right spelling
 - [x] ~~Installed-price toggle: "Show installed price (Miami-Dade, Broward, Palm Beach)" on /tires cards and tire pages, tire + installation = total for one tire and a set of 4, price from services.js, remembered, display only (cart unchanged), GA4 `installed_price_toggle`~~ (preview/installed-price 42d49d2)
-- [ ] Book an install time at checkout
-- [ ] Fitment by trim + staggered (logic + badge shipped in 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API)
 - [x] ~~Tire Size Finder scanner (door sticker / sidewall / VIN), one camera, Scan button in the home hero and /tires~~ (preview/scanner, shipped to main 2026-10-01; steps: docs/integrations/tire-size-finder.md)
   - [x] ~~Justin: Anthropic key `tiredrop-vercel-scanner` in Vercel (Sensitive, Production + Preview), $25 monthly spend limit, auto-reload on~~ (2026-10-01)
   - [x] ~~Guardrails: key read only server-side; per-IP limit 5 scans / 10 min; photo ≤3 MB (under Vercel's 4.5 MB body limit) and JPEG/PNG/WebP checked by bytes; 401/403/429/529 logged with a hint, never the key; "busy" and "isn't working" messages for shoppers~~ (preview/scanner)
@@ -170,9 +157,6 @@ _Last updated: 2026-10-02 (installed-price toggle on preview/installed-price; SH
 - [ ] Roadside flat tire help: give it a starting price → it joins the service catalog and online booking (phone only until then) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D5)
 - [ ] City pages wave 2: Pompano Beach, Miramar, Oakland Park, Pembroke Pines, Hollywood, Lauderhill (after wave 1 is indexed) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C7)
 - [ ] Phase 4: internal links, Search Console submit, monthly refresh
-- [ ] Justin: confirm the city facts the research left unverified, so they can go on the pages: Tamarac ZIPs, roads and neighbourhoods; Coral Springs, Davie and Weston roads; Coral Springs and Weston neighbourhoods; whether Plantation 33388 is a PO Box ZIP
-- [ ] Roadside flat tire help: give it a starting price → it joins the service catalog and online booking (phone only until then)
-- [ ] City pages wave 2: Pompano Beach, Miramar, Oakland Park, Pembroke Pines, Hollywood, Lauderhill (after wave 1 is indexed)
 - [ ] Phase 4: Search Console submit, monthly refresh (internal links done, below)
 - [x] ~~Phase 4 internal links: check:links + fixes~~ (preview/internal-links b823577)
   - `npm run check:links` reads the build: 154 pages, 50 articles; 0 broken links, 0 indexable orphans (only /search, noindex), 0 articles without a shop or tool link, so nothing needed fixing

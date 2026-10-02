@@ -101,7 +101,7 @@ export default function LocationsPage() {
     <>
       <Seo
         title="The Shop & Install Area"
-        description={`${BUSINESS.name} ships nationwide, and ${BUSINESS.parent} at ${BUSINESS.shop.full} fits what we sell. Hours, directions, ship-to-store pickup and the mobile install area: ${SERVICE_AREA_LABEL}.`}
+        description={`${BUSINESS.name} ships free to the 48 states + DC, and ${BUSINESS.parent} at ${BUSINESS.shop.full} fits what we sell. Hours, directions, ship-to-store pickup and the mobile install area: ${SERVICE_AREA_LABEL}.`}
       />
 
       <PageHero
