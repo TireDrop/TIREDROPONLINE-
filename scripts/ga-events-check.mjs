@@ -10,6 +10,9 @@
  *   /cart         view_cart
  *   /checkout     begin_checkout, then the delivery step → add_shipping_info
  *   /contact      a sent message → generate_lead { form_name: "contact" }
+ *   /tires        a vehicle with nothing in its size → view_search_results
+ *                 { results: 0 }, and its quote form → generate_lead
+ *                 { form_name: "size-quote" }
  *
  * and that nothing typed into a form (name, email, phone, message) appears
  * in any call.
@@ -221,6 +224,24 @@ try {
     await h.page.getByRole("button", { name: "Send Message" }).click();
     const [lead] = await h.waitEvent("generate_lead");
     assert.deepEqual(lead[2], { form_name: "contact" });
+  });
+
+  await check("/tires with a size nothing is stocked in: view_search_results { results: 0 }, then a size-quote lead", async () => {
+    await h.page.goto(`${BASE}/tires?year=2019&make=toyota&model=camry`);
+    const [seen] = await h.waitEvent("view_search_results");
+    assert.deepEqual(seen[2], {
+      search_type: "vehicle",
+      search_term: "2019 Toyota Camry",
+      results: 0,
+    });
+    await h.page.fill("#sq-name", "Casey Tester");
+    await h.page.fill("#sq-phone", "954-555-0123");
+    await h.page.getByRole("button", { name: "Get a quote" }).click();
+    await h.page.getByText("Got it.").waitFor();
+    const leads = await h.waitEvent("generate_lead");
+    assert.deepEqual(leads.at(-1)[2], { form_name: "size-quote" });
+    // Once per search, not once per render.
+    assert.equal((await h.events()).filter((c) => c[1] === "view_search_results").length, 1);
   });
 
   await check("no GA call carries anything typed into a form", async () => {

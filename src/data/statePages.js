@@ -151,12 +151,12 @@ const PILOT = {
     localInstall: {
       title: "Installed in South Florida, shipped everywhere else",
       body: [
-        "In Miami-Dade, Broward and Palm Beach counties you choose at checkout: ship to your address, ship free to the Sunrise shop for a bay fitting, or pick mobile installation and our van fits the tires where the car is parked. The van goes by ZIP code, so check yours on the mobile service page.",
+        "In Miami-Dade, Broward and Palm Beach counties you choose at checkout: ship to your address, ship free to the Sunrise shop and pay per tire for a bay fitting, or pick mobile installation and our van fits the tires where the car is parked. The van goes by ZIP code, so check yours on the mobile service page.",
         "Everywhere else in Florida, from Jacksonville to Pensacola to Fort Myers, it works as it does in every other state: the tires ship free to your address and a shop you choose mounts them. We don't install outside those three counties.",
       ],
     },
     shipNote:
-      "Florida orders ship free to any street address in the state, or free to our Sunrise shop if you want them fitted there. Taxes and fees, including Florida's $1 tire fee where it applies, are calculated at checkout.",
+      "Florida orders ship free to any street address in the state, or free to our Sunrise shop if you want them fitted there (installation is charged per tire). Taxes and fees, including Florida's $1 tire fee where it applies, are calculated at checkout.",
     mountNote:
       "Outside South Florida, ask the shop what it charges to take your old tires. That is the shop's own charge, separate from the state's $1 fee on new tires. After a flood or a storm cleanup, have the shop look for cuts and embedded debris on the tires coming off and on the spare.",
     faq: [
@@ -183,7 +183,7 @@ const PILOT = {
     ],
     seoTitle: "Tires Shipped Free to Florida",
     description:
-      "Free tire shipping anywhere in Florida, plus mobile install in Miami-Dade, Broward and Palm Beach. Florida's $1 tire fee, tread check and rain-first tire picks.",
+      "Free tire shipping anywhere in Florida; paid mobile install in Miami-Dade, Broward and Palm Beach. Florida's $1 tire fee, tread check and rain-first tire picks.",
   },
 
   georgia: {

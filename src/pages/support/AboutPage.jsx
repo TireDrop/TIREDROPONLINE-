@@ -11,6 +11,7 @@ import {
   Truck,
 } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
+import { getService } from "../../data/services.js";
 import { SERVICE_AREA_LABEL, SERVICE_COUNTIES } from "../../data/serviceArea.js";
 // The catalog is the source of truth for which brands this page may name, so
 // it can never list a brand nobody can buy.
@@ -23,6 +24,9 @@ import {
   SectionHead,
   Seo,
 } from "../../components/ui/index.jsx";
+
+// Installation is not free: name the shop's published starting price.
+const INSTALL = getService("tire-installation");
 
 const DIFFERENTIATORS = [
   {
@@ -78,8 +82,8 @@ const FACTS = [
   },
   {
     label: `In ${BUSINESS.shop.city}`,
-    title: "Free ship-to-store and install",
-    copy: `Send the order to ${BUSINESS.shop.name} at no shipping cost and the shop fits the tires there — mounted, balanced and the old set disposed of.`,
+    title: "Free ship-to-store, install at the shop",
+    copy: `Send the order to ${BUSINESS.shop.name} at no shipping cost and the shop fits the tires there, from $${INSTALL.priceFrom} ${INSTALL.priceUnit}: mounted, balanced and the old set disposed of.`,
   },
   {
     label: "Mobile install",

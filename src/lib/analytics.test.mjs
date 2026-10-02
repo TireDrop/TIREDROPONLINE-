@@ -56,6 +56,19 @@ test("drops email- and phone-shaped values even under allowed keys", () => {
   });
 });
 
+test("a search's result count passes, zero included", () => {
+  assert.deepEqual(
+    cleanParams({ search_type: "vehicle", search_term: "2019 Toyota Camry", results: 0 }),
+    { search_type: "vehicle", search_term: "2019 Toyota Camry", results: 0 },
+  );
+  trackEvent("view_search_results", { search_type: "tire_size", search_term: "215/55R17", results: 3 });
+  assert.deepEqual(calls.at(-1), [
+    "event",
+    "view_search_results",
+    { search_type: "tire_size", search_term: "215/55R17", results: 3 },
+  ]);
+});
+
 test("items keep GA's item fields only; a numeric SKU survives", () => {
   const out = cleanParams({
     currency: "USD",

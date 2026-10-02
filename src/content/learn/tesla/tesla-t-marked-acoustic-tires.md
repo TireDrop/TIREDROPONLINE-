@@ -146,4 +146,4 @@ The practical takeaway: **tell the shop your tire has foam before they start.** 
 
 ## Shop for your Tesla's tires
 
-Ready to compare tires? [Shop tires by vehicle](/tires), choose your Tesla, and check the product details for a T mark or foam. Tires ship free to the 48 contiguous states and DC, or free to our Sunrise shop for installation. In South Florida, [mobile installation](/mobile-service) covers Miami-Dade, Broward and Palm Beach, and you can [schedule service](/schedule) online. Have a foam-lined tire with a nail in it? Call (954) 773-1896 and tell us the tire before you book.
+Ready to compare tires? [Shop tires by vehicle](/tires), choose your Tesla, and check the product details for a T mark or foam. Tires ship free to the 48 contiguous states and DC, or free to our Sunrise shop, where installation is charged per tire. In South Florida, [mobile installation](/mobile-service) covers Miami-Dade, Broward and Palm Beach, and you can [schedule service](/schedule) online. Have a foam-lined tire with a nail in it? Call (954) 773-1896 and tell us the tire before you book.

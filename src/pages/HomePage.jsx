@@ -557,7 +557,7 @@ function InstallBand() {
       <Head
         eyebrow="South Florida only"
         title="Local? We'll put them on for you"
-        lede={`Ship-to-store is free, and installation happens at ${BUSINESS.parent} in ${BUSINESS.shop.city} — or in your own driveway if the van is the easier answer.`}
+        lede={`Ship-to-store is free, and installation, from $${INSTALL.priceFrom} ${INSTALL.priceUnit}, happens at ${BUSINESS.parent} in ${BUSINESS.shop.city} — or in your own driveway if the van is the easier answer.`}
       />
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -1066,7 +1066,7 @@ export default function HomePage() {
     <>
       <Seo
         title="Tires & Wheels Shipped Nationwide (48 states + DC)"
-        description="TireDrop is an online tire and wheel store shipping free to the 48 contiguous states and DC. Ship to your address, or free to our South Florida shop where we install them. Powered by Extreme Tires."
+        description={`Online tire and wheel store shipping free to the 48 contiguous states and DC, or to our South Florida shop, where we install from $${INSTALL.priceFrom} ${INSTALL.priceUnit}.`}
       />
       {/* A plain wrapper for the reveal hook to search; no layout of its own. */}
       <div ref={ref} className="contents">

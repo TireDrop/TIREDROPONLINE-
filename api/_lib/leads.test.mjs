@@ -349,6 +349,51 @@ test("forms: each form's fields are listed in order, message last; unknown field
   assert.deepEqual(shop.store[0].tags, ["new-lead", "lead", "lead-fleet-quote"]);
 });
 
+test("forms: a size quote from /tires lists the size and vehicle and is tagged lead-size-quote", async () => {
+  const shop = fakeShopify();
+  const res = await post(formsHandler(shop), {
+    form: "size-quote",
+    name: "Rae Diaz",
+    phone: "(954) 555-0142",
+    email: "",
+    size: "215/55R17",
+    vehicle: "2019 Toyota Camry",
+    website: "",
+  });
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body, { ok: true });
+  // Found and created by phone: the email was left empty.
+  assert.deepEqual(shop.calls[0].variables, { identifier: { phoneNumber: "+19545550142" } });
+  const c = shop.store[0];
+  assert.match(
+    c.metafields["tiredrop.last_lead"].value,
+    /^TireDrop size quote request — [^\n]+\nName: Rae Diaz\nPhone: \(954\) 555-0142\nPhone check: UNVERIFIED\. [^\n]+\nTire size: 215\/55R17\nVehicle: 2019 Toyota Camry$/,
+  );
+  assert.deepEqual(c.tags, ["new-lead", "lead", "lead-size-quote"]);
+});
+
+test("forms: a size quote needs a US phone number and the size", async () => {
+  const shop = fakeShopify();
+  const QUOTE = { form: "size-quote", name: "Rae", phone: "954-555-0142", size: "215/55R17", vehicle: "" };
+  const cases = [
+    // An email alone is not enough: the quote is a phone call.
+    [{ ...QUOTE, phone: "", email: "rae@example.com" }, /10-digit US mobile number/],
+    [{ ...QUOTE, phone: "555-0142" }, /10-digit US mobile number/],
+    [{ ...QUOTE, size: "" }, /tire size is missing/],
+    [{ ...QUOTE, size: "x".repeat(41) }, /Tire size is too long/],
+  ];
+  for (const [i, [body, error]] of cases.entries()) {
+    const res = await post(formsHandler(shop), body, { "x-forwarded-for": `198.51.100.${i}` });
+    assert.equal(res.statusCode, 400, JSON.stringify(body).slice(0, 80));
+    assert.match(res.body.error, error);
+  }
+  assert.equal(shop.calls.length, 0);
+  // A vehicle is optional: a size-only search has none.
+  const ok = await post(formsHandler(shop), QUOTE, { "x-forwarded-for": "198.51.100.9" });
+  assert.equal(ok.statusCode, 200);
+  assert.doesNotMatch(shop.store[0].metafields["tiredrop.last_lead"].value, /Vehicle:/);
+});
+
 test("forms: validation errors are 400s and reach nothing", async () => {
   const shop = fakeShopify();
   const cases = [

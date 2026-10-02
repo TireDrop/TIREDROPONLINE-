@@ -142,4 +142,4 @@ Not sure of your size? Our [Tesla factory tire sizes](/learn/tesla/tesla-tire-si
 
 ## Get the right tires on your Tesla
 
-When you know what you need, [shop tires by vehicle](/tires) and pick your Tesla. Tires ship free to the 48 contiguous states and DC, or free to our Sunrise shop for installation. In South Florida, [mobile installation](/mobile-service) covers Miami-Dade, Broward and Palm Beach, and you can [schedule service](/schedule) online for an install, rotation or TPMS check. Questions about a specific tire? Call (954) 773-1896.
+When you know what you need, [shop tires by vehicle](/tires) and pick your Tesla. Tires ship free to the 48 contiguous states and DC, or free to our Sunrise shop, where installation is charged per tire. In South Florida, [mobile installation](/mobile-service) covers Miami-Dade, Broward and Palm Beach, and you can [schedule service](/schedule) online for an install, rotation or TPMS check. Questions about a specific tire? Call (954) 773-1896.

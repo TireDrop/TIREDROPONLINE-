@@ -24,6 +24,7 @@ import {
 import ProductCard from "../../components/shop/ProductCard.jsx";
 import { TIRES } from "../../data/products.js";
 import { BUSINESS } from "../../data/business.js";
+import { getService } from "../../data/services.js";
 import { SERVICE_AREA_LABEL } from "../../data/serviceArea.js";
 import {
   CONTACT_EMAIL,
@@ -32,6 +33,10 @@ import {
   submitForm,
   useFormsWired,
 } from "../../data/forms.js";
+
+// Installation is not free: name the shop's published starting price.
+const INSTALL = getService("tire-installation");
+const INSTALL_FROM = `from $${INSTALL.priceFrom} ${INSTALL.priceUnit}`;
 
 const FLEET_TIRES = TIRES.filter((t) => t.category === "Commercial");
 
@@ -164,7 +169,7 @@ export default function CommercialTiresPage() {
     <>
       <Seo
         title="Commercial & Fleet Tires"
-        description="Load-rated commercial tires for vans, box trucks and work fleets from TireDrop — shipped to the 48 contiguous states and DC, or delivered free to our South Florida shop for fitting."
+        description={`Load-rated commercial tires for vans, box trucks and fleets, shipped free to the 48 states and DC, or to our South Florida shop to fit ${INSTALL_FROM}.`}
       />
       <PageHero
         eyebrow="Commercial"

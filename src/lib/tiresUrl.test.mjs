@@ -9,6 +9,7 @@ import {
   serializeTiresQuery,
   sizeToParam,
   slug,
+  searchTitle,
 } from "./tiresUrl.js";
 
 const VOCAB = {
@@ -245,4 +246,21 @@ test("slug", () => {
   assert.equal(slug("Truck & SUV"), "truck-suv");
   assert.equal(slug("BFGoodrich"), "bfgoodrich");
   assert.equal(slug("  Mercedes-Benz "), "mercedes-benz");
+});
+
+test("searchTitle: one line for a search in the URL, none for a bare /tires", () => {
+  const vocab = { makes: ["Toyota"], models: () => ["Camry"] };
+  assert.equal(
+    searchTitle(parseTiresQuery("?year=2019&make=toyota&model=camry", vocab).selection),
+    "Tires for your 2019 Toyota Camry",
+  );
+  assert.equal(searchTitle(parseTiresQuery("?size=225-50r17").selection), "225/50R17 tires");
+  assert.equal(
+    searchTitle(parseTiresQuery("?size=225-40r19&rear=255-35r19").selection),
+    "225/40R19 and 255/35R19 tires",
+  );
+  // A bare /tires, filters only, or a partial size keeps the full hero.
+  assert.equal(searchTitle(parseTiresQuery("").selection), null);
+  assert.equal(searchTitle(parseTiresQuery("?season=winter&w=225").selection), null);
+  assert.equal(searchTitle(null), null);
 });

@@ -87,7 +87,7 @@ export const CITY_PAGES = [
     faq: [
       {
         q: "I live in Sunrise. Is it easier to bring the car to the shop?",
-        a: "Sometimes. The shop is at 7712 West Oakland Park Blvd, open Monday to Friday 8:00 AM to 6:30 PM and Saturday 8:00 AM to 4:00 PM. Ship your tires free to the store at checkout and book a bay fitting. The van is the better pick when you can't spare the car, or the time it takes to sit and wait.",
+        a: "Sometimes. The shop is at 7712 West Oakland Park Blvd, open Monday to Friday 8:00 AM to 6:30 PM and Saturday 8:00 AM to 4:00 PM. Ship your tires free to the store at checkout and book a bay fitting, charged per tire. The van is the better pick when you can't spare the car, or the time it takes to sit and wait.",
       },
       {
         q: "My ZIP is 33326. Am I in Sunrise or Weston?",

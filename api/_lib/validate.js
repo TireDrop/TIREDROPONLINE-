@@ -438,6 +438,12 @@ export const LEAD_FORM_FIELDS = Object.freeze({
     ["window", "Time window", 20, false],
     ["notes", "Notes", 2000, true],
   ],
+  // /tires when nothing stocked comes in the shopper's size: a call-back
+  // with a quote. The size and vehicle ride along as hidden fields.
+  "size-quote": [
+    ["size", "Tire size", 40, false],
+    ["vehicle", "Vehicle", 120, false],
+  ],
 });
 
 export const LEAD_FORMS = Object.keys(LEAD_FORM_FIELDS);
@@ -523,6 +529,13 @@ export function validateLead(body) {
   const phone = cleanText(body.phone);
   if (phone.length > 30) return { ok: false, error: "Phone is too long." };
   const digits = usPhoneDigits(phone);
+  // A size quote is answered with a phone call, so it needs the number.
+  if (form === "size-quote" && !digits) {
+    return { ok: false, error: "Enter a 10-digit US mobile number so we can call with the quote." };
+  }
+  if (form === "size-quote" && !cleanText(body.size)) {
+    return { ok: false, error: "The tire size is missing. Reload the page, or call the shop." };
+  }
   if (!email && !digits) {
     return {
       ok: false,

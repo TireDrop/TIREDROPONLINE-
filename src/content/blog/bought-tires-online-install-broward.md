@@ -19,7 +19,7 @@ takeaways:
   - "Shipping is free to the 48 contiguous states and DC. Installation is South Florida only."
 faq:
   - q: "Where can I get tires installed after buying them online?"
-    a: "In South Florida, TireDrop orders can ship free to Extreme Tires in Sunrise for installation, or a mobile van can fit them at your home or office inside the local install area. Outside that area, your order ships to your address and you take the tires to an installer you trust."
+    a: "In South Florida, TireDrop orders can ship free to Extreme Tires in Sunrise, where installation is charged per tire, or a mobile van can fit them at your home or office inside the local install area. Outside that area, your order ships to your address and you take the tires to an installer you trust."
   - q: "Will a shop install tires I bought online somewhere else?"
     a: "Extreme Tires fits customer-supplied tires the same way it fits its own. Book a tire installation and bring them in, or mention it when you book so the shop knows what to expect. For other shops, call and ask before you order."
   - q: "What should I check when my tires arrive?"
@@ -57,7 +57,7 @@ author: "TireDrop Team, Extreme Tires, Sunrise FL"
 
 Ordering tires online is the easy part. Then comes the question every online buyer hits: who's going to put them on?
 
-If you're in South Florida, TireDrop was built around that question. TireDrop is the online store of Extreme Tires, a tire and service shop at 7712 West Oakland Park Blvd in Sunrise. So the answer can be "the same people who sold them to you." The full details live on our [ship-to-store and install page](/install). This post is the practical version: which route fits you, and what to check before a single lug nut comes off.
+If you're in South Florida, TireDrop was built around that question. TireDrop is the online store of Extreme Tires, a tire and service shop at 7712 West Oakland Park Blvd in Sunrise. So the answer can be "the same people who sold them to you." The full details live on our [installation page](/install). This post is the practical version: which route fits you, and what to check before a single lug nut comes off.
 
 ## Route 1: Ship them to the shop in Sunrise
 

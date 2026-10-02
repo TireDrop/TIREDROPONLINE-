@@ -30,6 +30,10 @@ import {
   WHEEL_DIAMETERS,
 } from "../../data/products.js";
 import { BUSINESS } from "../../data/business.js";
+import { getService } from "../../data/services.js";
+
+// Installation is not free: name the shop's published starting price.
+const INSTALL = getService("tire-installation");
 
 const SORTS = [
   { value: "best", label: "Featured" },
@@ -290,7 +294,7 @@ export default function WheelsPage() {
       <PageHero
         eyebrow="Wheels"
         title="Shop Wheels"
-        lede="Cast, flow-formed and forged wheels, fitment-checked before they ship. Send them to your address in the 48 contiguous states or DC, or free to our South Florida shop where we fit them for you."
+        lede={`Cast, flow-formed and forged wheels, fitment-checked before they ship. Send them free to your address in the 48 contiguous states or DC, or to our South Florida shop, where we fit them (tire installation from $${INSTALL.priceFrom} ${INSTALL.priceUnit}).`}
       />
       <Breadcrumbs trail={[{ label: "Wheels" }]} />
 

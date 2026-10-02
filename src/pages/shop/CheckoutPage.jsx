@@ -777,7 +777,7 @@ export default function CheckoutPage() {
       <>
         <Seo
           title="Checkout"
-          description="Complete your TireDrop order — shipped to the 48 contiguous states and DC, or free to our South Florida shop for installation."
+          description={`Complete your TireDrop order, shipped free to the 48 contiguous states and DC, or to our South Florida shop to fit from $${MOBILE_INSTALL.priceFrom} ${MOBILE_INSTALL.priceUnit}.`}
         />
         <Breadcrumbs
           trail={[{ label: "Cart", to: "/cart" }, { label: "Checkout" }]}
@@ -1026,7 +1026,7 @@ export default function CheckoutPage() {
     <>
       <Seo
         title="Checkout"
-        description="Complete your TireDrop order — shipped to your address in the 48 contiguous states and DC, or free to our South Florida shop for installation."
+        description={`Complete your TireDrop order, shipped free to your address in the 48 contiguous states and DC, or to our South Florida shop to fit from $${MOBILE_INSTALL.priceFrom} ${MOBILE_INSTALL.priceUnit}.`}
       />
       <Breadcrumbs
         trail={[{ label: "Cart", to: "/cart" }, { label: "Checkout" }]}
@@ -1158,7 +1158,7 @@ export default function CheckoutPage() {
                 <StepHeading
                   step={2}
                   title="Where should this go?"
-                  lede="Ship it free anywhere in the 48 contiguous states and DC, or — if you are in South Florida — send it free to our shop and let us fit it, or have our van fit it at your address."
+                  lede={`Ship it free anywhere in the 48 contiguous states and DC, or — if you are in South Florida — send it free to our shop and we fit it from $${MOBILE_INSTALL.priceFrom} ${MOBILE_INSTALL.priceUnit}, or have our van fit it at your address.`}
                   headingRef={headingRef}
                 />
 

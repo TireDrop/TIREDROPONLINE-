@@ -150,4 +150,4 @@ See how much the pressure in your tires moves between a cool morning and a hot a
 
 ## Shop and install tires for your Tesla
 
-When you've decided what matters most, [shop tires by vehicle](/tires) and choose your Tesla to see the sizes it takes. Tires ship free to the 48 contiguous states and DC, or free to our Sunrise shop for installation. In South Florida, our [mobile installation](/mobile-service) vans cover Miami-Dade, Broward and Palm Beach, and you can [schedule an install](/schedule) online. Want to talk through the trade-offs for your driving? Call (954) 773-1896.
+When you've decided what matters most, [shop tires by vehicle](/tires) and choose your Tesla to see the sizes it takes. Tires ship free to the 48 contiguous states and DC, or free to our Sunrise shop, where installation is charged per tire. In South Florida, our [mobile installation](/mobile-service) vans cover Miami-Dade, Broward and Palm Beach, and you can [schedule an install](/schedule) online. Want to talk through the trade-offs for your driving? Call (954) 773-1896.

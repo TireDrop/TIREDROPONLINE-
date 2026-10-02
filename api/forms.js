@@ -1,6 +1,9 @@
 // POST /api/forms
-//   { form: "contact" | "financing" | "fleet-quote" | "booking",
+//   { form: "contact" | "financing" | "fleet-quote" | "booking" | "size-quote",
 //     name, email, phone, ...the form's own fields, website? }
+//   A "size-quote" (/tires, when nothing stocked comes in the shopper's
+//   size) carries `size` and `vehicle` and must have a US phone number: the
+//   shop calls back with a quote.
 //   A "booking" may carry `order` (TD-260929-ABC234 or 1001, from
 //   /schedule?order=). When that paid install order verifies with the
 //   form's email, the booking is made ON THE ORDER, the same as /track's

@@ -18,6 +18,7 @@ import ScanTireButton from "../../components/shop/ScanTireButton.jsx";
 import SearchPanel from "../../components/shop/SearchPanel.jsx";
 import { ShoppingForBar } from "../../components/shop/Fitment.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
+import SizeQuoteForm from "../../components/shop/SizeQuoteForm.jsx";
 import { TireArt } from "../../components/shop/ProductArt.jsx";
 import {
   TIRES,
@@ -48,6 +49,7 @@ import {
 import {
   EMPTY_TIRE_FILTERS,
   parseTiresQuery,
+  searchTitle,
   selectionKey,
   slug,
   serializeTiresQuery,
@@ -55,6 +57,7 @@ import {
 import { useVehicle } from "../../context/VehicleContext.jsx";
 import { useTireSearch } from "../../data/useApi.js";
 import { money } from "../../context/CartContext.jsx";
+import { trackEvent } from "../../lib/analytics.js";
 
 // Tires sell as sets of four, so the price sorts are sorted on the set — the
 // number the shopper is actually comparing between two sites. Warranty sorts
@@ -166,6 +169,8 @@ export default function TiresPage() {
     [location.search],
   );
   const { filters, partial, sort, view } = state;
+  // The search in the address bar, as the one-line header (null: bare /tires).
+  const compactTitle = searchTitle(state.selection);
 
   const fitment = useVehicle();
   const {
@@ -372,6 +377,24 @@ export default function TiresPage() {
   const facets = facetCounts(facetBase, filters);
   const shown = showFit ? fitting.length : results.length;
 
+  // GA4: how many tires each search found in the shopper's size, so the
+  // searches that end on "nothing in your size" can be counted against the
+  // size-quote leads (generate_lead { form_name: "size-quote" }). Once per
+  // vehicle or size, after the search has answered.
+  const counted = useRef("");
+  const countKey = showFit && !search.loading ? `${ctxKey}|${fitSize}` : "";
+  useEffect(() => {
+    if (!countKey || counted.current === countKey) return;
+    counted.current = countKey;
+    trackEvent("view_search_results", {
+      search_type: resolved.kind === "size" ? "tire_size" : "vehicle",
+      search_term: resolved.kind === "size" ? fitSize : resolved.label,
+      results: fitting.length,
+    });
+    // Sent once per countKey; the values are read from that same render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countKey]);
+
   const activeFilterCount = countTireFilters(filters);
   const sizeLabel = `${sizeQuery.width || "any"}/${sizeQuery.aspect || "any"}R${
     sizeQuery.diameter || "any"
@@ -512,9 +535,13 @@ export default function TiresPage() {
         title="Shop Tires"
         description={`Shop ${brandSentence} tires by vehicle or by size. Shipped free to the 48 contiguous states and DC, or free to our South Florida shop.`}
       />
+      {/* With a vehicle or size in the address the results are the point,
+          so the header is one line and the first tires land in the first
+          screen. A bare /tires keeps the full hero. */}
       <PageHero
+        compact={Boolean(compactTitle)}
         eyebrow="Tires"
-        title="Shop Tires"
+        title={compactTitle || "Shop Tires"}
         lede={`Find your size, pick your set, then choose where it lands at checkout — your address in the 48 contiguous states or DC, or free to our South Florida shop, where we fit them from $${INSTALL.priceFrom} ${INSTALL.priceUnit}.`}
       />
       <Breadcrumbs trail={[{ label: "Tires" }]} />
@@ -547,8 +574,11 @@ export default function TiresPage() {
         </div>
       )}
 
-      <Section>
-        <ShoppingForBar className="mb-8" inline={false} />
+      <Section className={compactTitle ? "pt-4 md:pt-8" : ""}>
+        <ShoppingForBar
+          className={compactTitle ? "mb-4 md:mb-6" : "mb-8"}
+          inline={false}
+        />
 
         {/* Block flow below `lg`: the sidebar is a drawer there, so the
             aside renders nothing and a grid row would leave its gap behind
@@ -699,11 +729,20 @@ export default function TiresPage() {
                 <section aria-labelledby="fits-heading">
                   <h2
                     id="fits-heading"
-                    className="h3 mb-1 text-[1.25rem] md:text-[1.375rem]"
+                    className={`h3 mb-1 text-[1.25rem] md:text-[1.375rem] ${compactTitle ? "max-sm:sr-only" : ""}`}
                   >
                     {fitHeading}
                   </h2>
-                  <p className="mb-4 text-sm text-smoke">{fitLede}</p>
+                  {/* On a phone with a search in the address, the H1, the
+                      Shopping-for box and the count line above already say
+                      the vehicle, the size and where it came from. The
+                      heading stays for screen readers, the repeat lede goes,
+                      and the first tires land in the first screen. */}
+                  <p
+                    className={`mb-4 text-sm text-smoke ${compactTitle ? "hidden sm:block" : ""}`}
+                  >
+                    {fitLede}
+                  </p>
                   {fitting.length > 0 ? (
                     <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
                       {fitting.map((tire) => (
@@ -735,19 +774,13 @@ export default function TiresPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-                      <p className="text-sm leading-relaxed text-ink">
-                        Nothing on this page comes in {fitSize} right now. We
-                        can order it — call with the size and we will quote it.
-                      </p>
-                      <a
-                        href={BUSINESS.phoneHref}
-                        className="btn-primary btn-sm shrink-0"
-                      >
-                        <Phone size={16} aria-hidden />
-                        {BUSINESS.phone}
-                      </a>
-                    </div>
+                    // Nothing stocked in the size: call, or leave a number
+                    // for a quote (the "size-quote" lead, api/forms.js).
+                    <SizeQuoteForm
+                      key={fitSize}
+                      size={fitSize}
+                      vehicle={resolved.kind === "vehicle" ? resolved.label : ""}
+                    />
                   )}
                 </section>
 
@@ -797,7 +830,8 @@ export default function TiresPage() {
                     <p className="mt-1 text-sm text-bone/70">
                       Every order ships free to the 48 contiguous states and DC. In South
                       Florida, send it free to the shop instead and we mount,
-                      balance and dispose of the old set.
+                      balance and dispose of the old set, from $
+                      {INSTALL.priceFrom} {INSTALL.priceUnit}.
                     </p>
                   </div>
                 </div>

@@ -477,9 +477,10 @@ Google. No-ops in the prerender and wherever `gtag` is missing.
 | `begin_checkout` | `/checkout` with something in the cart | `currency`, `value`, `items` |
 | `add_shipping_info` | leaving the checkout's Delivery step | `shipping_tier` (`ship`, `ship-to-store`, `mobile`), `currency`, `value`, `items` |
 | `order_request` | a request-only order is sent | `currency` USD, `value` (incl. install), `shipping_tier`, `items` |
-| `generate_lead` | a form is delivered | `form_name`: `contact`, `booking` (/schedule), `fleet-quote`, `financing`, `newsletter` |
+| `generate_lead` | a form is delivered | `form_name`: `contact`, `booking` (/schedule), `fleet-quote`, `financing`, `size-quote` (/tires, nothing in the size), `newsletter` |
 | `install_booking` | `/track` booking panel: booked inline, or the external booking link clicked | `install_type`, `method` (`inline` / `external`) |
 | `search` | the tire/wheel finder is submitted | `search_type`, `search_term` (a size like `225/45R17` or "year make model" from the dropdowns) |
+| `view_search_results` | `/tires` with a vehicle or size, once per search after it answers | `search_type` (`vehicle`, `tire_size`), `search_term`, `results` (tires in the size; `0` is the dead end the size-quote form answers) |
 | `tool_use` | first touch of a Learn demo / free tool (once per page view) | `tool_id` |
 
 Items carry `item_id` (the SKU), `item_name`, `item_brand`,

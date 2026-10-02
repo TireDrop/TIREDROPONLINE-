@@ -39,7 +39,7 @@
  * without it a value is title-cased.
  */
 
-import { readSize } from "../data/fitmentCheck.js";
+import { readSize, vehicleLabel } from "../data/fitmentCheck.js";
 
 export const SEASON_VALUES = ["all-season", "all-weather", "summer", "winter"];
 export const TYPE_VALUES = [
@@ -398,4 +398,22 @@ export function serializeTiresQuery(state = {}) {
   add("search", state.search);
   (state.tracking ?? []).forEach(([k, v]) => add(k, v));
   return out.join("&");
+}
+
+/**
+ * The one-line H1 for a search in the address bar ("Tires for your 2019
+ * Toyota Camry", "225/50R17 tires"), or null for a bare /tires, which keeps
+ * the full hero (src/pages/shop/TiresPage.jsx). Pass the URL's selection:
+ * only a bare /tires hydrates the prerendered page (src/main.jsx), so the
+ * header the server rendered and the one the browser renders always agree.
+ */
+export function searchTitle(selection) {
+  if (selection?.type === "vehicle") return `Tires for your ${vehicleLabel(selection)}`;
+  if (selection?.type === "size") {
+    const front = readSize(selection.size)?.display;
+    const rear = selection.rear ? readSize(selection.rear)?.display : null;
+    if (!front) return null;
+    return rear ? `${front} and ${rear} tires` : `${front} tires`;
+  }
+  return null;
 }
