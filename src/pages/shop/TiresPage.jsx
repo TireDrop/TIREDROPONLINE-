@@ -28,7 +28,7 @@ import {
   VEHICLE_MAKES,
 } from "../../data/products.js";
 import { FITMENT } from "../../data/fitment.js";
-import { makesFor } from "../../data/vehicles.js";
+import { makesFor, modelsFor } from "../../data/vehicles.js";
 import { ratingsFor } from "../../data/tireRatings.js";
 import { setPrice } from "../../data/pricing.js";
 import { BUSINESS } from "../../data/business.js";
@@ -53,6 +53,7 @@ import {
   selectionKey,
   slug,
   serializeTiresQuery,
+  spellingIn,
 } from "../../lib/tiresUrl.js";
 import { useVehicle } from "../../context/VehicleContext.jsx";
 import { useTireSearch } from "../../data/useApi.js";
@@ -243,6 +244,33 @@ export default function TiresPage() {
     synced.current = urlKey;
     write({ ...state, selection });
   });
+
+  // A shared link's model that the size table doesn't know ("cx-5") reads in
+  // a best guess; NHTSA's list (the API, then the build's snapshot) has the
+  // real spelling, so the saved pick takes it once that answers. Checked
+  // against the pick at that moment, so a vehicle chosen meanwhile is kept.
+  const [spelled, setSpelled] = useState(null);
+  const urlVehicle =
+    state.selection?.type === "vehicle" && state.selection.model ? state.selection : null;
+  useEffect(() => {
+    if (!urlVehicle || spellingIn(VOCAB.models(urlVehicle.make), urlVehicle.model))
+      return undefined;
+    let live = true;
+    modelsFor(urlVehicle.make, urlVehicle.year).then(({ models }) => {
+      const model = spellingIn(models, urlVehicle.model);
+      if (live && model) setSpelled({ key: urlKey, model });
+    });
+    return () => {
+      live = false;
+    };
+    // Once per vehicle in the address; urlVehicle is derived from it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlKey]);
+  useEffect(() => {
+    if (!spelled || !ready || selection?.type !== "vehicle") return;
+    if (selectionKey(selection) === spelled.key && selection.model !== spelled.model)
+      selectVehicle({ ...selection, model: spelled.model });
+  }, [spelled, ready, selection, selectVehicle]);
 
   const sizeQuery = partial;
   const hasSize = Boolean(

@@ -36,7 +36,8 @@
  *
  * Pure: no React, no window. `vocab` supplies the lists that turn a slug
  * back into the catalog's own spelling (brands, categories, makes, models);
- * without it a value is title-cased.
+ * without it a value is title-cased, and a model gets modelFromUrl()'s
+ * best guess ("cx-5" -> "CX-5").
  */
 
 import { readSize, vehicleLabel } from "../data/fitmentCheck.js";
@@ -94,10 +95,50 @@ const titleCase = (s) =>
   s.replace(/(^|[\s-])([a-z])/g, (_, sep, c) => sep + c.toUpperCase());
 
 /** The catalog's spelling of `raw` from `list`, or null. */
-function pick(list, raw) {
+export function spellingIn(list, raw) {
   const n = norm(raw);
   if (!n) return null;
   return (list ?? []).find((item) => norm(item) === n) ?? null;
+}
+const pick = spellingIn;
+
+// Letters-only model-name parts that are written in capitals: "cx" in CX-5,
+// "hr" in C-HR, "wrx", "hd". Only these: "ion" and "fit" are words.
+// prettier-ignore
+const MODEL_ABBREVIATIONS = new Set([
+  "amg", "cc", "cl", "cla", "clk", "cls", "cr", "ct", "cts", "cx", "dts", "es", "ev", "ex",
+  "fj", "fr", "fx", "gl", "gla", "glb", "glc", "gle", "glk", "gls", "gs", "gt", "gti", "gto",
+  "gtr", "gx", "hd", "hhr", "hr", "id", "is", "jx", "lc", "le", "ls", "lt", "lx", "mdx", "mkc",
+  "mks", "mkt", "mkx", "mkz", "mx", "nsx", "nv", "nx", "qx", "rc", "rdx", "rl", "rlx", "rs",
+  "rsx", "rx", "sc", "se", "sl", "slk", "sq", "srt", "srx", "ss", "ssr", "st", "sti", "sts",
+  "suv", "svt", "sx", "tl", "tlx", "tsx", "tt", "tts", "ux", "wrx", "xc", "xe", "xf", "xj",
+  "xk", "xl", "xlt", "xt", "xts", "xv", "zdx",
+]);
+
+const capital = (w) => w.charAt(0).toUpperCase() + w.slice(1);
+
+/**
+ * A model from the URL that no list knows, in a best-guess spelling. The URL
+ * is lowercase ("cx-5"), so title case alone gave "Cx-5". Separators and
+ * digits stay as they are; a letters-only part is capitalised, or written in
+ * capitals when it is a known abbreviation (CX, HR, WRX); inside a part that
+ * mixes letters and digits, short letter runs are a code (RAV4, R1T, GLC300)
+ * and long ones a word (4Runner). A model typed with any capital is kept as
+ * typed ("iX", "e-Tron GT"): someone wrote that spelling on purpose.
+ */
+export function modelFromUrl(raw) {
+  const text = String(raw ?? "").trim();
+  if (/[A-Z]/.test(text)) return text;
+  return text
+    .split(/([^a-z0-9]+)/)
+    .map((part, i) => {
+      if (i % 2 || !part) return part;
+      if (/^[a-z]+$/.test(part)) {
+        return part.length <= 3 && MODEL_ABBREVIATIONS.has(part) ? part.toUpperCase() : capital(part);
+      }
+      return part.replace(/[a-z]+/g, (run) => (run.length <= 3 ? run.toUpperCase() : capital(run)));
+    })
+    .join("");
 }
 
 const list = (params, ...keys) =>
@@ -205,7 +246,7 @@ function readVehicle(params, vocab) {
 
   const makeName = pick(vocab?.makes, make) ?? titleCase(make);
   const modelName = model
-    ? (pick(vocab?.models?.(makeName), model) ?? titleCase(model))
+    ? (pick(vocab?.models?.(makeName), model) ?? modelFromUrl(model))
     : "";
   return { type: "vehicle", year, make: makeName, model: modelName };
 }

@@ -30,14 +30,15 @@ header comment, and `shopify/assets/td-tiremath.js` names
 | `home-check.mjs` | `check:home` | The home page: sections in story order in the prerendered HTML, 3-6 real Learn cards, no hidden reveal state in the markup; every scroll-reveal target visible with JavaScript off and with reduced motion; at 390px and 1440px the hero never hidden, everything revealed by scrolling, no sideways scroll, CLS under 0.1, no console errors. |
 | `footer-check.mjs` | `check:footer` | The site footer at 390px and 1440px: every footer link is in the footer or, for the trimmed Tools & Guides links, on `/learn` or `/sitemap`; the newsletter form inside `<footer>`; no sideways scroll; on a phone the link groups are closed `<details>` that open and close on tap (JavaScript on and off) with 44px summaries and call/email/directions buttons; on desktop every group visible without a click and no height change on hydration; no console errors. |
 | `sources-check.mjs` | `check:sources` | The sources rule on the built site, "only resources, no competitors": fails, naming file and value, on any link, `src`/`srcset` or URL in the page source (inline JSON too) to a retailer/installer domain or subdomain, and on a retailer's name in visible text, `<title>`, `<meta>` content, alt/title/aria-label text or JSON-LD; scans `dist/**/*.html`, `dist/sitemap.xml` and `dist/robots.txt`. Then reports every other external domain with counts, as known resources or UNREVIEWED (a warning, not a failure). The lists are one module, `src/lib/competitors.js`; `npm run test:sources` runs the same rule over `src/`, `public/` and `index.html` without a build. No browser, no network, about 1s. Not in the required gate list until the last offenders leave `src/`. |
+| `links-check.mjs` | `check:links` | Internal links on the built site, from real `<a href>` links only (nav, footer and the `/sitemap` page count; `sitemap.xml` does not). Reports (a) orphan pages no other page links to, (b) blog and Learn articles whose own copy, related links or demo never reach a shop or tool page (`/tires`, `/wheels`, `/install`, `/schedule`, a tool page; the closing box every article shares does not count), (c) broken internal links: a path with no page, file, `vercel.json` rewrite or redirect. Also lists indexable pages that only the nav, footer or `/sitemap` link to, and links that go through a redirect. Fails on any broken link and on an orphan that is meant to be indexed; (b) and the lists are reports. The rules live in `src/lib/internalLinks.js` (tested by `test:lib`). No browser, no network, under 1s. |
 
-`check:schema` and `check:sources` read `dist/` directly, so they need `npm run build` first.
+`check:schema`, `check:sources` and `check:links` read `dist/` directly, so they need `npm run build` first.
 So do the Chromium checks. They start
 `vite preview` themselves and mock every `/api` call, so nothing reaches
 Shopify. `test:api`, `test:content`, `test:data` and `test:lib` are `node --test`
 suites in `api/_lib/`, `src/content/`, `src/data/` (the mobile city pages:
 ZIPs, copy rules and the text-overlap check) and `src/lib/` (the GA4 event
-parameter filter, the translate helpers, the store search's matching and the sources rule's matchers), not scripts here.
+parameter filter, the translate helpers, the store search's matching, the sources rule's matchers and the internal-link rules), not scripts here.
 `test:sources` is `src/sourcesRule.test.mjs`: the sources rule over the source tree.
 
 ## Run by hand

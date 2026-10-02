@@ -8,6 +8,7 @@ done items. Show Justin the updated list, in this style, whenever it changes.
 _Last updated: 2026-10-02 (prompt pack for every item only Justin can do: docs/prompts/2026-10-02-justin-remaining.md, branch preview/justin-prompts `5fae72e`; each open item now points to its prompt, script or question. Earlier today: resources only + the check:sources gate, Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
 _Last updated: 2026-10-02 (preview/a11y-pass2: footer label "Shipping to 48 States + DC" and the accessibility second pass; earlier: SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
 _Last updated: 2026-10-02 (CRO fixes 1 + 4 on preview/cro-quote-compact, ready to ship; SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
+_Last updated: 2026-10-02 (internal links: check:links, all clear; shared /tires links spell models like CX-5 right; earlier: SHIPPED: resources only, with every competitor citation, link and meta mention removed, plus the check:sources gate so they can never come back; earlier today: Learn gap fill A + B, CRO quick wins, article bundle split, compact mobile footer, home redesign, Learn Buying + Fitment hubs, blog batch 2)_
 
 ## Site fixes (Claude)
 - [x] ~~Resources only: every competitor citation/link replaced with maker, AAA or government sources~~ (`7754330`, shipped to main 2026-10-02)
@@ -125,6 +126,9 @@ _Last updated: 2026-10-02 (CRO fixes 1 + 4 on preview/cro-quote-compact, ready t
   - [ ] After the preview deploys, check its Vercel build log for `[vpic-snapshot] wrote dist/data/vpic-models.json` (this sandbox can't reach NHTSA, so the snapshot was never generated here) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A17)
   - [ ] Shopify theme's `td-vehicles.js` still asks NHTSA straight from the browser and falls back to the 45-model table; point it at `/api/vehicles` (draft theme only) if the theme finder is ever shown again → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C11)
   - [ ] A shared /tires link spells a model the size table doesn't know from the URL ("cx-5" shows as "Cx-5"); the saved pick keeps the right spelling
+  - [ ] After the preview deploys, check its Vercel build log for `[vpic-snapshot] wrote dist/data/vpic-models.json` (this sandbox can't reach NHTSA, so the snapshot was never generated here)
+  - [ ] Shopify theme's `td-vehicles.js` still asks NHTSA straight from the browser and falls back to the 45-model table; point it at `/api/vehicles` (draft theme only) if the theme finder is ever shown again
+  - [x] ~~A shared /tires link spells a model the size table doesn't know from the URL ("cx-5" shows as "Cx-5"); the saved pick keeps the right spelling~~ (preview/internal-links b823577: reads as CX-5, RAV4, 4Runner; NHTSA's spelling once the model list answers)
 - [ ] Installed-price toggle
 - [ ] Book an install time at checkout → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C5)
 - [ ] Fitment by trim + staggered (logic + badge shipped in 347c4e1; trim and staggered sizes need real data: ATD fitment or a fitment API) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C3)
@@ -161,6 +165,13 @@ _Last updated: 2026-10-02 (CRO fixes 1 + 4 on preview/cro-quote-compact, ready t
 - [ ] Roadside flat tire help: give it a starting price → it joins the service catalog and online booking (phone only until then) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D5)
 - [ ] City pages wave 2: Pompano Beach, Miramar, Oakland Park, Pembroke Pines, Hollywood, Lauderhill (after wave 1 is indexed) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C7)
 - [ ] Phase 4: internal links, Search Console submit, monthly refresh
+- [ ] Justin: confirm the city facts the research left unverified, so they can go on the pages: Tamarac ZIPs, roads and neighbourhoods; Coral Springs, Davie and Weston roads; Coral Springs and Weston neighbourhoods; whether Plantation 33388 is a PO Box ZIP
+- [ ] Roadside flat tire help: give it a starting price → it joins the service catalog and online booking (phone only until then)
+- [ ] City pages wave 2: Pompano Beach, Miramar, Oakland Park, Pembroke Pines, Hollywood, Lauderhill (after wave 1 is indexed)
+- [ ] Phase 4: Search Console submit, monthly refresh (internal links done, below)
+- [x] ~~Phase 4 internal links: check:links + fixes~~ (preview/internal-links b823577)
+  - `npm run check:links` reads the build: 154 pages, 50 articles; 0 broken links, 0 indexable orphans (only /search, noindex), 0 articles without a shop or tool link, so nothing needed fixing
+  - Linked only from the nav, footer or /sitemap (not failing): /about, /financing, /gallery, /reviews
 - [x] ~~Article bundle split: each article loads only itself (article pages 312 → 176 KB gzipped JS)~~ (shipped to main 2026-10-02, release preview/release-2026-10-02)
   - Article pages drop from 312 KB to 176 KB of gzipped JS, /blog from 306 KB to 164 KB; prerendered article HTML unchanged
 - [x] ~~Tesla tires Learn hub (6 guides) at /learn/tesla~~ (c42e16d, shipped 2026-10-01)
