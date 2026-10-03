@@ -44,6 +44,12 @@ than held in a back room — can be said without naming anyone.
 **Not fixed in this pass:** `HomePage.jsx` is outside this audit's file scope.
 This is the highest-priority handover item.
 
+**Follow-up, 2026-10-03:** the privacy policy (`src/pages/support/LegalPage.jsx`,
+section 4) names ATD as the distributor that receives shipping addresses and
+order details. That stays on purpose (Justin's call): a privacy policy has to
+name who receives customer data. This finding is about marketing claims, and
+the `/local-delivery` page and home page card name no supplier.
+
 ---
 
 ### 2. There is no return window, restocking fee or damage-reporting deadline anywhere on the site
