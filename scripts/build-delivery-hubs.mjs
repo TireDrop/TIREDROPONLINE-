@@ -16,6 +16,8 @@
  *     haloRadius, hubs: [{ x, y, lat, lng }] }. Land and borders are from
  *     us-atlas states-albers-10m (already projected), and the hubs go through
  *     the same projection: geoAlbersUsa().scale(1300).translate([487.5, 305]).
+ *   src/data/deliveryHubsMini.generated.json  { viewBox, land, hubs: [[x, y]] }:
+ *     a coarse copy for the home page teaser, no coordinates.
  *   public/data/local-delivery-zips.json  { radiusMiles, count, zips }: every
  *     US 5-digit ZIP whose centroid is within LOCAL_DELIVERY_RADIUS_MILES of a
  *     hub, packed by 3-digit prefix (packZips in src/data/localDelivery.js).
@@ -42,6 +44,7 @@ const zipcodes = require("zipcodes");
 
 const SOURCE = resolve(ROOT, "src/data/deliveryHubs.source.json");
 const GENERATED = resolve(ROOT, "src/data/deliveryHubs.generated.json");
+const MINI = resolve(ROOT, "src/data/deliveryHubsMini.generated.json");
 const ZIPS_OUT = resolve(ROOT, "public/data/local-delivery-zips.json");
 
 const fail = (msg) => {
@@ -96,30 +99,31 @@ const projection = geoAlbersUsa().scale(1300).translate([487.5, 305]);
 // for a 975-wide canvas; at the page's widest that is about one CSS pixel, so
 // the outline looks the same at a fraction of the bytes.
 const MIN_STEP = 2;
-const thin = geoTransform({
-  lineStart() {
-    this.last = null;
-    this.stream.lineStart();
-  },
-  point(x, y) {
-    if (this.last && Math.hypot(x - this.last[0], y - this.last[1]) < MIN_STEP) return;
-    this.last = [x, y];
-    this.stream.point(x, y);
-  },
-});
-const path = geoPath(thin).digits(0);
+const thinner = (minStep) =>
+  geoTransform({
+    lineStart() {
+      this.last = null;
+      this.stream.lineStart();
+    },
+    point(x, y) {
+      if (this.last && Math.hypot(x - this.last[0], y - this.last[1]) < minStep) return;
+      this.last = [x, y];
+      this.stream.point(x, y);
+    },
+  });
+const path = geoPath(thinner(MIN_STEP)).digits(0);
 
 // Islets under MIN_ISLAND map units across are dropped: invisible at phone
 // width, and the Aleutians and the Maine coast alone are a third of the bytes.
 const MIN_ISLAND = 4;
-const dropIslets = (d) =>
+const dropIslets = (d, minIsland = MIN_ISLAND) =>
   d
     .split(/(?=M)/)
     .filter((sub) => {
       const n = sub.match(/-?\d+(?:\.\d+)?/g).map(Number);
       const xs = n.filter((_, i) => i % 2 === 0);
       const ys = n.filter((_, i) => i % 2 === 1);
-      return Math.max(...xs) - Math.min(...xs) + Math.max(...ys) - Math.min(...ys) >= MIN_ISLAND;
+      return Math.max(...xs) - Math.min(...xs) + Math.max(...ys) - Math.min(...ys) >= minIsland;
     })
     .join("");
 const land = dropIslets(path(feature(atlas, atlas.objects.nation)));
@@ -146,6 +150,19 @@ const generated = {
   borders,
 };
 
+// The home page teaser (HomeLocalDelivery in src/pages/HomePage.jsx): the
+// same map drawn about 300px wide, so a much coarser outline and whole-unit
+// hub positions, with no borders, no coordinates and no halos. A few KB in
+// the home page's HTML instead of the full map's 30+.
+const MINI_STEP = 9;
+const MINI_ISLAND = 24;
+const mini = {
+  "//": generated["//"],
+  viewBox: generated.viewBox,
+  land: dropIslets(geoPath(thinner(MINI_STEP)).digits(0)(feature(atlas, atlas.objects.nation)), MINI_ISLAND),
+  hubs: projected.map(({ x, y }) => [Math.round(x), Math.round(y)]),
+};
+
 /* -------------------------------- the ZIPs -------------------------------- */
 
 const inZone = Object.values(zipcodes.codes)
@@ -166,6 +183,7 @@ const zipsJson = JSON.stringify({
 
 writeFileSync(SOURCE, JSON.stringify(hubs, null, 2) + "\n");
 writeFileSync(GENERATED, JSON.stringify(generated, null, 2) + "\n");
+writeFileSync(MINI, JSON.stringify(mini) + "\n");
 mkdirSync(dirname(ZIPS_OUT), { recursive: true });
 writeFileSync(ZIPS_OUT, zipsJson + "\n");
 
@@ -174,5 +192,6 @@ const genBytes = Buffer.byteLength(JSON.stringify(generated));
 console.log(
   `build:hubs: ${hubs.length} hubs, ${inZone.length} ZIPs within ${LOCAL_DELIVERY_RADIUS_MILES} mi\n` +
     `  ${GENERATED.replace(ROOT + "/", "")}: ${kb(genBytes)} (${kb(gzipSync(JSON.stringify(generated)).length)} gzipped)\n` +
+    `  ${MINI.replace(ROOT + "/", "")}: ${kb(Buffer.byteLength(JSON.stringify(mini)))}\n` +
     `  ${ZIPS_OUT.replace(ROOT + "/", "")}: ${kb(zipsJson.length)} (${kb(gzipSync(zipsJson).length)} gzipped)`,
 );

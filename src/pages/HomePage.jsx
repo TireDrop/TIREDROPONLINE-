@@ -37,6 +37,9 @@ import {
   TIRE_CATEGORIES,
 } from "../data/products.js";
 import { STATE_PAGES_LIVE, getState, statePath } from "../data/stateList.js";
+// The hub map, coarse and position-only (npm run build:hubs): about 5 KB of
+// inline SVG, no request and no location lookup on the home page.
+import HUB_MINI from "../data/deliveryHubsMini.generated.json";
 import ProductCard from "../components/shop/ProductCard.jsx";
 import ScanTireButton from "../components/shop/ScanTireButton.jsx";
 import SearchPanel from "../components/shop/SearchPanel.jsx";
@@ -49,7 +52,8 @@ import { Seo, Section, SectionHead } from "../components/ui/index.jsx";
  * The home page reads top to bottom as one story:
  *
  *   find your fit (hero) → why buy here (trust strip) → what to buy (shop)
- *   → how it gets to you (how it works) → who fits it locally (install band)
+ *   → how it gets to you (how it works, with the local delivery teaser)
+ *   → who fits it locally (install band)
  *   → help choosing (free tools) → learn more (guides and posts)
  *   → the rest of the country (nationwide) → last questions (FAQ) → act.
  *
@@ -526,7 +530,59 @@ function HowItWorks() {
           Ship to store &amp; install
         </Link>
       </div>
+
+      <HomeLocalDelivery />
     </Section>
+  );
+}
+
+/**
+ * The way into /local-delivery, under "How it works": the delivery story's
+ * next chapter. Static on purpose: the page itself does the ZIP and location
+ * check, so the home page makes no extra request and asks for nothing. Same
+ * rules as that page: no partner name, no dates, speeds or fees, and it says
+ * it is rolling out. Free shipping and the 3-county install copy above stay
+ * as they are.
+ */
+function HomeLocalDelivery() {
+  return (
+    <div
+      data-reveal
+      data-home-local-delivery
+      className="card mx-auto mt-12 grid max-w-4xl items-center gap-6 p-5 sm:p-6 md:grid-cols-[minmax(0,1fr)_minmax(0,17rem)] md:gap-8 md:p-8"
+    >
+      <div>
+        <p className="eyebrow mb-2">Local delivery · rolling out</p>
+        <h3 className="h3 text-balance">Near one of our delivery hubs?</h3>
+        <p className="mt-2 text-sm leading-relaxed text-smoke">
+          We&apos;re adding local delivery around our hubs across the U.S.
+          See if your ZIP is in a zone. Until it launches, every order ships
+          free, the same as today.
+        </p>
+        <Link
+          to="/local-delivery#zip-check"
+          className="btn-dark mt-5 min-h-[48px] w-full sm:w-auto"
+        >
+          <MapPin size={17} aria-hidden />
+          Check your ZIP
+        </Link>
+      </div>
+      <div>
+        <svg
+          viewBox={HUB_MINI.viewBox}
+          role="img"
+          aria-label={`Map of the U.S. with ${HUB_MINI.hubs.length} local delivery hubs`}
+          className="mx-auto block h-auto w-full max-w-[15rem] md:max-w-[18rem]"
+        >
+          <path d={HUB_MINI.land} className="fill-ink/[0.08]" />
+          <g aria-hidden="true" className="fill-drop">
+            {HUB_MINI.hubs.map(([x, y]) => (
+              <circle key={`${x},${y}`} cx={x} cy={y} r={7.5} />
+            ))}
+          </g>
+        </svg>
+      </div>
+    </div>
   );
 }
 

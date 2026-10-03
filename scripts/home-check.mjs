@@ -75,6 +75,15 @@ check(
   `Learn shows ${cards.length} prerendered articles: ${cards.join(", ")}`,
 );
 
+// The local delivery teaser sits in "How it works" and links the ZIP check.
+const howHtml = /data-home-section="how"[\s\S]*?data-home-section="install"/.exec(html)?.[0] ?? "";
+const zipLink = /href="\/local-delivery#zip-check"[^>]*>([\s\S]*?)<\/a>/.exec(howHtml)?.[1] ?? "";
+check(
+  zipLink.replace(/<[^>]*>/g, "").trim() === "Check your ZIP" &&
+    /data-home-local-delivery[\s\S]*?<svg[^>]*role="img"[^>]*aria-label="Map of the U\.S\. with \d+ local delivery hubs"/.test(howHtml),
+  "prerendered How it works has the local delivery map and a Check your ZIP link",
+);
+
 /* ------------------------------ preview ------------------------------ */
 
 // vite preview runs as its own process group so the whole tree can be
@@ -133,6 +142,11 @@ async function newPage({ width, js = true, reducedMotion = "no-preference" }) {
     if (m.type() === "error" && !/status of 404/.test(m.text())) errors.push(m.text());
   });
   page.on("pageerror", (e) => errors.push(String(e)));
+  // The local delivery teaser is static: its zone list and location lookup
+  // belong to /local-delivery, never the home page's load.
+  page.on("request", (r) => {
+    if (/\/api\/geo|local-delivery-zips/.test(r.url())) errors.push(`home page requested ${r.url()}`);
+  });
   await page.route((url) => url.host !== local, (r) => r.fulfill({ status: 200, body: "" }));
   await page.route("**/api/status", (r) =>
     r.fulfill({ json: { atd: "sample", shopify: "live", checkout: "request", newsletter: "on", forms: "on", version: "test" } }),
