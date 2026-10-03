@@ -70,7 +70,7 @@ export const LOCAL_FAQ = [
   },
 ];
 
-/** What the checker does with location, shown under it. Keep it true to ZoneChecker and api/geo.js. */
+/** What the checker does with location, shown under it. Keep it true to ZoneChecker and api/_lib/geo.js. */
 export const LOCATION_NOTE =
   "We use your approximate location from your connection, or your device location if you allow it, only to check your zone. We don't store it.";
 

@@ -122,7 +122,9 @@ that do the server-side work:
 |                      | headers: `{ available, country, zip, lat, lng, city }`,   |
 |                      | each validated, or `{ available: false }` (locally).      |
 |                      | `Cache-Control: private, no-store`; nothing logged or     |
-|                      | stored. `/local-delivery` calls it once on load.          |
+|                      | stored. `/local-delivery` calls it once on load. Not its  |
+|                      | own function (Hobby allows 12, all taken): `vercel.json`  |
+|                      | rewrites it to `/api/status?geo=1`; `api/_lib/geo.js`.    |
 | `POST /api/forms`    | The site's forms (contact, financing, fleet quote,        |
 |                      | booking). Finds or creates the Shopify customer (no       |
 |                      | marketing consent), stores the lead in the metafields     |

@@ -1,7 +1,7 @@
 // Where is the visitor? For the /local-delivery zone check
 // (src/pages/shipping/LocalDeliveryPage.jsx), in two steps:
 //   1. approximate, with no prompt: GET /api/geo reads Vercel's IP headers
-//      (api/geo.js) and we use a U.S. ZIP, or U.S. coordinates;
+//      (api/_lib/geo.js) and we use a U.S. ZIP, or U.S. coordinates;
 //   2. precise, from the Geolocation API, which the browser asks about.
 // Every browser dependency is passed in, so the logic runs under node --test.
 
@@ -23,7 +23,7 @@ const isLatLng = (lat, lng) =>
  * U.S., unavailable, or anything malformed).
  */
 export function approxFromGeo(body) {
-  // `available` is only ever false (api/geo.js); a U.S. country is the test.
+  // `available` is only ever false (api/_lib/geo.js); a U.S. country is the test.
   if (!body || typeof body !== "object" || body.available === false || body.country !== "US") return null;
   const city =
     typeof body.city === "string" && body.city.length > 0 && body.city.length <= 64

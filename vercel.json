@@ -2,7 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
-  "rewrites": [{ "source": "/tires/p/:sku", "destination": "/spa" }],
+  "rewrites": [
+    { "source": "/tires/p/:sku", "destination": "/spa" },
+    { "source": "/api/geo", "destination": "/api/status?geo=1" }
+  ],
   "crons": [{ "path": "/api/cron/atd-sweep", "schedule": "0 12 * * *" }],
   "functions": {
     "api/cron/atd-sweep.js": { "maxDuration": 60 },

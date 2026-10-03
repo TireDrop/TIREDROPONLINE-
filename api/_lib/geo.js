@@ -1,5 +1,9 @@
-// Approximate visitor location from Vercel's IP-geolocation request headers,
-// for GET /api/geo (the /local-delivery zone check on page load).
+// GET /api/geo: approximate visitor location from Vercel's IP-geolocation
+// request headers, for the /local-delivery zone check on page load.
+//
+// Not its own function: the Hobby plan allows 12 per deployment and api/
+// already has 12, so vercel.json rewrites /api/geo to /api/status?geo=1 and
+// api/status.js hands the request to geoHandler() below.
 //
 // Vercel adds these to every request it routes to a function:
 //   x-vercel-ip-country      ISO 3166-1 alpha-2, e.g. "US"
@@ -11,6 +15,7 @@
 // { available: false }. Nothing here logs or keeps the values.
 
 import { zip5 } from "../../src/data/serviceArea.js";
+import { send } from "./http.js";
 
 const NUMBER = /^-?\d{1,3}(?:\.\d{1,8})?$/;
 // Letters (any script), spaces and the punctuation real place names use.
@@ -63,4 +68,15 @@ export function parseGeoHeaders(headers) {
     lng,
     city: city(header(headers, "x-vercel-ip-city")),
   };
+}
+
+/**
+ * The /api/geo response. Private and uncached: it is about this one
+ * visitor, so no shared cache may keep it. Nothing is logged or stored, and
+ * the IP itself is never read.
+ */
+export function geoHandler(req, res) {
+  return send(res, 200, parseGeoHeaders(req.headers), {
+    "Cache-Control": "private, no-store",
+  });
 }

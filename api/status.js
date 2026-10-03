@@ -27,7 +27,8 @@
 // there, and typed VIN and size entry keep working.
 
 import { getConfig } from "./_lib/config.js";
-import { methodNotAllowed, send } from "./_lib/http.js";
+import { getQuery, methodNotAllowed, send } from "./_lib/http.js";
+import { geoHandler } from "./_lib/geo.js";
 import { ENDPOINTS as ATD_ENDPOINTS } from "./_lib/atd.js";
 
 /** Status body; `endpoints` is injectable for tests. */
@@ -66,5 +67,7 @@ export default function handler(req, res) {
   if (req.method !== "GET" && req.method !== "HEAD") {
     return methodNotAllowed(res, "GET");
   }
+  // /api/geo is rewritten here (vercel.json): Hobby allows 12 functions, all taken.
+  if (getQuery(req).geo === "1") return geoHandler(req, res);
   return send(res, 200, statusBody(getConfig()), { "Cache-Control": "no-store" });
 }

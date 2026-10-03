@@ -1,13 +1,14 @@
 // Run with: npm run test:api
-// GET /api/geo (api/geo.js, api/_lib/geo.js) and the Permissions-Policy that
-// lets /local-delivery ask for the device location at all.
+// GET /api/geo (api/_lib/geo.js, served by api/status.js through a
+// vercel.json rewrite) and the Permissions-Policy that lets /local-delivery
+// ask for the device location at all.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 
 import { parseGeoHeaders } from "./geo.js";
-import geoHandler from "../geo.js";
+import statusHandler from "../status.js";
 
 const FULL = {
   "x-vercel-ip-country": "US",
@@ -80,6 +81,9 @@ test("parseGeoHeaders: repeated headers use the first value", () => {
   assert.equal(parseGeoHeaders({ ...FULL, "x-vercel-ip-country": ["US", "CA"] }).country, "US");
 });
 
+const vercel = JSON.parse(readFileSync(new URL("../../vercel.json", import.meta.url), "utf8"));
+const geoHandler = (req, res) => statusHandler({ ...req, url: "/api/status?geo=1" }, res);
+
 test("GET /api/geo: private, uncached JSON; other methods are refused", () => {
   const res = mockRes();
   geoHandler({ method: "GET", headers: FULL }, res);
@@ -95,14 +99,43 @@ test("GET /api/geo: private, uncached JSON; other methods are refused", () => {
   geoHandler({ method: "POST", headers: FULL }, post);
   assert.equal(post.statusCode, 405);
   assert.equal(post.headers.allow, "GET");
+
+  // Plain /api/status is unchanged and never carries location.
+  const status = mockRes();
+  statusHandler({ method: "GET", headers: FULL, url: "/api/status" }, status);
+  assert.equal(JSON.parse(status.body).zip, undefined);
+  assert.equal(status.headers["cache-control"], "no-store");
+});
+
+test("vercel.json rewrites /api/geo to the status function", () => {
+  assert.ok(
+    vercel.rewrites.some((r) => r.source === "/api/geo" && r.destination === "/api/status?geo=1"),
+  );
+});
+
+// A 13th function fails the whole deployment on the Hobby plan
+// (exceeded_serverless_functions_per_deployment), which this caught too late
+// once: count them here, where it is cheap.
+test("api/ stays within the Hobby plan's 12 functions", () => {
+  const count = (dir) =>
+    readdirSync(new URL(dir, import.meta.url), { withFileTypes: true }).reduce(
+      (n, e) =>
+        e.name.startsWith("_") || e.name.startsWith(".")
+          ? n
+          : e.isDirectory()
+            ? n + count(`${dir}${e.name}/`)
+            : n + (/\.(js|mjs|cjs|ts)$/.test(e.name) && !/\.test\./.test(e.name) ? 1 : 0),
+      0,
+    );
+  const functions = count("../");
+  assert.ok(functions <= 12, `${functions} functions in api/; the Hobby plan allows 12`);
 });
 
 // Root cause of "Use my location never works": the site-wide header had
 // geolocation=(), which blocks the Geolocation API on every page. It must
 // stay (self): our own pages may ask, embedded third-party frames may not.
 test("vercel.json Permissions-Policy allows geolocation for our own origin only", () => {
-  const config = JSON.parse(readFileSync(new URL("../../vercel.json", import.meta.url), "utf8"));
-  const values = config.headers
+  const values = vercel.headers
     .flatMap((h) => h.headers)
     .filter((h) => h.key.toLowerCase() === "permissions-policy")
     .map((h) => h.value);
