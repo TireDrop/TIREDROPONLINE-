@@ -102,11 +102,14 @@ Behaviour that is real and tested (`npm run test:api`):
 - **Local delivery from ATD's distribution centers** (built on preview as
   `/local-delivery`, branch `preview/local-delivery`; the page never names
   ATD or a hub location):
-  - Does local delivery go to consumers' homes, or only to installers and
-    dealers?
-  - The delivery radius for each hub (the page assumes 40 miles for all,
-    `LOCAL_DELIVERY_RADIUS_MILES` in `src/data/localDelivery.js`).
-  - Any fee for local delivery, per tire or per order.
+  - Consumers' homes: **yes**, per Justin (2026-10-03). Get it in writing with
+    the credentials.
+  - The delivery radius for each hub: **Justin is asking ATD** (2026-10-03).
+    ATD publishes no radius; it says only "same-day or next-day" delivery to
+    dealers from 110+ DCs. The page assumes 40 miles for all
+    (`LOCAL_DELIVERY_RADIUS_MILES` in `src/data/localDelivery.js`).
+  - Any fee for local delivery: **Justin expects none; confirming with ATD**
+    (2026-10-03). The page mentions no fee either way.
   - The go-live: when, and which hubs first.
   - Re-run `npm run build:hubs` after any change to the hub list or radius.
 
