@@ -119,6 +119,8 @@ async function newPage({ javaScriptEnabled = true } = {}) {
   await page.route("**/api/tires**", (route) =>
     route.fulfill({ status: 404, body: "" }),
   );
+  // /local-delivery asks once on load; this is the answer off Vercel.
+  await page.route("**/api/geo", (route) => route.fulfill({ json: { available: false } }));
   // Remembers the <h1> the served HTML contained, before any script runs.
   await page.addInitScript(() => {
     document.addEventListener("readystatechange", () => {

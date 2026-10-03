@@ -117,9 +117,11 @@ test("every route gets the security headers", () => {
   assert.equal(header("Referrer-Policy"), "strict-origin-when-cross-origin");
   // No preload: that is Justin's call (docs/ops/deploy.md).
   assert.equal(header("Strict-Transport-Security"), "max-age=63072000; includeSubDomains");
-  for (const f of ["camera", "microphone", "geolocation", "payment", "usb"]) {
+  for (const f of ["camera", "microphone", "payment", "usb"]) {
     assert.match(header("Permissions-Policy"), new RegExp(`\\b${f}=\\(\\)`));
   }
+  // Our own pages may ask for location (/local-delivery); =() blocked it everywhere.
+  assert.match(header("Permissions-Policy"), /\bgeolocation=\(self\)/);
 });
 
 test("the CSP allows every host Google Translate's element loads from (src/lib/translate.js)", () => {
