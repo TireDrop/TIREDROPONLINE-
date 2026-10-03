@@ -12,7 +12,7 @@ _Last updated: 2026-10-03 (home page now links the local delivery zones from How
   - [x] ~~Privacy policy covers the location check (sections 1 and 4)~~ (2026-10-03)
   - [x] ~~Justin tested Use my location on a real phone + PC~~ (Justin, 2026-10-03: "test is good")
 - [x] ~~Local delivery hubs page (/local-delivery) built on preview~~ (`e5c97a0`, branch preview/local-delivery: icons-only map of 105 hubs, ZIP + location check, no partner name or dates)
-  - [x] ~~Home page links to local delivery zones~~ (SHA_PENDING, branch preview/local-delivery: a "Near one of our delivery hubs?" card under How it works, small static hub map, "Check your ZIP" → /local-delivery#zip-check; no extra request on the home page)
+  - [x] ~~Home page links to local delivery zones~~ (`c81cf25`, branch preview/local-delivery: a "Near one of our delivery hubs?" card under How it works, small static hub map, "Check your ZIP" → /local-delivery#zip-check; no extra request on the home page)
 - [x] ~~Ship the 2026-10-02 team build to main (all 22 gates pass on the merged build; Justin said "ship it")~~ (`d2ba501`, shipped to main 2026-10-02)
 - [x] ~~QA sweep: 174 pages at 390 and 1280, nothing blocks buying; fixed "On this page" links hiding under the sticky header (48 links, 17 pages), desktop menu staying open on Tab/Escape, phone menu and filter sheets letting Tab escape, focused fields hidden behind the phone call bar; keyboard checks added to check:a11y~~ (`9a809f3`, `5236ed0`, `ef5315f`, `ff77416`, `d26c21e`, shipped to main 2026-10-02)
 - [x] ~~Checkout keeps the cart when the order request doesn't reach the shop (calm alert, nothing charged, retry); check:forms covers it (115 checks)~~ (`c4c65e7`, shipped to main 2026-10-02)
