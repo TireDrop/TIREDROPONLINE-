@@ -25,6 +25,9 @@
 //      advertising or social tracking pixels. Google Translate loads only
 //      once a visitor uses the header's Language button (section 3;
 //      components/layout/LanguageControl.jsx).
+//      Location: only /local-delivery uses it (api/_lib/geo.js reads the
+//      host's IP-location headers, no-store; the browser's Geolocation API if
+//      the visitor allows it, compared in the browser). Sections 1 and 4 say so.
 //      Email addresses are captured in two places, both stored in Shopify
 //      (sections 1, 2, 4, 5 and 6 say so):
 //        - the newsletter sign-up form in the site footer
@@ -72,7 +75,7 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
-const LAST_UPDATED = "October 1, 2026";
+const LAST_UPDATED = "October 3, 2026";
 
 // The four questions a customer — or anyone reviewing this site — comes to the
 // terms looking for. They are sections of this document rather than separate
@@ -270,6 +273,7 @@ const DOCS = {
           "What you type into the site's forms: the contact form, the financing form, the fleet quote form, the install booking form, and an order request sent from checkout",
           `Messages you send to ${BUSINESS.email} or leave on the phone`,
           "Your email address, if you sign up for TireDrop emails using the sign-up form in the site footer. It asks for nothing else.",
+          "Your approximate location, on the local delivery page only. When that page opens, our website host estimates your ZIP code and rough location from your internet connection, and the page uses it once to check whether you are in a local delivery zone. If you allow it, your browser can also share your device location for a more exact check; that check happens in your browser. We use your location only to check your delivery zone, and we do not store it.",
           "A photo or a VIN, only if you use the optional Tire Size Finder. A photo of your door sticker, tire or VIN is sent to our server and to Anthropic's API to read the tire size or VIN off it; we do not store the photo. A VIN, typed or read from a photo, is looked up in NHTSA's public vehicle database to find the year, make and model; we do not store it unless you include it with an order.",
         ],
         after: [
@@ -318,7 +322,7 @@ const DOCS = {
           "Shipping carriers, for delivery and tracking",
           "Financing providers, if you choose to apply; your application goes to them under their own privacy policy, not ours",
           "Manufacturers, when a warranty claim requires it",
-          "The company that hosts this website, which keeps ordinary server logs of requests made to it — and, if an order request cannot be saved in Shopify, a copy of that request in the same logs, so it is not lost",
+          "The company that hosts this website, which estimates a visitor's rough location from their internet connection for the local delivery page (see section 1), and keeps ordinary server logs of requests made to it — and, if an order request cannot be saved in Shopify, a copy of that request in the same logs, so it is not lost",
           "Google, which provides Google Analytics and receives information about how the site is used (see section 3), processed under Google's own privacy policy",
           "Anthropic, whose API reads a photo you choose to scan in the Tire Size Finder to find the tire size or VIN printed on it. Only the photo is sent, once, with no name or contact details, and we do not keep a copy",
           "NHTSA, the US Department of Transportation agency whose public vehicle database decodes a VIN you enter or scan in the Tire Size Finder. Only the VIN is sent",

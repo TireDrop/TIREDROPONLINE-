@@ -9,6 +9,8 @@ _Last updated: 2026-10-03 ("Use my location" fixed on preview/local-delivery: th
 
 ## Site fixes (Claude)
 - [x] ~~Use my location works on phones + PCs, auto-detects on load~~ (`80625fa` + `0dffb36`, branch preview/local-delivery, verified on the Vercel preview: Permissions-Policy `geolocation=()` → `(self)`; new `GET /api/geo` (rewritten to the status function: Hobby allows 12 functions) approximate location from the connection, prefilled and labelled; device location asked automatically and remembered "no"; iPhone and desktop help text)
+  - [x] ~~Privacy policy covers the location check (sections 1 and 4)~~ (2026-10-03)
+  - [x] ~~Justin tested Use my location on a real phone + PC~~ (Justin, 2026-10-03: "test is good")
 - [x] ~~Local delivery hubs page (/local-delivery) built on preview~~ (`e5c97a0`, branch preview/local-delivery: icons-only map of 105 hubs, ZIP + location check, no partner name or dates)
 - [x] ~~Ship the 2026-10-02 team build to main (all 22 gates pass on the merged build; Justin said "ship it")~~ (`d2ba501`, shipped to main 2026-10-02)
 - [x] ~~QA sweep: 174 pages at 390 and 1280, nothing blocks buying; fixed "On this page" links hiding under the sticky header (48 links, 17 pages), desktop menu staying open on Tab/Escape, phone menu and filter sheets letting Tab escape, focused fields hidden behind the phone call bar; keyboard checks added to check:a11y~~ (`9a809f3`, `5236ed0`, `ef5315f`, `ff77416`, `d26c21e`, shipped to main 2026-10-02)
