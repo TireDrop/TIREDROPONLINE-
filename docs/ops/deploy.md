@@ -118,6 +118,11 @@ that do the server-side work:
 |                      | live/off, `checkout` shopify/request, `forwarder` on/off, |
 |                      | `newsletter` on/off, `forms` on/off, `webhooks`           |
 |                      | configured/off.                                           |
+| `GET /api/geo`       | The visitor's approximate location from Vercel's IP       |
+|                      | headers: `{ available, country, zip, lat, lng, city }`,   |
+|                      | each validated, or `{ available: false }` (locally).      |
+|                      | `Cache-Control: private, no-store`; nothing logged or     |
+|                      | stored. `/local-delivery` calls it once on load.          |
 | `POST /api/forms`    | The site's forms (contact, financing, fleet quote,        |
 |                      | booking). Finds or creates the Shopify customer (no       |
 |                      | marketing consent), stores the lead in the metafields     |
@@ -398,7 +403,7 @@ fallback) by the first `headers` block in `vercel.json`:
 | `X-Content-Type-Options` | `nosniff` |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` |
 | `X-Frame-Options` | `SAMEORIGIN` (the CSP's `frame-ancestors 'self'` takes over once the CSP is enforced: browsers ignore `frame-ancestors` in a report-only policy) |
-| `Permissions-Policy` | camera, microphone, geolocation, payment, USB, serial, HID, MIDI, motion sensors, display capture, autoplay, encrypted media, passkeys, screen wake lock, XR and Topics all off (`=()`). Nothing on the site uses them; there is no "near me" button. Payment happens on Shopify's own domain, which this header does not reach. |
+| `Permissions-Policy` | `geolocation=(self)`: our own pages may ask for the device location (the `/local-delivery` zone check and its "Use my location" button); embedded third-party frames may not. With `geolocation=()` the browser blocks the Geolocation API outright, so "Use my location" failed on every phone and PC (headless checks never saw it: `vite preview` doesn't send this header; `test:api` and `check:local-delivery` now assert it). Camera, microphone, payment, USB, serial, HID, MIDI, motion sensors, display capture, autoplay, encrypted media, passkeys, screen wake lock, XR and Topics stay off (`=()`). Payment happens on Shopify's own domain, which this header does not reach. |
 | `Content-Security-Policy-Report-Only` | Below. **Report-only:** nothing is blocked; the browser only reports. |
 
 ### The CSP and why each source is there

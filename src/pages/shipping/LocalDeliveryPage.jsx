@@ -26,6 +26,14 @@ import {
   inZoneByCoords,
   isZipInZone,
 } from "../../data/localDelivery.js";
+import {
+  POSITION_OPTIONS,
+  deniedThisSession,
+  fetchApproxLocation,
+  geoPermissionState,
+  looksLikeIOS,
+  rememberDenied,
+} from "../../lib/geoLocate.js";
 import { useHydrated } from "../../lib/useHydrated.js";
 // Positions only (x, y, lat, lng): the hub list with its city names stays in
 // deliveryHubs.source.json and never reaches the browser.
@@ -49,7 +57,7 @@ export const LOCAL_FAQ = [
   },
   {
     q: "How do I know if I'm in a zone?",
-    a: "Enter your ZIP above, or use your location. We check it against the area around each hub on the map. The zones are a working estimate and may change before launch.",
+    a: "When the page opens, we check the approximate location of your connection, and your device location if you allow it. You can also enter any ZIP above or tap Use my location. We compare it with the area around each hub on the map. The zones are a working estimate and may change before launch.",
   },
   {
     q: "What happens if I order before it launches?",
@@ -61,6 +69,10 @@ export const LOCAL_FAQ = [
     link: { to: "/mobile-service", label: "Mobile installation in South Florida" },
   },
 ];
+
+/** What the checker does with location, shown under it. Keep it true to ZoneChecker and api/geo.js. */
+export const LOCATION_NOTE =
+  "We use your approximate location from your connection, or your device location if you allow it, only to check your zone. We don't store it.";
 
 const MAP_LABEL = `Map of the U.S. showing ${MAP.hubs.length} local delivery hubs`;
 
@@ -159,9 +171,39 @@ function loadZones() {
 const linkClass =
   "inline-flex min-h-[44px] items-center gap-1 font-display font-bold text-drop hover:text-dive";
 
+/** The words in front of an answer: where the location came from. */
+function lead({ source, zip, city }) {
+  if (source === "approx")
+    return zip ? (
+      <>
+        Based on your connection, you&rsquo;re near ZIP <strong>{zip}</strong>:{" "}
+      </>
+    ) : (
+      <>Based on your connection{city ? `, you’re near ${city}` : ""}: </>
+    );
+  if (source === "device") return <>Using your device location: </>;
+  return zip ? (
+    <>
+      <strong>{zip}</strong>:{" "}
+    </>
+  ) : null;
+}
+
+/** "… isn't in a local delivery zone yet", worded for where the location came from. */
+function notInZone({ source, zip }) {
+  if (source === "approx")
+    return <>{lead({ source, zip })}that area isn&rsquo;t</>;
+  if (source === "device") return <>{lead({ source })}you aren&rsquo;t</>;
+  return (
+    <>
+      <strong>{zip}</strong> isn&rsquo;t
+    </>
+  );
+}
+
 function Result({ result }) {
   if (!result) return null;
-  const { kind, zip } = result;
+  const { kind } = result;
   if (kind === "loading") return <p className="text-smoke">Checking…</p>;
   if (kind === "invalid")
     return <p className="text-smoke">Enter a five-digit ZIP code, like 85004.</p>;
@@ -174,8 +216,19 @@ function Result({ result }) {
   if (kind === "denied")
     return (
       <p className="text-smoke">
-        Location access is off for this site, so we can&rsquo;t check it. Enter
-        your ZIP instead.
+        Location access is off for this site.{" "}
+        {result.ios ? (
+          <>
+            To turn it on, open Settings &gt; Privacy &amp; Security &gt;
+            Location Services &gt; Safari Websites, then try again.
+          </>
+        ) : (
+          <>
+            To turn it on, select the site settings (lock) icon in the address
+            bar, allow Location, then try again.
+          </>
+        )}{" "}
+        Or enter your ZIP.
       </p>
     );
   if (kind === "geo-error")
@@ -184,18 +237,13 @@ function Result({ result }) {
         We couldn&rsquo;t get your location. Enter your ZIP instead.
       </p>
     );
-  const who = zip ? <strong>{zip}</strong> : "Your location";
   if (kind === "in")
     return (
       <div className="flex items-start gap-2 text-ink">
         <Check size={16} aria-hidden className="mt-0.5 shrink-0 text-drop" />
         <div>
           <p>
-            {zip && (
-              <>
-                {who}:{" "}
-              </>
-            )}
+            {lead(result)}
             {IN_ZONE_MESSAGE}
           </p>
           <Link to="/tires" className={linkClass}>
@@ -210,8 +258,8 @@ function Result({ result }) {
       <X size={16} aria-hidden className="mt-0.5 shrink-0 text-smoke" />
       <div>
         <p>
-          {who} isn&rsquo;t in a local delivery zone yet. Tires still ship free
-          to any street address in {BUSINESS.shipping.area}.
+          {notInZone(result)} in a local delivery zone yet. Tires still ship
+          free to any street address in {BUSINESS.shipping.area}.
         </p>
         <Link to="/tires" className={linkClass}>
           Shop tires
@@ -223,9 +271,19 @@ function Result({ result }) {
 }
 
 /**
- * "Is my ZIP in a zone?" The ZIP is checked in the browser against
- * public/data/local-delivery-zips.json; "Use my location" compares the
- * browser's position with the hub coordinates. Nothing is sent anywhere.
+ * "Is my ZIP in a zone?" A typed ZIP is checked in the browser against
+ * public/data/local-delivery-zips.json; a device position is compared with
+ * the hub coordinates in the browser too.
+ *
+ * On load, without asking: GET /api/geo gives the approximate location of
+ * the visitor's connection (Vercel's IP headers), and a U.S. ZIP from it is
+ * prefilled and answered, labelled as approximate. Then the precise device
+ * location replaces it: straight away when the visitor already allowed it,
+ * or by asking once the approximate answer is up. A "no" is remembered for
+ * the session and never shown as an error; "Use my location" stays as the
+ * manual way in, and explains how to turn location back on. Nothing
+ * automatic happens once the visitor types or checks something, or when the
+ * URL already carries ?zip=.
  *
  * Without JavaScript the form submits as a GET back to this page; once the
  * page hydrates, a ?zip= in the URL is checked, so a submit made before
@@ -236,6 +294,10 @@ function ZoneChecker() {
   const hydrated = useHydrated();
   const [result, setResult] = useState(null);
   const latest = useRef(0);
+  // Set by any typing, submit or click: from then on the visitor leads and
+  // the automatic checks stay quiet.
+  const touched = useRef(false);
+  const zipInput = useRef(null);
   const canLocate =
     hydrated && typeof navigator !== "undefined" && "geolocation" in navigator;
 
@@ -253,6 +315,11 @@ function ZoneChecker() {
     );
   };
 
+  const coordsResult = (lat, lng, extra) => ({
+    kind: inZoneByCoords(lat, lng, MAP.hubs) ? "in" : "out",
+    ...extra,
+  });
+
   // Once, on mount: the URL a pre-hydration submit landed on. Deferred a
   // tick so the answer renders after hydration, not inside it.
   useEffect(() => {
@@ -262,25 +329,79 @@ function ZoneChecker() {
     return () => clearTimeout(t);
   }, []);
 
+  // Once, on mount: the automatic check (see the comment above).
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("zip")) return undefined;
+    let cancelled = false;
+    let precise = false; // a device answer is showing; the approximate one never replaces it
+    const quiet = () => cancelled || touched.current;
+
+    const locateQuietly = () => {
+      if (quiet() || precise || !("geolocation" in navigator) || deniedThisSession(window)) return;
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          if (quiet()) return;
+          precise = true;
+          ++latest.current;
+          setResult(coordsResult(coords.latitude, coords.longitude, { source: "device" }));
+        },
+        // A "no" keeps whatever is showing; it isn't an error to the visitor.
+        (err) => err?.code === 1 && rememberDenied(window),
+        POSITION_OPTIONS,
+      );
+    };
+
+    const permission = geoPermissionState(navigator);
+    permission.then((state) => state === "granted" && locateQuietly());
+
+    const showApprox = async (approx) => {
+      if (!approx || quiet() || precise) return;
+      if (!approx.zip) {
+        setResult(coordsResult(approx.lat, approx.lng, { source: "approx", city: approx.city }));
+        return;
+      }
+      const data = await loadZones();
+      if (quiet() || precise) return;
+      if (zipInput.current && !zipInput.current.value) zipInput.current.value = approx.zip;
+      setResult({ kind: isZipInZone(approx.zip, data) ? "in" : "out", zip: approx.zip, source: "approx" });
+    };
+
+    fetchApproxLocation()
+      .then(showApprox)
+      .catch(() => {}) // zone list failed: say nothing until the visitor asks
+      .then(() => permission)
+      .then((state) => state === "prompt" && locateQuietly());
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const onSubmit = (e) => {
     e.preventDefault();
+    touched.current = true;
     checkZip(new FormData(e.currentTarget).get("zip"));
   };
 
   const locate = () => {
+    touched.current = true;
     const ticket = ++latest.current;
     setResult({ kind: "loading" });
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
         if (ticket !== latest.current) return;
-        const inZone = inZoneByCoords(coords.latitude, coords.longitude, MAP.hubs);
-        setResult({ kind: inZone ? "in" : "out" });
+        setResult(coordsResult(coords.latitude, coords.longitude, { source: "device" }));
       },
       (err) => {
         if (ticket !== latest.current) return;
-        setResult({ kind: err?.code === 1 ? "denied" : "geo-error" });
+        if (err?.code === 1) {
+          rememberDenied(window);
+          setResult({ kind: "denied", ios: looksLikeIOS(navigator) });
+        } else {
+          setResult({ kind: "geo-error" });
+        }
       },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
+      POSITION_OPTIONS,
     );
   };
 
@@ -299,6 +420,7 @@ function ZoneChecker() {
             ZIP code
           </label>
           <input
+            ref={zipInput}
             id={`${id}-zip`}
             name="zip"
             inputMode="numeric"
@@ -307,6 +429,9 @@ function ZoneChecker() {
             placeholder="e.g. 85004"
             className="field"
             aria-describedby={`${id}-result`}
+            onInput={() => {
+              touched.current = true;
+            }}
           />
         </div>
         <button type="submit" className="btn-dark min-h-[44px] shrink-0">
@@ -333,12 +458,20 @@ function ZoneChecker() {
         )}
       </div>
 
-      <div id={`${id}-result`} aria-live="polite" className="mt-2 text-sm leading-relaxed">
+      {/* Room for the longest automatic answer (approximate, out of zone)
+          is reserved up front, so an answer that arrives on its own after
+          load moves nothing below it. Heights measured per breakpoint; the
+          card is narrowest at lg, beside the map. */}
+      <div
+        id={`${id}-result`}
+        aria-live="polite"
+        className="mt-2 min-h-[10rem] text-sm leading-relaxed sm:min-h-[7.25rem] md:min-h-[5.75rem] lg:min-h-[10rem] xl:min-h-[8.75rem]"
+      >
         <Result result={result} />
       </div>
 
       <p className="mt-4 border-t border-ink/10 pt-3 text-xs leading-relaxed text-smoke">
-        Your ZIP and location are checked in your browser and never sent to us.
+        {LOCATION_NOTE}
       </p>
     </div>
   );
