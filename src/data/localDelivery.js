@@ -10,6 +10,9 @@
 //   src/data/deliveryHubs.generated.json  the map: viewBox, paths, projected hubs
 //   public/data/local-delivery-zips.json  ZIPs within the radius, fetched only
 //                                         when someone checks a ZIP
+//   public/data/local-delivery-areas.json ZIP-prefix centroids for the map's
+//                                         area zoom (see the bottom of this
+//                                         file), fetched with the ZIPs
 //
 // Plain JavaScript with no browser imports, so the build script and the tests
 // run it under Node.
@@ -94,4 +97,107 @@ export function isZipInZone(zip, zoneData) {
     if (packed.slice(i, i + 2) === suffix) return true;
   }
   return false;
+}
+
+/* ------------------------- the area zoom (page map) ------------------------- */
+
+/** ZIP-prefix centroids for the map's area zoom, fetched only when a ZIP is checked (public/data/…). */
+export const LOCAL_DELIVERY_AREAS_URL = "/data/local-delivery-areas.json";
+
+/**
+ * Lower-48 Albers projection, the same one `npm run build:hubs` draws the map
+ * and hubs with (d3 geoAlbersUsa, lower 48: parallels 29.5 and 45.5, rotate
+ * 96, center -0.6/38.7, scale 1300, translate 487.5/305), written out so the
+ * page can place a device position without shipping d3. The test projects
+ * every hub with it and compares the map x/y the build stored.
+ * Returns [x, y] in map units, or null for a point that is not a coordinate.
+ */
+const ALBERS = (() => {
+  const s0 = Math.sin(rad(29.5));
+  const n = (s0 + Math.sin(rad(45.5))) / 2;
+  const c = 1 + s0 * (2 * n - s0);
+  const raw = (lng, lat) => {
+    const r = Math.sqrt(c - 2 * n * Math.sin(rad(lat))) / n;
+    const t = rad(lng + 96) * n;
+    return [r * Math.sin(t), Math.sqrt(c) / n - r * Math.cos(t)];
+  };
+  const [cx, cy] = raw(-0.6 - 96, 38.7);
+  return (lng, lat) => {
+    const [x, y] = raw(lng, lat);
+    return [487.5 + 1300 * (x - cx), 305 - 1300 * (y - cy)];
+  };
+})();
+
+export function projectLower48(lat, lng) {
+  if (!isLatLng(lat, lng)) return null;
+  const [x, y] = ALBERS(lng, lat);
+  return [+x.toFixed(1), +y.toFixed(1)];
+}
+
+/** Map is 975 x 610 units; the contiguous states sit well inside it. */
+const onMap = (x, y) => x >= 0 && x <= 975 && y >= 0 && y <= 610;
+
+/** Contiguous states only: the zoom has nothing to show for Alaska, Hawaii or the territories. */
+export const isContiguous = (lat, lng) =>
+  isLatLng(lat, lng) && lat >= 24 && lat <= 50 && lng >= -125 && lng <= -66;
+
+/**
+ * Index of the hub nearest (lat, lng), or -1 for a bad point or no hubs. A
+ * simulated truck is sent to this hub's zone.
+ */
+export function nearestHubIndex(lat, lng, hubs) {
+  if (!isLatLng(lat, lng) || !Array.isArray(hubs)) return -1;
+  let best = -1;
+  let bestMiles = Infinity;
+  hubs.forEach((h, i) => {
+    if (!isLatLng(h?.lat, h?.lng)) return;
+    const d = milesBetween(lat, lng, h.lat, h.lng);
+    if (d < bestMiles) {
+      bestMiles = d;
+      best = i;
+    }
+  });
+  return best;
+}
+
+/**
+ * "About N miles to the nearest zone": the distance past the zone edge,
+ * rounded to the nearest 5 and never under 5 (an answer of "0 miles away"
+ * would contradict "not in a zone"). `hubMiles` is the distance to the
+ * nearest hub.
+ */
+export function zoneGapMiles(hubMiles, radius = LOCAL_DELIVERY_RADIUS_MILES) {
+  if (!Number.isFinite(hubMiles)) return null;
+  return Math.max(5, Math.round((hubMiles - radius) / 5) * 5);
+}
+
+/**
+ * Packs { prefix, x, y, hub, gap } rows as "ppp:x:y:hub:gap;" (map units, hub
+ * index into the hub list, gap in steps of 5 miles). Each row is the average
+ * of the ZIPs sharing a 3-digit prefix, so it names an area, never an address.
+ */
+export function packAreas(rows) {
+  return rows
+    .map((r) => `${r.prefix}:${r.x.toFixed(1)}:${r.y.toFixed(1)}:${r.hub}:${Math.round(r.gap / 5)};`)
+    .join("");
+}
+
+/**
+ * Looks one ZIP's prefix up in the packed areas ({ areas: packAreas(...) }).
+ * Returns { x, y, hub, gap } (gap in miles) or null: a bad ZIP, a prefix
+ * outside the contiguous states, or missing or malformed data. Scans the
+ * string rather than building a table, so a visit that checks one ZIP pays
+ * for one pass.
+ */
+export function areaForZip(zip, areaData) {
+  const z = zip5(zip);
+  const packed = areaData?.areas;
+  if (!z || typeof packed !== "string") return null;
+  // Rows start after a ";" (or at the very start), so match ";ppp:" in a copy with a leading one.
+  const from = `;${packed}`.indexOf(`;${z.slice(0, 3)}:`);
+  if (from < 0) return null;
+  const row = packed.slice(from, packed.indexOf(";", from) + 1 || undefined);
+  const [x, y, hub, gap] = row.replace(/;$/, "").split(":").slice(1).map(Number);
+  if (![x, y, hub, gap].every(Number.isFinite) || !onMap(x, y)) return null;
+  return { x, y, hub, gap: gap * 5 };
 }

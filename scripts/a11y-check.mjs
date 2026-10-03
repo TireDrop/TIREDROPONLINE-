@@ -146,10 +146,10 @@ const browser = await chromium.launch({
 });
 const local = new URL(BASE).host;
 
-async function newPage(width) {
+async function newPage(width, reducedMotion = "reduce") {
   const context = await browser.newContext({
     viewport: { width, height: 900 },
-    reducedMotion: "reduce",
+    reducedMotion,
   });
   await context.addInitScript((picks) => {
     if (location.hash === "#filled")
@@ -302,6 +302,8 @@ try {
       await page.goto(BASE + route, { waitUntil: "load" });
       await page.waitForFunction(isMounted);
       await page.waitForLoadState("networkidle");
+      // The truck layer is imported when the page is idle: scan the page with it on.
+      if (route === "/local-delivery") await page.waitForSelector("svg [data-truck]", { state: "attached" });
       // Let colour transitions settle, or axe measures a half-faded state.
       await page.waitForTimeout(300);
       if (!(await page.evaluate(() => Boolean(window.axe))))
@@ -329,6 +331,39 @@ try {
       }
       if (blocking.length) failures += blocking.length;
       else console.log(`ok   ${route} @${width}: no serious or critical issues`);
+    }
+
+    // /local-delivery with motion on, then zoomed to a ZIP with a hub bubble
+    // open: the live layer (counter, 105 hub buttons, pin, "Show whole map")
+    // at its busiest. The routes above scan it with reduced motion.
+    {
+      const live = await newPage(width, "no-preference");
+      const lp = live.page;
+      await lp.goto(BASE + "/local-delivery", { waitUntil: "load" });
+      await lp.waitForFunction(isMounted);
+      await lp.waitForSelector("svg [data-truck]", { state: "attached" });
+      await lp.getByLabel("ZIP code").fill("33351");
+      await lp.getByRole("button", { name: "Check my ZIP" }).click();
+      await lp.getByRole("button", { name: "Show whole map" }).waitFor();
+      await lp.locator('[aria-label^="Delivery hub 1 of"]').focus();
+      await lp.keyboard.press("Enter");
+      await lp.waitForTimeout(900);
+      if (!(await lp.evaluate(() => Boolean(window.axe)))) await lp.addScriptTag({ content: AXE });
+      const result = await lp.evaluate(() =>
+        window.axe.run(document, {
+          runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "best-practice"] },
+        }),
+      );
+      const blocking = result.violations.filter((v) => ["serious", "critical"].includes(v.impact));
+      for (const v of result.violations) {
+        report.push({ route: "/local-delivery (zoomed, bubble open)", width, ...v });
+        console.log(
+          `${blocking.includes(v) ? "FAIL" : "note"} /local-delivery (zoomed) @${width}: ${v.id} [${v.impact}] x${v.nodes.length} ${v.nodes.slice(0, 3).map((n) => n.target.join(" ")).join(" | ")}`,
+        );
+      }
+      if (blocking.length) failures += blocking.length;
+      else console.log(`ok   /local-delivery with motion, zoomed, hub bubble open @${width}: no serious or critical issues`);
+      await live.context.close();
     }
 
     // The skip link: first Tab stop, and it lands focus on <main>.

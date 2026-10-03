@@ -142,10 +142,12 @@ async function newPage({ width, js = true, reducedMotion = "no-preference" }) {
     if (m.type() === "error" && !/status of 404/.test(m.text())) errors.push(m.text());
   });
   page.on("pageerror", (e) => errors.push(String(e)));
-  // The local delivery teaser is static: its zone list and location lookup
-  // belong to /local-delivery, never the home page's load.
+  // The local delivery teaser is static: its zone list, location lookup,
+  // truck layer and area centroids belong to /local-delivery, never the home
+  // page's load.
   page.on("request", (r) => {
-    if (/\/api\/geo|local-delivery-zips/.test(r.url())) errors.push(`home page requested ${r.url()}`);
+    if (/\/api\/geo|local-delivery-zips|local-delivery-areas|deliveryTrucks|deliverySim/.test(r.url()))
+      errors.push(`home page requested ${r.url()}`);
   });
   await page.route((url) => url.host !== local, (r) => r.fulfill({ status: 200, body: "" }));
   await page.route("**/api/status", (r) =>

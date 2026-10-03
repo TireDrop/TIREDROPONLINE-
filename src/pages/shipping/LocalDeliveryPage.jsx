@@ -22,9 +22,16 @@ import {
 import { BUSINESS } from "../../data/business.js";
 import { SERVICE_AREA_LABEL, zip5 } from "../../data/serviceArea.js";
 import {
+  LOCAL_DELIVERY_AREAS_URL,
+  LOCAL_DELIVERY_RADIUS_MILES,
   LOCAL_DELIVERY_ZIPS_URL,
-  inZoneByCoords,
+  areaForZip,
+  isContiguous,
   isZipInZone,
+  nearestHubIndex,
+  nearestHubMiles,
+  projectLower48,
+  zoneGapMiles,
 } from "../../data/localDelivery.js";
 import {
   POSITION_OPTIONS,
@@ -45,10 +52,18 @@ import MAP from "../../data/deliveryHubs.generated.json";
  * name, and no dates, speeds or fees, because none of it is confirmed yet
  * (docs/integrations/atd.md, "Still unconfirmed"). Free shipping and the
  * South Florida install area are unchanged, and the page says so.
+ *
+ * The map is a plain SVG in the prerendered HTML. Once the page is idle in
+ * a browser, src/components/delivery/deliveryTrucks.js is imported to add the
+ * simulated trucks, the area zoom and tap-to-explore on top of it; nothing
+ * about it is needed to read the map or check a ZIP.
  */
 
 export const IN_ZONE_MESSAGE =
   "You're in a local delivery zone. Local delivery is rolling out; order now and we ship free while it launches.";
+
+/** Added after the in-zone answer; the map sends a simulated truck to a house in that zone. */
+export const TRUCK_LINE = "A truck is heading to a house near you.";
 
 export const LOCAL_FAQ = [
   {
@@ -80,52 +95,145 @@ const MAP_LABEL = `Map of the U.S. showing ${MAP.hubs.length} local delivery hub
 const PIN =
   "M0 0C-1.6-4.6-7-8.3-7-13.2a7 7 0 1 1 14 0C7-8.3 1.6-4.6 0 0Z";
 
+/** Runs `fn` once the page has loaded and the browser is idle; returns a cancel. Browser only. */
+function afterIdle(fn) {
+  let handle = 0;
+  let cancelled = false;
+  const run = () => {
+    if (cancelled) return;
+    if (typeof window.requestIdleCallback === "function") {
+      handle = window.requestIdleCallback(fn, { timeout: 2500 });
+    } else {
+      handle = window.setTimeout(fn, 300);
+    }
+  };
+  if (document.readyState === "complete") run();
+  else window.addEventListener("load", run, { once: true });
+  return () => {
+    cancelled = true;
+    window.removeEventListener("load", run);
+    if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(handle);
+    window.clearTimeout(handle);
+  };
+}
+
 /**
- * The hub map. One text alternative on the <svg>; every pin and halo is
- * decorative. Pins are drawn at a fixed screen size rather than map scale
- * (the --pin factor grows them as the map shrinks), so they stay readable at
- * 360px without crowding the map at 1440.
+ * The hub map and its legend. One text alternative on the <svg>; every pin
+ * and halo is decorative. Pins are drawn at a fixed screen size rather than
+ * map scale (the --pin factor grows them as the map shrinks, and --zoom,
+ * which the live layer sets, shrinks them back as it zooms in), so they stay
+ * readable at 360px without crowding the map at 1440. Strokes follow --zoom
+ * the same way.
+ *
+ * `focus` is the zoom request from the ZIP checker (see ZoneChecker):
+ * undefined before any answer, null to show the whole map, else
+ * { x, y, hub, inZone, reveal }. It is handed to the live layer once that has
+ * loaded, or the moment it does.
  */
-function HubMap() {
+function HubMap({ focus }) {
+  const host = useRef(null);
+  const svg = useRef(null);
+  const note = useRef(null);
+  const live = useRef(null);
+  const wanted = useRef(focus);
+
+  useEffect(() => {
+    wanted.current = focus;
+    if (focus !== undefined) live.current?.focus(focus);
+  }, [focus]);
+
+  // After idle, in the browser only: load the trucks. A failure leaves the
+  // static map exactly as it was prerendered.
+  useEffect(() => {
+    const abort = new AbortController();
+    const cancel = afterIdle(() => {
+      import("../../components/delivery/deliveryTrucks.js")
+        .then(({ mountTrucks }) =>
+          abort.signal.aborted
+            ? null
+            : mountTrucks({ svg: svg.current, host: host.current, note: note.current, map: MAP, signal: abort.signal }),
+        )
+        .then((controller) => {
+          if (!controller) return;
+          if (abort.signal.aborted) return controller.destroy();
+          live.current = controller;
+          if (wanted.current !== undefined) controller.focus(wanted.current);
+        })
+        .catch(() => {});
+    });
+    return () => {
+      abort.abort();
+      cancel();
+      live.current?.destroy();
+      live.current = null;
+    };
+  }, []);
+
   return (
-    <svg
-      viewBox={MAP.viewBox}
-      role="img"
-      aria-label={MAP_LABEL}
-      className="block h-auto w-full [--pin:1.5] sm:[--pin:1.3] lg:[--pin:1.2]"
-    >
-      <path d={MAP.land} className="fill-ink/[0.07]" />
-      <path
-        d={MAP.borders}
-        fill="none"
-        strokeWidth={1.25}
-        strokeLinejoin="round"
-        className="stroke-bone"
-      />
-      <g aria-hidden="true">
-        {MAP.hubs.map((h) => (
-          <circle
-            key={`h${h.x},${h.y}`}
-            cx={h.x}
-            cy={h.y}
-            r={MAP.haloRadius}
-            className="fill-drop/[0.12] stroke-drop/30"
-            strokeWidth={0.75}
+    <>
+      <div ref={host} className="relative">
+        <svg
+          ref={svg}
+          viewBox={MAP.viewBox}
+          role="img"
+          aria-label={MAP_LABEL}
+          className="block h-auto w-full [--pin:1.5] sm:[--pin:1.3] lg:[--pin:1.2]"
+        >
+          <path d={MAP.land} className="fill-ink/[0.07]" />
+          <path
+            d={MAP.borders}
+            fill="none"
+            strokeLinejoin="round"
+            style={{ strokeWidth: "calc(1.25px * var(--zoom, 1))" }}
+            className="stroke-bone"
           />
-        ))}
-      </g>
-      <g aria-hidden="true">
-        {MAP.hubs.map((h) => (
-          <g
-            key={`p${h.x},${h.y}`}
-            style={{ transform: `translate(${h.x}px, ${h.y}px) scale(var(--pin))` }}
-          >
-            <path d={PIN} strokeWidth={1.25} className="fill-drop stroke-bone" />
-            <circle cy={-13.2} r={2.6} className="fill-bone" />
+          <g aria-hidden="true">
+            {MAP.hubs.map((h) => (
+              <circle
+                key={`h${h.x},${h.y}`}
+                data-halo=""
+                cx={h.x}
+                cy={h.y}
+                r={MAP.haloRadius}
+                style={{ strokeWidth: "calc(0.75px * var(--zoom, 1))" }}
+                className="fill-drop/[0.12] stroke-drop/30"
+              />
+            ))}
           </g>
-        ))}
-      </g>
-    </svg>
+          <g aria-hidden="true">
+            {MAP.hubs.map((h) => (
+              <g
+                key={`p${h.x},${h.y}`}
+                style={{
+                  transform: `translate(${h.x}px, ${h.y}px) scale(calc(var(--pin) * var(--zoom, 1)))`,
+                }}
+              >
+                <path d={PIN} strokeWidth={1.25} className="fill-drop stroke-bone" />
+                <circle cy={-13.2} r={2.6} className="fill-bone" />
+              </g>
+            ))}
+          </g>
+        </svg>
+      </div>
+      <figcaption className="mt-3 flex flex-wrap gap-x-6 gap-y-2 border-t border-ink/10 px-1 pt-3 text-sm text-smoke">
+        <span className="flex items-center gap-2">
+          <LegendPin />
+          Local delivery hub
+        </span>
+        <span className="flex items-center gap-2">
+          <LegendHalo />
+          Approximate zone, not final
+        </span>
+        {/* Room for the live layer's legend line, held from the first paint so
+            it arriving after load moves nothing: two lines on a phone, one
+            from sm up, more when reduced motion swaps in the longer line.
+            Empty (and invisible) until then, and for good without JavaScript. */}
+        <p
+          ref={note}
+          className="invisible flex min-h-[2.5rem] basis-full flex-wrap items-center gap-x-2 sm:min-h-[1.25rem] motion-reduce:min-h-[3.75rem] sm:motion-reduce:min-h-[2.5rem]"
+        />
+      </figcaption>
+    </>
   );
 }
 
@@ -150,22 +258,61 @@ function LegendHalo() {
 
 // One fetch per visit, and only once someone checks; a failed fetch is
 // forgotten so the next try goes back to the network.
-let zonePromise = null;
-function loadZones() {
-  zonePromise ??= fetch(LOCAL_DELIVERY_ZIPS_URL)
-    .then((r) => {
-      if (!r.ok) throw new Error(`zones ${r.status}`);
-      return r.json();
-    })
-    .then((data) => {
-      if (!data || typeof data.zips !== "object") throw new Error("zones shape");
-      return data;
-    })
-    .catch((e) => {
-      zonePromise = null;
-      throw e;
-    });
-  return zonePromise;
+function onceLoader(url, valid) {
+  let promise = null;
+  return () => {
+    promise ??= fetch(url)
+      .then((r) => {
+        if (!r.ok) throw new Error(`${url} ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        if (!valid(data)) throw new Error(`${url} shape`);
+        return data;
+      })
+      .catch((e) => {
+        promise = null;
+        throw e;
+      });
+    return promise;
+  };
+}
+const loadZones = onceLoader(LOCAL_DELIVERY_ZIPS_URL, (d) => d && typeof d.zips === "object");
+// The ZIP-prefix centroids for the map's area zoom. Optional: without them the
+// answer is the same, just without the zoom and the "miles away" line.
+const loadAreas = onceLoader(LOCAL_DELIVERY_AREAS_URL, (d) => d && typeof d.areas === "string");
+
+/**
+ * The answer for a typed (or approximate) ZIP: in or out of a zone from the
+ * zone list, plus, when the prefix is in the contiguous states, where to zoom
+ * the map and how far the nearest zone is. Rejects only when the zone list
+ * cannot be loaded.
+ */
+async function answerZip(zip, extra) {
+  const [zones, areas] = await Promise.all([loadZones(), loadAreas().catch(() => null)]);
+  const inZone = isZipInZone(zip, zones);
+  const area = areaForZip(zip, areas);
+  return {
+    kind: inZone ? "in" : "out",
+    zip,
+    ...extra,
+    gap: !inZone && area ? area.gap : null,
+    focus: area ? { x: area.x, y: area.y, hub: area.hub, inZone } : null,
+  };
+}
+
+/** The answer for exact coordinates (a device position, or the connection's approximate one). */
+function answerCoords(lat, lng, extra) {
+  const miles = nearestHubMiles(lat, lng, MAP.hubs);
+  const inZone = miles <= LOCAL_DELIVERY_RADIUS_MILES;
+  const at = isContiguous(lat, lng) ? projectLower48(lat, lng) : null;
+  const hub = nearestHubIndex(lat, lng, MAP.hubs);
+  return {
+    kind: inZone ? "in" : "out",
+    ...extra,
+    gap: !inZone && at ? zoneGapMiles(miles) : null,
+    focus: at && hub >= 0 ? { x: at[0], y: at[1], hub, inZone } : null,
+  };
 }
 
 const linkClass =
@@ -244,7 +391,7 @@ function Result({ result }) {
         <div>
           <p>
             {lead(result)}
-            {IN_ZONE_MESSAGE}
+            {IN_ZONE_MESSAGE} {TRUCK_LINE}
           </p>
           <Link to="/tires" className={linkClass}>
             Shop tires
@@ -258,8 +405,9 @@ function Result({ result }) {
       <X size={16} aria-hidden className="mt-0.5 shrink-0 text-smoke" />
       <div>
         <p>
-          {notInZone(result)} in a local delivery zone yet. Tires still ship
-          free to any street address in {BUSINESS.shipping.area}.
+          {notInZone(result)} in a local delivery zone yet.{" "}
+          {result.gap ? `Nearest delivery zone is about ${result.gap} miles away. ` : ""}
+          Tires still ship free to any street address in {BUSINESS.shipping.area}.
         </p>
         <Link to="/tires" className={linkClass}>
           Shop tires
@@ -289,7 +437,7 @@ function Result({ result }) {
  * page hydrates, a ?zip= in the URL is checked, so a submit made before
  * hydration still gets its answer.
  */
-function ZoneChecker() {
+function ZoneChecker({ onFocus }) {
   const id = useId();
   const hydrated = useHydrated();
   const [result, setResult] = useState(null);
@@ -298,27 +446,37 @@ function ZoneChecker() {
   // the automatic checks stay quiet.
   const touched = useRef(false);
   const zipInput = useRef(null);
+  // The latest map callback, read by the one-time effects below.
+  const focusMap = useRef(onFocus);
+  useEffect(() => {
+    focusMap.current = onFocus;
+  }, [onFocus]);
   const canLocate =
     hydrated && typeof navigator !== "undefined" && "geolocation" in navigator;
+
+  // Shows an answer and tells the map where to look. Only a real answer moves
+  // the map: "in" and "out" zoom to the area (or back out when there is no
+  // area to show, as for Alaska); a bad ZIP clears the pin. Loading, errors
+  // and a refused location leave the map as it is. A visitor-led check also
+  // brings the map into view if it is off-screen.
+  // (A ref, so the one-time effects below can call it without re-running.)
+  const show = useRef((r) => {
+    setResult(r);
+    if (r.kind === "in" || r.kind === "out")
+      focusMap.current(r.focus ? { ...r.focus, reveal: touched.current } : null);
+    else if (r.kind === "invalid") focusMap.current(null);
+  });
 
   const checkZip = (raw) => {
     const ticket = ++latest.current;
     const zip = zip5(raw);
-    if (!zip) return setResult({ kind: "invalid" });
+    if (!zip) return show.current({ kind: "invalid" });
     setResult({ kind: "loading" });
-    loadZones().then(
-      (data) => {
-        if (ticket !== latest.current) return;
-        setResult({ kind: isZipInZone(zip, data) ? "in" : "out", zip });
-      },
+    answerZip(zip).then(
+      (r) => ticket === latest.current && show.current(r),
       () => ticket === latest.current && setResult({ kind: "error" }),
     );
   };
-
-  const coordsResult = (lat, lng, extra) => ({
-    kind: inZoneByCoords(lat, lng, MAP.hubs) ? "in" : "out",
-    ...extra,
-  });
 
   // Once, on mount: the URL a pre-hydration submit landed on. Deferred a
   // tick so the answer renders after hydration, not inside it.
@@ -343,7 +501,7 @@ function ZoneChecker() {
           if (quiet()) return;
           precise = true;
           ++latest.current;
-          setResult(coordsResult(coords.latitude, coords.longitude, { source: "device" }));
+          show.current(answerCoords(coords.latitude, coords.longitude, { source: "device" }));
         },
         // A "no" keeps whatever is showing; it isn't an error to the visitor.
         (err) => err?.code === 1 && rememberDenied(window),
@@ -357,13 +515,13 @@ function ZoneChecker() {
     const showApprox = async (approx) => {
       if (!approx || quiet() || precise) return;
       if (!approx.zip) {
-        setResult(coordsResult(approx.lat, approx.lng, { source: "approx", city: approx.city }));
+        show.current(answerCoords(approx.lat, approx.lng, { source: "approx", city: approx.city }));
         return;
       }
-      const data = await loadZones();
+      const answer = await answerZip(approx.zip, { source: "approx" });
       if (quiet() || precise) return;
       if (zipInput.current && !zipInput.current.value) zipInput.current.value = approx.zip;
-      setResult({ kind: isZipInZone(approx.zip, data) ? "in" : "out", zip: approx.zip, source: "approx" });
+      show.current(answer);
     };
 
     fetchApproxLocation()
@@ -390,7 +548,7 @@ function ZoneChecker() {
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
         if (ticket !== latest.current) return;
-        setResult(coordsResult(coords.latitude, coords.longitude, { source: "device" }));
+        show.current(answerCoords(coords.latitude, coords.longitude, { source: "device" }));
       },
       (err) => {
         if (ticket !== latest.current) return;
@@ -458,14 +616,15 @@ function ZoneChecker() {
         )}
       </div>
 
-      {/* Room for the longest automatic answer (approximate, out of zone)
-          is reserved up front, so an answer that arrives on its own after
-          load moves nothing below it. Heights measured per breakpoint; the
+      {/* Room for the longest automatic answer (approximate, out of zone, with
+          the distance to the nearest zone) is reserved up front, so an answer
+          that arrives on its own after load moves nothing below it. Heights
+          measured per width, a line (23px) per step as the text wraps; the
           card is narrowest at lg, beside the map. */}
       <div
         id={`${id}-result`}
         aria-live="polite"
-        className="mt-2 min-h-[10rem] text-sm leading-relaxed sm:min-h-[7.25rem] md:min-h-[5.75rem] lg:min-h-[10rem] xl:min-h-[8.75rem]"
+        className="mt-2 min-h-[14.25rem] text-sm leading-relaxed min-[400px]:min-h-[11.5rem] min-[430px]:min-h-[10rem] min-[500px]:min-h-[8.5rem] sm:min-h-[7.25rem] lg:min-h-[12.75rem] xl:min-h-[10rem]"
       >
         <Result result={result} />
       </div>
@@ -480,6 +639,8 @@ function ZoneChecker() {
 /* --------------------------------- page --------------------------------- */
 
 export default function LocalDeliveryPage() {
+  // Where the map should look, set by the ZIP checker (see HubMap).
+  const [focus, setFocus] = useState(undefined);
   return (
     <>
       <Seo
@@ -520,19 +681,9 @@ export default function LocalDeliveryPage() {
         />
         <div className="-mt-2 grid gap-6 md:-mt-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:items-start lg:gap-8">
           <figure className="card p-3 sm:p-5">
-            <HubMap />
-            <figcaption className="mt-3 flex flex-wrap gap-x-6 gap-y-2 border-t border-ink/10 px-1 pt-3 text-sm text-smoke">
-              <span className="flex items-center gap-2">
-                <LegendPin />
-                Local delivery hub
-              </span>
-              <span className="flex items-center gap-2">
-                <LegendHalo />
-                Approximate zone, not final
-              </span>
-            </figcaption>
+            <HubMap focus={focus} />
           </figure>
-          <ZoneChecker />
+          <ZoneChecker onFocus={setFocus} />
         </div>
       </Section>
 

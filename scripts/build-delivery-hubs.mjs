@@ -21,6 +21,13 @@
  *   public/data/local-delivery-zips.json  { radiusMiles, count, zips }: every
  *     US 5-digit ZIP whose centroid is within LOCAL_DELIVERY_RADIUS_MILES of a
  *     hub, packed by 3-digit prefix (packZips in src/data/localDelivery.js).
+ *   public/data/local-delivery-areas.json  { radiusMiles, count, areas }: one
+ *     row per 3-digit ZIP prefix in the contiguous states (the average of its
+ *     ZIPs, so an area and never an address): map x/y, the nearest hub's
+ *     index in the list above, and the miles from the zone edge in steps of
+ *     5 (packAreas). The page fetches it only after a ZIP is checked, to zoom
+ *     the map to that area. A prefix with ZIPs in a zone is centred on those,
+ *     so an in-zone answer lands inside the zone.
  *
  * Not part of `npm run build`.
  */
@@ -35,7 +42,12 @@ import { feature, mesh } from "topojson-client";
 import {
   LOCAL_DELIVERY_RADIUS_MILES,
   inZoneByCoords,
+  isContiguous,
+  milesBetween,
+  nearestHubIndex,
+  packAreas,
   packZips,
+  zoneGapMiles,
 } from "../src/data/localDelivery.js";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -46,6 +58,7 @@ const SOURCE = resolve(ROOT, "src/data/deliveryHubs.source.json");
 const GENERATED = resolve(ROOT, "src/data/deliveryHubs.generated.json");
 const MINI = resolve(ROOT, "src/data/deliveryHubsMini.generated.json");
 const ZIPS_OUT = resolve(ROOT, "public/data/local-delivery-zips.json");
+const AREAS_OUT = resolve(ROOT, "public/data/local-delivery-areas.json");
 
 const fail = (msg) => {
   console.error(`build:hubs: ${msg}`);
@@ -179,6 +192,41 @@ const zipsJson = JSON.stringify({
   zips: packZips(inZone),
 });
 
+// One row per 3-digit prefix: the mean position of its ZIPs (of only the ZIPs
+// in a zone, when it has any), projected onto the map. Nothing smaller than a
+// prefix survives, so the file cannot place anyone more closely than that.
+const prefixes = new Map();
+for (const z of Object.values(zipcodes.codes)) {
+  if (z.country !== "US" || !/^\d{5}$/.test(z.zip) || !isContiguous(z.latitude, z.longitude)) continue;
+  const p = z.zip.slice(0, 3);
+  const g = prefixes.get(p) ?? { all: [], inZone: [] };
+  g.all.push(z);
+  if (inZoneByCoords(z.latitude, z.longitude, hubs, LOCAL_DELIVERY_RADIUS_MILES)) g.inZone.push(z);
+  prefixes.set(p, g);
+}
+const mean = (zs, k) => zs.reduce((sum, z) => sum + z[k], 0) / zs.length;
+const areaRows = [...prefixes.keys()].sort().flatMap((prefix) => {
+  const g = prefixes.get(prefix);
+  const at = g.inZone.length ? g.inZone : g.all;
+  const lat = mean(at, "latitude");
+  const lng = mean(at, "longitude");
+  const xy = projection([lng, lat]);
+  const hub = nearestHubIndex(lat, lng, hubs);
+  if (!xy || hub < 0) return [];
+  // The gap is read from where the whole prefix sits, so an out-of-zone ZIP in
+  // a prefix that is partly in a zone still gets an honest "about N miles".
+  const gap = zoneGapMiles(
+    milesBetween(mean(g.all, "latitude"), mean(g.all, "longitude"), hubs[hub].lat, hubs[hub].lng),
+    LOCAL_DELIVERY_RADIUS_MILES,
+  );
+  return [{ prefix, x: xy[0], y: xy[1], hub, gap }];
+});
+const areasJson = JSON.stringify({
+  radiusMiles: LOCAL_DELIVERY_RADIUS_MILES,
+  count: areaRows.length,
+  areas: packAreas(areaRows),
+});
+
 /* -------------------------------- write -------------------------------- */
 
 writeFileSync(SOURCE, JSON.stringify(hubs, null, 2) + "\n");
@@ -186,6 +234,7 @@ writeFileSync(GENERATED, JSON.stringify(generated, null, 2) + "\n");
 writeFileSync(MINI, JSON.stringify(mini) + "\n");
 mkdirSync(dirname(ZIPS_OUT), { recursive: true });
 writeFileSync(ZIPS_OUT, zipsJson + "\n");
+writeFileSync(AREAS_OUT, areasJson + "\n");
 
 const kb = (n) => `${(n / 1024).toFixed(1)} KB`;
 const genBytes = Buffer.byteLength(JSON.stringify(generated));
@@ -193,5 +242,6 @@ console.log(
   `build:hubs: ${hubs.length} hubs, ${inZone.length} ZIPs within ${LOCAL_DELIVERY_RADIUS_MILES} mi\n` +
     `  ${GENERATED.replace(ROOT + "/", "")}: ${kb(genBytes)} (${kb(gzipSync(JSON.stringify(generated)).length)} gzipped)\n` +
     `  ${MINI.replace(ROOT + "/", "")}: ${kb(Buffer.byteLength(JSON.stringify(mini)))}\n` +
-    `  ${ZIPS_OUT.replace(ROOT + "/", "")}: ${kb(zipsJson.length)} (${kb(gzipSync(zipsJson).length)} gzipped)`,
+    `  ${ZIPS_OUT.replace(ROOT + "/", "")}: ${kb(zipsJson.length)} (${kb(gzipSync(zipsJson).length)} gzipped)\n` +
+    `  ${AREAS_OUT.replace(ROOT + "/", "")}: ${areaRows.length} areas, ${kb(areasJson.length)} (${kb(gzipSync(areasJson).length)} gzipped)`,
 );

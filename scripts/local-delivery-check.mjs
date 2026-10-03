@@ -15,6 +15,20 @@
  *   a "no" keeps the approximate answer, and a click on "Use my location"
  *   then explains how to turn it on (iPhone and desktop wording); ?zip= and
  *   typing switch the automatic check off.
+ * - The live layer (src/components/delivery/deliveryTrucks.js, imported
+ *   after the page is idle): the prerendered HTML and the JS-off page do not
+ *   know it; with JS on, trucks run shortly after idle (about 34, fewer on a
+ *   phone) with no play or pause button, the "Simulated deliveries" counter
+ *   and the "Simulated. Not live tracking." legend, and moving them shifts
+ *   nothing. ZIP 33351 zooms the map to its area with a "You are here" pin
+ *   and "Show whole map" restores it; 99999 and other non-contiguous ZIPs do
+ *   not zoom; 59801 zooms and says how far the nearest zone is (a multiple of
+ *   5). An allowed device location zooms too. A hub tap (pointer or key)
+ *   shows a "Delivery hub" bubble, a truck tap a simulated cargo bubble, Esc
+ *   clears, and arrow keys move between the "Delivery hub N of 105" buttons.
+ *   With reduced motion emulated the trucks are parked and nothing moves,
+ *   with the "Animation is off…" line. The home page requests no truck
+ *   module, centroid file or zone file.
  * - vercel.json still allows geolocation for our own pages (the real site's
  *   Permissions-Policy, which vite preview does not send).
  * - No console errors.
@@ -38,6 +52,7 @@ const SHOTS = process.env.SHOTS_DIR;
 const MAP = JSON.parse(readFileSync("src/data/deliveryHubs.generated.json", "utf8"));
 const LABEL = `Map of the U.S. showing ${MAP.hubs.length} local delivery hubs`;
 const IN_ZONE = "You're in a local delivery zone.";
+const N = MAP.hubs.length;
 
 let failures = 0;
 const ok = (msg) => console.log(`ok   ${msg}`);
@@ -188,6 +203,271 @@ try {
     ok(`${width}: a bad ZIP is explained`);
 
     check(errors.length === 0, `${width}: no console errors ${errors.join(" | ")}`);
+    await context.close();
+  }
+
+
+  /* ---------------- trucks, zoom and tap to explore (JS on) ---------------- */
+  const mapSvg = (page) => page.locator(`svg[aria-label="${LABEL}"]`);
+  const viewW = (page) =>
+    mapSvg(page).evaluate((el) => Number(el.getAttribute("viewBox").split(/\s+/)[2]));
+  const liveReady = (page) => page.waitForSelector("svg [data-truck]", { state: "attached", timeout: 15000 });
+  const shownTrucks = (page) =>
+    page.evaluate(
+      () => [...document.querySelectorAll("svg [data-truck]")].filter((g) => Number(g.getAttribute("opacity")) > 0.3).length,
+    );
+  const truckState = (page) =>
+    page.evaluate(() =>
+      [...document.querySelectorAll("svg [data-truck]")]
+        .map((g) => `${g.getAttribute("transform")}|${g.getAttribute("opacity")}`)
+        .join(";"),
+    );
+  const bubble = (page) => page.locator("figure div[aria-hidden='true'].shadow-lift");
+  const layoutShift = (page) =>
+    page.addInitScript(() => {
+      window.__cls = 0;
+      new PerformanceObserver((list) => {
+        for (const e of list.getEntries()) if (!e.hadRecentInput) window.__cls += e.value;
+      }).observe({ type: "layout-shift", buffered: true });
+    });
+
+  for (const width of [360, 1440]) {
+    const { context, page, errors } = await newPage(width, { init: () => {
+      window.__cls = 0;
+      new PerformanceObserver((list) => {
+        for (const e of list.getEntries()) if (!e.hadRecentInput) window.__cls += e.value;
+      }).observe({ type: "layout-shift", buffered: true });
+    } });
+    const t0 = Date.now();
+    await liveReady(page);
+    ok(`${width}: trucks are on the map ${Date.now() - t0} ms after load (imported when idle)`);
+    await page.waitForTimeout(800);
+    const shown = await shownTrucks(page);
+    const cap = width < 520 ? 22 : 34;
+    check(shown >= 8 && shown <= cap + 1, `${width}: ${shown} trucks running (at most ${cap + 1})`);
+    check(
+      (await page.locator("figure").getByRole("button", { name: /play|pause/i }).count()) === 0,
+      `${width}: no play or pause button`,
+    );
+    check((await page.locator("figure").getByText("Simulated. Not live tracking.").count()) === 1, `${width}: legend says "Simulated. Not live tracking."`);
+    check((await page.locator("figure").getByText("Simulated deliveries").count()) === 1, `${width}: the "Simulated deliveries" counter is up`);
+    const count = Number(await page.locator("figure b").first().textContent());
+    check(count > 0, `${width}: the pre-roll already counts deliveries (${count})`);
+    const named = await mapSvg(page).locator("title, [aria-label]:not(svg)").count();
+    check(named === 0, `${width}: the map still has one text alternative`);
+    check(
+      (await page.locator("figure svg [data-trucks], figure svg [data-houses], figure svg [data-you-are-here]").evaluateAll((els) => els.every((e) => e.getAttribute("aria-hidden") === "true"))),
+      `${width}: trucks, houses and the pin are aria-hidden`,
+    );
+    const hubBtns = page.locator('figure [aria-label^="Delivery hub "]');
+    check((await hubBtns.count()) === N, `${width}: ${N} hub buttons`);
+    check((await page.locator(`[aria-label="Delivery hub 1 of ${N}"]`).count()) === 1, `${width}: labelled "Delivery hub 1 of ${N}"`);
+    const bh = await hubBtns.first().evaluate((b) => b.getBoundingClientRect().height);
+    check(bh >= 44, `${width}: hub buttons are ${bh}px tall`);
+    const cls = await page.evaluate(() => window.__cls);
+    check(cls < 0.01, `${width}: layout shift ${cls.toFixed(4)} through load and trucks`);
+    await shot(page, `${width}-trucks.png`);
+
+    // Zoom: a zone ZIP, then back out.
+    check((await viewW(page)) === 975, `${width}: starts on the whole map`);
+    await checkZip(page, "33351");
+    await result(page).getByText(IN_ZONE).waitFor();
+    check(
+      (await result(page).getByText("A truck is heading to a house near you.").count()) === 1,
+      `${width}: an in-zone answer says a truck is heading to a house`,
+    );
+    await page.waitForFunction(() => Number(document.querySelector("svg[role=img]").getAttribute("viewBox").split(" ")[2]) < 200, null, { timeout: 5000 });
+    const zw = await viewW(page);
+    check(zw >= 130 && zw <= 400, `${width}: 33351 zooms to its area (${Math.round(zw)} units wide)`);
+    const pinShown = await page.locator("figure svg [data-you-are-here]").evaluate((g) => g.style.display !== "none");
+    check(pinShown, `${width}: "You are here" pin is up`);
+    const back = page.getByRole("button", { name: "Show whole map" });
+    await back.waitFor();
+    check(((await back.boundingBox())?.height ?? 0) >= 44, `${width}: Show whole map is a 44px target`);
+    await page.waitForTimeout(900);
+    const zoomedPins = await page.evaluate(() => document.querySelectorAll("svg [data-trucks] [data-truck]").length);
+    check(zoomedPins > 0, `${width}: trucks keep running while zoomed`);
+    await shot(page, `${width}-zoomed-in-zone.png`);
+    await back.click();
+    await page.waitForFunction(() => Number(document.querySelector("svg[role=img]").getAttribute("viewBox").split(" ")[2]) > 974, null, { timeout: 5000 });
+    check((await page.getByRole("button", { name: "Show whole map" }).count()) === 0 || !(await page.getByRole("button", { name: "Show whole map" }).isVisible()), `${width}: Show whole map hides again`);
+    ok(`${width}: Show whole map restores the full map`);
+
+    // Out of zone, but in the lower 48: zoom plus the distance (a multiple of 5).
+    await checkZip(page, "59801");
+    await result(page).getByText("isn’t in a local delivery zone yet").waitFor();
+    const gap = /Nearest delivery zone is about (\d+) miles away\./.exec(await result(page).textContent());
+    check(gap && Number(gap[1]) % 5 === 0 && Number(gap[1]) >= 5, `${width}: 59801 says how far the nearest zone is (${gap?.[1]} miles)`);
+    await page.waitForFunction(() => Number(document.querySelector("svg[role=img]").getAttribute("viewBox").split(" ")[2]) < 975, null, { timeout: 5000 });
+    ok(`${width}: 59801 zooms too, with no truck sent`);
+    await page.getByRole("button", { name: "Show whole map" }).click();
+
+    // Not in the lower 48: no zoom, no pin, no distance.
+    await page.waitForFunction(() => Number(document.querySelector("svg[role=img]").getAttribute("viewBox").split(" ")[2]) > 974, null, { timeout: 5000 });
+    await checkZip(page, "99999");
+    await result(page).getByText("isn’t in a local delivery zone yet").waitFor();
+    await page.waitForTimeout(900);
+    check((await viewW(page)) === 975, `${width}: 99999 does not zoom`);
+    check(!/Nearest delivery zone/.test(await result(page).textContent()), `${width}: 99999 gets no distance line`);
+    check(
+      !(await page.locator("figure svg [data-you-are-here]").evaluate((g) => g.style.display !== "none")),
+      `${width}: 99999 shows no pin`,
+    );
+
+    // Tap a hub (pointer), then Esc.
+    await page.locator("figure").scrollIntoViewIfNeeded();
+    const box = await mapSvg(page).boundingBox();
+    const isolated = MAP.hubs.findIndex((h, i) =>
+      MAP.hubs.every((o, j) => i === j || Math.hypot(o.x - h.x, o.y - h.y) > 45) && h.x > 150 && h.x < 850,
+    );
+    const hh = MAP.hubs[isolated];
+    const pinHalf = 10 * (width < 640 ? 1.5 : width < 1024 ? 1.3 : 1.2) * (box.width / 975);
+    await page.mouse.click(box.x + (hh.x / 975) * box.width, box.y + (hh.y / 610) * box.height - pinHalf);
+    await bubble(page).first().waitFor({ state: "visible" });
+    const said = await bubble(page).first().textContent();
+    check(/Delivery hub/.test(said) && /simulated deliver/i.test(said), `${width}: a hub tap shows "${said}"`);
+    check(
+      new RegExp(`^Delivery hub \\d+ of ${N}\\.`).test((await page.locator("figure [role=status]").textContent()).trim()),
+      `${width}: the tap is announced in the live region`,
+    );
+    check(!/Approximate zone/.test(said) && !/[A-Z][a-z]+, [A-Z]{2}/.test(said), `${width}: the bubble names no place`);
+    await shot(page, `${width}-hub-tap.png`);
+    await page.keyboard.press("Escape");
+    await bubble(page).first().waitFor({ state: "hidden" });
+    ok(`${width}: Esc clears the bubble`);
+
+    // Tap a truck.
+    let truckSaid = null;
+    for (let tries = 0; tries < 8 && !truckSaid; tries++) {
+      const spot = await page.evaluate(() => {
+        const svgEl = document.querySelector("svg[role=img]").getBoundingClientRect();
+        const t = [...document.querySelectorAll("svg [data-truck]")].find((g) => {
+          const r = g.getBoundingClientRect();
+          return Number(g.getAttribute("opacity")) > 0.9 && r.width > 4 && r.left > svgEl.left + 8 && r.right < svgEl.right - 8;
+        });
+        if (!t) return null;
+        const r = t.getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      });
+      if (!spot) {
+        await page.waitForTimeout(300);
+        continue;
+      }
+      await page.mouse.click(spot.x, spot.y);
+      await page.waitForTimeout(80);
+      const text = (await bubble(page).first().textContent().catch(() => "")) ?? "";
+      if (/Simulated$/.test(text) && (await bubble(page).first().isVisible())) truckSaid = text;
+    }
+    check(truckSaid && /(tire|wheel|set of 4)/i.test(truckSaid), `${width}: a truck tap shows a simulated cargo bubble ("${truckSaid}")`);
+    await page.keyboard.press("Escape");
+
+    // Keyboard: one tab stop, arrows rove, Enter selects.
+    await page.locator(`[aria-label="Delivery hub 1 of ${N}"]`).focus();
+    await page.keyboard.press("ArrowRight");
+    check(
+      (await page.evaluate(() => document.activeElement?.getAttribute("aria-label"))) === `Delivery hub 2 of ${N}`,
+      `${width}: ArrowRight moves to the next hub`,
+    );
+    check(
+      (await page.locator('figure [aria-label^="Delivery hub "][tabindex="0"]').count()) === 1,
+      `${width}: roving tabindex keeps one hub in the tab order`,
+    );
+    await page.keyboard.press("End");
+    check(
+      (await page.evaluate(() => document.activeElement?.getAttribute("aria-label"))) === `Delivery hub ${N} of ${N}`,
+      `${width}: End goes to the last hub`,
+    );
+    await page.keyboard.press("Enter");
+    await bubble(page).first().waitFor({ state: "visible" });
+    check(
+      (await page.locator(`[aria-label="Delivery hub ${N} of ${N}"]`).getAttribute("aria-pressed")) === "true",
+      `${width}: Enter on a hub selects it (aria-pressed)`,
+    );
+    await page.keyboard.press("Escape");
+    check(errors.length === 0, `${width}: live layer: no console errors ${errors.join(" | ")}`);
+    await context.close();
+  }
+
+  {
+    // Reduced motion: parked trucks, a few houses, nothing moves.
+    for (const width of [360, 1440]) {
+      const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
+      const page = await context.newPage();
+      await page.route((url) => url.host !== local, (r) => r.fulfill({ status: 200, body: "" }));
+      await page.route("**/api/**", (r) => r.fulfill({ status: 404, body: "" }));
+      await page.addInitScript(() => {
+        window.__cls = 0;
+        new PerformanceObserver((list) => {
+          for (const e of list.getEntries()) if (!e.hadRecentInput) window.__cls += e.value;
+        }).observe({ type: "layout-shift", buffered: true });
+      });
+      await page.goto(BASE + "/local-delivery", { waitUntil: "load" });
+      await liveReady(page);
+      await page.waitForTimeout(500);
+      const a = await truckState(page);
+      await page.waitForTimeout(1500);
+      const b = await truckState(page);
+      const parked = await shownTrucks(page);
+      check(parked >= 10, `${width}: reduced motion: ${parked} parked trucks`);
+      check(a === b, `${width}: reduced motion: nothing moved in 1.5 s`);
+      const houses = await page.evaluate(() => [...document.querySelectorAll("svg [data-houses] > g")].filter((g) => Number(g.getAttribute("opacity")) > 0.5).length);
+      check(houses >= 3 && houses <= 12, `${width}: reduced motion: ${houses} still houses`);
+      check(
+        (await page.locator("figure").getByText("Animation is off because your device asks for reduced motion.").count()) === 1,
+        `${width}: reduced motion: says the animation is off`,
+      );
+      check((await page.locator("figure").getByText("Simulated deliveries").isVisible().catch(() => false)) === false, `${width}: reduced motion: no counter`);
+      await checkZip(page, "33351");
+      await result(page).getByText(IN_ZONE).waitFor();
+      await page.waitForFunction(() => Number(document.querySelector("svg[role=img]").getAttribute("viewBox").split(" ")[2]) < 200, null, { timeout: 2000 });
+      ok(`${width}: reduced motion: the zoom still happens, at once`);
+      const c = await truckState(page);
+      await page.waitForTimeout(800);
+      check(c === (await truckState(page)), `${width}: reduced motion: still nothing moves after the zoom`);
+      check((await page.evaluate(() => window.__cls)) < 0.01, `${width}: reduced motion: no layout shift`);
+      await shot(page, `${width}-reduced-motion.png`);
+      await context.close();
+    }
+  }
+
+  {
+    // The prerendered page and the JS-off page know nothing of the live layer.
+    const html = readFileSync("dist/local-delivery.html", "utf8");
+    check(!/deliveryTrucks|deliverySim|local-delivery-areas/.test(html), "prerendered /local-delivery does not reference the truck module or the centroid file");
+    check(!/Delivery hub \d+ of/.test(html) && !/data-truck/.test(html), "prerendered /local-delivery has no hub buttons or trucks");
+    const { context, page } = await newPage(360, { js: false });
+    check((await page.locator("[data-truck], [data-you-are-here]").count()) === 0, "JS off: no trucks");
+    await context.close();
+  }
+
+  {
+    // The home page card stays static: no truck module, centroids or zone file, ever.
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await context.newPage();
+    const seen = [];
+    page.on("request", (r) => seen.push(r.url()));
+    await page.route((url) => url.host !== local, (r) => r.fulfill({ status: 200, body: "" }));
+    await page.route("**/api/**", (r) => r.fulfill({ status: 404, body: "" }));
+    await page.goto(BASE + "/", { waitUntil: "load" });
+    await page.waitForTimeout(3500); // well past idle
+    await page.mouse.wheel(0, 3000);
+    await page.waitForTimeout(800);
+    const bad = seen.filter((u) => /deliveryTrucks|deliverySim|local-delivery-areas|local-delivery-zips|LocalDeliveryPage/.test(u));
+    check(bad.length === 0, `home page: no truck module, centroid or zone file requested (${bad.join(", ") || "none of " + seen.length + " requests"})`);
+    check((await page.locator("[data-truck], [data-trucks]").count()) === 0, "home page: no trucks in the DOM");
+    await context.close();
+  }
+
+  {
+    // The module is fetched only after load, never in the critical path.
+    const { context, page } = await newPage(1440);
+    await liveReady(page);
+    const late = await page.evaluate(() => {
+      const nav = performance.getEntriesByType("navigation")[0];
+      const res = performance.getEntriesByType("resource").find((r) => /deliveryTrucks/.test(r.name));
+      return res && nav ? res.startTime - nav.loadEventStart : null;
+    });
+    check(late !== null && late >= -5, `the truck module is requested after the load event (${late?.toFixed(0)} ms after)`);
     await context.close();
   }
 

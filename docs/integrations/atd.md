@@ -112,6 +112,8 @@ Behaviour that is real and tested (`npm run test:api`):
     (2026-10-03). The page mentions no fee either way.
   - The go-live: when, and which hubs first.
   - Re-run `npm run build:hubs` after any change to the hub list or radius.
+    It rebuilds the map, the zone ZIPs and the ZIP-prefix centroids the map's
+    area zoom reads (`public/data/local-delivery-areas.json`).
 
 ## Questions for the ATD rep
 

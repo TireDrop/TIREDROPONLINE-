@@ -7,13 +7,20 @@ import { readFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 
 import {
+  LOCAL_DELIVERY_AREAS_URL,
   LOCAL_DELIVERY_RADIUS_MILES,
   LOCAL_DELIVERY_ZIPS_URL,
+  areaForZip,
   inZoneByCoords,
+  isContiguous,
   isZipInZone,
   milesBetween,
+  nearestHubIndex,
   nearestHubMiles,
+  packAreas,
   packZips,
+  projectLower48,
+  zoneGapMiles,
 } from "./localDelivery.js";
 import { FOOTER_COLUMNS } from "./business.js";
 
@@ -22,6 +29,9 @@ const SOURCE = JSON.parse(read("./deliveryHubs.source.json"));
 const GENERATED = JSON.parse(read("./deliveryHubs.generated.json"));
 const ZIPS_RAW = read("../../public/data/local-delivery-zips.json");
 const ZONES = JSON.parse(ZIPS_RAW);
+const AREAS_RAW = read("../../public/data/local-delivery-areas.json");
+const AREAS = JSON.parse(AREAS_RAW);
+const TRUCKS = read("../components/delivery/deliveryTrucks.js");
 const PAGE = read("../pages/shipping/LocalDeliveryPage.jsx");
 const APP = read("../App.jsx");
 const SHIPPING = read("../pages/ShippingPage.jsx");
@@ -158,4 +168,116 @@ test("page copy: no partner, no places, no dates, speeds, fees or phone", () => 
     PAGE,
     /You're in a local delivery zone\. Local delivery is rolling out; order now and we ship free while it launches\./,
   );
+});
+
+/* ----------------------------- the area zoom ----------------------------- */
+
+test("zoneGapMiles: past the zone edge, to the nearest 5, never under 5", () => {
+  assert.equal(zoneGapMiles(40.1), 5); // "0 miles away" would contradict "not in a zone"
+  assert.equal(zoneGapMiles(52), 10); // 12 rounds down to 10
+  assert.equal(zoneGapMiles(53), 15); // 13 rounds up to 15
+  assert.equal(zoneGapMiles(58), 20);
+  assert.equal(zoneGapMiles(240.4), 200);
+  assert.equal(zoneGapMiles(90, 50), 40);
+  assert.equal(zoneGapMiles(Infinity), null); // no valid hub to measure to
+  assert.equal(zoneGapMiles(Number.NaN), null);
+});
+
+test("nearestHubIndex: the closest hub, -1 for bad input", () => {
+  const hubs = [{ lat: 33.45, lng: -112.07 }, { lat: 25.77, lng: -80.19 }, { lat: Number.NaN, lng: 0 }];
+  assert.equal(nearestHubIndex(26, -80, hubs), 1);
+  assert.equal(nearestHubIndex(33, -111, hubs), 0);
+  assert.equal(nearestHubIndex(Number.NaN, 0, hubs), -1);
+  assert.equal(nearestHubIndex(33, -111, []), -1);
+  assert.equal(nearestHubIndex(33, -111, null), -1);
+});
+
+test("projectLower48 reproduces the build's map position for every hub", () => {
+  for (const h of GENERATED.hubs) {
+    const [x, y] = projectLower48(h.lat, h.lng);
+    assert.ok(Math.abs(x - h.x) <= 0.2 && Math.abs(y - h.y) <= 0.2, `${h.x},${h.y} vs ${x},${y}`);
+  }
+  assert.equal(projectLower48(Number.NaN, -100), null);
+  assert.equal(projectLower48(95, -100), null);
+});
+
+test("isContiguous: the lower 48 only", () => {
+  assert.ok(isContiguous(26.12, -80.25)); // South Florida
+  assert.ok(isContiguous(47.6, -122.3)); // Seattle
+  assert.ok(!isContiguous(61.2, -149.9)); // Anchorage
+  assert.ok(!isContiguous(21.3, -157.8)); // Honolulu
+  assert.ok(!isContiguous(18.4, -66.1)); // San Juan
+});
+
+test("packAreas and areaForZip round-trip, by prefix", () => {
+  const packed = packAreas([
+    { prefix: "333", x: 700.12, y: 500.5, hub: 3, gap: 12 },
+    { prefix: "334", x: 1, y: 2, hub: 104, gap: 5 },
+  ]);
+  assert.equal(packed, "333:700.1:500.5:3:2;334:1.0:2.0:104:1;");
+  assert.deepEqual(areaForZip("33351", { areas: packed }), { x: 700.1, y: 500.5, hub: 3, gap: 10 });
+  assert.deepEqual(areaForZip("33401-1234", { areas: packed }), { x: 1, y: 2, hub: 104, gap: 5 });
+  for (const bad of ["33501", "99999", "123", "", null, undefined]) assert.equal(areaForZip(bad, { areas: packed }), null, String(bad));
+  assert.equal(areaForZip("33351", null), null);
+  assert.equal(areaForZip("33351", { areas: 5 }), null);
+  assert.equal(areaForZip("33351", { areas: "333:oops;" }), null);
+  // A prefix is matched whole: "33" never matches "333".
+  assert.equal(areaForZip("33301", { areas: "233:1:1:0:1;" }), null);
+});
+
+test("areas file: contiguous prefixes only, area-sized, inside the map and the hub list", () => {
+  assert.equal(AREAS.radiusMiles, LOCAL_DELIVERY_RADIUS_MILES);
+  assert.equal(LOCAL_DELIVERY_AREAS_URL, "/data/local-delivery-areas.json");
+  assert.ok(AREAS_RAW.length < 22 * 1024, `${AREAS_RAW.length} bytes`);
+  assert.ok(gzipSync(AREAS_RAW).length < 10 * 1024);
+  const rows = AREAS.areas.split(";").filter(Boolean);
+  assert.equal(rows.length, AREAS.count);
+  for (const row of rows) {
+    assert.match(row, /^\d{3}:\d+\.\d:\d+\.\d:\d+:\d+$/);
+    const [prefix, x, y, hub, gap] = row.split(":");
+    assert.ok(+x >= 0 && +x <= 975 && +y >= 0 && +y <= 610, row);
+    assert.ok(+hub < GENERATED.hubs.length, row);
+    assert.ok(+gap >= 1, row);
+    // Not Alaska (995-999), Hawaii (967-968) or the territories (006-009, 969).
+    assert.ok(!/^(99[5-9]|96[789]|00[6-9])/.test(prefix), prefix);
+  }
+  // Nothing finer than a 3-digit prefix: no 5-digit ZIP appears anywhere in it.
+  assert.doesNotMatch(AREAS_RAW, /\d{5}/);
+});
+
+test("areas file agrees with the zone ZIPs: in-zone ZIPs land inside their hub's halo", () => {
+  for (const zip of ["33351", "10001", "90001", "60601", "30301"]) {
+    const area = areaForZip(zip, AREAS);
+    assert.ok(area, zip);
+    assert.equal(isZipInZone(zip, ZONES), true, zip);
+    const hub = GENERATED.hubs[area.hub];
+    assert.ok(Math.hypot(area.x - hub.x, area.y - hub.y) <= GENERATED.haloRadius * 1.6, zip);
+  }
+  // Missoula is nowhere near a hub: a real distance, not a clamp.
+  const far = areaForZip("59801", AREAS);
+  assert.equal(isZipInZone("59801", ZONES), false);
+  assert.ok(far.gap >= 10 && far.gap % 5 === 0, JSON.stringify(far));
+  for (const zip of ["99501", "96801", "00601", "99999"]) assert.equal(areaForZip(zip, AREAS), null, zip);
+});
+
+test("live layer: no hub names, no partner, no dates, speeds or fees in what it says", () => {
+  const code = TRUCKS.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  for (const { city } of SOURCE) assert.ok(!code.includes(city), city);
+  assert.doesNotMatch(AREAS_RAW, new RegExp(SOURCE.map((h) => h.city).join("|")));
+  for (const re of [/\bATD\b/, /American Tire/i, /same[- ]day/i, /next[- ]day/i, /\bfees?\b/i, /\$\d/, /safe to drive/i]) {
+    assert.doesNotMatch(code, re, String(re));
+  }
+  assert.match(code, /Simulated\. Not live tracking\./);
+  assert.match(code, /Animation is off because your device asks for reduced motion\./);
+  assert.match(code, /Delivery hub \$\{i \+ 1\} of \$\{N\}/);
+});
+
+test("page: the truck layer is a lazy import, after idle, and the page never imports it statically", () => {
+  assert.match(PAGE, /import\("\.\.\/\.\.\/components\/delivery\/deliveryTrucks\.js"\)/);
+  assert.doesNotMatch(PAGE, /^import .*deliveryTrucks/m);
+  assert.doesNotMatch(PAGE, /^import .*deliverySim/m);
+  assert.match(PAGE, /requestIdleCallback/);
+  // The home page card stays static: it must not know about trucks or the zoom.
+  const HOME = read("../pages/HomePage.jsx");
+  assert.doesNotMatch(HOME, /deliveryTrucks|deliverySim|local-delivery-areas/);
 });
