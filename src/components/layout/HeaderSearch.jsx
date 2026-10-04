@@ -361,11 +361,15 @@ export default function HeaderSearch({
         placeholder="Search sizes, brands, services, guides — 225/45R17"
         className="field h-11 w-full rounded-full pl-10 pr-24 text-[15px]"
       />
+      {/* The button is the input's full 44px height so it is a proper tap
+          target; the pill inside keeps the 36px look (4px inset all round). */}
       <button
         type="submit"
-        className="btn-primary btn-sm absolute right-1 top-1 h-9 min-h-0 rounded-full px-4"
+        className="group absolute right-0 top-0 flex h-11 items-center justify-end rounded-full pr-1"
       >
-        Search
+        <span className="btn-primary btn-sm h-9 min-h-0 rounded-full px-4 group-hover:bg-dive group-hover:shadow-none">
+          Search
+        </span>
       </button>
 
       {showing && (
