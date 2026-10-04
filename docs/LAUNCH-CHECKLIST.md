@@ -21,7 +21,7 @@ _Last updated: 2026-10-04 (helpcenter.kmcwheels.com listed as a maker resource o
   - [ ] Justin: a remembered vehicle with a door-jamb size that the partial size contradicts still shows "Not your size": drop the door-jamb size in that case, or keep it?
 - [x] ~~Search: "flat tire" shows Tire Repair again (new flat-tire articles had pushed it out of the typeahead); a page's keyword phrase now counts like a title match~~ (`bcaef07`, shipped to main 2026-10-02)
 - [x] ~~Windows: the build and every browser check now run on a Windows PC (file-URL imports, vite preview start/stop, CSP test line endings)~~ (`75b8ec3`, `07bb9fe`, `c994784`, shipped to main 2026-10-02)
-- [x] ~~Is `helpcenter.kmcwheels.com` a resource or a competitor? (`src/lib/competitors.js`)~~ (fe153e7 on preview/kmc-resource, Claude chose: resource because it is the wheel maker's own support center, not a shop; check:sources warning gone)
+- [x] ~~Is `helpcenter.kmcwheels.com` a resource or a competitor? (`src/lib/competitors.js`)~~ (ba15a9d on preview/kmc-resource, Claude chose: resource because it is the wheel maker's own support center, not a shop; check:sources warning gone)
 - [x] ~~check:forms 271s → 83s, same assertions (113 checks, 4 at a time; FORMS_SHARD=k/n to split)~~ (`31b614a`, branch preview/forms-split)
 - [x] ~~Resources only: every competitor citation/link replaced with maker, AAA or government sources~~ (`7754330`, shipped to main 2026-10-02)
 - [x] ~~Form fix: every form keeps typed values, plus the /schedule early-submit bug~~ (`2b2bd66`)
