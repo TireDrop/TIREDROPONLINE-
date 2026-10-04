@@ -287,11 +287,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tiredroponline.com/compare</loc>
-    <lastmod>2026-10-02</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://tiredroponline.com/contact</loc>
     <lastmod>2026-09-29</lastmod>
     <priority>0.8</priority>
@@ -640,11 +635,6 @@
     <loc>https://tiredroponline.com/privacy</loc>
     <lastmod>2026-10-03</lastmod>
     <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://tiredroponline.com/reviews</loc>
-    <lastmod>2026-09-29</lastmod>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tiredroponline.com/schedule</loc>

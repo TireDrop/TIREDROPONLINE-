@@ -115,8 +115,19 @@ export function navigateRoutes() {
  *
  * /track (Track My Order) is a lookup form with nothing to rank, and it is
  * noindex too. So is /search: a results page, different for every query.
+ *
+ * /compare (empty until tires are queued, about 1.6k characters) and /reviews
+ * (no reviews of its own) are thin and noindex too, with "follow" so links to
+ * them still work (Justin, 2026-10-04).
  */
-export const EXCLUDE = new Set(["/cart", "/checkout", "/track", "/search"]);
+export const EXCLUDE = new Set([
+  "/cart",
+  "/checkout",
+  "/track",
+  "/search",
+  "/compare",
+  "/reviews",
+]);
 
 /**
  * Learn guides and blog posts, from the Markdown in src/content, parsed by the

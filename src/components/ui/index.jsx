@@ -233,10 +233,21 @@ function shopStubNode() {
  * Routes that render at 200 but must never be indexed. A cart and a checkout
  * are empty for every crawler and have nothing to rank; listing them here
  * rather than passing a prop from each page keeps the decision in one place.
+ * /compare (an empty comparison tool until tires are queued) and /reviews (no
+ * reviews of its own) are thin, so they are here too: "noindex, follow" keeps
+ * every link to them working. Keep this list and EXCLUDE in
+ * scripts/generate-seo-files.mjs in step.
  * Product and service pages noindex themselves when the slug matches nothing
  * (see graphFor), so they are not listed here.
  */
-const NOINDEX_ROUTES = ["/cart", "/checkout", "/track", "/search"];
+const NOINDEX_ROUTES = [
+  "/cart",
+  "/checkout",
+  "/track",
+  "/search",
+  "/compare",
+  "/reviews",
+];
 
 /** Routes where the physical shop, not the web store, is the subject. */
 const SHOP_ROUTES = [
