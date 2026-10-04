@@ -105,7 +105,7 @@ export const CITY_PAGES = [
     nearby: ["plantation-fl", "tamarac-fl", "weston-fl", "davie-fl"],
     seoTitle: "Mobile Tire Installation in Sunrise, FL",
     description:
-      "Tires from TireDrop fitted at your home or work in Sunrise, FL by the van from our Oakland Park Blvd shop. Sunrise ZIPs, roads and local questions answered.",
+      "Tires from TireDrop fitted at your home or work in Sunrise, FL by the Extreme Tires van from our Oakland Park Blvd shop. Sunrise ZIPs, roads and local answers.",
   },
   {
     slug: "plantation-fl",
@@ -213,7 +213,7 @@ export const CITY_PAGES = [
     nearby: ["sunrise-fl", "coral-springs-fl"],
     seoTitle: "Mobile Tire Installation in Tamarac, FL",
     description:
-      "TireDrop tires fitted at your Tamarac, FL home or gated community by the van from our Sunrise shop. How the ZIP check works and what to have ready.",
+      "TireDrop tires fitted at your Tamarac, FL home or gated community by the Extreme Tires van from Sunrise. How the ZIP check works and what to have ready.",
   },
   {
     slug: "coral-springs-fl",
@@ -315,7 +315,7 @@ export const CITY_PAGES = [
     nearby: ["plantation-fl", "weston-fl", "fort-lauderdale-fl", "sunrise-fl"],
     seoTitle: "Mobile Tire Installation in Davie, FL",
     description:
-      "Tires bought on TireDrop, fitted at your Davie, FL home or workplace by our van. Davie ZIPs from 33314 to 33331, puncture repair and what the van does.",
+      "Tires bought on TireDrop, fitted at your Davie, FL home or workplace by our Extreme Tires van. Davie ZIPs 33314 to 33331, puncture repair, what the van does.",
   },
   {
     slug: "fort-lauderdale-fl",
@@ -431,7 +431,7 @@ export const CITY_PAGES = [
     nearby: ["sunrise-fl", "davie-fl"],
     seoTitle: "Mobile Tire Installation in Weston, FL",
     description:
-      "Bought tires on TireDrop? The van from our Sunrise shop fits them at your Weston, FL home or workplace. Weston ZIPs, gate and HOA tips, and what the van does.",
+      "Bought tires on TireDrop? The Extreme Tires van fits them at your Weston, FL home or workplace. Weston ZIPs, gate and HOA tips, and what the van does.",
   },
 ];
 
