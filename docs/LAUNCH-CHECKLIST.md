@@ -9,7 +9,7 @@ done items. Show Justin the updated list, in this style, whenever it changes.
 ## Site fixes (Claude)
 - [x] ~~Gallery taken off the site until there are photos (page parked in src/_parked/gallery, /gallery 302s to /about, out of the sitemap)~~ (`b7eef20`, branch preview/gallery-off)
 - [ ] Bring the Gallery back when there are real photos (restore steps in src/_parked/gallery/README.md; waiting on Justin's photos)
-_Last updated: 2026-10-04 (Gallery taken off the site until there are photos, /gallery 302s to /about; Home "How it works" animates itself, CSS only and reduced-motion safe; Google fonts self-hosted: no third-party font requests, 118 to 82 KB, phone home layout shift 0.20 to 0, LCP level in the lab; translate proxy now protects prices and sizes at startup; locator names your city or neighborhood (live, eb82ff5); header phone tap targets raised to 44 px (live, 9998032); door-jamb size fix and KMC help center resource live (822e5fc); Google "Request indexing" retried (Justin))_
+_Last updated: 2026-10-04 (Trust strip and returns policy drafts written, nothing live, waiting on D1 (preview/wave1-trust-draft); Gallery taken off the site until there are photos, /gallery 302s to /about; Home "How it works" animates itself, CSS only and reduced-motion safe; Google fonts self-hosted: no third-party font requests, 118 to 82 KB, phone home layout shift 0.20 to 0, LCP level in the lab; translate proxy now protects prices and sizes at startup; locator names your city or neighborhood (live, eb82ff5); header phone tap targets raised to 44 px (live, 9998032); door-jamb size fix and KMC help center resource live (822e5fc); Google "Request indexing" retried (Justin))_
 
 ## Site fixes (Claude)
 - [x] ~~Home "How it works" section animates itself (CSS only, reduced-motion safe)~~ (`0c2f1e1`, shipped to main: cursor click, thread fills with a parcel riding it, check, wrench turn, soft pulse, 9s replay; only while on screen)
@@ -119,6 +119,7 @@ _Last updated: 2026-10-04 (Gallery taken off the site until there are photos, /g
 - [ ] Switch the CSP from report-only to enforced after a week of clean `[csp]` logs (docs/ops/deploy.md, "Security headers") → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C9)
 - [x] ~~NHTSA lookup timeout~~ (c541339)
 - [ ] Returns window + warranty/road-hazard links → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D1)
+- [ ] Trust strip and returns policy drafts ready, waiting on D1 answers (competitor gap 2): docs/drafts/trust-and-returns.md (branch preview/wave1-trust-draft, SHA pending)
 - [x] ~~"Continental US" wording (~40 places) → "48 contiguous states + DC"~~ (c541339)
 - [ ] Shopify theme copy still says "continental United States" (shop. redirects to the main site, so it does not render; update the draft theme only if the redirect ever comes off) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C10)
 - [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A9)

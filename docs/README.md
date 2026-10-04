@@ -50,6 +50,10 @@ the code fits together is in the root [README](../README.md).
 - [2026-10-04-seo-indexing.md](audits/2026-10-04-seo-indexing.md): sitemap, robots, titles, canonicals, JSON-LD and internal links checked against a real build; URL pattern counts, what changed, and what was left for Justin.
 - [2026-10-04-city-depth.md](audits/2026-10-04-city-depth.md): Tamarac, Weston, Coral Springs and Davie city pages deepened from verified facts (source per fact), where the van brand is named, and /compare and /reviews set to noindex.
 
+## drafts/: ready-to-drop-in copy, not live
+
+- [trust-and-returns.md](drafts/trust-and-returns.md): the returns and refunds policy, a four-tile trust strip and the file-by-file change map, all with placeholders until Justin answers D1. Read it before touching the returns terms or adding trust tiles to tire pages.
+
 ## archive/: retired, kept for the record
 
 Each file starts with a "Why retired" line. Do not act on these.
