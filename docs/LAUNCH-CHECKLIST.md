@@ -9,7 +9,7 @@ done items. Show Justin the updated list, in this style, whenever it changes.
 ## Site fixes (Claude)
 - [x] ~~Gallery taken off the site until there are photos (page parked in src/_parked/gallery, /gallery 302s to /about, out of the sitemap)~~ (`b7eef20`, branch preview/gallery-off)
 - [ ] Bring the Gallery back when there are real photos (restore steps in src/_parked/gallery/README.md; waiting on Justin's photos)
-_Last updated: 2026-10-04 (Gallery taken off the site until there are photos, /gallery 302s to /about; Home "How it works" animates itself, CSS only and reduced-motion safe; Google fonts self-hosted: no third-party font requests, 118 to 82 KB, phone home layout shift 0.20 to 0, LCP level in the lab; translate proxy now protects prices and sizes at startup; locator names your city or neighborhood (live, eb82ff5); header phone tap targets raised to 44 px (live, 9998032); door-jamb size fix and KMC help center resource live (822e5fc); Google "Request indexing" retried (Justin))_
+_Last updated: 2026-10-05 (Local city and neighborhood page plan, top 25 ranked, plan only; Gallery taken off the site until there are photos, /gallery 302s to /about; Home "How it works" animates itself, CSS only and reduced-motion safe; Google fonts self-hosted: no third-party font requests, 118 to 82 KB, phone home layout shift 0.20 to 0, LCP level in the lab; translate proxy now protects prices and sizes at startup; locator names your city or neighborhood (live, eb82ff5); header phone tap targets raised to 44 px (live, 9998032); door-jamb size fix and KMC help center resource live (822e5fc); Google "Request indexing" retried (Justin))_
 
 ## Site fixes (Claude)
 - [x] ~~Home "How it works" section animates itself (CSS only, reduced-motion safe)~~ (`0c2f1e1`, shipped to main: cursor click, thread fills with a parcel riding it, check, wrench turn, soft pulse, 9s replay; only while on screen)
@@ -169,6 +169,8 @@ _Last updated: 2026-10-04 (Gallery taken off the site until there are photos, /g
 - [x] ~~Store-wide search with typeahead: sizes in any spelling, vehicles, brands/types, tires, 91 pages; /search results page; GA4 `search` + `search_suggestion`~~ (preview/search 1214d45, shipped to main 2026-10-01)
 
 ## Content & SEO: Blog + Learn (Claude; plan in docs/prompts/blog-learn-build.md)
+- [ ] Local city and neighborhood page plan, top 25 ranked (competitor gap 8); pages not built yet (branch preview/wave1-local-plan, SHA pending; docs/audits/2026-10-05-local-pages-plan.md + local-pages-plan.json)
+  - [ ] Verify the plan's gaps in Chrome: 2020 populations (all snippet-only), drive times (none sourced), USPS ZIP lists; prompt is in section 8 of the plan
 - [x] ~~Blog batch 5: 10 posts (Florida sun and dry rot, flat on I-95, TPMS vs a gauge, cold-front TPMS light, moving to Florida, glovebox tire kit, back-to-school check, bigger wheels myth, Turnpike to Orlando, Alligator Alley)~~ (`aca62b5`…`e56433c`, shipped to main 2026-10-02)
   - #32 (registration) and #42 (heat and pressure routine) held back: each would compete with a live Learn guide (reworked below)
   - [ ] 5 facts were snippet-only or helper-read: Miccosukee plaza fuel at Exit 49, Road Ranger on the Collier side, Turkey Lake WheelRight, Goodyear dry-rot causes, AAA sealant shelf life + CR-V Hybrid kit limits (listed in blog-plan.md)
