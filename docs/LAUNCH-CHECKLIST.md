@@ -5,7 +5,7 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-04 (Google fonts self-hosted: no third-party font requests, 118 to 82 KB, phone home layout shift 0.20 to 0, LCP level in the lab; translate proxy now protects prices and sizes at startup; locator names your city or neighborhood (live, eb82ff5); header phone tap targets raised to 44 px (live, 9998032); door-jamb size fix and KMC help center resource live (822e5fc); Google "Request indexing" retried (Justin))_
+_Last updated: 2026-10-04 (batch 4 fact check ledger: 12 of 12 still need Justin's read; Google fonts self-hosted: no third-party font requests, 118 to 82 KB, phone home layout shift 0.20 to 0, LCP level in the lab; translate proxy now protects prices and sizes at startup; locator names your city or neighborhood (live, eb82ff5); header phone tap targets raised to 44 px (live, 9998032); door-jamb size fix and KMC help center resource live (822e5fc); Google "Request indexing" retried (Justin))_
 
 ## Site fixes (Claude)
 - [x] ~~Use my location works on phones + PCs, auto-detects on load~~ (`80625fa` + `0dffb36`, branch preview/local-delivery, verified on the Vercel preview: Permissions-Policy `geolocation=()` → `(self)`; new `GET /api/geo` (rewritten to the status function: Hobby allows 12 functions) approximate location from the connection, prefilled and labelled; device location asked automatically and remembered "no"; iPhone and desktop help text)
@@ -185,7 +185,7 @@ _Last updated: 2026-10-04 (Google fonts self-hosted: no third-party font request
   - Civic, Wrangler, Silverado boat towing, low rolling resistance for hybrids, small fleet checklist, new-car tires wearing early, curb/pothole signs, rotation upsell myth, unused tires still age, Thanksgiving road trip check
   - #37 (Tesla Model 3 flat) skipped: the Learn guide /learn/tesla/tesla-flat-tire-no-spare already targets the same search. Rework with a new angle or drop
   - #11 (Thanksgiving) quotes AAA's 2025 forecast: update with the 2026 numbers when AAA publishes them in mid-November
-  - [ ] 12 facts were snippet-only: confirm them → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A19)
+  - [ ] 0 of 12 confirmed by reading (every source host is blocked in the sandbox; search summaries corroborate all 12, none conflict, no copy changed), 12 left for Justin → ledger and short Chrome prompt in docs/audits/2026-10-04-batch4-fact-check.md; full prompt in docs/prompts/2026-10-02-justin-remaining.md (#A19)
 - [x] ~~6 new tools with their own tool pages, embedded in 8 articles~~ (preview/tools 210b348, shipped 2026-10-01)
 - [x] ~~Wave 1 city pages + mobile hub: Sunrise, Plantation, Tamarac, Coral Springs, Davie, Fort Lauderdale, Weston~~ (preview/cities bb42574, shipped 2026-10-01)
 - [ ] Justin: Google Business Profile link + map pin (for geo schema) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A9)
