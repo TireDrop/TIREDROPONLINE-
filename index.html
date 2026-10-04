@@ -74,25 +74,12 @@
          in `vite dev` and dist/spa.html, the Seo component sets them once
          React renders. A static canonical here would call every URL a
          duplicate of the home page. -->
-    <!-- Fonts are self-hosted (faces in src/index.css; Vite rewrites these two
-         hrefs to the fingerprinted files). Preloaded: Archivo (headings) and
-         Instrument Sans (body), the roman faces every page paints above the
-         fold. crossorigin is required even same-origin, or the browser fetches
-         the file twice. Italic loads only when italic text appears. -->
-    <link
-      rel="preload"
-      as="font"
-      type="font/woff2"
-      crossorigin
-      href="/src/fonts/archivo-latin-wdth-wght.woff2"
-    />
-    <link
-      rel="preload"
-      as="font"
-      type="font/woff2"
-      crossorigin
-      href="/src/fonts/instrument-sans-latin-normal.woff2"
-    />
+    <!-- Fonts are self-hosted: the @font-face rules are in src/index.css and
+         Vite fingerprints the files into /assets/. Deliberately NOT preloaded:
+         in the lab (4x CPU, slow 4G) preloading both roman files delayed LCP by
+         about 100 ms, because they compete with the render-blocking CSS and JS;
+         the size-adjusted fallback faces keep the swap from shifting the layout
+         (CLS 0). -->
   </head>
   <body>
     <div id="root"></div>
