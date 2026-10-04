@@ -1,13 +1,17 @@
-import React, { useSyncExternalStore } from "react";
+import React, { useEffect, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Wrench } from "lucide-react";
 
 import { money } from "../../context/CartContext.jsx";
 import { SET_SIZE } from "../../data/pricing.js";
-import { trackInstalledPriceToggle } from "../../lib/analytics.js";
+import {
+  trackInstalledPriceDefault,
+  trackInstalledPriceToggle,
+} from "../../lib/analytics.js";
 import {
   INSTALL_SERVICE,
   getInstalledShown,
+  getInstalledSource,
   installedLines,
   setInstalledShown,
   subscribeInstalled,
@@ -19,7 +23,9 @@ const NO_TRANSLATE = { translate: "no", className: "notranslate" };
 /**
  * Whether installed prices are on. The prerendered page and the hydration
  * render are always "off" (the server snapshot), and a visitor who turned
- * them on gets them in the render straight after, so nothing mismatches.
+ * them on, or who starts on by the local default (src/data/installedDefault.js,
+ * off in production), gets them in the render straight after, so nothing
+ * mismatches.
  */
 export function useInstalledShown() {
   return useSyncExternalStore(subscribeInstalled, getInstalledShown, () => false);
@@ -32,6 +38,12 @@ export function useInstalledShown() {
  */
 export function InstalledPriceToggle({ placement, className = "" }) {
   const on = useInstalledShown();
+  // GA4: the local default turned it on (not the visitor, not the preview
+  // flag), once per page view, so a later A/B read can tell the two apart.
+  const byDefault = on && getInstalledSource() === "default-local";
+  useEffect(() => {
+    if (byDefault) trackInstalledPriceDefault(placement);
+  }, [byDefault, placement]);
   const toggle = () => {
     setInstalledShown(!on);
     trackInstalledPriceToggle(!on, placement);

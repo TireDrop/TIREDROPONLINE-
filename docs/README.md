@@ -27,6 +27,7 @@ the code fits together is in the root [README](../README.md).
 
 - [deploy.md](ops/deploy.md): Vercel project settings, every `/api` endpoint, every server environment variable, local `vercel dev`, and the Shopify → Vercel cutover checklist. Use it for any deploy or env change.
 - [domain-migration-2026-09-28.md](ops/domain-migration-2026-09-28.md): record of moving tiredroponline.com to Vercel and Shopify to shop.tiredroponline.com, with the rollback and follow-ups.
+- [installed-price-default.md](ops/installed-price-default.md): the switch that would start the installed price on for visitors in the three counties (off in production), the `?installed=local` preview flag, its GA4 events and measured layout shift.
 - [turn-on-the-forms.md](ops/turn-on-the-forms.md): runbook for switching the site's forms on and checking a lead reaches info@.
 
 ## content/: Learn and Blog

@@ -497,6 +497,7 @@ Google. No-ops in the prerender and wherever `gtag` is missing.
 | `view_search_results` | `/tires` with a vehicle or size, once per search after it answers | `search_type` (`vehicle`, `tire_size`), `search_term`, `results` (tires in the size; `0` is the dead end the size-quote form answers) |
 | `tool_use` | first touch of a Learn demo / free tool (once per page view) | `tool_id` |
 | `installed_price_toggle` | "Show installed price" pressed on `/tires` or a tire page | `toggle_state` (`on` / `off`), `placement` (`results` / `product`) |
+| `installed_price_default` | the local default (`INSTALLED_DEFAULT_FOR_LOCAL`, off in production) turned installed prices on for a visitor in the three counties; once per page view, never from the `?installed=local` preview flag. Not a key event. | `default_source` (`local`), `placement` (`results` / `product`) |
 
 Items carry `item_id` (the SKU), `item_name`, `item_brand`,
 `item_category` (tire/wheel), `item_variant` (size), `price` (per unit,

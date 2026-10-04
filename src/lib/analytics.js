@@ -277,3 +277,15 @@ export function trackInstalledPriceToggle(on, placement) {
     placement,
   });
 }
+
+/**
+ * The installed-price toggle started ON by the local default
+ * (INSTALLED_DEFAULT_FOR_LOCAL, off in production), not pressed by the
+ * visitor: once per page view. Pair it with installed_price_toggle (the
+ * visitor chose) for an A/B read. Not a key event.
+ */
+export function trackInstalledPriceDefault(placement) {
+  oncePerPage("installed-default", () =>
+    trackEvent("installed_price_default", { default_source: "local", placement }),
+  );
+}
