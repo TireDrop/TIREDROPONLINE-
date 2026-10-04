@@ -47,6 +47,7 @@ the code fits together is in the root [README](../README.md).
 - [2026-09-24-functional-audit.md](audits/2026-09-24-functional-audit.md): bugs found by driving the site in Chromium and not yet fixed at the time.
 - [2026-09-24-distributor-readiness.md](audits/2026-09-24-distributor-readiness.md): the site reviewed as an ATD dealer-approval reviewer would see it.
 - [2026-09-29-site-audit.md](audits/2026-09-29-site-audit.md): four parallel audits (UX/conversion, technical, trust/checkout/ops, competitors). The source of most open checklist items.
+- [2026-10-04-seo-indexing.md](audits/2026-10-04-seo-indexing.md): sitemap, robots, titles, canonicals, JSON-LD and internal links checked against a real build; URL pattern counts, what changed, and what was left for Justin.
 
 ## archive/: retired, kept for the record
 
