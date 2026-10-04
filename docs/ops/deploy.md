@@ -408,6 +408,12 @@ fallback) by the first `headers` block in `vercel.json`:
 | `Permissions-Policy` | `geolocation=(self)`: our own pages may ask for the device location (the `/local-delivery` zone check and its "Use my location" button); embedded third-party frames may not. With `geolocation=()` the browser blocks the Geolocation API outright, so "Use my location" failed on every phone and PC (headless checks never saw it: `vite preview` doesn't send this header; `test:api` and `check:local-delivery` now assert it). Camera, microphone, payment, USB, serial, HID, MIDI, motion sensors, display capture, autoplay, encrypted media, passkeys, screen wake lock, XR and Topics stay off (`=()`). Payment happens on Shopify's own domain, which this header does not reach. |
 | `Content-Security-Policy-Report-Only` | Below. **Report-only:** nothing is blocked; the browser only reports. |
 
+### Fonts (self-hosted)
+
+Archivo (headings, variable `wdth` 100-125 and `wght` 500-900) and Instrument Sans (body, `wght` 400-700, plus italic) are served from our own origin, so there is no render-blocking Google stylesheet and no cross-origin connection before text can paint. The three latin-only `.woff2` files live in `src/fonts/` (81.9 KB for the two roman files, 110.5 KB with italic, against about 120 KB from Google), are declared with `@font-face` (`font-display: swap`) at the top of `src/index.css`, and Vite fingerprints them into `/assets/`, so the existing `/assets/(.*)` immutable one-year cache in `vercel.json` covers them. `index.html` preloads the two roman files; the prerender keeps the tags in every page's head. Size-adjusted `Archivo Fallback` and `Instrument Sans Fallback` faces (system fonts scaled to match) keep the swap from shifting the layout.
+
+To update or re-cut the fonts later: `npm install` (the `@fontsource-variable/archivo` and `@fontsource-variable/instrument-sans` dev dependencies are only a source of files), `pip install fonttools brotli`, then `python3 scripts/subset-fonts.py`. Keep the glyph list in that script and the `unicode-range` in `src/index.css` in sync. Both fonts are SIL OFL 1.1 (`src/fonts/OFL.txt`).
+
 ### The CSP and why each source is there
 
 | Directive | Allows | For |
@@ -415,8 +421,8 @@ fallback) by the first `headers` block in `vercel.json`:
 | `default-src` | `'self'` | everything not listed |
 | `script-src` | `'self'`, the gtag snippet's `sha256-` hash, `*.googletagmanager.com` | the Vite bundle, GA4 (`gtag.js`) |
 | | `translate.google.com`, `translate.googleapis.com`, `translate-pa.googleapis.com`, `www.gstatic.com` | Google Translate (`preview/translate`, loaded on demand) |
-| `style-src` | `'self'`, `'unsafe-inline'`, `fonts.googleapis.com`, `translate.googleapis.com`, `www.gstatic.com` | the CSS bundle, Google Fonts CSS, Translate's CSS. `'unsafe-inline'` because React writes `style="…"` attributes into the prerendered HTML (and Translate injects styles); hashes cannot cover attributes. Style injection is low risk next to script injection, which stays locked down. |
-| `font-src` | `'self'`, `data:`, `fonts.gstatic.com` | Archivo and Instrument Sans |
+| `style-src` | `'self'`, `'unsafe-inline'`, `fonts.googleapis.com`, `translate.googleapis.com`, `www.gstatic.com` | the CSS bundle, Translate's CSS (`fonts.googleapis.com` is no longer used: the fonts are self-hosted, see "Fonts" below; it can be dropped from this list). `'unsafe-inline'` because React writes `style="…"` attributes into the prerendered HTML (and Translate injects styles); hashes cannot cover attributes. Style injection is low risk next to script injection, which stays locked down. |
+| `font-src` | `'self'`, `data:`, `fonts.gstatic.com` | Archivo and Instrument Sans now come from `'self'` (`/assets/*.woff2`); `fonts.gstatic.com` is unused and can be dropped from this list |
 | `img-src` | `'self'`, `data:`, `blob:`, any `https:` | product photos come from the distributor's image host (not confirmed yet), plus GA and Translate images |
 | `connect-src` | `'self'`, `vpic.nhtsa.dot.gov`, `*.google-analytics.com`, `*.analytics.google.com`, `*.googletagmanager.com`, `translate.google.com`, `translate.googleapis.com`, `translate-pa.googleapis.com` | `/api`, the NHTSA make/model lookup, GA4 hits (incl. `region1.google-analytics.com`), Translate (translations from `translate-pa`/`translate.googleapis.com`, the element's pings to `translate.google.com`). `api/_lib/cspReport.test.mjs` checks every Translate host in `src/lib/translate.js` is listed. |
 | `frame-src` | `translate.google.com`, `translate.googleapis.com` | Translate's frames; nothing else on the site embeds a frame |

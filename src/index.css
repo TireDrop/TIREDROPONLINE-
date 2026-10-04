@@ -1,3 +1,90 @@
+/* Self-hosted fonts (no Google Fonts request: no render-blocking stylesheet,
+   no third-party handshakes). The files in src/fonts/ are subset and axis-limited
+   by scripts/subset-fonts.py; keep its glyph list and the unicode-range below in
+   sync. Vite fingerprints them, and index.html preloads the two above the fold. */
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 500 900;
+  font-stretch: 100% 125%;
+  font-display: swap;
+  src: url("./fonts/archivo-latin-wdth-wght.woff2") format("woff2");
+  unicode-range:
+    U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DC, U+2013-2014,
+    U+2018-201E, U+2020-2022, U+2026, U+2030, U+2032-2033, U+2039-203A, U+20AC,
+    U+2122, U+2190-2193, U+2212;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("./fonts/instrument-sans-latin-normal.woff2") format("woff2");
+  unicode-range:
+    U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DC, U+2013-2014,
+    U+2018-201E, U+2020-2022, U+2026, U+2030, U+2032-2033, U+2039-203A, U+20AC,
+    U+2122, U+2190-2193, U+2212;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: italic;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("./fonts/instrument-sans-latin-italic.woff2") format("woff2");
+  unicode-range:
+    U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DC, U+2013-2014,
+    U+2018-201E, U+2020-2022, U+2026, U+2030, U+2032-2033, U+2039-203A, U+20AC,
+    U+2122, U+2190-2193, U+2212;
+}
+
+/* What shows for the instant before a font arrives (font-display: swap): the
+   system face, scaled and spaced to Archivo's and Instrument Sans's metrics so
+   the swap moves almost nothing. Numbers are measured: size-adjust is the ratio
+   of average letter advance (Archivo 700 at wdth 100, the button and label style,
+   and 800 at wdth 108, the heading style, against Arial Bold; Instrument Sans 400
+   against Arial, 600-700 against Arial Bold), the
+   overrides are the real font's ascent and descent divided by that ratio. */
+@font-face {
+  font-family: "Archivo Fallback";
+  font-weight: 500 799;
+  src: local("Arial Bold"), local("Arial-BoldMT"), local("Helvetica Bold"),
+    local("Liberation Sans Bold");
+  size-adjust: 98%;
+  ascent-override: 89.6%;
+  descent-override: 21.4%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Archivo Fallback";
+  font-weight: 800 900;
+  src: local("Arial Bold"), local("Arial-BoldMT"), local("Helvetica Bold"),
+    local("Liberation Sans Bold");
+  size-adjust: 111.3%;
+  ascent-override: 78.9%;
+  descent-override: 18.9%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Instrument Sans Fallback";
+  font-weight: 400;
+  src: local("Arial"), local("ArialMT"), local("Helvetica"),
+    local("Liberation Sans");
+  size-adjust: 103.2%;
+  ascent-override: 94%;
+  descent-override: 24.2%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Instrument Sans Fallback";
+  font-weight: 500 700;
+  src: local("Arial Bold"), local("Arial-BoldMT"), local("Helvetica Bold"),
+    local("Liberation Sans Bold");
+  size-adjust: 98%;
+  ascent-override: 99%;
+  descent-override: 25.5%;
+  line-gap-override: 0%;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

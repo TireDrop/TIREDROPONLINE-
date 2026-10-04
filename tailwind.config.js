@@ -40,13 +40,22 @@ export default {
         // expanded rather than condensed and letter-spaced — which is the look
         // every template defaults to. Instrument Sans has more warmth in its
         // lowercase than the usual neutral workhorse.
+        // The "… Fallback" faces are size-adjusted system fonts (src/index.css)
+        // that stand in until the real font loads, so the swap barely shifts.
         display: [
           '"Archivo"',
+          '"Archivo Fallback"',
           '"Archivo Black"',
           "Helvetica Neue",
           "sans-serif",
         ],
-        sans: ['"Instrument Sans"', "system-ui", "-apple-system", "sans-serif"],
+        sans: [
+          '"Instrument Sans"',
+          '"Instrument Sans Fallback"',
+          "system-ui",
+          "-apple-system",
+          "sans-serif",
+        ],
       },
 
       borderRadius: {
