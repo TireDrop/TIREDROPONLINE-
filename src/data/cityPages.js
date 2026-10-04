@@ -76,7 +76,7 @@ export const CITY_PAGES = [
     route:
       "The shop is on Oakland Park Blvd, which runs west to the Sawgrass Expressway at exit 3 and east all the way to A1A. The closest Turnpike interchanges are Sunrise Blvd (exit 58) and Commercial Blvd (exit 62); Oakland Park Blvd crosses the Turnpike without one.",
     intro:
-      "Our shop is right here in Sunrise on West Oakland Park Blvd, near University Dr, and the vans work out of it, so Sunrise is home ground. Pick your tires on TireDrop, choose mobile installation at checkout, and a technician brings them to your driveway, your condo lot or your workplace in Sunrise and fits them there. Rather drive over? The shop is in town, and ship-to-store is free.",
+      "Our Extreme Tires shop is right here in Sunrise on West Oakland Park Blvd, near University Dr, and the Extreme Tires vans work out of it, so Sunrise is home ground. Pick your tires on TireDrop, choose mobile installation at checkout, and a technician brings them to your driveway, your condo lot or your workplace in Sunrise and fits them there. Rather drive over? The shop is in town, and ship-to-store is free.",
     whereWeWork: [
       "The main Sunrise ZIP codes are the seven below, and several of them cross city lines. 33313 and 33322 also take in parts of Plantation, 33325 reaches into Plantation and Davie, and 33326 is shared with Weston. That is exactly why the van goes by ZIP code and not by the city name on the envelope. All seven are Broward County ZIPs, so every one of them is in.",
       "One to skip: 33345 is a Sunrise PO Box ZIP, with no street address behind it. Book with the ZIP of the place the car will actually be parked.",
@@ -132,10 +132,10 @@ export const CITY_PAGES = [
     route:
       "From the shop on Oakland Park Blvd, University Dr and Pine Island Rd both run into Plantation, and they are the same local roads that lead to I-595.",
     intro:
-      "Plantation, a Broward city of 91,750 people at the 2020 Census, is next door to our Sunrise shop, where the vans are based. Buy tires on TireDrop, choose mobile installation, and we fit them at your house in Plantation Acres or Jacaranda, at your office, or wherever the car spends the day. No drop-off, no waiting room, no ride to arrange.",
+      "Plantation, a Broward city of 91,750 people at the 2020 Census, is next door to our Extreme Tires shop in Sunrise, where the Extreme Tires vans are based. Buy tires on TireDrop, choose mobile installation, and the Extreme Tires van fits them at your house in Plantation Acres or Jacaranda, at your office, or wherever the car spends the day. No drop-off, no waiting room, no ride to arrange.",
     whereWeWork: [
       "The main Plantation ZIP codes are 33313, 33317, 33322, 33324 and 33325, and they overlap with the cities around them. 33313 and 33322 also take in parts of Sunrise; 33317, 33324 and 33325 are shared with Davie, and 33325 reaches into Sunrise as well. Because the van goes by ZIP, an address on any of them is covered whether it reads Plantation, Sunrise or Davie.",
-      "Neighbourhoods we name here are the ones we could confirm: Plantation Acres, Jacaranda and the Central Park area. Your street doesn't need to be on the list; the ZIP is what counts.",
+      "Neighbourhoods listed here are examples, not a limit on where we go: Plantation Acres, Jacaranda and the Central Park area. Your street doesn't need to be on the list; the ZIP is what counts.",
     ],
     roadside:
       "A nail on Peters Rd, a flat in an office lot off Broward Blvd, a soft tire in your Jacaranda driveway: call during shop hours and we come out. Mobile flat tire repair in Plantation means the tire is inspected from the inside and fixed if it can be, and your spare goes on if it can't.",
@@ -165,7 +165,7 @@ export const CITY_PAGES = [
     nearby: ["sunrise-fl", "davie-fl", "fort-lauderdale-fl"],
     seoTitle: "Mobile Tire Installation in Plantation, FL",
     description:
-      "Buy tires on TireDrop and have them fitted in your Plantation, FL driveway or office lot. Plantation ZIPs, roads, HOA tips and what the van can do on site.",
+      "Tires from TireDrop fitted in your Plantation, FL driveway or office lot by the Extreme Tires van. Plantation ZIPs, roads, HOA tips and on-site service.",
   },
   {
     slug: "tamarac-fl",
@@ -186,7 +186,7 @@ export const CITY_PAGES = [
     route:
       "Tamarac is next door to the shop: the van heads north from Oakland Park Blvd on University Dr.",
     intro:
-      "Tamarac, a Broward County city of 71,897 people at the 2020 Census, is next door to our Sunrise shop. Buy tires on TireDrop, choose mobile installation, and a technician from the Extreme Tires shop in Sunrise fits them where you live or work in Tamarac: mounted, balanced, lug nuts torqued to spec and pressures set, with your old set hauled away.",
+      "Tamarac, a Broward County city of 71,897 people at the 2020 Census, is next door to our Extreme Tires shop in Sunrise. Buy tires on TireDrop, choose mobile installation, and a technician in the Extreme Tires van fits them where you live or work in Tamarac: mounted, balanced, lug nuts torqued to spec and pressures set, with your old set hauled away.",
     whereWeWork: [
       "The neighbourhood isn't what decides coverage. The ZIP code where the car is parked is. Broward ZIP codes often cross city lines, so the city name on an address is a poor guide. If the ZIP is in Miami-Dade, Broward or Palm Beach County, the van comes. Type it into the checker below; checkout and the booking form run the same check.",
       "Live behind a gate? Give us the gate code, or the name the guardhouse should have on its list, when you book, and check whether your association wants service vehicles registered ahead of time.",
@@ -257,7 +257,7 @@ export const CITY_PAGES = [
     route:
       "The van takes the Sawgrass Expressway or University Dr north from the shop.",
     intro:
-      "Coral Springs, a Broward County city of 134,394 people at the 2020 Census, is a short drive from our Sunrise shop up the Sawgrass Expressway or University Dr. Your new set gets ordered on TireDrop; the fitting happens in Coral Springs, on your driveway or in your office lot, because the balancer, tire changer and torque wrenches ride along in the van.",
+      "Coral Springs, a Broward County city of 134,394 people at the 2020 Census, is a short drive from our Extreme Tires shop in Sunrise up the Sawgrass Expressway or University Dr. Your new set gets ordered on TireDrop; the fitting happens in Coral Springs, on your driveway or in your office lot, because the balancer, tire changer and torque wrenches ride along in the Extreme Tires van.",
     whereWeWork: [
       "The main Coral Springs ZIP codes are 33065, 33067, 33071 and 33076. Two of them, 33067 and 33076, also cover parts of Parkland, so if your address says Parkland on one of those ZIPs, you're covered too. All four are Broward County ZIPs.",
       "What we look at is the five-digit code for the spot the car will sit in, never the town printed above it. Unsure about yours? Put it in the checker below and it answers on the spot, using the same rule as checkout.",
@@ -289,7 +289,7 @@ export const CITY_PAGES = [
       },
       {
         q: "Can you fit the tires at my office while I work?",
-        a: "Yes, if the lot has space alongside your car for the van and the property allows service vehicles. Give us the building, the lot and where you parked, leave the keys at the front desk or bring them down when the technician calls, and go back to work.",
+        a: "Yes, if the lot has space alongside your car for the van and the property allows service vehicles. Give us the building, the lot and where you parked, leave the keys at the front desk and note the details at checkout or in the install notes, then go back to work.",
       },
       {
         q: "Should I ship the tires to my house or to the shop?",
@@ -315,7 +315,7 @@ export const CITY_PAGES = [
     nearby: ["tamarac-fl", "sunrise-fl"],
     seoTitle: "Mobile Tire Installation in Coral Springs, FL",
     description:
-      "TireDrop tires fitted at your Coral Springs, FL home or office, Parkland ZIPs 33067 and 33076 included, plus flat tire help in driveways and parking lots.",
+      "TireDrop tires fitted at your Coral Springs, FL home or office by the Extreme Tires van. Parkland ZIPs 33067 and 33076 included, plus flat tire help.",
   },
   {
     slug: "davie-fl",
@@ -352,10 +352,10 @@ export const CITY_PAGES = [
     route:
       "The van heads south from the shop on University Dr, or takes I-595.",
     intro:
-      "Davie, in Broward County, had 105,691 people at the 2020 Census, and it's a short drive from our Sunrise shop down University Dr or along I-595. Choose the tires on TireDrop and the van brings them to a Pine Island Ridge or Forest Ridge driveway, an employer's lot or any other Davie address, then takes the worn set away for recycling.",
+      "Davie, in Broward County, had 105,691 people at the 2020 Census, and it's a short drive from our Extreme Tires shop in Sunrise down University Dr or along I-595. Choose the tires on TireDrop and the Extreme Tires van brings them to a Pine Island Ridge or Forest Ridge driveway, an employer's lot or any other Davie address, then takes the worn set away for recycling.",
     whereWeWork: [
       "Davie spreads across seven main ZIP codes: 33314, 33317, 33324, 33325, 33328, 33330 and 33331. Plenty of them are shared. 33317, 33324 and 33325 also cover parts of Plantation, 33325 reaches into Sunrise, and 33331 is shared with Weston. Since the van works by ZIP, an envelope reading Plantation, Sunrise or Weston changes nothing for a Davie street on one of those codes.",
-      "Pine Island Ridge and Forest Ridge are the Davie neighbourhoods we could confirm for this page. If yours isn't named, the ZIP checker below gives the answer.",
+      "Pine Island Ridge and Forest Ridge are two Davie neighbourhoods we serve, and they are examples, not a limit on where we go. If yours isn't named, the ZIP checker below gives the answer.",
     ],
     roadside:
       "A flat in your Pine Island Ridge driveway, an office parking lot or a side street in Forest Ridge: call during shop hours. Mobile flat tire repair in Davie starts with the technician taking the tire off and checking the inside, then repairing it or fitting your spare.",
@@ -441,7 +441,7 @@ export const CITY_PAGES = [
     route:
       "The shop is on Oakland Park Blvd, and Oakland Park Blvd runs east from it to A1A, meeting I-95 at exits 31A and 31B on the way.",
     intro:
-      "Fort Lauderdale is Broward's largest city, with 182,760 people at the 2020 Census, and a short drive east along Oakland Park Blvd from our Sunrise shop. Buy tires on TireDrop, choose mobile installation, and we fit them at your home, in your building's lot or at your office in Fort Lauderdale, from Victoria Park to Galt Ocean Mile.",
+      "Fort Lauderdale is Broward's largest city, with 182,760 people at the 2020 Census, and a short drive east along Oakland Park Blvd from our Extreme Tires shop in Sunrise. Buy tires on TireDrop, choose mobile installation, and the Extreme Tires van fits them at your home, in your building's lot or at your office in Fort Lauderdale, from Victoria Park to Galt Ocean Mile.",
     whereWeWork: [
       "Fort Lauderdale has more main ZIP codes than any other city on our list: ten, from 33301 to 33316. All of them are Broward ZIPs, and the van goes by ZIP, not by neighbourhood, so Las Olas, Rio Vista, Coral Ridge and everywhere in between is covered.",
       "In a condo or high-rise, the garage is usually the question. Garages often have height limits and their own rules about outside work, so tell us the building name, the garage clearance if you know it, and whether the car can be moved to an open or visitor space. If the garage won't take the van, a surface lot or the street usually will.",
@@ -474,7 +474,7 @@ export const CITY_PAGES = [
     nearby: ["plantation-fl", "davie-fl"],
     seoTitle: "Mobile Tire Installation in Fort Lauderdale, FL",
     description:
-      "TireDrop tires fitted at your Fort Lauderdale home, condo lot or office, from Las Olas to Galt Ocean Mile. Condo garage tips, ZIPs and what the van covers.",
+      "TireDrop tires fitted at your Fort Lauderdale home, condo lot or office by the Extreme Tires van, Las Olas to Galt Ocean Mile. Condo garage tips and ZIPs.",
   },
   {
     slug: "weston-fl",
@@ -504,7 +504,7 @@ export const CITY_PAGES = [
     route:
       "The van takes Oakland Park Blvd west to the Sawgrass Expressway, then heads south.",
     intro:
-      "Weston, a Broward County city of 68,107 people at the 2020 Census, is a short drive from our Sunrise shop down the Sawgrass Expressway. The set you pick on TireDrop gets fitted in your Weston driveway or at work, so nobody has to drop the car anywhere, line up a ride back, or sit in a lobby while it's done.",
+      "Weston, a Broward County city of 68,107 people at the 2020 Census, is a short drive from our Extreme Tires shop in Sunrise down the Sawgrass Expressway. The set you pick on TireDrop gets fitted by the Extreme Tires van in your Weston driveway or at work, so nobody has to drop the car anywhere, line up a ride back, or sit in a lobby while it's done.",
     whereWeWork: [
       "The main Weston ZIP codes are 33326, 33327, 33331 and 33332, and two of them are shared with neighbours: 33326 with Sunrise and 33331 with Davie. Every one sits in Broward, and since coverage follows the ZIP, the town name on your mail never decides it.",
       "Inside a community association? Many have their own service-vehicle rules, so read yours first and pass on any gate code or guard instructions at booking; that keeps the technician from being held at the entrance.",
