@@ -28,6 +28,7 @@
     "check:footer": "node scripts/footer-check.mjs",
     "check:sources": "node scripts/sources-check.mjs",
     "check:links": "node scripts/links-check.mjs",
+    "check:mobile-price": "node scripts/mobile-price-check.mjs",
     "check:local-delivery": "node scripts/local-delivery-check.mjs",
     "test:api": "node --test \"api/_lib/*.test.mjs\"",
     "test:content": "node --test \"src/content/*.test.mjs\"",

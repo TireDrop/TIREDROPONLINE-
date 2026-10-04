@@ -29,6 +29,7 @@ import HOME_READING from "virtual:home-reading";
 import TOOL_LINKS from "virtual:tool-links";
 import { BUSINESS, YELP_PROFILE, googleReviewHref } from "../data/business.js";
 import { SERVICE_AREA_LABEL } from "../data/serviceArea.js";
+import MobilePriceStrip from "../components/services/MobilePriceStrip.jsx";
 import ServiceAreaCounties from "../components/ui/ServiceAreaCounties.jsx";
 import { MOBILE_SERVICES, SHOP_SERVICES, getService } from "../data/services.js";
 import {
@@ -731,9 +732,11 @@ function InstallBand() {
           <div className="flex-1">
             <ServiceList services={MOBILE_SERVICES} />
           </div>
-          <Link to="/mobile-service" className="btn-outline btn-sm mt-6 min-h-[44px] self-start">
-            How the van works
-          </Link>
+          <MobilePriceStrip variant="card" className="mt-6">
+            <Link to="/mobile-service" className="btn-outline btn-sm min-h-[44px]">
+              How the van works
+            </Link>
+          </MobilePriceStrip>
         </div>
       </div>
 

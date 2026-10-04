@@ -21,6 +21,9 @@ import {
   SectionHead,
   Seo,
 } from "../../components/ui/index.jsx";
+import MobilePriceStrip, {
+  MOBILE_BOOK,
+} from "../../components/services/MobilePriceStrip.jsx";
 import ZipCheck from "../../components/ui/ZipCheck.jsx";
 import RoadsideHelp from "../../components/ui/RoadsideHelp.jsx";
 import { faqSchema } from "../../components/content/schema.js";
@@ -33,7 +36,7 @@ import {
 } from "../../data/cityPages.js";
 import { MOBILE_SERVICES } from "../../data/services.js";
 
-const BOOK = "/schedule?service=tire-installation";
+const BOOK = MOBILE_BOOK;
 
 function NotFoundPanel() {
   return (
@@ -127,18 +130,8 @@ export default function MobileCityPage() {
         eyebrow={`Mobile tire service · ${city.county} County`}
         title={`Mobile Tire Installation in ${city.name}, FL`}
         lede={city.intro}
-      >
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <Link to={BOOK} className="btn-primary">
-            Book Mobile Install
-            <ArrowRight size={18} aria-hidden />
-          </Link>
-          <a href={BUSINESS.phoneHref} className="btn-ghost-light">
-            <Phone size={18} aria-hidden />
-            Call {BUSINESS.phone}
-          </a>
-        </div>
-      </PageHero>
+        lead={<MobilePriceStrip place={city.name} county={city.county} />}
+      />
 
       {/* ---------- How it works (shared, short) ---------- */}
       <Section className="bg-bone">

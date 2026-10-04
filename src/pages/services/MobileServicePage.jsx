@@ -28,6 +28,7 @@ import {
   SectionHead,
   Seo,
 } from "../../components/ui/index.jsx";
+import MobilePriceStrip from "../../components/services/MobilePriceStrip.jsx";
 import ServiceAreaCounties from "../../components/ui/ServiceAreaCounties.jsx";
 import ZipCheck from "../../components/ui/ZipCheck.jsx";
 import { faqSchema } from "../../components/content/schema.js";
@@ -215,20 +216,11 @@ export default function MobileServicePage() {
       />
 
       <PageHero
+        lead={<MobilePriceStrip />}
         eyebrow="Mobile install — Miami-Dade, Broward, Palm Beach"
         title="Mobile Tire Installation in South Florida"
         lede={`You bought the tires. We'll come fit them. A fully equipped ${BUSINESS.parent} van brings your new set to your home, office or jobsite anywhere in ${SERVICE_AREA_LABEL}, and fits it where the car is already parked.`}
       >
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <Link to="/schedule?service=tire-installation" className="btn-primary">
-            Book Mobile Install
-            <ArrowRight size={18} aria-hidden />
-          </Link>
-          <a href={BUSINESS.phoneHref} className="btn-ghost-light">
-            <Phone size={18} aria-hidden />
-            Call {BUSINESS.phone}
-          </a>
-        </div>
         <p className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-bone/60">
           <span className="flex items-center gap-1.5">
             <Check size={14} aria-hidden className="text-amber" />

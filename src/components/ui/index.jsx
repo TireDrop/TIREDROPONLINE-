@@ -944,7 +944,7 @@ export function SectionHead({
  * The element tree is the same either way, so switching it keeps the H1 node
  * (a hydrated page that turns compact is updated in place, not replaced).
  */
-export function PageHero({ eyebrow, title, lede, children, compact = false }) {
+export function PageHero({ eyebrow, title, lede, children, lead, compact = false }) {
   return (
     <header className="relative overflow-hidden bg-ink bg-ink-wash text-bone">
       <div
@@ -967,6 +967,9 @@ export function PageHero({ eyebrow, title, lede, children, compact = false }) {
         >
           {title}
         </h1>
+        {/* `lead`: a block straight under the title, ahead of the lede, so a
+            price or a Book button sits in the first phone screen. */}
+        {lead && !compact && <div className="mt-6 max-w-xl">{lead}</div>}
         {lede && !compact && (
           <p className="lede mt-5 max-w-2xl text-bone/70 md:text-[1.25rem]">
             {lede}
