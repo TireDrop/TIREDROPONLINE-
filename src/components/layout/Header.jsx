@@ -28,11 +28,14 @@ function UtilityBar() {
   return (
     <div className="bg-ink bg-steel-wash text-bone">
       <div className="wrap flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-2 text-xs">
-        {/* Calling is the primary action on a phone — keep it comfortably tappable. */}
+        {/* Calling is the primary action on a phone, so below the desktop
+            breakpoint it is a full 44px target (`!`: index.css floors every
+            tel: link at 36px with a selector that outranks a utility); the
+            negative margin gives the extra height back. */}
         <a
           href={BUSINESS.phoneHref}
           translate="no"
-          className="notranslate -my-1 flex min-h-[32px] items-center gap-1.5 py-1 font-display text-sm font-bold tracking-[-0.005em] transition-colors hover:text-amber"
+          className="notranslate -my-2 flex min-h-[32px] items-center gap-1.5 py-1 font-display text-sm font-bold tracking-[-0.005em] transition-colors hover:text-amber max-lg:!min-h-[44px] lg:-my-1"
         >
           <Phone size={13} aria-hidden />
           {BUSINESS.phone}
@@ -186,7 +189,7 @@ function MobileDrawer({ open, onClose }) {
             ref={closeButtonRef}
             onClick={onClose}
             aria-label="Close menu"
-            className="rounded-sm p-1.5 text-ink hover:bg-fog"
+            className="-mr-[5px] flex h-11 w-11 items-center justify-center rounded-sm text-ink hover:bg-fog"
           >
             <X size={22} aria-hidden />
           </button>
@@ -200,23 +203,24 @@ function MobileDrawer({ open, onClose }) {
 
         <nav aria-label="Mobile" className="flex-1 overflow-y-auto px-5 py-4">
           <ul className="space-y-1">
+            {/* Every row is a 44px tap target; the text keeps its size. */}
             {NAV.map((item) => (
               <li key={item.label}>
                 <Link
                   to={item.to}
                   onClick={onClose}
-                  className="block py-2.5 font-display text-[15px] font-bold uppercase tracking-[0.015em] text-ink"
+                  className="flex min-h-[44px] items-center font-display text-[15px] font-bold uppercase tracking-[0.015em] text-ink"
                 >
                   {item.label}
                 </Link>
                 {item.children && (
-                  <ul className="mb-2 ml-3 space-y-0.5 border-l border-ink/10 pl-4">
+                  <ul className="mb-2 ml-3 border-l border-ink/10 pl-4">
                     {item.children.map((child) => (
                       <li key={child.label}>
                         <Link
                           to={child.to}
                           onClick={onClose}
-                          className="block py-1.5 text-sm text-smoke transition-colors hover:text-drop"
+                          className="flex min-h-[44px] items-center text-sm text-smoke transition-colors hover:text-drop"
                         >
                           {child.label}
                         </Link>
@@ -250,13 +254,13 @@ function MobileDrawer({ open, onClose }) {
         </div>
 
         <div className="border-t border-ink/10 p-5">
-          <Link to="/tires" onClick={onClose} className="btn-primary w-full">
+          <Link to="/tires" onClick={onClose} className="btn-primary min-h-[44px] w-full">
             Shop Tires
           </Link>
           <a
             href={BUSINESS.phoneHref}
             translate="no"
-            className="notranslate btn-outline mt-2 w-full"
+            className="notranslate btn-outline mt-2 !min-h-[44px] w-full"
           >
             <Phone size={16} aria-hidden />
             {BUSINESS.phone}
@@ -330,12 +334,12 @@ export default function Header() {
             </a>
             <Link
               to="/cart"
-              className="relative rounded-sm p-2.5 text-ink transition-colors hover:bg-fog hover:text-drop"
+              className="relative rounded-sm p-3 text-ink transition-colors hover:bg-fog hover:text-drop lg:p-2.5"
               aria-label={`Cart, ${count} item${count === 1 ? "" : "s"}`}
             >
               <ShoppingCart size={21} aria-hidden />
               {count > 0 && (
-                <span className="tnum absolute right-0.5 top-0.5 flex h-[19px] min-w-[19px] items-center justify-center rounded-full bg-drop px-1 text-[11px] font-bold leading-none text-bone ring-2 ring-bone">
+                <span className="tnum absolute right-1 top-1 flex h-[19px] min-w-[19px] items-center justify-center rounded-full bg-drop px-1 text-[11px] font-bold leading-none text-bone ring-2 ring-bone lg:right-0.5 lg:top-0.5">
                   {count}
                 </span>
               )}
@@ -344,7 +348,7 @@ export default function Header() {
             <button
               onClick={() => setMenuOpen(true)}
               aria-label="Open menu"
-              className="rounded-sm p-2.5 text-ink transition-colors hover:bg-fog hover:text-drop lg:hidden"
+              className="rounded-sm p-3 text-ink transition-colors hover:bg-fog hover:text-drop lg:hidden"
             >
               <Menu size={22} aria-hidden />
             </button>

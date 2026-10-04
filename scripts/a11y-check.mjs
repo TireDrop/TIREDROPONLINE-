@@ -12,7 +12,9 @@
  * keyboard behaviour axe cannot see (keyboardChecks below): the phone menu
  * and filter sheets keep Tab inside and close on Escape, focus never hides
  * behind the phone action bar, and the desktop nav dropdowns close once focus
- * moves past them or on Escape.
+ * moves past them or on Escape. At 390 it also measures every link and button
+ * in the phone header and the open menu drawer (tapTargetChecks below): each
+ * must be at least 44x44 px, and the page must not scroll sideways.
  *
  * Starts `vite preview` on A11Y_PORT (default 4320), or tests A11Y_BASE when
  * that is set to an already running server. Every /api call is mocked and
@@ -292,6 +294,58 @@ async function keyboardChecks(page, width) {
   return problems;
 }
 
+/**
+ * Phone tap targets (the site's 44px convention): every link and button in the
+ * header, search and open menu drawer on "/" is at least 44x44 px, and neither
+ * state scrolls sideways. Returns the failures.
+ */
+async function tapTargetChecks(page, width) {
+  const problems = [];
+  await page.goto(BASE + "/", { waitUntil: "load" });
+  await page.waitForFunction(isMounted);
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(300);
+  const measure = (inDrawer) =>
+    page.evaluate((drawer) => {
+      const main = document.getElementById("main");
+      return [...document.querySelectorAll("a, button, input, select")]
+        .filter((el) => {
+          const r = el.getBoundingClientRect();
+          // The skip link only shows while it has focus; it is checked above.
+          if (r.width <= 1 || r.height <= 1 || el.matches('a[href="#main"]')) return false;
+          if (drawer) return el.closest('[role="dialog"]') && !el.matches('[tabindex="-1"]');
+          return !el.closest('[role="dialog"]') && main && el.compareDocumentPosition(main) & Node.DOCUMENT_POSITION_FOLLOWING;
+        })
+        .map((el) => {
+          const r = el.getBoundingClientRect();
+          return {
+            name: (el.getAttribute("aria-label") || el.value || el.textContent || el.tagName).trim().replace(/\s+/g, " ").slice(0, 30),
+            w: Math.round(r.width * 10) / 10,
+            h: Math.round(r.height * 10) / 10,
+          };
+        });
+    }, inDrawer);
+  const overflow = () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  const verdict = (where, boxes, wide) => {
+    const small = boxes.filter((b) => b.w < 44 || b.h < 44);
+    if (!boxes.length) problems.push(`tap targets @${width}: found no controls in the ${where}`);
+    else if (small.length)
+      problems.push(
+        `tap targets @${width}: ${small.length} of ${boxes.length} in the ${where} under 44x44: ${small
+          .slice(0, 4)
+          .map((b) => `"${b.name}" ${b.w}x${b.h}`)
+          .join(", ")}`,
+      );
+    else console.log(`ok   tap targets @${width}: all ${boxes.length} controls in the ${where} are at least 44x44`);
+    if (wide > 0) problems.push(`tap targets @${width}: the page scrolls sideways by ${wide}px with the ${where} showing`);
+  };
+  verdict("header", await measure(false), await overflow());
+  await page.locator('button[aria-label="Open menu"]').click();
+  await page.locator(MODAL).waitFor();
+  verdict("open menu drawer", await measure(true), await overflow());
+  return problems;
+}
+
 let failures = 0;
 const report = [];
 
@@ -389,6 +443,11 @@ try {
       failures += 1;
       console.log(`FAIL ${problem}`);
     }
+    if (width < 1024)
+      for (const problem of await tapTargetChecks(page, width)) {
+        failures += 1;
+        console.log(`FAIL ${problem}`);
+      }
     await context.close();
   }
 } finally {
