@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -474,7 +474,63 @@ const STEPS = [
   },
 ];
 
+/**
+ * The thread between two steps: a track, a fill that draws along it and a
+ * small parcel that rides it. Decorative, so aria-hidden. Horizontal between
+ * the round icons from md up (`h`), vertical down the stacked cards below it
+ * (`v`). The CSS (.how-*, src/index.css) plays it only while the list carries
+ * `how-play`; without that class it rests on its finished state.
+ */
+function HowSeg({ n, dir, className = "", style }) {
+  return (
+    <span
+      aria-hidden
+      className={`how-seg how-seg-${dir} how-seg-${n} pointer-events-none absolute ${className}`}
+      style={style}
+    >
+      <span className="how-fill" />
+      <span className="how-trk">
+        <span className="how-dot" />
+      </span>
+    </span>
+  );
+}
+
+/**
+ * Plays the "How it works" story while the list is on screen: adds `how-play`
+ * once it scrolls into view and takes it off when it leaves or the tab is
+ * hidden, so the CSS loop never runs unseen. No class, no animation: the
+ * prerendered page, no-JS visitors and reduced motion all see the finished
+ * state. Same trigger margin as the scroll reveal so both start together.
+ */
+function useHowPlay(ref) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !("IntersectionObserver" in window)) return undefined;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)
+      return undefined;
+    let seen = false;
+    const sync = () => el.classList.toggle("how-play", seen && !document.hidden);
+    const io = new IntersectionObserver(
+      ([e]) => {
+        seen = e.isIntersecting;
+        sync();
+      },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.2 },
+    );
+    io.observe(el);
+    document.addEventListener("visibilitychange", sync);
+    return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", sync);
+      el.classList.remove("how-play");
+    };
+  }, [ref]);
+}
+
 function HowItWorks() {
+  const flow = useRef(null);
+  useHowPlay(flow);
   return (
     <Section id="how-it-works" data-home-section="how" className="bg-bone">
       <Head
@@ -484,12 +540,18 @@ function HowItWorks() {
         lede="Orders ship direct from a distributor warehouse rather than sitting on a shelf to age, so what turns up is fresh rubber."
       />
 
-      <ol className="relative grid gap-4 md:grid-cols-3 md:gap-6">
+      <ol
+        ref={flow}
+        data-how-flow
+        className="relative grid gap-4 md:grid-cols-3 md:gap-6"
+      >
         {/* The thread between the three steps on a wide screen. */}
         <span
           aria-hidden
           className="pointer-events-none absolute left-[16.6%] right-[16.6%] top-9 hidden h-px bg-gradient-to-r from-drop/10 via-drop/40 to-drop/10 md:block"
         />
+        <HowSeg n={1} dir="h" className="left-[16.67%] top-[35px] hidden h-0.5 w-[33.33%] md:block" />
+        <HowSeg n={2} dir="h" className="left-1/2 top-[35px] hidden h-0.5 w-[33.33%] md:block" />
         {STEPS.map(({ Icon, title, copy }, i) => (
           <li
             key={title}
@@ -497,14 +559,36 @@ function HowItWorks() {
             style={{ "--rv-i": i }}
             className="relative flex gap-4 rounded-card border border-ink/[0.07] bg-fog/60 p-5 md:flex-col md:items-center md:border-0 md:bg-transparent md:p-0 md:text-center"
           >
-            <span className="relative flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-bone text-drop shadow-card ring-1 ring-ink/[0.06]">
-              <Icon size={28} aria-hidden />
+            {/* Stacked cards: the thread runs down from this icon to the next. */}
+            {i < 2 && (
+              <HowSeg n={i + 1} dir="v" className="left-[55px] top-[92px] z-10 w-0.5 md:hidden" style={{ bottom: -38 }} />
+            )}
+            <span
+              className={`how-ico how-ico-${i + 1} relative flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-bone text-drop shadow-card ring-1 ring-ink/[0.06]`}
+            >
+              <span aria-hidden className="how-halo" />
+              {i === 0 && <span aria-hidden className="how-halo how-click" />}
+              <Icon size={28} aria-hidden className="how-glyph" />
               <span
                 aria-hidden
-                className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-ink font-display text-xs font-bold text-bone"
+                className="how-badge absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-ink font-display text-xs font-bold text-bone"
               >
                 {i + 1}
               </span>
+              {i === 1 && (
+                <svg
+                  aria-hidden
+                  viewBox="0 0 24 24"
+                  className="how-check absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-drop p-1 text-bone ring-2 ring-bone"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m5 12 5 5L19 7" />
+                </svg>
+              )}
             </span>
             <div className="md:mt-5 md:max-w-xs">
               <h3 className="h3">

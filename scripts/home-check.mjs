@@ -8,7 +8,11 @@
  *    state baked into the markup.
  * 2. JavaScript off: every reveal target is fully visible.
  * 3. Reduced motion: hydrated, scrolled top to bottom, nothing is ever hidden.
- * 4. Full motion at 390px and 1440px: below-the-fold targets start hidden,
+ * 4. "How it works" plays by itself: the prerendered list carries the
+ *    decorative thread but no `how-play` class; with motion it gains the
+ *    class on scroll-in and loses it on scroll-out; under reduced motion it
+ *    never does and rests on its finished state (thread filled, check shown).
+ * 5. Full motion at 390px and 1440px: below-the-fold targets start hidden,
  *    the hero never does, and scrolling reveals every one; no sideways
  *    scroll, no layout shift from the reveal (CLS under 0.1) and no console
  *    errors.
@@ -82,6 +86,16 @@ check(
   zipLink.replace(/<[^>]*>/g, "").trim() === "Check your ZIP" &&
     /data-home-local-delivery[\s\S]*?<svg[^>]*role="img"[^>]*aria-label="Map of the U\.S\. with \d+ local delivery hubs"/.test(howHtml),
   "prerendered How it works has the local delivery map and a Check your ZIP link",
+);
+
+// The "How it works" story is CSS-driven: its markup is decorative and the
+// play class only ever arrives after hydration.
+check(
+  /<ol[^>]*data-how-flow/.test(howHtml) &&
+    !/how-play/.test(html) &&
+    (howHtml.match(/<span aria-hidden="true" class="how-seg /g) ?? []).length === 4 &&
+    (howHtml.match(/class="how-check /g) ?? []).length === 1,
+  "prerendered How it works has the thread (4 aria-hidden segments), one check, and no play class",
 );
 
 /* ------------------------------ preview ------------------------------ */
@@ -214,6 +228,24 @@ try {
       "reduced motion: nothing hidden before or after scrolling",
     );
     check(errors.length === 0, `reduced motion: no console errors ${errors.join(" | ")}`);
+    // How it works: scrolled into view, it still never plays, and shows the
+    // finished state with nothing animating.
+    await page.evaluate(() => document.querySelector("[data-how-flow]").scrollIntoView({ block: "center", behavior: "instant" }));
+    await page.waitForTimeout(500);
+    const rest = await page.evaluate(() => {
+      const ol = document.querySelector("[data-how-flow]");
+      const css = (sel) => [...ol.querySelectorAll(sel)].map((e) => getComputedStyle(e));
+      return {
+        playing: ol.classList.contains("how-play"),
+        running: ol.getAnimations({ subtree: true }).length,
+        fills: css(".how-fill").every((c) => c.transform === "none" && c.opacity === "1"),
+        check: css(".how-check").every((c) => c.opacity === "1" && c.transform === "none"),
+      };
+    });
+    check(
+      !rest.playing && rest.running === 0 && rest.fills && rest.check,
+      `reduced motion: How it works rests on its finished state (${JSON.stringify(rest)})`,
+    );
     await context.close();
   }
 
@@ -241,6 +273,34 @@ try {
     const end = await page.evaluate(revealState);
     const left = end.filter((s) => s.hidden || s.opacity < 1).length;
     check(left === 0, `${width}: every target revealed after scrolling (${left} left)`);
+
+    // How it works: the loop runs only while the list is on screen, in
+    // transform and opacity, and the section does not change size.
+    const howH = () => page.evaluate(() => document.querySelector('[data-home-section="how"]').getBoundingClientRect().height);
+    const h0 = await howH();
+    await page.evaluate(() => document.querySelector("[data-how-flow]").scrollIntoView({ block: "center", behavior: "instant" }));
+    await page.waitForFunction(() => document.querySelector("[data-how-flow]").classList.contains("how-play"), null, { timeout: 3000 }).then(
+      () => ok(`${width}: How it works starts playing when scrolled into view`),
+      () => bad(`${width}: How it works never gained how-play on scroll-in`),
+    );
+    await page.waitForTimeout(1200);
+    const anim = await page.evaluate(() => {
+      const props = new Set();
+      const all = document.querySelector("[data-how-flow]").getAnimations({ subtree: true });
+      for (const a of all) for (const k of a.effect.getKeyframes()) for (const p of Object.keys(k)) props.add(p);
+      return { n: all.length, props: [...props].filter((p) => !["offset", "easing", "composite", "computedOffset"].includes(p)).sort() };
+    });
+    check(
+      anim.n >= 8 && anim.props.every((p) => p === "opacity" || p === "transform"),
+      `${width}: ${anim.n} animations, only ${anim.props.join(" + ")}`,
+    );
+    check(Math.abs((await howH()) - h0) < 0.5, `${width}: How it works keeps its height while playing`);
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+    await page.waitForTimeout(600);
+    check(
+      !(await page.evaluate(() => document.querySelector("[data-how-flow]").classList.contains("how-play"))),
+      `${width}: How it works stops when scrolled out of view`,
+    );
 
     const { sw, iw, cls } = await page.evaluate(() => ({
       sw: document.documentElement.scrollWidth,
