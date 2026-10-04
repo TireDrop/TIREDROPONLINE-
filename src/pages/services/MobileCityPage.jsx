@@ -89,7 +89,8 @@ function FactList({ title, items }) {
 /**
  * /mobile-service/:city — mobile tire installation in one city. One template
  * for every city in src/data/cityPages.js; the copy that makes each page its
- * own (intro, ZIPs, roads, local notes, FAQ) is in the data, and the parts
+ * own (intro, ZIPs, roads, local notes, FAQ, and on the deepened pages the
+ * optional `around` and `beforeWeCome` sections) is in the data, and the parts
  * every page shares (how it works, the services, the scope) are short on
  * purpose. Seo adds the shop, a Service node with the city as areaServed,
  * and Home > Mobile Tire Service > City (src/components/ui/index.jsx).
@@ -198,6 +199,42 @@ export default function MobileCityPage() {
           </div>
         </div>
       </Section>
+
+      {/* ---------- Roads and areas around the city (deepened pages) ---------- */}
+      {city.around && (
+        <Section className="bg-bone">
+          <SectionHead
+            eyebrow="Around town"
+            title={`Roads and areas around ${city.name}`}
+          />
+          <div className="-mt-2 max-w-3xl space-y-4 text-[15px] leading-relaxed text-ink md:-mt-6">
+            {city.around.map((p) => (
+              <p key={p.slice(0, 40)}>{p}</p>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* ---------- What to know before we come (deepened pages) ---------- */}
+      {city.beforeWeCome && (
+        <Section className="bg-fog">
+          <SectionHead
+            eyebrow="Before the visit"
+            title="What to know before we come"
+          />
+          <div className="-mt-2 max-w-3xl text-[15px] leading-relaxed text-ink md:-mt-6">
+            <p>{city.beforeWeCome.lede}</p>
+            <ul className="mt-4 space-y-3">
+              {city.beforeWeCome.points.map((line) => (
+                <li key={line.slice(0, 40)} className="flex items-start gap-3">
+                  <Check size={18} aria-hidden className="mt-0.5 shrink-0 text-drop" />
+                  {line}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Section>
+      )}
 
       {/* ---------- Local notes ---------- */}
       <Section className="bg-bone">

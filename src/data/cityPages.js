@@ -34,7 +34,11 @@
 //   intro         the hero lede
 //   whereWeWork   paragraphs for "Where we work in {name}"
 //   conditionsTitle, conditions   the local driving or tire notes
-//   faq           4–5 city questions
+//   around        optional: paragraphs for "Roads and areas around {name}"
+//   beforeWeCome  optional: { lede, points[] } for "What to know before we come"
+//                 (both are on the four deepened pages, 2026-10-04; each line
+//                 is sourced in docs/audits/2026-10-04-city-depth.md)
+//   faq           4–7 city questions
 //   nearby        2–4 neighbouring city slugs
 //   seoTitle      <title> before " | TireDrop" (unique, ≤ 60 with suffix)
 //   description   meta description, ≤ 160 characters
@@ -168,21 +172,39 @@ export const CITY_PAGES = [
     name: "Tamarac",
     county: "Broward",
     population: 71897,
-    // The research's Tamarac ZIPs, roads and neighbourhoods are all marked
-    // unverified, so none are listed yet. The ZIP checker covers it.
+    // The research's Tamarac ZIPs are unverified, so none are listed; the ZIP
+    // checker covers it. Roads and neighbourhoods are the Wikipedia ones the
+    // city-depth fact sheet allows (2026-10-04); see docs/audits/2026-10-04-city-depth.md.
     zips: [],
-    areas: [],
-    roads: [],
+    areas: [
+      "Tamarac Lakes Sections One and Two",
+      "Tamarac Lakes North and South",
+      "Mainlands of Tamarac Lakes",
+      "The Woodlands",
+    ],
+    roads: ["Commercial Blvd (SR 870)", "US 441 / SR 7"],
     route:
       "Tamarac is next door to the shop: the van heads north from Oakland Park Blvd on University Dr.",
     intro:
       "Tamarac, a Broward County city of 71,897 people at the 2020 Census, is next door to our Sunrise shop. Buy tires on TireDrop, choose mobile installation, and a technician from the Extreme Tires shop in Sunrise fits them where you live or work in Tamarac: mounted, balanced, lug nuts torqued to spec and pressures set, with your old set hauled away.",
     whereWeWork: [
-      "We don't keep a list of Tamarac neighbourhoods, because the neighbourhood isn't what decides it. The ZIP code where the car is parked is. Broward ZIP codes often cross city lines, so the city name on an address is a poor guide. If the ZIP is in Miami-Dade, Broward or Palm Beach County, the van comes. Type it into the checker below; checkout and the booking form run the same check.",
+      "We name only the Tamarac neighbourhoods we could confirm, and the neighbourhood isn't what decides coverage anyway. The ZIP code where the car is parked is. Broward ZIP codes often cross city lines, so the city name on an address is a poor guide. If the ZIP is in Miami-Dade, Broward or Palm Beach County, the van comes. Type it into the checker below; checkout and the booking form run the same check.",
       "Live behind a gate? Give us the gate code, or the name the guardhouse should have on its list, when you book, and check whether your association wants service vehicles registered ahead of time.",
     ],
     roadside:
       "A flat at home, in a community lot or in a shopping center parking lot in Tamarac doesn't have to wait for a tow. Call during shop hours for flat tire help in Tamarac: the van changes the tire or puts your spare on, and repairs the flat where a repair is possible.",
+    around: [
+      "Commercial Blvd (SR 870) has junctions with Florida's Turnpike and with US 441 (SR 7) in Tamarac, and it meets University Dr (SR 817) at the line between Sunrise and Tamarac. SR 7 is a major boundary reference in the city, with development on both sides of it. A cross street or a landmark on one of those roads helps when you book.",
+      "The neighbourhoods we can confirm by name are Tamarac Lakes, which has named sections (Sections One and Two, Tamarac Lakes North and South, and the Mainlands of Tamarac Lakes), and The Woodlands. If yours isn't on that list, nothing changes: the van goes by the ZIP where the car is parked.",
+    ],
+    beforeWeCome: {
+      lede: "Many Tamarac communities are 55+ condo or single-family communities, and condo and 55+ communities have their own rules for access and parking. This is general advice, not a rule we set.",
+      points: [
+        "Confirm with your association before you book whether service vehicles may come in, and where one may park.",
+        "Tell us where the car is: a numbered space, a covered spot or a visitor lot. The technician needs room beside the car, on the work side.",
+        "If the association wants the visit on its list ahead of time, sort that out before the day, so the technician isn't held at the entrance.",
+      ],
+    },
     conditionsTitle: "Tire notes for Tamarac drivers",
     conditions: [
       "Whatever roads you take, heat is the constant in South Florida. Tire pressure moves about 1 psi for every 10°F, according to NHTSA, so a tire set on a cool morning reads higher by mid-afternoon and drops back overnight. Set it cold, to the number on the driver's door placard, not the maximum printed on the sidewall.",
@@ -209,6 +231,10 @@ export const CITY_PAGES = [
         q: "What if my tire can't be repaired?",
         a: "Under USTMA practice, a puncture up to 1/4 inch in the tread area may be repairable with a plug and patch fitted from the inside, once the tire is off the wheel and inspected. Damage in the sidewall or shoulder can't be repaired, so that tire has to be replaced. Order the new one on TireDrop and we fit it.",
       },
+      {
+        q: "I live in a 55+ community in Tamarac. Can the van come?",
+        a: "Coverage follows the ZIP, not the type of community, so if your ZIP is in Broward, Miami-Dade or Palm Beach County the van can come. Many Tamarac communities are 55+ condo or single-family communities with their own access and parking rules, so check with your association first, then tell us where the car is parked and what the gate needs.",
+      },
     ],
     nearby: ["sunrise-fl", "coral-springs-fl"],
     seoTitle: "Mobile Tire Installation in Tamarac, FL",
@@ -221,9 +247,13 @@ export const CITY_PAGES = [
     county: "Broward",
     population: 134394,
     zips: ["33065", "33067", "33071", "33076"],
-    // Roads and neighbourhoods are marked unverified in the research.
-    areas: [],
-    roads: [],
+    // The research marked roads and neighbourhoods unverified; these are the
+    // city-depth fact sheet's (2026-10-04): Wikipedia, AARoads and coralsprings.gov.
+    areas: [
+      "Sample Rd and University Dr redevelopment hub",
+      "Coral Springs Commerce Park",
+    ],
+    roads: ["Sawgrass Expressway (SR 869)", "Sample Rd", "University Dr"],
     route:
       "The van takes the Sawgrass Expressway or University Dr north from the shop.",
     intro:
@@ -234,6 +264,19 @@ export const CITY_PAGES = [
     ],
     roadside:
       "Picked up a screw on the way to work, or found a flat in a Coral Springs parking lot after errands? That's what the van's flat tire help in Coral Springs is for, during shop hours: the tire repaired on the spot when it qualifies, swapped for your spare when it doesn't.",
+    around: [
+      "Coral Springs borders Parkland to the north, Coconut Creek to the east, Margate and North Lauderdale to the southeast and Tamarac to the south, with the Everglades to the west.",
+      "The Sawgrass Expressway (SR 869) borders the city on its north and west edges. Its exits include Atlantic Blvd (exit 8), Sample Rd (exit 11), Coral Ridge Dr (exit 14) and University Dr (exit 15, on the Parkland and Coral Springs line). Sample Rd and University Dr is the city's redevelopment hub.",
+      "Coral Springs Commerce Park covers 442 acres off the Sawgrass Expressway and is a business park with employers on site, so some cars spend the workday in an office park lot. Fitting tires there while you work is the same job as anywhere else in the city, once the lot has room and the property allows service vehicles.",
+    ],
+    beforeWeCome: {
+      lede: "Two things are worth planning for in Coral Springs: heavy rain, and the lot you park in.",
+      points: [
+        "The City of Coral Springs' Stormwater Master Plan lists \"frequent flooding during strong rain\" as a current challenge, and most canals are not city-managed. After a heavy downpour, look each tire over for nails, cuts and bulges, because water on the road can cover debris.",
+        "At an office park or another workplace, a quick word with property management about service vehicles is worth it. That's general advice, not a rule we set.",
+        "Tell us the building, the lot and where you parked, and leave room beside the car on the work side.",
+      ],
+    },
     conditionsTitle: "Tire notes for Coral Springs drivers",
     conditions: [
       "Florida sun and heat age rubber whether the car is driven or not. Every tire carries a DOT date code on the sidewall, four digits for the week and year it was made, and an older tire can show plenty of tread and still be cracking at the sidewall. Ask the technician to point out the code on the old set and on the new one.",
@@ -260,6 +303,14 @@ export const CITY_PAGES = [
         q: "How do I know it's time for new tires?",
         a: "Check the tread depth and the age. NHTSA and USTMA use 2/32 inch as the replace point, and the DOT code on the sidewall tells you when the tire was made. Our tire check walks you through both, and the technician can measure each tire when the van is there.",
       },
+      {
+        q: "Can the van fit tires at an office park off the Sawgrass Expressway?",
+        a: "If the ZIP of the lot is in our area (the checker tells you), yes, as long as there is room beside your car and the property allows service vehicles. Coral Springs Commerce Park is a 442-acre business park off the Sawgrass Expressway, and any lot like it works the same way: give us the building, the lot and where you parked.",
+      },
+      {
+        q: "Is it worth checking my tires after heavy rain in Coral Springs?",
+        a: "It is. The City of Coral Springs' Stormwater Master Plan lists \"frequent flooding during strong rain\" as a current challenge. Water that stands on a road can cover debris, so after a heavy downpour check each tire for nails, cuts and bulges, and measure the tread. The technician can say which tire can be fixed and which needs replacing.",
+      },
     ],
     nearby: ["tamarac-fl", "sunrise-fl"],
     seoTitle: "Mobile Tire Installation in Coral Springs, FL",
@@ -272,9 +323,32 @@ export const CITY_PAGES = [
     county: "Broward",
     population: 105691,
     zips: ["33314", "33317", "33324", "33325", "33328", "33330", "33331"],
-    areas: ["Pine Island Ridge", "Forest Ridge"],
-    // The research's Davie road list is marked unverified.
-    roads: [],
+    areas: [
+      "Pine Island Ridge",
+      "Forest Ridge",
+      "Flamingo Gardens",
+      "Tree Tops Park",
+      "Long Key Natural Area",
+      "Nova Southeastern University area",
+      "South Florida Education Center area",
+    ],
+    // The research's Davie road list was unverified; these are the roads
+    // Davie's own Local Roads Master Plan names (city-depth fact sheet, 2026-10-04).
+    roads: [
+      "Griffin Rd (SR 818)",
+      "Nova Dr",
+      "Hiatus Rd",
+      "Flamingo Rd",
+      "University Dr (SR 817)",
+      "Nob Hill Rd",
+      "Orange Dr",
+      "Pine Island Rd",
+      "Davie Rd",
+      "Stirling Rd",
+      "Weston Rd",
+      "Sheridan St",
+      "Oakes Rd",
+    ],
     route:
       "The van heads south from the shop on University Dr, or takes I-595.",
     intro:
@@ -285,6 +359,18 @@ export const CITY_PAGES = [
     ],
     roadside:
       "A flat in your Pine Island Ridge driveway, an office parking lot or a side street in Forest Ridge: call during shop hours. Mobile flat tire repair in Davie starts with the technician taking the tire off and checking the inside, then repairing it or fitting your spare.",
+    around: [
+      "Davie's Local Roads Master Plan names thirteen roads, listed above. One of them, Griffin Rd (SR 818), runs through Davie, crosses University Dr (SR 817), has a Florida's Turnpike interchange and forms the Davie and Cooper City border.",
+      "Davie has a strong equestrian character: horseback riding is common, and the Local Roads Master Plan includes an Equestrian Trails layer. Named places include Flamingo Gardens, Tree Tops Park and Long Key Natural Area, along with the Nova Southeastern University and South Florida Education Center campus areas. Whichever one is near you, the van goes by the ZIP where the car is parked.",
+    ],
+    beforeWeCome: {
+      lede: "A few details are worth mentioning when you book a Davie visit. This is general advice, not a rule we set.",
+      points: [
+        "A rural or gravel driveway: say so, and say where on the property the car sits. The technician needs firm, level ground beside the car.",
+        "A gate: give us the gate code when you book.",
+        "A campus or workplace lot: tell us the building and the lot, and check that the property allows service vehicles.",
+      ],
+    },
     conditionsTitle: "Tire notes for Davie drivers",
     conditions: [
       "Building sites, roadwork and storm cleanup all leave screws and nails on the road, and one lodged in the tread can let air out slowly for weeks. Don't pull it out: the fastener is often plugging the hole until the tire comes off the wheel.",
@@ -310,6 +396,14 @@ export const CITY_PAGES = [
       {
         q: "Do you do alignments in Davie?",
         a: "Not by van. An alignment needs a rack, so it happens at the Sunrise shop. If you're getting new tires and the old ones wore unevenly, book the alignment at the shop and the mobile install separately, or have both done in the bay.",
+      },
+      {
+        q: "Can you fit tires at a campus or workplace lot in Davie?",
+        a: "If the lot's ZIP is in our area and the property allows service vehicles, yes. Tell us the building and the lot, check with the property that service vehicles are allowed, and have the keys ready when the technician calls.",
+      },
+      {
+        q: "My address is near Griffin Rd. Is that Davie or Cooper City?",
+        a: "Griffin Rd forms the Davie and Cooper City border, so an address near it can read either name. Use the ZIP: if the ZIP where the car is parked is in Miami-Dade, Broward or Palm Beach County, the van comes, and the checker on this page confirms it.",
       },
     ],
     nearby: ["plantation-fl", "weston-fl", "fort-lauderdale-fl", "sunrise-fl"],
@@ -388,9 +482,25 @@ export const CITY_PAGES = [
     county: "Broward",
     population: 68107,
     zips: ["33326", "33327", "33331", "33332"],
-    // The research's Weston roads and neighbourhoods are marked unverified.
-    areas: [],
-    roads: [],
+    // The research marked these unverified; the city-depth fact sheet
+    // (2026-10-04, Wikipedia and westonfl.org) supplies the ones below.
+    areas: [
+      "Country Isles",
+      "Windmill Ranch",
+      "Emerald Estates",
+      "Indian Trace development district",
+      "Bonaventure development district",
+    ],
+    roads: [
+      "Bonaventure Blvd",
+      "Royal Palm Blvd",
+      "Indian Trace",
+      "Weston Rd",
+      "Griffin Rd (SR 818)",
+      "US 27",
+      "I-75",
+      "SR 84",
+    ],
     route:
       "The van takes Oakland Park Blvd west to the Sawgrass Expressway, then heads south.",
     intro:
@@ -401,6 +511,18 @@ export const CITY_PAGES = [
     ],
     roadside:
       "Flat in the driveway before the school run, or in a Weston shopping plaza lot? Call during shop hours for mobile flat tire repair in Weston. We fix the tire where it sits if the damage is repairable, or swap on your spare, and fit a new tire once you've chosen one.",
+    around: [
+      "Weston's principal local roads are Bonaventure Blvd, Royal Palm Blvd, Indian Trace and Weston Rd. I-75 runs along the city's east edge and, along the north edge, as Alligator Alley. US 27 is on the west, SR 84 runs along the north border and the I-75 service road, and Griffin Rd (SR 818) is near the south border. I-595's western end is at the point where Weston, Sunrise and Davie meet.",
+      "Weston has two development districts, Indian Trace and Bonaventure, and Country Isles, Windmill Ranch and Emerald Estates are named neighbourhoods. The western edge borders the Everglades. None of those names changes coverage: the van goes by the ZIP where the car is parked.",
+    ],
+    beforeWeCome: {
+      lede: "Two things are worth planning for in Weston: standing water after heavy rain, and the gate.",
+      points: [
+        "The City of Weston's stormwater system is a set of interconnected lakes and canals, with more than 2,000 catch basins, 5 pump stations and 2,214 acres of lake and canal, and the city says unobstructed water flow in storms is essential to prevent flooding. Water that stands on the road can cover debris, so look each tire over after a downpour and tell us if the car sat in water.",
+        "Controlled-access communities commonly use a manned gate, a transponder or both. That's general advice, not a TireDrop promise: give us your gate details when you book, so the technician isn't held at the entrance.",
+        "Tell us where the car will be, a driveway, a plaza lot or a street, with room beside it on the work side.",
+      ],
+    },
     conditionsTitle: "Tire notes for Weston drivers",
     conditions: [
       "Uneven wear tells you something. A set that's worn on the inside or outside edge only, or in patches, usually points to alignment or worn suspension parts, and new tires fitted on top of that wear the same way. If your old set looks like that, book an alignment at the Sunrise shop after the install; the van can't do it, because it needs a rack.",
@@ -426,6 +548,14 @@ export const CITY_PAGES = [
       {
         q: "Can the van fit tires on an SUV or a pickup?",
         a: "Yes, for passenger and light truck tires. Tell us the vehicle and the tire size when you book so we can confirm the van's changer and balancer suit the job, or point you to the shop if they don't.",
+      },
+      {
+        q: "Should I check my tires after heavy rain in Weston?",
+        a: "Yes, it's worth a look. Weston's stormwater system is a network of lakes and canals, and the city says unobstructed water flow in storms is essential to prevent flooding. After a downpour, walk around the car, check each tire for nails, cuts and bulges, and measure the tread. A bulge can't be repaired; a nail in the tread area sometimes can be, and the technician finds out with the tire off the wheel.",
+      },
+      {
+        q: "Does it matter which part of Weston I live in?",
+        a: "No. Weston has two development districts, Indian Trace and Bonaventure, and named neighbourhoods such as Country Isles, Windmill Ranch and Emerald Estates, but coverage follows the ZIP code where the car is parked. If it's one of our Broward ZIPs, the van comes, and the ZIP checker on this page confirms it.",
       },
     ],
     nearby: ["sunrise-fl", "davie-fl"],

@@ -79,7 +79,7 @@ test("city pages: the seven wave-1 cities, well formed", () => {
     assert.match(c.slug, /^[a-z]+(-[a-z]+)*-fl$/, c.slug);
     assert.ok(SERVICE_COUNTIES.includes(c.county), `${c.slug}: county ${c.county}`);
     assert.ok(Number.isInteger(c.population) && c.population > 0, c.slug);
-    assert.ok(c.faq.length >= 4 && c.faq.length <= 5, `${c.slug}: ${c.faq.length} FAQs`);
+    assert.ok(c.faq.length >= 4 && c.faq.length <= 7, `${c.slug}: ${c.faq.length} FAQs`);
     assert.ok(c.whereWeWork.length >= 1 && c.conditions.length >= 1, c.slug);
     assert.ok(c.intro.includes(c.name), `${c.slug}: intro never names the city`);
     assert.ok(
@@ -187,6 +187,8 @@ const TEMPLATE_TEXT = [
   "Main roads",
   "Main ZIP codes",
   "Ship to store",
+  "Roads and areas around",
+  "What to know before we come",
   "Local notes",
   "By van",
   "Honest scope",
@@ -224,6 +226,10 @@ export function pageText(c) {
     SHARED.zipLabel, "Check my ZIP",
     c.route,
     SHARED.shopLine, "Ship to store",
+    ...(c.around ? ["Around town", `Roads and areas around ${name}`, ...c.around] : []),
+    ...(c.beforeWeCome
+      ? ["Before the visit", "What to know before we come", c.beforeWeCome.lede, ...c.beforeWeCome.points]
+      : []),
     "Local notes", c.conditionsTitle, ...c.conditions,
     "Roadside flat help", `Flat tire help in ${name}`, c.roadside,
     ...SHARED.roadsideItems.flatMap((s) => [s.title, s.body]),
@@ -276,10 +282,12 @@ export function overlapReport() {
 }
 
 const MIN_WORDS = 700;
-const MAX_WORDS = 1200;
+// 1,200 until the four deepened pages (2026-10-04) added their roads, access
+// and rain sections; the ceiling is still there to stop padding.
+const MAX_WORDS = 1500;
 const MIN_UNIQUE = 0.6;
 
-test("city pages: 700–1,200 words, at least 60% unique to the city", () => {
+test("city pages: 700–1,500 words, at least 60% unique to the city", () => {
   for (const r of overlapReport()) {
     assert.ok(r.words >= MIN_WORDS && r.words <= MAX_WORDS, `${r.slug}: ${r.words} words`);
     assert.ok(
