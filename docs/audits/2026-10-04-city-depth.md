@@ -82,3 +82,9 @@ JSON-LD: no new node. The pages already emitted FAQPage from `city.faq`, so the 
 2. Plantation, Coral Springs and Fort Lauderdale descriptions say only "the van". Name the Extreme Tires van there too?
 3. Tamarac still has no ZIP list (the City of Tamarac site was unreadable). Open on the checklist (#D8), as is Plantation 33388.
 4. After merge: re-submit the sitemap and request indexing for the four deepened city pages. Search Console will drop `/compare` and `/reviews` over the next crawls.
+
+## Review fixes (same day)
+
+- Coral Springs: removed the "business park with employers on site" filler from the section and the office-park FAQ (only "442 acres off the Sawgrass Expressway" remains); the rain FAQ no longer repeats the stormwater quote or the debris advice (the quote now appears once, under "What to know before we come").
+- Tamarac: removed both "we could confirm" phrasings (whereWeWork and `around`).
+- Davie: FAQ now says "have the keys and any gate code ready when you book" (no call step promised); `around` no longer gives a road count and says the roads are "listed above", which is true: the road chips render in the Service area section, above it.

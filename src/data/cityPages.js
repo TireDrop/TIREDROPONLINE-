@@ -188,14 +188,14 @@ export const CITY_PAGES = [
     intro:
       "Tamarac, a Broward County city of 71,897 people at the 2020 Census, is next door to our Sunrise shop. Buy tires on TireDrop, choose mobile installation, and a technician from the Extreme Tires shop in Sunrise fits them where you live or work in Tamarac: mounted, balanced, lug nuts torqued to spec and pressures set, with your old set hauled away.",
     whereWeWork: [
-      "We name only the Tamarac neighbourhoods we could confirm, and the neighbourhood isn't what decides coverage anyway. The ZIP code where the car is parked is. Broward ZIP codes often cross city lines, so the city name on an address is a poor guide. If the ZIP is in Miami-Dade, Broward or Palm Beach County, the van comes. Type it into the checker below; checkout and the booking form run the same check.",
+      "The neighbourhood isn't what decides coverage. The ZIP code where the car is parked is. Broward ZIP codes often cross city lines, so the city name on an address is a poor guide. If the ZIP is in Miami-Dade, Broward or Palm Beach County, the van comes. Type it into the checker below; checkout and the booking form run the same check.",
       "Live behind a gate? Give us the gate code, or the name the guardhouse should have on its list, when you book, and check whether your association wants service vehicles registered ahead of time.",
     ],
     roadside:
       "A flat at home, in a community lot or in a shopping center parking lot in Tamarac doesn't have to wait for a tow. Call during shop hours for flat tire help in Tamarac: the van changes the tire or puts your spare on, and repairs the flat where a repair is possible.",
     around: [
       "Commercial Blvd (SR 870) has junctions with Florida's Turnpike and with US 441 (SR 7) in Tamarac, and it meets University Dr (SR 817) at the line between Sunrise and Tamarac. SR 7 is a major boundary reference in the city, with development on both sides of it. A cross street or a landmark on one of those roads helps when you book.",
-      "The neighbourhoods we can confirm by name are Tamarac Lakes, which has named sections (Sections One and Two, Tamarac Lakes North and South, and the Mainlands of Tamarac Lakes), and The Woodlands. If yours isn't on that list, nothing changes: the van goes by the ZIP where the car is parked.",
+      "Tamarac Lakes has named sections (Sections One and Two, Tamarac Lakes North and South, and the Mainlands of Tamarac Lakes), and The Woodlands is another named area. If yours isn't one of them, nothing changes: the van goes by the ZIP where the car is parked.",
     ],
     beforeWeCome: {
       lede: "Many Tamarac communities are 55+ condo or single-family communities, and condo and 55+ communities have their own rules for access and parking. This is general advice, not a rule we set.",
@@ -267,7 +267,7 @@ export const CITY_PAGES = [
     around: [
       "Coral Springs borders Parkland to the north, Coconut Creek to the east, Margate and North Lauderdale to the southeast and Tamarac to the south, with the Everglades to the west.",
       "The Sawgrass Expressway (SR 869) borders the city on its north and west edges. Its exits include Atlantic Blvd (exit 8), Sample Rd (exit 11), Coral Ridge Dr (exit 14) and University Dr (exit 15, on the Parkland and Coral Springs line). Sample Rd and University Dr is the city's redevelopment hub.",
-      "Coral Springs Commerce Park covers 442 acres off the Sawgrass Expressway and is a business park with employers on site, so some cars spend the workday in an office park lot. Fitting tires there while you work is the same job as anywhere else in the city, once the lot has room and the property allows service vehicles.",
+      "Coral Springs Commerce Park covers 442 acres off the Sawgrass Expressway. Fitting tires in a workplace lot while you work is the same job as anywhere else in the city, once the lot has room and the property allows service vehicles.",
     ],
     beforeWeCome: {
       lede: "Two things are worth planning for in Coral Springs: heavy rain, and the lot you park in.",
@@ -305,11 +305,11 @@ export const CITY_PAGES = [
       },
       {
         q: "Can the van fit tires at an office park off the Sawgrass Expressway?",
-        a: "If the ZIP of the lot is in our area (the checker tells you), yes, as long as there is room beside your car and the property allows service vehicles. Coral Springs Commerce Park is a 442-acre business park off the Sawgrass Expressway, and any lot like it works the same way: give us the building, the lot and where you parked.",
+        a: "If the ZIP of the lot is in our area (the checker tells you), yes, as long as there is room beside your car and the property allows service vehicles. Coral Springs Commerce Park covers 442 acres off the Sawgrass Expressway, and any workplace lot works the same way: give us the building, the lot and where you parked.",
       },
       {
         q: "Is it worth checking my tires after heavy rain in Coral Springs?",
-        a: "It is. The City of Coral Springs' Stormwater Master Plan lists \"frequent flooding during strong rain\" as a current challenge. Water that stands on a road can cover debris, so after a heavy downpour check each tire for nails, cuts and bulges, and measure the tread. The technician can say which tire can be fixed and which needs replacing.",
+        a: "Yes, it is worth a look after a strong storm. Check each tire for nails, cuts and bulges and measure the tread. The technician can say which tire can be fixed and which needs replacing.",
       },
     ],
     nearby: ["tamarac-fl", "sunrise-fl"],
@@ -360,7 +360,7 @@ export const CITY_PAGES = [
     roadside:
       "A flat in your Pine Island Ridge driveway, an office parking lot or a side street in Forest Ridge: call during shop hours. Mobile flat tire repair in Davie starts with the technician taking the tire off and checking the inside, then repairing it or fitting your spare.",
     around: [
-      "Davie's Local Roads Master Plan names thirteen roads, listed above. One of them, Griffin Rd (SR 818), runs through Davie, crosses University Dr (SR 817), has a Florida's Turnpike interchange and forms the Davie and Cooper City border.",
+      "Davie's Local Roads Master Plan names the roads listed above. One of them, Griffin Rd (SR 818), runs through Davie, crosses University Dr (SR 817), has a Florida's Turnpike interchange and forms the Davie and Cooper City border.",
       "Davie has a strong equestrian character: horseback riding is common, and the Local Roads Master Plan includes an Equestrian Trails layer. Named places include Flamingo Gardens, Tree Tops Park and Long Key Natural Area, along with the Nova Southeastern University and South Florida Education Center campus areas. Whichever one is near you, the van goes by the ZIP where the car is parked.",
     ],
     beforeWeCome: {
@@ -399,7 +399,7 @@ export const CITY_PAGES = [
       },
       {
         q: "Can you fit tires at a campus or workplace lot in Davie?",
-        a: "If the lot's ZIP is in our area and the property allows service vehicles, yes. Tell us the building and the lot, check with the property that service vehicles are allowed, and have the keys ready when the technician calls.",
+        a: "If the lot's ZIP is in our area and the property allows service vehicles, yes. Tell us the building and the lot, check with the property that service vehicles are allowed, and have the keys and any gate code ready when you book.",
       },
       {
         q: "My address is near Griffin Rd. Is that Davie or Cooper City?",
