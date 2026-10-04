@@ -50,6 +50,7 @@ the code fits together is in the root [README](../README.md).
 - [2026-10-04-seo-indexing.md](audits/2026-10-04-seo-indexing.md): sitemap, robots, titles, canonicals, JSON-LD and internal links checked against a real build; URL pattern counts, what changed, and what was left for Justin.
 - [2026-10-04-city-depth.md](audits/2026-10-04-city-depth.md): Tamarac, Weston, Coral Springs and Davie city pages deepened from verified facts (source per fact), where the van brand is named, and /compare and /reviews set to noindex.
 - [2026-10-05-local-pages-plan.md](audits/2026-10-05-local-pages-plan.md): ranked build list of the next 25 city and neighborhood pages in the three counties (population snippets, ring ordering, READY or NEEDS-FACT per page, how to build without thin content). Data twin: [local-pages-plan.json](audits/local-pages-plan.json). Plan only, no pages built.
+- [2026-10-05-checkout-options.md](audits/2026-10-05-checkout-options.md): how checkout works today (request-only, Shopify draft orders), four ways to take payment online with an install slot compared, the recommendation (stay on Shopify, pay after fitment first), a claims ledger, read-only Chrome prompts and the decisions Justin needs to make. Read it before choosing a payment processor.
 
 ## drafts/: ready-to-drop-in copy, not live
 
