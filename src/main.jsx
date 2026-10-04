@@ -5,6 +5,7 @@ import App from "./App.jsx";
 import { CartProvider } from "./context/CartContext.jsx";
 import { CompareProvider } from "./context/CompareContext.jsx";
 import { VehicleProvider } from "./context/VehicleContext.jsx";
+import { protectEarlyOnProxy } from "./components/layout/LanguageControl.jsx";
 import { watchTyped } from "./lib/keepTyped.js";
 import { preloadPages } from "./lib/lazyPage.js";
 import "./index.css";
@@ -20,6 +21,10 @@ const root = document.getElementById("root");
 // over is recorded from here on, and put back if React replaces the markup
 // instead of hydrating it (src/lib/keepTyped.js).
 const typed = watchTyped(root);
+
+// On translate.goog, start keeping prices and sizes out of the translation now,
+// before hydration (see LanguageControl.jsx).
+protectEarlyOnProxy();
 
 /** Runs once, in the layout phase of the first commit: after the whole tree
  *  is in the DOM, before the browser paints it. */

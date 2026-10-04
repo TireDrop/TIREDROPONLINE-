@@ -354,6 +354,17 @@ function warmUp() {
   if (ELEMENT_ENABLED && !onProxy()) loadElement().catch(() => {});
 }
 
+/**
+ * Called from main.jsx before anything loads. On translate.goog Google is
+ * already rewriting the page, and its observer would otherwise get to every
+ * node React adds (a product page's price, tire size) before ours exists,
+ * because the protector used to start only after hydration. Starting it here
+ * puts it first in line, whatever the network and font loading do to timing.
+ */
+export function protectEarlyOnProxy() {
+  if (onProxy()) activateSafety();
+}
+
 let booted = false;
 
 /** Runs once, after hydration: picks up a translation already in progress. */
