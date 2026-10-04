@@ -127,6 +127,7 @@ export const RESOURCE_DOMAINS = [
   "konigwheels.com",
   "methodracewheels.com",
   "wheelpros.com",
+  "helpcenter.kmcwheels.com", // KMC Wheels (a Wheel Pros brand): the maker's own support center (offset, backspace, specs). Listed by host: the brand site routes buyers to dealers
   "tesla.com",
   "subaru.com",
   "toyota.com",
