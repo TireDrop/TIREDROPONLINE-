@@ -54,6 +54,22 @@ test("resources: allowlist by domain, suffix and pattern; a competitor never cou
   assert.ok(!isResourceHost("gov.example.com"));
 });
 
+test("KMC Wheels help center is a maker resource; look-alike retailers stay competitors", () => {
+  // Decision 2026-10-04: helpcenter.kmcwheels.com is the wheel maker's own support center, not a retailer.
+  assert.ok(isResourceHost("helpcenter.kmcwheels.com"));
+  assert.ok(!isCompetitorHost("helpcenter.kmcwheels.com"));
+  assert.ok(isResourceHost("helpcenter.wheelpros.com"), "the parent company's help center is a resource too");
+  // Listed by host, so the rest of the domain and look-alikes are not blanket-allowed.
+  assert.ok(!isResourceHost("shop.kmcwheels.com"));
+  assert.ok(!isResourceHost("nothelpcenter.kmcwheels.com.example.org"));
+  assert.ok(!isResourceHost("helpcenter.kmcwheels.com.example.org"));
+  assert.ok(!isResourceHost("helpcenter-kmcwheels.com"));
+  // A retailer on a look-alike host is still a competitor, and a competitor never counts as a resource.
+  assert.ok(isCompetitorHost("www.tirerack.com"));
+  assert.ok(isCompetitorHost("shop.tesla.com") && !isResourceHost("shop.tesla.com"));
+  assert.ok(!isCompetitorHost("helpcenter.kmcwheels.com"));
+});
+
 test("names: case-insensitive, word boundaries, either apostrophe, any spacing", () => {
   assert.deepEqual(names("Per TIRE RACK and discount tire"), ["Tire Rack", "Discount Tire"]);
   assert.deepEqual(names("America’s Tire and Sam's Club"), ["America's Tire", "Sam's Club"]);
