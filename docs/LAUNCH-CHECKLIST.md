@@ -5,9 +5,11 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-04 (Google fonts self-hosted: no third-party font requests, 118 to 82 KB, phone home layout shift 0.20 to 0, LCP level in the lab; translate proxy now protects prices and sizes at startup; locator names your city or neighborhood (live, eb82ff5); header phone tap targets raised to 44 px (live, 9998032); door-jamb size fix and KMC help center resource live (822e5fc); Google "Request indexing" retried (Justin))_
+_Last updated: 2026-10-04 (Gallery taken off the site until there are photos, /gallery 302s to /about; Google fonts self-hosted: no third-party font requests, 118 to 82 KB, phone home layout shift 0.20 to 0, LCP level in the lab; translate proxy now protects prices and sizes at startup; locator names your city or neighborhood (live, eb82ff5); header phone tap targets raised to 44 px (live, 9998032); door-jamb size fix and KMC help center resource live (822e5fc); Google "Request indexing" retried (Justin))_
 
 ## Site fixes (Claude)
+- [x] ~~Gallery taken off the site until there are photos (page parked in src/_parked/gallery, /gallery 302s to /about, out of the sitemap)~~ (`b7eef20`, branch preview/gallery-off)
+- [ ] Bring the Gallery back when there are real photos (restore steps in src/_parked/gallery/README.md; waiting on Justin's photos)
 - [x] ~~Use my location works on phones + PCs, auto-detects on load~~ (`80625fa` + `0dffb36`, branch preview/local-delivery, verified on the Vercel preview: Permissions-Policy `geolocation=()` → `(self)`; new `GET /api/geo` (rewritten to the status function: Hobby allows 12 functions) approximate location from the connection, prefilled and labelled; device location asked automatically and remembered "no"; iPhone and desktop help text)
   - [x] ~~Privacy policy covers the location check (sections 1 and 4)~~ (2026-10-03)
   - [x] ~~Locator shows your city/neighborhood instead of a ZIP~~ (`5782530`, shipped to main: connection answer says "near Sunrise, FL" from /api/geo; device answer says "near Wynwood, Miami, FL" from BigDataCloud's keyless client-side reverse geocode, coordinates rounded to ~100 m, nothing stored; privacy policy sections 1 and 4, FAQ and note updated; live geocoder call unverified until the preview is tested on a phone)
