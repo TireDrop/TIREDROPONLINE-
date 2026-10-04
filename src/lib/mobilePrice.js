@@ -32,3 +32,26 @@ export function mobileCoverageLine({ place, county, area }) {
     ? `Mobile van in ${place}${county ? `, ${county} County` : ""}`
     : `Mobile van in ${area}`;
 }
+
+// The Spanish pages (/es/instalacion-movil, src/data/spanishPages.js) read the
+// same one price: the number and the unit come from the catalog, only the words
+// around them are Spanish. A unit with no Spanish here gives no line rather
+// than a price with the wrong unit.
+const UNIT_ES = { "per tire": "por llanta", "per wheel": "por rueda" };
+
+/** `{ lead, from, unit, text }` in Spanish, e.g. "Instalación desde $25 por llanta", or null. */
+export function mobilePriceLineEs(service = INSTALL_SERVICE) {
+  const quote = installQuote(service);
+  const unit = quote && UNIT_ES[quote.unit.trim().toLowerCase()];
+  if (!quote || !unit) return null;
+  const lead = "Instalación";
+  const from = `desde $${dollars(quote.price)}`;
+  return { lead, from, unit, text: `${lead} ${from} ${unit}` };
+}
+
+/** "Camioneta móvil en Hialeah, condado de Miami-Dade" or "Camioneta móvil en <area>". */
+export function mobileCoverageLineEs({ place, county, area }) {
+  return place
+    ? `Camioneta móvil en ${place}${county ? `, condado de ${county}` : ""}`
+    : `Camioneta móvil en ${area}`;
+}

@@ -38,6 +38,7 @@ import {
   languageLabel,
   mergeGoogleLanguages,
   originalUrl,
+  pageLanguage,
   proxyLanguage,
 } from "../../lib/translate.js";
 
@@ -106,12 +107,15 @@ function writeStored(value) {
   }
 }
 
+/** The language this page is written in ("es" on the Spanish test pages). */
+const sourceLanguage = () => pageLanguage(window.location.pathname);
+
 function setGoogtrans(code) {
   const domains = cookieDomains(window.location.hostname);
   for (const domain of domains) {
     const scope = domain ? `; domain=${domain}` : "";
     document.cookie = code
-      ? `googtrans=${googtransValue(code)}; path=/${scope}; SameSite=Lax`
+      ? `googtrans=${googtransValue(code, sourceLanguage())}; path=/${scope}; SameSite=Lax`
       : `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${scope}`;
     if (code) return; // writing once, host-only, is enough
   }
@@ -238,7 +242,7 @@ function loadElement() {
     window.tdGoogleTranslateInit = () => {
       try {
         new window.google.translate.TranslateElement(
-          { pageLanguage: "en", autoDisplay: false },
+          { pageLanguage: sourceLanguage(), autoDisplay: false },
           "td-gt-element",
         );
         window.clearTimeout(timer);
@@ -315,6 +319,8 @@ function goToFallback(code) {
 /** What the control does when a language is picked. */
 async function chooseLanguage(code) {
   if (!isValidCode(code)) return;
+  // Already written in that language (Español on a Spanish page): nothing to do.
+  if (code === sourceLanguage()) return;
   if (onProxy() || !ELEMENT_ENABLED) {
     goToFallback(code);
     return;

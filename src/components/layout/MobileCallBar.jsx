@@ -28,11 +28,12 @@ export default function MobileCallBar() {
   if (!bar) return null;
 
   const { action } = bar;
+  const es = bar.lang === "es";
   const Icon = action ? ICONS[action.icon] ?? ShoppingCart : null;
 
   return (
     <nav
-      aria-label="Quick actions"
+      aria-label={es ? "Acciones rápidas" : "Quick actions"}
       className="fixed inset-x-0 bottom-0 z-40 min-h-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] border-t border-graphite bg-ink/95 shadow-[0_-10px_28px_-12px_rgba(7,14,26,.55)] backdrop-blur lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
@@ -54,10 +55,18 @@ export default function MobileCallBar() {
           // that outranks a plain utility, and alone in the row it would
           // shrink to that.
           className={`${action ? "btn-ghost-light flex-[2]" : "btn-primary flex-1"} !min-h-[46px] min-w-0 whitespace-nowrap px-3 py-3 text-[15px]`}
-          aria-label={`Call TireDrop at ${BUSINESS.phone}`}
+          aria-label={
+            es
+              ? `Llamar a TireDrop al ${BUSINESS.phone}`
+              : `Call TireDrop at ${BUSINESS.phone}`
+          }
         >
           <Phone size={17} aria-hidden />
-          {action ? "Call" : `Call ${BUSINESS.phone}`}
+          {action
+            ? es
+              ? "Llamar"
+              : "Call"
+            : `Call ${BUSINESS.phone}`}
         </a>
       </div>
     </nav>

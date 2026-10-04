@@ -22,6 +22,15 @@
 export const ELEMENT_ENABLED = true;
 export const ELEMENT_SRC = "https://translate.google.com/translate_a/element.js";
 export const SOURCE_LANG = "en";
+
+/**
+ * The language a page is written in: Spanish under /es/ (the native Spanish
+ * test pages, src/data/spanishRoutes.js), English everywhere else. The
+ * translator must be told, or it would treat Spanish text as English.
+ */
+export function pageLanguage(pathname) {
+  return /^\/es(\/|$)/.test(pathname ?? "") ? "es" : SOURCE_LANG;
+}
 export const STORAGE_KEY = "td-translate";
 
 /**
@@ -310,11 +319,12 @@ export function proxyLanguage(href) {
  */
 export function buildFallbackUrl(code, pageHref) {
   if (!isValidCode(code)) throw new Error(`Not a language code: ${code}`);
+  const original = originalUrl(pageHref);
   const params = new URLSearchParams({
-    sl: SOURCE_LANG,
+    sl: pageLanguage(new URL(original).pathname),
     tl: code,
     hl: code,
-    u: originalUrl(pageHref),
+    u: original,
   });
   return `https://translate.google.com/translate?${params}`;
 }
@@ -325,7 +335,7 @@ export function buildFallbackUrl(code, pageHref) {
  * variant it may have been written under.
  * ------------------------------------------------------------------------- */
 
-export const googtransValue = (code) => `/${SOURCE_LANG}/${code}`;
+export const googtransValue = (code, source = SOURCE_LANG) => `/${source}/${code}`;
 
 /** Domain attributes to clear googtrans under: none, the host, and each parent. */
 export function cookieDomains(hostname) {

@@ -9,6 +9,19 @@ import {
   zip5,
 } from "../../data/serviceArea.js";
 
+// The Spanish pages' wording (lang="es"). Same rule, same links.
+const ES = {
+  label: "Código postal (ZIP) donde estará el vehículo",
+  placeholder: "ej. 33351",
+  button: "Verificar mi código postal",
+  invalid: "Escriba un código postal de cinco dígitos, como 33351.",
+  inside: "está dentro del área móvil. La camioneta puede ir a donde usted está.",
+  book: "Reserve una instalación móvil",
+  outside: (area) => `está fuera de ${area}, así que la camioneta no puede ir allí. Las llantas igual se envían gratis a los 48 estados contiguos y DC.`,
+  shipping: "Cómo funciona el envío (en inglés)",
+  area: "los condados de Miami-Dade, Broward y Palm Beach",
+};
+
 /**
  * "Does the van come to my ZIP?" The same rule checkout and /schedule use
  * (isInServiceArea in src/data/serviceArea.js), answered on the page. Only a
@@ -20,8 +33,10 @@ import {
  */
 export default function ZipCheck({
   label = "ZIP code where the car will be parked",
+  lang = "en",
   className = "",
 }) {
+  const es = lang === "es";
   const id = useId();
   const [result, setResult] = useState(null);
 
@@ -41,7 +56,7 @@ export default function ZipCheck({
             htmlFor={`${id}-zip`}
             className="label"
           >
-            {label}
+            {es ? ES.label : label}
           </label>
           <input
             id={`${id}-zip`}
@@ -49,33 +64,37 @@ export default function ZipCheck({
             inputMode="numeric"
             autoComplete="postal-code"
             maxLength={10}
-            placeholder="e.g. 33351"
+            placeholder={es ? ES.placeholder : "e.g. 33351"}
             className="field"
             aria-describedby={`${id}-result`}
           />
         </div>
         <button type="submit" className="btn-dark min-h-[44px] shrink-0">
           <MapPin size={16} aria-hidden />
-          Check my ZIP
+          {es ? ES.button : "Check my ZIP"}
         </button>
       </form>
 
       <div id={`${id}-result`} aria-live="polite" className="mt-3 text-sm leading-relaxed">
         {result?.kind === "invalid" && (
-          <p className="text-smoke">Enter a five-digit ZIP code, like 33351.</p>
+          <p className="text-smoke">
+            {es ? ES.invalid : "Enter a five-digit ZIP code, like 33351."}
+          </p>
         )}
         {result?.kind === "in" && (
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-ink">
             <Check size={16} aria-hidden className="shrink-0 text-drop" />
             <span>
-              <strong>{result.zip}</strong> is in the mobile area. The van can
-              come to you.
+              <strong>{result.zip}</strong>{" "}
+              {es
+                ? ES.inside
+                : "is in the mobile area. The van can come to you."}
             </span>
             <Link
               to="/schedule?service=tire-installation"
               className="inline-flex min-h-[44px] items-center gap-1 font-display font-bold text-drop hover:text-dive"
             >
-              Book a mobile install
+              {es ? ES.book : "Book a mobile install"}
               <ArrowRight size={14} aria-hidden />
             </Link>
           </p>
@@ -84,11 +103,17 @@ export default function ZipCheck({
           <p className="flex items-start gap-2 text-ink">
             <X size={16} aria-hidden className="mt-0.5 shrink-0 text-smoke" />
             <span>
-              <strong>{result.zip}</strong> is outside {SERVICE_AREA_LABEL},
-              so the van can&rsquo;t come there. Tires still ship free to{" "}
-              {BUSINESS.shipping.area}.{" "}
+              <strong>{result.zip}</strong>{" "}
+              {es ? (
+                ES.outside(ES.area)
+              ) : (
+                <>
+                  is outside {SERVICE_AREA_LABEL}, so the van can&rsquo;t come
+                  there. Tires still ship free to {BUSINESS.shipping.area}.
+                </>
+              )}{" "}
               <Link to="/shipping" className="text-drop underline hover:text-dive">
-                How shipping works
+                {es ? ES.shipping : "How shipping works"}
               </Link>
             </span>
           </p>

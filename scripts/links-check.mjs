@@ -27,6 +27,12 @@ import { fileURLToPath } from "node:url";
 
 import { TOOL_PAGES } from "../src/components/demos/toolPages.js";
 import {
+  ES_HUB_PATH,
+  SPANISH_PAGES_INDEXABLE,
+  SPANISH_TWINS,
+  esCityPath,
+} from "../src/data/spanishRoutes.js";
+import {
   anchorHrefs,
   articleSendsOn,
   isArticleRoute,
@@ -168,7 +174,52 @@ const parkedIssues = parkedProblems({
 console.log(`\nParked routes (must not be linked, built or in the sitemap): ${parkedHits.length + parkedIssues.length} problem(s)`);
 for (const p of [...parkedHits, ...parkedIssues]) console.log(`  ${p}`);
 
+// The Spanish test pages (src/data/spanishRoutes.js): both are built, say
+// <html lang="es">, link to their English twin, to each other and to the
+// booking page and the phone; and the English pages link to them, and name
+// them in hreflang, only while SPANISH_PAGES_INDEXABLE is true.
+const spanishIssues = [];
+{
+  const need = (cond, msg) => cond || spanishIssues.push(msg);
+  const hrefsOf = (route) => anchorHrefs(pages.get(route)?.html ?? "").map((h) => routeOf(h) ?? h);
+  const esLinks = (route) => hrefsOf(route).filter((r) => r.startsWith("/es/"));
+  for (const [en, es] of SPANISH_TWINS) {
+    const esPage = pages.get(es);
+    const enPage = pages.get(en);
+    need(esPage, `${es} is not built`);
+    need(enPage, `${en} is not built`);
+    if (!esPage || !enPage) continue;
+    need(/<html lang="es">/.test(esPage.html), `${es}: <html lang> is not "es"`);
+    need(/<html lang="en">/.test(enPage.html), `${en}: <html lang> is not "en"`);
+    need(hrefsOf(es).includes(en), `${es} has no link to its English twin ${en}`);
+    need(
+      hrefsOf(es).includes("/schedule") && esPage.html.includes("/schedule?service=tire-installation"),
+      `${es} has no booking link`,
+    );
+    need(esPage.html.includes('href="tel:+19547731896"'), `${es} has no tap-to-call link`);
+    need(esPage.noindex === !SPANISH_PAGES_INDEXABLE, `${es}: noindex is ${esPage.noindex} with SPANISH_PAGES_INDEXABLE=${SPANISH_PAGES_INDEXABLE}`);
+    const alternates = [...enPage.html.matchAll(/<link rel="alternate" hreflang="([^"]+)"/g)].map((m) => m[1]);
+    if (SPANISH_PAGES_INDEXABLE) {
+      need(hrefsOf(en).includes(es), `${en} has no link to its Spanish twin ${es}`);
+      for (const page of [en, es])
+        need(
+          ["en-US", "es-US", "x-default"].every((c) => pages.get(page).html.includes(`hreflang="${c}"`)),
+          `${page} is missing an hreflang`,
+        );
+    } else {
+      need(!hrefsOf(en).includes(es), `${en} links to ${es} while the Spanish pages are switched off`);
+      need(!alternates.length, `${en} carries hreflang while the Spanish pages are switched off`);
+      need(!/hreflang=/.test(esPage.html), `${es} carries hreflang while it is switched off`);
+    }
+  }
+  need(esLinks(ES_HUB_PATH).includes(esCityPath("hialeah-fl")), "the Spanish hub does not link to the Spanish Hialeah page");
+  need(hrefsOf(esCityPath("hialeah-fl")).includes(ES_HUB_PATH), "the Spanish Hialeah page does not link to the Spanish hub");
+  console.log(`\nSpanish test pages (${SPANISH_PAGES_INDEXABLE ? "indexable" : "noindex"}): ${spanishIssues.length} problem(s)`);
+  for (const p of spanishIssues) console.log(`  ${p}`);
+}
+
 const problems = [];
+if (spanishIssues.length) problems.push(`${spanishIssues.length} Spanish-page problem(s)`);
 if (parkedHits.length || parkedIssues.length) problems.push(`${parkedHits.length + parkedIssues.length} parked-route problem(s)`);
 if (broken.length) problems.push(`${broken.length} broken internal link(s)`);
 if (indexableOrphans.length) problems.push(`${indexableOrphans.length} indexable orphan page(s)`);

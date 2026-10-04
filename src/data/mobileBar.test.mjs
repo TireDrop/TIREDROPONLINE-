@@ -58,3 +58,16 @@ test("everything else keeps the default", () => {
     assert.deepEqual(action(p), DEFAULT_ACTION, p);
   }
 });
+
+test("Spanish mobile pages book the van, with the bar in Spanish", () => {
+  for (const p of ["/es/instalacion-movil", "/es/instalacion-movil/hialeah-fl", "/es/instalacion-movil/"]) {
+    const bar = mobileBarFor(p);
+    assert.equal(bar.lang, "es", p);
+    assert.deepEqual(bar.action, {
+      to: "/schedule?service=tire-installation",
+      label: "Reservar",
+      icon: "calendar",
+    });
+  }
+  assert.equal(mobileBarFor("/mobile-service").lang, undefined);
+});

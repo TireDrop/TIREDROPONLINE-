@@ -4,10 +4,18 @@ import { ArrowRight, MapPin, Phone } from "lucide-react";
 
 import { BUSINESS } from "../../data/business.js";
 import { SERVICE_AREA_LABEL } from "../../data/serviceArea.js";
-import { mobileCoverageLine, mobilePriceLine } from "../../lib/mobilePrice.js";
+import {
+  mobileCoverageLine,
+  mobileCoverageLineEs,
+  mobilePriceLine,
+  mobilePriceLineEs,
+} from "../../lib/mobilePrice.js";
 
 /** The booking route the mobile pages and the phone action bar share. */
 export const MOBILE_BOOK = "/schedule?service=tire-installation";
+
+/** The three counties in Spanish, for the Spanish strip's coverage line. */
+export const SERVICE_AREA_LABEL_ES = "Miami-Dade, Broward y Palm Beach";
 
 /**
  * Starting price, service area and a one-tap Book button for the mobile van,
@@ -21,16 +29,22 @@ export const MOBILE_BOOK = "/schedule?service=tire-installation";
  *   variant "card": on a light card (home), Book plus whatever `children` adds.
  *
  * `place` and `county` name a city page; leave them out for the three counties.
+ * `lang="es"` is the Spanish pages' strip: same price source and same links,
+ * Spanish words ("Instalación desde $25 por llanta", Reservar, Llamar).
  */
 export default function MobilePriceStrip({
   place,
   county,
   variant = "hero",
+  lang = "en",
   children,
   className = "",
 }) {
-  const price = mobilePriceLine();
-  const coverage = mobileCoverageLine({ place, county, area: SERVICE_AREA_LABEL });
+  const es = lang === "es";
+  const price = es ? mobilePriceLineEs() : mobilePriceLine();
+  const coverage = es
+    ? mobileCoverageLineEs({ place, county, area: SERVICE_AREA_LABEL_ES })
+    : mobileCoverageLine({ place, county, area: SERVICE_AREA_LABEL });
   const hero = variant === "hero";
 
   return (
@@ -72,13 +86,14 @@ export default function MobilePriceStrip({
           to={MOBILE_BOOK}
           className={`btn-primary min-h-[48px] ${hero ? "flex-1 basis-40" : "btn-sm !min-h-[44px]"}`}
         >
-          Book your install
+          {es ? "Reservar instalación" : "Book your install"}
           <ArrowRight size={18} aria-hidden />
         </Link>
         {hero ? (
           <a href={BUSINESS.phoneHref} className="btn-ghost-light min-h-[48px]">
             <Phone size={18} aria-hidden />
-            Call<span className="hidden sm:inline"> {BUSINESS.phone}</span>
+            {es ? "Llamar" : "Call"}
+            <span className="hidden sm:inline"> {BUSINESS.phone}</span>
           </a>
         ) : (
           children

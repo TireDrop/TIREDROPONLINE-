@@ -124,7 +124,7 @@ export function articleSendsOn(html, toolPaths = []) {
  */
 export function mainContentHtml(html) {
   const m = /<main\b[^>]*>([\s\S]*)<\/main>/i.exec(String(html ?? ""));
-  return m ? m[1].replace(/<nav\b[^>]*aria-label="Breadcrumb"[\s\S]*?<\/nav>/i, "") : "";
+  return m ? m[1].replace(/<nav\b[^>]*aria-label="(?:Breadcrumb|Ruta de navegación)"[\s\S]*?<\/nav>/i, "") : "";
 }
 
 /** True when the page's robots meta says noindex. */

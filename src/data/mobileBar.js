@@ -6,8 +6,9 @@ import { getService } from "./services.js";
  * hydrating client always agree on it.
  *
  * Returns `null` when the bar stays away, otherwise
- * `{ action: { to, label, icon } | null }`: the lit button, or none when the
- * page only gets a full-width Call button. Call is always there.
+ * `{ action: { to, label, icon } | null, lang? }`: the lit button, or none when
+ * the page only gets a full-width Call button. Call is always there. `lang` is
+ * "es" on the Spanish pages, for the bar's own words.
  */
 
 /** Product pages own the bottom of a phone screen with their own buy bar. */
@@ -41,6 +42,14 @@ export function mobileBarFor(pathname = "/") {
   // Shopping-for bar), so the bar takes them on to what they picked.
   if (path === "/tires") {
     return { action: { to: "/cart", label: "Cart", icon: "cart" } };
+  }
+
+  // The Spanish mobile pages book the van too, with the bar in Spanish.
+  if (path === "/es/instalacion-movil" || path.startsWith("/es/instalacion-movil/")) {
+    return {
+      action: { to: BOOK_INSTALL, label: "Reservar", icon: "calendar" },
+      lang: "es",
+    };
   }
 
   // The mobile hub and every city page under it book the van.

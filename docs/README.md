@@ -28,6 +28,7 @@ the code fits together is in the root [README](../README.md).
 - [deploy.md](ops/deploy.md): Vercel project settings, every `/api` endpoint, every server environment variable, local `vercel dev`, and the Shopify → Vercel cutover checklist. Use it for any deploy or env change.
 - [domain-migration-2026-09-28.md](ops/domain-migration-2026-09-28.md): record of moving tiredroponline.com to Vercel and Shopify to shop.tiredroponline.com, with the rollback and follow-ups.
 - [turn-on-the-forms.md](ops/turn-on-the-forms.md): runbook for switching the site's forms on and checking a lead reaches info@.
+- [spanish-pages.md](ops/spanish-pages.md): the two Spanish test pages, the `SPANISH_PAGES_INDEXABLE` switch (noindex until a native speaker approves), how to turn them on, and the reviewer's checklist.
 
 ## content/: Learn and Blog
 

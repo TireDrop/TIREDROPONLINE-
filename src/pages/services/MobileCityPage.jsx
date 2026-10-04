@@ -21,6 +21,7 @@ import {
   SectionHead,
   Seo,
 } from "../../components/ui/index.jsx";
+import TwinLink from "../../components/services/TwinLink.jsx";
 import MobilePriceStrip, {
   MOBILE_BOOK,
 } from "../../components/services/MobilePriceStrip.jsx";
@@ -35,6 +36,7 @@ import {
   getCityPage,
 } from "../../data/cityPages.js";
 import { MOBILE_SERVICES } from "../../data/services.js";
+import { twinPath } from "../../data/spanishRoutes.js";
 
 const BOOK = MOBILE_BOOK;
 
@@ -131,7 +133,10 @@ export default function MobileCityPage() {
         title={`Mobile Tire Installation in ${city.name}, FL`}
         lede={city.intro}
         lead={<MobilePriceStrip place={city.name} county={city.county} />}
-      />
+      >
+        {/* Only where the page has a Spanish twin and the twin is switched on. */}
+        {twinPath(path) && <TwinLink path={path} />}
+      </PageHero>
 
       {/* ---------- How it works (shared, short) ---------- */}
       <Section className="bg-bone">

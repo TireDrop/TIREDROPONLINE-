@@ -174,7 +174,7 @@ const FAKE_TRANSLATOR = String.raw`
       sel.addEventListener("change", function () {
         if (sel.value) window.__startFakeTranslation(sel.value);
       });
-      var m = /(?:^|; )googtrans=\/en\/([^;]+)/.exec(document.cookie);
+      var m = /(?:^|; )googtrans=\/(?:en|es)\/([^;]+)/.exec(document.cookie);
       if (m) { sel.value = m[1]; window.__startFakeTranslation(m[1]); }
     },
   };
@@ -704,6 +704,51 @@ try {
     await h.page.getByRole("button", { name: "Translate", exact: true }).click();
     await h.page.waitForURL((u) => u.hostname === "translate.google.com");
     assert(new URL(h.page.url()).searchParams.get("tl") === "vi", h.page.url());
+    await h.context.close();
+  });
+
+  /* ----------------------- 5b. the Spanish test pages ----------------------- */
+
+  // /es/instalacion-movil is already Spanish (<html lang="es">): the control
+  // must not translate it "from English" into Spanish, and a pick of another
+  // language must tell Google the page is Spanish (sl=es).
+  await check("1440 Spanish page: Español is a no-op (no cookie, no navigation); another language goes through Google with sl=es", async () => {
+    const h = await open(1440, { element: "fail" });
+    await h.page.goto(`${BASE}/es/instalacion-movil`);
+    await hydrated(h.page);
+    assert((await h.page.evaluate(() => document.documentElement.lang)) === "es", "html lang is not es");
+    await openDesktopControl(h.page);
+    await h.page.getByRole("button", { name: "Español" }).click();
+    await sleep(500);
+    const state = await h.page.evaluate(() => ({
+      href: location.href,
+      cookie: document.cookie.includes("googtrans"),
+      translated: document.documentElement.classList.contains("translated-ltr"),
+    }));
+    assert(state.href === `${BASE}/es/instalacion-movil`, `navigated: ${state.href}`);
+    assert(!state.cookie && !state.translated, `Español translated a Spanish page: ${JSON.stringify(state)}`);
+    if ((await languageButton(h.page).getAttribute("aria-expanded")) !== "true") await openDesktopControl(h.page);
+    await h.page.getByRole("button", { name: "Português" }).click();
+    await h.page.waitForURL((u) => u.hostname === "translate.google.com" && u.pathname === "/translate");
+    const url = new URL(h.page.url());
+    assert(url.searchParams.get("sl") === "es", `sl ${url.searchParams.get("sl")}`);
+    assert(url.searchParams.get("tl") === "pt", `tl ${url.searchParams.get("tl")}`);
+    assert(url.searchParams.get("u") === `${BASE}/es/instalacion-movil`, `u ${url.searchParams.get("u")}`);
+    await h.context.close();
+  });
+
+  await check("1440 Spanish page, element mode: the googtrans cookie says /es/<code> and the page translates with its prices intact", async () => {
+    const h = await open(1440);
+    await h.page.goto(`${BASE}/es/instalacion-movil/hialeah-fl`);
+    await hydrated(h.page);
+    await openDesktopControl(h.page);
+    await h.page.getByRole("button", { name: "Português" }).click();
+    await waitTranslated(h.page, "pt");
+    const cookie = await h.page.evaluate(() => document.cookie);
+    assert(/googtrans=\/es\/pt/.test(cookie), `cookie: ${cookie}`);
+    const bad = await protectedIntact(h.page);
+    assert(!bad.length, bad.join("; "));
+    noErrors(h.errors);
     await h.context.close();
   });
 

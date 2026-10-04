@@ -109,6 +109,11 @@ const MobileServicePage = lazyPage("pages/services/MobileServicePage.jsx", () =>
 const MobileCityPage = lazyPage("pages/services/MobileCityPage.jsx", () =>
   import("./pages/services/MobileCityPage.jsx"),
 );
+// The Spanish test pages (/es/instalacion-movil and Hialeah): noindex until a
+// native speaker approves the copy (src/data/spanishRoutes.js).
+const SpanishMobilePage = lazyPage("pages/services/SpanishMobilePage.jsx", () =>
+  import("./pages/services/SpanishMobilePage.jsx"),
+);
 const AutoServicePage = lazyPage("pages/services/AutoServicePage.jsx", () =>
   import("./pages/services/AutoServicePage.jsx"),
 );
@@ -295,6 +300,14 @@ export default function App() {
             <Route
               path="/mobile-service/:city"
               element={<MobileCityPage />}
+            />
+            <Route
+              path="/es/instalacion-movil"
+              element={<SpanishMobilePage kind="hub" />}
+            />
+            <Route
+              path="/es/instalacion-movil/:city"
+              element={<SpanishMobilePage kind="city" />}
             />
             <Route path="/auto-service" element={<AutoServicePage />} />
             <Route path="/services/:slug" element={<ServiceDetailPage />} />
