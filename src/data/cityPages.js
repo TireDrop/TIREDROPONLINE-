@@ -213,7 +213,7 @@ export const CITY_PAGES = [
     nearby: ["sunrise-fl", "coral-springs-fl"],
     seoTitle: "Mobile Tire Installation in Tamarac, FL",
     description:
-      "TireDrop tires fitted at your Tamarac, FL home or gated community by the Extreme Tires van from Sunrise. How the ZIP check works and what to have ready.",
+      "TireDrop tires fitted at your Tamarac, FL home or gated community by the van from our Sunrise shop. How the ZIP check works and what to have ready.",
   },
   {
     slug: "coral-springs-fl",
@@ -431,7 +431,7 @@ export const CITY_PAGES = [
     nearby: ["sunrise-fl", "davie-fl"],
     seoTitle: "Mobile Tire Installation in Weston, FL",
     description:
-      "Bought tires on TireDrop? The Extreme Tires van fits them at your Weston, FL home or workplace. Weston ZIPs, gate and HOA tips, and what the van does.",
+      "Bought tires on TireDrop? The van from our Sunrise shop fits them at your Weston, FL home or workplace. Weston ZIPs, gate and HOA tips, and what the van does.",
   },
 ];
 

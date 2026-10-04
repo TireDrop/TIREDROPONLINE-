@@ -26,6 +26,7 @@ import RoadsideHelp from "../../components/ui/RoadsideHelp.jsx";
 import { faqSchema } from "../../components/content/schema.js";
 import { BUSINESS } from "../../data/business.js";
 import {
+  CITY_PAGES,
   CITY_PAGE_SHARED as SHARED,
   cityPath,
   getCityPage,
@@ -99,6 +100,12 @@ export default function MobileCityPage() {
   if (!city) return <NotFoundPanel />;
 
   const nearby = city.nearby.map(getCityPage).filter(Boolean);
+  // Every other city page, so each city page links to all its siblings and
+  // none depends on a hand-picked "nearby" list to be crawlable. No distance
+  // is implied: only the nearby list above says "nearby".
+  const others = CITY_PAGES.filter(
+    (c) => c.slug !== city.slug && !city.nearby.includes(c.slug),
+  );
   const path = cityPath(city.slug);
 
   return (
@@ -299,6 +306,21 @@ export default function MobileCityPage() {
             </Link>
           </li>
         </ul>
+        {others.length > 0 && (
+          <>
+            <h2 className="h3 mb-5 mt-8">More mobile service cities</h2>
+            <ul className="flex flex-wrap gap-2.5">
+              {others.map((c) => (
+                <li key={c.slug}>
+                  <Link to={cityPath(c.slug)} className="btn-outline btn-sm">
+                    <MapPin size={14} aria-hidden />
+                    Mobile tire installation in {c.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </Section>
     </>
   );
