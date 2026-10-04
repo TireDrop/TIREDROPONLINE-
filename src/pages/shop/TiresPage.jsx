@@ -183,10 +183,23 @@ export default function TiresPage() {
     selectVehicle,
     selectSize,
     clear,
+    setSearchPartial,
     openChanger,
     closeChanger,
     changer,
   } = fitment;
+
+  // A partial size typed over a remembered door-jamb size it contradicts is
+  // the newer search: the fitment answers follow it (VehicleContext), until
+  // this page closes.
+  useEffect(() => {
+    setSearchPartial({
+      width: partial.width,
+      aspect: partial.aspect,
+      diameter: partial.diameter,
+    });
+    return () => setSearchPartial(null);
+  }, [partial.width, partial.aspect, partial.diameter, setSearchPartial]);
 
   /** The page as it stands: the address bar's filters, the saved selection. */
   const current = { ...state, selection: ready ? selection : state.selection };

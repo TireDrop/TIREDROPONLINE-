@@ -490,3 +490,20 @@ export function partialConflicts(partial, size, rear = null) {
   if (front === null) return false;
   return !front && !(rear && fits(rear));
 }
+
+/**
+ * The selection the /tires search answers against. A remembered vehicle
+ * with a door-jamb size the shopper confirmed turns any tire of another
+ * size into "Doesn't fit", so a partial size typed over it (the header
+ * search's /tires?w=245&a=40) would call the very size being entered a
+ * miss. The partial is the newer search: the contradicted door-jamb size
+ * (and rear) is left out for this search, the vehicle stays. Pure, so the
+ * saved selection is never rewritten; the cart and checkout read it as
+ * saved, and still flag a line that misses the confirmed size.
+ */
+export function selectionForSearch(selection, partial) {
+  if (selection?.type !== "vehicle" || !selection.size) return selection;
+  if (!partialConflicts(partial, selection.size, selection.rear ?? null)) return selection;
+  const { size: _size, rear: _rear, ...vehicle } = selection;
+  return vehicle;
+}

@@ -12,7 +12,9 @@ import {
   slug,
   searchTitle,
   partialConflicts,
+  selectionForSearch,
 } from "./tiresUrl.js";
+import { checkFit, resolveSelection } from "../data/fitmentCheck.js";
 
 const VOCAB = {
   brands: ["BFGoodrich", "Continental", "Michelin", "Nitto"],
@@ -345,4 +347,39 @@ test("partialConflicts: the URL's size parts against the size being shopped for"
   assert.equal(partialConflicts(p("245", "40"), "225/40R19", "255/35R19"), true);
   // Not a size: nothing to contradict.
   assert.equal(partialConflicts(p("245"), "junk"), false);
+});
+
+test("selectionForSearch: a partial size that contradicts the door-jamb size wins, for the search only", () => {
+  const p = (width = "", aspect = "", diameter = "") => ({ width, aspect, diameter });
+  const camry = { type: "vehicle", year: "2019", make: "Toyota", model: "Camry", size: "225/45R17" };
+  const tire = "245/40R18";
+
+  // The bug: with the door-jamb size confirmed, a 245/40 search read as a
+  // confirmed miss about the size being typed ("Doesn't fit your 2019 Toyota Camry").
+  const before = checkFit(tire, resolveSelection(camry));
+  assert.equal(before.status, "no-fit");
+
+  // Fixed: the vehicle stays, the contradicted size gives way, nothing is called a miss.
+  const eff = selectionForSearch(camry, p("245", "40"));
+  assert.deepEqual(eff, { type: "vehicle", year: "2019", make: "Toyota", model: "Camry" });
+  const after = checkFit(tire, resolveSelection(eff));
+  assert.equal(after.status, "check");
+  assert.doesNotMatch(`${after.title} ${after.detail}`, /Not your size|Doesn't fit/);
+  // The saved selection itself is never rewritten.
+  assert.equal(camry.size, "225/45R17");
+
+  // A partial that agrees, no partial, or a staggered axle that agrees: unchanged.
+  assert.equal(selectionForSearch(camry, p("225", "45")), camry);
+  assert.equal(selectionForSearch(camry, p()), camry);
+  const bmw = { ...camry, make: "BMW", model: "3 Series", size: "225/40R19", rear: "255/35R19" };
+  assert.equal(selectionForSearch(bmw, p("255", "35")), bmw);
+  assert.deepEqual(selectionForSearch(bmw, p("245", "40")), {
+    type: "vehicle", year: "2019", make: "BMW", model: "3 Series",
+  });
+  // A vehicle with no door-jamb size, a size-only selection and null are left alone.
+  const bare = { type: "vehicle", year: "2019", make: "Toyota", model: "Camry" };
+  assert.equal(selectionForSearch(bare, p("245", "40")), bare);
+  const sized = { type: "size", size: "225/45R17" };
+  assert.equal(selectionForSearch(sized, p("245", "40")), sized);
+  assert.equal(selectionForSearch(null, p("245", "40")), null);
 });

@@ -14,6 +14,7 @@ import {
   resolveSelection,
 } from "../data/fitmentCheck.js";
 import { OTHER, loadSelection, saveSelection } from "../data/vehicles.js";
+import { selectionForSearch } from "../lib/tiresUrl.js";
 
 // The one place the site keeps what the shopper is shopping for: a vehicle
 // (year, make, model, and the size they picked when the trims differ, or the
@@ -111,6 +112,12 @@ export function VehicleProvider({ children }) {
 
   const clear = useCallback(() => commit(null), [commit]);
 
+  // The partial size on the /tires address bar while that page is open (set
+  // by TiresPage, null elsewhere): the search answers against the selection
+  // minus a door-jamb size it contradicts. Why here: only `resolved` changes,
+  // so the saved selection, the cart and checkout's review stay as saved.
+  const [searchPartial, setSearchPartial] = useState(null);
+
   const openChanger = useCallback(
     (tab = "vehicle") =>
       setChanger((c) => ({ open: true, tab, nonce: c.nonce + 1 })),
@@ -122,8 +129,8 @@ export function VehicleProvider({ children }) {
   );
 
   const resolved = useMemo(
-    () => resolveSelection(state.selection),
-    [state.selection],
+    () => resolveSelection(selectionForSearch(state.selection, searchPartial)),
+    [state.selection, searchPartial],
   );
 
   const value = useMemo(
@@ -137,6 +144,7 @@ export function VehicleProvider({ children }) {
       selectSize,
       pickOption,
       clear,
+      setSearchPartial,
       changer,
       openChanger,
       closeChanger,

@@ -2066,6 +2066,35 @@ for (const width of [390, 1440]) {
     await h.context.close();
   });
 
+  await check(`${width} fitment: a partial size typed over a remembered door-jamb size wins on /tires only; the cart still flags the miss`, async () => {
+    const h = await open(width, { delay: 0 });
+    const { page } = h;
+    const tire = cartTire;
+    const saved = { ...F150, size: "265/70R17" };
+    await seedFitment(page, {
+      selection: saved,
+      cart: { lines: [tire("t-fits", FITS, "Fits", "265/70R17"), tire("t-nofit", NO_FIT, "Wide", "285/70R17")] },
+    });
+    // 285/70 is typed in the header search: the 265/70R17 sticker size is not called against it.
+    await page.goto(`${BASE}/tires?w=285&a=70`);
+    await card(page, NO_FIT).locator("[data-fit]").waitFor();
+    assert.match(await card(page, NO_FIT).locator("[data-fit]").innerText(), /^Check fitment$/);
+    assert.equal(await addOnCard(page, NO_FIT).count(), 1, "Add shown for the size being entered");
+    assert.equal(await page.getByText(/Doesn't fit|Not your size/).count(), 0, "nothing is called a miss about the size being typed");
+    // The saved size is untouched.
+    assert.deepEqual(
+      JSON.parse(await page.evaluate(() => localStorage.getItem("tiredrop.fitment.v1"))),
+      saved,
+    );
+    // Opening the cart from here (no reload): the line that misses the sticker size is flagged again.
+    await page.evaluate(() => document.querySelector('a[href="/cart"]').click());
+    const flag = page.locator('[data-testid="cart-fit-flag"]');
+    await flag.waitFor();
+    assert.match(await flag.innerText(), /Doesn't fit your 2019 Ford F-150/);
+    noErrors(fitErrors(h.errors));
+    await h.context.close();
+  });
+
   await check(`${width} fitment: Compare crowns a Best only between tires of one size`, async () => {
     const h = await open(width, { delay: 0 });
     const { page } = h;
