@@ -130,3 +130,35 @@ export function mainContentHtml(html) {
 /** True when the page's robots meta says noindex. */
 export const isNoindex = (html) =>
   /<meta\b[^>]*name=["']robots["'][^>]*content=["'][^"']*noindex/i.test(String(html ?? ""));
+
+/**
+ * Routes taken off the site on purpose. No built page may link to one, none
+ * may be built or listed in sitemap.xml, and vercel.json must send each to
+ * its stand-in with a temporary (302) redirect so the URL stays recoverable.
+ * To bring one back, delete it here (see src/_parked/gallery/README.md).
+ */
+export const PARKED_ROUTES = [{ route: "/gallery", to: "/about" }];
+
+/** The parked routes that `hrefs` link to (query and hash ignored). */
+export function parkedLinks(hrefs, parked = PARKED_ROUTES) {
+  const routes = new Set(parked.map((p) => p.route));
+  return [...new Set((hrefs ?? []).map(routeOf).filter((r) => r && routes.has(r)))];
+}
+
+/**
+ * What is wrong with a parked route's setup: `redirects` is vercel.json's
+ * redirect list, `sitemapXml` the text of sitemap.xml, `builtRoutes` every
+ * route that has a built page. Returns a list of plain-English problems.
+ */
+export function parkedProblems({ redirects = [], sitemapXml = "", builtRoutes = [] }, parked = PARKED_ROUTES) {
+  const problems = [];
+  for (const { route, to } of parked) {
+    if (builtRoutes.includes(route)) problems.push(`${route} is still built as a page`);
+    if (sitemapXml.includes(`<loc>https://tiredroponline.com${route}</loc>`)) problems.push(`${route} is in sitemap.xml`);
+    const r = redirects.find((x) => x.source === route);
+    if (!r) problems.push(`${route} has no redirect in vercel.json`);
+    else if (r.statusCode !== 302) problems.push(`${route} redirects with ${r.statusCode}, not a temporary 302`);
+    else if (r.destination !== to) problems.push(`${route} redirects to ${r.destination}, expected ${to}`);
+  }
+  return problems;
+}

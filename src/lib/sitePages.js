@@ -195,12 +195,6 @@ export const STATIC_PAGES = [
     text: "Where to read and leave reviews of the shop.",
   },
   {
-    path: "/gallery",
-    title: "Gallery",
-    keywords: "photos pictures shop work",
-    text: "Photos from the shop and the vans.",
-  },
-  {
     path: "/learn",
     title: "Learn: tire guides",
     keywords: "learn guide guides how to help articles faq questions",

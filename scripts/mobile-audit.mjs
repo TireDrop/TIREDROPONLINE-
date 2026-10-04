@@ -95,7 +95,6 @@ const ROUTES = [
   "/learn",
   "/learn/tread",
   "/blog",
-  "/gallery",
   "/sitemap",
   "/terms",
   "/privacy",

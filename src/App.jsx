@@ -135,9 +135,6 @@ const ReviewsPage = lazyPage("pages/support/ReviewsPage.jsx", () =>
 const FinancingPage = lazyPage("pages/support/FinancingPage.jsx", () =>
   import("./pages/support/FinancingPage.jsx"),
 );
-const GalleryPage = lazyPage("pages/support/GalleryPage.jsx", () =>
-  import("./pages/support/GalleryPage.jsx"),
-);
 const TrackOrderPage = lazyPage("pages/support/TrackOrderPage.jsx", () =>
   import("./pages/support/TrackOrderPage.jsx"),
 );
@@ -314,7 +311,6 @@ export default function App() {
               path="/tire-care"
               element={<Navigate to="/learn" replace />}
             />
-            <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/sitemap" element={<SitemapPage />} />
             {/* Search results (noindex, not in the sitemap). */}
             <Route path="/search" element={<SearchPage />} />

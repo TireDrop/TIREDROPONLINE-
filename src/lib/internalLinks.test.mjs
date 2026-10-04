@@ -9,6 +9,8 @@ import {
   isNoindex,
   isShopOrToolRoute,
   mainContentHtml,
+  parkedLinks,
+  parkedProblems,
   routeOf,
   routeOfFile,
   vercelSourceRegex,
@@ -93,4 +95,20 @@ test("isNoindex", () => {
   assert.ok(isNoindex('<meta name="robots" content="noindex, follow" />'));
   assert.ok(!isNoindex('<meta name="robots" content="index, follow" />'));
   assert.ok(!isNoindex("<title>x</title>"));
+});
+
+test("parkedLinks finds links to a parked route, however written", () => {
+  assert.deepEqual(parkedLinks(["/gallery", "/gallery?x=1", "https://tiredroponline.com/gallery/", "/about", "/tires"]), ["/gallery"]);
+  assert.deepEqual(parkedLinks(["/about", "/gallery-of-nothing", "https://example.com/gallery"]), []);
+  assert.deepEqual(parkedLinks(undefined), []);
+});
+
+test("parkedProblems wants a 302 to the stand-in, no page and no sitemap entry", () => {
+  const ok = { redirects: [{ source: "/gallery", destination: "/about", statusCode: 302 }], sitemapXml: "<loc>https://tiredroponline.com/about</loc>", builtRoutes: ["/about"] };
+  assert.deepEqual(parkedProblems(ok), []);
+  assert.match(parkedProblems({ ...ok, redirects: [] }).join(), /no redirect/);
+  assert.match(parkedProblems({ ...ok, redirects: [{ source: "/gallery", destination: "/about", statusCode: 301 }] }).join(), /not a temporary 302/);
+  assert.match(parkedProblems({ ...ok, redirects: [{ source: "/gallery", destination: "/", statusCode: 302 }] }).join(), /expected \/about/);
+  assert.match(parkedProblems({ ...ok, builtRoutes: ["/gallery"] }).join(), /still built/);
+  assert.match(parkedProblems({ ...ok, sitemapXml: "<loc>https://tiredroponline.com/gallery</loc>" }).join(), /in sitemap\.xml/);
 });

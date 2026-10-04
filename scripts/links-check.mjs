@@ -32,6 +32,8 @@ import {
   isArticleRoute,
   isNoindex,
   mainContentHtml,
+  parkedLinks,
+  parkedProblems,
   routeOf,
   routeOfFile,
   vercelSourceRegex,
@@ -152,7 +154,22 @@ for (const [route, from] of viaRedirect) {
   console.log(`  ${route} -> ${to}  (${from.size} page${from.size === 1 ? "" : "s"}, e.g. ${[...from][0]})`);
 }
 
+// Parked routes (the Gallery until there are photos): no page links to one,
+// none is built or in sitemap.xml, and vercel.json 302s each to its stand-in.
+const parkedHits = [];
+for (const [, { file, html }] of sources) {
+  for (const route of parkedLinks(anchorHrefs(html))) parkedHits.push(`${file} links to ${route}`);
+}
+const parkedIssues = parkedProblems({
+  redirects: vercel.redirects ?? [],
+  sitemapXml: existsSync(join(DIST, "sitemap.xml")) ? readFileSync(join(DIST, "sitemap.xml"), "utf8") : "",
+  builtRoutes: [...pages.keys()],
+});
+console.log(`\nParked routes (must not be linked, built or in the sitemap): ${parkedHits.length + parkedIssues.length} problem(s)`);
+for (const p of [...parkedHits, ...parkedIssues]) console.log(`  ${p}`);
+
 const problems = [];
+if (parkedHits.length || parkedIssues.length) problems.push(`${parkedHits.length + parkedIssues.length} parked-route problem(s)`);
 if (broken.length) problems.push(`${broken.length} broken internal link(s)`);
 if (indexableOrphans.length) problems.push(`${indexableOrphans.length} indexable orphan page(s)`);
 if (problems.length) {

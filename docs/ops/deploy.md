@@ -364,7 +364,7 @@ Shopify serving the domain until the Vercel site is verified.
    under `redirects`):
    - `/collections/tires` → `/tires`, `/collections/wheels` → `/wheels`
    - `/pages/<x>` → `/<x>` for about, shipping, install, mobile-service,
-     auto-service, commercial-tires, locations, contact, reviews, gallery,
+     auto-service, commercial-tires, locations, contact, reviews,
      financing, terms, privacy, accessibility, find-my-tires, tire-size and
      tire-check; `/pages/tire-care` and `/tire-care` → `/learn`
    - `/cart` is the same path on both sites, so it needs no redirect;

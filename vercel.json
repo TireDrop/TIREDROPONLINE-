@@ -86,10 +86,12 @@
     { "source": "/products", "destination": "/tires", "statusCode": 301 },
     { "source": "/products/:path*", "destination": "/tires", "statusCode": 301 },
     {
-      "source": "/pages/:page(about|shipping|install|mobile-service|auto-service|commercial-tires|locations|contact|reviews|gallery|financing|terms|privacy|accessibility|find-my-tires|tire-size|tire-check)",
+      "source": "/pages/:page(about|shipping|install|mobile-service|auto-service|commercial-tires|locations|contact|reviews|financing|terms|privacy|accessibility|find-my-tires|tire-size|tire-check)",
       "destination": "/:page",
       "statusCode": 301
     },
+    { "source": "/gallery", "destination": "/about", "statusCode": 302 },
+    { "source": "/pages/gallery", "destination": "/about", "statusCode": 302 },
     { "source": "/pages/tire-care", "destination": "/learn", "statusCode": 301 },
     { "source": "/tire-care", "destination": "/learn", "statusCode": 301 },
     {
