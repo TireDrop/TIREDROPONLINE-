@@ -169,7 +169,7 @@ _Last updated: 2026-10-05 (Local city and neighborhood page plan, top 25 ranked,
 - [x] ~~Store-wide search with typeahead: sizes in any spelling, vehicles, brands/types, tires, 91 pages; /search results page; GA4 `search` + `search_suggestion`~~ (preview/search 1214d45, shipped to main 2026-10-01)
 
 ## Content & SEO: Blog + Learn (Claude; plan in docs/prompts/blog-learn-build.md)
-- [ ] Local city and neighborhood page plan, top 25 ranked (competitor gap 8); pages not built yet (branch preview/wave1-local-plan, SHA pending; docs/audits/2026-10-05-local-pages-plan.md + local-pages-plan.json)
+- [ ] Local city and neighborhood page plan, top 25 ranked (competitor gap 8); pages not built yet (branch preview/wave1-local-plan, `546a2cf`; docs/audits/2026-10-05-local-pages-plan.md + local-pages-plan.json)
   - [ ] Verify the plan's gaps in Chrome: 2020 populations (all snippet-only), drive times (none sourced), USPS ZIP lists; prompt is in section 8 of the plan
 - [x] ~~Blog batch 5: 10 posts (Florida sun and dry rot, flat on I-95, TPMS vs a gauge, cold-front TPMS light, moving to Florida, glovebox tire kit, back-to-school check, bigger wheels myth, Turnpike to Orlando, Alligator Alley)~~ (`aca62b5`…`e56433c`, shipped to main 2026-10-02)
   - #32 (registration) and #42 (heat and pressure routine) held back: each would compete with a live Learn guide (reworked below)
