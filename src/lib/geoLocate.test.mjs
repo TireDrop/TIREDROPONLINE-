@@ -13,17 +13,17 @@ import {
 
 test("approxFromGeo: a U.S. ZIP wins, then U.S. coordinates, else nothing", () => {
   assert.deepEqual(
-    approxFromGeo({ available: true, country: "US", zip: "33351", lat: 26.1, lng: -80.2, city: "Sunrise" }),
-    { zip: "33351", city: "Sunrise" },
+    approxFromGeo({ available: true, country: "US", zip: "33351", lat: 26.1, lng: -80.2, city: "Sunrise", region: "FL" }),
+    { zip: "33351", city: "Sunrise", region: "FL" },
   );
   assert.deepEqual(
     approxFromGeo({ available: true, country: "US", zip: null, lat: 25.77, lng: -80.19, city: null }),
-    { lat: 25.77, lng: -80.19, city: null },
+    { lat: 25.77, lng: -80.19, city: null, region: null },
   );
   assert.equal(approxFromGeo({ available: true, country: "CA", zip: null, lat: 45, lng: -75 }), null);
   assert.equal(approxFromGeo({ available: false }), null);
   assert.equal(approxFromGeo({ available: false, country: "US", zip: "33351" }), null);
-  assert.deepEqual(approxFromGeo({ country: "US", zip: "33351" }), { zip: "33351", city: null });
+  assert.deepEqual(approxFromGeo({ country: "US", zip: "33351" }), { zip: "33351", city: null, region: null });
   assert.equal(approxFromGeo(null), null);
   assert.equal(approxFromGeo("<html>"), null);
   assert.equal(approxFromGeo({ available: true, country: "US", zip: "12", lat: 200, lng: 0 }), null);
@@ -35,7 +35,7 @@ const json = (body, ok = true) => async () => ({ ok, json: async () => body });
 test("fetchApproxLocation: our JSON, or null for every failure", async () => {
   assert.deepEqual(
     await fetchApproxLocation({ fetchImpl: json({ available: true, country: "US", zip: "33351" }) }),
-    { zip: "33351", city: null },
+    { zip: "33351", city: null, region: null },
   );
   assert.equal(await fetchApproxLocation({ fetchImpl: json({}, false) }), null);
   assert.equal(

@@ -11,6 +11,8 @@
 //   x-vercel-ip-latitude     e.g. "26.1650"
 //   x-vercel-ip-longitude    e.g. "-80.2690"
 //   x-vercel-ip-city         URL-encoded, e.g. "Fort%20Lauderdale"
+//   x-vercel-ip-country-region  state/region code, e.g. "FL" (the page shows
+//                            "near Sunrise, FL" instead of a ZIP)
 // Locally (vite preview, node --test) none are set, so the answer is
 // { available: false }. Nothing here logs or keeps the values.
 
@@ -44,8 +46,13 @@ function city(raw) {
   return CITY.test(decoded) ? decoded : null;
 }
 
+function usState(raw) {
+  const code = raw.toUpperCase();
+  return /^[A-Z]{2}$/.test(code) ? code : null;
+}
+
 /**
- * { available: true, country, zip, lat, lng, city } from the request
+ * { available: true, country, zip, lat, lng, city, region } from the request
  * headers, or { available: false } when there is no usable country.
  * Every field is validated: anything malformed becomes null rather than
  * reaching the browser. lat and lng come as a pair or not at all, and
@@ -67,6 +74,8 @@ export function parseGeoHeaders(headers) {
     lat,
     lng,
     city: city(header(headers, "x-vercel-ip-city")),
+    // Only a U.S. state code is shown, so anything else is not passed on.
+    region: country === "US" ? usState(header(headers, "x-vercel-ip-country-region")) : null,
   };
 }
 

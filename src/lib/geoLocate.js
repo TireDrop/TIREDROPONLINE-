@@ -18,9 +18,10 @@ const isLatLng = (lat, lng) =>
   Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
 
 /**
- * What the page can use from an /api/geo body: { zip, city } for a U.S.
- * ZIP, else { lat, lng, city } for U.S. coordinates, else null (outside the
- * U.S., unavailable, or anything malformed).
+ * What the page can use from an /api/geo body: { zip, city, region } for a
+ * U.S. ZIP, else { lat, lng, city, region } for U.S. coordinates, else null
+ * (outside the U.S., unavailable, or anything malformed). The city and state
+ * are what the visitor sees; the ZIP only drives the zone check.
  */
 export function approxFromGeo(body) {
   // `available` is only ever false (api/_lib/geo.js); a U.S. country is the test.
@@ -29,9 +30,10 @@ export function approxFromGeo(body) {
     typeof body.city === "string" && body.city.length > 0 && body.city.length <= 64
       ? body.city
       : null;
+  const region = typeof body.region === "string" && /^[A-Z]{2}$/.test(body.region) ? body.region : null;
   const zip = typeof body.zip === "string" ? zip5(body.zip) : null;
-  if (zip) return { zip, city };
-  if (isLatLng(body.lat, body.lng)) return { lat: body.lat, lng: body.lng, city };
+  if (zip) return { zip, city, region };
+  if (isLatLng(body.lat, body.lng)) return { lat: body.lat, lng: body.lng, city, region };
   return null;
 }
 

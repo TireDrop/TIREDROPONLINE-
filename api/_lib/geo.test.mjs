@@ -16,6 +16,7 @@ const FULL = {
   "x-vercel-ip-latitude": "26.1650",
   "x-vercel-ip-longitude": "-80.2690",
   "x-vercel-ip-city": "Fort%20Lauderdale",
+  "x-vercel-ip-country-region": "FL",
 };
 
 function mockRes() {
@@ -33,7 +34,18 @@ test("parseGeoHeaders: a full U.S. answer", () => {
     lat: 26.165,
     lng: -80.269,
     city: "Fort Lauderdale",
+    region: "FL",
   });
+});
+
+test("parseGeoHeaders: region is a two-letter U.S. state, else null", () => {
+  const regionOf = (raw, country = "US") =>
+    parseGeoHeaders({ ...FULL, "x-vercel-ip-country": country, "x-vercel-ip-country-region": raw }).region;
+  assert.equal(regionOf("fl"), "FL");
+  assert.equal(regionOf(""), null);
+  assert.equal(regionOf("<b>"), null);
+  assert.equal(regionOf("FLA"), null);
+  assert.equal(regionOf("ON", "CA"), null); // only U.S. states are shown
 });
 
 test("parseGeoHeaders: no headers (local preview) is unavailable", () => {

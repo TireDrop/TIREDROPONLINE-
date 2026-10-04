@@ -41,6 +41,7 @@ import {
   looksLikeIOS,
   rememberDenied,
 } from "../../lib/geoLocate.js";
+import { approxPlace, lookupPlace } from "../../lib/placeName.js";
 import { useHydrated } from "../../lib/useHydrated.js";
 // Positions only (x, y, lat, lng): the hub list with its city names stays in
 // deliveryHubs.source.json and never reaches the browser.
@@ -72,7 +73,7 @@ export const LOCAL_FAQ = [
   },
   {
     q: "How do I know if I'm in a zone?",
-    a: "When the page opens, we check the approximate location of your connection, and your device location if you allow it. You can also enter any ZIP above or tap Use my location. We compare it with the area around each hub on the map. The zones are a working estimate and may change before launch.",
+    a: "When the page opens, we check the approximate location of your connection, and your device location if you allow it, and show the city or neighborhood we think you're near. You can also enter any ZIP above or tap Use my location. We compare the location with the area around each hub on the map, in your browser. If you allow your device location, its approximate position (rounded to about 100 meters) is sent once to BigDataCloud, a mapping service, to look up the name of your neighborhood or city, and that name is shown only to you. We don't store it. The zones are a working estimate and may change before launch.",
   },
   {
     q: "What happens if I order before it launches?",
@@ -87,7 +88,7 @@ export const LOCAL_FAQ = [
 
 /** What the checker does with location, shown under it. Keep it true to ZoneChecker and api/_lib/geo.js. */
 export const LOCATION_NOTE =
-  "We use your approximate location from your connection, or your device location if you allow it, only to check your zone. We don't store it.";
+  "We use your approximate location from your connection, or your device location if you allow it, only to check your zone and name your city or neighborhood. A device location is sent once, rounded to about 100 meters, to BigDataCloud to look up that name. We don't store any of it.";
 
 const MAP_LABEL = `Map of the U.S. showing ${MAP.hubs.length} local delivery hubs`;
 
@@ -318,17 +319,20 @@ function answerCoords(lat, lng, extra) {
 const linkClass =
   "inline-flex min-h-[44px] items-center gap-1 font-display font-bold text-drop hover:text-dive";
 
-/** The words in front of an answer: where the location came from. */
-function lead({ source, zip, city }) {
+/**
+ * The words in front of an answer: where the location came from, and, for a
+ * connection or device answer, the place name (plain text, never a ZIP). A
+ * typed ZIP is the only answer that shows a ZIP, because the visitor typed it.
+ */
+function lead({ source, zip, place }) {
   if (source === "approx")
-    return zip ? (
-      <>
-        Based on your connection, you&rsquo;re near ZIP <strong>{zip}</strong>:{" "}
-      </>
+    return place ? (
+      <>Based on your connection, you&rsquo;re near {place}: </>
     ) : (
-      <>Based on your connection{city ? `, you’re near ${city}` : ""}: </>
+      <>Based on your connection, here&rsquo;s what we see near you: </>
     );
-  if (source === "device") return <>Using your device location: </>;
+  if (source === "device")
+    return place ? <>Using your device location, you&rsquo;re near {place}: </> : <>Using your device location: </>;
   return zip ? (
     <>
       <strong>{zip}</strong>:{" "}
@@ -337,10 +341,10 @@ function lead({ source, zip, city }) {
 }
 
 /** "… isn't in a local delivery zone yet", worded for where the location came from. */
-function notInZone({ source, zip }) {
+function notInZone({ source, zip, place }) {
   if (source === "approx")
-    return <>{lead({ source, zip })}that area isn&rsquo;t</>;
-  if (source === "device") return <>{lead({ source })}you aren&rsquo;t</>;
+    return <>{lead({ source, place })}that area isn&rsquo;t</>;
+  if (source === "device") return <>{lead({ source, place })}you aren&rsquo;t</>;
   return (
     <>
       <strong>{zip}</strong> isn&rsquo;t
@@ -425,9 +429,13 @@ function Result({ result }) {
  *
  * On load, without asking: GET /api/geo gives the approximate location of
  * the visitor's connection (Vercel's IP headers), and a U.S. ZIP from it is
- * prefilled and answered, labelled as approximate. Then the precise device
+ * prefilled and answered, labelled as approximate and worded with the city
+ * and state it came from, not the ZIP. Then the precise device
  * location replaces it: straight away when the visitor already allowed it,
- * or by asking once the approximate answer is up. A "no" is remembered for
+ * or by asking once the approximate answer is up. The device answer appears at
+ * once; its place name (neighborhood and city, from a reverse geocode of the
+ * rounded position, see lib/placeName.js) fills in when it arrives, and the
+ * answer simply stays without one if that fails. A "no" is remembered for
  * the session and never shown as an error; "Use my location" stays as the
  * manual way in, and explains how to turn location back on. Nothing
  * automatic happens once the visitor types or checks something, or when the
@@ -467,6 +475,18 @@ function ZoneChecker({ onFocus }) {
     else if (r.kind === "invalid") focusMap.current(null);
   });
 
+  // The device answer (zone, zoom and pin) shows at once, from the position
+  // and the hub list in the browser. Then, for this answer only, the place
+  // name is looked up and added to its first words; nothing is kept.
+  const showDevice = ({ latitude, longitude }) => {
+    show.current(answerCoords(latitude, longitude, { source: "device" }));
+    const ticket = latest.current;
+    lookupPlace(latitude, longitude).then((place) => {
+      if (!place || ticket !== latest.current) return;
+      setResult((r) => (r?.source === "device" && (r.kind === "in" || r.kind === "out") ? { ...r, place } : r));
+    });
+  };
+
   const checkZip = (raw) => {
     const ticket = ++latest.current;
     const zip = zip5(raw);
@@ -501,7 +521,7 @@ function ZoneChecker({ onFocus }) {
           if (quiet()) return;
           precise = true;
           ++latest.current;
-          show.current(answerCoords(coords.latitude, coords.longitude, { source: "device" }));
+          showDevice(coords);
         },
         // A "no" keeps whatever is showing; it isn't an error to the visitor.
         (err) => err?.code === 1 && rememberDenied(window),
@@ -514,11 +534,12 @@ function ZoneChecker({ onFocus }) {
 
     const showApprox = async (approx) => {
       if (!approx || quiet() || precise) return;
+      const place = approxPlace(approx.city, approx.region);
       if (!approx.zip) {
-        show.current(answerCoords(approx.lat, approx.lng, { source: "approx", city: approx.city }));
+        show.current(answerCoords(approx.lat, approx.lng, { source: "approx", place }));
         return;
       }
-      const answer = await answerZip(approx.zip, { source: "approx" });
+      const answer = await answerZip(approx.zip, { source: "approx", place });
       if (quiet() || precise) return;
       if (zipInput.current && !zipInput.current.value) zipInput.current.value = approx.zip;
       show.current(answer);
@@ -548,7 +569,7 @@ function ZoneChecker({ onFocus }) {
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
         if (ticket !== latest.current) return;
-        show.current(answerCoords(coords.latitude, coords.longitude, { source: "device" }));
+        showDevice(coords);
       },
       (err) => {
         if (ticket !== latest.current) return;
@@ -620,11 +641,13 @@ function ZoneChecker({ onFocus }) {
           the distance to the nearest zone) is reserved up front, so an answer
           that arrives on its own after load moves nothing below it. Heights
           measured per width, a line (23px) per step as the text wraps; the
-          card is narrowest at lg, beside the map. */}
+          card is narrowest at lg, beside the map. Includes a device answer
+          whose place name ("Neighborhood, City, ST", up to about 60
+          characters) arrives a moment after it. */}
       <div
         id={`${id}-result`}
         aria-live="polite"
-        className="mt-2 min-h-[14.25rem] text-sm leading-relaxed min-[400px]:min-h-[11.5rem] min-[430px]:min-h-[10rem] min-[500px]:min-h-[8.5rem] sm:min-h-[7.25rem] lg:min-h-[12.75rem] xl:min-h-[10rem]"
+        className="mt-2 min-h-[14.25rem] text-sm leading-relaxed min-[400px]:min-h-[13rem] min-[430px]:min-h-[11.5rem] min-[500px]:min-h-[10rem] sm:min-h-[7.25rem] lg:min-h-[12.75rem] xl:min-h-[11.5rem]"
       >
         <Result result={result} />
       </div>
