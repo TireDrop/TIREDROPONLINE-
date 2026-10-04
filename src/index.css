@@ -439,6 +439,173 @@
   transform: translate3d(0, 18px, 0);
 }
 
+/* ---------- Home "How it works" story (HomePage.jsx, HowItWorks) ----------
+   The finished state is the resting one: line filled, check shown, nothing
+   moving. While the list carries `how-play` (added only once it is on screen,
+   and never under reduced motion) one 9s loop plays: the cursor clicks, the
+   thread fills to step 2 with a parcel riding it, the check lands, the thread
+   fills on to step 3, the wrench turns, then a soft pulse and a quiet reset.
+   Opacity and transform only, so the section never changes size. */
+.how-seg-h {
+  --s0x: 0;
+  --s0y: 1;
+  --tx: -100%;
+  --ty: 0;
+}
+.how-seg-v {
+  --s0x: 1;
+  --s0y: 0;
+  --tx: 0;
+  --ty: -100%;
+}
+.how-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: theme("colors.drop");
+  transform-origin: 0 0;
+}
+.how-trk {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+.how-dot {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  background: theme("colors.amber");
+  box-shadow: 0 0 0 2px theme("colors.bone");
+}
+.how-seg-h .how-dot {
+  right: 0;
+  top: 50%;
+  transform: translate(50%, -50%);
+}
+.how-seg-v .how-dot {
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 50%);
+}
+.how-halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid theme("colors.drop");
+  opacity: 0;
+  pointer-events: none;
+}
+
+.how-play {
+  --how-t: 9s;
+}
+.how-play .how-fill,
+.how-play .how-trk,
+.how-play .how-halo,
+.how-play .how-badge,
+.how-play .how-check,
+.how-play .how-ico,
+.how-play .how-glyph {
+  animation-duration: var(--how-t);
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.how-play .how-seg-1 .how-fill { animation-name: how-fill-1; animation-timing-function: ease-in-out; }
+.how-play .how-seg-2 .how-fill { animation-name: how-fill-2; animation-timing-function: ease-in-out; }
+.how-play .how-seg-1 .how-trk { animation-name: how-ride-1; animation-timing-function: ease-in-out; }
+.how-play .how-seg-2 .how-trk { animation-name: how-ride-2; animation-timing-function: ease-in-out; }
+.how-play .how-ico-1 .how-glyph { animation-name: how-click; }
+.how-play .how-ico-1 .how-click { animation-name: how-ripple; }
+.how-play .how-ico-2 { animation-name: how-pop-2; }
+.how-play .how-ico-3 { animation-name: how-pop-3; }
+.how-play .how-ico-3 .how-glyph { animation-name: how-turn; }
+.how-play .how-halo:not(.how-click) { animation-name: how-pulse; }
+.how-play .how-ico-1 .how-badge { animation-name: how-badge-1; }
+.how-play .how-ico-2 .how-badge { animation-name: how-badge-2; }
+.how-play .how-ico-3 .how-badge { animation-name: how-badge-3; }
+.how-play .how-check { animation-name: how-check; }
+
+/* Times are of the 9s loop: 1s = 11.1%. */
+@keyframes how-click {
+  0%, 5.5% { transform: scale(1); }
+  7.5% { transform: translate(1px, 1px) scale(0.82); }
+  11%, 100% { transform: scale(1); }
+}
+@keyframes how-ripple {
+  0%, 7.5% { transform: scale(0.9); opacity: 0; }
+  8% { transform: scale(0.9); opacity: 0.55; }
+  17%, 100% { transform: scale(1.7); opacity: 0; }
+}
+@keyframes how-badge-1 {
+  0%, 6% { transform: scale(0.4); opacity: 0; }
+  10% { transform: scale(1.25); opacity: 1; }
+  13%, 90% { transform: scale(1); opacity: 1; }
+  96%, 100% { transform: scale(1); opacity: 0; }
+}
+@keyframes how-badge-2 {
+  0%, 24% { transform: scale(0.4); opacity: 0; }
+  28% { transform: scale(1.25); opacity: 1; }
+  31%, 90% { transform: scale(1); opacity: 1; }
+  96%, 100% { transform: scale(1); opacity: 0; }
+}
+@keyframes how-badge-3 {
+  0%, 43% { transform: scale(0.4); opacity: 0; }
+  47% { transform: scale(1.25); opacity: 1; }
+  50%, 90% { transform: scale(1); opacity: 1; }
+  96%, 100% { transform: scale(1); opacity: 0; }
+}
+@keyframes how-fill-1 {
+  0%, 11% { transform: scale(var(--s0x), var(--s0y)); opacity: 1; }
+  25%, 90% { transform: scale(1, 1); opacity: 1; }
+  96% { transform: scale(1, 1); opacity: 0; }
+  100% { transform: scale(var(--s0x), var(--s0y)); opacity: 0; }
+}
+@keyframes how-fill-2 {
+  0%, 30% { transform: scale(var(--s0x), var(--s0y)); opacity: 1; }
+  44%, 90% { transform: scale(1, 1); opacity: 1; }
+  96% { transform: scale(1, 1); opacity: 0; }
+  100% { transform: scale(var(--s0x), var(--s0y)); opacity: 0; }
+}
+@keyframes how-ride-1 {
+  0%, 10.5% { transform: translate(var(--tx), var(--ty)); opacity: 0; }
+  12% { transform: translate(var(--tx), var(--ty)); opacity: 1; }
+  24% { transform: translate(0, 0); opacity: 1; }
+  26%, 100% { transform: translate(0, 0); opacity: 0; }
+}
+@keyframes how-ride-2 {
+  0%, 29.5% { transform: translate(var(--tx), var(--ty)); opacity: 0; }
+  31% { transform: translate(var(--tx), var(--ty)); opacity: 1; }
+  43% { transform: translate(0, 0); opacity: 1; }
+  45%, 100% { transform: translate(0, 0); opacity: 0; }
+}
+@keyframes how-pop-2 {
+  0%, 24% { transform: scale(1); }
+  27.5% { transform: scale(1.12); }
+  32%, 100% { transform: scale(1); }
+}
+@keyframes how-check {
+  0%, 25% { transform: scale(0.3); opacity: 0; }
+  29% { transform: scale(1.2); opacity: 1; }
+  32%, 90% { transform: scale(1); opacity: 1; }
+  96%, 100% { transform: scale(1); opacity: 0; }
+}
+@keyframes how-pop-3 {
+  0%, 43% { transform: scale(1); }
+  46.5% { transform: scale(1.12); }
+  51%, 100% { transform: scale(1); }
+}
+@keyframes how-turn {
+  0%, 43.5% { transform: rotate(0); }
+  47.5% { transform: rotate(25deg); }
+  51.5%, 100% { transform: rotate(0); }
+}
+@keyframes how-pulse {
+  0%, 56% { transform: scale(1); opacity: 0; }
+  57% { transform: scale(1); opacity: 0.4; }
+  67%, 100% { transform: scale(1.4); opacity: 0; }
+}
+
 @media print {
   [data-rv] {
     opacity: 1 !important;
@@ -459,6 +626,17 @@
   [data-rv] {
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  /* The How it works story rests on its finished state. */
+  .how-play .how-fill,
+  .how-play .how-trk,
+  .how-play .how-halo,
+  .how-play .how-badge,
+  .how-play .how-check,
+  .how-play .how-ico,
+  .how-play .how-glyph {
+    animation: none !important;
   }
 
   *,
