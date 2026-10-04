@@ -24,7 +24,7 @@
 //
 //   slug          URL segment, "{city}-fl"
 //   name          city name as written on the page
-//   county        "Broward" (wave 1 is all Broward)
+//   county        "Broward" or "Miami-Dade" (batch 2 added Hialeah); one of SERVICE_COUNTIES
 //   population    2020 Census figure from the research, for the intro
 //   zips          main ZIP codes (verified lists only; PO Box ZIPs left out)
 //   areas         neighbourhoods and landmarks (verified only)
@@ -39,9 +39,10 @@
 //                 (both are on the four deepened pages, 2026-10-04; each line
 //                 is sourced in docs/audits/2026-10-04-city-depth.md)
 //   faq           4–7 city questions
-//   nearby        2–4 neighbouring city slugs
+//   nearby        2–6 neighbouring city slugs
 //   seoTitle      <title> before " | TireDrop" (unique, ≤ 60 with suffix)
 //   description   meta description, ≤ 160 characters
+//   nearbyTitle   optional: heading for the nearby list when "Nearby" would overstate it (Hialeah)
 
 /** Justin's wording for the one place the van won't work (2026-10-01). */
 const HIGHWAY_LINE =
@@ -106,7 +107,7 @@ export const CITY_PAGES = [
         a: "Not to the Turnpike itself: we don't work on highway or expressway shoulders. For your safety, call 911 or *347 (FDOT Road Rangers) first. Once you're off the highway, on a side street or in a parking lot, call us and the van comes to you there during shop hours.",
       },
     ],
-    nearby: ["plantation-fl", "tamarac-fl", "weston-fl", "davie-fl"],
+    nearby: ["plantation-fl", "tamarac-fl", "weston-fl", "davie-fl", "lauderhill-fl", "oakland-park-fl"],
     seoTitle: "Mobile Tire Installation in Sunrise, FL",
     description:
       "Tires from TireDrop fitted at your home or work in Sunrise, FL by the Extreme Tires van from our Oakland Park Blvd shop. Sunrise ZIPs, roads and local answers.",
@@ -236,7 +237,7 @@ export const CITY_PAGES = [
         a: "Coverage follows the ZIP, not the type of community, so if your ZIP is in Broward, Miami-Dade or Palm Beach County the van can come. Many Tamarac communities are 55+ condo or single-family communities with their own access and parking rules, so check with your association first, then tell us where the car is parked and what the gate needs.",
       },
     ],
-    nearby: ["sunrise-fl", "coral-springs-fl"],
+    nearby: ["sunrise-fl", "coral-springs-fl", "lauderhill-fl"],
     seoTitle: "Mobile Tire Installation in Tamarac, FL",
     description:
       "TireDrop tires fitted at your Tamarac, FL home or gated community by the Extreme Tires van from Sunrise. How the ZIP check works and what to have ready.",
@@ -406,7 +407,7 @@ export const CITY_PAGES = [
         a: "Griffin Rd forms the Davie and Cooper City border, so an address near it can read either name. Use the ZIP: if the ZIP where the car is parked is in Miami-Dade, Broward or Palm Beach County, the van comes, and the checker on this page confirms it.",
       },
     ],
-    nearby: ["plantation-fl", "weston-fl", "fort-lauderdale-fl", "sunrise-fl"],
+    nearby: ["plantation-fl", "weston-fl", "fort-lauderdale-fl", "sunrise-fl", "pembroke-pines-fl", "hollywood-fl"],
     seoTitle: "Mobile Tire Installation in Davie, FL",
     description:
       "Tires bought on TireDrop, fitted at your Davie, FL home or workplace by our Extreme Tires van. Davie ZIPs 33314 to 33331, puncture repair, what the van does.",
@@ -558,10 +559,429 @@ export const CITY_PAGES = [
         a: "No. Weston has two development districts, Indian Trace and Bonaventure, and named neighbourhoods such as Country Isles, Windmill Ranch and Emerald Estates, but coverage follows the ZIP code where the car is parked. If it's one of our Broward ZIPs, the van comes, and the ZIP checker on this page confirms it.",
       },
     ],
-    nearby: ["sunrise-fl", "davie-fl"],
+    nearby: ["sunrise-fl", "davie-fl", "pembroke-pines-fl"],
     seoTitle: "Mobile Tire Installation in Weston, FL",
     description:
       "Bought tires on TireDrop? The Extreme Tires van fits them at your Weston, FL home or workplace. Weston ZIPs, gate and HOA tips, and what the van does.",
+  },
+  {
+    slug: "pembroke-pines-fl",
+    name: "Pembroke Pines",
+    county: "Broward",
+    population: 171178,
+    // Batch 2 (2026-10-05): no ZIPs, roads or neighbourhoods are listed. The
+    // plan's candidate ZIPs are unverified and no government source was
+    // readable (docs/audits/2026-10-05-local-pages-plan.md), so the ZIP checker
+    // decides. Populations are the plan's MED ones (census.gov, two searches).
+    // Each page's wording is its own on purpose: the overlap test counts any
+    // five-word run found on another page, so batch 2 copy is never recycled.
+    zips: [],
+    areas: [],
+    roads: [],
+    route:
+      "Pembroke Pines is a Broward County address, so it falls inside the three-county area the Extreme Tires vans work, from their base at the Sunrise shop.",
+    intro:
+      "Pembroke Pines counted 171,178 residents in the 2020 Census. Whichever driveway or parking space your car sits in, the Extreme Tires van, based at our Sunrise shop, can bring the tire work to it instead of the car going to a waiting room. Buy the set on TireDrop, ask for mobile installation, and the technician mounts, balances and torques the wheels on the spot.",
+    whereWeWork: [
+      "Three Broward neighbours blur together on the map and in the mailbox: Pembroke Pines, Hollywood and Miramar. A letter for a Pembroke Pines street can be addressed to Hollywood, and a Hollywood house can carry the Pembroke Pines name. Booking sidesteps the puzzle, since coverage is read from the ZIP code of the parking spot, not the town on the envelope.",
+      "No Pembroke Pines ZIP list appears here. Ours hasn't been checked against the postal service's, and an unchecked list does more harm than a blank one. Type the ZIP for the parking spot into the box on this page: anything across the three counties of Miami-Dade, Broward and Palm Beach is covered, and checkout applies the identical rule.",
+    ],
+    roadside:
+      "Picture a flat on a weekday morning in Pembroke Pines: a driveway, an office lot, a shopping plaza. For flat tire help in Pembroke Pines, phone during shop hours and the van comes to the car. The tire is repaired on the spot when the damage allows it, and the spare goes on when it does not.",
+    beforeWeCome: {
+      lede: "If your home or building has an association, one phone call before booking can save a delay. Treat these as suggestions, not conditions of booking.",
+      points: [
+        "Ask the association or the building office whether a service van may enter, and where it can stand during the visit.",
+        "Pass on the gate code, or the name the guard should have on the list, when you book.",
+        "Describe the spot: driveway, numbered space or visitor lot. The technician works alongside the car, so a free strip down one side makes it easy.",
+      ],
+    },
+    conditionsTitle: "Replacing two tires or four in Pembroke Pines",
+    conditions: [
+      "Not every replacement is a full set. When only two tires are bought, tire makers want the new pair behind, on the rear axle, regardless of which wheels drive the car. The reasoning is grip: the axle with deeper tread keeps the car steadier when the road is wet. The two old tires with more tread left then move to the front.",
+      "A full set removes the question. For either job, read the size molded into the sidewall of a tire on the car, a string like 225/65R17, and quote it when you book. If you order on TireDrop, the size travels with the order.",
+    ],
+    faq: [
+      {
+        q: "Which city name should I give, Pembroke Pines or Hollywood?",
+        a: "Give the street address as it appears on your mail, and the ZIP code separately. The ZIP is what we check, and coverage doesn't change with the city name. Try it in the box on this page and you will see the result before you book.",
+      },
+      {
+        q: "I only need two new tires. Where do they go?",
+        a: "On the rear axle. Tire makers recommend putting the new pair at the back, because the tires with more tread there keep the car steadier on wet roads. Mention in your booking that you are doing two, and the visit is planned around that.",
+      },
+      {
+        q: "Does the van come to an office or shopping plaza in Pembroke Pines?",
+        a: "Yes. The lot needs space next to your car, and the property has to let service vehicles in. Name the building, the lot and the row or spot.",
+      },
+      {
+        q: "Is it better to ship the tires home or to your store?",
+        a: "Both work. At home, the boxes wait for the van wherever you stack them. At our Sunrise shop, shipping is free, and the van collects the set there and brings it along.",
+      },
+      {
+        q: "Could I drive to your shop rather than book the van?",
+        a: "You could. The shop is in Sunrise, with weekday hours to 6:30 PM and Saturday hours to 4:00 PM, and a bay fitting is charged per tire. People pick the van when they can't spare the car for the visit.",
+      },
+    ],
+    nearby: ["hollywood-fl", "miramar-fl", "davie-fl", "weston-fl"],
+    seoTitle: "Mobile Tire Installation in Pembroke Pines, FL",
+    description:
+      "TireDrop tires fitted at your Pembroke Pines, FL home or work by the Extreme Tires van from Sunrise. ZIP check, Hollywood and Miramar mail, shop option.",
+  },
+  {
+    slug: "hollywood-fl",
+    name: "Hollywood",
+    county: "Broward",
+    population: 153067,
+    zips: [],
+    areas: [],
+    roads: [],
+    route:
+      "Hollywood sits in Broward County, the county of the Sunrise shop that the Extreme Tires vans work from.",
+    intro:
+      "The 2020 Census put Hollywood at 153,067 people, and the Extreme Tires van can reach any Hollywood parking spot with a covered ZIP code. Our Sunrise shop is where the vans start out; the van carries the machines, so a set bought on TireDrop is fitted where you leave the car: the driveway, the lot at work or the space behind your building.",
+    whereWeWork: [
+      "Hollywood, Pembroke Pines and Miramar are close neighbours, and mail doesn't always respect the borders between them: an address can say Hollywood on a street that belongs to a neighbour. Nothing about that slows a booking. The van reads the ZIP code of the place the car will be parked, and the city line on an envelope never enters into it.",
+      "We have not printed a Hollywood ZIP list, because we have not been able to confirm one. The ZIP lookup on this page gives a straight answer, and the same rule sits behind checkout and every booking.",
+    ],
+    roadside:
+      "Spotted a flat in a Hollywood lot, by your front door or along a side street? Phone us in shop hours for mobile flat tire repair in Hollywood. The technician reads the damage from the inside of the tire, repairs it if it qualifies and mounts your spare if it does not.",
+    beforeWeCome: {
+      lede: "A few facts at booking keep a Hollywood visit smooth. They are our suggestions, nothing you must do.",
+      points: [
+        "Send the street address and ZIP together. A Hollywood address may share its ZIP with a neighbouring city, and the booking follows the ZIP.",
+        "Name the spot: a driveway, a numbered bay, a visitor space or a curb.",
+        "If the wheels have locking nuts, find the key beforehand. Drivers often keep it in the glovebox or the center console.",
+      ],
+    },
+    conditionsTitle: "Heat, pressure and your Hollywood tires",
+    conditions: [
+      "Florida heat moves tire pressure: roughly 1 psi for each 10°F, according to NHTSA. A tire inflated on a cool morning therefore shows a higher number once the day warms up, and sinks back overnight. Take readings with the tires cold, before the car has been driven, and aim for the number on the door-jamb placard, never the maximum stamped into the sidewall.",
+      "A monthly gauge check is cheap protection. Underinflated tires bend more with every turn of the wheel and run hotter, and a slow leak appears as a creeping number weeks before it becomes a flat.",
+    ],
+    faq: [
+      {
+        q: "My mail says Hollywood, but the street is near Pembroke Pines or Miramar. What do I do?",
+        a: "Nothing special. Pick any of the three pages; the answer is identical because coverage is set by ZIP. Enter the ZIP where the car is kept and book.",
+      },
+      {
+        q: "Do I have to stay with the car?",
+        a: "No. Leave the car unlocked or hand over the keys, add the wheel lock key if there is one, and make sure a strip beside the car is free. You can go indoors, and the technician lets you know when the work is finished.",
+      },
+      {
+        q: "The tire keeps losing air. Can that be handled at home?",
+        a: "A puncture, yes in most cases. Book a flat repair: the wheel comes off, the inside of the tire is inspected, and a qualifying puncture is repaired. Where it can't be, a replacement is needed. Leave any nail where it sits until then.",
+      },
+      {
+        q: "My building has a parking garage or lot. Will the van be allowed in?",
+        a: "Buildings set their own rules for outside work. Ask the office, then give us the building name and the spot at booking. If the answer is no, free shipping to our Sunrise shop and a bay fitting is the other route.",
+      },
+      {
+        q: "What does the air pressure number on the tire mean?",
+        a: "The figure on the sidewall is the most the tire can hold. The right setting for your car is on the placard in the driver's door jamb, and NHTSA says to set it with the tires cold.",
+      },
+    ],
+    nearby: ["pembroke-pines-fl", "miramar-fl", "davie-fl"],
+    seoTitle: "Mobile Tire Installation in Hollywood, FL",
+    description:
+      "Tires from TireDrop fitted at your Hollywood, FL home or work by the Extreme Tires van. ZIP check for shared Hollywood mail, gate tips and shop option.",
+  },
+  {
+    slug: "miramar-fl",
+    name: "Miramar",
+    county: "Broward",
+    population: 134721,
+    zips: [],
+    areas: [],
+    roads: [],
+    route:
+      "Within the three-county area that the Sunrise shop's vans serve, Miramar falls in Broward.",
+    intro:
+      "Miramar's 2020 Census count was 134,721. The Extreme Tires van, based at our Sunrise shop, serves Miramar addresses on the strength of their ZIP codes, and it fits new tires in the open: on your driveway, at your workplace or in front of your building. Pick tires on TireDrop, tick the mobile box at checkout and the old set leaves with the technician.",
+    whereWeWork: [
+      "Miramar touches Pembroke Pines and Hollywood, and some Miramar mail carries a neighbour's name. That is harmless here. What a booking turns on is the five-digit ZIP of the spot where the car will stand; across Miami-Dade, Broward and Palm Beach, a covered ZIP means the van is available.",
+      "We print no Miramar ZIP list, since none has been verified. The checker covers every case, and checkout reads from the same rule.",
+    ],
+    roadside:
+      "After the school run, a plaza lot or a night in the driveway, a tire can be down. When you need flat tire help in Miramar, ring us during shop hours. The van can patch a qualifying puncture where the car stands, or swap in your spare when a patch isn't possible.",
+    beforeWeCome: {
+      lede: "A little preparation helps the visit run smoothly. These are suggestions only.",
+      points: [
+        "Find the size on the sidewall of a tire on the car, a code in the pattern 245/45R18, and have it to hand. A TireDrop order already carries it.",
+        "State how many tires you are doing, and whether the car has a full-size spare, a compact one or none.",
+        "Say where the car will be, and leave a free strip alongside it.",
+      ],
+    },
+    conditionsTitle: "Reading tread depth before you order",
+    conditions: [
+      "Water has to escape from under a tire, and tread is the channel it escapes through. NHTSA and USTMA name 2/32 inch as the replace-by point, the depth at which the wear bars sit level with the surface. Consumer Reports' testing backs thinking about new tires from 4/32 inch, since stopping distances on wet roads lengthen as the tread wears. A heavy summer storm is where drivers notice it first.",
+      "Measure all four, in more than one spot. Front and rear tires wear at different speeds, and a tire that has worn unevenly says something about pressure, rotation or alignment. Our tire check explains how to take each reading before you order.",
+    ],
+    faq: [
+      {
+        q: "Does Miramar follow different rules from Pembroke Pines or Hollywood?",
+        a: "No. All three sit in Broward, and one ZIP rule applies to each. Use the checker on this page; checkout gives the same answer.",
+      },
+      {
+        q: "How low can the tread go?",
+        a: "NHTSA and USTMA treat 2/32 inch as the limit, where the wear bars become level with the tread. Consumer Reports suggests considering new tires at 4/32 inch because wet braking gets worse as tread wears. Our tire check shows how to measure, and the technician can measure each tire when the van is there.",
+      },
+      {
+        q: "Can the van do an alignment?",
+        a: "No. Alignment needs a rack, which stays at the Sunrise shop. Have the van fit the tires, then book the alignment at the shop separately.",
+      },
+      {
+        q: "I bought wheels and tires together. Is that one visit?",
+        a: "Yes: new wheels are van work. The tires get mounted and balanced on them, and the TPMS sensors are moved across or programmed. Order the pair on TireDrop and book once.",
+      },
+      {
+        q: "What size do I tell you?",
+        a: "Each tire has its size molded into the sidewall: width, a slash, aspect ratio, the letter R, then wheel diameter, for example 245/45R18. A TireDrop order passes it along automatically.",
+      },
+    ],
+    nearby: ["pembroke-pines-fl", "hollywood-fl"],
+    seoTitle: "Mobile Tire Installation in Miramar, FL",
+    description:
+      "TireDrop tires fitted at your Miramar, FL home or workplace by the Extreme Tires van. ZIP check, tread-depth tips, wheels and tires in one visit.",
+  },
+  {
+    slug: "pompano-beach-fl",
+    name: "Pompano Beach",
+    county: "Broward",
+    population: 112046,
+    zips: [],
+    areas: [],
+    roads: [],
+    route:
+      "Pompano Beach shares a county with our Sunrise shop: both are in Broward.",
+    intro:
+      "The 2020 Census counted 112,046 people in Pompano Beach. The Extreme Tires van, based at our Sunrise shop, can fit your tires in Pompano Beach: on your driveway, at your workplace or outside your building. Order on TireDrop and pick mobile installation at checkout.",
+    whereWeWork: [
+      "Pompano Beach and our Sunrise shop are in one county, Broward, so there is no county line to wonder about. What matters is the ZIP of the spot where the car will wait for us, and the form on this page gives the answer as soon as you type it.",
+      "Pompano Beach ZIPs, roads and neighbourhoods are left off this page. None has been confirmed, and a wrong entry would mislead more than a blank. The ZIP rule is what the van runs on, so nothing is lost.",
+    ],
+    roadside:
+      "Found a nail at work, a flat in the driveway, or a tire that sinks overnight? Ask for mobile flat tire repair in Pompano Beach by phoning in shop hours. The wheel comes off, the inside of the tire gets checked, and a qualifying puncture is repaired; otherwise your spare goes on.",
+    beforeWeCome: {
+      lede: "When the problem is a flat, a few details help most, and they are quick to give. Take these as suggestions.",
+      points: [
+        "Say where the hole is: in the tread, near the edge, or in the sidewall. That decides whether it can be repaired.",
+        "Say whether the tire still holds air, and whether the car carries a spare.",
+        "Leave any nail or screw where it is, and tell us the car's location, which must be off any highway or expressway shoulder.",
+      ],
+    },
+    conditionsTitle: "When a Pompano Beach tire goes flat",
+    conditions: [
+      "A nail or screw in the tread is a familiar cause of a flat, and the rule is to leave it where it is. Often the fastener is plugging the hole, and pulling it can turn a slow leak into a flat. Keep the next trip short and call us.",
+      "Repair depends on position. Tire-industry practice, as USTMA describes it, allows a small hole in the tread area, 1/4 inch at most, to be sealed with a plug and patch from the inside, but only once the tire is off the wheel and inspected. A hole in the sidewall or shoulder rules repair out. The repair check on this site lets you tap the damaged spot on a diagram.",
+    ],
+    faq: [
+      {
+        q: "My tire went flat at work in Pompano Beach. Will the van come there?",
+        a: "Yes, in shop hours, if there is room next to the car and the property lets a service vehicle in. Give us the building and where the car sits.",
+      },
+      {
+        q: "I found a screw in the tread. Should I pull it out?",
+        a: "Leave it in. It may be sealing the hole. Keep the trip short, then book a repair so the technician can take the tire off and examine the inside.",
+      },
+      {
+        q: "How can I tell whether a puncture is repairable?",
+        a: "Location is the test. A small hole in the tread area can be plugged and patched from the inside, while sidewall or shoulder damage rules a repair out. The repair check shows which side of that line yours is on.",
+      },
+      {
+        q: "And if the tire turns out to be beyond repair?",
+        a: "A replacement is ordered on TireDrop and the van fits it. If your spare is in the car, it can go on first so the car is mobile again.",
+      },
+      {
+        q: "Is the shop in the same county as Pompano Beach?",
+        a: "Our shop is in Sunrise, in Broward like Pompano Beach. Shipping tires to it is free, and the bay can fit them if you would rather not use the van.",
+      },
+    ],
+    nearby: ["oakland-park-fl", "fort-lauderdale-fl"],
+    seoTitle: "Mobile Tire Installation in Pompano Beach, FL",
+    description:
+      "Tires from TireDrop fitted at your Pompano Beach, FL home or work by the Extreme Tires van. ZIP check, flat repair rules and what the van does.",
+  },
+  {
+    slug: "lauderhill-fl",
+    name: "Lauderhill",
+    county: "Broward",
+    population: 74482,
+    zips: [],
+    areas: [],
+    roads: [],
+    route:
+      "Lauderhill and the Sunrise shop are both in Broward County, which is the base of the Extreme Tires vans.",
+    intro:
+      "In the 2020 Census Lauderhill had 74,482 residents. For a car parked in a Lauderhill driveway, apartment lot or workplace, the Extreme Tires van from our Sunrise shop is a booking away: pick the tires on TireDrop, request mobile installation at checkout and the fitting happens beside the car.",
+    whereWeWork: [
+      "Broward ZIP codes regularly straddle city limits, which means an address that says Lauderhill can share its ZIP with a neighbouring city. Our Sunrise page shows the pattern from the other direction. The van doesn't care which name is on the mail; it cares about the ZIP of the place the car sits.",
+      "No Lauderhill ZIP list is printed yet, because none has been confirmed. Type any ZIP into the lookup on this page, and checkout will agree with it.",
+    ],
+    roadside:
+      "A flat in an apartment lot, a soft tire in the driveway or a nail picked up on the road: flat tire help in Lauderhill takes one phone call in shop hours. The van repairs the tire where it sits if it qualifies, and mounts the spare if it doesn't.",
+    beforeWeCome: {
+      lede: "Parking arrangements vary between complexes and communities, so a little checking helps. These are suggestions, not requirements.",
+      points: [
+        "If the community is gated or guarded, send the code, or the name for the guard's list, with your booking.",
+        "Tell us whether the car is in a numbered space, a visitor lot or on the street. The technician needs firm, level ground and a free strip along the car.",
+        "If management limits outside work in the lot, ask before booking. If the answer is no, a workplace fitting or a bay at the shop, with tires shipped free, are the alternatives.",
+      ],
+    },
+    conditionsTitle: "Keeping a Lauderhill set wearing evenly",
+    conditions: [
+      "Rotation moves each tire to a different corner so all four tires wear down at one pace. The Tire Industry Association's suggested interval is somewhere between 5,000 and 7,000 miles, and the manual that came with your car has the last word. On a front-wheel-drive car the front pair steers and does most of the braking, so it wears out first.",
+      "You don't need to buy new tires to book it. The van rotates the set beside your car, and can balance them in the same visit. Our rotation tool shows the right pattern for your drivetrain and tread.",
+    ],
+    faq: [
+      {
+        q: "Which is easier, the van or the shop?",
+        a: "That depends on your day. The shop in Sunrise takes tires shipped free and fits them in a bay, charged per tire; the van saves you the wait and the trip.",
+      },
+      {
+        q: "I live in an apartment with no driveway. Is that a problem?",
+        a: "No. Any parking space, lot or street works if the ground is firm and level and there is a free strip beside the car. Say where it is when you book.",
+      },
+      {
+        q: "How often do tires need rotating?",
+        a: "The suggested interval ranges between 5,000 and 7,000 miles, with the car's manual deciding. Our rotation tool shows the pattern that suits your car.",
+      },
+      {
+        q: "My mail says Lauderhill, but the ZIP is shared with another city. Does it matter?",
+        a: "No. The area is set by ZIP code, and every ZIP in Miami-Dade, Broward and Palm Beach County counts. The lookup on this page confirms yours.",
+      },
+      {
+        q: "Can I book just a rotation, without buying tires?",
+        a: "Yes. The van does rotations, balancing, flat repairs, TPMS service and wheel fitting, and the tires don't have to come from us. Alignment is the one job that stays at the shop, because it needs a rack.",
+      },
+    ],
+    nearby: ["sunrise-fl", "plantation-fl", "tamarac-fl", "fort-lauderdale-fl"],
+    seoTitle: "Mobile Tire Installation in Lauderhill, FL",
+    description:
+      "TireDrop tires fitted at your Lauderhill, FL home or complex lot by the Extreme Tires van from Sunrise. ZIP check, gate tips, rotation by van.",
+  },
+  {
+    slug: "oakland-park-fl",
+    name: "Oakland Park",
+    county: "Broward",
+    population: 44229,
+    zips: [],
+    areas: [],
+    roads: [],
+    route:
+      "The shop is on a road called Oakland Park Blvd, in Sunrise. Sunrise and the city of Oakland Park are both in Broward County.",
+    intro:
+      "Oakland Park's population was 44,229 in the 2020 Census, and its name matches the road our shop stands on. That shop is in Sunrise, though, not in the city of Oakland Park. The Extreme Tires van does the visiting: order tires on TireDrop, ask for mobile installation, and fitting happens wherever the car is parked in Oakland Park.",
+    whereWeWork: [
+      "Search for a tire shop in Oakland Park and you may land on our address, and the road name is why: 7712 West Oakland Park Blvd, Sunrise, FL 33351 names the road, not the city. The city of Oakland Park itself is covered by the van, on the same ZIP-code rule as every other address we serve.",
+      "We haven't verified any Oakland Park ZIPs yet, so none are printed. The ZIP check on this page takes any ZIP, and a booking is read by the same rule.",
+    ],
+    roadside:
+      "Flat outside the office, a soft tire in the driveway or a nail from a side street? Phone in shop hours to get flat tire help in Oakland Park, meaning a repair on the spot when the tire qualifies, or your spare mounted when it doesn't.",
+    beforeWeCome: {
+      lede: "Whether you book the van or a bay, a short list helps. Consider these suggestions.",
+      points: [
+        "Choose one route: the van comes to your address, or you take the car to the shop on West Oakland Park Blvd in Sunrise.",
+        "For the van, name the spot and keep room along one side of the car.",
+        "If the edges of your old tires are worn unevenly, mention it. That usually means an alignment is due, and alignment is shop work.",
+      ],
+    },
+    conditionsTitle: "Edge wear, alignment and the van",
+    conditions: [
+      "Look at how your old set wore. Wear that sits on one edge, or comes in patches, is a clue that the car needs aligning or has tired suspension parts, and new tires fitted without that being fixed will wear the same way. The van cannot align a car, because the car has to be on a rack.",
+      "So work in two steps. Let the van do the tires wherever the car sits, then take the car to the Sunrise shop for the alignment, or have both jobs done in the bay. Even wear across all four tires is what regular rotation keeps.",
+    ],
+    faq: [
+      {
+        q: "Is your shop in Oakland Park?",
+        a: "No. It is in Sunrise, on Oakland Park Blvd, the road that shares the city's name. Oakland Park addresses are served by the van through the ZIP rule.",
+      },
+      {
+        q: "One edge of my tires is worn. Will new ones cure it?",
+        a: "No. Uneven edge wear points to alignment, and fresh tires on a car that is out of line wear the same way. Have the van fit the set, then book an alignment at the Sunrise shop.",
+      },
+      {
+        q: "Can the van fit tires at my workplace in Oakland Park?",
+        a: "Yes, so long as the lot has space beside your car and the property admits service vehicles. Give the building name, plus the lot and spot.",
+      },
+      {
+        q: "What decides whether the van comes to my address?",
+        a: "The ZIP code where the car will be parked. If it is in Miami-Dade, Broward or Palm Beach County, the van comes, and the ZIP check on this page shows the answer before you book.",
+      },
+      {
+        q: "Can the alignment and the tires be one booking?",
+        a: "They are two jobs in two places: the van fits tires at your address, and the shop's rack in Sunrise does the alignment. For a single visit, have the tires shipped to the store, free, and book both in the bay.",
+      },
+    ],
+    nearby: ["fort-lauderdale-fl", "pompano-beach-fl", "sunrise-fl"],
+    seoTitle: "Mobile Tire Installation in Oakland Park, FL",
+    description:
+      "Tires from TireDrop fitted at your Oakland Park, FL home or work by the Extreme Tires van. Our shop is in Sunrise: ZIP check, alignment and van tips.",
+  },
+  {
+    slug: "hialeah-fl",
+    name: "Hialeah",
+    county: "Miami-Dade",
+    population: 223109,
+    // The first page outside Broward. Kept to the county, the ZIP rule and
+    // what the van does: nothing on language, demographics, roads or ZIPs.
+    zips: [],
+    areas: [],
+    roads: [],
+    route:
+      "The Extreme Tires vans are based at our Sunrise shop in Broward County, so a Hialeah visit starts across the county line. We book by ZIP code, and we confirm an arrival window when we book.",
+    intro:
+      "By the 2020 Census Hialeah had 223,109 residents, in Miami-Dade County. Our shop is across the county line in Sunrise, but the Extreme Tires van works in Miami-Dade too, so a set bought on TireDrop can be fitted in Hialeah: on a driveway, in a building lot or at a workplace. Choose mobile installation at checkout and the technician does the rest beside the car.",
+    whereWeWork: [
+      "Miami-Dade is one of three counties the van covers, with Broward and Palm Beach, and a single rule applies in all of them: the five-digit ZIP of the place the car will be parked. If that ZIP is in Miami-Dade, Broward or Palm Beach County, the van comes.",
+      "This is our first page for a Miami-Dade city, so it sticks to what we can stand behind: the county, the ZIP rule and what the van does. No ZIP list is printed, because none has been confirmed. The ZIP lookup on this page answers for any ZIP.",
+    ],
+    roadside:
+      "Flat in a Hialeah parking lot, a driveway or a side street? Mobile flat tire repair in Hialeah starts with a call during shop hours. If the damage can be repaired, the technician does it where the car sits; if not, your spare goes on.",
+    beforeWeCome: {
+      lede: "Because the van starts in Broward, a few details help us plan a Hialeah visit. None of this is required.",
+      points: [
+        "Give the ZIP of the spot where the car will be parked, with the street address. The booking form checks it.",
+        "Tell us if there is a gate, a guard or a building office the technician should check in with.",
+        "If you would rather skip the van, tires ship free to the Sunrise shop, in Broward County, for a bay fitting.",
+      ],
+    },
+    conditionsTitle: "Tire notes for Hialeah drivers",
+    conditions: [
+      "A tire ages whether or not the car moves. Each one carries a DOT code on the sidewall, and the last four digits give the week and the year it was made: 2524 means the 25th week of 2024. Heat and sun are hard on rubber, so an older tire can show good tread and still be cracking at the sidewall.",
+      "Ask the technician to point out the code on your old tires and on the new ones when the van is there. It takes a few seconds and tells you how old each tire is.",
+    ],
+    faq: [
+      {
+        q: "Does the van really come to Miami-Dade?",
+        a: "Yes. Mobile installation covers Miami-Dade, Broward and Palm Beach counties, and it is decided by ZIP code. Check the ZIP where the car will be parked on this page, and checkout runs the same check.",
+      },
+      {
+        q: "Where is the shop? Is it in Hialeah?",
+        a: "The shop is in Sunrise, in Broward County, not in Hialeah. The van is how Hialeah drivers get tires fitted without making that trip.",
+      },
+      {
+        q: "What if my ZIP isn't covered?",
+        a: "The ZIP lookup and checkout tell you before you pay. If it is outside Miami-Dade, Broward and Palm Beach, ship the tires free to our Sunrise shop instead, or call (954) 773-1896.",
+      },
+      {
+        q: "Do I need to buy my tires on TireDrop to book the van?",
+        a: "No. If the tires are already in your garage, book the van for them.",
+      },
+      {
+        q: "Can the van fit tires at my workplace in Hialeah?",
+        a: "Yes. The lot needs space beside the car, and the property must allow service vehicles. Name the building, the lot and the row.",
+      },
+      {
+        q: "How can I tell how old my tires are?",
+        a: "Read the DOT code on the sidewall. The last four digits are the week and year of manufacture, so 2524 is week 25 of 2024. The technician can show you the code on each tire when the van is there.",
+      },
+    ],
+    nearby: ["hollywood-fl", "miramar-fl"],
+    nearbyTitle: "Broward city pages, across the county line",
+    seoTitle: "Mobile Tire Installation in Hialeah, FL",
+    description:
+      "Tires from TireDrop fitted at your Hialeah, FL home or work by the Extreme Tires van. Miami-Dade ZIP check, what the van does, free ship-to-store.",
   },
 ];
 

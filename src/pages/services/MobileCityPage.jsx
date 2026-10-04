@@ -319,7 +319,7 @@ export default function MobileCityPage() {
 
       {/* ---------- Nearby + hub ---------- */}
       <Section className="bg-bone">
-        <h2 className="h3 mb-5">Nearby city pages</h2>
+        <h2 className="h3 mb-5">{city.nearbyTitle ?? "Nearby city pages"}</h2>
         <ul className="flex flex-wrap gap-2.5">
           {nearby.map((c) => (
             <li key={c.slug}>

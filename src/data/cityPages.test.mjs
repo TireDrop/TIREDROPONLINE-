@@ -60,9 +60,58 @@ test("city pages: eligibility stays ZIP-based (city names decide nothing)", () =
   for (const c of CITY_PAGES) assert.ok(!rule.includes(`"${c.name}"`), c.name);
 });
 
+/* --------------------------- batch 2 pages --------------------------- */
+
+const BATCH_2 = {
+  "pembroke-pines-fl": "Broward",
+  "hollywood-fl": "Broward",
+  "miramar-fl": "Broward",
+  "pompano-beach-fl": "Broward",
+  "lauderhill-fl": "Broward",
+  "oakland-park-fl": "Broward",
+  "hialeah-fl": "Miami-Dade",
+};
+
+test("batch 2: each page exists with its county, and Hialeah is Miami-Dade", () => {
+  for (const [slug, county] of Object.entries(BATCH_2)) {
+    const c = getCityPage(slug);
+    assert.ok(c, `${slug} has no entry`);
+    assert.equal(c.county, county, slug);
+  }
+  // The first page outside Broward says Miami-Dade; Broward appears only as where the shop is.
+  const h = getCityPage("hialeah-fl");
+  assert.match(h.intro, /Miami-Dade County/);
+  assert.ok(!/is in Broward/.test(h.route));
+});
+
+test("batch 2: no unconfirmed ZIPs, roads or places, and no language or demographic claims", () => {
+  for (const slug of Object.keys(BATCH_2)) {
+    const c = getCityPage(slug);
+    // The plan's ZIPs and places are unverified: the ZIP checker decides.
+    assert.deepEqual([c.zips, c.areas, c.roads], [[], [], []], slug);
+    assert.match(c.whereWeWork.join(" "), /checker|ZIP (box|form|check|lookup)|(box|form|lookup) on this page/i, `${slug}: points to the ZIP check`);
+  }
+  const text = strings(getCityPage("hialeah-fl")).join("\n");
+  assert.ok(
+    !/\b(spanish|bilingual|language|latino|hispanic|cuban|immigra\w*|demograph\w*|community of)\b/i.test(text),
+    "Hialeah copy claims nothing about language or demographics",
+  );
+});
+
+test("batch 2: every new page has nearby links, and existing pages link back where the cities are neighbours", () => {
+  for (const slug of Object.keys(BATCH_2)) {
+    assert.ok(getCityPage(slug).nearby.length >= 2, slug);
+  }
+  // Hand-picked inbound links (the template also lists every sibling on every page).
+  const inbound = (slug) => CITY_PAGES.filter((c) => c.slug !== slug && c.nearby.includes(slug)).length;
+  for (const slug of ["lauderhill-fl", "pembroke-pines-fl"]) {
+    assert.ok(inbound(slug) >= 2, `${slug}: linked from ${inbound(slug)} pages`);
+  }
+});
+
 /* ------------------------------ data ------------------------------ */
 
-test("city pages: the seven wave-1 cities, well formed", () => {
+test("city pages: the 14 cities (wave 1 and batch 2), well formed", () => {
   assert.deepEqual(
     CITY_PAGES.map((c) => c.slug),
     [
@@ -73,6 +122,13 @@ test("city pages: the seven wave-1 cities, well formed", () => {
       "davie-fl",
       "fort-lauderdale-fl",
       "weston-fl",
+      "pembroke-pines-fl",
+      "hollywood-fl",
+      "miramar-fl",
+      "pompano-beach-fl",
+      "lauderhill-fl",
+      "oakland-park-fl",
+      "hialeah-fl",
     ],
   );
   for (const c of CITY_PAGES) {
@@ -86,7 +142,7 @@ test("city pages: the seven wave-1 cities, well formed", () => {
       new RegExp(`(flat tire help|mobile flat tire repair) in ${c.name}`, "i").test(c.roadside),
       `${c.slug}: roadside lede needs "flat tire help in ${c.name}" or "mobile flat tire repair in ${c.name}"`,
     );
-    assert.ok(c.nearby.length >= 2 && c.nearby.length <= 4, `${c.slug}: nearby`);
+    assert.ok(c.nearby.length >= 2 && c.nearby.length <= 6, `${c.slug}: nearby`);
     for (const n of c.nearby) {
       assert.ok(getCityPage(n), `${c.slug}: nearby "${n}" is not a city page`);
       assert.notEqual(n, c.slug);
@@ -244,7 +300,7 @@ export function pageText(c) {
     ...c.faq.flatMap((f) => [f.q, f.a]),
     BUSINESS.tagline, `Book a mobile install in ${name}`, SHARED.ctaBody,
     "Book Mobile Install", "Shop Tires", BUSINESS.phone,
-    "Nearby city pages",
+    c.nearbyTitle ?? "Nearby city pages",
     ...c.nearby.map((n) => `Mobile tire installation in ${getCityPage(n).name}`),
     "All mobile service areas",
   ].join("\n");

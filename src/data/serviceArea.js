@@ -95,6 +95,7 @@ export const SERVICE_AREA_EXAMPLES = [
       "Miramar",
       "Hollywood",
       "Pompano Beach",
+      "Oakland Park",
     ],
   },
   {
