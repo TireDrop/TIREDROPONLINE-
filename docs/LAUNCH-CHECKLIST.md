@@ -119,7 +119,7 @@ _Last updated: 2026-10-04 (Trust strip and returns policy drafts written, nothin
 - [ ] Switch the CSP from report-only to enforced after a week of clean `[csp]` logs (docs/ops/deploy.md, "Security headers") → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C9)
 - [x] ~~NHTSA lookup timeout~~ (c541339)
 - [ ] Returns window + warranty/road-hazard links → prompt in docs/prompts/2026-10-02-justin-remaining.md (#D1)
-- [ ] Trust strip and returns policy drafts ready, waiting on D1 answers (competitor gap 2): docs/drafts/trust-and-returns.md (branch preview/wave1-trust-draft, SHA pending)
+- [ ] Trust strip and returns policy drafts ready, waiting on D1 answers (competitor gap 2): docs/drafts/trust-and-returns.md (branch preview/wave1-trust-draft, SHA 639c9f4)
 - [x] ~~"Continental US" wording (~40 places) → "48 contiguous states + DC"~~ (c541339)
 - [ ] Shopify theme copy still says "continental United States" (shop. redirects to the main site, so it does not render; update the draft theme only if the redirect ever comes off) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#C10)
 - [ ] Homepage reviews card: use a real Google review link (it currently points at a Maps search) → prompt in docs/prompts/2026-10-02-justin-remaining.md (#A9)
