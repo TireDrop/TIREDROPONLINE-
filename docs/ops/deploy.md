@@ -119,7 +119,8 @@ that do the server-side work:
 |                      | `newsletter` on/off, `forms` on/off, `webhooks`           |
 |                      | configured/off.                                           |
 | `GET /api/geo`       | The visitor's approximate location from Vercel's IP       |
-|                      | headers: `{ available, country, zip, lat, lng, city }`,   |
+|                      | headers: `{ available, country, zip, lat, lng, city,        |
+|                      | region }`,                                               |
 |                      | each validated, or `{ available: false }` (locally).      |
 |                      | `Cache-Control: private, no-store`; nothing logged or     |
 |                      | stored. `/local-delivery` calls it once on load. Not its  |
@@ -424,7 +425,7 @@ To update or re-cut the fonts later: `npm install` (the `@fontsource-variable/ar
 | `style-src` | `'self'`, `'unsafe-inline'`, `fonts.googleapis.com`, `translate.googleapis.com`, `www.gstatic.com` | the CSS bundle, Translate's CSS (`fonts.googleapis.com` is no longer used: the fonts are self-hosted, see "Fonts" below; it can be dropped from this list). `'unsafe-inline'` because React writes `style="…"` attributes into the prerendered HTML (and Translate injects styles); hashes cannot cover attributes. Style injection is low risk next to script injection, which stays locked down. |
 | `font-src` | `'self'`, `data:`, `fonts.gstatic.com` | Archivo and Instrument Sans now come from `'self'` (`/assets/*.woff2`); `fonts.gstatic.com` is unused and can be dropped from this list |
 | `img-src` | `'self'`, `data:`, `blob:`, any `https:` | product photos come from the distributor's image host (not confirmed yet), plus GA and Translate images |
-| `connect-src` | `'self'`, `vpic.nhtsa.dot.gov`, `*.google-analytics.com`, `*.analytics.google.com`, `*.googletagmanager.com`, `translate.google.com`, `translate.googleapis.com`, `translate-pa.googleapis.com` | `/api`, the NHTSA make/model lookup, GA4 hits (incl. `region1.google-analytics.com`), Translate (translations from `translate-pa`/`translate.googleapis.com`, the element's pings to `translate.google.com`). `api/_lib/cspReport.test.mjs` checks every Translate host in `src/lib/translate.js` is listed. |
+| `connect-src` | `'self'`, `api.bigdatacloud.net`, `vpic.nhtsa.dot.gov`, `*.google-analytics.com`, `*.analytics.google.com`, `*.googletagmanager.com`, `translate.google.com`, `translate.googleapis.com`, `translate-pa.googleapis.com` | `/api`, the `/local-delivery` neighborhood/city name for an allowed device location (BigDataCloud client-side reverse geocode, coordinates rounded to 3 decimals, nothing stored; `src/lib/placeName.js`), the NHTSA make/model lookup, GA4 hits (incl. `region1.google-analytics.com`), Translate (translations from `translate-pa`/`translate.googleapis.com`, the element's pings to `translate.google.com`). `api/_lib/cspReport.test.mjs` checks every Translate host in `src/lib/translate.js` is listed. |
 | `frame-src` | `translate.google.com`, `translate.googleapis.com` | Translate's frames; nothing else on the site embeds a frame |
 | `object-src` `'none'`, `base-uri` `'self'`, `form-action` `'self'`, `manifest-src` `'self'`, `worker-src` `'self'` | | |
 | `report-uri` | `/api/csp-report` | |

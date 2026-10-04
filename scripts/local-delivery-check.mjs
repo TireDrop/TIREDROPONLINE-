@@ -15,6 +15,15 @@
  *   a "no" keeps the approximate answer, and a click on "Use my location"
  *   then explains how to turn it on (iPhone and desktop wording); ?zip= and
  *   typing switch the automatic check off.
+ * - Place names (the geocoder host is mocked, the live call cannot be
+ *   reached from CI): the connection answer names the city and state, no ZIP;
+ *   an allowed device location is named from the mocked reverse geocode
+ *   ("near Wynwood, Miami, FL"); a failing, empty or slow geocoder leaves
+ *   "Using your device location:" with no error; the request carries only the
+ *   rounded latitude, longitude and language; a ZIP or street in the reply is
+ *   never shown; nothing is stored (localStorage, sessionStorage, cookies);
+ *   a long name moves nothing below the answer; the home page requests the
+ *   geocoder never.
  * - The live layer (src/components/delivery/deliveryTrucks.js, imported
  *   after the page is idle): the prerendered HTML and the JS-off page do not
  *   know it; with JS on, trucks run shortly after idle (about 34, fewer on a
@@ -110,7 +119,7 @@ const local = new URL(BASE).host;
 
 async function newPage(
   width,
-  { js = true, geo, path = "/local-delivery", geoApi, init, userAgent } = {},
+  { js = true, geo, path = "/local-delivery", geoApi, init, userAgent, before } = {},
 ) {
   const context = await browser.newContext({
     viewport: { width, height: width < 800 ? 800 : 900 },
@@ -134,6 +143,7 @@ async function newPage(
     await page.route("**/api/geo", (r) =>
       r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(geoApi) }),
     );
+  if (before) await before(page);
   await page.goto(BASE + path, { waitUntil: "load" });
   return { context, page, errors };
 }
@@ -553,13 +563,14 @@ try {
     {
       // Approximate only: the visitor says no to the device prompt.
       const { context, page, errors } = await newPage(width, {
-        geoApi: { country: "US", zip: "33351" },
+        geoApi: { country: "US", zip: "33351", city: "Sunrise", region: "FL" },
         init: DENY,
       });
       const before = await note(page).boundingBox();
       await result(page)
-        .getByText(`Based on your connection, you’re near ZIP 33351: ${IN_ZONE}`)
+        .getByText(`Based on your connection, you’re near Sunrise, FL: ${IN_ZONE}`)
         .waitFor();
+      check(!/\b33351\b/.test(await result(page).textContent()), `${width}: the approximate line shows the city, no ZIP`);
       check(
         (await page.getByLabel("ZIP code").inputValue()) === "33351",
         `${width}: /api/geo ZIP 33351 is prefilled and answered as approximate`,
@@ -587,12 +598,12 @@ try {
   {
     // Out of zone from the connection, and the iPhone settings path.
     const { context, page } = await newPage(360, {
-      geoApi: { available: true, country: "US", zip: "59801", lat: 46.87, lng: -113.99, city: null },
+      geoApi: { available: true, country: "US", zip: "59801", lat: 46.87, lng: -113.99, city: "Missoula", region: "MT" },
       init: DENY,
       userAgent: IPHONE,
     });
     await result(page)
-      .getByText("Based on your connection, you’re near ZIP 59801: that area isn’t in a local delivery zone yet")
+      .getByText("Based on your connection, you’re near Missoula, MT: that area isn’t in a local delivery zone yet")
       .waitFor();
     ok("approximate ZIP out of zone is labelled as approximate");
     await page.waitForFunction(() => sessionStorage.getItem("td-geo-denied") === "1");
@@ -648,6 +659,213 @@ try {
       "typing before the automatic answer: it never overwrites the field or the result",
     );
     await context.close();
+  }
+
+
+  /* ------------------------------ place names ------------------------------ */
+  {
+    const GEOCODER = "api.bigdatacloud.net";
+    const WYNWOOD = {
+      latitude: 25.8009,
+      longitude: -80.1991,
+      locality: "Wynwood",
+      city: "Miami",
+      principalSubdivision: "Florida",
+      principalSubdivisionCode: "US-FL",
+      countryCode: "US",
+      postcode: "33127",
+      streetName: "NW 2nd Ave",
+      houseNumber: "2520",
+    };
+    // Mocks the geocoder host and records every request made to it.
+    const mockGeocoder = (calls, respond) => async (page) => {
+      await page.route(`https://${GEOCODER}/**`, (r) => {
+        calls.push(r.request().url());
+        return respond(r);
+      });
+    };
+    const json = (body) => (r) =>
+      r.fulfill({
+        status: 200,
+        contentType: "application/json",
+        headers: { "access-control-allow-origin": "*" },
+        body: JSON.stringify(body),
+      });
+    const MIAMI_PRECISE = { latitude: 25.800912345, longitude: -80.199149876 };
+    const stored = (page) =>
+      page.evaluate(() => ({
+        local: JSON.stringify({ ...localStorage }),
+        session: JSON.stringify({ ...sessionStorage }),
+        cookie: document.cookie,
+      }));
+
+    for (const width of [360, 1440]) {
+      // (b) the device location is named, (d) the request is minimal, (e) nothing is stored.
+      {
+        const calls = [];
+        const { context, page, errors } = await newPage(width, {
+          geo: MIAMI_PRECISE,
+          geoApi: { country: "US", zip: "33351", city: "Sunrise", region: "FL" },
+          before: mockGeocoder(calls, json(WYNWOOD)),
+        });
+        await result(page)
+          .getByText(`Using your device location, you’re near Wynwood, Miami, FL: ${IN_ZONE}`)
+          .waitFor();
+        const text = await result(page).textContent();
+        check(text.includes("A truck is heading to a house near you."), `${width}: device answer keeps the truck line`);
+        check(
+          !/\b33127\b|NW 2nd|2520|\b33351\b/.test(text),
+          `${width}: device answer shows no ZIP, street or house number even if the reply has them`,
+        );
+        const urls = calls.map((u) => new URL(u));
+        check(urls.length === 1, `${width}: exactly one reverse-geocode request (${urls.length})`);
+        const q = urls[0];
+        check(
+          q.pathname === "/data/reverse-geocode-client" &&
+            [...q.searchParams.keys()].sort().join() === "latitude,localityLanguage,longitude" &&
+            q.searchParams.get("latitude") === "25.801" &&
+            q.searchParams.get("longitude") === "-80.199" &&
+            q.searchParams.get("localityLanguage") === "en",
+          `${width}: the request has only latitude, longitude and language, rounded to 3 decimals (${q.search})`,
+        );
+        const mem = await stored(page);
+        const all = `${mem.local} ${mem.session} ${mem.cookie}`;
+        check(
+          !/25\.80|80\.19|Wynwood|Miami|Sunrise/.test(all),
+          `${width}: no storage or cookie holds the coordinates or a place name (${all.slice(0, 80)})`,
+        );
+        await page.locator("#zip-check").scrollIntoViewIfNeeded();
+        await shot(page, `${width}-place-device-in.png`);
+        check(errors.length === 0, `${width}: place name: no console errors ${errors.join(" | ")}`);
+        await context.close();
+      }
+      // Out of zone, named.
+      {
+        const { context, page } = await newPage(width, {
+          geo: MISSOULA,
+          before: mockGeocoder([], json({ locality: "", city: "Missoula", principalSubdivisionCode: "US-MT", countryCode: "US" })),
+        });
+        await result(page)
+          .getByText("Using your device location, you’re near Missoula, MT: you aren’t in a local delivery zone yet")
+          .waitFor();
+        ok(`${width}: out of zone, the device answer is named too`);
+        await page.locator("#zip-check").scrollIntoViewIfNeeded();
+        await shot(page, `${width}-place-device-out.png`);
+        await context.close();
+      }
+      // (a) the approximate line names the city; no city says "near you".
+      {
+        const { context, page } = await newPage(width, {
+          geoApi: { country: "US", zip: "33351", city: "Sunrise", region: "FL" },
+          init: DENY,
+        });
+        await result(page).getByText(`Based on your connection, you’re near Sunrise, FL: ${IN_ZONE}`).waitFor();
+        await page.locator("#zip-check").scrollIntoViewIfNeeded();
+        await shot(page, `${width}-place-approx.png`);
+        await context.close();
+      }
+    }
+    {
+      const { context, page } = await newPage(360, {
+        geoApi: { country: "US", zip: "33351", city: null, region: "FL" },
+        init: DENY,
+      });
+      await result(page).getByText(`Based on your connection, here’s what we see near you: ${IN_ZONE}`).waitFor();
+      ok("approximate answer with no city says it is near you, with no ZIP");
+      await context.close();
+    }
+    // (c) a failing, empty, non-JSON, slow or blocked geocoder: clean fallback, no error shown.
+    for (const [label, respond] of [
+      ["HTTP 500", (r) => r.fulfill({ status: 500, body: "" })],
+      ["402 (fair use)", (r) => r.fulfill({ status: 402, body: "" })],
+      ["empty place", json({ locality: "", city: "", principalSubdivisionCode: "US-FL", countryCode: "US" })],
+      ["only a ZIP and a street", json({ postcode: "33127", streetName: "NW 2nd Ave", countryCode: "US" })],
+      ["not JSON", (r) => r.fulfill({ status: 200, contentType: "text/html", body: "<html>" })],
+      ["network error", (r) => r.abort()],
+    ]) {
+      const { context, page, errors } = await newPage(360, {
+        geo: MIAMI,
+        before: mockGeocoder([], respond),
+      });
+      await result(page).getByText(`Using your device location: ${IN_ZONE}`).waitFor();
+      await page.waitForTimeout(400);
+      const text = await result(page).textContent();
+      check(
+        text.startsWith(`Using your device location: ${IN_ZONE}`) && !/couldn|error|near Wynwood/i.test(text),
+        `geocoder ${label}: falls back to "Using your device location:" with no error`,
+      );
+      check(errors.length === 0, `geocoder ${label}: no console errors ${errors.join(" | ")}`);
+      await context.close();
+    }
+    {
+      // A geocoder that never answers: the zone answer is there at once, and stays without a name.
+      const { context, page } = await newPage(360, {
+        geo: MIAMI,
+        before: mockGeocoder([], () => new Promise(() => {})),
+      });
+      await result(page).getByText(`Using your device location: ${IN_ZONE}`).waitFor();
+      await page.waitForTimeout(4600);
+      check(
+        (await result(page).textContent()).startsWith(`Using your device location: ${IN_ZONE}`),
+        "a geocoder that never answers: the answer stays without a name after the 4 s timeout",
+      );
+      await context.close();
+    }
+    {
+      // The zone answer never waits for the name.
+      const { context, page } = await newPage(360, {
+        geo: MIAMI,
+        before: mockGeocoder([], async (r) => {
+          await new Promise((res) => setTimeout(res, 1500));
+          return json(WYNWOOD)(r);
+        }),
+      });
+      await result(page).getByText(`Using your device location: ${IN_ZONE}`).waitFor({ timeout: 1200 });
+      await result(page).getByText("you’re near Wynwood, Miami, FL").waitFor();
+      ok("the zone answer shows first; the name joins it when it arrives");
+      await context.close();
+    }
+    {
+      // The Use my location button names the place too; a typed ZIP never does.
+      const calls = [];
+      const { context, page } = await newPage(360, { before: mockGeocoder(calls, json(WYNWOOD)) });
+      await checkZip(page, "33351");
+      await result(page).getByText(IN_ZONE).waitFor();
+      check(
+        (await result(page).textContent()).startsWith("33351:") && calls.length === 0,
+        "a typed ZIP keeps showing the ZIP and asks no geocoder",
+      );
+      await context.close();
+    }
+    {
+      // A long name must not move anything below the answer, at the widths the reserved height was measured for.
+      const LONG = { locality: "Fisher Island Neighborhood Area", city: "North Miami Beach Heights", principalSubdivisionCode: "US-FL", countryCode: "US" };
+      for (const width of [360, 390, 414, 430, 500, 768, 1024, 1440]) {
+        const { context, page } = await newPage(width, {
+          geo: MIAMI,
+          before: mockGeocoder([], async (r) => {
+            await new Promise((res) => setTimeout(res, 700));
+            return json(LONG)(r);
+          }),
+        });
+        await result(page).getByText(`Using your device location: ${IN_ZONE}`).waitFor();
+        const before = await note(page).boundingBox();
+        await result(page).getByText("you’re near Fisher Island Neighborhood Area, North Miami Beach Heights, FL").waitFor();
+        const after = await note(page).boundingBox();
+        check(
+          Math.abs((after?.y ?? 0) - (before?.y ?? 0)) < 1,
+          `${width}: a long place name moves nothing below the answer (${before?.y} -> ${after?.y})`,
+        );
+        await context.close();
+      }
+    }
+    {
+      // The home page never asks the geocoder.
+      const calls = [];
+      const { context } = await newPage(360, { path: "/", before: mockGeocoder(calls, json(WYNWOOD)) });
+      check(calls.length === 0, "the home page requests no reverse geocode");
+      await context.close();
+    }
   }
 
   /* -------------------------- zone fetch fails -------------------------- */
