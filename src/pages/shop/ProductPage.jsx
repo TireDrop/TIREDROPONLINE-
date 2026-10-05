@@ -403,7 +403,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
           {/* Buy box */}
           <div>
             <p className="eyebrow">{product.brand}</p>
-            <h1 className="h1 mt-1">{product.model}</h1>
+            <h1 className="h1 mt-1"><span className="sr-only">{product.brand} </span>{product.model}</h1>
             <p className="tnum mt-2 font-display text-lg text-smoke">
               {sizeLabel}
               {isTire && ` · ${product.loadIndex}${product.speedRating}`}

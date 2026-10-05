@@ -592,7 +592,7 @@ export default function TiresPage() {
   return (
     <>
       <Seo
-        title="Shop Tires"
+        title="Buy Tires Online, Shipped Free or Fit in Sunrise FL"
         description={`Shop ${brandSentence} tires by vehicle or by size. Shipped free to the 48 contiguous states and DC, or free to our South Florida shop.`}
       />
       {/* With a vehicle or size in the address the results are the point,

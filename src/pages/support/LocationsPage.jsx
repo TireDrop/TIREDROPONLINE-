@@ -100,7 +100,7 @@ export default function LocationsPage() {
   return (
     <>
       <Seo
-        title="The Shop & Install Area"
+        title="Tire Shop & Install Area in Sunrise, FL"
         description={`${BUSINESS.name} ships free to the 48 states + DC, and ${BUSINESS.parent} at ${BUSINESS.shop.full} fits what we sell. Hours, directions, ship-to-store pickup and the mobile install area: ${SERVICE_AREA_LABEL}.`}
       />
 
