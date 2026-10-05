@@ -29,6 +29,7 @@ the code fits together is in the root [README](../README.md).
 - [domain-migration-2026-09-28.md](ops/domain-migration-2026-09-28.md): record of moving tiredroponline.com to Vercel and Shopify to shop.tiredroponline.com, with the rollback and follow-ups.
 - [installed-price-default.md](ops/installed-price-default.md): the switch that would start the installed price on for visitors in the three counties (off in production), the `?installed=local` preview flag, its GA4 events and measured layout shift.
 - [turn-on-the-forms.md](ops/turn-on-the-forms.md): runbook for switching the site's forms on and checking a lead reaches info@.
+- [spanish-pages.md](ops/spanish-pages.md): the two Spanish test pages, the `SPANISH_PAGES_INDEXABLE` switch (noindex until a native speaker approves), how to turn them on, and the reviewer's checklist.
 
 ## content/: Learn and Blog
 

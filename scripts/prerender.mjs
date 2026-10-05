@@ -49,6 +49,7 @@ import {
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { isSpanishPath, langFor } from "../src/data/spanishRoutes.js";
 import {
   EXCLUDE,
   allRoutes,
@@ -169,6 +170,12 @@ function headTags(head, { canonical = true } = {}) {
     tags.push(`<meta name="description" content="${esc(head.description)}" />`);
   tags.push(`<meta name="robots" content="${esc(head.robots)}" />`);
   if (canonical) tags.push(`<link rel="canonical" href="${esc(head.url)}" />`);
+  // hreflang pairs (English page and Spanish twin); none while the Spanish
+  // pages are switched off.
+  for (const alt of head.alternates ?? [])
+    tags.push(
+      `<link rel="alternate" hreflang="${esc(alt.hreflang)}" href="${esc(alt.href)}" />`,
+    );
   tags.push(
     `<meta property="og:title" content="${esc(head.title)}" />`,
     `<meta property="og:type" content="${esc(head.ogType)}" />`,
@@ -200,7 +207,12 @@ function page({ head, html, pages, route, canonical = true }) {
   ]
     .filter(Boolean)
     .join(" ");
+  // <html lang> follows the page: "es" on the Spanish test pages.
+  const lang = head.lang ?? "en";
+  if (!base.includes('<html lang="en">'))
+    fail('index.html no longer opens with <html lang="en">. Update page().');
   return base
+    .replace('<html lang="en">', `<html lang="${esc(lang)}">`)
     .replace("</head>", `    ${tags.join("\n    ")}\n  </head>`)
     .replace(
       '<div id="root"></div>',
@@ -270,6 +282,11 @@ for (const { path } of routes) {
     problems.push(`${path}: canonical is ${head.url}, expected ${expectedUrl}`);
   if (indexable && head.robots !== "index, follow")
     problems.push(`${path}: is in the sitemap but renders "${head.robots}"`);
+  // The Spanish test pages: out of the sitemap means noindex (the guard).
+  if (isSpanishPath(path) && !indexable && head.robots === "index, follow")
+    problems.push(`${path}: is a Spanish page kept out of the sitemap but is indexable`);
+  if (head.lang !== langFor(path))
+    problems.push(`${path}: <html lang> is ${head.lang}, expected ${langFor(path)}`);
   if (indexable) {
     if (titles.has(head.title))
       problems.push(`${path}: same <title> as ${titles.get(head.title)}`);

@@ -20,6 +20,7 @@ import {
   mergeGoogleLanguages,
   originalHost,
   originalUrl,
+  pageLanguage,
   proxyLanguage,
 } from "./translate.js";
 
@@ -285,4 +286,31 @@ test("the guard leaves calls that would have worked alone", () => {
 test("without a Node constructor (the prerender), the guard does nothing", () => {
   assert.equal(installDomGuard(undefined), false);
   assert.equal(isDomGuardInstalled(undefined), false);
+});
+
+/* ------------------------- Spanish test pages ------------------------- */
+
+test("pages under /es/ are written in Spanish, every other page in English", () => {
+  assert.equal(pageLanguage("/es/instalacion-movil"), "es");
+  assert.equal(pageLanguage("/es/instalacion-movil/hialeah-fl"), "es");
+  assert.equal(pageLanguage("/es"), "es");
+  for (const p of ["/", "/tires", "/mobile-service", "/essential", "/esp", undefined])
+    assert.equal(pageLanguage(p), "en", String(p));
+});
+
+test("the translator is told a Spanish page is Spanish (sl=es, /es/<code>)", () => {
+  const out = new URL(buildFallbackUrl("pt", "https://tiredroponline.com/es/instalacion-movil"));
+  assert.equal(out.searchParams.get("sl"), "es");
+  assert.equal(out.searchParams.get("tl"), "pt");
+  // From Google's proxy too: the page's own path decides.
+  const viaProxy = new URL(
+    buildFallbackUrl(
+      "ru",
+      "https://tiredroponline-com.translate.goog/es/instalacion-movil/hialeah-fl?_x_tr_sl=es&_x_tr_tl=pt",
+    ),
+  );
+  assert.equal(viaProxy.searchParams.get("sl"), "es");
+  assert.equal(viaProxy.searchParams.get("u"), "https://tiredroponline.com/es/instalacion-movil/hialeah-fl");
+  assert.equal(googtransValue("fr", "es"), "/es/fr");
+  assert.equal(googtransValue("fr"), "/en/fr", "English pages are unchanged");
 });

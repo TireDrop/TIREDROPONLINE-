@@ -102,6 +102,9 @@ const ROUTES = [
   "/schedule",
   "/mobile-service",
   firstIn("mobile-service"),
+  // The Spanish test pages (built even while they are noindex).
+  "/es/instalacion-movil",
+  "/es/instalacion-movil/hialeah-fl",
   "/tires-shipped",
   firstIn("tires-shipped"),
   "/local-delivery", // the inline SVG map and the ZIP checker

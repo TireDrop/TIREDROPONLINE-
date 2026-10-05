@@ -133,6 +133,7 @@ const FAQ_ALLOWED = [
   /^\/blog\/[^/]+$/,
   /^\/learn\/[^/]+\/[^/]+$/,
   /^\/mobile-service(\/[^/]+)?$/,
+  /^\/es\/instalacion-movil(\/[^/]+)?$/, // the Spanish twins of the two above
 ];
 
 /** BUSINESS.geo, read the way the Seo component reads it. */
@@ -356,7 +357,7 @@ function checkNode(node, ids, canonical, route) {
 
 /** The visible <Breadcrumbs> trail: [{ name, href|null }]. */
 function visibleTrails(html) {
-  return [...html.matchAll(/<nav aria-label="Breadcrumb"[\s\S]*?<\/nav>/g)].map(
+  return [...html.matchAll(/<nav aria-label="(?:Breadcrumb|Ruta de navegación)"[\s\S]*?<\/nav>/g)].map(
     ([nav]) =>
       [...nav.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)].map(([, li]) => {
         const a = /<a [^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/.exec(li);
@@ -374,6 +375,7 @@ const ROUTE_TYPES = [
   ["/tires", (r) => r === "/tires"],
   ["product /tires|/wheels/:slug", (r) => /^\/(tires|wheels)\/[^/]+$/.test(r)],
   ["/services/:slug", (r) => /^\/services\/[^/]+$/.test(r)],
+  ["Spanish /es/instalacion-movil[/*]", (r) => /^\/es\/instalacion-movil(\/[^/]+)?$/.test(r)],
   ["/mobile-service", (r) => r === "/mobile-service"],
   ["city /mobile-service/*-fl", (r) => /^\/mobile-service\/[^/]+-fl$/.test(r)],
   ["/tires-shipped", (r) => r === "/tires-shipped"],

@@ -18,6 +18,13 @@ import { getLiveState } from "../../data/stateList.js";
 import { getProduct } from "../../data/products.js";
 import { getService } from "../../data/services.js";
 import { noteFormStart } from "../../data/formGuard.js";
+// Only the switch, the twin table and three small helpers: the Spanish copy
+// itself stays out of this file, which is in every page's bundle.
+import {
+  ES_HUB_PATH,
+  hreflangFor,
+  langFor,
+} from "../../data/spanishRoutes.js";
 
 const ORIGIN = `https://${BUSINESS.domain}`;
 const OG_IMAGE = `${ORIGIN}/brand/og-tiredrop.jpg`;
@@ -48,6 +55,43 @@ function upsertLink(rel, href) {
     document.head.appendChild(tag);
   }
   tag.setAttribute("href", href);
+}
+
+/**
+ * The page's <html lang>. Left alone while a translator has the page: Google
+ * and Chrome write their own lang and a translated-ltr/rtl class on <html>,
+ * and putting "en" back would undo it on the next route change.
+ */
+function setHtmlLang(lang) {
+  const root = document.documentElement;
+  if (/\btranslated-(?:ltr|rtl)\b/.test(root.className)) return;
+  if (root.lang !== lang) root.lang = lang;
+}
+
+/**
+ * Makes the page's hreflang alternates exactly `alternates` ([{ hreflang,
+ * href }], empty for most pages): updates tags already there, adds the
+ * missing ones and removes the rest, so going from an English page to its
+ * Spanish twin and back never leaves the wrong pair behind.
+ */
+function syncAlternates(alternates) {
+  const want = new Map(alternates.map((a) => [a.hreflang, a.href]));
+  for (const tag of document.head.querySelectorAll(
+    'link[rel="alternate"][hreflang]',
+  )) {
+    const code = tag.getAttribute("hreflang");
+    if (want.has(code)) {
+      tag.setAttribute("href", want.get(code));
+      want.delete(code);
+    } else tag.remove();
+  }
+  for (const [code, href] of want) {
+    const tag = document.createElement("link");
+    tag.setAttribute("rel", "alternate");
+    tag.setAttribute("hreflang", code);
+    tag.setAttribute("href", href);
+    document.head.appendChild(tag);
+  }
 }
 
 function setJsonLd(data) {
@@ -266,6 +310,9 @@ const getCityPage = (slug) => CITY_BY_SLUG[slug] ?? null;
 /** /mobile-service/<city>: the mobile city pages (src/data/cityPages.js). */
 const CITY_ROUTE = /^\/mobile-service\/([^/]+)$/;
 
+/** /es/instalacion-movil/<city>: the Spanish city pages (src/data/spanishPages.js). */
+const ES_CITY_ROUTE = /^\/es\/instalacion-movil\/[^/]+$/;
+
 /** /tires-shipped/<state>: the state shipping pages (src/data/stateList.js). */
 const STATE_ROUTE = /^\/tires-shipped\/([^/]+)$/;
 
@@ -447,14 +494,15 @@ const CRUMB_PARENTS = [
   [/^\/services\/.+/, { name: "Auto Service", path: "/auto-service" }],
   [/^\/install$/, { name: "How shipping works", path: "/shipping" }],
   [CITY_ROUTE, { name: "Mobile Tire Service", path: "/mobile-service" }],
+  [ES_CITY_ROUTE, { name: "Instalación móvil", path: ES_HUB_PATH }],
   [STATE_ROUTE, { name: "Shipping to 48 States + DC", path: "/tires-shipped" }],
 ];
 
-function breadcrumbNode(pathname, url, name, parents) {
+function breadcrumbNode(pathname, url, name, parents, lang = "en") {
   const fixed = CRUMB_PARENTS.find(([re]) => re.test(pathname))?.[1];
   const between = parents ?? (fixed ? [fixed] : []);
   const trail = [
-    { name: "Home", url: `${ORIGIN}/` },
+    { name: lang === "es" ? "Inicio" : "Home", url: `${ORIGIN}/` },
     ...between.map((p) => ({ name: p.name, url: `${ORIGIN}${p.path}` })),
     { name, url },
   ];
@@ -476,14 +524,24 @@ function breadcrumbNode(pathname, url, name, parents) {
  * rendered at 200 — it must not be indexed, and the component can tell on its
  * own by looking the slug up, without the page passing anything.
  */
-function graphFor(pathname, url, title, fullTitle, description, noindex, crumbs) {
+function graphFor(
+  pathname,
+  url,
+  title,
+  fullTitle,
+  description,
+  noindex,
+  crumbs,
+  crumbLabel,
+  lang,
+) {
   const webPage = {
     "@type": "WebPage",
     "@id": `${url}#webpage`,
     url,
     name: fullTitle,
     ...(description ? { description } : {}),
-    inLanguage: "en-US",
+    inLanguage: lang === "es" ? "es-US" : "en-US",
     isPartOf: { "@id": `${ORIGIN}/#website` },
     about: { "@id": `${ORIGIN}/#organization` },
   };
@@ -501,7 +559,7 @@ function graphFor(pathname, url, title, fullTitle, description, noindex, crumbs)
   ];
 
   let missing = false;
-  let crumbName = title;
+  let crumbName = crumbLabel ?? title;
   let crumbParents = crumbs;
 
   graph.push(isShopRoute(pathname) ? shopNode() : shopStubNode());
@@ -575,7 +633,7 @@ function graphFor(pathname, url, title, fullTitle, description, noindex, crumbs)
 
   // Inner pages that are meant to be indexed get a breadcrumb trail.
   if (pathname !== "/" && !hide) {
-    graph.push(breadcrumbNode(pathname, url, crumbName, crumbParents));
+    graph.push(breadcrumbNode(pathname, url, crumbName, crumbParents, lang));
     webPage.breadcrumb = { "@id": `${url}#breadcrumb` };
   }
 
@@ -595,10 +653,12 @@ export function headFor({
   description,
   noindex = false,
   crumbs,
+  crumbName,
   type,
   schema,
   pathname,
 }) {
+  const lang = langFor(pathname);
   const fullTitle = `${title} | ${BUSINESS.name}`;
   const url = `${ORIGIN}${pathname === "/" ? "/" : pathname.replace(/\/+$/, "")}`;
   const { graph, hide } = graphFor(
@@ -609,11 +669,20 @@ export function headFor({
     description,
     noindex,
     crumbs,
+    crumbName,
+    lang,
   );
   return {
     title: fullTitle,
     description: description || null,
     url,
+    lang,
+    // hreflang pairs for the English page and its Spanish twin, empty until
+    // the Spanish pages are switched on (src/data/spanishRoutes.js).
+    alternates: hreflangFor(pathname).map((a) => ({
+      hreflang: a.hreflang,
+      href: `${ORIGIN}${a.path}`,
+    })),
     ogType:
       type ?? (/^\/(tires|wheels)\/.+/.test(pathname) ? "product" : "website"),
     robots: hide ? "noindex, follow" : "index, follow",
@@ -634,6 +703,8 @@ export function headFor({
 
 function applyHead(head) {
   document.title = head.title;
+  setHtmlLang(head.lang);
+  syncAlternates(head.alternates);
   if (head.description)
     upsertMeta('meta[name="description"]', {
       name: "description",
@@ -697,6 +768,9 @@ export const HeadCollectorContext = createContext(null);
  * `[{ name, path }]` — e.g. a Learn article passes Learn and its hub. Without
  * it, the trail comes from CRUMB_PARENTS, or is just Home > this page.
  *
+ * `crumbName` overrides the last breadcrumb's name (default: `title`), for a
+ * page whose visible trail ends in a shorter label than its title.
+ *
  * `type` overrides og:type (the Learn and Blog articles pass "article").
  *
  * `schema` is extra JSON-LD nodes for this page (Article, FAQPage), appended
@@ -714,6 +788,7 @@ export function Seo({
   description,
   noindex = false,
   crumbs,
+  crumbName,
   type,
   schema,
 }) {
@@ -721,7 +796,16 @@ export function Seo({
   const collector = useContext(HeadCollectorContext);
   if (collector)
     collector.set(
-      headFor({ title, description, noindex, crumbs, type, schema, pathname }),
+      headFor({
+        title,
+        description,
+        noindex,
+        crumbs,
+        crumbName,
+        type,
+        schema,
+        pathname,
+      }),
     );
 
   // Compared by value, so arrays written inline do not re-run this on every
@@ -738,12 +822,13 @@ export function Seo({
         description,
         noindex,
         crumbs: extra.crumbs ?? undefined,
+        crumbName,
         type,
         schema: extra.schema ?? undefined,
         pathname,
       }),
     );
-  }, [title, description, noindex, type, extraKey, pathname]);
+  }, [title, description, noindex, crumbName, type, extraKey, pathname]);
 
   return null;
 }
@@ -981,16 +1066,20 @@ export function PageHero({ eyebrow, title, lede, children, lead, compact = false
   );
 }
 
-export function Breadcrumbs({ trail = [] }) {
+export function Breadcrumbs({ trail = [], lang = "en" }) {
+  const es = lang === "es";
   return (
-    <nav aria-label="Breadcrumb" className="border-b border-ink/10 bg-bone">
+    <nav
+      aria-label={es ? "Ruta de navegación" : "Breadcrumb"}
+      className="border-b border-ink/10 bg-bone"
+    >
       <ol className="wrap flex flex-wrap items-center gap-1.5 py-2 text-xs text-smoke">
         <li>
           <Link
             to="/"
             className="flex min-h-[32px] items-center hover:text-drop"
           >
-            Home
+            {es ? "Inicio" : "Home"}
           </Link>
         </li>
         {trail.map((c, i) => (

@@ -24,6 +24,12 @@ import { execFileSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, resolve } from "node:path";
 import {
+  ES_CITY_SLUGS,
+  SPANISH_PAGES_INDEXABLE,
+  esCityPath,
+  spanishPaths,
+} from "../src/data/spanishRoutes.js";
+import {
   contentLastmod,
   contentProblems,
   contentRoutes,
@@ -127,6 +133,9 @@ export const EXCLUDE = new Set([
   "/search",
   "/compare",
   "/reviews",
+  // The Spanish test pages stay out of the sitemap (and say noindex) until a
+  // native speaker has approved the copy: SPANISH_PAGES_INDEXABLE.
+  ...(SPANISH_PAGES_INDEXABLE ? [] : spanishPaths()),
 ]);
 
 /**
@@ -164,7 +173,7 @@ function priorityFor(path) {
     return "0.9";
   if (path.startsWith("/tires/") || path.startsWith("/wheels/")) return "0.7";
   if (path.startsWith("/services/")) return "0.6";
-  if (path.startsWith("/mobile-service/")) return "0.7";
+  if (path.startsWith("/mobile-service/") || path.startsWith("/es/")) return "0.7";
   if (/^\/(learn|blog)\/.+/.test(path)) return "0.6";
   if (["/terms", "/privacy", "/accessibility", "/sitemap"].includes(path))
     return "0.3";
@@ -230,6 +239,13 @@ export async function allRoutes({ extra = [] } = {}) {
     ...WHEELS.map((w) => ({ path: `/wheels/${w.slug}`, sources: productFiles })),
     ...SERVICES.map((s) => ({ path: `/services/${s.slug}`, sources: serviceFiles })),
     ...CITY_PAGES.map((c) => ({ path: `/mobile-service/${c.slug}`, sources: cityFiles })),
+    // The Spanish city pages (src/data/spanishPages.js); the Spanish hub is a
+    // static route in App.jsx. Prerendered always, in the sitemap only while
+    // SPANISH_PAGES_INDEXABLE is true (EXCLUDE above).
+    ...ES_CITY_SLUGS.map((slug) => ({
+      path: esCityPath(slug),
+      sources: [files.get("SpanishMobilePage"), "src/data/spanishPages.js"],
+    })),
     // Only the routed state pages: every other state stays unlisted.
     ...STATE_PAGES_LIVE.map((slug) => ({ path: `/tires-shipped/${slug}`, sources: stateFiles })),
   ];

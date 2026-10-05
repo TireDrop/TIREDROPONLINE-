@@ -29,6 +29,7 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 import MobilePriceStrip from "../../components/services/MobilePriceStrip.jsx";
+import TwinLink from "../../components/services/TwinLink.jsx";
 import ServiceAreaCounties from "../../components/ui/ServiceAreaCounties.jsx";
 import ZipCheck from "../../components/ui/ZipCheck.jsx";
 import { faqSchema } from "../../components/content/schema.js";
@@ -234,6 +235,7 @@ export default function MobileServicePage() {
             <Check size={14} aria-hidden className="text-amber" />
             Old tires hauled away
           </span>
+          <TwinLink path="/mobile-service" />
         </p>
       </PageHero>
 
