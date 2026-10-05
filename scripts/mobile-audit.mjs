@@ -78,6 +78,7 @@ const ROUTES = [
   "/can-my-tire-be-repaired",
   "/car-shaking-checker",
   "/tire-rotation-pattern",
+  "/wheel-offset-calculator",
   "/commercial-tires",
   "/cart",
   "/checkout",

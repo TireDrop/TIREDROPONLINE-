@@ -60,6 +60,7 @@ const FILES = {
   "damage-map": "RepairabilityMap.jsx",
   "noise-vibration": "NoiseVibration.jsx",
   "rotation-pattern": "RotationPattern.jsx",
+  "wheel-offset": "WheelOffsetCalculator.jsx",
 };
 
 const vite = await createServer({
@@ -203,6 +204,20 @@ const STATES = {
       await expectText(page, "where each tire ends up");
     },
     initial: "Fronts go straight back",
+  },
+  "wheel-offset": {
+    async drive(page) {
+      const demo = page.locator('[data-demo="wheel-offset"]');
+      await demo.getByRole("button", { name: "Example: Truck, big swing" }).click();
+      await expectText(page, "Large change: call us before you order");
+      await demo.getByRole("textbox", { name: /Tire size/ }).first().fill("banana");
+      await expectText(page, "doesn't read as a tire size");
+      await demo.getByRole("spinbutton", { name: /Width/ }).first().fill("-9");
+      await expectText(page, "has to be more than zero");
+      await demo.getByRole("button", { name: "Example: SUV, small change" }).click();
+      await expectText(page, "Close to your current setup");
+    },
+    initial: "Noticeably different: have the fit checked",
   },
 };
 

@@ -56,6 +56,9 @@ export const DEMOS = {
   "rotation-pattern": loadDemo("RotationPattern.jsx", () =>
     import("./RotationPattern.jsx"),
   ),
+  "wheel-offset": loadDemo("WheelOffsetCalculator.jsx", () =>
+    import("./WheelOffsetCalculator.jsx"),
+  ),
 };
 
 export const DEMO_META = {
@@ -105,6 +108,12 @@ export const DEMO_META = {
   "rotation-pattern": {
     title: "Tire rotation pattern",
     alt: "Shows the rotation pattern that fits a vehicle's drivetrain, tread type and tire setup (forward cross, rearward cross, X-pattern, front-to-back or side-to-side) as a diagram and a step list. TIA suggests rotating at a regular interval, and the owner's manual's schedule and pattern come first.",
+  },
+
+  // Built (wave 3)
+  "wheel-offset": {
+    title: "Wheel offset and clearance check",
+    alt: "Compares a current wheel with a new one by width and offset, and shows how far the wheel face and inner edge move in millimeters and inches, the backspacing of both, and, when tire sizes are given, the tire's width, diameter and sidewall moves. The bands are generic geometry guides, not a fitment promise: clearance also depends on the vehicle, so have fitment confirmed before you order.",
   },
 
   // Reserved (later phases): listed so articles can reference them now and

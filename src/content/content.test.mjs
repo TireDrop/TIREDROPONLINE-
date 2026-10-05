@@ -594,6 +594,7 @@ test("the Buying and Fitment hubs: eight sourced guides that follow the copy rul
     "/plus-size-calculator",
     "/tire-rotation-pattern",
     "/can-my-tire-be-repaired",
+    "/wheel-offset-calculator",
   ]);
 
   for (const [hub, slugs] of Object.entries(expected)) {

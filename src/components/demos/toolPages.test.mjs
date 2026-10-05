@@ -9,12 +9,14 @@ import { readFileSync } from "node:fs";
 
 import { TOOL_PAGES, TOOL_PAGE_ALIASES } from "./toolPages.js";
 import { BANNED_WORDS } from "./demoLogic.js";
+import { findCompetitorHosts, findCompetitorNames } from "../../lib/competitors.js";
 import { getService } from "../../data/services.js";
 import { contentRoutes } from "../../content/node.js";
 
 const read = (p) => readFileSync(new URL(p, import.meta.url), "utf8");
 const APP = read("../../App.jsx");
 const INDEX = read("./index.js");
+const TOOL_REDIRECT = read("../../pages/tools/ToolRedirect.jsx");
 const VERCEL = JSON.parse(read("../../../vercel.json"));
 
 function strings(value) {
@@ -33,7 +35,7 @@ const OFF_LIMITS = [
   /\bsafe to drive\b/i,
 ];
 
-test("tool pages: six, one per demo, each registered", () => {
+test("tool pages: seven, one per demo, each registered", () => {
   assert.deepEqual(
     TOOL_PAGES.map((t) => t.id),
     [
@@ -43,6 +45,7 @@ test("tool pages: six, one per demo, each registered", () => {
       "damage-map",
       "noise-vibration",
       "rotation-pattern",
+      "wheel-offset",
     ],
   );
   for (const t of TOOL_PAGES) {
@@ -86,12 +89,19 @@ test("tool pages: /tools/<id> redirects on the server and in the app", () => {
     assert.equal(r.destination, path);
     assert.equal(r.statusCode, 301);
   }
-  assert.match(APP, /\.\.\.TOOL_PAGE_ALIASES/);
+  // The in-app redirect lives in ToolRedirect.jsx (a lazy page), routed from App.jsx.
+  assert.match(TOOL_REDIRECT, /\.\.\.TOOL_PAGE_ALIASES/);
+  assert.match(APP, /path="\/tools\/:tool" element=\{<ToolRedirect \/>\}/);
 });
 
 test("tool pages: related articles are published, bookings are real services", () => {
   const live = new Set(contentRoutes());
-  const sitePages = new Set(["/tire-size", "/tire-check", "/find-my-tires"]);
+  const sitePages = new Set([
+    "/tire-size",
+    "/tire-check",
+    "/find-my-tires",
+    ...TOOL_PAGES.map((t) => t.path),
+  ]);
   for (const t of TOOL_PAGES) {
     const articles = t.related.filter((p) => /^\/(learn|blog)\//.test(p));
     assert.ok(articles.length >= 1 && articles.length <= 3, `${t.id}: ${articles.length} articles`);
@@ -101,4 +111,27 @@ test("tool pages: related articles are published, bookings are real services", (
     assert.ok(t.services.length >= 1, `${t.id}: no booking`);
     for (const slug of t.services) assert.ok(getService(slug), `${t.id}: no service "${slug}"`);
   }
+});
+
+test("wheel offset page: the three bands, the vehicle caveat and the phone check are on the page", () => {
+  const t = TOOL_PAGES.find((x) => x.id === "wheel-offset");
+  assert.equal(t.path, "/wheel-offset-calculator");
+  const text = strings(t).join(" ");
+  assert.match(text, /not a fitment promise/);
+  assert.match(text, /brakes, struts, (the )?fender lip, suspension and steering lock/);
+  assert.match(text, /confirms? fitment (by phone )?before any wheel ships/);
+  // Never says a combination works: "fits", "will clear", "approved".
+  assert.ok(!/\b(fits|will fit|will clear|approved?)\b/i.test(text), "no fit promise");
+  // No competitor names or links (the shared list in src/lib/competitors.js).
+  assert.deepEqual(findCompetitorNames(text), []);
+  assert.deepEqual(findCompetitorHosts(text), []);
+  assert.ok(t.related.includes("/learn/fitment/wheel-offset-backspacing"));
+});
+
+test("wheel offset page: linked from the nav, the Learn tool list, the fitment guidance and the hub", () => {
+  const BUSINESS = read("../../data/business.js");
+  assert.equal((BUSINESS.match(/\/wheel-offset-calculator/g) ?? []).length, 2, "tools menu and footer");
+  assert.match(read("../../pages/learn/LearnIndexPage.jsx"), /to: "\/wheel-offset-calculator"/);
+  assert.match(read("../../pages/shop/WheelsPage.jsx"), /\/wheel-offset-calculator/);
+  assert.match(read("../../content/learn/hubs.json"), /"href": "\/wheel-offset-calculator"/);
 });

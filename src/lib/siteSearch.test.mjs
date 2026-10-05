@@ -185,6 +185,7 @@ test("rotation and mobile find the right pages", () => {
 
   for (const [q, path] of [
     ["plus size", "/plus-size-calculator"],
+    ["wheel offset", "/wheel-offset-calculator"],
     ["load speed", "/load-speed-check"],
     ["pressure temperature", "/tire-pressure-temperature"],
     ["repaired", "/can-my-tire-be-repaired"],

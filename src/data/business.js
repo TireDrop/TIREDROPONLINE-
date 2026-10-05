@@ -176,6 +176,7 @@ export const NAV = [
       { label: "Can It Be Repaired?", to: "/can-my-tire-be-repaired" },
       { label: "Car Shaking Checker", to: "/car-shaking-checker" },
       { label: "Tire Rotation Pattern", to: "/tire-rotation-pattern" },
+      { label: "Wheel Offset Check", to: "/wheel-offset-calculator" },
     ],
   },
   // Tire guides by topic, and the blog. Plain links, no dropdowns: the
@@ -247,6 +248,7 @@ export const FOOTER_COLUMNS = [
       { label: "Can It Be Repaired?", to: "/can-my-tire-be-repaired" },
       { label: "Car Shaking Checker", to: "/car-shaking-checker" },
       { label: "Tire Rotation Pattern", to: "/tire-rotation-pattern" },
+      { label: "Wheel Offset Check", to: "/wheel-offset-calculator" },
       { label: "Learn: Tire Guides", to: "/learn" },
       { label: "Blog", to: "/blog" },
     ],

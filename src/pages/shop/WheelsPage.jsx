@@ -275,6 +275,9 @@ export default function WheelsPage() {
                 <Phone size={16} aria-hidden />
                 {BUSINESS.phone}
               </a>
+              <Link to="/wheel-offset-calculator" className="btn-outline btn-sm">
+                Wheel offset check
+              </Link>
               <Link to="/shipping" className="btn-outline btn-sm">
                 How shipping works
               </Link>

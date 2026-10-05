@@ -108,6 +108,8 @@
     { "source": "/tools/damage-map", "destination": "/can-my-tire-be-repaired", "statusCode": 301 },
     { "source": "/tools/noise-vibration", "destination": "/car-shaking-checker", "statusCode": 301 },
     { "source": "/tools/rotation-pattern", "destination": "/tire-rotation-pattern", "statusCode": 301 },
+    { "source": "/tools/wheel-offset", "destination": "/wheel-offset-calculator", "statusCode": 301 },
+    { "source": "/tools/wheel-offset-calculator", "destination": "/wheel-offset-calculator", "statusCode": 301 },
     { "source": "/pages", "destination": "/", "statusCode": 301 },
     { "source": "/pages/:path*", "destination": "/", "statusCode": 301 },
     {

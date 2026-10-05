@@ -285,6 +285,10 @@ export default function App() {
               path="/tire-rotation-pattern"
               element={<DemoToolPage tool="rotation-pattern" />}
             />
+            <Route
+              path="/wheel-offset-calculator"
+              element={<DemoToolPage tool="wheel-offset" />}
+            />
             <Route path="/tools/:tool" element={<ToolRedirect />} />
             <Route path="/commercial-tires" element={<CommercialTiresPage />} />
             <Route path="/cart" element={<CartPage />} />

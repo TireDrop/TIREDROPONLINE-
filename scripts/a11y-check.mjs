@@ -135,6 +135,7 @@ const PHONE_ROUTES = [
   "/locations",
   "/auto-service",
   "/load-speed-check",
+  "/wheel-offset-calculator",
 ];
 
 /** Two real tire slugs for the "/compare#filled" visit. */

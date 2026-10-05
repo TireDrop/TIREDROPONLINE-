@@ -85,6 +85,11 @@
         "href": "/tire-rotation-pattern"
       },
       {
+        "text": "Comparing two wheels?",
+        "label": "See how far offset and width move the wheel with the wheel offset check",
+        "href": "/wheel-offset-calculator"
+      },
+      {
         "text": "Shopping for wheels?",
         "label": "Read our wheel fitment guidance",
         "href": "/wheels?view=fitment"

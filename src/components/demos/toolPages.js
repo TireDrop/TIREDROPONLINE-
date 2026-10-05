@@ -282,6 +282,51 @@ export const TOOL_PAGES = [
     ],
     services: ["tire-rotation"],
   },
+  {
+    id: "wheel-offset",
+    path: "/wheel-offset-calculator",
+    aliases: ["wheel-offset-calculator"],
+    label: "Wheel offset check",
+    blurb: "How far does a new wheel move out or in? Offset, backspacing and tire change.",
+    seoTitle: "Wheel Offset and Clearance Calculator",
+    description:
+      "Compare two wheels by width and offset: how far the face and inner edge move, backspacing and tire change. Call us to confirm fitment before you order.",
+    h1: "How far does a new wheel move out or in?",
+    intro:
+      "Offset decides where a wheel sits between the suspension and the fender. Enter your current wheel and the one you're considering to see how far the face and inside edge move, in millimeters and inches, plus the backspacing and, with tire sizes, the tire's width and diameter. The bands are generic geometry guides, not a fitment promise: clearance also depends on your vehicle, and TireDrop confirms fitment by phone before any wheel ships.",
+    howTo: [
+      "Find the width and offset of your current wheel. They're usually stamped on the back, as in 20x9 ET18: 20 inches across, 9 inches wide and an 18 mm offset.",
+      "Type the width and offset into “Current wheel”. The diameter and tire size are optional, and the tire sizes unlock the tire results.",
+      "Do the same for the new wheel, using the width and offset from its listing. Or tap an example to see how the bands read.",
+      "Read each result: how far the wheel face and inside edge move, and which band the change falls in.",
+      "Call us with your year, make, model and trim before you order. Brakes, struts, the fender lip, suspension and steering lock decide clearance, and the numbers here can't see them.",
+    ],
+    faq: [
+      {
+        q: "What is wheel offset?",
+        a: "Offset is the distance in millimeters from the wheel's centerline to its mounting surface, usually stamped after ET. A lower offset pushes the wheel out toward the fender, and a higher one tucks it in toward the suspension. Our offset and backspacing guide explains it in full.",
+      },
+      {
+        q: "What is backspacing?",
+        a: "Backspacing is the distance in inches from the mounting surface to the back lip of the wheel. It works out to half the wheel's width plus the offset, so a more positive offset means more backspacing.",
+      },
+      {
+        q: "What do the three bands mean?",
+        a: "They only describe how far the numbers moved. Up to about 6 mm (a quarter inch) reads as close to your current setup, up to about 19 mm (three-quarters of an inch) as noticeably different, and more than that as a large change. Tire width and overall diameter have their own limits. They are generic geometry guides, not a fitment promise.",
+      },
+      {
+        q: "If the result says close to my current setup, can I order?",
+        a: "Not on the numbers alone. The tool measures how far the wheel and tire move, not what is around them. Clearance depends on your vehicle's brakes, struts, fender lip, suspension and steering lock. Call us with your vehicle details and we confirm fitment before any wheel ships.",
+      },
+    ],
+    related: [
+      "/learn/fitment/wheel-offset-backspacing",
+      "/learn/fitment/different-tire-size",
+      "/learn/fitment/bolt-pattern",
+      "/plus-size-calculator",
+    ],
+    services: ["wheel-installation", "tire-installation"],
+  },
 ];
 
 export const TOOL_PAGE_BY_ID = Object.fromEntries(

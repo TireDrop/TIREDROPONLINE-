@@ -51,6 +51,7 @@ related:
   - /learn/sidewall/how-to-read-tire-size
   - /wheels
   - /plus-size-calculator
+  - /wheel-offset-calculator
 cta:
   label: "Shop wheels"
   href: /wheels
@@ -123,7 +124,7 @@ Worked examples against an 18x8 ET45 wheel:
 | 18x9 ET45 | 12.7 mm (0.5 in) out | 12.7 mm (0.5 in) in | Rule 2: 1 in (25.4 mm) wider, split in half |
 | 18x9 ET35 | 22.7 mm out | 2.7 mm in | Both: 12.7 + 10 out; 12.7 − 10 in |
 
-The examples show the math, not a recommendation for any vehicle. The tire's own width and sidewall bulge sit on top of these numbers.
+The examples show the math, not a recommendation for any vehicle. To try your own numbers, use the [wheel offset check](/wheel-offset-calculator). The tire's own width and sidewall bulge sit on top of these numbers.
 
 ## Poke, rub and clearance
 

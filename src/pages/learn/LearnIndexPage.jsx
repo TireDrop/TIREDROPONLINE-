@@ -5,6 +5,7 @@ import {
   ArrowLeftRight,
   Camera,
   CircleGauge,
+  MoveHorizontal,
   Phone,
   RefreshCw,
   Ruler,
@@ -71,6 +72,12 @@ const TOOLS = [
     Icon: ArrowLeftRight,
     title: "Plus size calculator",
     copy: "Bigger wheels? Overall diameter and speedometer change.",
+  },
+  {
+    to: "/wheel-offset-calculator",
+    Icon: MoveHorizontal,
+    title: "Wheel offset check",
+    copy: "How far does a new wheel move out or in? Offset, backspacing and tire change.",
   },
   {
     to: "/tire-pressure-temperature",
