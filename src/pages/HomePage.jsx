@@ -130,6 +130,25 @@ function Hero() {
       data-home-section="hero"
       className="relative overflow-hidden bg-ink-wash text-bone"
     >
+      {/* Night-time Miami tire photo behind the hero. Decorative (empty alt),
+          sized so it reserves its space, and shown as it arrives: it is the
+          largest paint on the page. The gradient keeps the headline and the
+          finder card readable over the brightest part of the picture. */}
+      <img
+        src="/brand/hero-tires-2000.webp"
+        srcSet="/brand/hero-tires-1000.webp 1000w, /brand/hero-tires-2000.webp 2000w"
+        sizes="100vw"
+        width={2000}
+        height={667}
+        alt=""
+        fetchpriority="high"
+        decoding="async"
+        className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-[70%_center]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/55 to-ink/20 lg:from-ink/70 lg:via-ink/35 lg:to-transparent"
+      />
       {/* Tread-pattern wash behind the headline. */}
       <div
         aria-hidden
