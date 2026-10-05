@@ -7,7 +7,7 @@ done items. Show Justin the updated list, in this style, whenever it changes.
 
 
 ## Site fixes (Claude)
-- [ ] Financing and add-on options brief (competitor gaps 7 and 11); waiting on Justin's provider choice and pricing (branch preview/wave3-financing-warranty-brief, SHA PENDING; docs/audits/2026-10-05-financing-and-addons-brief.md; first step is two read-only Chrome checks of Shopify's installment option)
+- [ ] Financing and add-on options brief (competitor gaps 7 and 11); waiting on Justin's provider choice and pricing (branch preview/wave3-financing-warranty-brief, 1546a54; docs/audits/2026-10-05-financing-and-addons-brief.md; first step is two read-only Chrome checks of Shopify's installment option)
 - [x] ~~Gallery taken off the site until there are photos (page parked in src/_parked/gallery, /gallery 302s to /about, out of the sitemap)~~ (`b7eef20`, branch preview/gallery-off)
 - [ ] Install photo habit and review request drafts ready for the crew; waiting on Justin (competitor gaps 3 and 9) (branch preview/wave1-photo-habit, 5f179b8; docs/ops/install-photo-habit.md, review-request-drafts.md, gallery-return-plan.md; needs: photo storage tool, who takes photos, the Google review link)
 - [ ] Spanish test pages (mobile hub and Hialeah) built, noindex until a native speaker reviews the copy (competitor gap 10); waiting on Justin (branch preview/wave2-spanish-pages, a183b45; switch SPANISH_PAGES_INDEXABLE in src/data/spanishRoutes.js, steps and reviewer checklist in docs/ops/spanish-pages.md; needs: does the crew speak Spanish, who is the native reviewer)
