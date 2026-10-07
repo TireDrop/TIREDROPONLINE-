@@ -20,6 +20,8 @@
   .\Write-LoadPill.ps1 -Install -WhatIf        # show the scheduled task it would create
   .\Write-LoadPill.ps1 -Install -EveryMinutes 5
   .\Write-LoadPill.ps1 -Uninstall
+  .\Write-LoadPill.ps1 -Status                 # last reading, task state, FRESH / STALE (exit 0 / 3)
+  .\Write-LoadPill.ps1 -Prompt                 # paste-ready instruction that syncs load.json into hq/pcload
 #>
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
 param(
@@ -29,6 +31,9 @@ param(
   [int]$MaxLogLines = 5000,
   [switch]$Install,
   [switch]$Uninstall,
+  [switch]$Status,                   # show the last reading and whether it is stale (older than StaleMinutes)
+  [switch]$Prompt,                   # print the paste-ready instruction that syncs load.json into the board's hq/pcload
+  [int]$StaleMinutes = 15,
   [int]$EveryMinutes = 5,
   [string]$TaskName = 'DreamTeam-LoadPill'
 )
@@ -50,6 +55,33 @@ function Write-Log {
 
 function Get-LevelName([double]$ratio) {
   if ($ratio -lt 0.5) { 'low' } elseif ($ratio -lt 1) { 'normal' } elseif ($ratio -lt 1.5) { 'high' } else { 'extreme' }
+}
+
+# ---------- Status: honest freshness, never "ok" on old data ----------
+if ($Status) {
+  $f = Join-Path $OutDir 'load.json'
+  if (-not (Test-Path $f)) { Write-Host "No reading yet at $f. Run the script once first."; exit 2 }
+  $d = Get-Content $f -Raw | ConvertFrom-Json
+  $ageMin = [math]::Round(([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds() - [int64]$d.updatedAt) / 60000, 1)
+  $task = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
+  Write-Host ("PC load: {0} / {1} / {2}  ratio {3}  level {4}  ({5} cores)" -f $d.load1, $d.load5, $d.load15, $d.ratio, $d.level, $d.cpus)
+  Write-Host ("Task '{0}': {1}" -f $TaskName, $(if ($task) { $task.State } else { 'NOT INSTALLED' }))
+  if ($ageMin -gt $StaleMinutes) { Write-Host "STALE: last reading $ageMin min ago (limit $StaleMinutes)." -ForegroundColor Yellow; exit 3 }
+  Write-Host "FRESH: last reading $ageMin min ago." -ForegroundColor Green
+  return
+}
+
+# ---------- Prompt: paste into a Claude session that has the Artifact tool (Cowork heartbeat / Claude Code) ----------
+if ($Prompt) {
+  $p = Join-Path $OutDir 'load.json'
+  @"
+PC load sync (every heartbeat). Do ONLY this: read the file $p (the REAL numbers written by Write-LoadPill.ps1; never invent or edit them).
+Then ArtifactData get hq/pcload for its version and update it with exactly the fields in that file
+(load1, load5, load15, cpus, ratio, level, note, updatedAt) pinned with if_version.
+If updatedAt is older than $StaleMinutes minutes, write level:'stale' and note:'last reading N min ago' instead of the old level.
+If the file is missing, write nothing and tell Justin. Send Justin nothing otherwise.
+"@ | Write-Host
+  return
 }
 
 # ---------- Install / Uninstall (scheduled task, hidden window) ----------
