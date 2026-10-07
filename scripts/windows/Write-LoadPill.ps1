@@ -129,8 +129,14 @@ try {
   # ---------- Rolling history gives load5 / load15 ----------
   $histFile = Join-Path $OutDir 'history.json'
   $hist = @()
-  if (Test-Path $histFile) { try { $hist = @(Get-Content $histFile -Raw | ConvertFrom-Json) } catch { Write-Log 'WARN' 'history.json unreadable, starting fresh' } }
-  $hist = @($hist | Where-Object { $_.t -gt ($nowMs - 15 * 60 * 1000) }) + [pscustomobject]@{ t = $nowMs; v = $nowSample }
+  if (Test-Path $histFile) {
+    try {
+      # Windows PowerShell 5.1 returns a JSON array as ONE nested object; piping through ForEach-Object flattens it into real readings
+      $raw  = Get-Content $histFile -Raw | ConvertFrom-Json
+      $hist = @($raw | ForEach-Object { $_ } | Where-Object { $_ -and $null -ne $_.t -and $null -ne $_.v -and ($_.t -isnot [array]) -and ($_.v -isnot [array]) })
+    } catch { Write-Log 'WARN' 'history.json unreadable, starting fresh'; $hist = @() }
+  }
+  $hist = @($hist | Where-Object { [int64]$_.t -gt ($nowMs - 15 * 60 * 1000) }) + [pscustomobject]@{ t = $nowMs; v = $nowSample }
   function Get-Avg($minutes) {
     $vals = @($hist | Where-Object { $_.t -gt ($nowMs - $minutes * 60 * 1000) } | ForEach-Object { [double]$_.v })
     if ($vals.Count -eq 0) { return $nowSample }
@@ -162,7 +168,7 @@ try {
     $tmp = "$outFile.tmp"
     Set-Content -Path $tmp -Value $json -Encoding UTF8            # atomic: temp file then move
     Move-Item -Path $tmp -Destination $outFile -Force
-    ($hist | ConvertTo-Json -Compress) | Set-Content -Path $histFile -Encoding UTF8
+    ConvertTo-Json -InputObject @($hist) -Compress | Set-Content -Path $histFile -Encoding UTF8   # always a JSON array, even with one reading
     Write-Log 'OK' "ratio=$ratio level=$level cpu=$([math]::Round($cpuAvg,1))% queue=$([math]::Round($qAvg,1)) cores=$cores"
     # keep the log from growing forever
     $lines = @(Get-Content $script:LogFile)
