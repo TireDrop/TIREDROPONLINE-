@@ -166,7 +166,7 @@ try {
     Write-Log 'OK' "ratio=$ratio level=$level cpu=$([math]::Round($cpuAvg,1))% queue=$([math]::Round($qAvg,1)) cores=$cores"
     # keep the log from growing forever
     $lines = @(Get-Content $script:LogFile)
-    if ($lines.Count -gt $MaxLogLines) { $lines[0] + $lines[-($MaxLogLines - 1)..-1] | Set-Content -Path $script:LogFile -Encoding UTF8 }
+    if ($lines.Count -gt $MaxLogLines) { (@($lines[0]) + @($lines[(-($MaxLogLines - 1))..-1])) | Set-Content -Path $script:LogFile -Encoding UTF8 }
   }
 }
 catch {
