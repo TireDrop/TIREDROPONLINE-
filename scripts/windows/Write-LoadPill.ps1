@@ -112,7 +112,7 @@ $mutex = New-Object System.Threading.Mutex($false, 'Global\DreamTeamLoadPill')
 if (-not $mutex.WaitOne(0)) { Write-Host 'Another run is in progress, skipping.'; return }
 try {
   # ---------- Sample REAL numbers ----------
-  $cores = [int](Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
+  $cores = [int][Environment]::ProcessorCount   # no CIM module load, so -WhatIf prints no alias noise
   if ($cores -lt 1) { throw 'Could not read the logical processor count.' }
 
   $cpuCounter = '\Processor Information(_Total)\% Processor Time'
