@@ -16,17 +16,6 @@ export const TIRE_CATEGORIES = [
 
 export const WHEEL_CATEGORIES = ["Alloy", "Forged", "Off-Road", "Truck"];
 
-export const WHEEL_FINISHES = [
-  "Matte Black",
-  "Satin Black",
-  "Gloss Black Milled",
-  "Gunmetal",
-  "Silver",
-  "Bronze",
-  "Machined",
-  "Chrome",
-];
-
 export const TIRES = [
   {
     id: "t-cont-truecontact-tour",

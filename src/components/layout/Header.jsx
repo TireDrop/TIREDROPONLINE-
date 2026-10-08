@@ -168,6 +168,7 @@ function MobileDrawer({ open, onClose }) {
     <div className="fixed inset-0 z-50 lg:hidden">
       {/* The backdrop closes on a tap; the keyboard has the X and Escape. */}
       <button
+        type="button"
         aria-label="Close menu"
         tabIndex={-1}
         className="absolute inset-0 bg-ink/60"
@@ -183,6 +184,7 @@ function MobileDrawer({ open, onClose }) {
         <div className="flex items-center justify-between border-b border-ink/10 px-5 py-4">
           <Logo className="h-16" variant="full" />
           <button
+            type="button"
             ref={closeButtonRef}
             onClick={onClose}
             aria-label="Close menu"
@@ -268,17 +270,17 @@ function MobileDrawer({ open, onClose }) {
 }
 
 export default function Header() {
-  const [menuOpen, setMenuOpen] = useState(false);
   const { count } = useCart();
   const { pathname } = useLocation();
+  // The drawer is open only for the route it was opened on, so navigating
+  // closes it without an effect.
+  const [openPath, setOpenPath] = useState(null);
+  const menuOpen = openPath === pathname;
 
   // Stable identity: the drawer's effect depends on it, and a fresh closure
   // every render would re-run that effect and yank focus back to the close
   // button while the user is still tabbing through the menu.
-  const closeMenu = useCallback(() => setMenuOpen(false), []);
-
-  // Close the drawer whenever navigation happens.
-  useEffect(() => setMenuOpen(false), [pathname]);
+  const closeMenu = useCallback(() => setOpenPath(null), []);
 
   return (
     <>
@@ -342,7 +344,8 @@ export default function Header() {
             </Link>
 
             <button
-              onClick={() => setMenuOpen(true)}
+              type="button"
+              onClick={() => setOpenPath(pathname)}
               aria-label="Open menu"
               className="rounded-sm p-2.5 text-ink transition-colors hover:bg-fog hover:text-drop lg:hidden"
             >

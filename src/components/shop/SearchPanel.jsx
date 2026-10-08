@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Car, Ruler, Search } from "lucide-react";
 
@@ -119,12 +119,15 @@ export default function SearchPanel({
   const [diameter, setDiameter] = useState(String(initial?.diameter ?? ""));
 
   // Keep the visible tab in step with the nav links that deep-link into it.
-  useEffect(() => {
+  // Adjusted during render (not in an effect) so there is no extra paint.
+  const [seenRequested, setSeenRequested] = useState();
+  if (requested !== seenRequested) {
+    setSeenRequested(requested);
     if (requested === "size" || requested === "vehicle") {
       setTab(requested);
       setError("");
     }
-  }, [requested]);
+  }
 
   // Every make sold in the chosen year, and that year's models.
   const yearMakes = useMemo(() => makesFor(year), [year]);
