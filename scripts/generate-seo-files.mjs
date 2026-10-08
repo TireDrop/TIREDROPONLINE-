@@ -133,6 +133,8 @@ export const EXCLUDE = new Set([
   "/search",
   "/compare",
   "/reviews",
+  // The scroll story concept: a private preview, never listed.
+  "/scroll-story",
   // The Spanish test pages stay out of the sitemap (and say noindex) until a
   // native speaker has approved the copy: SPANISH_PAGES_INDEXABLE.
   ...(SPANISH_PAGES_INDEXABLE ? [] : spanishPaths()),

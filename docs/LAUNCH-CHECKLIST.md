@@ -7,7 +7,7 @@ done items. Show Justin the updated list, in this style, whenever it changes.
 
 
 ## Site fixes (Claude)
-- [ ] Scroll-story hero concept (anime.js, tire and rim, scroll-craft flow): private static preview at /scroll-preview on branch preview/scroll-craft-hero, noindex and out of the sitemap; real Higgsfield frames to follow
+- [ ] Scroll-story hero concept (anime.js, tire and rim, scroll-craft flow): private static preview at /scroll-story on branch preview/scroll-craft-hero, noindex and out of the sitemap; real Higgsfield frames to follow
 - [ ] Financing and add-on options brief (competitor gaps 7 and 11); waiting on Justin's provider choice and pricing (branch preview/wave3-financing-warranty-brief, 1546a54; docs/audits/2026-10-05-financing-and-addons-brief.md; first step is two read-only Chrome checks of Shopify's installment option)
 - [x] ~~Gallery taken off the site until there are photos (page parked in src/_parked/gallery, /gallery 302s to /about, out of the sitemap)~~ (`b7eef20`, branch preview/gallery-off)
 - [ ] Checkout options brief for online payment (competitor gap 1); waiting on Justin's processor choice (branch preview/wave2-checkout-options, SHA 1dd4fcd; docs/audits/2026-10-05-checkout-options.md; recommends staying on Shopify: pay after fitment first, pay-at-order for exact fits once ATD is live; needs: answers to the 10 decisions at the end of the brief and three read-only Chrome prompts)

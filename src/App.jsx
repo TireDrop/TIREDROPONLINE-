@@ -25,6 +25,9 @@ import { isProductPath } from "./data/mobileBar.js";
 // main bundle instead of after it. Splitting it keeps the home page's own
 // code and data (the vehicle and size search, the featured tires, the tool
 // list) out of every other page's download.
+const ScrollStoryPage = lazyPage("pages/ScrollStoryPage.jsx", () =>
+  import("./pages/ScrollStoryPage.jsx"),
+);
 const HomePage = lazyPage("pages/HomePage.jsx", () =>
   import("./pages/HomePage.jsx"),
 );
@@ -195,6 +198,8 @@ export default function App() {
   // A product page has no phone action bar (MobileCallBar): its own buy bar
   // drops to the bottom edge, which it finds through --call-bar-h.
   const productPage = isProductPath(pathname);
+  // The scroll story concept is a full-screen experience: no site chrome.
+  const bare = pathname === "/scroll-story";
 
   return (
     <div
@@ -220,9 +225,11 @@ export default function App() {
       <InPageAnchors />
       {/* `contents` keeps the masthead's sticky row sticky against the page,
           not against this wrapper. */}
-      <header className="contents">
-        <Header />
-      </header>
+      {!bare && (
+        <header className="contents">
+          <Header />
+        </header>
+      )}
 
       <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">
         {/* Holds the viewport open while a route chunk loads, so the
@@ -240,6 +247,7 @@ export default function App() {
               element={<StateShippingPage />}
             />
             <Route path="/local-delivery" element={<LocalDeliveryPage />} />
+            <Route path="/scroll-story" element={<ScrollStoryPage />} />
 
             {/* Tires & wheels e-commerce */}
             <Route path="/tires" element={<TiresPage />} />
@@ -367,21 +375,25 @@ export default function App() {
         </Suspense>
       </main>
 
-      <Footer />
+      {!bare && <Footer />}
 
-      {/* Keeps the end of the page clear of whatever is floating over the
-          bottom edge: the phone action bar (or, on a product page, its buy
-          bar, about as tall), the compare tray when it has something in it. */}
-      <div
-        aria-hidden
-        className={
-          productPage
-            ? "h-[calc(4.5rem+env(safe-area-inset-bottom))] lg:h-0"
-            : "h-[calc(var(--call-bar-h)+var(--compare-tray-h)+env(safe-area-inset-bottom))] lg:h-[var(--compare-tray-h)]"
-        }
-      />
-      <CompareTray />
-      <MobileCallBar />
+      {!bare && (
+        <>
+          {/* Keeps the end of the page clear of whatever is floating over the
+              bottom edge: the phone action bar (or, on a product page, its buy
+              bar, about as tall), the compare tray when it has something in it. */}
+          <div
+            aria-hidden
+            className={
+              productPage
+                ? "h-[calc(4.5rem+env(safe-area-inset-bottom))] lg:h-0"
+                : "h-[calc(var(--call-bar-h)+var(--compare-tray-h)+env(safe-area-inset-bottom))] lg:h-[var(--compare-tray-h)]"
+            }
+          />
+          <CompareTray />
+          <MobileCallBar />
+        </>
+      )}
     </div>
   );
 }

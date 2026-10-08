@@ -291,6 +291,7 @@ const NOINDEX_ROUTES = [
   "/search",
   "/compare",
   "/reviews",
+  "/scroll-story",
 ];
 
 /** Routes where the physical shop, not the web store, is the subject. */
