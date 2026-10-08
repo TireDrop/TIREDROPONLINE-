@@ -1,6 +1,10 @@
 # Shopify theme source
 
-> Synced from EDIT HERE (166982615192) on 2026-09-28: a complete copy of the
+> **Theme IDs (as of 2026-09-30): 166982615192 is now the LIVE theme (role MAIN); never write to it.
+> The draft you edit is "EDIT HERE " (188753510552). Always check a theme's role is UNPUBLISHED
+> before writing.**
+>
+> Synced from EDIT HERE (166982615192) on 2026-09-28, before it was published: a complete copy of the
 > draft theme, Horizon base files included, 547 files in all (assets 130,
 > blocks 95, config 2, layout 2, locales 57, sections 78, snippets 156,
 > templates 27). Every file matches the theme's checksumMd5 except JSON the

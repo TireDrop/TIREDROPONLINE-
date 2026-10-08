@@ -21,7 +21,7 @@ const HELPFUL_LINKS = [
     to: "/shipping",
     icon: Truck,
     title: "Shipping & Install",
-    copy: "Free shipping to your address, or free to our shop if you are in South Florida.",
+    copy: `Free shipping to ${BUSINESS.shipping.area}, or free to our shop if you are in South Florida.`,
   },
   {
     to: "/schedule",

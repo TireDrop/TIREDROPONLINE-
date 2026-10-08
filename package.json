@@ -17,6 +17,7 @@
     "check:forms": "node scripts/forms-keep-values-check.mjs",
     "check:prerender": "node scripts/prerender-check.mjs",
     "check:schema": "node scripts/schema-check.mjs",
+    "verify": "node scripts/verify-all.mjs",
     "check:docs": "node scripts/docs-links-check.mjs",
     "check:ga": "node scripts/ga-events-check.mjs",
     "check:remember": "node scripts/remember-check.mjs",
