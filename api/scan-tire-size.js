@@ -121,7 +121,7 @@ export function createScanTireSizeHandler({
   now = () => performance.now(),
   log = console,
 } = {}) {
-  return async function handler(req, res) {
+  async function handle(req, res) {
     if (req.method !== "POST") return methodNotAllowed(res, "POST");
     const started = now();
     const ip = clientIp(req);
@@ -220,6 +220,18 @@ export function createScanTireSizeHandler({
       ms: now() - started,
     });
     return send(res, 200, result, NO_STORE);
+  }
+
+  // Anything the steps above did not anticipate becomes a clean JSON 500, never
+  // an unhandled rejection or a stack trace in the response.
+  return async function handler(req, res) {
+    try {
+      return await handle(req, res);
+    } catch {
+      log.error("[scan] outcome=unexpected_error");
+      if (res.headersSent || res.writableEnded) return undefined;
+      return send(res, 500, { error: "scanner_unavailable" }, NO_STORE);
+    }
   };
 }
 

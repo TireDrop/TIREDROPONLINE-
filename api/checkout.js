@@ -46,11 +46,11 @@ import { priceLines } from "./_lib/catalog.js";
 import {
   buildOrder,
   deliverOrderRequest,
+  makeOrderRef,
   MOBILE_INSTALL_NOTE,
 } from "./_lib/orders.js";
 import { createDraftCheckout, ShopifyCheckoutError } from "./_lib/shopify.js";
 import { AtdError } from "./_lib/atd.js";
-import { makeOrderRef } from "./_lib/orders.js";
 import { clientIp, createRateLimiter } from "./_lib/ratelimit.js";
 import {
   BODY_LIMITS,
