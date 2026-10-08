@@ -48,6 +48,7 @@ import { searchTires } from "../data/api.js";
 import { serializeTiresQuery, slug } from "../lib/tiresUrl.js";
 import { useScrollReveal } from "../lib/useScrollReveal.js";
 import { Seo, Section, SectionHead } from "../components/ui/index.jsx";
+import TireTransitionDemo from "../components/demos/TireTransitionDemo.jsx";
 
 /*
  * The home page reads top to bottom as one story:
@@ -1233,6 +1234,7 @@ export default function HomePage() {
       />
       {/* A plain wrapper for the reveal hook to search; no layout of its own. */}
       <div ref={ref} className="contents">
+        <TireTransitionDemo />
         <Hero />
         <TrustBar />
         <Shop />
