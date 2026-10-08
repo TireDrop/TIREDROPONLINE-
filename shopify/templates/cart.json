@@ -5,7 +5,7 @@
       "blocks": {
         "trust_ship": {
           "type": "trust",
-          "settings": { "icon": "truck", "title": "Ships nationwide", "copy": "Drop-shipped free to any address in the continental United States." }
+          "settings": { "icon": "truck", "title": "Free shipping to the 48 states + DC", "copy": "Drop-shipped free to any address in the 48 contiguous states and DC." }
         },
         "trust_fit": {
           "type": "trust",

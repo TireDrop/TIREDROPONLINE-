@@ -56,7 +56,7 @@
         "dismiss_days": 14,
         "exclude_paths": "/cart\n/checkout\n/checkouts\n/account\n/challenge\n/password\n/pages/contact\n/pages/financing\n/pages/commercial-tires",
         "eyebrow": "The TireDrop list",
-        "heading": "Tire tips that save you money",
+        "heading": "Tire tips and care guides",
         "body": "Seasonal tire checks, fitment help for your vehicle, and first word when new sizes and brands land. No spam — unsubscribe anytime.",
         "email_label": "Email address",
         "email_placeholder": "you@example.com",

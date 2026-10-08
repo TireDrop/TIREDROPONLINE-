@@ -25,7 +25,7 @@
         "plans_eyebrow": "Plan Options",
         "plans_title": "Three shapes a plan usually takes",
         "plans_lede": "These are the kinds of programs financing providers commonly offer for tire and wheel purchases. What you are actually offered depends on the lender and on your application.",
-        "plans_note": "We do not quote rates, approval odds or monthly payments on this page, because we do not set them. Ask us what programs are running the day you buy, and read the lender's offer before you accept it.",
+        "plans_note": "We do not quote approval odds or monthly payments on this page, because we do not set them. Ask us what programs are running the day you buy, and read the lender's offer before you accept it.",
         "req_eyebrow": "Before You Apply",
         "req_title": "What you will likely need",
         "requirements": "A valid, government-issued photo ID\nA Social Security number or ITIN, if the lender asks for one\nProof of a steady income source\nAn active checking account or debit card for payments\nA working phone number and email for the lender's verification step\nTo be at least 18 years old, with a billing address in the United States",
@@ -77,7 +77,7 @@
           "settings": {
             "icon": "wallet",
             "title": "Financing through a lender",
-            "copy": "A third-party financing provider can spread the cost over time. They review the application, they approve or decline it, and they set the rate and the term. Call first — which programs are open changes, and we will not send you to an application that is not running."
+            "copy": "A third-party financing provider can spread the cost over time. They review the application, they approve or decline it, and they set the terms. Call first — which programs are open changes, and we will not send you to an application that is not running."
           }
         },
         "method_3": {
@@ -110,12 +110,12 @@
         "plan_2": {
           "type": "plan",
           "settings": {
-            "name": "Promotional period",
-            "tag": "Most common",
+            "name": "Mid-size orders",
+            "tag": "Sets of four",
             "highlight": true,
-            "summary": "Some lender programs offer no interest if the balance is paid in full within a promotional window on purchases over a set amount.",
-            "points": "Typically aimed at a full set of four, or tires plus install\nPromotional terms apply only if you meet them exactly\nInterest can be charged back if the balance is not cleared in time",
-            "note": "Promotional offers change. Ask what is available the day you apply."
+            "summary": "A payment option may be offered by an approved provider for a full set of four, or tires plus install, with terms shown before you purchase.",
+            "points": "Typically aimed at a full set of four, or tires plus install\nThe provider shows the terms before you accept\nRead the full terms before you agree",
+            "note": "Availability changes. Ask what is available the day you apply."
           }
         },
         "plan_3": {
@@ -124,9 +124,9 @@
             "name": "Longer term",
             "tag": "Bigger orders",
             "highlight": false,
-            "summary": "Fixed monthly payments over a longer term for larger tickets — a wheel and tire package, or a set plus alignment and brakes.",
-            "points": "Lower monthly payment, longer commitment\nInterest usually applies for the whole term\nYou can normally pay it off early — confirm with the lender",
-            "note": "Rate and term depend entirely on the lender's decision."
+            "summary": "Scheduled monthly payments over a longer term for larger tickets — a wheel and tire package, or a set plus alignment and brakes.",
+            "points": "Lower monthly payment, longer commitment\nThe provider sets the length of the term\nConfirm early-payoff rules with the provider",
+            "note": "Terms depend entirely on the provider's decision."
           }
         },
         "step_1": {
@@ -147,7 +147,7 @@
           "type": "step",
           "settings": {
             "title": "Read what you were actually offered",
-            "copy": "If you are approved, check the amount, the term, the rate and any fees before you accept. Ask questions. Walking away at this point costs you nothing."
+            "copy": "If you are approved, check the amount, the term and any fees before you accept. Ask questions. Walking away at this point costs you nothing."
           }
         },
         "step_4": {
@@ -161,14 +161,14 @@
           "type": "term",
           "settings": {
             "lead": "We are not a bank and we are not a lender.",
-            "copy": "Financing is provided by a third-party company. They review the application, they decide, and they set the rate, the term and any fees. Nothing on this page is an offer of credit or a promise that you will be approved."
+            "copy": "Financing is provided by a third-party company. They review the application, they decide, and they set the term and any fees. Nothing on this page is an offer of credit or a promise that you will be approved."
           }
         },
         "term_2": {
           "type": "term",
           "settings": {
-            "lead": "Rates and APR vary.",
-            "copy": "The annual percentage rate you are offered depends on the provider's program and on their review of your application. Some promotional plans advertise no interest if the full balance is paid within the promotional period — if it is not, interest may be charged on the original amount from the date of purchase. That is the detail people miss most often."
+            "lead": "Terms vary.",
+            "copy": "The terms you are offered depend on the provider's program and on their review of your application. A payment option, where one is available, is shown to you with its terms before you purchase — read them before you accept."
           }
         },
         "term_3": {
@@ -231,14 +231,14 @@
           "type": "faq",
           "settings": {
             "q": "Can I pay it off early?",
-            "a": "Most plans allow it, and on a promotional no-interest offer paying early is usually the entire point. Confirm the details in your lender agreement, since early-payoff rules come from them."
+            "a": "Many plans allow it. Confirm the details in your lender agreement, since early-payoff rules come from them."
           }
         },
         "faq_6": {
           "type": "faq",
           "settings": {
             "q": "What if I return part of a financed order?",
-            "a": "Refunds go back through the way you paid, so a refund on a financed order is credited against your balance with the lender. That can take a billing cycle or two to show up on their side, and any interest already charged is between you and them. Our return terms are on the terms page."
+            "a": "Refunds go back through the way you paid, so a refund on a financed order is credited against your balance with the lender. That can take a billing cycle or two to show up on their side, and any charges already applied are between you and them. Our return terms are on the terms page."
           }
         },
         "faq_7": {
