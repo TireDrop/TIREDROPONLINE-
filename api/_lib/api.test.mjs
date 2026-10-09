@@ -756,7 +756,9 @@ test("partial Shopify config fails loud: status lists it and checkout is a 503",
       { method: "POST", body: validOrder() },
     );
     assert.equal(res.statusCode, 503);
-    assert.match(res.body.error, /Shopify is partially configured/);
+    // The customer sees generic text; the detail stays in status + the server log.
+    assert.match(res.body.error, /temporarily unavailable/i);
+    assert.doesNotMatch(res.body.error, /Shopify|SHOPIFY_|partially configured/);
   } finally {
     console.error = savedError;
   }
@@ -818,4 +820,31 @@ test("vehicle search resolves the factory size for the model year (sample mode)"
   assert.equal(none.statusCode, 200);
   assert.equal(none.body.query.size, null);
   assert.deepEqual(none.body.items, []);
+});
+
+// ---- misconfigured integrations never leak setup details to the browser -----
+// The page shows `error` to the customer, so it must not name env vars or
+// vendors. The detail goes to the server log only.
+
+test("checkout with a half-configured ATD returns generic text, no variable names", async () => {
+  resetCheckoutRateLimit();
+  const handler = createCheckoutHandler({ env: { ATD_API_KEY: "x" } });
+  const res = await call(handler, { method: "POST", body: validOrder() });
+  assert.equal(res.statusCode, 503);
+  assert.match(res.body.error, /temporarily unavailable/i);
+  assert.doesNotMatch(res.body.error, /ATD|SHOPIFY|ANTHROPIC|_KEY|_SECRET|_BASE|misconfigured/i);
+});
+
+test("tire search with a half-configured ATD returns generic text, no variable names", async () => {
+  const saved = process.env.ATD_API_KEY;
+  process.env.ATD_API_KEY = "x";
+  try {
+    const res = await call(tiresHandler, { method: "GET", query: { size: "225/45R17" } });
+    assert.equal(res.statusCode, 503);
+    assert.match(res.body.error, /temporarily unavailable/i);
+    assert.doesNotMatch(res.body.error, /ATD|_KEY|_SECRET|_BASE|misconfigured/i);
+  } finally {
+    if (saved === undefined) delete process.env.ATD_API_KEY;
+    else process.env.ATD_API_KEY = saved;
+  }
 });

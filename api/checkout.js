@@ -152,7 +152,7 @@ export function createCheckoutHandler({ env, atd = {}, shopify = {}, now = Date.
         return send(
           res,
           503,
-          { error: `Checkout is misconfigured. ${blocking.join(" ")}` },
+          { error: "Checkout is temporarily unavailable. Please try again in a few minutes, or call the shop." },
           NO_STORE,
         );
       }
