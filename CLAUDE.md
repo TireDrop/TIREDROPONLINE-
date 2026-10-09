@@ -1,6 +1,7 @@
 # TireDrop: notes for Claude sessions
 
 - Address the owner as **Justin**.
+- **Finding files:** `docs/ops/file-map.md` ("Where is X?" lookup, which check proves each change).
 - **Launch checklist:** `docs/LAUNCH-CHECKLIST.md` is Justin's master to-do list.
   - Whenever a task is finished, tick it AND strike it through (`- [x] ~~item~~ (commit or date)`), add new tasks to the right section, and bump "Last updated".
   - Show Justin the updated checklist in that same style whenever it changes.

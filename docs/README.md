@@ -28,6 +28,7 @@ the code fits together is in the root [README](../README.md).
 - [deploy.md](ops/deploy.md): Vercel project settings, every `/api` endpoint, every server environment variable, local `vercel dev`, and the Shopify → Vercel cutover checklist. Use it for any deploy or env change.
 - [domain-migration-2026-09-28.md](ops/domain-migration-2026-09-28.md): record of moving tiredroponline.com to Vercel and Shopify to shop.tiredroponline.com, with the rollback and follow-ups.
 - [turn-on-the-forms.md](ops/turn-on-the-forms.md): runbook for switching the site's forms on and checking a lead reaches info@.
+- [file-map.md](ops/file-map.md): "Where is X?" lookup: which file to change for each kind of task, which npm check proves it, where tests live, what is generated, and what needs Justin. Read it first when you need to find a file.
 
 ## content/: Learn and Blog
 
