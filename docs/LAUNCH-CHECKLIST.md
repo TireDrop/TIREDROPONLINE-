@@ -5,9 +5,12 @@ Done items get ticked AND struck through (`- [x] ~~item~~ (commit or date)`).
 Open items stay `- [ ]`. Add new items to the right section; don't delete
 done items. Show Justin the updated list, in this style, whenever it changes.
 
-_Last updated: 2026-10-02, evening (blog reworks #32/#42 on preview/blog-rework, #37 dropped; ATD call held: site approval and API credentials pending at ATD. SHIPPED to main today: team build d2ba501 (blog batch 5, Learn gap fill C, tire page + cart, page speed, QA, search, Windows dev); resources only + check:sources; wave 2 (quote form, installed price, blog batch 3, a11y 0 issues, check:links); blog batch 4; check:forms 271s → 83s)_
+_Last updated: 2026-10-09 (checkout/tire-search error text made generic; docs/ops/file-map.md added). Earlier, 2026-10-02 evening (blog reworks #32/#42 on preview/blog-rework, #37 dropped; ATD call held: site approval and API credentials pending at ATD. SHIPPED to main today: team build d2ba501 (blog batch 5, Learn gap fill C, tire page + cart, page speed, QA, search, Windows dev); resources only + check:sources; wave 2 (quote form, installed price, blog batch 3, a11y 0 issues, check:links); blog batch 4; check:forms 271s → 83s)_
 
 ## Site fixes (Claude)
+
+- [x] ~~Customers no longer see setup details when checkout or tire search is half-configured (the 503 body used to list environment-variable names); generic wording now, detail stays in the server log and /api/status, regression tests added~~ (`ac86207`, 2026-10-09)
+- [x] ~~File map for agents: docs/ops/file-map.md (task to file, which check proves it, where tests live, what is generated, what needs Justin)~~ (`c1a8e17`, 2026-10-09)
 - [x] ~~Ship the 2026-10-02 team build to main (all 22 gates pass on the merged build; Justin said "ship it")~~ (`d2ba501`, shipped to main 2026-10-02)
 - [x] ~~QA sweep: 174 pages at 390 and 1280, nothing blocks buying; fixed "On this page" links hiding under the sticky header (48 links, 17 pages), desktop menu staying open on Tab/Escape, phone menu and filter sheets letting Tab escape, focused fields hidden behind the phone call bar; keyboard checks added to check:a11y~~ (`9a809f3`, `5236ed0`, `ef5315f`, `ff77416`, `d26c21e`, shipped to main 2026-10-02)
 - [x] ~~Checkout keeps the cart when the order request doesn't reach the shop (calm alert, nothing charged, retry); check:forms covers it (115 checks)~~ (`c4c65e7`, shipped to main 2026-10-02)
