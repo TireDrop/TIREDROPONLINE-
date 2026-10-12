@@ -18,6 +18,7 @@ the code fits together is in the root [README](../README.md).
 - [shopify-checkout.md](integrations/shopify-checkout.md): how checkout creates Shopify draft orders, the app scopes it needs, and when it takes payment. Read it before touching `/api/checkout`.
 - [website-leads.md](integrations/website-leads.md): forms and order requests → Shopify customer → Flow "Website lead alert" → info@. Use it to build or fix the lead Flow.
 - [webhooks.md](integrations/webhooks.md): Shopify `orders/paid` and `orders/cancelled` webhooks into `/api/webhooks/shopify`, and how to set them up.
+- [telegram-order-alerts.md](integrations/telegram-order-alerts.md): a Telegram message to Justin for every paid order (rides the `orders/paid` webhook), what it contains, and the BotFather + Vercel env var setup.
 - [install-scheduling.md](integrations/install-scheduling.md): the "Schedule your install" hand-off after payment, and Tire Guru's role (`INSTALL_BOOKING_URL`, or bookings entered by hand).
 - [atd.md](integrations/atd.md): the ATD catalog, price and stock adapter (still sample mode) and what must be confirmed with ATD. Read it before the ATD call or any ATD work.
 - [atd-forwarder.md](integrations/atd-forwarder.md): the gated job that places paid orders with ATD and syncs tracking, plus its sandbox test plan.

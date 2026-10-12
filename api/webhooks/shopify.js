@@ -61,6 +61,7 @@ import { Buffer } from "node:buffer";
 import { getConfig } from "../_lib/config.js";
 import { forwardOrder, handleOrderCancelled } from "../_lib/forwarder.js";
 import { installKind, markNeedsScheduling, restPayloadToNode } from "../_lib/booking.js";
+import { notifyPaidOrder, telegramConfig } from "../_lib/telegram.js";
 
 export const WEBHOOK_MAX_BYTES = 1024 * 1024;
 export const DEDUPE_MAX_ENTRIES = 2000;
@@ -111,10 +112,13 @@ function createLru(max) {
 }
 
 const seen = createLru(DEDUPE_MAX_ENTRIES);
+// One Telegram alert per order, even if Shopify retries the delivery.
+const alerted = createLru(DEDUPE_MAX_ENTRIES);
 
 /** Test hook. */
 export function resetWebhookDedupe() {
   seen.clear();
+  alerted.clear();
 }
 
 // ---- Topics --------------------------------------------------------------------
@@ -195,6 +199,27 @@ export function createShopifyWebhookHandler({ env, deps = {}, waitUntil } = {}) 
       payload = JSON.parse(raw.toString("utf8"));
     } catch {
       return json(400, { error: "Body is not JSON." });
+    }
+
+    // ---- Telegram alert (orders/paid) ------------------------------------------
+    // Independent of the ATD forwarder and of the Admin API: it only reads the
+    // webhook body, so it fires even when ordering is off. Never throws.
+    if (topic === TOPICS.paid && telegramConfig(env ?? process.env)) {
+      const alertKey = String(payload?.id ?? payload?.name ?? "");
+      if (alertKey && !alerted.has(alertKey)) {
+        alerted.add(alertKey);
+        const alert = notifyPaidOrder(payload, {
+          env: env ?? process.env,
+          shopDomain,
+          fetchImpl: deps.telegramFetch,
+          log,
+        }).then((r) => {
+          if (!r.ok) alerted.delete(alertKey); // let a retry try again
+        });
+        const deferAlert = waitUntil === undefined ? vercelWaitUntil() : waitUntil;
+        if (deferAlert) deferAlert(alert);
+        else await alert;
+      }
     }
 
     // ---- which work, if any ------------------------------------------------
