@@ -60,7 +60,7 @@ name, email, phone or street address. The bot token is never logged.
 > Deployments → latest production deployment → Redeploy. Do not print or
 > copy the token anywhere else.
 
-## Customer order tracking (built, off until the webhook is registered)
+## Customer order tracking (live since 2026-10-12)
 
 A customer messages **@TIREDROPONLINE_Bot** `#1001 you@example.com` and gets
 the same small public view as the Track My Order page: payment and shipping
