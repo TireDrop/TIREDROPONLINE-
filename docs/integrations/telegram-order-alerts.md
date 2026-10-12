@@ -60,8 +60,30 @@ name, email, phone or street address. The bot token is never logged.
 > Deployments → latest production deployment → Redeploy. Do not print or
 > copy the token anywhere else.
 
-## Not built yet
+## Customer order tracking (built, off until the webhook is registered)
 
-Customer-facing order tracking over Telegram (a bot customers message with an
-order number). Say the word; it would reuse `/api/track` and its
-number-plus-email check.
+A customer messages **@TIREDROPONLINE_Bot** `#1001 you@example.com` and gets
+the same small public view as the Track My Order page: payment and shipping
+state, how it is delivered, items, tracking links, and where the tires are
+with our supplier. **Same rule as /track: the order is shown only when the
+email matches**, and a wrong number, wrong email or unknown order all get the
+identical "couldn't find it" answer. No prices, address, phone or delivery
+dates. Installs point to tiredroponline.com/track to book.
+
+- Only private chats are answered; groups are ignored.
+- Lookups are rate limited per chat (10 per 10 minutes, the same budget as
+  /track).
+- Security: Telegram sends the secret given to `setWebhook` in
+  `X-Telegram-Bot-Api-Secret-Token`; it must equal `TELEGRAM_WEBHOOK_SECRET`
+  or the update is a 401. The reply goes back in the HTTP response, so this
+  path never needs the bot token.
+- Plumbing: `POST /api/webhooks/telegram` is rewritten (`vercel.json`) to
+  `/api/webhooks/shopify?src=telegram`, because `api/` is capped at 12
+  functions on the Hobby plan. Code: `api/_lib/telegramWebhook.js`,
+  `api/_lib/telegramTrack.js`; tests: `api/_lib/telegramTrack.test.mjs`.
+- Your order alerts are unaffected: they still go only to `TELEGRAM_CHAT_ID`.
+
+Going live: set `TELEGRAM_WEBHOOK_SECRET` in Vercel (Production), deploy, then
+register once with Telegram:
+`setWebhook` with `url=https://tiredroponline.com/api/webhooks/telegram` and
+`secret_token=<the same secret>`. To turn tracking off, call `deleteWebhook`.

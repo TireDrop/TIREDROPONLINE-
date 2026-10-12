@@ -4,7 +4,8 @@
   "trailingSlash": false,
   "rewrites": [
     { "source": "/tires/p/:sku", "destination": "/spa" },
-    { "source": "/api/geo", "destination": "/api/status?geo=1" }
+    { "source": "/api/geo", "destination": "/api/status?geo=1" },
+    { "source": "/api/webhooks/telegram", "destination": "/api/webhooks/shopify?src=telegram" }
   ],
   "crons": [{ "path": "/api/cron/atd-sweep", "schedule": "0 12 * * *" }],
   "functions": {

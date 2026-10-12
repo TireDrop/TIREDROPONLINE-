@@ -62,6 +62,7 @@ import { getConfig } from "../_lib/config.js";
 import { forwardOrder, handleOrderCancelled } from "../_lib/forwarder.js";
 import { installKind, markNeedsScheduling, restPayloadToNode } from "../_lib/booking.js";
 import { notifyPaidOrder, telegramConfig } from "../_lib/telegram.js";
+import { createTelegramWebhookHandler } from "../_lib/telegramWebhook.js";
 
 export const WEBHOOK_MAX_BYTES = 1024 * 1024;
 export const DEDUPE_MAX_ENTRIES = 2000;
@@ -301,4 +302,15 @@ export function createShopifyWebhookHandler({ env, deps = {}, waitUntil } = {}) 
   };
 }
 
-export const POST = createShopifyWebhookHandler();
+const shopifyPOST = createShopifyWebhookHandler();
+const telegramPOST = createTelegramWebhookHandler();
+
+/**
+ * One function, two senders: vercel.json rewrites /api/webhooks/telegram to
+ * ?src=telegram on this file (api/ is capped at 12 functions on the Hobby
+ * plan). Everything else is the Shopify webhook, unchanged.
+ */
+export async function POST(request) {
+  const src = new URL(request.url).searchParams.get("src");
+  return src === "telegram" ? telegramPOST(request) : shopifyPOST(request);
+}
