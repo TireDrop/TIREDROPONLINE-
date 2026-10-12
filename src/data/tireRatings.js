@@ -162,9 +162,3 @@ export function ratingsFor(tire) {
     isLightTruck,
   };
 }
-
-/** Convenience for the compare table: axis rows already resolved to values. */
-export const ratingRows = (tire) => {
-  const r = ratingsFor(tire);
-  return r ? RATING_AXES.map((a) => ({ ...a, value: r[a.key] })) : [];
-};

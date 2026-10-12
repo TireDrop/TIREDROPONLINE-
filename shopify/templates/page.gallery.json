@@ -19,7 +19,7 @@
         "video_badge": "Coming soon",
         "videos_note": "<strong>Want the short version now?</strong> Every topic above is written out in full in the tire care guides.",
         "videos_note_label": "Read the guides",
-        "tips_title": "Short reads that save tires",
+        "tips_title": "Short reads on tire care",
         "tips_lede": "The advice we give on the phone, written down so you can check it in your own driveway — wherever that driveway is.",
         "tip_link_label": "Read the tip",
         "cta_eyebrow": "Tires shipped. Or installed.",
@@ -34,7 +34,7 @@
         "tile_1": {
           "type": "tile",
           "settings": {
-            "caption": "Order out the door — 4x Continental, shipped to Georgia",
+            "caption": "Order out the door — 4x Continental tires",
             "detail": "Picked from the distributor closest to the customer, boxed and on its way without passing through a warehouse of ours.",
             "tone": "ink-graphite"
           }

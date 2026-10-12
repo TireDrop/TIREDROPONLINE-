@@ -173,24 +173,3 @@ export const FITMENT_YEAR_SPANS = Object.fromEntries(
     [Math.min(...gens.map((g) => g[0])), Math.max(...gens.map((g) => g[1]))],
   ]),
 );
-
-/**
- * The OE size split into the numbers the catalog filters on, or null.
- *
- * Every entry in the table is plain P-metric, so this parses without the
- * general size parser and stays cheap enough to call on every render.
- */
-export function oeSizeFor(make, model) {
-  const record = fitmentFor(make, model);
-  if (!record) return null;
-  const [size, bodyStyle] = record;
-  const m = /^(\d{3})\/(\d{2})R(\d{2})$/.exec(size);
-  if (!m) return null;
-  return {
-    size,
-    bodyStyle,
-    width: Number(m[1]),
-    aspect: Number(m[2]),
-    rimDiameter: Number(m[3]),
-  };
-}

@@ -854,3 +854,22 @@ test("auto reply in the empty-string shape reads like the nullable one", () => {
   assert.equal(blurry.reason, "blurry");
 });
 
+
+test("an unexpected throw inside the handler is a clean JSON 500, not an unhandled rejection", async () => {
+  const lines = [];
+  const handler = createScanTireSizeHandler({
+    env: KEY_ENV,
+    log: { info() {}, warn() {}, error: (...a) => lines.push(a.join(" ")) },
+  });
+  const res = mockRes();
+  const req = {
+    method: "POST",
+    get headers() {
+      throw new Error("secret internal detail");
+    },
+  };
+  await handler(req, res);
+  assert.equal(res.statusCode, 500);
+  assert.deepEqual(res.body, { error: "scanner_unavailable" });
+  assert.ok(lines.every((l) => !l.includes("secret internal detail")));
+});

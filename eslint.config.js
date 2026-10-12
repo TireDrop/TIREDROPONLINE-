@@ -18,7 +18,7 @@ export default [
   // vite.config.js.timestamp-*.mjs: Vite's short-lived bundle of its config; a
   // build running beside lint deletes it mid-read and crashed the lint gate.
   {
-    ignores: ["dist/**", "node_modules/**", ".scratch/**", "shopify/**", "vite.config.js.timestamp-*"],
+    ignores: ["dist/**", "node_modules/**", ".scratch/**", "shopify/**", ".claude/worktrees/**", "vite.config.js.timestamp-*"],
   },
   js.configs.recommended,
   {

@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     return send(
       res,
       503,
-      { error: `Tire search is misconfigured. ${config.atd.issues.join(" ")}` },
+      { error: "Tire search is temporarily unavailable. Please try again in a few minutes, or call the shop." },
       NO_STORE,
     );
   }

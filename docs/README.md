@@ -30,6 +30,7 @@ the code fits together is in the root [README](../README.md).
 - [installed-price-default.md](ops/installed-price-default.md): the switch that would start the installed price on for visitors in the three counties (off in production), the `?installed=local` preview flag, its GA4 events and measured layout shift.
 - [turn-on-the-forms.md](ops/turn-on-the-forms.md): runbook for switching the site's forms on and checking a lead reaches info@.
 - [spanish-pages.md](ops/spanish-pages.md): the two Spanish test pages, the `SPANISH_PAGES_INDEXABLE` switch (noindex until a native speaker approves), how to turn them on, and the reviewer's checklist.
+- [file-map.md](ops/file-map.md): "Where is X?" lookup: which file to change for each kind of task, which npm check proves it, where tests live, what is generated, and what needs Justin. Read it first when you need to find a file.
 
 ## content/: Learn and Blog
 
