@@ -12,6 +12,7 @@ header comment, and `shopify/assets/td-tiremath.js` names
 | --- | --- |
 | `generate-seo-files.mjs` | Writes `public/robots.txt` and `public/sitemap.xml` from the router and content. Runs at the start of every `vite build` (plugin in `vite.config.js`) and again from the prerender. `ALLOW_INDEXING` lives here. |
 | `prerender.mjs` | After `vite build`: renders every route to `dist/<route>.html`, plus `dist/404.html` and `dist/spa.html`. |
+| `build-chat-knowledge.mjs` | After the prerender: writes `api/_lib/chatKnowledge.generated.json` (committed), the chunks of public site text the chatbot answers from. Reads the indexable pages in `dist/` (their `<main>` only), plus business facts, the service price list and the page directory from the data files. Product pages and noindex pages are left out. Test: `npm run test:chat-kb`. |
 | `vpic-snapshot.mjs` | Last: writes `dist/data/vpic-models.json`, every listed make's models across all years from NHTSA vPIC, the vehicle finders' fallback when neither `/api/vehicles` nor vPIC answers. One probe request first: with no network (this sandbox) it writes nothing and never fails the build. `VPIC_SNAPSHOT=off` skips it; `VPIC_BASE` points it at another vPIC. |
 
 ## Gates (run before every push to `main`)
@@ -19,6 +20,7 @@ header comment, and `shopify/assets/td-tiremath.js` names
 | Script | npm script | What it checks |
 | --- | --- | --- |
 | `prerender-check.mjs` | `check:prerender` | The built site in Chromium: per-page head tags with JavaScript off, hydration without mismatch, client-side navigation. |
+| `chat-kb-check.mjs` | `check:chat-kb` | The committed chatbot knowledge file is not empty, is under 1.5 MB, matches the sources it was built from (hash, no build needed) and has no chunk under a noindex route or a catalog product page. Stale: run `npm run build` and commit the file. |
 | `schema-check.mjs` | `check:schema` | The JSON-LD in every built page: parses, every `@id` resolves, Google's required properties per type, one BreadcrumbList matching the visible trail, no ratings or reviews, the shop's `geo` pin once set. No browser. |
 | `forms-keep-values-check.mjs` | `check:forms` | Every form keeps and sends a value however it was entered (typing, automation, autofill), at 390px and 1440px, including the /tires size-quote card. Each check has its own browser context, so they run `FORMS_CONCURRENCY` at a time (default 4; `1` is the old serial run) and print in declaration order, with the five slowest named at the end. `FORMS_SHARD=k/n` runs every n-th check from the k-th (e.g. `1/3`, `2/3`, `3/3` split the same list across three jobs); `FORMS_ONLY=<regex>` picks checks by name. |
 | `newsletter-signup-check.mjs` | `check:newsletter` | The newsletter is only the footer form: no pop-up, validation, success and failure messages. |
