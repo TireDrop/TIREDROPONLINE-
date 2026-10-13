@@ -155,7 +155,8 @@ test("stand-in: no key means no model call, an excerpt and sources", async () =>
   assert.equal(f.calls.length, 0);
   assert.equal(r.body.mode, "standin");
   assert.equal(r.body.handoff, false);
-  assert.match(r.body.reply, /48 contiguous states/);
+  // The reply is the sentence that answers the question, not the chunk's opening lines.
+  assert.match(r.body.reply, /Free shipping applies to every order/);
   assert.equal(r.body.sources[0].path, "/shipping");
   assert.ok(r.body.sources.length <= 3);
 });
@@ -456,4 +457,12 @@ test("vercel.json: /api/chat is rewritten to the status function and never cache
   assert.ok(vercel.rewrites.some((r) => r.source === "/api/chat" && r.destination === "/api/status?chat=1"));
   const rule = vercel.headers.find((h) => h.source === "/api/chat");
   assert.ok(rule?.headers.some((h) => h.key === "Cache-Control" && h.value === "no-store"));
+});
+
+test("stand-in: an off-topic question hands off instead of quoting a loose match", async () => {
+  const h = createChatHandler({ env: {}, knowledge: KB });
+  const r = await post(h, ask("What is the capital of France?"));
+  assert.equal(r.statusCode, 200);
+  assert.equal(r.body.handoff, true);
+  assert.deepEqual(r.body.sources, []);
 });

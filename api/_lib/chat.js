@@ -137,6 +137,7 @@ const STOP = new Set(
   (
     "a an and are as at be but by can do does for from has have how i if in is it its me my of on or our so " +
     "than that the their them then there these they this to us was we what when where which who will with you your " +
+    "much many mean means get got need want tell about please any some offer offers " +
     "el la los las un una y o de del en es por para que con mi su se lo al como"
   ).split(" "),
 );
@@ -280,6 +281,40 @@ export function excerpt(text, maxChars = 420) {
     count += 1;
   }
   return (out || flat.slice(0, maxChars)).trim();
+}
+
+
+/**
+ * Stand-in answer: the one or two sentences, across the best chunks, that
+ * mention the most of what the visitor asked. Nothing is returned (so the
+ * caller hands off) unless a sentence covers most of the question's words,
+ * which keeps an off-topic question from getting a loosely related excerpt.
+ */
+export function answerSentences(hits, query, { maxChars = 420 } = {}) {
+  const terms = [...new Set(tokenize(query))];
+  if (!terms.length) return "";
+  const need = terms.length <= 2 ? terms.length : Math.ceil(terms.length * 0.5);
+  let top = null;
+  hits.forEach((hit, rank) => {
+    const flat = String(hit.chunk.text ?? "").replace(/\s+/g, " ").trim();
+    const sentences = flat.match(/[^.!?]+[.!?]+(?=\s|$)/g) ?? [];
+    sentences.forEach((raw, i) => {
+      const sentence = raw.trim();
+      // Page chrome (menus, headings run together) has no sentence shape.
+      if (sentence.length < 25 || sentence.length > 320 || sentence.includes(" | ")) return;
+      if ((sentence.match(/\b[A-Z][a-z]+/g) ?? []).length > sentence.split(/\s+/).length * 0.35) return;
+      const words = new Set(tokenize(sentence));
+      const covered = terms.filter((t) => words.has(t)).length;
+      if (covered < need) return;
+      const score = covered * 10 - rank * 2 - i * 0.1;
+      if (!top || score > top.score) top = { score, sentence, sentences, i, rank };
+    });
+  });
+  if (!top) return "";
+  let out = top.sentence;
+  const next = top.sentences[top.i + 1]?.trim();
+  if (next && next.length >= 25 && (out + " " + next).length <= maxChars) out += " " + next;
+  return out;
 }
 
 // ---- Model ---------------------------------------------------------------------------
@@ -517,7 +552,7 @@ export function createChatHandler({
         console.log("[chat] standin handoff", messages.length);
         return handoff("standin");
       }
-      const reply = excerpt(best.chunk.text);
+      const reply = answerSentences(hits.slice(0, 3), lastUser);
       if (!reply || breaksHouseRules(reply)) return handoff("standin");
       console.log("[chat] standin answer", messages.length);
       return send(res, 200, { reply, sources, handoff: false, mode: "standin" }, NO_STORE);
