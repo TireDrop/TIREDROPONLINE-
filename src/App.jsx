@@ -5,6 +5,7 @@ import Header from "./components/layout/Header.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import MobileCallBar from "./components/layout/MobileCallBar.jsx";
 import CompareTray from "./components/shop/CompareTray.jsx";
+import ChatWidget from "./components/chat/ChatWidget.jsx";
 import { InPageAnchors, ScrollToTop } from "./components/ui/index.jsx";
 import { trackPageView } from "./lib/analytics.js";
 import { lazyPage } from "./lib/lazyPage.js";
@@ -382,6 +383,7 @@ export default function App() {
       />
       <CompareTray />
       <MobileCallBar />
+      <ChatWidget />
     </div>
   );
 }

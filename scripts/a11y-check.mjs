@@ -14,7 +14,11 @@
  * behind the phone action bar, and the desktop nav dropdowns close once focus
  * moves past them or on Escape. At 390 it also measures every link and button
  * in the phone header and the open menu drawer (tapTargetChecks below): each
- * must be at least 44x44 px, and the page must not scroll sideways.
+ * must be at least 44x44 px, and the page must not scroll sideways. The chat
+ * widget (chatChecks below) is opened at both widths against a mocked
+ * POST /api/chat: focus moves into it, Tab stays inside, a reply with a source
+ * link and the Call / Contact buttons renders, axe finds nothing serious, and
+ * Escape closes it with focus back on its button.
  *
  * Starts `vite preview` on A11Y_PORT (default 4320), or tests A11Y_BASE when
  * that is set to an already running server. Every /api call is mocked and
@@ -182,6 +186,18 @@ async function newPage(width, reducedMotion = "reduce") {
   await page.route("**/api/tires**", (route) =>
     route.fulfill({ status: 404, body: "" }),
   );
+  // The chat widget's endpoint (api/_lib/chat.js): a reply with a source and
+  // the handoff buttons, so the open panel is scanned in its fullest state.
+  await page.route("**/api/chat", (route) =>
+    route.fulfill({
+      json: {
+        reply: "Shipping is free to the 48 contiguous states and DC.\n\n- No order minimum\n- Installation is South Florida only",
+        sources: [{ title: "Shipping", path: "/shipping" }],
+        handoff: true,
+        mode: "live",
+      },
+    }),
+  );
   return { context, page };
 }
 
@@ -295,6 +311,59 @@ async function keyboardChecks(page, width) {
       problems.push(`nav dropdowns @${width}: Escape left ${esc.menus} open (focus aria-expanded=${esc.expanded})`);
     else console.log(`ok   nav dropdowns @${width}: close when focus moves past them and on Escape`);
   }
+  return problems;
+}
+
+/**
+ * The chat widget, open: focus lands in the message box, Tab and Shift+Tab stay
+ * inside the dialog, a chip sends a message and the reply (source link, Call
+ * and Contact buttons) arrives, axe finds nothing serious, and Escape closes it
+ * with focus back on the launcher. Also that it is gone on /cart. Returns the
+ * failures.
+ */
+async function chatChecks(page, width) {
+  const problems = [];
+  await page.goto(BASE + "/contact", { waitUntil: "load" });
+  await page.waitForFunction(isMounted);
+  await page.waitForLoadState("networkidle");
+  const launcher = page.locator('button[aria-haspopup="dialog"][aria-label^="Ask TireDrop"]');
+  await launcher.click();
+  const dialog = page.locator('[role="dialog"][aria-label], [role="dialog"][aria-labelledby]').filter({ hasText: "AI assistant" });
+  await dialog.waitFor();
+  const inField = await page.evaluate(() => document.activeElement?.tagName === "TEXTAREA");
+  if (!inField) problems.push(`chat @${width}: focus did not move to the message box on open`);
+  await page.getByRole("button", { name: "Is shipping free?" }).click();
+  await dialog.getByRole("link", { name: "Shipping" }).waitFor();
+  await dialog.getByRole("link", { name: /^Call / }).waitFor();
+  let escaped = "";
+  for (const key of [...Array(30).fill("Tab"), ...Array(12).fill("Shift+Tab")]) {
+    await page.keyboard.press(key);
+    const where = await page.evaluate(
+      () =>
+        document.activeElement?.closest('[role="dialog"]')
+          ? ""
+          : (document.activeElement?.textContent || document.activeElement?.tagName || "").trim().slice(0, 40),
+    );
+    if (where && !escaped) escaped = `${key} reached "${where}"`;
+  }
+  if (escaped) problems.push(`chat @${width}: focus left the open dialog (${escaped})`);
+  if (!(await page.evaluate(() => Boolean(window.axe)))) await page.addScriptTag({ content: AXE });
+  const result = await page.evaluate(() =>
+    window.axe.run(document, {
+      runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "best-practice"] },
+    }),
+  );
+  for (const v of result.violations.filter((x) => ["serious", "critical"].includes(x.impact)))
+    problems.push(`chat open @${width}: ${v.id} [${v.impact}] ${v.nodes.slice(0, 3).map((n) => n.target.join(" ")).join(" | ")}`);
+  await page.keyboard.press("Escape");
+  const closed = (await dialog.count()) === 0;
+  const back = await launcher.evaluate((el) => el === document.activeElement);
+  if (!closed || !back)
+    problems.push(`chat @${width}: Escape ${closed ? "closed it but focus did not return to the launcher" : "did not close it"}`);
+  await page.goto(BASE + "/cart", { waitUntil: "load" });
+  await page.waitForFunction(isMounted);
+  if ((await launcher.count()) !== 0) problems.push(`chat @${width}: the launcher shows on /cart`);
+  if (!problems.length) console.log(`ok   chat widget @${width}: focus in, Tab stays inside, reply renders, axe clean, Escape returns focus, hidden on /cart`);
   return problems;
 }
 
@@ -444,6 +513,10 @@ try {
     }
 
     for (const problem of await keyboardChecks(page, width)) {
+      failures += 1;
+      console.log(`FAIL ${problem}`);
+    }
+    for (const problem of await chatChecks(page, width)) {
       failures += 1;
       console.log(`FAIL ${problem}`);
     }

@@ -97,7 +97,7 @@ export function trackPageView(key, path = key) {
 //
 // GA4's recommended ecommerce and lead events, plus five custom ones
 // (order_request, install_booking, tool_use, search_suggestion,
-// installed_price_toggle). Every event
+// installed_price_toggle) and three for the chat widget (below). Every event
 // goes through trackEvent(), which keeps only the parameter names listed below and drops
 // any value that looks like an email address or a phone number, so nothing
 // a visitor typed about themselves (name, email, phone, address, notes,
@@ -125,6 +125,10 @@ export function trackPageView(key, path = key) {
 //   tool_use           first touch of a demo     tool_id (once per page view)
 //   installed_price_toggle  "Show installed      toggle_state ("on" / "off"),
 //                      price" pressed            placement ("results" / "product")
+//   chat_open          chat widget opened        (none)
+//   chat_message       a chat message sent       (none; the text is never sent to GA)
+//   chat_handoff_click Call or Contact button    method ("call" / "contact")
+//                      under a chat reply
 //
 // `purchase` is NOT sent. Checkout is request-only today: no money changes
 // hands on this site. When online payment is switched on, the purchase is

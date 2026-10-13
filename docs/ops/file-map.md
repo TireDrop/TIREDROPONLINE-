@@ -23,6 +23,7 @@ SEO file headers and `vite.config.js` all name current paths.
 | Fitment and vehicles (year/make/model) | `src/data/fitment.js`, `fitmentCheck.js`, `vehicles.js`, `vehicleList.js`, `vin.js`; UI `src/components/shop/Fitment.jsx`, `VehicleSelect.jsx`, `ModelCombobox.jsx`; state `src/context/VehicleContext.jsx`; server `api/vehicles.js`, `api/_lib/vehicles.js`, `api/_lib/vpic.js`, `api/_lib/fitmentAttrs.js` |
 | The photo scanner | `src/data/scanner.js`, `src/data/scanHandoff.js`, `src/components/shop/ScanTireButton.jsx`, `src/pages/tools/TireSizeFinderPage.jsx`; server `api/scan-tire-size.js`, `api/_lib/scanTireSize.js`; doc `docs/integrations/tire-size-finder.md` |
 | Forms and leads (contact, quote, schedule) | `src/data/forms.js`, `formGuard.js`, `src/components/shop/SizeQuoteForm.jsx`; server `api/forms.js`, `api/_lib/leads.js`, `spam.js`, `validate.js`, `ratelimit.js`; doc `docs/integrations/website-leads.md` |
+| Site chatbot widget (floating button, panel, client) | `src/components/chat/ChatWidget.jsx`, `chatClient.js` (+ `chatClient.test.mjs`); mounted in `src/App.jsx`; server `api/_lib/chat.js` |
 | Newsletter | `src/components/layout/NewsletterSignup.jsx`, `api/newsletter.js`, `api/_lib/newsletter.js` |
 | Install booking, scheduling | `src/data/booking.js`, `src/pages/services/SchedulePage.jsx`, `api/book-install.js`, `api/_lib/booking.js`, `installBooking.js`, `tireguru.js` |
 | Cart, checkout, orders | `src/context/CartContext.jsx`, `src/pages/shop/CartPage.jsx`, `CheckoutPage.jsx`; server `api/checkout.js`, `api/_lib/orders.js`, `api/_lib/shopify.js`; doc `docs/integrations/shopify-checkout.md` |
@@ -90,6 +91,7 @@ Tests sit next to the source they cover, as `*.test.mjs`, and run with
 | `src/content/*.test.mjs` | `npm run test:content` |
 | `src/sourcesRule.test.mjs` | `npm run test:sources` |
 | `src/components/demos/*.test.mjs` | no npm script; run `node --test "src/components/demos/*.test.mjs"` |
+| `src/components/chat/*.test.mjs` | no npm script; run `node --test "src/components/chat/*.test.mjs"` |
 
 Browser checks are scripts, not unit tests: `scripts/*-check.mjs`.
 
