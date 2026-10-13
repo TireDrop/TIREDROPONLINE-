@@ -29,6 +29,7 @@
 import { getConfig } from "./_lib/config.js";
 import { getQuery, methodNotAllowed, send } from "./_lib/http.js";
 import { geoHandler } from "./_lib/geo.js";
+import { chatHandler } from "./_lib/chat.js";
 import { ENDPOINTS as ATD_ENDPOINTS } from "./_lib/atd.js";
 
 /** Status body; `endpoints` is injectable for tests. */
@@ -64,6 +65,9 @@ export function statusBody(config, endpoints = ATD_ENDPOINTS) {
 }
 
 export default function handler(req, res) {
+  // /api/chat is rewritten here too (vercel.json); chatHandler is POST-only and
+  // answers every other method with its own 405.
+  if (getQuery(req).chat === "1") return chatHandler(req, res);
   if (req.method !== "GET" && req.method !== "HEAD") {
     return methodNotAllowed(res, "GET");
   }
