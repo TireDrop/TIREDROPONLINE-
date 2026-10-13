@@ -25,6 +25,10 @@
 // `scanner` is "on" when ANTHROPIC_API_KEY is set, so the Tire Size Finder
 // (/tire-size-finder) can read a photo; "off" shows "Photo scan coming soon"
 // there, and typed VIN and size entry keep working.
+//
+// `chat` is "on" under the same condition (ANTHROPIC_API_KEY set). The
+// "Ask TireDrop" button only renders when it is "on": without the key the
+// bot could only match sentences from the site, so it stays hidden.
 
 import { getConfig } from "./_lib/config.js";
 import { getQuery, methodNotAllowed, send } from "./_lib/http.js";
@@ -58,6 +62,7 @@ export function statusBody(config, endpoints = ATD_ENDPOINTS) {
     webhooks: config.webhooks.mode,
     booking: config.booking.mode,
     scanner: config.scanner.mode,
+    chat: config.scanner.mode,
     version: config.version,
   };
   if (issues.length) body.issues = issues;

@@ -4,6 +4,8 @@
 // filter, the tool loop, the daily cap, the timeout, and GET status unchanged.
 // The knowledge file is injected: these tests do not read the built one.
 
+import { statusBody } from "../status.js";
+import { getConfig } from "./config.js";
 import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -472,4 +474,10 @@ test("answers say which knowledge they used, so a missing file is visible", asyn
   const r = await post(h, ask("Is shipping free?"));
   assert.equal(r.headers["x-chat-kb-chunks"], String(KB.chunks.length));
   assert.equal(r.headers["x-chat-kb-built"], "2026-10-13T00:00:00.000Z");
+});
+
+test("status reports chat on only when the Anthropic key is set (the button hides otherwise)", () => {
+  assert.equal(statusBody(getConfig({})).chat, "off");
+  assert.equal(statusBody(getConfig({ ANTHROPIC_API_KEY: "sk-test" })).chat, "on");
+  assert.ok(!JSON.stringify(statusBody(getConfig({ ANTHROPIC_API_KEY: "sk-test" }))).includes("sk-test"), "never the key");
 });

@@ -5,6 +5,7 @@ import { Loader2, MessageCircle, Phone, Send, X } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
 import { isProductPath } from "../../data/mobileBar.js";
 import { trackEvent } from "../../lib/analytics.js";
+import { useApiStatus } from "../../data/useApi.js";
 import { pageLanguage } from "../../lib/translate.js";
 import { trapTab } from "../../lib/trapFocus.js";
 import {
@@ -148,6 +149,7 @@ function HandoffButtons({ t, onClick }) {
 
 export default function ChatWidget() {
   const { pathname } = useLocation();
+  const status = useApiStatus();
   const t = COPY[pageLanguage(pathname) === "es" ? "es" : "en"];
   const titleId = useId();
   const counterId = useId();
@@ -221,7 +223,8 @@ export default function ChatWidget() {
     if (hidden) setOpen(false);
   }, [hidden]);
 
-  if (hidden) return null;
+  // Only once the server says the AI is connected (ANTHROPIC_API_KEY set).
+  if (hidden || status?.chat !== "on") return null;
 
   const openPanel = () => {
     setOpen(true);

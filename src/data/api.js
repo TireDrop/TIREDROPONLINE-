@@ -137,6 +137,7 @@ export const OFFLINE_STATUS = Object.freeze({
   newsletter: "off",
   forms: "off",
   scanner: "off",
+  chat: "off",
   version: null,
   offline: true,
 });
@@ -148,7 +149,7 @@ let statusPromise = null;
 /** False only when this host definitely has no API. */
 const apiPresent = () => getStatus().then((s) => !s.absent);
 
-/** `{ atd, shopify, checkout, newsletter, forms, scanner, version }`. Never throws; cached per page load. */
+/** `{ atd, shopify, checkout, newsletter, forms, scanner, chat, version }`. Never throws; cached per page load. */
 export function getStatus() {
   if (!statusPromise) {
     statusPromise = request("/status", { timeout: TIMEOUT_MS.status })
@@ -162,6 +163,8 @@ export function getStatus() {
         forms: s.forms === "on" ? "on" : "off",
         // Only an explicit "on" offers photo scans in the Tire Size Finder.
         scanner: s.scanner === "on" ? "on" : "off",
+        // Only an explicit "on" shows the Ask TireDrop chat button.
+        chat: s.chat === "on" ? "on" : "off",
         version: s.version ?? null,
         offline: false,
       }))

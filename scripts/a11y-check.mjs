@@ -179,6 +179,7 @@ async function newPage(width, reducedMotion = "reduce") {
         checkout: "request",
         newsletter: "on",
         forms: "on",
+        chat: "on",
         version: "test",
       },
     }),
