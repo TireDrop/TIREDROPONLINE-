@@ -538,10 +538,16 @@ export function createChatHandler({
     const lastUser = messages[messages.length - 1].content;
 
     const kb = knowledge ?? loadKnowledge();
+    // Which knowledge this answer used, so a deploy that lost the file is visible.
+    const KB_HEADERS = {
+      ...NO_STORE,
+      "X-Chat-Kb-Chunks": String(kb.chunks.length),
+      "X-Chat-Kb-Built": String(kb.built ?? "none"),
+    };
     const hits = retrieve(kb, queryFor(messages), { page });
     const sources = sourcesFrom(hits);
     const handoff = (mode) =>
-      send(res, 200, { reply: handoffReply(lastUser), sources: [], handoff: true, mode }, NO_STORE);
+      send(res, 200, { reply: handoffReply(lastUser), sources: [], handoff: true, mode }, KB_HEADERS);
 
     const apiKey = String(environment.ANTHROPIC_API_KEY ?? "").trim();
 
@@ -555,7 +561,7 @@ export function createChatHandler({
       const reply = answerSentences(hits.slice(0, 3), lastUser);
       if (!reply || breaksHouseRules(reply)) return handoff("standin");
       console.log("[chat] standin answer", messages.length);
-      return send(res, 200, { reply, sources, handoff: false, mode: "standin" }, NO_STORE);
+      return send(res, 200, { reply, sources, handoff: false, mode: "standin" }, KB_HEADERS);
     }
 
     // ---- Live ----
@@ -600,7 +606,7 @@ export function createChatHandler({
       res,
       200,
       { reply: text, sources: wantsHandoff ? [] : outSources, handoff: wantsHandoff, mode: "live" },
-      NO_STORE,
+      KB_HEADERS,
     );
   };
 }

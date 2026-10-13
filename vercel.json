@@ -13,7 +13,10 @@
     "api/cron/atd-sweep.js": { "maxDuration": 60 },
     "api/webhooks/shopify.js": { "maxDuration": 60 },
     "api/scan-tire-size.js": { "maxDuration": 60 },
-    "api/status.js": { "maxDuration": 30 }
+    "api/status.js": {
+      "maxDuration": 30,
+      "includeFiles": "api/_lib/chatKnowledge.generated.json"
+    }
   },
   "headers": [
     {

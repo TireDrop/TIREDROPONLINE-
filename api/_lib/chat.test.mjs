@@ -466,3 +466,10 @@ test("stand-in: an off-topic question hands off instead of quoting a loose match
   assert.equal(r.body.handoff, true);
   assert.deepEqual(r.body.sources, []);
 });
+
+test("answers say which knowledge they used, so a missing file is visible", async () => {
+  const h = createChatHandler({ env: {}, knowledge: { built: "2026-10-13T00:00:00.000Z", chunks: KB.chunks } });
+  const r = await post(h, ask("Is shipping free?"));
+  assert.equal(r.headers["x-chat-kb-chunks"], String(KB.chunks.length));
+  assert.equal(r.headers["x-chat-kb-built"], "2026-10-13T00:00:00.000Z");
+});
