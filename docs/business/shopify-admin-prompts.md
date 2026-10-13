@@ -1460,3 +1460,17 @@ HARD RULES:
 one with 4 × the front size only → tag `fitment-check`, fulfillment on hold,
 one email. The `size-scanned` tag shows on orders whose size came from the
 photo scanner (Orders → filter by tag to see scanner-driven sales).
+
+## 27. Site chatbot: add the Anthropic API key to Vercel
+
+Why: the "Ask TireDrop" chat bubble needs an Anthropic API key to answer in full
+sentences. Without it the bot still runs, but only matches sentences from the site.
+
+```
+Do this in my browser, in order, and stop and tell me if anything looks different:
+1. Open console.anthropic.com, sign in (or create an account), go to Billing and add a small prepaid balance, for example $10, and turn auto-reload OFF. Then go to API keys, click Create key, name it "tiredrop-chat", and copy the key. Do not paste the key anywhere except step 2.
+2. Open vercel.com, the TireDrop project (tiredroponline-), Settings, Environment Variables. Add ANTHROPIC_API_KEY with the key, for Production and Preview, and mark it Sensitive. Add CHAT_DAILY_CAP = 1500 for Production and Preview.
+3. Open the project's Deployments tab and redeploy the latest deployment so the variable takes effect.
+4. Tell me when it is done. Do not show me the key.
+```
+
