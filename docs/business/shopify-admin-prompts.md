@@ -1493,3 +1493,29 @@ Do this in my browser. Stop and tell me if anything looks different. Do not chan
 6. Open the Shipping policy (Settings → Policies) and read the sentence about cost: it must say shipping is free to the 48 contiguous states and DC. Tell me if it differs. Do not edit it.
 7. Report back every rate and zone as they are now, and what you changed.
 ```
+
+## 29. Brands page: collect HD logos (SVG or large PNG)
+
+Why: the /brands page uses logos cut out of a small slide, so they are soft on big
+phones. This collects each brand's own high-resolution logo. Easier route: ask the
+distributor rep for the brand logo pack ("Digital Assets" in their marketing support);
+if that arrives, skip this and attach the pack instead.
+
+```
+Do this in my browser, one brand at a time, and tell me anything that looks different or any brand you could not finish. Do not buy, sign up for, or log in to anything. Do not use stock-logo or "free logo" websites.
+
+Goal: for each brand below, get the brand's OWN official logo from the brand's official website (look for Press, Media, Brand Assets, Brand Guidelines, Newsroom, Downloads, or Logo in the site menu or footer; or search "<brand> brand assets logo download" and open only the brand's own domain). Prefer SVG. If there is no SVG, a PNG at least 800 pixels wide with a transparent background. Take the full-colour, horizontal logo on a transparent or white background. Do not edit, recolour or crop the logo, and do not accept a result that is small, blurry or clearly an old version.
+
+Save each file into a folder called tiredrop-brand-logos, named exactly:
+- tire-<brand>.svg (or .png) for tire brands, wheel-<brand>.svg (or .png) for wheel brands
+- all lowercase, spaces become hyphens, drop accents (König becomes konig). Examples: tire-continental.svg, tire-toyo-tires.svg, wheel-gear-off-road.png, wheel-konig.svg
+
+Passenger and light truck tire brands (16): Continental, Dunlop, Toyo Tires, Pirelli, Hercules Tires, General Tire, Falken, Nitto, Hankook, Ironman, Nexen Tire, Nokian Tyres, Kumho Tire, Laufenn, GT Radial, Vogue Tyres
+Commercial-only tire brands (7): Dynatrac Tires, Double Coin, Firestone, Carlstar, Hi-Run, Regency, ITP   (name these tire-<brand> too)
+Wheel brands (17): TIS, TIS Motorsports, Gear Off Road, Edge Street, Edge Offroad, Motiv Wheels, Ultra Motorsports, DTS, Pacer, König, Maxx1M, Mamba Off-Road, OE Performance, Focal, Platinum Wheels, Cragar, Boyd Coddington
+
+If a brand's site says the logo needs dealer or partner login, or prohibits use without approval, do not work around it: write that brand and the page address on a list and move on.
+
+When done, give me: (1) a table with brand, file name, format, pixel size, and the page address you got it from; (2) the list of brands you could not get; (3) a reminder that I need to zip the tiredrop-brand-logos folder and attach it in the Claude chat.
+```
+
