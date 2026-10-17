@@ -22,6 +22,7 @@ import {
   DEFAULT_MODEL,
   tireCards,
   systemPrompt,
+  serviceFacts,
   lastWholeSentence,
   pinnedSources,
 } from "./chat.js";
@@ -586,4 +587,10 @@ test("system prompt: grounded install facts, financing page, cards, off-topic ma
   assert.match(p, /call lookup_tires first/);
   assert.match(p, /\[\[OFFTOPIC\]\]/);
   assert.match(p, /from \$25 per tire/);
+});
+
+test("system prompt always carries the service price list, even with no retrieval hits", () => {
+  const p = systemPrompt({ page: null, hits: [] });
+  assert.match(p, /Tire Installation \(shop or mobile van\): from \$25 per tire/);
+  assert.match(serviceFacts(), /Tire Balancing/);
 });
