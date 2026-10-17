@@ -960,7 +960,7 @@ const FAQ = [
   },
   {
     q: "Can I mix tire sizes front and rear?",
-    a: "Some cars leave the factory staggered, with a wider tire on the rear — that is fine, because it is the design. Mixing sizes that were not designed to be mixed is not. Never mix sizes across one axle. On an all-wheel-drive car, even small differences in rolling circumference between axles make the centre differential or coupling work continuously, and that gets expensive. Replace in pairs across an axle at minimum, and all four on an all-wheel-drive car.",
+    a: "Some cars leave the factory staggered, with a wider tire on the rear, and that is by design. Mixing sizes that were not designed to be mixed is not. Never mix sizes across one axle. On an all-wheel-drive car, even small differences in rolling circumference between axles make the centre differential or coupling work continuously, and that gets expensive. Replace in pairs across an axle at minimum, and all four on an all-wheel-drive car.",
   },
   {
     q: "What does plus-sizing do?",
