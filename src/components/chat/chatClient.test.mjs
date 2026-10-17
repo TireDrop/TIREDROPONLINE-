@@ -10,6 +10,7 @@ import {
   ChatError,
   MAX_CHARS,
   MAX_MESSAGES,
+  normalizeTires,
   STORAGE_KEY,
   buildRequestMessages,
   clip,
@@ -74,7 +75,7 @@ test("sendChat posts the wire format and returns the reply", async () => {
   assert.equal(seen.url, "/api/chat");
   assert.equal(seen.init.method, "POST");
   assert.deepEqual(JSON.parse(seen.init.body), { messages: [{ role: "user", content: "Is shipping free?" }], page: "/tires" });
-  assert.deepEqual(out, { reply: "Yes.", sources: [{ title: "Shipping", path: "/shipping" }], handoff: false, mode: "live" });
+  assert.deepEqual(out, { reply: "Yes.", sources: [{ title: "Shipping", path: "/shipping" }], tires: [], handoff: false, mode: "live" });
 });
 
 test("sendChat maps failures to ChatError", async () => {
@@ -135,4 +136,27 @@ test("history round-trips and survives blocked or corrupt storage", () => {
   assert.deepEqual(loadHistory(throwing), []);
   assert.doesNotThrow(() => saveHistory(h, throwing));
   assert.deepEqual(loadHistory(null), []);
+});
+
+test("normalizeTires: real paths only, max 3, price only as a number, image only https", () => {
+  const good = { brand: "Continental", model: "VikingContact 7", size: "225/45R17", loadIndex: "94", speedRating: "T", accent: "#E03A1E", href: "/tires/continental-vikingcontact-7-225-45r17" };
+  const out = normalizeTires([
+    good,
+    { ...good, href: "/tires/a", price: 142.5, inStock: true, image: "https://cdn.example/x.jpg" },
+    { ...good, href: "//evil.example/x" },
+    { ...good, href: "https://evil.example/x" },
+    { ...good, href: "/tires/b", price: "free", image: "http://insecure/x.jpg", accent: "red" },
+    { ...good, href: "/tires/c" },
+    { ...good, href: "/tires/d" },
+    { brand: "", model: "x", size: "y", href: "/tires/e" },
+  ]);
+  assert.equal(out.length, 3);
+  assert.equal(out[0].price, null);
+  assert.equal(out[1].price, 142.5);
+  assert.equal(out[1].inStock, true);
+  assert.equal(out[1].image, "https://cdn.example/x.jpg");
+  assert.equal(out[2].price, null);
+  assert.equal(out[2].image, null);
+  assert.equal(out[2].accent, null);
+  assert.deepEqual(normalizeTires(undefined), []);
 });
