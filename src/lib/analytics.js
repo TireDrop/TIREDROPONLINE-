@@ -28,6 +28,8 @@
 // Privacy §§3, 4 and 6 describe what Google Analytics receives; this adds no
 // new data (page title, URL and path are what gtag's own page views carry).
 
+import { installClickTracking } from "./clickTracking.js";
+
 const PLACEHOLDER_TITLE = /^Loading\b/;
 const MAX_WAIT_MS = 5000;
 
@@ -95,9 +97,11 @@ export function trackPageView(key, path = key) {
 /*  Conversion events                                                  */
 /* ------------------------------------------------------------------ */
 //
-// GA4's recommended ecommerce and lead events, plus five custom ones
+// GA4's recommended ecommerce and lead events, plus custom ones
 // (order_request, install_booking, tool_use, search_suggestion,
-// installed_price_toggle) and three for the chat widget (below). Every event
+// installed_price_toggle, newsletter_signup, scan_tap, the three quiz events,
+// phone_click and install_cta_click) and three for the chat widget (below).
+// Every event
 // goes through trackEvent(), which keeps only the parameter names listed below and drops
 // any value that looks like an email address or a phone number, so nothing
 // a visitor typed about themselves (name, email, phone, address, notes,
@@ -111,9 +115,15 @@ export function trackPageView(key, path = key) {
 //   begin_checkout     /checkout with a cart     items, value, currency
 //   add_shipping_info  checkout delivery step    shipping_tier, items, value
 //   order_request      request-only order sent   value (incl. install), shipping_tier, items
-//   generate_lead      a form delivered          form_name
+//   generate_lead      a form delivered          form_name (contact, booking,
+//                      (NOT the newsletter)      fleet-quote, financing, size-quote)
+//   newsletter_signup  footer / newsletter form  placement (the form's source, "footer")
+//                      subscribed; kept apart from generate_lead so a mailing-list
+//                      email never counts as a sales lead
 //   install_booking    /track booking panel      install_type, method
-//   search             tire/wheel finder         search_term (size or Y/M/M), search_type
+//   search             tire/wheel finder         search_term (size or Y/M/M), search_type,
+//                                                placement ("home_hero", "tires",
+//                                                "wheels"; from the page the form is on)
 //                      header search submit,     search_term (as typed), search_type "site"
 //                      "See all results"
 //   view_search_results /tires with a vehicle  search_type, search_term, results (tires
@@ -125,6 +135,24 @@ export function trackPageView(key, path = key) {
 //   tool_use           first touch of a demo     tool_id (once per page view)
 //   installed_price_toggle  "Show installed      toggle_state ("on" / "off"),
 //                      price" pressed            placement ("results" / "product")
+//   scan_tap           "Scan door sticker,       placement ("home_hero", "tires", ...,
+//                      tire or VIN" tapped       from the section / "page"), method
+//                                                ("camera" opens the phone camera,
+//                                                "finder" goes to the Tire Size Finder)
+//   quiz_start         /find-my-tires, step 1    (none) once per page view
+//                      (the vehicle / size) done
+//   quiz_complete      /find-my-tires result     (none) once per result address
+//                      shortlist shown
+//   quiz_result_click  link clicked on the       method ("product" a tire page,
+//                      quiz shortlist            "all_tires" the /tires list)
+//   phone_click        any tel: link             placement: "header", "footer",
+//                      (document listener,       "mobile_bar" (the phone action bar),
+//                      src/lib/clickTracking.js) "home_<section>" (home page section
+//                                                id), "dialog" (chat panel), "page"
+//   install_cta_click  a link to /install,       placement ("home_<section>"),
+//                      /mobile-service or        install_type ("shop", "mobile",
+//                      /schedule inside a home   "schedule")
+//                      page section (same listener)
 //   chat_open          chat widget opened        (none)
 //   chat_message       a chat message sent       (none; the text is never sent to GA)
 //   chat_handoff_click Call or Contact button    method ("call" / "contact")
@@ -293,3 +321,7 @@ export function trackInstalledPriceDefault(placement) {
     trackEvent("installed_price_default", { default_source: "local", placement }),
   );
 }
+
+// phone_click and install_cta_click come from one document-level listener, so
+// no component carries tracking code for them. Client only: it needs a document.
+installClickTracking(trackEvent);

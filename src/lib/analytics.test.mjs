@@ -157,3 +157,18 @@ test("tool_use fires once per page view, again on a new page", () => {
   oncePerPage("k", () => n++);
   assert.equal(n, 1);
 });
+
+test("placement, install_type and method pass; a typed search_term shaped like a phone does not", () => {
+  trackEvent("search", { search_type: "tire_size", search_term: "225/50R17", placement: "home_hero" });
+  trackEvent("newsletter_signup", { placement: "footer", email: "jo@example.com" });
+  trackEvent("phone_click", { placement: "mobile_bar", href: "tel:+19547890000", number: "9547890000" });
+  trackEvent("install_cta_click", { placement: "home_install", install_type: "shop" });
+  trackEvent("search", { search_type: "site", search_term: "954-789-0000" });
+  assert.deepEqual(calls, [
+    ["event", "search", { search_type: "tire_size", search_term: "225/50R17", placement: "home_hero" }],
+    ["event", "newsletter_signup", { placement: "footer" }],
+    ["event", "phone_click", { placement: "mobile_bar" }],
+    ["event", "install_cta_click", { placement: "home_install", install_type: "shop" }],
+    ["event", "search", { search_type: "site" }],
+  ]);
+});

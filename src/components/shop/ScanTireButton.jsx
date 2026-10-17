@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { trackEvent } from "../../lib/analytics.js";
+import { placementFor } from "../../lib/clickTracking.js";
 import { handOffPhoto } from "../../data/scanHandoff.js";
 import { isTouchDevice, scannerOn } from "../../data/scanner.js";
 
@@ -40,8 +42,14 @@ export default function ScanTireButton({
 
   const finder = "/tire-size-finder?scan=1";
 
-  const onClick = () => {
-    if (photoOn === true && isTouchDevice()) inputRef.current?.click();
+  const onClick = (event) => {
+    const camera = photoOn === true && isTouchDevice();
+    // Where the button sits ("home_hero" in the hero) and which way it went.
+    trackEvent("scan_tap", {
+      placement: placementFor(event.currentTarget),
+      method: camera ? "camera" : "finder",
+    });
+    if (camera) inputRef.current?.click();
     else navigate(finder);
   };
 

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -35,6 +35,7 @@ import {
 } from "../../data/vehicles.js";
 import { useVehicle } from "../../context/VehicleContext.jsx";
 import { useTireSearch } from "../../data/useApi.js";
+import { oncePerPage, trackEvent } from "../../lib/analytics.js";
 import { RATING_AXES, ratingsFor } from "../../data/tireRatings.js";
 import { compareSizes, parseSize } from "../../data/tireMath.js";
 import { SET_SIZE, setPrice } from "../../data/pricing.js";
@@ -1244,6 +1245,20 @@ export default function FindMyTiresPage() {
   const showAlternates = shortlist.length < 3 && alternates.length > 0;
   const altList = alternates.slice(0, 3);
 
+  // The shortlist was reached (not just a link opened with a missing answer).
+  useEffect(() => {
+    if (showResults) oncePerPage("quiz-complete", () => trackEvent("quiz_complete"));
+  }, [showResults]);
+
+  // A tire page or the full list opened from the shortlist.
+  const onResultClick = (event) => {
+    const href = event.target.closest?.("a[href]")?.getAttribute("href");
+    if (!href) return;
+    trackEvent("quiz_result_click", {
+      method: href.startsWith("/tires/") ? "product" : "all_tires",
+    });
+  };
+
   const primaryGroup = {
     noun: onSize.length
       ? "tires that fit your answers"
@@ -1323,6 +1338,8 @@ export default function FindMyTiresPage() {
         { push: true },
       );
       setStepError("");
+      // The first answer is in: the quiz has started (once per page view).
+      oncePerPage("quiz-start", () => trackEvent("quiz_start"));
       return;
     }
     if (step === 2 && !answers.roads) {
@@ -1422,7 +1439,7 @@ export default function FindMyTiresPage() {
           ]}
         />
 
-        <Section className="bg-fog">
+        <Section className="bg-fog" onClick={onResultClick}>
           <div className="mb-7 flex flex-wrap items-center gap-2">
             {chips.map((chip) => (
               <button

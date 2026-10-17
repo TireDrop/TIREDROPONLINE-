@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { Car, Ruler, Search } from "lucide-react";
 
 import {
@@ -52,7 +52,13 @@ const withValue = (options, value, order) => {
 const up = (a, b) => Number(a) - Number(b);
 const down = (a, b) => Number(b) - Number(a);
 
-const SELECT = "field appearance-none bg-bone pr-8";
+// 16px below md: iOS Safari zooms the page when a field under 16px is focused.
+// md and up keep .field's 15px.
+const SELECT = "field appearance-none bg-bone pr-8 text-base md:text-[15px]";
+
+/** Which finder a `search` event came from, by the page it is on. */
+const placementFor = (pathname) =>
+  pathname === "/" ? "home_hero" : pathname.replace(/^\/+|\/+$/g, "").split("/")[0] || "page";
 const TAB_ICON = "h-4 w-4 shrink-0 md:h-[18px] md:w-[18px]";
 
 /** A typed model as it can go in a URL (src/lib/tiresUrl.js). */
@@ -65,6 +71,7 @@ const cleanModel = (s) =>
 
 function Field({
   id,
+  name,
   label,
   value,
   onChange,
@@ -79,6 +86,7 @@ function Field({
       </label>
       <select
         id={id}
+        name={name}
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
@@ -101,8 +109,12 @@ export default function SearchPanel({
   initial,
   onCancel,
   onEnterSize,
+  placement,
 }) {
   const [params] = useSearchParams();
+  const { pathname } = useLocation();
+  // Home-hero searches are told apart from /tires ones in GA (`placement`).
+  const where = placement ?? placementFor(pathname);
   const requested = params.get("search");
   const [tab, setTab] = useState(
     initial?.tab ?? (requested === "size" ? "size" : "vehicle"),
@@ -183,6 +195,7 @@ export default function SearchPanel({
     trackEvent("search", {
       search_type: "vehicle",
       search_term: [year, makeValue, modelValue].join(" "),
+      placement: where,
     });
     onSearch({ type: "vehicle", year, make: makeValue, model: modelValue });
   };
@@ -236,6 +249,7 @@ export default function SearchPanel({
       search_term: isWheel
         ? `${diameter || "any"}x${width || "any"}`
         : `${width || "any"}/${aspect || "any"}R${diameter || "any"}`,
+      placement: where,
     });
     onSearch({ type: "size", width, aspect, diameter });
   };
@@ -315,10 +329,17 @@ export default function SearchPanel({
         className="rounded-b-[11px] bg-bone p-5 md:p-6"
       >
         {tab === "vehicle" ? (
-          <form onSubmit={submitVehicle}>
+          // action + named fields: a submit before the page has hydrated (or with
+          // scripts blocked) still reaches /tires with the vehicle or size in
+          // the address. The script path calls preventDefault and is unchanged.
+          <form
+            onSubmit={submitVehicle}
+            {...(isWheel ? null : { action: "/tires", method: "get" })}
+          >
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Field
                 id="finder-year"
+                name="year"
                 label="Year"
                 value={year}
                 onChange={setYear}
@@ -327,6 +348,7 @@ export default function SearchPanel({
               />
               <Field
                 id="finder-make"
+                name="make"
                 label="Make"
                 value={makeValue}
                 onChange={(v) => {
@@ -358,7 +380,7 @@ export default function SearchPanel({
                   disabled={!modelReady}
                   busy={Boolean(year && makeValue && live.loading)}
                   describedBy={modelNote ? "finder-model-note" : undefined}
-                  className="bg-bone"
+                  className="bg-bone text-base md:text-[15px]"
                 />
               </div>
             </div>
@@ -390,10 +412,14 @@ export default function SearchPanel({
             </p>
           </form>
         ) : (
-          <form onSubmit={submitSize}>
+          <form
+            onSubmit={submitSize}
+            {...(isWheel ? null : { action: "/tires", method: "get" })}
+          >
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Field
                 id="finder-width"
+                name={isWheel ? undefined : "w"}
                 label={isWheel ? "Wheel Width" : "Width"}
                 value={width}
                 onChange={setWidth}
@@ -402,6 +428,7 @@ export default function SearchPanel({
               />
               <Field
                 id="finder-aspect"
+                name={isWheel ? undefined : "a"}
                 label={isWheel ? "Bolt Pattern" : "Aspect Ratio"}
                 value={aspect}
                 onChange={setAspect}
@@ -410,6 +437,7 @@ export default function SearchPanel({
               />
               <Field
                 id="finder-diameter"
+                name={isWheel ? undefined : "d"}
                 label={isWheel ? "Diameter" : "Rim Diameter"}
                 value={diameter}
                 onChange={setDiameter}

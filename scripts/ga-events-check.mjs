@@ -13,6 +13,15 @@
  *   /tires        a vehicle with nothing in its size → view_search_results
  *                 { results: 0 }, and its quote form → generate_lead
  *                 { form_name: "size-quote" }
+ *   /             tel: links → phone_click { placement } (header, a home
+ *                 section, footer); the hero size search → search with
+ *                 placement "home_hero"; a link to /install in the install
+ *                 section → install_cta_click; the hero scan tap → scan_tap
+ *   /tires        the finder's search → search with placement "tires"
+ *   footer        the newsletter form → newsletter_signup (and NOT
+ *                 generate_lead)
+ *   /find-my-tires  step one → quiz_start, the shortlist → quiz_complete,
+ *                 a link on it → quiz_result_click
  *
  * and that nothing typed into a form (name, email, phone, message) appears
  * in any call.
@@ -93,11 +102,19 @@ async function open() {
   );
   await page.route("**/api/status", (route) =>
     route.fulfill({
-      json: { atd: "sample", shopify: "live", checkout: "request", newsletter: "off", forms: "on", version: "test" },
+      json: { atd: "sample", shopify: "live", checkout: "request", newsletter: "on", forms: "on", scanner: "on", version: "test" },
     }),
   );
   await page.route("**/api/tires**", (route) => route.fulfill({ status: 404, body: "" }));
   await page.route("**/api/forms", (route) => route.fulfill({ json: { ok: true } }));
+  await page.route("**/api/newsletter", (route) => route.fulfill({ json: { ok: true } }));
+  // A tel: tap must not try to dial from the browser under test. This runs
+  // after analytics' capture-phase listener, which is what is being checked.
+  await page.addInitScript(() => {
+    document.addEventListener("click", (e) => {
+      if (e.target.closest?.('a[href^="tel:"]')) e.preventDefault();
+    });
+  });
   // Every gtag() call, as an array, survives reloads in sessionStorage.
   await page.addInitScript(() => {
     const KEY = "__gaCalls";
@@ -247,6 +264,97 @@ try {
     assert.deepEqual(leads.at(-1)[2], { form_name: "size-quote" });
     // Once per search, not once per render.
     assert.equal((await h.events()).filter((c) => c[1] === "view_search_results").length, 1);
+  });
+
+  await check("home: tel: taps are phone_click with a placement and no number", async () => {
+    await h.page.goto(`${BASE}/`);
+    await h.page.waitForSelector("header a[href^='tel:']");
+    const before = (await h.events()).length;
+    await h.page.locator("header a[href^='tel:']").first().click();
+    await h.page.locator("[data-home-section] a[href^='tel:']").first().click();
+    await h.page.locator("footer a[href^='tel:']").first().click();
+    const calls = (await h.events()).slice(before).filter((c) => c[1] === "phone_click");
+    const placements = calls.map((c) => c[2].placement);
+    assert.equal(placements[0], "header");
+    assert.match(placements[1], /^home_[a-z]+$/);
+    assert.equal(placements[2], "footer");
+    for (const c of calls) assert.deepEqual(Object.keys(c[2]), ["placement"]);
+  });
+
+  await check("home: hero size search is search { placement: home_hero }; the scan tap is scan_tap", async () => {
+    await h.page.goto(`${BASE}/`);
+    await h.page.getByTestId("hero-scan").click();
+    const [scan] = await h.waitEvent("scan_tap");
+    assert.deepEqual(scan[2], { placement: "home_hero", method: "finder" });
+    await h.page.goto(`${BASE}/`);
+    await h.page.getByRole("tab", { name: "Shop by Tire Size" }).click();
+    await h.page.selectOption("#finder-width", "225");
+    await h.page.selectOption("#finder-aspect", "50");
+    await h.page.selectOption("#finder-diameter", "17");
+    await h.page.getByRole("button", { name: "Search Sizes" }).click();
+    const found = (await h.waitEvent("search")).at(-1);
+    assert.deepEqual(found[2], { search_type: "tire_size", search_term: "225/50R17", placement: "home_hero" });
+  });
+
+  await check("/tires: the finder's search carries placement tires", async () => {
+    // A fresh visitor: the walk above remembered a vehicle, and /tires then
+    // opens on its results instead of the finder.
+    const t = await open();
+    try {
+      await t.page.goto(`${BASE}/tires?search=size`);
+      await t.page.selectOption("#finder-width", "225");
+      await t.page.selectOption("#finder-aspect", "50");
+      await t.page.selectOption("#finder-diameter", "17");
+      await t.page.locator("form:has(#finder-width)").evaluate((f) => f.requestSubmit());
+      const found = (await t.waitEvent("search")).at(-1);
+      assert.equal(found[2].placement, "tires");
+      assert.equal(found[2].search_term, "225/50R17");
+    } finally {
+      await t.context.close();
+    }
+  });
+
+  await check("home: a link to /install inside a home section is install_cta_click", async () => {
+    await h.page.goto(`${BASE}/`);
+    const link = h.page.locator("[data-home-section] a[href='/install']").first();
+    await link.scrollIntoViewIfNeeded();
+    await link.click();
+    const [cta] = await h.waitEvent("install_cta_click");
+    assert.match(cta[2].placement, /^home_[a-z]+$/);
+    assert.equal(cta[2].install_type, "shop");
+    assert.deepEqual(Object.keys(cta[2]).sort(), ["install_type", "placement"]);
+  });
+
+  await check("footer newsletter is newsletter_signup, not generate_lead", async () => {
+    await h.page.goto(`${BASE}/contact`);
+    const before = (await h.events()).length;
+    const box = h.page.getByTestId("newsletter-signup");
+    await box.locator("input[type=email]").fill("casey@example.com");
+    await box.getByRole("button").first().click();
+    const [news] = await h.waitEvent("newsletter_signup");
+    assert.deepEqual(news[2], { placement: "footer" });
+    await h.page.waitForTimeout(300);
+    const fresh = (await h.events()).slice(before);
+    assert.equal(fresh.filter((c) => c[1] === "generate_lead").length, 0, "newsletter counted as a lead");
+  });
+
+  await check("/find-my-tires: quiz_start, quiz_complete, quiz_result_click, nothing typed", async () => {
+    await h.page.goto(`${BASE}/find-my-tires`);
+    await h.page.getByRole("button", { name: "I know my tire size" }).click();
+    await h.page.fill("#quiz-size", "225/50R17");
+    await h.page.getByRole("button", { name: "Continue" }).click();
+    const [start] = await h.waitEvent("quiz_start");
+    assert.deepEqual(start[2], {});
+    for (let step = 2; step <= 5; step += 1) {
+      await h.page.locator("form label:has(input)").first().click();
+      await h.page.getByRole("button", { name: step === 5 ? "Show my shortlist" : "Continue" }).click();
+    }
+    const [done] = await h.waitEvent("quiz_complete");
+    assert.deepEqual(done[2], {});
+    await h.page.locator("main a[href^='/tires']").first().click();
+    const [click] = await h.waitEvent("quiz_result_click");
+    assert.match(click[2].method, /^(product|all_tires)$/);
+    assert.equal((await h.events()).filter((c) => c[1] === "quiz_start").length, 1);
   });
 
   await check("no GA call carries anything typed into a form", async () => {

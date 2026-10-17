@@ -138,7 +138,8 @@ export function NewsletterSignup({ tone = "dark", source = "footer", className =
     setError(null);
     try {
       await subscribeNewsletter({ email: value, source, ...guard });
-      trackEvent("generate_lead", { form_name: "newsletter" });
+      // Its own event: a mailing-list email is not a sales lead (generate_lead).
+      trackEvent("newsletter_signup", { placement: source });
       setDone(true);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : COPY.failed);
