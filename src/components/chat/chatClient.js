@@ -7,7 +7,8 @@
 //   request   { messages: [{ role: "user" | "assistant", content }], page }
 //             at most 12 messages, each content at most 800 characters, the
 //             last one from the user
-//   200       { reply, sources: [{ title, path }] (max 3), handoff, mode }
+//   200       { reply, sources: [{ title, path }] (max 3), tires: [card] (max 3),
+//             handoff, mode }
 //   400/429   { error }            503  { error, handoff: true }
 
 export const MAX_MESSAGES = 12;
@@ -73,6 +74,43 @@ export function normalizeSources(sources) {
   return out;
 }
 
+const clipText = (v, n) => (typeof v === "string" ? v.trim().slice(0, n) : "");
+
+/**
+ * Tire cards from the server: at most 3, each with a real site path and the
+ * catalog's own text. A price shows only when the server sent a number (a
+ * live catalog answer); an image only when it is an https URL.
+ */
+export function normalizeTires(tires) {
+  if (!Array.isArray(tires)) return [];
+  const seen = new Set();
+  const out = [];
+  for (const t of tires) {
+    const href = typeof t?.href === "string" ? t.href.trim() : "";
+    if (!/^\/(?!\/)[^\s\\]*$/.test(href) || seen.has(href)) continue;
+    const brand = clipText(t.brand, 40);
+    const model = clipText(t.model, 60);
+    const size = clipText(t.size, 20);
+    if (!brand || !model || !size) continue;
+    seen.add(href);
+    out.push({
+      brand,
+      model,
+      size,
+      loadIndex: clipText(t.loadIndex, 6) || null,
+      speedRating: clipText(t.speedRating, 3) || null,
+      category: clipText(t.category, 30) || null,
+      accent: /^#[0-9a-fA-F]{6}$/.test(t.accent ?? "") ? t.accent : null,
+      image: typeof t.image === "string" && /^https:\/\//.test(t.image) ? t.image.slice(0, 500) : null,
+      price: typeof t.price === "number" && t.price > 0 && t.price < 10000 ? t.price : null,
+      inStock: t.inStock === true ? true : t.inStock === false ? false : null,
+      href,
+    });
+    if (out.length === 3) break;
+  }
+  return out;
+}
+
 export class ChatError extends Error {
   constructor(message, { status = 0, handoff = true } = {}) {
     super(message);
@@ -126,6 +164,7 @@ export async function sendChat(history, page, fetchImpl = globalThis.fetch, { ti
     return {
       reply: data.reply.trim(),
       sources: normalizeSources(data.sources),
+      tires: normalizeTires(data.tires),
       handoff: data.handoff === true,
       mode: data.mode === "standin" ? "standin" : "live",
     };
@@ -181,6 +220,7 @@ export function loadHistory(storage = safeStorage()) {
         role: m.role,
         content: m.content.slice(0, 4000),
         sources: m.role === "assistant" ? normalizeSources(m.sources) : undefined,
+        tires: m.role === "assistant" ? normalizeTires(m.tires) : undefined,
         handoff: m.role === "assistant" && m.handoff === true,
         error: m.error === true,
       }));

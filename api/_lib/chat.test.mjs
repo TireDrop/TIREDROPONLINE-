@@ -20,6 +20,10 @@ import {
   CHAT_RATE_LIMIT,
   MAX_ROUNDS,
   DEFAULT_MODEL,
+  tireCards,
+  systemPrompt,
+  lastWholeSentence,
+  pinnedSources,
 } from "./chat.js";
 import statusHandler from "../status.js";
 import { BUSINESS } from "../../src/data/business.js";
@@ -480,4 +484,106 @@ test("status reports chat on only when the Anthropic key is set (the button hide
   assert.equal(statusBody(getConfig({})).chat, "off");
   assert.equal(statusBody(getConfig({ ANTHROPIC_API_KEY: "sk-test" })).chat, "on");
   assert.ok(!JSON.stringify(statusBody(getConfig({ ANTHROPIC_API_KEY: "sk-test" }))).includes("sk-test"), "never the key");
+});
+
+/* ----------------------------- tire cards ------------------------------ */
+
+test("tireCards: sample items get a catalog link and no price or stock", () => {
+  const cards = tireCards([{ id: "t-cont-truecontact-tour", sku: "t-cont-truecontact-tour", brand: "Continental", model: "TrueContact Tour", size: "215/60R16", loadIndex: "95", speedRating: "H", price: 142, available: null }], false);
+  assert.equal(cards.length, 1);
+  assert.equal(cards[0].href, "/tires/continental-truecontact-tour-215-60r16");
+  assert.equal("price" in cards[0], false);
+  assert.equal(cards[0].image, null);
+});
+
+test("tireCards: live items link to /tires/p/:sku and carry price, stock and an https image", () => {
+  const cards = tireCards([
+    { id: "atd-123", sku: "123", brand: "Acme", model: "Grip", size: "225/45R17", price: 99.5, available: true, image: "https://cdn.example/a.jpg" },
+    { id: "atd-124", sku: "124", brand: "Acme", model: "Soft", size: "225/45R17", price: 80, available: false, image: "http://x/y.jpg" },
+    { id: "atd-1", sku: "1", brand: "", model: "x", size: "y" },
+  ], true);
+  assert.equal(cards.length, 2);
+  assert.equal(cards[0].href, "/tires/p/123");
+  assert.equal(cards[0].price, 99.5);
+  assert.equal(cards[0].inStock, true);
+  assert.equal(cards[0].image, "https://cdn.example/a.jpg");
+  assert.equal(cards[1].inStock, false);
+  assert.equal(cards[1].image, null);
+});
+
+test("tireCards: at most 3", () => {
+  const items = Array.from({ length: 6 }, (_, i) => ({ id: `atd-${i}`, sku: String(i), brand: "A", model: "M" + i, size: "225/45R17" }));
+  assert.equal(tireCards(items, true).length, 3);
+});
+
+test("live: a tire lookup returns cards from the catalog, and the tool_result never carries them", async () => {
+  const f = fakeFetch(
+    toolBody({ size: "225/45R17" }),
+    textBody("One match is in the catalog; the card is below."),
+  );
+  const h = createChatHandler({
+    env: LIVE, fetchImpl: f, knowledge: KB,
+    search: async () => ({ source: "sample", query: { size: "225/45R17" }, items: [{ id: "t-cont-truecontact-tour", sku: "t-cont-truecontact-tour", brand: "Continental", model: "TrueContact Tour", size: "215/60R16" }] }),
+  });
+  const r = await post(h, ask("Do you have 215/60R16?"));
+  assert.equal(r.statusCode, 200);
+  assert.equal(r.body.tires.length, 1);
+  assert.equal(r.body.tires[0].brand, "Continental");
+  const result = f.calls[1].body.messages.at(-1).content[0];
+  assert.equal("cards" in result, false);
+});
+
+test("live: no lookup means no cards", async () => {
+  const f = fakeFetch(textBody("Shipping is free to the 48 contiguous states and DC."));
+  const h = createChatHandler({ env: LIVE, fetchImpl: f, knowledge: KB });
+  const r = await post(h, ask("Is shipping free?"));
+  assert.deepEqual(r.body.tires, []);
+});
+
+/* ------------------- off-topic, truncation, pinned sources ------------------- */
+
+test("live: an off-topic decline carries no sources, no cards and no marker", async () => {
+  const f = fakeFetch(textBody("I can only help with tires and this website. Want a tire size checked? [[OFFTOPIC]]"));
+  const h = createChatHandler({ env: LIVE, fetchImpl: f, knowledge: KB });
+  const r = await post(h, ask("What is the capital of France?"));
+  assert.equal(r.body.handoff, false);
+  assert.deepEqual(r.body.sources, []);
+  assert.deepEqual(r.body.tires, []);
+  assert.ok(!r.body.reply.includes("OFFTOPIC"));
+});
+
+test("live: a reply cut off by max_tokens ends on its last whole sentence", async () => {
+  const f = fakeFetch({ stop_reason: "max_tokens", content: [{ type: "text", text: "Shipping is free to the 48 contiguous states and DC. It covers every order and" }] });
+  const h = createChatHandler({ env: LIVE, fetchImpl: f, knowledge: KB });
+  const r = await post(h, ask("shipping"));
+  assert.equal(r.body.reply, "Shipping is free to the 48 contiguous states and DC.");
+});
+
+test("lastWholeSentence leaves a finished reply alone", () => {
+  assert.equal(lastWholeSentence("All done."), "All done.");
+  assert.equal(lastWholeSentence("short cut"), "short cut");
+});
+
+test("pinnedSources: financing, install and hours questions get their page", () => {
+  assert.equal(pinnedSources("Do you offer financing?")[0].path, "/financing");
+  assert.equal(pinnedSources("How much is installation?")[0].path, "/services/tire-installation");
+  assert.equal(pinnedSources("What are your hours?")[0].path, "/contact");
+  assert.deepEqual(pinnedSources("What is the capital of France?"), []);
+});
+
+test("live: a financing question lists /financing first", async () => {
+  const f = fakeFetch(textBody("You can pay by card, Shop Pay or Shop Pay Installments, subject to eligibility at checkout."));
+  const h = createChatHandler({ env: LIVE, fetchImpl: f, knowledge: KB });
+  const r = await post(h, ask("Do you offer financing?"));
+  assert.equal(r.body.sources[0].path, "/financing");
+  assert.equal(r.body.handoff, false);
+});
+
+test("system prompt: grounded install facts, financing page, cards, off-topic marker", () => {
+  const p = systemPrompt({ page: null, hits: [] });
+  assert.match(p, /Never retract/);
+  assert.match(p, /\/financing/);
+  assert.match(p, /call lookup_tires first/);
+  assert.match(p, /\[\[OFFTOPIC\]\]/);
+  assert.match(p, /from \$25 per tire/);
 });

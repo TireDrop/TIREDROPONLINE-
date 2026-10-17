@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Loader2, MessageCircle, Phone, Send, X } from "lucide-react";
 
+import ProductArt from "../shop/ProductArt.jsx";
+
 import { BUSINESS } from "../../data/business.js";
 import { isProductPath } from "../../data/mobileBar.js";
 import { trackEvent } from "../../lib/analytics.js";
@@ -62,6 +64,11 @@ const COPY = {
     you: "You said",
     bot: "TireDrop assistant said",
     sources: "From these pages",
+    viewTire: "View tire",
+    tiresLabel: "Tires from the catalog",
+    each: "each",
+    inStock: "In stock",
+    outOfStock: "Out of stock",
     count: (n) => `${n} of ${MAX_CHARS}`,
     callBtn: `Call ${BUSINESS.phone}`,
     contact: "Contact us",
@@ -95,6 +102,11 @@ const COPY = {
     you: "Tú dijiste",
     bot: "El asistente de TireDrop dijo",
     sources: "De estas páginas",
+    viewTire: "Ver llanta",
+    tiresLabel: "Llantas del catálogo",
+    each: "cada una",
+    inStock: "En existencia",
+    outOfStock: "Agotada",
     count: (n) => `${n} de ${MAX_CHARS}`,
     callBtn: `Llamar ${BUSINESS.phone}`,
     contact: "Contáctanos",
@@ -122,6 +134,56 @@ function Reply({ text }) {
         {block.text}
       </p>
     ),
+  );
+}
+
+/** One catalog tire the assistant found: the picture, the name, the size, a link. */
+function TireCard({ tire, t, onClick }) {
+  const spec = `${tire.size}${tire.loadIndex ? ` · ${tire.loadIndex}${tire.speedRating ?? ""}` : ""}`;
+  return (
+    <li className="flex gap-3 rounded-card border border-ink/10 bg-fog p-2">
+      <div className="flex h-[84px] w-[84px] shrink-0 items-center justify-center rounded-sm bg-gradient-to-b from-bone to-fog">
+        {tire.image ? (
+          <img src={tire.image} alt="" loading="lazy" className="max-h-[80px] max-w-[80px] object-contain" />
+        ) : (
+          <ProductArt
+            kind="tire"
+            accent={tire.accent ?? undefined}
+            size={80}
+            label={`${tire.brand} ${tire.model}`}
+            className="pointer-events-none h-auto w-[76px]"
+          />
+        )}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col justify-center">
+        <p translate="no" className="notranslate text-[11px] font-semibold uppercase tracking-[0.09em] text-smoke">
+          {tire.brand}
+        </p>
+        <p translate="no" className="notranslate font-display text-[15px] font-bold leading-tight text-ink">
+          {tire.model}
+        </p>
+        <p translate="no" className="notranslate tnum text-[12px] text-smoke">
+          {spec}
+          {tire.category ? ` · ${tire.category}` : ""}
+        </p>
+        {tire.price !== null && (
+          <p translate="no" className="notranslate tnum mt-0.5 text-[13px] font-semibold text-ink">
+            ${tire.price.toFixed(2)} <span className="font-normal text-smoke">{t.each}</span>
+            {tire.inStock !== null && (
+              <span className="font-normal text-smoke"> · {tire.inStock ? t.inStock : t.outOfStock}</span>
+            )}
+          </p>
+        )}
+        <Link
+          to={tire.href}
+          onClick={onClick}
+          aria-label={`${t.viewTire}: ${tire.brand} ${tire.model} ${tire.size}`}
+          className="mt-1 inline-flex min-h-[32px] items-center text-[14px] font-semibold text-drop underline underline-offset-2 hover:text-dive"
+        >
+          {t.viewTire}
+        </Link>
+      </div>
+    </li>
   );
 }
 
@@ -243,7 +305,7 @@ export default function ChatWidget() {
       const out = await sendChat(next, pathname);
       setHistory((h) => [
         ...h,
-        { role: "assistant", content: out.reply, sources: out.sources, handoff: out.handoff },
+        { role: "assistant", content: out.reply, sources: out.sources, tires: out.tires, handoff: out.handoff },
       ]);
     } catch (err) {
       setHistory((h) => [
@@ -363,6 +425,13 @@ export default function ChatWidget() {
                 <div key={i} data-last-reply={i === history.length - 1 ? "" : undefined} className="max-w-[92%] break-words rounded-card rounded-tl-sm bg-bone p-3 shadow-card">
                   <span className="sr-only">{t.bot}: </span>
                   <Reply text={m.content} />
+                  {m.tires?.length > 0 && (
+                    <ul aria-label={t.tiresLabel} className="mt-3 flex flex-col gap-2">
+                      {m.tires.map((tire) => (
+                        <TireCard key={tire.href} tire={tire} t={t} onClick={onSource} />
+                      ))}
+                    </ul>
+                  )}
                   {m.sources?.length > 0 && (
                     <div className="mt-3 border-t border-ink/10 pt-2">
                       <p className="text-[12px] font-semibold text-smoke">{t.sources}</p>
