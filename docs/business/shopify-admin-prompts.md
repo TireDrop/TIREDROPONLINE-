@@ -1474,3 +1474,22 @@ Do this in my browser, in order, and stop and tell me if anything looks differen
 4. Tell me when it is done. Do not show me the key.
 ```
 
+
+## 28. Shopify shipping: free to the 48 states + DC, nothing to Alaska, Hawaii or territories
+
+Why: the site promises free shipping to the 48 contiguous states + DC and ATD does
+not ship to Alaska or Hawaii (docs/integrations/atd-supplier-facts.md). Checkout
+should say the same. ATD's FedEx rates ($17 to $140 by weight) are TireDrop's cost,
+not a customer price, so they do not go into the customer's checkout. Run prompt 9
+first if you want a read-only look at what is there now.
+
+```
+Do this in my browser. Stop and tell me if anything looks different. Do not change tax settings.
+1. Open Shopify admin and check the store name in the top-left is TireDrop (store email info@tiredroponline.com, not Ziggy's Miami). If it is a different store, stop and tell me.
+2. Settings → Shipping and delivery. Open the "General shipping rates" profile. List every zone and rate you see first, then continue.
+3. Make sure there is a zone for the United States that covers all states EXCEPT Alaska and Hawaii (and no territories), with ONE rate named "Free Shipping" priced $0.00 and no weight or price conditions. Include DC.
+4. Make sure Alaska, Hawaii, Puerto Rico, Guam and the other US territories are NOT in any zone with a rate, so checkout will not offer shipping there. Do not add any international zone.
+5. If local pickup is on for the Sunrise shop, leave it on and free.
+6. Open the Shipping policy (Settings → Policies) and read the sentence about cost: it must say shipping is free to the 48 contiguous states and DC. Tell me if it differs. Do not edit it.
+7. Report back every rate and zone as they are now, and what you changed.
+```

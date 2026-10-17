@@ -21,6 +21,7 @@ the code fits together is in the root [README](../README.md).
 - [telegram-order-alerts.md](integrations/telegram-order-alerts.md): a Telegram message to Justin for every paid order (rides the `orders/paid` webhook), customer order tracking over the same bot, and the BotFather + Vercel env var setup.
 - [install-scheduling.md](integrations/install-scheduling.md): the "Schedule your install" hand-off after payment, and Tire Guru's role (`INSTALL_BOOKING_URL`, or bookings entered by hand).
 - [atd.md](integrations/atd.md): the ATD catalog, price and stock adapter (still sample mode) and what must be confirmed with ATD. Read it before the ATD call or any ATD work.
+- [atd-supplier-facts.md](integrations/atd-supplier-facts.md): everything ATD's two 2026 documents say: contacts, coverage, FedEx flat rates, local delivery, cancel and return process, and the questions still open for ATD. Read it before pricing shipping or placing a test order.
 - [atd-forwarder.md](integrations/atd-forwarder.md): the gated job that places paid orders with ATD and syncs tracking, plus its sandbox test plan.
 - [tire-size-finder.md](integrations/tire-size-finder.md): the photo scanner at `/tire-size-finder` (door sticker, sidewall, VIN → exact size): `ANTHROPIC_API_KEY` setup, spend limit, cost per scan, endpoint contract and the real-phone test plan.
 
