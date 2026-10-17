@@ -10,6 +10,7 @@ the code fits together is in the root [README](../README.md).
 ## business/: running the store
 
 - [shopify-admin-prompts.md](business/shopify-admin-prompts.md): numbered copy-paste Chrome prompts for everything Claude cannot do itself (Shopify admin, Vercel, Flow). Use it when a task needs Justin's browser.
+- [shipping-pricing-plan.md](business/shipping-pricing-plan.md): competitor shipping policies, ATD freight cost per order, the four options (free shipping stays recommended) and the file list to change if shipping pricing changes. Read it before touching any shipping wording.
 - [parent-business-facts.md](business/parent-business-facts.md): where each fact about Extreme Tires (name, review profiles, distributor presence, services) came from and how far to trust it. Check it before the site states a fact about the shop.
 - [2026-09-23-meeting-brief.html](business/2026-09-23-meeting-brief.html): the ATD / Tire Guru / Net Driven meeting brief from 2026-09-23. Open it in a browser for the supplier background and the questions that were asked.
 
@@ -21,6 +22,7 @@ the code fits together is in the root [README](../README.md).
 - [telegram-order-alerts.md](integrations/telegram-order-alerts.md): a Telegram message to Justin for every paid order (rides the `orders/paid` webhook), customer order tracking over the same bot, and the BotFather + Vercel env var setup.
 - [install-scheduling.md](integrations/install-scheduling.md): the "Schedule your install" hand-off after payment, and Tire Guru's role (`INSTALL_BOOKING_URL`, or bookings entered by hand).
 - [atd.md](integrations/atd.md): the ATD catalog, price and stock adapter (still sample mode) and what must be confirmed with ATD. Read it before the ATD call or any ATD work.
+- [atd-supplier-facts.md](integrations/atd-supplier-facts.md): everything ATD's two 2026 documents say: contacts, coverage, FedEx flat rates, local delivery, cancel and return process, and the questions still open for ATD. Read it before pricing shipping or placing a test order.
 - [atd-forwarder.md](integrations/atd-forwarder.md): the gated job that places paid orders with ATD and syncs tracking, plus its sandbox test plan.
 - [tire-size-finder.md](integrations/tire-size-finder.md): the photo scanner at `/tire-size-finder` (door sticker, sidewall, VIN → exact size): `ANTHROPIC_API_KEY` setup, spend limit, cost per scan, endpoint contract and the real-phone test plan.
 
