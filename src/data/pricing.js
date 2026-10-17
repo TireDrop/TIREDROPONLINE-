@@ -23,11 +23,11 @@ export function priceBreakdown(product, qty = SET_SIZE) {
 
 /**
  * Delivery wording. Transit depends on which distributor warehouse has the
- * size and the shopper's ZIP code, so the site names no date: checkout shows
- * the estimate once the address is known.
+ * size and the shopper's ZIP code, so the site names no date. Checkout shows
+ * none either: the estimate is confirmed before the order ships.
  */
 export const DELIVERY_NOTE =
-  "Free shipping to the 48 contiguous states and DC — the delivery estimate is shown at checkout.";
+  "Free shipping to the 48 contiguous states and DC. We confirm the delivery estimate before your order ships.";
 
 /** The same promise where a card has one short line to spare. */
-export const DELIVERY_NOTE_SHORT = "Free shipping (48 states + DC) · estimate at checkout";
+export const DELIVERY_NOTE_SHORT = "Free shipping (48 states + DC)";

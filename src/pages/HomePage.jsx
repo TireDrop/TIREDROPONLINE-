@@ -36,7 +36,7 @@ import { BUSINESS, YELP_PROFILE, googleReviewHref } from "../data/business.js";
 import { SERVICE_AREA_LABEL } from "../data/serviceArea.js";
 import MobilePriceStrip from "../components/services/MobilePriceStrip.jsx";
 import ServiceAreaCounties from "../components/ui/ServiceAreaCounties.jsx";
-import { MOBILE_SERVICES, SHOP_SERVICES, getService } from "../data/services.js";
+import { MOBILE_SERVICES, getService } from "../data/services.js";
 import {
   TIRES,
   TIRE_BRAND_NAMES,
@@ -93,6 +93,24 @@ function Head(props) {
 // Installation is not free: name the shop's published starting price,
 // from the service catalog, wherever free ship-to-store is offered.
 const INSTALL = getService("tire-installation");
+
+// What the Sunrise bay does to a tire you ship there, in the catalog's own
+// order. (SHOP_SERVICES is the bay-only work, brakes and lift kits, and is
+// left on /auto-service.)
+const BAY_TIRE_SERVICES = [
+  "tire-installation",
+  "tire-balancing",
+  "tire-repair",
+  "tire-rotation",
+  "wheel-installation",
+]
+  .map(getService)
+  .filter(Boolean);
+
+// Shop hours, as the shop publishes them (BUSINESS.hours), on one line.
+const HOURS_LINE = BUSINESS.hours
+  .map(({ days, time }) => `${days} ${time}`)
+  .join(" · ");
 
 function Hero() {
   const navigate = useNavigate();
@@ -160,14 +178,16 @@ function Hero() {
           phone the finder clears the fold instead of sitting under four lines
           of prose. On a wide screen the explicit row/column placement puts the
           copy back together in the left half with the finder beside it. */}
-      <div className="wrap relative grid gap-7 py-10 md:py-14 lg:grid-cols-[.9fr_1.1fr] lg:gap-x-12 lg:gap-y-6 lg:py-20">
+      <div className="wrap relative grid gap-7 py-10 md:py-14 lg:grid-cols-[.9fr_1.1fr] lg:gap-x-12 lg:gap-y-6 lg:py-20 max-md:gap-5 max-md:py-6">
         <div className="order-1 lg:col-start-1 lg:row-start-1 lg:self-end">
-          <p className="eyebrow-dark mb-3 flex items-center gap-2">
+          <p className="eyebrow-dark mb-2 flex items-center gap-2 md:mb-3">
             <Truck size={16} aria-hidden />
-            {BUSINESS.tagline}
+            Free shipping to 48 states + DC
           </p>
 
-          <h1 className="h1 text-balance">
+          {/* A step smaller on a phone so the headline is two lines and the
+              finder's first field and Find Tires both clear the fold. */}
+          <h1 className="h1 text-balance max-md:text-[2rem] max-[359px]:text-[1.7rem]">
             Order tires online.
             <span className="block text-volt">We ship them to you.</span>
           </h1>
@@ -178,9 +198,9 @@ function Hero() {
             on a phone, because shopping by vehicle or by sidewall size is how
             nearly every tire purchase starts. */}
         <div className="order-2 rounded-card bg-bone p-5 text-ink shadow-lift ring-4 ring-volt/25 md:p-7 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-center">
-          <p className="eyebrow mb-1.5">Start here</p>
-          <h2 className="h2 mb-1 text-3xl md:text-4xl">Find your fit</h2>
-          <p className="mb-5 text-sm text-smoke">
+          <p className="eyebrow mb-1.5 max-md:hidden">Start here</p>
+          <h2 className="h2 mb-3 text-[1.65rem] md:mb-1 md:text-4xl">Find your fit</h2>
+          <p className="mb-5 text-sm text-smoke max-md:hidden">
             Shop by vehicle, by the size stamped on your sidewall, or snap a
             photo.
           </p>
@@ -218,14 +238,17 @@ function Hero() {
 
         <div className="order-3 lg:col-start-1 lg:row-start-2 lg:self-start">
           <p className="lede max-w-lg text-bone/70">
-            An online tire and wheel store shipping to any address in{" "}
-            {BUSINESS.shipping.area} — or free to our South Florida shop, where
-            we fit them from ${INSTALL.priceFrom} {INSTALL.priceUnit}.
+            An online tire and wheel store. Free shipping to any address in{" "}
+            {BUSINESS.shipping.area}, or free to our {BUSINESS.shop.city} shop
+            in South Florida, where we fit them from ${INSTALL.priceFrom}{" "}
+            {INSTALL.priceUnit}.
           </p>
 
-          <div className="mt-6 flex flex-wrap gap-3">
+          {/* Desktop only: on a phone the finder above is the one action
+              (the header and the call bar still link to the catalog). */}
+          <div className="mt-6 hidden flex-wrap gap-3 md:flex">
             <Link to="/tires" className="btn-primary min-h-[48px]">
-              Shop Tires
+              Browse all tires
               <ArrowRight size={17} aria-hidden />
             </Link>
             <Link to="/shipping" className="btn-ghost-light min-h-[48px]">
@@ -260,7 +283,8 @@ const TRUST = [
   {
     Icon: Wrench,
     title: "Installed in South Florida",
-    copy: `Free ship-to-store at our ${BUSINESS.shop.city} shop, or the mobile van in Miami-Dade, Broward and Palm Beach.`,
+    copy: `Free ship-to-store at our ${BUSINESS.shop.city} shop, or the mobile van in Miami-Dade, Broward and Palm Beach. Installation from $${INSTALL.priceFrom} ${INSTALL.priceUnit}.`,
+    to: "/install",
   },
 ];
 
@@ -272,7 +296,7 @@ function TrustBar() {
       className="border-b border-ink/[0.07] bg-bone"
     >
       <ul className="wrap grid grid-cols-1 gap-x-6 gap-y-5 py-8 sm:grid-cols-2 md:py-10 lg:grid-cols-4 lg:gap-x-0 lg:divide-x lg:divide-ink/[0.07]">
-        {TRUST.map(({ Icon, title, copy }, i) => (
+        {TRUST.map(({ Icon, title, copy, to }, i) => (
           <li
             key={title}
             data-reveal
@@ -284,11 +308,25 @@ function TrustBar() {
             </span>
             <div>
               <h3 className="text-balance text-[15px] leading-snug md:text-base">
-                {title}
+                {to ? (
+                  <Link to={to} className="hover:text-drop">
+                    {title}
+                  </Link>
+                ) : (
+                  title
+                )}
               </h3>
               <p className="mt-1 text-[13px] leading-relaxed text-smoke">
                 {copy}
               </p>
+              {to && (
+                <Link
+                  to={to}
+                  className="inline-flex min-h-[44px] items-center text-[13px] font-semibold text-drop hover:text-dive"
+                >
+                  See install options →
+                </Link>
+              )}
             </div>
           </li>
         ))}
@@ -310,6 +348,14 @@ function TrustBar() {
             >
               {BUSINESS.phone}
             </a>
+            <p className="text-[13px] leading-relaxed text-smoke">
+              {BUSINESS.shop.city}, {BUSINESS.shop.state} shop
+              {BUSINESS.hours.map(({ days, time }) => (
+                <span key={days} className="block">
+                  {days} {time}
+                </span>
+              ))}
+            </p>
           </div>
         </li>
       </ul>
@@ -472,7 +518,7 @@ const STEPS = [
   {
     Icon: PackageCheck,
     title: "Ship to you or the shop",
-    copy: `Free to any address in ${BUSINESS.shipping.area}, or free to our ${BUSINESS.shop.city} shop. Checkout shows the delivery estimate before you commit.`,
+    copy: `Free to any address in ${BUSINESS.shipping.area}, or free to our ${BUSINESS.shop.city} shop. We confirm your delivery estimate before the order ships.`,
   },
   {
     Icon: Wrench,
@@ -679,11 +725,13 @@ function HomeLocalDelivery() {
 
 /* --------------------------- Install & mobile band ------------------------ */
 
-function ServiceList({ services }) {
+// `phoneRows`: how many rows a phone shows; the rest appear from sm up, and
+// the card's "all services" link covers the rest on a phone.
+function ServiceList({ services, phoneRows = services.length }) {
   return (
     <ul className="space-y-1">
-      {services.map((s) => (
-        <li key={s.slug}>
+      {services.map((s, i) => (
+        <li key={s.slug} className={i >= phoneRows ? "max-sm:hidden" : undefined}>
           <Link
             to={`/services/${s.slug}`}
             className="flex min-h-[44px] items-center justify-between gap-4 border-b border-ink/5 text-sm transition-colors hover:text-drop"
@@ -717,11 +765,19 @@ function InstallBand() {
             <h3 className="h3">In the bay — {BUSINESS.shop.city}</h3>
           </div>
           <div className="flex-1">
-            <ServiceList services={SHOP_SERVICES} />
+            <ServiceList services={BAY_TIRE_SERVICES} phoneRows={3} />
           </div>
-          <Link to="/install" className="btn-primary btn-sm mt-6 min-h-[44px] self-start">
-            Ship to store &amp; install
-          </Link>
+          <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-1">
+            <Link to="/install" className="btn-primary btn-sm min-h-[44px]">
+              Ship to store &amp; install
+            </Link>
+            <Link
+              to="/auto-service"
+              className="inline-flex min-h-[44px] items-center text-sm font-semibold text-drop hover:text-dive"
+            >
+              Brakes, alignment &amp; more →
+            </Link>
+          </div>
         </div>
 
         <div
@@ -736,7 +792,7 @@ function InstallBand() {
             <h3 className="h3">Mobile — Miami-Dade to Palm Beach</h3>
           </div>
           <div className="flex-1">
-            <ServiceList services={MOBILE_SERVICES} />
+            <ServiceList services={MOBILE_SERVICES} phoneRows={3} />
           </div>
           <MobilePriceStrip variant="card" className="mt-6">
             <Link to="/mobile-service" className="btn-outline btn-sm min-h-[44px]">
@@ -1068,8 +1124,8 @@ function SupplyNetwork() {
         </ul>
         <p className="mt-6 text-xs leading-relaxed text-bone/60">
           Network figures as reported by our distribution partner. Delivery
-          times depend on your address; checkout shows the estimate for your
-          order.
+          times depend on your address; we confirm the estimate for your
+          order before it ships.
         </p>
       </div>
     </section>
@@ -1158,7 +1214,7 @@ const FAQ = [
   },
   {
     q: "How long will my tires take to arrive?",
-    a: "Checkout shows the delivery estimate for your order once your address is entered, because transit depends on which distributor warehouse has your size and how far it has to travel. We would rather show you a real estimate than print a promise on a page that cannot know your ZIP code.",
+    a: "We confirm the delivery estimate for your order before it ships, because transit depends on which distributor warehouse has your size and how far it has to travel. We would rather confirm a real estimate than print a promise on a page that cannot know your ZIP code.",
   },
   {
     q: "Do you ship to Alaska, Hawaii or outside the US?",
@@ -1264,6 +1320,9 @@ function FinalCta() {
             Call {BUSINESS.phone}
           </a>
         </div>
+        <p className="max-w-md text-sm leading-relaxed text-bone/65">
+          {BUSINESS.shop.city}, {BUSINESS.shop.state} shop · {HOURS_LINE}
+        </p>
         <p className="flex items-center gap-2 font-display text-xs font-bold uppercase tracking-[0.09em] text-bone/60">
           <CircleDollarSign size={14} aria-hidden />
           {BUSINESS.poweredBy}
