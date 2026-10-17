@@ -216,7 +216,7 @@ export default function HeaderSearch({
   const choose = (option) => {
     const searched = term.trim() || text;
     if (option.group === "all") {
-      trackEvent("search", { search_term: searched, search_type: "site" });
+      trackEvent("search", { search_term: searched, search_type: "site", placement: "header" });
     } else {
       trackEvent("search_suggestion", {
         search_term: searched,
@@ -238,7 +238,7 @@ export default function HeaderSearch({
       inputRef.current?.focus();
       return;
     }
-    trackEvent("search", { search_term: typed, search_type: "site" });
+    trackEvent("search", { search_term: typed, search_type: "site", placement: "header" });
     loadEngine().then(
       (m) => finish(m.submitPath(typed, SEARCH_DATA)),
       () => finish(searchPath(typed)),

@@ -64,7 +64,7 @@ export default function SearchPage() {
     e.preventDefault();
     const value = String(new FormData(e.currentTarget).get("q") ?? "").trim();
     if (!value) return;
-    trackEvent("search", { search_term: value, search_type: "site" });
+    trackEvent("search", { search_term: value, search_type: "site", placement: "search_page" });
     navigate(searchPath(value));
   };
 

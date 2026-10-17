@@ -491,9 +491,14 @@ Google. No-ops in the prerender and wherever `gtag` is missing.
 | `begin_checkout` | `/checkout` with something in the cart | `currency`, `value`, `items` |
 | `add_shipping_info` | leaving the checkout's Delivery step | `shipping_tier` (`ship`, `ship-to-store`, `mobile`), `currency`, `value`, `items` |
 | `order_request` | a request-only order is sent | `currency` USD, `value` (incl. install), `shipping_tier`, `items` |
-| `generate_lead` | a form is delivered | `form_name`: `contact`, `booking` (/schedule), `fleet-quote`, `financing`, `size-quote` (/tires, nothing in the size), `newsletter` |
+| `generate_lead` | a form is delivered | `form_name`: `contact`, `booking` (/schedule), `fleet-quote`, `financing`, `size-quote` (/tires, nothing in the size). The newsletter no longer fires this: it sends `newsletter_signup` |
 | `install_booking` | `/track` booking panel: booked inline, or the external booking link clicked | `install_type`, `method` (`inline` / `external`) |
-| `search` | the tire/wheel finder is submitted | `search_type`, `search_term` (a size like `225/45R17` or "year make model" from the dropdowns) |
+| `search` | the tire/wheel finder, the header search or the search page is submitted | `search_type`, `search_term` (a size like `225/45R17` or "year make model" from the dropdowns), `placement` (`home_hero`, `tires`, `wheels`, `header`, `search_page`) |
+| `phone_click` | any `tel:` link is tapped | `placement` (`header`, `footer`, `mobile_bar`, `dialog`, `page`, or `home_<section>`); never the number |
+| `install_cta_click` | a home-page link to /install, /schedule or /mobile-service is clicked | `placement` (`home_<section>`), `install_type` (`shop`, `schedule`, `mobile`) |
+| `scan_tap` | the hero scan button is tapped | `placement`, `method` (`camera` or `finder`) |
+| `quiz_start`, `quiz_complete`, `quiz_result_click` | the /find-my-tires quiz starts, shows its shortlist, and a shortlist link is clicked | `method` (`product` or `all_tires`) on the click only |
+| `newsletter_signup` | the footer email form is delivered | `placement` (the form's source, `footer`) |
 | `view_search_results` | `/tires` with a vehicle or size, once per search after it answers | `search_type` (`vehicle`, `tire_size`), `search_term`, `results` (tires in the size; `0` is the dead end the size-quote form answers) |
 | `tool_use` | first touch of a Learn demo / free tool (once per page view) | `tool_id` |
 | `installed_price_toggle` | "Show installed price" pressed on `/tires` or a tire page | `toggle_state` (`on` / `off`), `placement` (`results` / `product`) |
