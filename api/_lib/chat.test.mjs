@@ -104,14 +104,14 @@ test("validateChat: rejects the bad shapes", () => {
   );
 });
 
-test("handler: 400 with no-store on bad input, 405 on GET, 413 on a huge body", async () => {
+test("handler: 400 with no-store on bad input, 405 on PUT, 413 on a huge body", async () => {
   const h = createChatHandler({ env: {}, knowledge: KB });
   const bad = await post(h, { messages: [] });
   assert.equal(bad.statusCode, 400);
   assert.equal(bad.headers["cache-control"], "no-store");
   assert.ok(bad.body.error);
-  const get = await post(h, undefined, { method: "GET" });
-  assert.equal(get.statusCode, 405);
+  const put = await post(h, undefined, { method: "PUT" });
+  assert.equal(put.statusCode, 405);
   const big = await post(h, ask("x"), { headers: { "content-length": "999999" } });
   assert.equal(big.statusCode, 413);
 });
@@ -432,9 +432,9 @@ test("daily cap: past CHAT_DAILY_CAP live messages answer 503 handoff; stand-in 
 
 test("status.js: ?chat=1 goes to the chat handler (POST only); plain GET status is unchanged", async () => {
   const post405 = mockRes();
-  await statusHandler({ method: "GET", headers: {}, url: "/api/status?chat=1" }, post405);
+  await statusHandler({ method: "PUT", headers: {}, url: "/api/status?chat=1" }, post405);
   assert.equal(post405.statusCode, 405);
-  assert.equal(post405.headers.allow, "POST");
+  assert.equal(post405.headers.allow, "GET, POST");
 
   const viaStatus = mockRes();
   await statusHandler(
@@ -480,4 +480,19 @@ test("status reports chat on only when the Anthropic key is set (the button hide
   assert.equal(statusBody(getConfig({})).chat, "off");
   assert.equal(statusBody(getConfig({ ANTHROPIC_API_KEY: "sk-test" })).chat, "on");
   assert.ok(!JSON.stringify(statusBody(getConfig({ ANTHROPIC_API_KEY: "sk-test" }))).includes("sk-test"), "never the key");
+});
+
+test("GET /api/chat reports the knowledge this deploy has, and never anything else", async () => {
+  const built = "2026-10-17T00:00:00.000Z";
+  const h = createChatHandler({
+    env: { ANTHROPIC_API_KEY: "sk-test" },
+    knowledge: { built, chunks: KB.chunks },
+  });
+  const r = await post(h, undefined, { method: "GET" });
+  assert.equal(r.statusCode, 200);
+  assert.deepEqual(r.body, { chunks: KB.chunks.length, built, mode: "live" });
+  assert.equal(r.headers["cache-control"], "no-store");
+  assert.ok(!JSON.stringify(r.body).includes("sk-test"), "never the key");
+  const off = await post(createChatHandler({ env: {}, knowledge: KB }), undefined, { method: "GET" });
+  assert.equal(off.body.mode, "standin");
 });

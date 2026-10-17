@@ -1,4 +1,5 @@
-// POST /api/chat: the site assistant behind the chat bubble.
+// POST /api/chat: the site assistant behind the chat bubble. (GET /api/chat
+// reports how many knowledge chunks this deploy has and when they were built.)
 //
 //   { messages: [{ role: "user" | "assistant", content }], page?: "/tires" }
 //   -> 200 { reply, sources: [{ title, path }], handoff, mode: "live" | "standin" }
@@ -513,8 +514,23 @@ export function createChatHandler({
   now = Date.now,
 } = {}) {
   return async function handler(req, res) {
-    if (req.method !== "POST") return methodNotAllowed(res, "POST");
     const environment = env ?? process.env;
+    // GET: which knowledge this deploy is answering from (no message text, no
+    // secrets), so a deploy that lost or failed to rebuild it is visible.
+    if (req.method === "GET" || req.method === "HEAD") {
+      const known = knowledge ?? loadKnowledge();
+      return send(
+        res,
+        200,
+        {
+          chunks: known.chunks.length,
+          built: known.built ?? null,
+          mode: String(environment.ANTHROPIC_API_KEY ?? "").trim() ? "live" : "standin",
+        },
+        NO_STORE,
+      );
+    }
+    if (req.method !== "POST") return methodNotAllowed(res, "GET, POST");
 
     if (limiter.hit(clientIp(req), now())) {
       console.warn("[chat] rate limited");
