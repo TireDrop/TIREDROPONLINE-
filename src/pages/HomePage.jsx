@@ -401,13 +401,12 @@ function Shop() {
         }
       />
 
-      {/* On a phone the five cards are a swipe row rather than a 900px
-          stack; the row bleeds to the screen edge and snaps card by card.
-          The row reveals as one piece, so a card swiped in later is never
-          caught mid-fade. */}
+      {/* Every card sits on the page: two columns on a phone (the odd fifth
+          card spans both), never a swipe row running off the screen edge.
+          The grid reveals as one piece. */}
       <div
         data-reveal
-        className="-mx-5 grid auto-cols-[68%] grid-flow-col gap-3 overflow-x-auto overscroll-x-contain scroll-px-5 px-5 pb-5 pt-1 [scrollbar-width:none] snap-x snap-mandatory sm:mx-0 sm:auto-cols-auto sm:grid-flow-row sm:grid-cols-2 sm:overflow-visible sm:p-0 sm:snap-none lg:grid-cols-5 [&::-webkit-scrollbar]:hidden"
+        className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5 max-sm:[&>:last-child:nth-child(odd)]:col-span-2"
       >
         {TIRE_CATEGORIES.map((category) => {
           const Icon = CATEGORY_ICONS[category] ?? BadgeCheck;
@@ -415,7 +414,7 @@ function Shop() {
             <Link
               key={category}
               to={`/tires?category=${encodeURIComponent(category)}`}
-              className="card-hover group flex snap-start flex-col p-5 transition-colors hover:border-drop/40"
+              className="card-hover group flex flex-col p-4 transition-colors hover:border-drop/40 sm:p-5"
             >
               <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-card bg-sky text-drop transition-colors group-hover:bg-drop group-hover:text-bone">
                 <Icon size={22} aria-hidden />
@@ -1014,14 +1013,15 @@ function Learn() {
         }
       />
 
-      {/* A swipe row on a phone, like the categories, so six cards are not
-          a 2,000px stack; a grid from `sm` up. Reveals as one piece. */}
+      {/* One column on a phone so every card sits on the page (no swipe row
+          running off the edge); two columns from `sm`, three from `lg`.
+          Reveals as one piece. */}
       <ul
         data-reveal
-        className="-mx-5 grid auto-cols-[84%] grid-flow-col gap-3 overflow-x-auto overscroll-x-contain scroll-px-5 px-5 pb-5 pt-1 [scrollbar-width:none] snap-x snap-mandatory sm:mx-0 sm:auto-cols-auto sm:grid-flow-row sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:p-0 sm:snap-none lg:grid-cols-3 [&::-webkit-scrollbar]:hidden"
+        className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3"
       >
         {cards.map((card) => (
-          <li key={card.path} className="flex snap-start">
+          <li key={card.path} className="flex">
             <Link
               to={card.path}
               className="card-hover group flex w-full flex-col p-6 hover:border-drop/40"
