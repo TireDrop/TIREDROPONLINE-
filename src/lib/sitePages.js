@@ -183,6 +183,12 @@ export const STATIC_PAGES = [
     text: "The Sunrise shop on West Oakland Park Blvd: address, hours and directions.",
   },
   {
+    path: "/brands",
+    title: "Tire and wheel brands",
+    keywords: "brands logos continental pirelli toyo nitto hankook falken kumho general wheels tis cragar",
+    text: "The tire and wheel brands in the TireDrop supply network, shown as logos.",
+  },
+  {
     path: "/about",
     title: "About TireDrop",
     keywords: "about company extreme tires who we are",

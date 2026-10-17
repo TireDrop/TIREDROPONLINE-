@@ -126,6 +126,9 @@ const SchedulePage = lazyPage("pages/services/SchedulePage.jsx", () =>
 );
 
 // About & Support
+const BrandsPage = lazyPage("pages/BrandsPage.jsx", () =>
+  import("./pages/BrandsPage.jsx"),
+);
 const AboutPage = lazyPage("pages/support/AboutPage.jsx", () =>
   import("./pages/support/AboutPage.jsx"),
 );
@@ -319,6 +322,7 @@ export default function App() {
             <Route path="/schedule" element={<SchedulePage />} />
 
             {/* About & support */}
+            <Route path="/brands" element={<BrandsPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/locations" element={<LocationsPage />} />
             <Route path="/contact" element={<ContactPage />} />

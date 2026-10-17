@@ -128,6 +128,7 @@ export const NAV = [
       { label: "Shop by Vehicle", to: "/tires?search=vehicle" },
       { label: "Shop by Tire Size", to: "/tires?search=size" },
       { label: "Tire Brands", to: "/tires?view=brands" },
+      { label: "Brand Logos", to: "/brands" },
       { label: "Commercial & Fleet", to: "/commercial-tires" },
     ],
   },
