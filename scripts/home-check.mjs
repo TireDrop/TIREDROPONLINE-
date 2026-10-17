@@ -35,6 +35,7 @@ const ORDER = [
   "trust",
   "shop",
   "how",
+  "network",
   "install",
   "tools",
   "learn",

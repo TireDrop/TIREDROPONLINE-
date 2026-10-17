@@ -1,9 +1,11 @@
 import React, { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  ArrowLeftRight,
   ArrowRight,
   BadgeCheck,
   BookOpen,
+  Boxes,
   Building2,
   CalendarCheck,
   ChevronDown,
@@ -13,14 +15,17 @@ import {
   Gauge,
   ListChecks,
   MapPin,
+  Monitor,
   MousePointerClick,
   PackageCheck,
   Phone,
+  Route,
   Ruler,
   ScanLine,
   Snowflake,
   Store,
   Truck,
+  Warehouse,
   Wrench,
 } from "lucide-react";
 
@@ -54,6 +59,7 @@ import { Seo, Section, SectionHead } from "../components/ui/index.jsx";
  *
  *   find your fit (hero) → why buy here (trust strip) → what to buy (shop)
  *   → how it gets to you (how it works, with the local delivery teaser)
+ *   → the supply network behind it (national reach, figures from our distributor)
  *   → who fits it locally (install band)
  *   → help choosing (free tools) → learn more (guides and posts)
  *   → the rest of the country (nationwide) → last questions (FAQ) → act.
@@ -1003,6 +1009,73 @@ function Learn() {
   );
 }
 
+/* ------------------------------ Supply network ---------------------------- */
+
+// The reach of the national distribution network every order is filled
+// through. The figures are the distributor's own, not TireDrop's fleet, so
+// the band says so and never names the company. The distributor also quotes
+// overnight transfers; that is a delivery-speed promise, which this site does
+// not make (see the FAQ on arrival times), so it is left out.
+const NETWORK = [
+  { Icon: Boxes, big: "Broad", label: "range of tire and wheel brands" },
+  { Icon: Monitor, big: "24/7", label: "visibility into live inventory" },
+  {
+    Icon: ArrowLeftRight,
+    big: "Local + regional",
+    label: "transfers between locations, available in most areas",
+  },
+  { Icon: Warehouse, big: "110+", label: "distribution centers" },
+  { Icon: Truck, big: "900+", label: "delivery vehicles on the road nationwide" },
+  { Icon: Route, big: "40 million", label: "delivery miles logged every year" },
+];
+
+function SupplyNetwork() {
+  return (
+    <section
+      id="supply-network"
+      data-home-section="network"
+      className="section relative overflow-hidden bg-ink-wash text-bone"
+    >
+      <Hairline />
+      <div className="wrap relative">
+        <Head
+          eyebrow="The network behind your order"
+          title="Backed by a national supply network"
+          lede="Every order is filled through a nationwide distribution network. Here is the reach behind it."
+          tone="dark"
+        />
+        <ul className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+          {NETWORK.map(({ Icon, big, label }, i) => (
+            <li
+              key={label}
+              data-reveal
+              style={{ "--rv-i": i }}
+              className="flex items-start gap-4 rounded-card border border-bone/15 bg-bone/[0.04] p-5 sm:p-6"
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-volt/15 text-volt">
+                <Icon size={22} aria-hidden />
+              </span>
+              <div>
+                <p className="font-display text-2xl font-extrabold leading-tight tracking-tight text-bone md:text-[1.75rem]">
+                  {big}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-bone/75">
+                  {label}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-6 text-xs leading-relaxed text-bone/60">
+          Network figures as reported by our distribution partner. Delivery
+          times depend on your address; checkout shows the estimate for your
+          order.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 /* -------------------------------- Nationwide ------------------------------ */
 
 function Nationwide() {
@@ -1218,6 +1291,7 @@ export default function HomePage() {
         <TrustBar />
         <Shop />
         <HowItWorks />
+        <SupplyNetwork />
         <InstallBand />
         <ToolsBand />
         <Learn />
