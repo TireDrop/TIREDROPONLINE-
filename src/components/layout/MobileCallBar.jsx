@@ -55,10 +55,14 @@ export default function MobileCallBar() {
           // that outranks a plain utility, and alone in the row it would
           // shrink to that.
           className={`${action ? "btn-ghost-light flex-[2]" : "btn-primary flex-1"} !min-h-[46px] min-w-0 whitespace-nowrap px-3 py-3 text-[15px]`}
+          // WCAG 2.5.3: with no `action` the visible text is "Call <phone>",
+          // which a longer label would not contain, so the text is the name.
           aria-label={
-            es
-              ? `Llamar a TireDrop al ${BUSINESS.phone}`
-              : `Call TireDrop at ${BUSINESS.phone}`
+            !action
+              ? undefined
+              : es
+                ? `Llamar a TireDrop al ${BUSINESS.phone}`
+                : `Call TireDrop at ${BUSINESS.phone}`
           }
         >
           <Phone size={17} aria-hidden />

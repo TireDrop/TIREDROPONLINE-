@@ -255,7 +255,6 @@ export default function ProductCard({ product, installed = false }) {
                 type="button"
                 onClick={addSet}
                 className="btn-primary btn-sm min-h-[44px] w-full px-2 sm:px-4"
-                aria-label={`Add a set of ${SET_SIZE} ${product.brand} ${product.model} to the cart`}
               >
                 {added ? (
                   <>
@@ -268,6 +267,13 @@ export default function ProductCard({ product, installed = false }) {
                     <span className="sm:hidden">Add 4</span>
                     <span className="hidden sm:inline">
                       Add set of {SET_SIZE}
+                    </span>
+                    {/* WCAG 2.5.3: the name must start with the visible text,
+                        so the product rides along as hidden text, not an
+                        aria-label that rewrites the words. */}
+                    <span className="sr-only">
+                      {" "}
+                      {product.brand} {product.model}
                     </span>
                   </>
                 )}
