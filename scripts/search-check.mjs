@@ -344,7 +344,7 @@ await check("1440 Enter with nothing highlighted: a size goes to the size, anyth
   await h.page.keyboard.press("Enter");
   await h.page.waitForURL(/\/tires\?size=225-45r17/);
   let [search] = await waitEvent(h.page, "search");
-  assert.deepEqual(search, { search_term: "2254517", search_type: "site" });
+  assert.deepEqual(search, { search_term: "2254517", search_type: "site", placement: "header" });
 
   await typeIn(h, "rotation");
   await h.page.keyboard.press("Enter");
