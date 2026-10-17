@@ -319,6 +319,8 @@ export default function HeaderSearch({
     <form
       ref={rootRef}
       role="search"
+      action="/search"
+      method="get"
       onSubmit={submit}
       onBlur={(e) => {
         if (!rootRef.current?.contains(e.relatedTarget)) setOpen(false);
@@ -336,6 +338,7 @@ export default function HeaderSearch({
       <input
         ref={inputRef}
         id={id}
+        name="q"
         type="search"
         role="combobox"
         aria-autocomplete="list"
@@ -358,8 +361,8 @@ export default function HeaderSearch({
           loadPages();
         }}
         onKeyDown={onKeyDown}
-        placeholder="Search sizes, brands, services, guides — 225/45R17"
-        className="field h-11 w-full rounded-full pl-10 pr-24 text-[15px]"
+        placeholder="Search size, e.g. 225/45R17"
+        className="field h-11 w-full rounded-full pl-10 pr-24 text-base md:text-[15px]"
       />
       {/* The button is the input's full 44px height so it is a proper tap
           target; the pill inside keeps the 36px look (4px inset all round). */}

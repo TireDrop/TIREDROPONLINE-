@@ -226,6 +226,10 @@ export default function ChatWidget() {
   const inputRef = useRef(null);
   const listRef = useRef(null);
   const wasOpen = useRef(false);
+  // On a phone the round button would sit over the home hero's headline and
+  // form, so it waits until the hero has scrolled out of view. Pages without
+  // a hero are unaffected (and desktop, where it sits clear of the form).
+  const [overHero, setOverHero] = useState(false);
 
   // The saved conversation is read after hydration, never during render, so
   // the server HTML and the first client render are the same.
@@ -284,6 +288,31 @@ export default function ChatWidget() {
   useEffect(() => {
     if (hidden) setOpen(false);
   }, [hidden]);
+
+  useEffect(() => {
+    setOverHero(false);
+    if (typeof IntersectionObserver === "undefined") return undefined;
+    let io = null;
+    let tries = 0;
+    // The page may still be loading its chunk, so look for the hero a few times.
+    const look = () => {
+      const hero = document.querySelector('[data-home-section="hero"]');
+      if (hero) {
+        // The top margin ignores the strip of hero left under the sticky header.
+        io = new IntersectionObserver(([entry]) => setOverHero(entry.isIntersecting), {
+          rootMargin: "-140px 0px 0px 0px",
+        });
+        io.observe(hero);
+        return true;
+      }
+      return ++tries >= 20;
+    };
+    const timer = look() ? null : setInterval(() => look() && clearInterval(timer), 250);
+    return () => {
+      clearInterval(timer);
+      io?.disconnect();
+    };
+  }, [pathname]);
 
   // Only once the server says the AI is connected (ANTHROPIC_API_KEY set).
   if (hidden || status?.chat !== "on") return null;
@@ -362,12 +391,12 @@ export default function ChatWidget() {
         aria-label={t.launcherLabel}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className={`${lift} fixed right-3 z-40 inline-flex min-h-[48px] items-center gap-2 rounded-full bg-drop px-5 font-display text-[15px] font-bold text-bone shadow-glow transition-colors hover:bg-dive lg:bottom-[calc(var(--compare-tray-h)+1.25rem)] lg:right-5 ${
-          open ? "max-lg:invisible" : ""
+        className={`${lift} fixed right-3 z-40 inline-flex h-12 w-12 items-center justify-center gap-2 rounded-full bg-drop font-display text-[15px] font-bold text-bone shadow-glow transition-colors hover:bg-dive sm:h-auto sm:w-auto sm:min-h-[48px] sm:px-5 lg:bottom-[calc(var(--compare-tray-h)+1.25rem)] lg:right-5 ${
+          open || overHero ? "max-lg:invisible" : ""
         }`}
       >
         <MessageCircle size={20} aria-hidden />
-        {t.launcher}
+        <span className="hidden sm:inline">{t.launcher}</span>
       </button>
 
       {open && (

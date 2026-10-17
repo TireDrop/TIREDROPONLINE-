@@ -208,7 +208,7 @@ export default function ProductCard({ product, installed = false }) {
               {" "}
               · install{" "}
               <span {...NO_TRANSLATE}>+{money(product.installPrice)}</span>
-              /tire
+              /tire (South Florida)
             </span>
           </p>
 

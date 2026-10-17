@@ -50,9 +50,11 @@ function UtilityBar() {
         <span className="flex items-start gap-1.5 text-amber">
           <Truck size={13} aria-hidden className="mt-0.5 shrink-0" />
           <span className="font-display font-bold tracking-[-0.005em]">
-            Free ship-to-store in South Florida ·{" "}
-            <span className="whitespace-nowrap">
-              install from ${INSTALL.priceFrom} {INSTALL.priceUnit}
+            Free shipping to 48 states + DC
+            <span className="hidden sm:inline">
+              {" "}
+              · South Florida install from ${INSTALL.priceFrom}{" "}
+              {INSTALL.priceUnit}
             </span>
           </span>
         </span>
