@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Phone, Ruler } from "lucide-react";
+import { Phone } from "lucide-react";
 
 import {
   Seo,
@@ -10,6 +10,11 @@ import {
   SectionHead,
 } from "../../components/ui/index.jsx";
 import { BUSINESS } from "../../data/business.js";
+import {
+  FITMENT_TOPICS,
+  FITMENT_CHECKLIST,
+  FITMENT_FAQ,
+} from "../../data/wheelFitmentCopy.js";
 
 /**
  * /wheel-fitment: what decides whether a wheel fits, and what we check before
@@ -17,33 +22,6 @@ import { BUSINESS } from "../../data/business.js";
  * Seo component canonicalised to /wheels, so it could never rank by itself;
  * vercel.json 301s the old address here.
  */
-const FITMENT_STEPS = [
-  {
-    title: "1. Bolt pattern",
-    body: "Count the lugs and measure across them — 5x114.3 means five lugs on a 114.3mm circle. It has to match exactly; adapters are a last resort, not a plan.",
-  },
-  {
-    title: "2. Diameter and width",
-    body: "A 20x9 wheel is 20 inches tall and 9 inches wide. Going up in diameter means going down in tire sidewall to keep the overall height close to stock.",
-  },
-  {
-    title: "3. Offset",
-    body: "Offset is how far the mounting face sits from the wheel's centerline. Too little and the tire rubs the fender; too much and it hits the strut or control arm.",
-  },
-  {
-    title: "4. Center bore",
-    body: "The wheel's center hole should sit on the vehicle's hub. When the wheel bore is larger, hub-centric rings fill the gap — they ship with the wheels.",
-  },
-  {
-    title: "5. Brake clearance",
-    body: "Big factory calipers need spoke clearance. We check this before your order is released so nothing ships that will not turn.",
-  },
-  {
-    title: "6. Load rating",
-    body: "Trucks, vans and three-row SUVs need wheels rated for their weight. Passenger-rated wheels on a work truck is how rims crack.",
-  },
-];
-
 export default function WheelFitmentPage() {
   return (
   <>
@@ -64,24 +42,81 @@ export default function WheelFitmentPage() {
     <Section>
       <SectionHead
         eyebrow="Get it right the first time"
-        title="What we check on every wheel order"
-        lede="Send us the year, make, model and trim — plus a photo of the back of your current wheel if you are already running aftermarket."
+        title="How wheel fitment works"
+        lede="Plain-English notes on each measurement. These are general facts, so always confirm against your own vehicle before ordering."
         action={
           <Link to="/wheels" className="btn-outline btn-sm">
             Shop all wheels
           </Link>
         }
       />
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {FITMENT_STEPS.map((step) => (
-          <div key={step.title} className="card p-6">
-            <Ruler size={22} aria-hidden className="mb-3 text-drop" />
-            <h3 className="h3">{step.title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-smoke">
-              {step.body}
-            </p>
-          </div>
+      <div className="max-w-[72ch] space-y-10">
+        {FITMENT_TOPICS.map((t) => (
+          <section key={t.id} id={t.id} aria-labelledby={`${t.id}-h`}>
+            <h2 id={`${t.id}-h`} className="h3">
+              {t.title}
+            </h2>
+            {t.paras.map((p) => (
+              <p key={p.slice(0, 24)} className="mt-3 text-[15px] leading-relaxed text-smoke">
+                {p}
+              </p>
+            ))}
+            {t.links && (
+              <p className="mt-3 text-[15px]">
+                {t.links.map((l) => (
+                  <Link key={l.to} to={l.to} className="link">
+                    {l.label}
+                  </Link>
+                ))}
+              </p>
+            )}
+          </section>
         ))}
+
+        <section id="what-to-send" aria-labelledby="what-to-send-h">
+          <h2 id="what-to-send-h" className="h3">
+            What to send us
+          </h2>
+          <p className="mt-3 text-[15px] leading-relaxed text-smoke">
+            Send this through our{" "}
+            <Link to="/contact" className="link">
+              contact page
+            </Link>{" "}
+            or by phone.
+          </p>
+          <ul className="mt-3 list-disc space-y-1.5 pl-5 text-[15px] leading-relaxed text-smoke">
+            {FITMENT_CHECKLIST.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <p className="mt-3 text-[15px] leading-relaxed text-smoke">
+            Free shipping covers the 48 contiguous states and DC; see{" "}
+            <Link to="/shipping" className="link">
+              how shipping works
+            </Link>
+            . Fitting is available at our South Florida shop only; see{" "}
+            <Link to="/install" className="link">
+              installation
+            </Link>
+            .
+          </p>
+        </section>
+
+        <section id="faq" aria-labelledby="faq-h">
+          <h2 id="faq-h" className="h3">
+            Wheel fitment questions
+          </h2>
+          <dl className="mt-3 space-y-4">
+            {FITMENT_FAQ.map((f) => (
+              <div key={f.q}>
+                <dt className="text-[15px] font-bold text-ink">{f.q}</dt>
+                <dd className="m-0 mt-1 text-[15px] leading-relaxed text-smoke">
+                  {f.a}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
       </div>
 
       <div className="card mt-10 flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
@@ -101,8 +136,8 @@ export default function WheelFitmentPage() {
           <Link to="/wheel-offset-calculator" className="btn-outline btn-sm">
             Wheel offset check
           </Link>
-          <Link to="/shipping" className="btn-outline btn-sm">
-            How shipping works
+          <Link to="/contact" className="btn-outline btn-sm">
+            Contact us
           </Link>
         </div>
       </div>
