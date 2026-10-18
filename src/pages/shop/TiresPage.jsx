@@ -20,7 +20,7 @@ import { ShoppingForBar } from "../../components/shop/Fitment.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
 import SizeQuoteForm from "../../components/shop/SizeQuoteForm.jsx";
 import { InstalledPriceToggle } from "../../components/shop/InstalledPrice.jsx";
-import { TireArt } from "../../components/shop/ProductArt.jsx";
+import BrandWall from "../../components/brands/BrandWall.jsx";
 import {
   TIRES,
   TIRE_CATEGORIES,
@@ -53,13 +53,11 @@ import {
   partialConflicts,
   searchTitle,
   selectionKey,
-  slug,
   serializeTiresQuery,
   spellingIn,
 } from "../../lib/tiresUrl.js";
 import { useVehicle } from "../../context/VehicleContext.jsx";
 import { useTireSearch } from "../../data/useApi.js";
-import { money } from "../../context/CartContext.jsx";
 import { trackEvent } from "../../lib/analytics.js";
 
 // Tires sell as sets of four, so the price sorts are sorted on the set — the
@@ -518,27 +516,17 @@ export default function TiresPage() {
     el.querySelector("select, input")?.focus({ preventScroll: true });
   }, [changing, changer.nonce]);
 
-  const brandGroups = useMemo(() => {
-    const map = new Map();
-    TIRES.forEach((t) => {
-      const entry = map.get(t.brand) || { brand: t.brand, items: [] };
-      entry.items.push(t);
-      map.set(t.brand, entry);
-    });
-    return [...map.values()].sort((a, b) => a.brand.localeCompare(b.brand));
-  }, []);
-
   if (view === "brands") {
     return (
       <>
         <Seo
-          title="Tire Brands"
-          description={`${brandSentence} tires from TireDrop, shipped free to the 48 contiguous states and DC.`}
+          title="Tire and Wheel Brands"
+          description="Browse tire and wheel brands at TireDrop. Filter by tires, wheels or commercial, or search by name. Free shipping to the 48 contiguous states and DC."
         />
         <PageHero
-          eyebrow="Tires"
-          title="Shop Tires by Brand"
-          lede={`${brandSentence} tires in one catalog, shipped direct from a distributor warehouse to the 48 contiguous states and DC.`}
+          eyebrow="Shop by brand"
+          title="Tire and wheel brands"
+          lede="Filter by tires, wheels or commercial, or search for a brand by name."
         />
         <Breadcrumbs
           trail={[{ label: "Tires", to: "/tires" }, { label: "Brands" }]}
@@ -546,43 +534,29 @@ export default function TiresPage() {
         <Section>
           <SectionHead
             eyebrow="Brands"
-            title="Pick a brand"
-            lede="Tap any brand to see every size and model we can ship."
+            title="Brand logos"
+            lede="Tires first, then wheels, each group A to Z."
             action={
-              <Link to="/tires" className="btn-outline btn-sm">
-                Shop all tires
-              </Link>
+              <div className="flex flex-wrap gap-2">
+                <Link to="/tires" className="btn-outline btn-sm">
+                  Shop all tires
+                </Link>
+                <Link to="/wheels" className="btn-outline btn-sm">
+                  Shop all wheels
+                </Link>
+              </div>
             }
           />
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {brandGroups.map(({ brand, items }) => {
-              const from = Math.min(...items.map((i) => i.price));
-              const categories = [...new Set(items.map((i) => i.category))];
-              return (
-                <Link
-                  key={brand}
-                  to={`/tires?brand=${slug(brand)}`}
-                  className="card-hover flex items-center gap-4 p-5"
-                >
-                  <TireArt
-                    accent={items[0].accent}
-                    size={84}
-                    label={`${brand} tires`}
-                    className="shrink-0"
-                  />
-                  <div className="min-w-0">
-                    <h3 className="h3">{brand}</h3>
-                    <p className="mt-1 text-xs text-smoke">
-                      {items.length} model{items.length === 1 ? "" : "s"} ·{" "}
-                      {categories.join(", ")}
-                    </p>
-                    <p className="tnum mt-2 font-display text-sm font-bold text-drop">
-                      From {money(from)} each
-                    </p>
-                  </div>
-                </Link>
-              );
-            })}
+          <BrandWall />
+          <div className="mt-10 max-w-[78ch] space-y-2 text-[13px] text-smoke">
+            <p>
+              Brand names and logos are trademarks of their owners and appear
+              here to identify the products we sell.
+            </p>
+            <p>
+              Free shipping to the 48 contiguous states and DC. Installation is
+              South Florida only.
+            </p>
           </div>
         </Section>
       </>
