@@ -47,6 +47,7 @@ import { STATE_PAGES_LIVE, getState, statePath } from "../data/stateList.js";
 // inline SVG, no request and no location lookup on the home page.
 import HUB_MINI from "../data/deliveryHubsMini.generated.json";
 import ProductCard from "../components/shop/ProductCard.jsx";
+import BrandStrip from "../components/home/BrandStrip.jsx";
 import ScanTireButton from "../components/shop/ScanTireButton.jsx";
 import SearchPanel from "../components/shop/SearchPanel.jsx";
 import { searchTires } from "../data/api.js";
@@ -57,7 +58,8 @@ import { Seo, Section, SectionHead } from "../components/ui/index.jsx";
 /*
  * The home page reads top to bottom as one story:
  *
- *   find your fit (hero) → why buy here (trust strip) → what to buy (shop)
+ *   find your fit (hero) → why buy here (trust strip) → brands (logo strip)
+ *   → what to buy (shop)
  *   → how it gets to you (how it works, with the local delivery teaser)
  *   → the supply network behind it (national reach, figures from our distributor)
  *   → who fits it locally (install band)
@@ -1289,6 +1291,7 @@ export default function HomePage() {
       <div ref={ref} className="contents">
         <Hero />
         <TrustBar />
+        <BrandStrip />
         <Shop />
         <HowItWorks />
         <SupplyNetwork />

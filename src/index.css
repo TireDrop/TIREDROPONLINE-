@@ -439,6 +439,78 @@
   transform: translate3d(0, 18px, 0);
 }
 
+
+/* ---------- Home brand strip (src/components/home/BrandStrip.jsx) ----------
+   Two identical lists side by side, slid left by exactly one list's width, so
+   the loop has no jump. Fixed chip size, so nothing shifts. Pauses on hover
+   and keyboard focus. Reduced motion: no movement, one wrapped static list. */
+.brand-rail {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.brand-track {
+  display: flex;
+  width: max-content;
+  animation: brand-slide 70s linear infinite;
+}
+.brand-track:hover,
+.brand-track:focus-within {
+  animation-play-state: paused;
+}
+.brand-list {
+  display: flex;
+  flex: none;
+  gap: 14px;
+  padding-right: 14px;
+  margin: 0;
+  list-style: none;
+}
+.brand-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 168px;
+  height: 76px;
+  padding: 10px 14px;
+  overflow: hidden;
+  border: 1px solid rgb(7 14 26 / 0.09);
+  border-radius: 6px;
+}
+.brand-chip img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+@keyframes brand-slide {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-rail {
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .brand-track {
+    animation: none;
+    display: block;
+    width: auto;
+    padding-inline: 1.25rem;
+  }
+  .brand-list {
+    flex: initial;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-right: 0;
+  }
+  .brand-dup {
+    display: none;
+  }
+}
+
 /* ---------- Home "How it works" story (HomePage.jsx, HowItWorks) ----------
    The finished state is the resting one: line filled, check shown, nothing
    moving. While the list carries `how-play` (added only once it is on screen,

@@ -12,6 +12,7 @@ SEO file headers and `vite.config.js` all name current paths.
 | Task | Look here |
 | --- | --- |
 | A page's copy (wording, headings) | `src/pages/<area>/*Page.jsx` (areas: `shop`, `services`, `support`, `tools`, `shipping`, `learn`, `blog`; the home, install, shipping, search and 404 pages sit at `src/pages/`) |
+| Home page brand strip (logos, order) | `src/components/home/BrandStrip.jsx`, order and files `src/data/brandStrip.js`, logos `public/brand/logos/`, CSS `.brand-*` in `src/index.css`; docs `docs/content/brand-strip-ranking.md`, `brand-logos.md` |
 | Header, footer, mobile call bar, search box | `src/components/layout/` |
 | Shared business facts (name, phone, email, address, hours) | `src/data/business.js` |
 | Service area, towns, counties, ZIPs | `src/data/serviceArea.js`; city landing pages `src/data/cityPages.js`; state shipping pages `src/data/statePages.js`, `src/data/stateList.js` |

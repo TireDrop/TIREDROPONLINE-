@@ -33,6 +33,7 @@ const PORT = Number(process.env.HOME_PORT ?? 4352);
 const ORDER = [
   "hero",
   "trust",
+  "brands",
   "shop",
   "how",
   "network",
