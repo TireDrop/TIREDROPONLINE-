@@ -743,3 +743,48 @@
     }
   }
 }
+
+
+/* ---------- Brands page wall (src/components/brands/BrandWall.jsx) ----------
+   Two columns on phones, then as many 240px tiles as fit. Tiles lift on hover
+   (not low-res stand-ins); tiles that start below the first screen wait at
+   .brand-pre and rise in as they arrive. Reduced motion: no lift, no rise. */
+.brand-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+@media (min-width: 481px) {
+  .brand-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+  }
+}
+.brand-tile {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease,
+    opacity 0.5s ease;
+}
+.brand-tile:not(.brand-tile-static):hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px -12px rgb(10 99 232 / 0.45);
+  border-color: rgb(10 99 232);
+}
+.brand-tile-static:hover {
+  border-color: rgb(10 99 232);
+}
+.brand-tile.brand-pre {
+  opacity: 0;
+  transform: translateY(18px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-tile {
+    transition: none;
+  }
+  .brand-tile:not(.brand-tile-static):hover {
+    transform: none;
+  }
+  .brand-tile.brand-pre {
+    opacity: 1;
+    transform: none;
+  }
+}
