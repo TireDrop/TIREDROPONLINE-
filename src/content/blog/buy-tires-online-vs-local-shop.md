@@ -59,7 +59,7 @@ author: "TireDrop Team, Extreme Tires, Sunrise FL"
 
 We sell tires online and we fit them in a shop, so we see this question from both sides. The honest answer is that neither is always better. Each one is strong at different things, and the right choice depends on what you care about and where you live.
 
-Here are the trade-offs, how to compare cost without being fooled by a tire-only price, and the steps that matter no matter where you buy.
+Here are the trade-offs, how to compare cost without being fooled by a tire-only price, and the steps that matter no matter where you buy. If you decide to order, you can [shop tires by size](/tires) and see [how our installation works](/install) before you check out.
 
 ## Where buying online is strong
 

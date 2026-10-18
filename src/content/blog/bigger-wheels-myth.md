@@ -63,7 +63,7 @@ author: "TireDrop Team, Extreme Tires, Sunrise FL"
 
 Bigger wheels look great. Look at almost any performance car or upscale trim and the wheels get bigger as the price goes up, so it's natural to assume bigger wheels with thinner tires simply drive better.
 
-They do drive *differently*. Whether that's better depends on what you want from the car, and on South Florida roads, the trade-offs are worth knowing before you spend money on a wheel upgrade.
+They do drive *differently*. Whether that's better depends on what you want from the car, and on South Florida roads, the trade-offs are worth knowing before you spend money on a wheel upgrade. If you do go bigger, [check wheel fitment](/wheel-fitment) first and then [browse wheels](/wheels).
 
 ## What "plus sizing" means
 

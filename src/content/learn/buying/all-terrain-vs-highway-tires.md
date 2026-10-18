@@ -61,7 +61,7 @@ author: "TireDrop Team, Extreme Tires, Sunrise FL"
 
 ## Three letters, three jobs
 
-Truck and SUV tires mostly fall into three families, and the abbreviations on product pages tell you which one you're looking at.
+Truck and SUV tires mostly fall into three families, and the abbreviations on product pages tell you which one you're looking at. To see them in practice, our [truck and SUV tires](/tires) include all-terrain options such as the [Nitto Ridge Grappler](/tires/nitto-ridge-grappler-285-70r17).
 
 - **H/T, highway terrain.** Built for paved roads.
 - **A/T, all-terrain.** Built to split the difference between pavement and dirt, gravel or grass.

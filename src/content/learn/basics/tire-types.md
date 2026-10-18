@@ -62,7 +62,7 @@ author: "TireDrop Team, Extreme Tires, Sunrise FL"
 
 ## Three questions sort every tire
 
-Tire listings throw a lot of labels at you: all-season, grand touring, A/T, UHP, run-flat, directional. They make more sense once you see they answer three different questions:
+Tire listings throw a lot of labels at you: all-season, grand touring, A/T, UHP, run-flat, directional. They make more sense once you see they answer three different questions (you can see them on the [tire catalog](/tires) filters, and work vans have their own [commercial tire](/commercial-tires) options):
 
 1. **What climate is it built for?** Summer, winter, all-season or all-weather.
 2. **What kind of driving is it built for?** Touring, performance or all-terrain, plus light truck construction for heavy loads.

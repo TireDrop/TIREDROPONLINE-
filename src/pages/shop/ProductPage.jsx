@@ -30,6 +30,7 @@ import {
 } from "../../components/ui/index.jsx";
 import ProductArt from "../../components/shop/ProductArt.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
+import ProductRelatedLinks from "../../components/shop/ProductRelatedLinks.jsx";
 import {
   InstalledPriceLines,
   InstalledPriceToggle,
@@ -905,6 +906,8 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
           </div>
         </div>
       </Section>
+
+      <ProductRelatedLinks product={product} />
 
       {/* Related */}
       {related.length > 0 && (
