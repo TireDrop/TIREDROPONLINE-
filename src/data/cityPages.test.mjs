@@ -219,8 +219,9 @@ test("hub and roadside copy: no banned words in the page source", () => {
     assert.ok(!BANNED_WORDS.test(src), `${name}: ${src.match(BANNED_WORDS)?.[0]}`);
     assert.ok(!/\b24\s*\/\s*7\b/.test(src), `${name}: 24/7`);
   }
-  // Hub H1: "Mobile Tire Installation" and South Florida.
-  assert.match(HUB, /title="Mobile Tire Installation in South Florida"/);
+  // Hub H1 names South Florida and says "mobile tire service", the phrase
+  // South Florida searches use (docs/audits/2026-10-18-site-seo-audit.md).
+  assert.match(HUB, /title="Mobile tire service in South Florida"/);
 });
 
 /* ------------------------------ wiring ------------------------------ */

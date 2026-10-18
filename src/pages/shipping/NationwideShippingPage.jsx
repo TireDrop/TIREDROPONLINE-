@@ -118,14 +118,14 @@ export default function NationwideShippingPage() {
   return (
     <>
       <Seo
-        title="Tires Shipped Free Nationwide (48 states + DC)"
+        title="Tires Shipped to Your House: Free, 48 States + DC"
         description={`Buy tires online from ${BUSINESS.name} and they ship free to ${BUSINESS.shipping.area}. Fitment checked, tracking emailed, mounted by any local shop. State tire guides inside.`}
       />
       <Breadcrumbs trail={[{ label: "Shipping to 48 States + DC" }]} />
 
       <PageHero
         eyebrow="Free shipping · 48 states + DC"
-        title="Tires Shipped Free Nationwide"
+        title="Tires shipped to your house, free"
         lede={`Buy tires online from ${BUSINESS.name} and they ship free to any street address in ${BUSINESS.shipping.area}, with no order minimum. Pick by vehicle or size, let us confirm the fit, and have any local shop mount them. In South Florida, we can install them too.`}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">

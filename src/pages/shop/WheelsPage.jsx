@@ -1,9 +1,8 @@
 import React, { useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import {
   CircleDot,
   Phone,
-  Ruler,
   SearchX,
   SlidersHorizontal,
   X,
@@ -45,32 +44,6 @@ const PRICE_MIN = Math.min(...WHEELS.map((w) => w.price));
 const PRICE_MAX = Math.max(...WHEELS.map((w) => w.price));
 const FINISHES = [...new Set(WHEELS.map((w) => w.finish))].sort();
 
-const FITMENT_STEPS = [
-  {
-    title: "1. Bolt pattern",
-    body: "Count the lugs and measure across them — 5x114.3 means five lugs on a 114.3mm circle. It has to match exactly; adapters are a last resort, not a plan.",
-  },
-  {
-    title: "2. Diameter and width",
-    body: "A 20x9 wheel is 20 inches tall and 9 inches wide. Going up in diameter means going down in tire sidewall to keep the overall height close to stock.",
-  },
-  {
-    title: "3. Offset",
-    body: "Offset is how far the mounting face sits from the wheel's centerline. Too little and the tire rubs the fender; too much and it hits the strut or control arm.",
-  },
-  {
-    title: "4. Center bore",
-    body: "The wheel's center hole should sit on the vehicle's hub. When the wheel bore is larger, hub-centric rings fill the gap — they ship with the wheels.",
-  },
-  {
-    title: "5. Brake clearance",
-    body: "Big factory calipers need spoke clearance. We check this before your order is released so nothing ships that will not turn.",
-  },
-  {
-    title: "6. Load rating",
-    body: "Trucks, vans and three-row SUVs need wheels rated for their weight. Passenger-rated wheels on a work truck is how rims crack.",
-  },
-];
 
 const listParam = (params, key) =>
   (params.get(key) || "").split(",").filter(Boolean);
@@ -223,80 +196,19 @@ export default function WheelsPage() {
       d: "",
     });
 
-  if (view === "fitment") {
-    return (
-      <>
-        <Seo
-          title="Wheel Fitment Guidance"
-          description="Bolt pattern, offset, center bore and load rating explained — how TireDrop specs wheels that actually fit your vehicle before they ship."
-        />
-        <PageHero
-          eyebrow="Wheels"
-          title="Fitment Guidance"
-          lede="Six numbers decide whether a wheel bolts on and clears everything. Here is what each one means, and what we check before anything ships."
-        />
-        <Breadcrumbs
-          trail={[{ label: "Wheels", to: "/wheels" }, { label: "Fitment" }]}
-        />
-        <Section>
-          <SectionHead
-            eyebrow="Get it right the first time"
-            title="What we check on every wheel order"
-            lede="Send us the year, make, model and trim — plus a photo of the back of your current wheel if you are already running aftermarket."
-            action={
-              <Link to="/wheels" className="btn-outline btn-sm">
-                Shop all wheels
-              </Link>
-            }
-          />
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {FITMENT_STEPS.map((step) => (
-              <div key={step.title} className="card p-6">
-                <Ruler size={22} aria-hidden className="mb-3 text-drop" />
-                <h3 className="h3">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-smoke">
-                  {step.body}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="card mt-10 flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h2 className="h3">Not sure what fits?</h2>
-              <p className="mt-1 text-sm text-smoke">
-                Call {BUSINESS.phone} with your vehicle details and we will spec
-                the package — wheels and tires together, shipped to you or free
-                to our South Florida shop for fitting.
-              </p>
-            </div>
-            <div className="flex shrink-0 flex-wrap gap-3">
-              <a href={BUSINESS.phoneHref} className="btn-primary btn-sm">
-                <Phone size={16} aria-hidden />
-                {BUSINESS.phone}
-              </a>
-              <Link to="/wheel-offset-calculator" className="btn-outline btn-sm">
-                Wheel offset check
-              </Link>
-              <Link to="/shipping" className="btn-outline btn-sm">
-                How shipping works
-              </Link>
-            </div>
-          </div>
-        </Section>
-      </>
-    );
-  }
+  // Fitment guidance has its own address, /wheel-fitment, so it can rank on
+  // its own (vercel.json sends the old ?view=fitment address there too).
+  if (view === "fitment") return <Navigate to="/wheel-fitment" replace />;
 
   return (
     <>
       <Seo
-        title="Shop Wheels"
-        description="Alloy, forged, off-road and truck wheels from Enkei, Method, Fuel, Vossen and more, shipped to the 48 contiguous states and DC or free to our South Florida shop."
+        title="Buy Wheels Online: Alloy, Forged and Off-Road"
+        description="Buy wheels online: alloy, forged, off-road and truck wheels, fitment-checked before they ship, shipped to the 48 contiguous states and DC or free to our South Florida shop."
       />
       <PageHero
         eyebrow="Wheels"
-        title="Shop Wheels"
+        title="Buy wheels online"
         lede={`Cast, flow-formed and forged wheels, fitment-checked before they ship. Send them free to your address in the 48 contiguous states or DC, or to our South Florida shop, where we fit them (tire installation from $${INSTALL.priceFrom} ${INSTALL.priceUnit}).`}
       />
       <Breadcrumbs trail={[{ label: "Wheels" }]} />
@@ -317,7 +229,7 @@ export default function WheelsPage() {
                 Wheel fitment comes down to bolt pattern, offset and brake
                 clearance. Call us and we will confirm the package before
                 anything ships — see our{" "}
-                <Link to="/wheels?view=fitment" className="text-drop underline">
+                <Link to="/wheel-fitment" className="text-drop underline">
                   fitment guidance
                 </Link>
                 .
@@ -471,7 +383,7 @@ export default function WheelsPage() {
                       Reset search
                     </Link>
                     <Link
-                      to="/wheels?view=fitment"
+                      to="/wheel-fitment"
                       className="btn-outline btn-sm"
                     >
                       Fitment guidance

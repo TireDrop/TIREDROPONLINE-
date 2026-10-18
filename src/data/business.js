@@ -137,7 +137,7 @@ export const NAV = [
     children: [
       { label: "Shop All Wheels", to: "/wheels" },
       { label: "Shop by Vehicle", to: "/wheels?search=vehicle" },
-      { label: "Fitment Guidance", to: "/wheels?view=fitment" },
+      { label: "Fitment Guidance", to: "/wheel-fitment" },
     ],
   },
   {

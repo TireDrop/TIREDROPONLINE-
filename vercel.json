@@ -87,7 +87,13 @@
     {
       "source": "/tires",
       "has": [{ "type": "query", "key": "view", "value": "brands" }],
-      "destination": "/brands",
+      "destination": "/brands?",
+      "statusCode": 301
+    },
+    {
+      "source": "/wheels",
+      "has": [{ "type": "query", "key": "view", "value": "fitment" }],
+      "destination": "/wheel-fitment?",
       "statusCode": 301
     },
     { "source": "/coupons", "destination": "/tires", "statusCode": 301 },

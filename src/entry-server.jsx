@@ -8,6 +8,7 @@
 import React from "react";
 import { renderToPipeableStream } from "react-dom/server";
 import { StaticRouter } from "react-router-dom/server";
+import { Buffer } from "node:buffer";
 import { Writable } from "node:stream";
 
 import App from "./App.jsx";
@@ -95,14 +96,25 @@ export function render(url) {
   resetUsedPages();
 
   return new Promise((resolve, reject) => {
-    let html = "";
+    // Collect the raw bytes and decode once at the end, so a multi-byte
+    // character split across two chunks still decodes whole.
+    const chunks = [];
     const sink = new Writable({
       write(chunk, _enc, done) {
-        html += chunk.toString();
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
         done();
       },
     });
-    sink.on("finish", () => resolve({ html, head, pages: usedPages() }));
+    sink.on("finish", () => {
+      // React 18's streaming renderer fills a fixed-size byte buffer; when a
+      // multi-byte character (an em dash) does not fit at the end of one, the
+      // encoder stops short and the unused bytes come out as NULs in front of
+      // it. The source and bundles are clean (checked 2026-10-18), so the
+      // zeros carry nothing and are dropped. scripts/prerender.mjs fails the
+      // build if one ever gets through.
+      const html = Buffer.concat(chunks).toString("utf8").replace(/\0+/g, "");
+      resolve({ html, head, pages: usedPages() });
+    });
 
     const stream = renderToPipeableStream(
       <React.StrictMode>

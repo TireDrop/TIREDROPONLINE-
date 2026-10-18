@@ -11,8 +11,5 @@ Disallow: /cart
 # The site's own JSON API (Vercel functions), not pages.
 Disallow: /api/
 
-# Filter and view states of pages that are already listed on their own.
-Disallow: /*?search=
-Disallow: /*?view=
 
 Sitemap: https://tiredroponline.com/sitemap.xml
