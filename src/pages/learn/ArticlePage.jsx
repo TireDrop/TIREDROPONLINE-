@@ -21,6 +21,11 @@ import {
   getLearnArticles,
 } from "../../content/index.js";
 import { ArticleDetail } from "../../content/details.js";
+import {
+  BLOG_IMAGE_SIZE,
+  blogImageAlt,
+  blogImageSrc,
+} from "../../data/blogImages.js";
 import NotFoundPage from "../NotFoundPage.jsx";
 
 /** Up to four others from the same hub (or category), for "Related reading". */
@@ -65,6 +70,8 @@ export default function ArticlePage({ section }) {
 
 function ArticleView({ article }) {
   const { rendered } = article;
+  // Blog posts only; Learn guides have no hero picture.
+  const heroSrc = article.section === "blog" ? blogImageSrc(article.slug) : null;
 
   // Visible breadcrumbs, and the BreadcrumbList pages between Home and this
   // one (Seo adds both ends).
@@ -140,6 +147,19 @@ function ArticleView({ article }) {
         <div className="bg-bone">
           <div className="wrap grid gap-10 py-10 md:py-14 lg:grid-cols-[minmax(0,1fr)_260px] lg:gap-14">
             <div className="min-w-0 max-w-[72ch]">
+              {heroSrc && (
+                <figure className="mb-8">
+                  <img
+                    src={heroSrc}
+                    alt={blogImageAlt(article.slug)}
+                    width={BLOG_IMAGE_SIZE.width}
+                    height={BLOG_IMAGE_SIZE.height}
+                    fetchPriority="high"
+                    decoding="async"
+                    className="aspect-video w-full rounded-card object-cover shadow-card"
+                  />
+                </figure>
+              )}
               <TableOfContents toc={rendered.toc} extra={extraToc} />
 
               <ArticleBody segments={rendered.segments} demo={article.demo} />

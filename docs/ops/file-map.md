@@ -37,6 +37,7 @@ SEO file headers and `vite.config.js` all name current paths.
 | Site search | `src/lib/siteSearch.js`, `searchData.js`, `sitePages.js`, `src/components/layout/HeaderSearch.jsx`, `src/pages/SearchPage.jsx` |
 | Chatbot knowledge (what the site chat answers from) | `scripts/build-chat-knowledge.mjs` writes `api/_lib/chatKnowledge.generated.json` after the prerender; freshness `npm run check:chat-kb`, test `npm run test:chat-kb` |
 | Blog posts | `src/content/blog/*.md` (loaded by `src/content/index.js`) |
+| Blog hero pictures (post page + /blog card thumbnails) | `public/brand/blog/<slug>.webp` (1344x752); slug to alt text in `src/data/blogImages.js`; drawn by `ArticleCard` in `src/components/content/parts.jsx` and `ArticleView` in `src/pages/learn/ArticlePage.jsx`; `npm run test:content` checks the manifest and files agree |
 | Learn guides and hubs | `src/content/learn/<hub>/*.md`, hub list `src/content/learn/hubs.json`, loader `src/content/index.js`, `core.js`, `store.js`, `node.js` |
 | Learn interactive demos | `src/components/demos/` (logic in `*Logic.js`, registry `index.js`, sources `sources.js`) |
 | Tool pages (size finder, tire check, find my tires) | `src/pages/tools/`, `src/components/demos/toolPages.js` |

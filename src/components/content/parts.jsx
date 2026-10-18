@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { BUSINESS } from "../../data/business.js";
 import { getService } from "../../data/services.js";
+import { BLOG_IMAGE_SIZE, blogImageSrc } from "../../data/blogImages.js";
 import { Badge } from "../ui/index.jsx";
 import { getHub, isExternalUrl, isLive } from "../../content/index.js";
 import { TOOL_PAGES } from "../demos/toolPages.js";
@@ -71,12 +72,26 @@ export function ArticleCard({
   showDate = false,
   headingAs: Heading = "h3",
 }) {
+  // Blog posts with a hero picture get it as a full-width thumbnail on top of
+  // the card. It is decorative here (the title carries the meaning), so alt="".
+  const thumb = article.section === "blog" ? blogImageSrc(article.slug) : null;
   return (
     <li className="h-full">
       <Link
         to={article.path}
-        className="card-hover group flex h-full flex-col p-5 md:p-6"
+        className="card-hover group flex h-full flex-col overflow-hidden p-5 md:p-6"
       >
+        {thumb && (
+          <img
+            src={thumb}
+            alt=""
+            width={BLOG_IMAGE_SIZE.width}
+            height={BLOG_IMAGE_SIZE.height}
+            loading="lazy"
+            decoding="async"
+            className="-mx-5 -mt-5 mb-4 aspect-video w-[calc(100%+2.5rem)] max-w-none object-cover md:-mx-6 md:-mt-6 md:w-[calc(100%+3rem)]"
+          />
+        )}
         <div className="mb-3 flex flex-wrap items-center gap-2">
           {showSection && (
             <span className="eyebrow">{sectionLabel(article)}</span>
