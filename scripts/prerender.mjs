@@ -272,6 +272,9 @@ for (const { path } of routes) {
   if (pages.includes("pages/NotFoundPage.jsx"))
     problems.push(`${path}: rendered the 404 page. Does App.jsx have a <Route> for it?`);
   if (!/<h1[\s>]/.test(html)) problems.push(`${path}: no <h1>`);
+  // A NUL in the markup is invalid HTML; it came from decoding the render
+  // stream chunk by chunk (src/entry-server.jsx), and must never come back.
+  if (html.includes("\0")) problems.push(`${path}: contains a NUL byte`);
   if (text.length < MIN_TEXT)
     problems.push(`${path}: only ${text.length} characters of text`);
   if (!head) {

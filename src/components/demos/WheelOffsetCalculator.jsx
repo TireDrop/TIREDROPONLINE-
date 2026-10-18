@@ -419,7 +419,7 @@ export default function WheelOffsetCalculator() {
           <PhoneCall size={16} aria-hidden="true" className="shrink-0" />
           Call {BUSINESS.phone}
         </a>
-        <a href="/wheels?view=fitment" className={LINK_CLS}>
+        <a href="/wheel-fitment" className={LINK_CLS}>
           Wheel fitment guidance
           <ArrowRight size={16} aria-hidden="true" className="shrink-0" />
         </a>

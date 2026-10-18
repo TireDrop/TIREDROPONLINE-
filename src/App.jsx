@@ -64,6 +64,9 @@ const ProductPage = lazyPage("pages/shop/ProductPage.jsx", () =>
 const TireSkuPage = lazyPage("pages/shop/TireSkuPage.jsx", () =>
   import("./pages/shop/TireSkuPage.jsx"),
 );
+const WheelFitmentPage = lazyPage("pages/shop/WheelFitmentPage.jsx", () =>
+  import("./pages/shop/WheelFitmentPage.jsx"),
+);
 const BrandsPage = lazyPage("pages/BrandsPage.jsx", () =>
   import("./pages/BrandsPage.jsx"),
 );
@@ -295,6 +298,7 @@ export default function App() {
             />
             <Route path="/tools/:tool" element={<ToolRedirect />} />
             <Route path="/brands" element={<BrandsPage />} />
+            <Route path="/wheel-fitment" element={<WheelFitmentPage />} />
             <Route path="/commercial-tires" element={<CommercialTiresPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
