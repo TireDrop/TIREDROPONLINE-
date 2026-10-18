@@ -938,7 +938,7 @@ export default function TireSizeFinderPage() {
   return (
     <>
       <Seo
-        title="Tire Size Finder: what size tires does my car have?"
+        title="Tire Size Finder: What Size Is My Tire?"
         description="Find your exact tire size: scan the tire sticker in your driver's door frame or the size on your tire's sidewall, look up your car by VIN, or type the size. Front and rear sizes for staggered cars."
       />
       <Breadcrumbs trail={[{ label: "Tire Size Finder" }]} />

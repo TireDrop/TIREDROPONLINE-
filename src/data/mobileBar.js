@@ -1,4 +1,4 @@
-import { getService } from "./services.js";
+import { getServiceFacts } from "./serviceFacts.js";
 
 /**
  * What the phone action bar (components/layout/MobileCallBar.jsx) offers on a
@@ -59,7 +59,7 @@ export function mobileBarFor(pathname = "/") {
 
   const service = path.match(/^\/services\/([^/]+)$/);
   if (service) {
-    const found = getService(service[1]);
+    const found = getServiceFacts(service[1]);
     if (found) {
       const install = /installation$/.test(found.slug);
       return {

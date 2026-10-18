@@ -9,7 +9,7 @@
 // FACTS: only what is verified and cited. Every ZIP, road and neighbourhood
 // on the 7 batch 2 pages and the 6 pages added 2026-10-18 has a source line
 // in docs/audits/2026-10-18-city-facts.md; anything unconfirmed is left out
-// (Tamarac still lists no ZIPs). No drive times, no
+// (every city page now lists ZIPs). No drive times, no
 // distances, no arrival times: roads and routes only, and "we confirm an
 // arrival window when we book". Justin (2026-10-01) approved saying a city
 // is close to the shop ("next door", "a short drive") with no minutes or
@@ -174,10 +174,12 @@ export const CITY_PAGES = [
     name: "Tamarac",
     county: "Broward",
     population: 71897,
-    // The research's Tamarac ZIPs are unverified, so none are listed; the ZIP
-    // checker covers it. Roads and neighbourhoods are the Wikipedia ones the
-    // city-depth fact sheet allows (2026-10-04); see docs/audits/2026-10-04-city-depth.md.
-    zips: [],
+    // ZIPs: the four Standard ZIPs on both the Wikipedia infobox and the
+    // zip-codes.com list for Tamarac (2026-10-18, docs/audits/2026-10-18-city-facts.md).
+    // 33320 and 33359 are PO Box ZIPs and stay off the list. Roads and
+    // neighbourhoods are the Wikipedia ones the city-depth fact sheet allows
+    // (2026-10-04); see docs/audits/2026-10-04-city-depth.md.
+    zips: ["33309", "33319", "33321", "33351"],
     areas: [
       "Tamarac Lakes Sections One and Two",
       "Tamarac Lakes North and South",
@@ -190,8 +192,8 @@ export const CITY_PAGES = [
     intro:
       "Tamarac, a Broward County city of 71,897 people at the 2020 Census, is next door to our Extreme Tires shop in Sunrise. Buy tires on TireDrop, choose mobile installation, and a technician in the Extreme Tires van fits them where you live or work in Tamarac: mounted, balanced, lug nuts torqued to spec and pressures set, with your old set hauled away.",
     whereWeWork: [
-      "The neighbourhood isn't what decides coverage. The ZIP code where the car is parked is. Broward ZIP codes often cross city lines, so the city name on an address is a poor guide. If the ZIP is in Miami-Dade, Broward or Palm Beach County, the van comes. Type it into the checker below; checkout and the booking form run the same check.",
-      "Live behind a gate? Give us the gate code, or the name the guardhouse should have on its list, when you book, and check whether your association wants service vehicles registered ahead of time.",
+      "The neighbourhood isn't what decides coverage. The ZIP code where the car is parked is. The main Tamarac ZIP codes are 33309, 33319, 33321 and 33351, and they cross city lines: directories list 33309 with Lauderdale Lakes and Oakland Park, 33319 with Lauderhill and Sunrise, and 33321 and 33351 with Lauderhill (33351 with Sunrise too). All four are Broward County ZIPs, so every one of them is in. If the ZIP is in Miami-Dade, Broward or Palm Beach County, the van comes. Type it into the checker below; checkout and the booking form run the same check.",
+      "One to skip: 33320 and 33359 are Tamarac PO Box ZIPs, with no street address behind them. Book with the ZIP of the place the car will actually be parked. Live behind a gate? Give us the gate code, or the name the guardhouse should have on its list, when you book, and check whether your association wants service vehicles registered ahead of time.",
     ],
     roadside:
       "A flat at home, in a community lot or in a shopping center parking lot in Tamarac doesn't have to wait for a tow. Call during shop hours for flat tire help in Tamarac: the van changes the tire or puts your spare on, and repairs the flat where a repair is possible.",

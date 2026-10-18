@@ -80,7 +80,7 @@ export default function ServiceDetailPage() {
       <Seo
         title={
           service.mobile
-            ? `${service.name} in Miami-Dade, Broward & Palm Beach`
+            ? `${service.name} in South Florida`
             : `${service.name} in ${BUSINESS.shop.city}, FL`
         }
         description={`${service.blurb} From $${service.priceFrom} ${service.priceUnit}. ${

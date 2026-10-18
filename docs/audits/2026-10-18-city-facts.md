@@ -51,6 +51,11 @@ Short names: **WP** = Wikipedia, **ZC** = zip-codes.com city page `https://www.z
 - Powerline Rd (SR 845) crosses Atlantic Blvd in Pompano Beach: https://en.wikipedia.org/wiki/Florida_State_Road_845
 - Sawgrass Expressway links Oakland Park Blvd (exit 3) to Atlantic Blvd (exit 8): https://en.wikipedia.org/wiki/Florida_State_Road_816 and https://www.aaroads.com/guides/fl-869-north (as used in docs/audits/2026-10-04-city-depth.md)
 
+### Tamarac (ZIPs added 2026-10-18, branch `preview/seo-tech-leftovers`)
+- ZIPs 33309, 33319, 33321, 33351. Wikipedia infobox for Tamarac lists "33309, 33319, 33320, 33321, 33351, 33359": https://en.wikipedia.org/wiki/Tamarac,_Florida . zip-codes.com (the Fort Lauderdale page, which says "Tamarac, FL is an Alias Name for the city of Fort Lauderdale, FL") lists six ZIPs with Tamarac as an alias: 33309, 33319, 33321, 33351 Standard, and 33320, 33359 P.O. Box: https://www.zip-codes.com/city/fl-tamarac.asp . The four Standard ZIPs are on both lists, so they are listed; the two PO Box ZIPs are named in the copy only to tell the shopper to skip them. The list we had before (33319, 33321, 33351) is confirmed; 33309 is added by the same two-source rule.
+- Directory aliases in the copy ("33309 with Lauderdale Lakes and Oakland Park", "33319 with Lauderhill and Sunrise", "33321 and 33351 with Lauderhill", 33351 also Sunrise) come from the Alias Names column of zip-codes.com, worded as "directories list". All four are Broward ZIPs, so they pass `isInServiceArea()`.
+- The City of Tamarac's own site and USPS were not fetched (USPS's lookup is an interactive form), so no ZIP rests on them.
+
 ### Lauderhill
 - ZIPs 33311, 33313, 33319, 33351 (33312 and 33321 list Lauderhill in ZC but not in the infobox, so left out); Fort Lauderdale is an accepted name on all four: https://en.wikipedia.org/wiki/Lauderhill,_Florida and https://www.zip-codes.com/city/fl-lauderhill.asp
 - Inverrary is "north of Oakland Park Boulevard and east of University Drive": https://en.wikipedia.org/wiki/Lauderhill,_Florida
