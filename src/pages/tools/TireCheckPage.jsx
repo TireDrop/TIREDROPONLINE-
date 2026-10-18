@@ -701,7 +701,7 @@ export default function TireCheckPage() {
   return (
     <>
       <Seo
-        title="Do I need new tires? Tread depth and tire age checker"
+        title="Tire Tread and Age Checker: Do I Need New Tires?"
         description="Check your tread with a penny, a quarter or a gauge, decode the DOT date code on the sidewall, and get a straight answer on whether your tires need replacing — including when they do not."
       />
       <Breadcrumbs

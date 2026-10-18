@@ -2,8 +2,8 @@
 // actually pay?" for a local shopper, before checkout. A display aid only:
 // it never touches the cart, the checkout or what an order costs.
 //
-// The install price is the catalog's, read from src/data/services.js
-// (getService("tire-installation").priceFrom and priceUnit). It is a "from"
+// The install price is the catalog's, read from src/data/serviceFacts.js
+// (getServiceFacts("tire-installation").priceFrom and priceUnit). It is a "from"
 // price, so every installed figure is labelled "installed from". The van
 // bills the same labor as the bay (/mobile-service), and services.js keeps
 // one price, so there is one line; a separate mobile price would need its
@@ -18,13 +18,13 @@
 // production), and a ?installed=local|off flag previews that. Whatever the
 // default, the visitor's own choice, on or off, always wins.
 
-import { getService } from "../data/services.js";
+import { getServiceFacts } from "../data/serviceFacts.js";
 import { SET_SIZE } from "../data/pricing.js";
 import { INSTALLED_DEFAULT_FOR_LOCAL } from "../data/installedDefault.js";
 import { isInServiceArea } from "../data/serviceArea.js";
 import { fetchApproxLocation } from "./geoLocate.js";
 
-export const INSTALL_SERVICE = getService("tire-installation");
+export const INSTALL_SERVICE = getServiceFacts("tire-installation");
 
 const KEY = "tiredrop.installed.v1";
 

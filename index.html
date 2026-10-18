@@ -25,7 +25,11 @@
         allow_ad_personalization_signals: false,
       });
     </script>
-    <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg" />
+    <!-- /favicon.ico (16, 32 and 48 px, rendered from favicon.svg) is what
+         crawlers and old browsers request by default; modern browsers take
+         the SVG. -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg" sizes="any" />
     <!-- Safari on iOS ignores the SVG favicon, and an SVG cannot be used as a
          home-screen icon at all, so this is a flat 180x180 PNG on brand ink. -->
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />

@@ -1,11 +1,11 @@
 import React, { Suspense, useEffect } from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
 import Header from "./components/layout/Header.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import MobileCallBar from "./components/layout/MobileCallBar.jsx";
 import CompareTray from "./components/shop/CompareTray.jsx";
-import ChatWidget from "./components/chat/ChatWidget.jsx";
+import ChatLoader from "./components/chat/ChatLoader.jsx";
 import { InPageAnchors, ScrollToTop } from "./components/ui/index.jsx";
 import { trackPageView } from "./lib/analytics.js";
 import { lazyPage } from "./lib/lazyPage.js";
@@ -197,6 +197,32 @@ function PageViewTracker() {
   return null;
 }
 
+/**
+ * vercel.json 301s the old query-state addresses (/tires?view=brands to
+ * /brands, /wheels?view=fitment to /wheel-fitment), but Vercel appends the
+ * request's query string to a redirect destination and plain config cannot
+ * drop it, so a visitor lands on /brands?view=brands. Those pages have no use
+ * for the old parameter (their canonical already ignores the query), so this
+ * removes just that one parameter from the address bar, replacing the history
+ * entry. Any other parameter is kept.
+ */
+const LEGACY_VIEW = { "/brands": "brands", "/wheel-fitment": "fitment" };
+
+function LegacyViewCleanup() {
+  const { pathname, search, hash } = useLocation();
+  const navigate = useNavigate();
+  useEffect(() => {
+    const legacy = LEGACY_VIEW[pathname];
+    if (!legacy) return;
+    const params = new URLSearchParams(search);
+    if (params.get("view") !== legacy) return;
+    params.delete("view");
+    const rest = params.toString();
+    navigate(`${pathname}${rest ? `?${rest}` : ""}${hash}`, { replace: true });
+  }, [pathname, search, hash, navigate]);
+  return null;
+}
+
 export default function App() {
   const { pathname } = useLocation();
   // A product page has no phone action bar (MobileCallBar): its own buy bar
@@ -224,6 +250,7 @@ export default function App() {
         Skip to main content
       </a>
       <ScrollToTop pathname={pathname} />
+      <LegacyViewCleanup />
       <InPageAnchors />
       {/* `contents` keeps the masthead's sticky row sticky against the page,
           not against this wrapper. */}
@@ -391,7 +418,7 @@ export default function App() {
       />
       <CompareTray />
       <MobileCallBar />
-      <ChatWidget />
+      <ChatLoader />
     </div>
   );
 }
