@@ -10,6 +10,7 @@ the code fits together is in the root [README](../README.md).
 ## business/: running the store
 
 - [shopify-admin-prompts.md](business/shopify-admin-prompts.md): numbered copy-paste Chrome prompts for everything Claude cannot do itself (Shopify admin, Vercel, Flow). Use it when a task needs Justin's browser.
+- [seo-roadmap-to-10.md](business/seo-roadmap-to-10.md): phased plan to take the site SEO score from 6 to 10 (who does what, what is blocked on the ATD feed).
 - [shipping-pricing-plan.md](business/shipping-pricing-plan.md): competitor shipping policies, ATD freight cost per order, the four options (free shipping stays recommended) and the file list to change if shipping pricing changes. Read it before touching any shipping wording.
 - [parent-business-facts.md](business/parent-business-facts.md): where each fact about Extreme Tires (name, review profiles, distributor presence, services) came from and how far to trust it. Check it before the site states a fact about the shop.
 - [2026-09-23-meeting-brief.html](business/2026-09-23-meeting-brief.html): the ATD / Tire Guru / Net Driven meeting brief from 2026-09-23. Open it in a browser for the supplier background and the questions that were asked.
