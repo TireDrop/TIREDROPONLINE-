@@ -108,7 +108,7 @@ export const CITY_PAGES = [
       },
     ],
     nearby: ["plantation-fl", "tamarac-fl", "weston-fl", "davie-fl", "lauderhill-fl", "oakland-park-fl"],
-    seoTitle: "Mobile Tire Installation in Sunrise, FL",
+    seoTitle: "Mobile Tire Service in Sunrise, FL",
     description:
       "Tires from TireDrop fitted at your home or work in Sunrise, FL by the Extreme Tires van from our Oakland Park Blvd shop. Sunrise ZIPs, roads and local answers.",
   },
@@ -164,7 +164,7 @@ export const CITY_PAGES = [
       },
     ],
     nearby: ["sunrise-fl", "davie-fl", "fort-lauderdale-fl"],
-    seoTitle: "Mobile Tire Installation in Plantation, FL",
+    seoTitle: "Mobile Tire Service in Plantation, FL",
     description:
       "Tires from TireDrop fitted in your Plantation, FL driveway or office lot by the Extreme Tires van. Plantation ZIPs, roads, HOA tips and on-site service.",
   },
@@ -238,7 +238,7 @@ export const CITY_PAGES = [
       },
     ],
     nearby: ["sunrise-fl", "coral-springs-fl", "lauderhill-fl"],
-    seoTitle: "Mobile Tire Installation in Tamarac, FL",
+    seoTitle: "Mobile Tire Service in Tamarac, FL",
     description:
       "TireDrop tires fitted at your Tamarac, FL home or gated community by the Extreme Tires van from Sunrise. How the ZIP check works and what to have ready.",
   },
@@ -314,7 +314,7 @@ export const CITY_PAGES = [
       },
     ],
     nearby: ["tamarac-fl", "sunrise-fl"],
-    seoTitle: "Mobile Tire Installation in Coral Springs, FL",
+    seoTitle: "Mobile Tire Service in Coral Springs, FL",
     description:
       "TireDrop tires fitted at your Coral Springs, FL home or office by the Extreme Tires van. Parkland ZIPs 33067 and 33076 included, plus flat tire help.",
   },
@@ -408,7 +408,7 @@ export const CITY_PAGES = [
       },
     ],
     nearby: ["plantation-fl", "weston-fl", "fort-lauderdale-fl", "sunrise-fl", "pembroke-pines-fl", "hollywood-fl"],
-    seoTitle: "Mobile Tire Installation in Davie, FL",
+    seoTitle: "Mobile Tire Service in Davie, FL",
     description:
       "Tires bought on TireDrop, fitted at your Davie, FL home or workplace by our Extreme Tires van. Davie ZIPs 33314 to 33331, puncture repair, what the van does.",
   },
@@ -473,7 +473,7 @@ export const CITY_PAGES = [
       },
     ],
     nearby: ["plantation-fl", "davie-fl"],
-    seoTitle: "Mobile Tire Installation in Fort Lauderdale, FL",
+    seoTitle: "Mobile Tire Service in Fort Lauderdale, FL",
     description:
       "TireDrop tires fitted at your Fort Lauderdale home, condo lot or office by the Extreme Tires van, Las Olas to Galt Ocean Mile. Condo garage tips and ZIPs.",
   },
@@ -560,7 +560,7 @@ export const CITY_PAGES = [
       },
     ],
     nearby: ["sunrise-fl", "davie-fl", "pembroke-pines-fl"],
-    seoTitle: "Mobile Tire Installation in Weston, FL",
+    seoTitle: "Mobile Tire Service in Weston, FL",
     description:
       "Bought tires on TireDrop? The Extreme Tires van fits them at your Weston, FL home or workplace. Weston ZIPs, gate and HOA tips, and what the van does.",
   },
@@ -624,7 +624,7 @@ export const CITY_PAGES = [
       },
     ],
     nearby: ["hollywood-fl", "miramar-fl", "davie-fl", "weston-fl"],
-    seoTitle: "Mobile Tire Installation in Pembroke Pines, FL",
+    seoTitle: "Mobile Tire Service in Pembroke Pines, FL",
     description:
       "TireDrop tires fitted at your Pembroke Pines, FL home or work by the Extreme Tires van from Sunrise. ZIP check, Hollywood and Miramar mail, shop option.",
   },
@@ -682,7 +682,7 @@ export const CITY_PAGES = [
       },
     ],
     nearby: ["pembroke-pines-fl", "miramar-fl", "davie-fl"],
-    seoTitle: "Mobile Tire Installation in Hollywood, FL",
+    seoTitle: "Mobile Tire Service in Hollywood, FL",
     description:
       "Tires from TireDrop fitted at your Hollywood, FL home or work by the Extreme Tires van. ZIP check for shared Hollywood mail, gate tips and shop option.",
   },
@@ -740,7 +740,7 @@ export const CITY_PAGES = [
       },
     ],
     nearby: ["pembroke-pines-fl", "hollywood-fl"],
-    seoTitle: "Mobile Tire Installation in Miramar, FL",
+    seoTitle: "Mobile Tire Service in Miramar, FL",
     description:
       "TireDrop tires fitted at your Miramar, FL home or workplace by the Extreme Tires van. ZIP check, tread-depth tips, wheels and tires in one visit.",
   },
@@ -798,7 +798,7 @@ export const CITY_PAGES = [
       },
     ],
     nearby: ["oakland-park-fl", "fort-lauderdale-fl"],
-    seoTitle: "Mobile Tire Installation in Pompano Beach, FL",
+    seoTitle: "Mobile Tire Service in Pompano Beach, FL",
     description:
       "Tires from TireDrop fitted at your Pompano Beach, FL home or work by the Extreme Tires van. ZIP check, flat repair rules and what the van does.",
   },
@@ -856,7 +856,7 @@ export const CITY_PAGES = [
       },
     ],
     nearby: ["sunrise-fl", "plantation-fl", "tamarac-fl", "fort-lauderdale-fl"],
-    seoTitle: "Mobile Tire Installation in Lauderhill, FL",
+    seoTitle: "Mobile Tire Service in Lauderhill, FL",
     description:
       "TireDrop tires fitted at your Lauderhill, FL home or complex lot by the Extreme Tires van from Sunrise. ZIP check, gate tips, rotation by van.",
   },
@@ -914,7 +914,7 @@ export const CITY_PAGES = [
       },
     ],
     nearby: ["fort-lauderdale-fl", "pompano-beach-fl", "sunrise-fl"],
-    seoTitle: "Mobile Tire Installation in Oakland Park, FL",
+    seoTitle: "Mobile Tire Service in Oakland Park, FL",
     description:
       "Tires from TireDrop fitted at your Oakland Park, FL home or work by the Extreme Tires van. Our shop is in Sunrise: ZIP check, alignment and van tips.",
   },
@@ -979,7 +979,7 @@ export const CITY_PAGES = [
     ],
     nearby: ["hollywood-fl", "miramar-fl"],
     nearbyTitle: "Broward city pages, across the county line",
-    seoTitle: "Mobile Tire Installation in Hialeah, FL",
+    seoTitle: "Mobile Tire Service in Hialeah, FL",
     description:
       "Tires from TireDrop fitted at your Hialeah, FL home or work by the Extreme Tires van. Miami-Dade ZIP check, what the van does, free ship-to-store.",
   },
