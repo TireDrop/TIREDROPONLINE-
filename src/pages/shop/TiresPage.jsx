@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Phone, SearchX, SlidersHorizontal, Truck, X } from "lucide-react";
 
 import {
@@ -20,7 +20,6 @@ import { ShoppingForBar } from "../../components/shop/Fitment.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
 import SizeQuoteForm from "../../components/shop/SizeQuoteForm.jsx";
 import { InstalledPriceToggle } from "../../components/shop/InstalledPrice.jsx";
-import BrandWall from "../../components/brands/BrandWall.jsx";
 import {
   TIRES,
   TIRE_CATEGORIES,
@@ -516,52 +515,9 @@ export default function TiresPage() {
     el.querySelector("select, input")?.focus({ preventScroll: true });
   }, [changing, changer.nonce]);
 
-  if (view === "brands") {
-    return (
-      <>
-        <Seo
-          title="Tire and Wheel Brands"
-          description="Browse tire and wheel brands at TireDrop. Filter by tires, wheels or commercial, or search by name. Free shipping to the 48 contiguous states and DC."
-        />
-        <PageHero
-          eyebrow="Shop by brand"
-          title="Tire and wheel brands"
-          lede="Filter by tires, wheels or commercial, or search for a brand by name."
-        />
-        <Breadcrumbs
-          trail={[{ label: "Tires", to: "/tires" }, { label: "Brands" }]}
-        />
-        <Section>
-          <SectionHead
-            eyebrow="Brands"
-            title="Brand logos"
-            lede="Tires first, then wheels, each group A to Z."
-            action={
-              <div className="flex flex-wrap gap-2">
-                <Link to="/tires" className="btn-outline btn-sm">
-                  Shop all tires
-                </Link>
-                <Link to="/wheels" className="btn-outline btn-sm">
-                  Shop all wheels
-                </Link>
-              </div>
-            }
-          />
-          <BrandWall />
-          <div className="mt-10 max-w-[78ch] space-y-2 text-[13px] text-smoke">
-            <p>
-              Brand names and logos are trademarks of their owners and appear
-              here to identify the products we sell.
-            </p>
-            <p>
-              Free shipping to the 48 contiguous states and DC. Installation is
-              South Florida only.
-            </p>
-          </div>
-        </Section>
-      </>
-    );
-  }
+  // The brand list has its own address, /brands, so it can rank on its own
+  // (vercel.json sends the old ?view=brands address there too).
+  if (view === "brands") return <Navigate to="/brands" replace />;
 
   return (
     <>

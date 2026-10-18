@@ -64,6 +64,9 @@ const ProductPage = lazyPage("pages/shop/ProductPage.jsx", () =>
 const TireSkuPage = lazyPage("pages/shop/TireSkuPage.jsx", () =>
   import("./pages/shop/TireSkuPage.jsx"),
 );
+const BrandsPage = lazyPage("pages/BrandsPage.jsx", () =>
+  import("./pages/BrandsPage.jsx"),
+);
 const CommercialTiresPage = lazyPage("pages/shop/CommercialTiresPage.jsx", () =>
   import("./pages/shop/CommercialTiresPage.jsx"),
 );
@@ -291,6 +294,7 @@ export default function App() {
               element={<DemoToolPage tool="wheel-offset" />}
             />
             <Route path="/tools/:tool" element={<ToolRedirect />} />
+            <Route path="/brands" element={<BrandsPage />} />
             <Route path="/commercial-tires" element={<CommercialTiresPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />

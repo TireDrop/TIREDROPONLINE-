@@ -20,7 +20,7 @@ import {
 const START_LINKS = [
   { label: "Shop tires by size", to: "/tires?search=size" },
   { label: "Shop tires by vehicle", to: "/tires?search=vehicle" },
-  { label: "Tire brands", to: "/tires?view=brands" },
+  { label: "Tire brands", to: "/brands" },
   { label: "Shop wheels", to: "/wheels" },
   { label: "Mobile tire installation", to: "/mobile-service" },
   { label: "Ship to store and install", to: "/install" },

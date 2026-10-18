@@ -127,7 +127,7 @@ export const NAV = [
       { label: "Shop All Tires", to: "/tires" },
       { label: "Shop by Vehicle", to: "/tires?search=vehicle" },
       { label: "Shop by Tire Size", to: "/tires?search=size" },
-      { label: "Tire Brands", to: "/tires?view=brands" },
+      { label: "Tire Brands", to: "/brands" },
       { label: "Commercial & Fleet", to: "/commercial-tires" },
     ],
   },

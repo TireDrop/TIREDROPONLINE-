@@ -190,6 +190,9 @@ function redirectedPaths() {
     const vercel = JSON.parse(readFileSync(resolve(ROOT, "vercel.json"), "utf8"));
     return new Set(
       (vercel.redirects ?? [])
+        // A redirect that only applies with a given query (/tires?view=brands)
+        // leaves the plain path itself served, so it is not "redirected".
+        .filter((r) => !r.has)
         .map((r) => r.source)
         .filter((src) => !/[:(*]/.test(src)),
     );

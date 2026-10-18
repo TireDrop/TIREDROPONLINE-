@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { BRANDS_ALL, BRAND_FILTERS } from "../../data/brandsAll.js";
 
 /**
- * The Brands page wall (/tires?view=brands): every brand logo as a tile, with
+ * The Brands page wall (/brands): every brand logo as a tile, with
  * type filters and a name search.
  *
  * Tags: every tile carries data-brand and data-seg so the same markup can be

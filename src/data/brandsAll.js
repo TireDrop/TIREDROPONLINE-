@@ -1,5 +1,5 @@
 /**
- * Every brand logo on the Brands page (/tires?view=brands, src/components/brands/BrandWall.jsx).
+ * Every brand logo on the Brands page (/brands, src/components/brands/BrandWall.jsx).
  *
  * One row per brand, tires first then wheels, A to Z inside each group (this is
  * the page's own order, not the home strip's ranked order in brandStrip.js).

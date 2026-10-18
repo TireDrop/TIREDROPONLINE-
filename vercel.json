@@ -84,6 +84,12 @@
     }
   ],
   "redirects": [
+    {
+      "source": "/tires",
+      "has": [{ "type": "query", "key": "view", "value": "brands" }],
+      "destination": "/brands",
+      "statusCode": 301
+    },
     { "source": "/coupons", "destination": "/tires", "statusCode": 301 },
     { "source": "/deals", "destination": "/tires", "statusCode": 301 },
     { "source": "/track-order", "destination": "/track", "statusCode": 301 },

@@ -52,7 +52,7 @@ export const STATIC_PAGES = [
     boost: 1,
   },
   {
-    path: "/tires?view=brands",
+    path: "/brands",
     title: "Tire brands",
     keywords: "brand brands manufacturer makers",
     text: "Every tire brand in the catalog.",

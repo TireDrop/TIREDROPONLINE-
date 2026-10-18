@@ -47,7 +47,7 @@ export default function BrandStrip() {
             <h2 className="mt-1 text-xl md:text-2xl">Tire brands</h2>
           </div>
           <Link
-            to="/tires?view=brands"
+            to="/brands"
             className="inline-flex min-h-[44px] items-center gap-1.5 font-display text-sm font-bold text-drop hover:text-dive"
           >
             See all brands
