@@ -7,110 +7,110 @@
  * scene. A post with no entry here simply renders without a picture, so a
  * new post never breaks the page while its image is being made.
  *
- * The pictures are AI-generated scenes with no logos, brand names, licence
+ * The pictures are generated documentary-style photos with no logos, brand names, licence
  * plates or readable text in them, so they never imply a product, a rating
  * or a claim the copy does not make. src/content/blogImages.test.mjs checks
  * that every entry has a file and every file has an entry.
  */
 export const BLOG_IMAGES = {
   "alligator-alley-drive-tires":
-    "A sedan driving a straight highway across Everglades sawgrass at sunrise",
+    "A man beside a silver crossover with a flat rear tire and a spare leaning on the bumper on the shoulder of a flat Everglades highway.",
   "back-to-school-car-check-broward":
-    "A parent and a teenager crouched beside a family car's front tire in a driveway, checking the tread",
+    "A teen crouches at a car's front tire with a tread gauge while a parent watches, on a concrete driveway in front of a stucco house.",
   "best-time-to-buy-tires-south-florida":
-    "Stacks of new tires in a bright garage with palm trees outside the open bay door",
+    "A man crouches in a Florida driveway pressing a tread depth gauge into the groove of a worn tire on a silver crossover.",
   "bigger-wheels-myth":
-    "Two wheels side by side, one with a tall sidewall tire and one with a large rim and thin low-profile tire",
+    "A tall-sidewall tire on a small wheel and a thin-sidewall tire on a larger wheel, side by side with a level across both tops.",
   "bought-tires-online-install-broward":
-    "A technician mounting a tire in a South Florida shop bay, delivered tire boxes stacked nearby",
+    "A technician's hands photograph the raised DOT date code on a new tire stacked with others beside an opened box in a tire shop.",
   "buy-tires-online-vs-local-shop":
-    "A laptop on a desk beside a local tire shop bay with a car on a lift",
+    "A technician fits a new tire in a shop bay while a set of delivered tires in stretch wrap leans against the wall.",
   "choosing-between-tire-brands":
-    "Four unmarked tires with different tread patterns lined up on a dark floor",
+    "A woman in a home garage rests a hand on one of two new tires with different tread patterns leaning against a workbench.",
   "cold-front-tpms-light-florida":
-    "A car covered in dew on a misty South Florida morning, front tire in focus",
+    "A person in a hoodie crouches in a Florida driveway checking a car tire's pressure with a pencil gauge on a cool, overcast morning.",
   "curb-pothole-tire-alignment-signs":
-    "A tire and alloy wheel splashing through a pothole beside a curb on a wet street",
+    "A hand points to a round bulge in the sidewall of a front tire next to a chipped concrete curb, with scraped rubber and a gouged wheel rim.",
   "ev-tire-wear-budget":
-    "An electric sedan charging at night in Miami, alloy wheel and tire in the foreground",
+    "A person measures the worn inner edge of a plugged-in electric hatchback's front tire with a tread gauge in a garage.",
   "flat-tire-on-i-95":
-    "A silver sedan with a flat rear tire pulled onto a highway shoulder at golden hour",
+    "A silver sedan with a flat rear tire on an interstate shoulder while a woman stands by the guardrail on her phone.",
   "flooded-car-tires-wheels":
-    "A sedan stranded in shallow floodwater, its tire half under water on a Florida street",
+    "A silver sedan parked in brown floodwater up to its wheels, with a dried silt waterline on its lower doors and bumper.",
   "florida-sun-dry-rot-tires":
-    "Close-up of fine cracks in a tire sidewall under harsh Florida sun",
+    "A hand flexes the faded gray sidewall of a car tire covered in fine dry rot cracks, parked in strong sun on a Florida driveway.",
   "ford-f-150-tires-p-vs-lt":
-    "A full-size pickup truck hitched to a trailer in a driveway at sunset",
+    "A man crouches at a pickup's rear tire, hand on the sidewall marked LT265/70R17 Load Range E, with a boat trailer hitched behind.",
   "get-tires-installed-after-buying-online":
-    "Four new tires stacked on a porch as a mobile tire technician walks toward them",
+    "A technician and customer inspect a stack of four newly delivered tires on the floor of a tire shop before mounting.",
   "glovebox-tire-kit-florida":
-    "A tire emergency kit with a gauge, inflator, flashlight and gloves laid out in a car",
+    "An open hatchback trunk with a tire gauge, 12-volt inflator, sealant bottle, flashlight and reflective triangle laid out beside the spare.",
   "honda-civic-tires-guide":
-    "A compact sedan on a palm-lined Miami boulevard at golden hour, alloy wheel in focus",
+    "A person points to the tire information sticker on the driver's door pillar of an open silver compact sedan parked in a driveway.",
   "honda-cr-v-tires-guide":
-    "A white crossover loaded with a cooler and bikes on a sunny Florida beach road",
+    "A parent checks a rear tire's pressure with a pencil gauge beside a crossover with its hatch open, loaded with luggage and beach chairs.",
   "how-old-are-tires-bought-online":
-    "A fingertip pointing at the molded date-code area on a tire sidewall",
+    "A hand rests on a new tire's sidewall beside the molded DOT 3524 date code while another hand photographs it with a phone.",
   "hurricane-season-tire-check":
-    "A hand checking tire tread with a gauge in a driveway under a storm sky",
+    "Hands press a tread depth gauge into a tire groove in a driveway, with plywood panels and bottled water stacked against the house.",
   "hydroplaning-broward-downpours":
-    "A tire throwing spray on a rain-soaked highway during a thunderstorm",
+    "View from the driver's seat through a rainy windshield at standing water on a multi-lane highway with spray from the trucks ahead.",
   "jeep-wrangler-tires-guide":
-    "A boxy open-air off-road SUV with all-terrain tires on a sandy Florida beach trail",
+    "A hand measures an all-terrain tire's tread groove on a boxy SUV on wet, sandy pavement in a palm-lined beach parking lot.",
   "king-tide-salt-water-wheels":
-    "A car wheel moving through shallow king-tide saltwater on a Miami Beach street",
+    "A white sedan drives slowly through murky tidal floodwater halfway up its wheels on a sunny South Florida waterfront street.",
   "low-rolling-resistance-hybrids":
-    "A hybrid hatchback on an empty highway at dawn, one smooth tire in close focus",
+    "A technician in a gray work shirt examines a new tire's tread in a shop bay while rain falls on the parking lot outside.",
   "mobile-tire-install-condo-office":
-    "A mobile tire technician mounting a tire on a car in a condo parking garage",
+    "A technician in a work shirt removes a wheel from a silver sedan in a condo lot, with a white work van and a new tire on a cart beside it.",
   "moving-to-florida-tire-tips":
-    "A loaded car driving over a bridge toward the Miami skyline",
+    "A man rolls a deep-treaded winter tire toward a stack of moving boxes in a Florida garage, a sedan parked beside it.",
   "new-car-tires-wear-out-early":
-    "A new sedan on a dealership lot with its front tire showing uneven wear",
+    "A technician checks uneven wear across the inner edge of a front tire on a fairly new silver crossover while the owner watches.",
   "new-tires-front-or-back":
-    "A technician carrying a new tire toward the rear wheel of a car on a lift",
+    "A technician lifts a new deep-tread tire toward the rear hub of a sedan on a lift, while the front tire looks more worn.",
   "nitrogen-in-tires-myth":
-    "A hand connecting an air hose to a tire valve stem beside a gas cylinder",
+    "A hand presses a pencil tire gauge onto a valve stem while holding a green valve cap between two fingers beside a dusty wheel.",
   "packed-car-weight-limit":
-    "A hatchback with its rear open, packed with luggage, a cooler and a roof box",
+    "A person leans in to read the door-edge sticker on a midsize sedan overloaded with a roof box, suitcases, a cooler and beach chairs.",
   "replace-all-four-tires-myth":
-    "Four tires lined up in a shop, three with deep tread and one visibly worn, with a tread depth gauge on the floor",
+    "A new tire and a worn tire with a sidewall cut stand side by side as a technician measures tread depth, with a crossover on a lift behind.",
   "rideshare-driver-tires":
-    "A sedan with a dashboard phone mount driving through Miami streets at night",
+    "A driver checks tread with a gauge on a curb-scuffed tire of a sedan at an airport pickup curb, a dark phone mounted inside.",
   "same-size-tires-different-prices":
-    "Two tires of the same size side by side, one with a more complex tread pattern",
+    "A technician's hand traces the sidewall of one of two same-size tires with different tread patterns leaning on a rack in a tire shop.",
   "sidewall-max-psi-myth":
-    "A hand pressing a digital tire pressure gauge onto a valve stem",
+    "A hand holds an air hose to a tire valve beside the sidewall marking MAX. PRESS. 44 PSI at a gas station air pump.",
   "silverado-boat-towing-tires":
-    "A full-size pickup backing a boat trailer down a ramp into calm water at sunrise",
+    "A man checks the rear tire pressure of a white full-size pickup hitched to a boat trailer at a Florida boat ramp.",
   "small-fleet-tire-checklist":
-    "A fleet manager checking a tire on a white work van in a South Florida lot",
+    "A worker in a work shirt checks tire pressure on the first of three white work vans parked in a yard, a log clipboard on the hood.",
   "snowbird-car-sat-all-summer-tires":
-    "A dusty car under a carport with a front tire that looks slightly flat-spotted",
+    "A man in a linen shirt checks a slightly soft tire with a pressure gauge on a dusty, debris-covered car in a Florida condo parking lot.",
   "storm-cleanup-nail-in-tire":
-    "A roofing nail embedded in a tire tread on wet pavement",
+    "A finger points to a roofing nail head in a sedan's tire tread beside a curbside pile of shingles and storm debris.",
   "tesla-model-y-tires-guide":
-    "An electric crossover with aero wheels parked in front of palm trees at dusk",
+    "A woman reads the tire information sticker on the open door pillar of a silver electric crossover plugged in at a home charger.",
   "thanksgiving-road-trip-tire-check":
-    "A packed family SUV at dawn as an adult checks a front tire with a pressure gauge",
+    "An adult kneels to check a rear tire's pressure on a hatchback packed with luggage and a cooler in a driveway at dawn.",
   "tire-recall-notice-what-to-do":
-    "A hand holding a paper notice next to a tire in a garage",
+    "A person kneels in a garage photographing the DOT code on a tire sidewall with a phone, with a folded letter lying face-down on the floor.",
   "tire-rotation-upsell-myth":
-    "A technician loosening a lug nut on a car raised on a lift in a shop bay",
+    "A technician compares tread wear on two tires on the shop floor, with a sedan on a lift behind him missing two wheels.",
   "toyota-camry-tires-guide":
-    "A midsize sedan driving along a quiet palm-lined road at dusk",
+    "A gray sedan drives through an afternoon rain shower on a Florida road with its front tire throwing up water from a puddle.",
   "toyota-rav4-tires-guide":
-    "A white compact crossover on a wet palm-lined Florida road after rain",
+    "Four identical new tires lined up on a shop floor in front of a compact crossover on a lift with all four wheels off.",
   "tpms-still-need-tire-gauge":
-    "A glowing tire-pressure warning light on a dashboard with a gauge held in front",
+    "A person crouches at a slightly soft front tire with a pencil gauge on the valve while the open car door shows a dark dashboard.",
   "turnpike-orlando-drive-tires":
-    "A sedan heading north on a Florida toll highway at sunrise",
+    "A driver crouches to check a loaded crossover's tire pressure in a highway service plaza lot with flat Florida scrub beyond.",
   "unused-tires-still-age-myth":
-    "Tires and a spare stacked in a dusty home garage",
+    "A hand wipes dust off a stored tire in a Florida garage to show the DOT 1816 date code and fine cracks in the sidewall.",
   "used-car-after-storm-season-tires":
-    "A flashlight shining on the spare-tire well of a used car's open trunk",
+    "A buyer shines a phone flashlight into a used sedan's spare tire well showing dried silt, rust and mud.",
   "worn-tires-florida-rain-4-32":
-    "A tire channeling water through its tread grooves in a heavy downpour",
+    "A hand holds a quarter upside down in a shallow groove of a worn damp tire after a Florida rain shower.",
 };
 
 /** `/brand/blog/<slug>.webp` for a blog post that has a picture, else null. */

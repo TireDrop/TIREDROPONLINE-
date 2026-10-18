@@ -39,6 +39,7 @@ the code fits together is in the root [README](../README.md).
 
 - [learn-plan.md](content/learn-plan.md): keyword research, hubs, the 50-guide plan and the interactive demo list for `/learn`.
 - [blog-plan.md](content/blog-plan.md): keyword research, the 50-post plan and the publishing calendar for `/blog`.
+- [blog-image-prompts.md](content/blog-image-prompts.md): the realistic-photo prompt for each blog post's hero picture (written from the post text), plus alt text.
 - [pilot-verification.md](content/pilot-verification.md): source check of every claim in the 10 pilot articles. Follow its method when verifying new articles.
 - [brand-strip-ranking.md](content/brand-strip-ranking.md): how the home page brand strip is ordered (editorial order, sources, how far to trust it, which brands are held back). Read it before reordering `src/data/brandStrip.js`.
 - [brand-logos.md](content/brand-logos.md): where each logo file in `public/brand/logos/` came from, and what must be cleared before it goes live.
