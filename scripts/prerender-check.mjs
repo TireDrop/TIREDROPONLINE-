@@ -352,7 +352,7 @@ for (const url of ["/tires?size=225/45R18", "/tire-size?size=225/45R17", "/no-su
   });
   await page.locator('#root a[href="/tires"]:visible').first().click();
   await page.waitForURL(`${BASE}/tires`);
-  await page.waitForFunction(() => document.title.startsWith("Buy Tires Online"));
+  await page.waitForFunction(() => document.title.startsWith("Buy Tires Online by Vehicle or Size"));
   const state = await page.evaluate(() => ({
     same: window.__sameDocument === true,
     canonical: document.querySelector('link[rel="canonical"]')?.href,

@@ -48,7 +48,7 @@ export default function WheelFitmentPage() {
   return (
   <>
     <Seo
-      title="Wheel Fitment Guide: Bolt Pattern, Offset, Center Bore"
+      title="Wheel Fitment Guide: Bolt Pattern and Offset"
       crumbs={[{ name: "Wheels", path: "/wheels" }]}
       crumbName="Fitment"
       description="Bolt pattern, offset, center bore and load rating explained — how TireDrop specs wheels that actually fit your vehicle before they ship."
