@@ -20,6 +20,20 @@
  *   - BUSINESS.geo, once pasted into src/data/business.js, reaches the shop
  *     as GeoCoordinates with the same numbers.
  *
+ *   - PRODUCT_SCHEMA_ENABLED (src/data/seoFlags.js) decides Product markup:
+ *     OFF: any Product, Offer or AggregateOffer node, or schema.org/Product
+ *     or /Offer microdata, anywhere in the build fails the check (the sample
+ *     catalog must not publish prices as fact). ON: every indexable
+ *     /tires/<slug> and /wheels/<slug> page carries exactly one Product with
+ *     one Offer (numeric price over zero, USD, NewCondition, canonical url),
+ *     free OfferShippingDetails to US with exactly the 48 states + DC, no
+ *     deliveryTime, a return policy iff RETURN_WINDOW_DAYS is a number (and
+ *     the same number), availability only when PRODUCT_AVAILABILITY_ENABLED,
+ *     valid gtin and https images when present; no Product on any other page.
+ *     A missing image or sku is a WARNING (printed, not a failure): the
+ *     sample catalog has neither, and Google requires a photo for merchant
+ *     listings, so the warning is the "not ready to go live" signal.
+ *
  * Prints what each route type emits, then any failures. Exit 1 on failure.
  *
  *   npm run build && npm run check:schema
@@ -30,6 +44,12 @@ import { fileURLToPath } from "node:url";
 
 import { BUSINESS } from "../src/data/business.js";
 import { AUTHOR } from "../src/content/core.js";
+import {
+  PRODUCT_AVAILABILITY_ENABLED,
+  PRODUCT_SCHEMA_ENABLED,
+  RETURN_WINDOW_DAYS,
+} from "../src/data/seoFlags.js";
+import { SHIPPING_REGIONS, validGtin } from "../src/data/productSchema.js";
 
 const ROOT = resolve(fileURLToPath(import.meta.url), "../..");
 const DIST = resolve(ROOT, "dist");
@@ -43,8 +63,10 @@ if (!existsSync(join(DIST, "index.html"))) {
 /* ------------------------------ helpers ------------------------------ */
 
 const failures = [];
+const warnings = new Map();
 let page = "";
 const fail = (msg) => failures.push(`${page}: ${msg}`);
+const warn = (msg) => warnings.set(msg, [...(warnings.get(msg) ?? []), page]);
 
 function htmlFiles(dir) {
   return readdirSync(dir).flatMap((name) => {
@@ -267,7 +289,6 @@ function checkNode(node, ids, canonical, route) {
 
   if (isType(node, "Product")) {
     need(node.name, "no name");
-    need(node.sku, "no sku");
     need(node.brand?.name, "no brand name");
     const offers = [].concat(node.offers ?? []);
     need(
@@ -355,6 +376,201 @@ function checkNode(node, ids, canonical, route) {
   }
 }
 
+const PRODUCT_PAGE = /^\/(tires|wheels)\/[^/]+$/;
+const PRICE_TEXT = /^\d+(\.\d{1,2})?$/;
+const OFFER_TYPES = ["Offer", "AggregateOffer"];
+const AVAILABILITY =
+  /^https:\/\/schema\.org\/(InStock|OutOfStock|LimitedAvailability|BackOrder|PreOrder|SoldOut)$/;
+
+/**
+ * Product / Offer rules, decided by the PRODUCT_SCHEMA_ENABLED switch.
+ * `all` is every object in every JSON-LD block; `roots` are the blocks;
+ * `html` is the page with its scripts, for stray microdata.
+ */
+function checkProductMarkup({ all, html, route, canonical, indexable, roots }) {
+  const products = all.filter((o) => isType(o, "Product"));
+  const offers = all.filter((o) => isType(o, ...OFFER_TYPES));
+  const microdata =
+    /itemtype="https?:\/\/schema\.org\/(Product|Offer|AggregateOffer)"/.exec(
+      html,
+    );
+
+  if (!PRODUCT_SCHEMA_ENABLED) {
+    if (products.length || offers.length)
+      fail(
+        `${products.length} Product / ${offers.length} Offer node(s) while PRODUCT_SCHEMA_ENABLED is false: ` +
+          `the sample catalog must not publish prices as fact (src/data/seoFlags.js)`,
+      );
+    if (microdata)
+      fail(
+        `schema.org/${microdata[1]} microdata while PRODUCT_SCHEMA_ENABLED is false`,
+      );
+    return;
+  }
+
+  if (!(PRODUCT_PAGE.test(route) && indexable)) {
+    if (products.length || offers.length)
+      fail(
+        "Product/Offer markup on a page that is not an indexable product page",
+      );
+    return;
+  }
+  if (products.length !== 1) {
+    fail(`${products.length} Product nodes on a product page (want exactly 1)`);
+    return;
+  }
+
+  const [product] = products;
+  const need = (cond, msg) => cond || fail(`Product: ${msg}`);
+  const top = roots.flatMap((r) =>
+    Array.isArray(r["@graph"]) ? r["@graph"] : [r],
+  );
+  need(
+    top.includes(product),
+    "Product is not a top-level node of the page's graph",
+  );
+  need(
+    product.url === canonical,
+    `url ${product.url} is not the canonical ${canonical}`,
+  );
+  need(
+    product["@id"] === `${canonical}#product`,
+    `@id ${product["@id"]} is not ${canonical}#product`,
+  );
+  need(
+    typeof product.name === "string" && product.name.trim(),
+    "no name",
+  );
+  need(
+    isType(product.brand, "Brand") && product.brand.name,
+    "brand is not a Brand with a name",
+  );
+  need(
+    typeof product.description === "string" && product.description.trim(),
+    "no description",
+  );
+
+  // Identifiers and photos: only real ones. Missing ones are warnings.
+  if (product.gtin !== undefined)
+    need(
+      validGtin(product.gtin) === String(product.gtin),
+      `gtin ${product.gtin} fails the check digit`,
+    );
+  if (product.image === undefined)
+    warn(
+      "no image: Google REQUIRES one for merchant listings, and the sample catalog has no photos",
+    );
+  else
+    need(
+      [].concat(product.image).every(isAbsUrl),
+      "image is not an absolute https URL",
+    );
+  if (product.sku === undefined)
+    warn("no sku: recommended, and the sample catalog has none");
+
+  const o = product.offers;
+  need(
+    offers.length === 1 && o === offers[0] && !Array.isArray(o),
+    "want exactly one Offer, as product.offers",
+  );
+  if (!o || Array.isArray(o)) return;
+  need(isType(o, "Offer"), "offers is not an Offer");
+  need(
+    o.url === canonical,
+    `offer url ${o.url} is not the canonical ${canonical}`,
+  );
+  need(
+    typeof o.price === "number" &&
+      Number.isFinite(o.price) &&
+      o.price > 0 &&
+      PRICE_TEXT.test(String(o.price)),
+    `price ${JSON.stringify(o.price)} is not a number over 0 with at most 2 decimals`,
+  );
+  need(o.priceCurrency === "USD", `priceCurrency ${o.priceCurrency} is not USD`);
+  need(
+    o.itemCondition === "https://schema.org/NewCondition",
+    `itemCondition ${o.itemCondition} is not NewCondition`,
+  );
+  for (const k of ["priceValidUntil", "priceSpecification"])
+    need(
+      o[k] === undefined,
+      `${k} must not be emitted (no promised dates, no strike-through prices)`,
+    );
+
+  // Availability only when the owner decided to show it.
+  if (o.availability !== undefined) {
+    need(
+      PRODUCT_AVAILABILITY_ENABLED,
+      "availability emitted while PRODUCT_AVAILABILITY_ENABLED is false",
+    );
+    need(
+      AVAILABILITY.test(o.availability),
+      `availability ${o.availability} is not a schema.org ItemAvailability URL`,
+    );
+  }
+
+  // Shipping: free to the US, exactly the 48 states + DC, no delivery time.
+  const ship = o.shippingDetails;
+  need(isType(ship, "OfferShippingDetails"), "no OfferShippingDetails");
+  if (ship) {
+    need(
+      isType(ship.shippingRate, "MonetaryAmount") &&
+        ship.shippingRate.value === 0 &&
+        ship.shippingRate.currency === "USD",
+      "shippingRate is not a 0 USD MonetaryAmount (shipping is free)",
+    );
+    const dest = ship.shippingDestination;
+    need(
+      isType(dest, "DefinedRegion") && dest.addressCountry === "US",
+      "shippingDestination is not a DefinedRegion in US",
+    );
+    const regions = [].concat(dest?.addressRegion ?? []);
+    need(
+      regions.length === SHIPPING_REGIONS.length &&
+        SHIPPING_REGIONS.every((r) => regions.includes(r)),
+      `shippingDestination regions are not exactly the 48 states + DC (${regions.length} listed)`,
+    );
+    for (const code of ["AK", "HI", "PR", "GU", "VI", "AS", "MP"])
+      need(!regions.includes(code), `ships to ${code}, outside the shipping area`);
+    need(
+      ship.deliveryTime === undefined,
+      "deliveryTime emitted: the data has no handling or transit facts",
+    );
+  }
+
+  // Returns: a policy iff the owner set a window, and the same window.
+  const returns = o.hasMerchantReturnPolicy;
+  if (Number.isInteger(RETURN_WINDOW_DAYS) && RETURN_WINDOW_DAYS > 0) {
+    need(
+      isType(returns, "MerchantReturnPolicy"),
+      "no hasMerchantReturnPolicy although RETURN_WINDOW_DAYS is set",
+    );
+    if (returns) {
+      need(returns.applicableCountry === "US", "return applicableCountry is not US");
+      need(
+        returns.returnPolicyCategory ===
+          "https://schema.org/MerchantReturnFiniteReturnWindow",
+        "return policy is not a finite return window",
+      );
+      need(
+        returns.merchantReturnDays === RETURN_WINDOW_DAYS,
+        `merchantReturnDays ${returns.merchantReturnDays} is not RETURN_WINDOW_DAYS ${RETURN_WINDOW_DAYS}`,
+      );
+      need(
+        !["returnMethod", "returnFees", "returnShippingFeesAmount"].some(
+          (k) => k in returns,
+        ),
+        "return method/fees emitted: the terms do not state them as fixed",
+      );
+    }
+  } else {
+    need(
+      returns === undefined,
+      "hasMerchantReturnPolicy emitted while RETURN_WINDOW_DAYS is not set",
+    );
+  }
+}
+
 /** The visible <Breadcrumbs> trail: [{ name, href|null }]. */
 function visibleTrails(html) {
   return [...html.matchAll(/<nav aria-label="(?:Breadcrumb|Ruta de navegación)"[\s\S]*?<\/nav>/g)].map(
@@ -425,6 +641,14 @@ for (const file of files) {
   blocksTotal += blocks.length;
   if (!blocks.length) {
     if (indexable) fail("no JSON-LD");
+    checkProductMarkup({
+      all: [],
+      html: html.replace(/<script[\s\S]*?<\/script>/g, ""),
+      route,
+      canonical,
+      indexable,
+      roots: [],
+    });
     continue;
   }
 
@@ -473,6 +697,14 @@ for (const file of files) {
     }
 
   for (const node of nodes) checkNode(node, ids, canonical, route);
+  checkProductMarkup({
+    all: roots.flatMap((r) => [...walk(r)].map(([obj]) => obj)),
+    html: html.replace(/<script[\s\S]*?<\/script>/g, ""),
+    route,
+    canonical,
+    indexable,
+    roots,
+  });
 
   // Breadcrumbs.
   const lists = nodes.filter((n) => isType(n, "BreadcrumbList"));
@@ -552,6 +784,15 @@ console.log(
     `\n  Shop geo: ${GEO && GEO !== "invalid" ? `${GEO.latitude}, ${GEO.longitude}` : "not published (BUSINESS.geo is null: TODO(geo))"}` +
     `\n  /tires/p/:sku is client-rendered (dist/spa.html) and noindexed: no JSON-LD in its served HTML.`,
 );
+
+console.log(
+  `  Product markup: ${PRODUCT_SCHEMA_ENABLED ? "ON (PRODUCT_SCHEMA_ENABLED = true)" : "OFF (PRODUCT_SCHEMA_ENABLED = false): no Product or Offer node anywhere in the build"}` +
+    (PRODUCT_SCHEMA_ENABLED
+      ? `\n  Return policy: ${Number.isInteger(RETURN_WINDOW_DAYS) ? `${RETURN_WINDOW_DAYS}-day window` : "none (RETURN_WINDOW_DAYS is null)"}; availability: ${PRODUCT_AVAILABILITY_ENABLED ? "shown when the record reports stock" : "not emitted"}`
+      : ""),
+);
+for (const [msg, pages] of warnings)
+  console.log(`  WARNING (${pages.length} pages): ${msg}`);
 
 if (failures.length) {
   console.error(`\n${failures.length} problem(s):`);
