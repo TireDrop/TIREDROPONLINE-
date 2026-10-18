@@ -78,24 +78,81 @@ test("batch 2: each page exists with its county, and Hialeah is Miami-Dade", () 
     assert.ok(c, `${slug} has no entry`);
     assert.equal(c.county, county, slug);
   }
-  // The first page outside Broward says Miami-Dade; Broward appears only as where the shop is.
+  // Hialeah says Miami-Dade; Broward appears only as where the shop is.
   const h = getCityPage("hialeah-fl");
   assert.match(h.intro, /Miami-Dade County/);
   assert.ok(!/is in Broward/.test(h.route));
 });
 
-test("batch 2: no unconfirmed ZIPs, roads or places, and no language or demographic claims", () => {
-  for (const slug of Object.keys(BATCH_2)) {
+// ZIPs, neighbourhoods and roads for the batch 2 pages were added on
+// 2026-10-18, and the six pages after them carry the same detail from the
+// start. Every line is sourced in docs/audits/2026-10-18-city-facts.md.
+const NEW_PAGES = {
+  "miami-fl": "Miami-Dade",
+  "doral-fl": "Miami-Dade",
+  "homestead-fl": "Miami-Dade",
+  "boca-raton-fl": "Palm Beach",
+  "west-palm-beach-fl": "Palm Beach",
+  "boynton-beach-fl": "Palm Beach",
+};
+const FILLED = [...Object.keys(BATCH_2), ...Object.keys(NEW_PAGES)];
+
+// PO Box and single-organisation ZIPs: no street address, so never listed.
+const NO_STREET_ZIPS = [
+  "33002", "33011", "33017", "33039", "33061", "33075", "33090", "33092", "33097",
+  "33101", "33102", "33402", "33416", "33424", "33425", "33427", "33429", "33464",
+  "33474", "33481", "33488", "33497", "33499",
+];
+
+test("filled pages: ZIPs, neighbourhoods and roads, each ZIP named in the copy, none a PO Box", () => {
+  for (const slug of FILLED) {
     const c = getCityPage(slug);
-    // The plan's ZIPs and places are unverified: the ZIP checker decides.
-    assert.deepEqual([c.zips, c.areas, c.roads], [[], [], []], slug);
-    assert.match(c.whereWeWork.join(" "), /checker|ZIP (box|form|check|lookup)|(box|form|lookup) on this page/i, `${slug}: points to the ZIP check`);
+    assert.ok(c.zips.length >= 4, `${slug}: ${c.zips.length} ZIPs`);
+    assert.ok(c.areas.length >= 4, `${slug}: ${c.areas.length} areas`);
+    assert.ok(c.roads.length >= 3, `${slug}: ${c.roads.length} roads`);
+    const where = c.whereWeWork.join(" ");
+    for (const zip of c.zips) {
+      assert.ok(where.includes(zip), `${slug}: ${zip} is listed but not written into the copy`);
+      assert.ok(!NO_STREET_ZIPS.includes(zip), `${slug}: ${zip} is a PO Box or unique ZIP`);
+    }
+    assert.match(strings(c).join(" "), /checker|ZIP (box|form|check|lookup)|(box|form|lookup) on this page/i, `${slug}: points to the ZIP check`);
+    assert.ok(c.around?.length >= 1 && c.beforeWeCome, `${slug}: roads and areas section`);
   }
   const text = strings(getCityPage("hialeah-fl")).join("\n");
   assert.ok(
     !/\b(spanish|bilingual|language|latino|hispanic|cuban|immigra\w*|demograph\w*|community of)\b/i.test(text),
     "Hialeah copy claims nothing about language or demographics",
   );
+});
+
+test("new pages: three Miami-Dade and three Palm Beach, each naming its county", () => {
+  for (const [slug, county] of Object.entries(NEW_PAGES)) {
+    const c = getCityPage(slug);
+    assert.ok(c, `${slug} has no entry`);
+    assert.equal(c.county, county, slug);
+    assert.ok(c.whereWeWork.join(" ").includes(county), `${slug}: the copy never names ${county}`);
+  }
+  const by = (county) => CITY_PAGES.filter((c) => c.county === county).length;
+  assert.equal(by("Palm Beach"), 3);
+  assert.ok(by("Miami-Dade") >= 4);
+  // The shop is in Sunrise, so a page outside Broward never calls it local.
+  for (const slug of FILLED.filter((s) => getCityPage(s).county !== "Broward")) {
+    const text = strings(getCityPage(slug)).join(" ");
+    assert.ok(!/\b(our|the) (shop|store) (is|sits) in (Miami|Doral|Homestead|Boca|West Palm|Boynton|Hialeah)/i.test(text), slug);
+  }
+});
+
+test("new pages: every page links a city in its own county, and is linked back", () => {
+  for (const slug of FILLED.filter((s) => getCityPage(s).county !== "Broward")) {
+    const c = getCityPage(slug);
+    assert.ok(c.nearby.length >= 2, slug);
+    assert.ok(
+      c.nearby.some((n) => getCityPage(n).county === c.county),
+      `${slug}: no nearby link inside ${c.county}`,
+    );
+    const inbound = CITY_PAGES.filter((o) => o.slug !== slug && o.nearby.includes(slug)).length;
+    assert.ok(inbound >= 1, `${slug}: no page links to it`);
+  }
 });
 
 test("batch 2: every new page has nearby links, and existing pages link back where the cities are neighbours", () => {
@@ -111,7 +168,7 @@ test("batch 2: every new page has nearby links, and existing pages link back whe
 
 /* ------------------------------ data ------------------------------ */
 
-test("city pages: the 14 cities (wave 1 and batch 2), well formed", () => {
+test("city pages: the 20 cities (wave 1, batch 2 and the six added 2026-10-18), well formed", () => {
   assert.deepEqual(
     CITY_PAGES.map((c) => c.slug),
     [
@@ -129,6 +186,12 @@ test("city pages: the 14 cities (wave 1 and batch 2), well formed", () => {
       "lauderhill-fl",
       "oakland-park-fl",
       "hialeah-fl",
+      "miami-fl",
+      "doral-fl",
+      "homestead-fl",
+      "boca-raton-fl",
+      "west-palm-beach-fl",
+      "boynton-beach-fl",
     ],
   );
   for (const c of CITY_PAGES) {
