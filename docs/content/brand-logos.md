@@ -1,6 +1,6 @@
-# Brand logo files (home strip and the planned Brands page)
+# Brand logo files (home strip and the Brands page)
 
-The 14 files in `public/brand/logos/` are copies of the brands' own logos,
+All 42 brand files are in `public/brand/logos/` (the table below lists the 15 used by the home strip; the other 27 are in `src/data/brandsAll.js`, with their sources and grades in the collection's `report.md`). They are copies of the brands' own logos,
 saved exactly as downloaded: not edited, recoloured, cropped or traced. The
 full collection (all 42 brands, every source address, a grade per file) is
 the `tiredrop-brand-logos` folder and its `report.md`, kept by Justin.
