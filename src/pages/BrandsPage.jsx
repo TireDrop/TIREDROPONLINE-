@@ -58,7 +58,7 @@ export default function BrandsPage() {
     <>
       <Seo
         title="Tire and Wheel Brands"
-        description={`Browse ${tires} tire brands and ${wheels} wheel brands, from Continental and Michelin to Cragar and Edge. Filter by type or search by name. Ships free to 48 states and DC.`}
+        description="The tire and wheel brands you will see at TireDrop, from Continental and Michelin to Cragar and Edge. Filter by type or search by name. Ships free to 48 states and DC."
         schema={[ITEM_LIST]}
       />
       <PageHero
@@ -85,8 +85,9 @@ export default function BrandsPage() {
         />
         <div className="mb-6 max-w-[65ch] space-y-3 text-[15px] text-smoke">
           <p>
-            This is the list of {tires} tire brands and {wheels} wheel brands
-            TireDrop shows, including brands for commercial and fleet tires.
+            These are the {tires} tire brands and {wheels} wheel brands you
+            will see on TireDrop, including brands with commercial and fleet
+            lines. Which sizes are available depends on the catalog on the day.
             Use the buttons to narrow it to tires, wheels or commercial, or type
             part of a name to find one.
           </p>

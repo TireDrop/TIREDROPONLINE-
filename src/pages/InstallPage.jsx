@@ -154,7 +154,7 @@ export default function InstallPage() {
   return (
     <>
       <Seo
-        title="Ship to Store & Install"
+        title="Tire Installation in Sunrise, FL: Ship to Store"
         description={`Choose free ship-to-store at checkout and have your ${BUSINESS.name} order delivered to ${BUSINESS.parent} in ${BUSINESS.shop.city}, FL, then installed. South Florida only — see the local install area, shop hours and directions.`}
       />
 

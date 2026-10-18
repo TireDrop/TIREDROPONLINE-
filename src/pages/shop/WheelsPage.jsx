@@ -203,12 +203,12 @@ export default function WheelsPage() {
   return (
     <>
       <Seo
-        title="Shop Wheels"
-        description="Alloy, forged, off-road and truck wheels from Enkei, Method, Fuel, Vossen and more, shipped to the 48 contiguous states and DC or free to our South Florida shop."
+        title="Buy Wheels Online: Alloy, Forged and Off-Road"
+        description="Buy wheels online: alloy, forged, off-road and truck wheels, fitment-checked before they ship, shipped to the 48 contiguous states and DC or free to our South Florida shop."
       />
       <PageHero
         eyebrow="Wheels"
-        title="Shop Wheels"
+        title="Buy wheels online"
         lede={`Cast, flow-formed and forged wheels, fitment-checked before they ship. Send them free to your address in the 48 contiguous states or DC, or to our South Florida shop, where we fit them (tire installation from $${INSTALL.priceFrom} ${INSTALL.priceUnit}).`}
       />
       <Breadcrumbs trail={[{ label: "Wheels" }]} />

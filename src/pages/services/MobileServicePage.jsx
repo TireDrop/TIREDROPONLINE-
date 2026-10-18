@@ -211,7 +211,7 @@ export default function MobileServicePage() {
   return (
     <>
       <Seo
-        title="Mobile Tire Installation in South Florida"
+        title="Mobile Tire Service in Miami, Broward, Palm Beach"
         description={`Bought tires on ${BUSINESS.name}? ${BUSINESS.parent} brings a fully equipped van to your home, office or jobsite across ${SERVICE_AREA_LABEL} to fit them — plus balancing, repair, rotation, oil changes and TPMS.`}
         schema={[faqSchema(FAQ, "/mobile-service")]}
       />
@@ -219,7 +219,7 @@ export default function MobileServicePage() {
       <PageHero
         lead={<MobilePriceStrip />}
         eyebrow="Mobile install — Miami-Dade, Broward, Palm Beach"
-        title="Mobile Tire Installation in South Florida"
+        title="Mobile tire service in South Florida"
         lede={`You bought the tires. We'll come fit them. A fully equipped ${BUSINESS.parent} van brings your new set to your home, office or jobsite anywhere in ${SERVICE_AREA_LABEL}, and fits it where the car is already parked.`}
       >
         <p className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-bone/60">
