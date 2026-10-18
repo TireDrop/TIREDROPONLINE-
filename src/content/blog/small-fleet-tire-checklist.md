@@ -66,7 +66,7 @@ author: "TireDrop Team, Extreme Tires, Sunrise FL"
 
 For a landscaper, a plumber or a delivery business, a flat tire is a lost job, not just a repair. Three vans on the road means three sets of tires wearing every day in South Florida heat, and most small fleets only think about them when one goes flat.
 
-This checklist turns tires into a routine: what the federal rules say, what to check and when, and how to keep a simple log. It's written for fleets of a few vehicles up to a couple dozen.
+This checklist turns tires into a routine: what the federal rules say, what to check and when, and how to keep a simple log. It's written for fleets of a few vehicles up to a couple dozen. If you're sourcing tires, see our [commercial tire options](/commercial-tires); if downtime is the worry, [mobile service](/mobile-service) brings the work to your lot.
 
 ## First: which rules apply to you?
 

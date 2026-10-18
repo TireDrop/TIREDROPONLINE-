@@ -19,6 +19,7 @@ import SearchPanel from "../../components/shop/SearchPanel.jsx";
 import { ShoppingForBar } from "../../components/shop/Fitment.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
 import SizeQuoteForm from "../../components/shop/SizeQuoteForm.jsx";
+import BrandsHubLink from "../../components/shop/BrandsHubLink.jsx";
 import { InstalledPriceToggle } from "../../components/shop/InstalledPrice.jsx";
 import {
   TIRES,
@@ -833,6 +834,8 @@ export default function TiresPage() {
           </div>
         </div>
       </Section>
+
+      <BrandsHubLink kind="tires" />
     </>
   );
 }

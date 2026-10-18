@@ -64,7 +64,7 @@ author: "TireDrop Team, Extreme Tires, Sunrise FL"
 
 ## Two tires, one size, different jobs
 
-Search for tires for a pickup and you'll often see the same size twice: **P265/70R17** and **LT265/70R17**. Same numbers, different letters in front. That letter matters more than most people expect.
+Search for tires for a pickup and you'll often see the same size twice: **P265/70R17** and **LT265/70R17**. Same numbers, different letters in front. That letter matters more than most people expect, and it's one of the filters on our [tire catalog](/tires) (work trucks and vans also have [commercial tires](/commercial-tires)).
 
 NHTSA's tire safety material lists what the leading letters mean: **P** for passenger car and **LT** for light truck. Michelin adds that a P means the tire's loads follow U.S. Tire and Rim Association standards for passenger tires.
 

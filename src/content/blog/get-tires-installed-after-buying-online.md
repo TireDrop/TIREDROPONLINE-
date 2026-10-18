@@ -65,7 +65,7 @@ Finding the right tire online is the easy part. You can compare specs, sizes and
 
 The answer is simple once you plan for it, and annoying if you don't. Here's how to get tires bought online installed anywhere in the US, in the order that saves you the most trouble.
 
-One note up front: TireDrop ships free to any address in the 48 contiguous states and DC, but our own installation covers South Florida only. If you live elsewhere, this guide is about choosing and working with an installer near you.
+One note up front: TireDrop ships free to any address in the 48 contiguous states and DC, but our own installation covers South Florida only. If you live elsewhere, this guide is about choosing and working with an installer near you. In South Florida, [how tire installation works](/install) covers the shop and [mobile service](/mobile-service) covers the driveway.
 
 ## Step 1: Find an installer before you check out
 

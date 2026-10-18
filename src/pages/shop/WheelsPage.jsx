@@ -21,6 +21,7 @@ import Filters, {
   countActiveFilters,
 } from "../../components/shop/Filters.jsx";
 import SearchPanel from "../../components/shop/SearchPanel.jsx";
+import BrandsHubLink from "../../components/shop/BrandsHubLink.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
 import {
   WHEELS,
@@ -427,6 +428,8 @@ export default function WheelsPage() {
           </div>
         </div>
       </Section>
+
+      <BrandsHubLink kind="wheels" />
     </>
   );
 }
