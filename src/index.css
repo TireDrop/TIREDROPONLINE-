@@ -453,10 +453,17 @@
   display: flex;
   width: max-content;
   animation: brand-slide 70s linear infinite;
+  will-change: transform; /* own GPU layer so phones scroll it smoothly */
 }
-.brand-track:hover,
+/* Hover pause only where a real hover exists; on touch a tap would leave the
+   strip stuck paused. Keyboard focus always pauses. */
 .brand-track:focus-within {
   animation-play-state: paused;
+}
+@media (hover: hover) {
+  .brand-track:hover {
+    animation-play-state: paused;
+  }
 }
 .brand-list {
   display: flex;
