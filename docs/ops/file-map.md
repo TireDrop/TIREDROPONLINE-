@@ -34,6 +34,7 @@ SEO file headers and `vite.config.js` all name current paths.
 | Server config, env reading | `api/_lib/config.js`, `api/_lib/http.js`; status endpoint `api/status.js` |
 | Analytics and GA4 events | `src/lib/analytics.js` (all events), `api/track.js` + `api/_lib/track.js` (server hits), `api/csp-report.js` |
 | SEO files (sitemap, robots) | `scripts/generate-seo-files.mjs` writes `public/robots.txt`, `public/sitemap.xml`; prerender `scripts/prerender.mjs`; page schema `src/components/content/schema.js` |
+| Product / Offer JSON-LD (off until the ATD catalog is live) | switches `src/data/seoFlags.js`; builder `src/data/productSchema.js`, test `src/data/productSchema.test.mjs`; wired in `src/pages/shop/ProductPage.jsx`; check `scripts/schema-check.mjs`; doc `docs/integrations/product-structured-data.md` |
 | Site search | `src/lib/siteSearch.js`, `searchData.js`, `sitePages.js`, `src/components/layout/HeaderSearch.jsx`, `src/pages/SearchPage.jsx` |
 | Chatbot knowledge (what the site chat answers from) | `scripts/build-chat-knowledge.mjs` writes `api/_lib/chatKnowledge.generated.json` after the prerender; freshness `npm run check:chat-kb`, test `npm run test:chat-kb` |
 | Blog posts | `src/content/blog/*.md` (loaded by `src/content/index.js`) |
