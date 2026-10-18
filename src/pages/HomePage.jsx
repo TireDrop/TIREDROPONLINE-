@@ -1284,7 +1284,7 @@ export default function HomePage() {
   return (
     <>
       <Seo
-        title="Tires & Wheels Shipped Nationwide (48 states + DC)"
+        title="Buy Tires Online, Shipped Free to 48 States + DC"
         description={`Online tire and wheel store shipping free to the 48 contiguous states and DC, or to our South Florida shop, where we install from $${INSTALL.priceFrom} ${INSTALL.priceUnit}.`}
       />
       {/* A plain wrapper for the reveal hook to search; no layout of its own. */}

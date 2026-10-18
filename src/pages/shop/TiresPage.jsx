@@ -77,13 +77,6 @@ const SORTS = [
   { value: "wet", label: "Best wet grip" },
 ];
 
-// Written from the catalog rather than typed, so a brand cannot be advertised
-// after its last product is gone.
-const brandSentence = TIRE_BRAND_NAMES.length
-  ? TIRE_BRAND_NAMES.slice(0, -1).join(", ") +
-    " and " +
-    TIRE_BRAND_NAMES[TIRE_BRAND_NAMES.length - 1]
-  : "Major-brand";
 
 // What turns the address bar's lowercase slugs back into the catalog's own
 // spelling (src/lib/tiresUrl.js).
@@ -522,8 +515,8 @@ export default function TiresPage() {
   return (
     <>
       <Seo
-        title="Shop Tires"
-        description={`Shop ${brandSentence} tires by vehicle or by size. Shipped free to the 48 contiguous states and DC, or free to our South Florida shop.`}
+        title="Buy Tires Online by Vehicle or Size"
+        description="Buy tires online by vehicle or by tire size. Every set ships free to the 48 contiguous states and DC, or free to our South Florida shop for installation."
       />
       {/* With a vehicle or size in the address the results are the point,
           so the header is one line and the first tires land in the first
@@ -531,7 +524,7 @@ export default function TiresPage() {
       <PageHero
         compact={Boolean(compactTitle)}
         eyebrow="Tires"
-        title={compactTitle || "Shop Tires"}
+        title={compactTitle || "Buy tires online"}
         lede={`Find your size, pick your set, then choose where it lands at checkout — your address in the 48 contiguous states or DC, or free to our South Florida shop, where we fit them from $${INSTALL.priceFrom} ${INSTALL.priceUnit}.`}
       />
       <Breadcrumbs trail={[{ label: "Tires" }]} />

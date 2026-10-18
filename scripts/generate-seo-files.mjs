@@ -386,9 +386,10 @@ function robotsTxt() {
     "# The site's own JSON API (Vercel functions), not pages.",
     "Disallow: /api/",
     "",
-    "# Filter and view states of pages that are already listed on their own.",
-    "Disallow: /*?search=",
-    "Disallow: /*?view=",
+    // No query-string rules: the footer links to /tires?search=vehicle and
+    // /tires?search=size, and /tires?view=brands 301s to /brands. Blocking
+    // those stops Google following the site's own links and redirects. The
+    // canonical on /tires handles the duplicate-content side.
     "",
     `Sitemap: ${ORIGIN}/sitemap.xml`,
     "",

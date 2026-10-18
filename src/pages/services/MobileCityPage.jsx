@@ -130,7 +130,7 @@ export default function MobileCityPage() {
 
       <PageHero
         eyebrow={`Mobile tire service · ${city.county} County`}
-        title={`Mobile Tire Installation in ${city.name}, FL`}
+        title={`Mobile Tire Service in ${city.name}, FL`}
         lede={city.intro}
         lead={<MobilePriceStrip place={city.name} county={city.county} />}
       >

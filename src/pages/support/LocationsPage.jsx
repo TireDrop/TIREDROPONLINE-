@@ -100,13 +100,13 @@ export default function LocationsPage() {
   return (
     <>
       <Seo
-        title="The Shop & Install Area"
+        title="Tire Shop in Sunrise, FL: Hours and Directions"
         description={`${BUSINESS.name} ships free to the 48 states + DC, and ${BUSINESS.parent} at ${BUSINESS.shop.full} fits what we sell. Hours, directions, ship-to-store pickup and the mobile install area: ${SERVICE_AREA_LABEL}.`}
       />
 
       <PageHero
         eyebrow="The Shop"
-        title="Where your tires can be fitted"
+        title="Tire shop in Sunrise, FL"
         lede={`${BUSINESS.name} is the online store of ${BUSINESS.parent} — one business, one address, one phone number. We ship to ${BUSINESS.shipping.area}, so most customers never need an address from us. If you are near ${BUSINESS.shop.city}, this is the shop behind the website.`}
       >
         <div className="flex flex-wrap gap-3">

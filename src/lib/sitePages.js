@@ -65,7 +65,7 @@ export const STATIC_PAGES = [
     boost: 1,
   },
   {
-    path: "/wheels?view=fitment",
+    path: "/wheel-fitment",
     title: "Wheel fitment guidance",
     keywords: "bolt pattern offset center bore wheel size rims",
     text: "Bolt pattern, offset and center bore, explained before you buy.",

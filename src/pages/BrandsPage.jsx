@@ -58,7 +58,7 @@ export default function BrandsPage() {
     <>
       <Seo
         title="Tire and Wheel Brands"
-        description={`Browse ${tires} tire brands and ${wheels} wheel brands, from Continental and Michelin to Cragar and Edge. Filter by type or search by name. Ships free to 48 states and DC.`}
+        description="The tire and wheel brands you will see at TireDrop, from Continental and Michelin to Cragar and Edge. Filter by type or search by name. Ships free to 48 states and DC."
         schema={[ITEM_LIST]}
       />
       <PageHero
@@ -83,12 +83,30 @@ export default function BrandsPage() {
             </div>
           }
         />
-        <p className="mb-6 max-w-[65ch] text-[15px] text-smoke">
-          This is the list of {tires} tire brands and {wheels} wheel brands
-          TireDrop shows, including brands for commercial and fleet tires. Use
-          the buttons to narrow it to tires, wheels or commercial, or type part
-          of a name to find one.
-        </p>
+        <div className="mb-6 max-w-[65ch] space-y-3 text-[15px] text-smoke">
+          <p>
+            These are the {tires} tire brands and {wheels} wheel brands you
+            will see on TireDrop, including brands with commercial and fleet
+            lines. Which sizes are available depends on the catalog on the day.
+            Use the buttons to narrow it to tires, wheels or commercial, or type
+            part of a name to find one.
+          </p>
+          <p>
+            <strong className="text-ink">Tires</strong> covers passenger,
+            truck, SUV and light-truck brands, from the large names to
+            value lines made by the same groups.{" "}
+            <strong className="text-ink">Wheels</strong> covers street,
+            off-road and classic wheel makers.{" "}
+            <strong className="text-ink">Commercial</strong> narrows the tire
+            list to brands with medium-truck, trailer or fleet lines.
+          </p>
+          <p>
+            To shop, start from your size or your vehicle rather than the
+            brand: the catalog shows what fits, and you compare brands from
+            there. Every order ships free to the 48 contiguous states and DC,
+            or to our South Florida shop for installation.
+          </p>
+        </div>
         <BrandWall />
         <nav aria-label="More from TireDrop" className="mt-12">
           <h2 className="h3">Keep shopping</h2>
