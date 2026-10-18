@@ -5,6 +5,7 @@ import {
   ArrowRight,
   Check,
   Clock,
+  ExternalLink,
   MapPin,
   Phone,
   SearchX,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 
 import {
+  Accordion,
   Badge,
   Breadcrumbs,
   EmptyState,
@@ -97,7 +99,7 @@ export default function ServiceDetailPage() {
 
       <PageHero
         eyebrow={service.category}
-        title={service.name}
+        title={service.heading ?? service.name}
         lede={service.blurb}
       >
         <div className="flex flex-wrap items-center gap-2.5">
@@ -161,6 +163,23 @@ export default function ServiceDetailPage() {
         </div>
       </div>
 
+      {/* ---------- What it is ---------- */}
+      {service.intro?.length > 0 && (
+        <Section className="bg-bone">
+          <div className="max-w-3xl">
+            <p className="eyebrow mb-2">What it is</p>
+            <h2 className="h2">About {service.name}</h2>
+            <div className="mt-5 space-y-4">
+              {service.intro.map((para) => (
+                <p key={para} className="text-base leading-relaxed text-smoke">
+                  {para}
+                </p>
+              ))}
+            </div>
+          </div>
+        </Section>
+      )}
+
       {/* ---------- Included + symptoms ---------- */}
       <Section className="bg-fog">
         <div className="grid items-start gap-6 lg:grid-cols-2">
@@ -200,17 +219,66 @@ export default function ServiceDetailPage() {
                 </li>
               ))}
             </ul>
-            <p className="mt-6 border-t border-bone/15 pt-4 text-sm leading-relaxed text-bone/70">
-              Seeing something on this list? Do not wait it out. Catching it
-              early is the difference between a {service.duration.toLowerCase()}{" "}
-              visit and a tow.
-            </p>
+            {service.closing && (
+              <p className="mt-6 border-t border-bone/15 pt-4 text-sm leading-relaxed text-bone/70">
+                {service.closing}
+              </p>
+            )}
           </div>
         </div>
       </Section>
 
+      {/* ---------- When you need it + what we do ---------- */}
+      {(service.when?.length > 0 || service.steps?.length > 0) && (
+        <Section className="bg-bone">
+          <div className="grid items-start gap-10 lg:grid-cols-2">
+            {service.when?.length > 0 && (
+              <div>
+                <p className="eyebrow mb-2">When you need it</p>
+                <h2 className="h3">Signs, mileage and age</h2>
+                <div className="mt-5 space-y-4">
+                  {service.when.map((para) => (
+                    <p
+                      key={para}
+                      className="text-sm leading-relaxed text-smoke"
+                    >
+                      {para}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )}
+            {service.steps?.length > 0 && (
+              <div>
+                <p className="eyebrow mb-2">Step by step</p>
+                <h2 className="h3">
+                  {service.mobile
+                    ? "What happens at your appointment"
+                    : `What happens in the ${BUSINESS.shop.city} bay`}
+                </h2>
+                <ol className="mt-5 space-y-3">
+                  {service.steps.map((step, i) => (
+                    <li key={step} className="flex items-start gap-3">
+                      <span
+                        aria-hidden
+                        className="tnum mt-0.5 w-6 shrink-0 text-right font-display font-bold text-drop"
+                      >
+                        {i + 1}.
+                      </span>
+                      <span className="text-sm leading-relaxed text-ink">
+                        {step}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+          </div>
+        </Section>
+      )}
+
       {/* ---------- Pricing honesty ---------- */}
-      <Section className="bg-bone">
+      <Section className="bg-fog">
         <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="max-w-2xl">
             <p className="eyebrow mb-2">Straight pricing</p>
@@ -222,16 +290,34 @@ export default function ServiceDetailPage() {
             </h2>
             <p className="lede mt-4">
               That is a real starting price, not a teaser. What you actually pay
-              depends on your vehicle, wheel size and the parts the job needs —
-              run-flats, oversized fitments, seized hardware and premium parts
-              all move the number. We confirm the total with you before any tool
-              comes out, and the price we quote is the price you pay.
+              depends on your vehicle and what the job needs. We confirm the
+              total with you before any tool comes out, and the price we quote
+              is the price you pay.
             </p>
+            {service.priceFactors?.length > 0 && (
+              <>
+                <h3 className="h3 mt-6">What changes the price</h3>
+                <ul className="mt-3 space-y-2.5">
+                  {service.priceFactors.map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <Check
+                        size={18}
+                        aria-hidden
+                        className="mt-0.5 shrink-0 text-drop"
+                      />
+                      <span className="text-sm leading-relaxed text-ink">
+                        {item}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
             <p className="mt-4 text-sm leading-relaxed text-smoke">
               Not sure what your vehicle needs? Call {BUSINESS.phone} with your
-              year, make and model and we will price it over the phone. Already
-              bought tires on {BUSINESS.name}? Say so when you book — this is
-              the appointment that puts them on.
+              year, make and model and we will price it over the phone.
+              {service.fitsOnlineOrders &&
+                ` Already bought tires or wheels on ${BUSINESS.name}? Say so when you book. This is the appointment that puts them on.`}
             </p>
           </div>
 
@@ -240,7 +326,7 @@ export default function ServiceDetailPage() {
             <p className="mt-2 text-sm leading-relaxed text-smoke">
               {service.mobile
                 ? "Book online and the van comes to your address. We confirm an arrival window when we book."
-                : `Pick a window and there will be a bay open in ${BUSINESS.shop.city} when you arrive.`}
+                : `Pick a time that suits you and we confirm the appointment at the ${BUSINESS.shop.city} shop when we book.`}
             </p>
             <div className="mt-5 flex flex-col gap-3">
               <Link
@@ -270,12 +356,87 @@ export default function ServiceDetailPage() {
         </div>
       </Section>
 
+      {/* ---------- FAQ ---------- */}
+      {service.faq?.length > 0 && (
+        <Section className="bg-bone">
+          <SectionHead
+            eyebrow="Questions, answered"
+            title={`${service.name}: common questions`}
+          />
+          <Accordion items={service.faq} />
+        </Section>
+      )}
+
+      {/* ---------- Guides + sources ---------- */}
+      {(service.guides?.length > 0 || service.sources?.length > 0) && (
+        <Section className="bg-fog">
+          <div className="grid items-start gap-10 lg:grid-cols-2">
+            {service.guides?.length > 0 && (
+              <div>
+                <h2 className="h3">Related reading and tools</h2>
+                <ul className="mt-4 space-y-2.5 text-sm">
+                  {service.guides.map((g) => (
+                    <li key={g.to}>
+                      <Link
+                        to={g.to}
+                        className="inline-flex items-center gap-1.5 font-semibold text-drop underline decoration-drop/30 underline-offset-2 hover:decoration-drop"
+                      >
+                        {g.label}
+                        <ArrowRight size={14} aria-hidden />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {service.sources?.length > 0 && (
+              <div>
+                <h2 id="sources" className="h3">
+                  Sources
+                </h2>
+                <ol className="mt-4 space-y-2.5 text-sm">
+                  {service.sources.map((source, i) => (
+                    <li key={source.url} className="flex gap-3">
+                      <span className="tnum w-6 shrink-0 text-right font-display font-bold text-smoke">
+                        {i + 1}.
+                      </span>
+                      <span className="min-w-0">
+                        <a
+                          href={source.url}
+                          target="_blank"
+                          rel="noopener nofollow"
+                          className="inline-flex items-baseline gap-1 break-words font-semibold text-drop underline decoration-drop/30 underline-offset-2 hover:decoration-drop"
+                        >
+                          {source.title}
+                          <ExternalLink
+                            size={12}
+                            aria-hidden
+                            className="shrink-0 self-center"
+                          />
+                          <span className="sr-only"> (opens in a new tab)</span>
+                        </a>
+                        {source.publisher && (
+                          <span className="text-smoke">
+                            {" "}
+                            ({source.publisher})
+                          </span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+          </div>
+        </Section>
+      )}
+
       {/* ---------- Related ---------- */}
       {related.length > 0 && (
-        <Section className="bg-fog">
+        <Section className="bg-bone">
           <SectionHead
             eyebrow="Related"
-            title={`More ${service.category.toLowerCase()} services`}
+            title="More services like this"
             lede="Customers who book this one usually ask about these next."
             action={
               <Link to="/auto-service" className="btn-outline btn-sm">
