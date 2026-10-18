@@ -191,7 +191,7 @@ _Last updated: 2026-10-18 (SEO phase 2 merged and live bcbef31, then re-audited:
 ## SEO re-audit follow-ups (2026-10-18, after phase 2 went live)
 - [x] ~~Re-audit the live site and compare to the 6/10 baseline~~ (2026-10-18: technical 8 to 8.5, on-page 6.5 to 7, schema/local 5 to 6; overall about 6.1 to 7.4)
 - [ ] Justin: return window in days (`RETURN_WINDOW_DAYS`), still blank; blocks return-policy markup and Merchant Center
-- [ ] Justin: Google Business Profile details (geo, Place ID, review link are still null) via a Chrome prompt; plus Bing Webmaster, Apple Business Connect, citations, cross-link extrememobiletires.com
+- [ ] Justin: off-site SEO Chrome prompts S1–S7 in docs/prompts/2026-10-18-off-site-seo-prompts.md (Search Console re-crawl, Bing Webmaster, GBP pin/Place ID/review link, Bing Places, Apple Business Connect, Facebook/Yelp check, cross-link extrememobiletires.com)
 - [ ] Claude: link Learn/Blog articles to product, category and brand pages (0 of 90 do today)
 - [ ] Claude: product pages, H1 should include the brand (32 of 32 drop it); remove sample prices and "most requested" claims from descriptions
 - [ ] Claude: thicken /brands and /wheel-fitment (323 and 285 words), reword /brands intro so it does not imply all 42 brands are sold
