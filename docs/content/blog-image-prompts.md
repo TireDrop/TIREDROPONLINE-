@@ -8,6 +8,19 @@ One prompt per blog post, written from the post's own text so the picture shows 
 - File name = the post slug, saved as `public/brand/blog/<slug>.webp`; alt text lives in `src/data/blogImages.js`.
 - Generated in ChatGPT (project TIRE DROP). The old Higgsfield set used a cinematic grade and was rejected on 2026-10-18 (audit: 49 of 49 read as AI).
 
+## Remake notes (2026-10-18)
+
+The 49 final pictures are the ChatGPT set Justin approved ("use all the good ones"). Eight were re-shot after review, with the prompt tightened as below. The prompts under each post are the first-pass wording; for these eight, add the fix when you redo one:
+
+- `florida-sun-dry-rot-tires`: ask for fine sidewall cracks clearly visible in close-up.
+- `hurricane-season-tire-check`, `tire-recall-notice-what-to-do`: ask for a generic DOT-style code, large enough to read as a code, no real characters needed.
+- `ford-f-150-tires-p-vs-lt`: no readable sidewall lettering (the first pass came back as garbled text).
+- `same-size-tires-different-prices`: plain shop shelf, not a glossy showroom.
+- `low-rolling-resistance-hybrids`: a fine, shallow, closely spaced tread, not a chunky off-road one.
+- `storm-cleanup-nail-in-tire`: the nail head must be visible in the tread, close-up.
+- `rideshare-driver-tires`: no readable airport or terminal signs in the background.
+- Shop scenes: four were redone because the floors looked dirty; the clean-floor, clean-wall rule above is now in every shop prompt.
+
 ## Prompts
 
 ### `alligator-alley-drive-tires`
