@@ -395,6 +395,30 @@ Shopify serving the domain until the Vercel site is verified.
 7. **Keep the Shopify plan.** Checkout, the orders, Flow, the order emails
    and Order Printer all run on it. Only the storefront moves to Vercel.
 
+## Two routing limits (checked 2026-10-18)
+
+- **Old-query 301s keep the query string.** `/tires?view=brands` redirects to
+  `/brands?view=brands`, and `/wheels?view=fitment` to
+  `/wheel-fitment?view=fitment`. Vercel appends the request's query string to a
+  `redirects` destination, and `vercel.json` has no option to drop it: a
+  trailing `?` on the destination (`"/brands?"`) does not strip it (seen live),
+  and the project-level bulk-redirect `preserveQueryParams` switch is a
+  dashboard/API setting, not a `vercel.json` field. Edge middleware could do it
+  but would sit in front of every `/tires` and `/wheels` request, so it was not
+  added. Handled instead: both targets are self-canonical (the query is
+  ignored), and `LegacyViewCleanup` in `src/App.jsx` removes the old `view`
+  parameter from the address bar on arrival (other parameters stay).
+  `scripts/generate-seo-files.mjs` `redirectedPaths()` still ignores redirects
+  with `has`, so `/tires` and `/wheels` themselves stay pages.
+- **`/404` answers 200.** `dist/404.html` is the file Vercel serves, with status
+  404, for any path that matches nothing (`/nonexistent` is a real 404). With
+  `cleanUrls`, the file is also reachable at its own name, `/404`, as an
+  ordinary static file with status 200. A rewrite cannot beat a static file,
+  and `redirects` can only answer 3xx, so the exact path `/404` cannot return
+  404 from `vercel.json`. It is harmless: the page is `noindex` in its meta
+  tag, `/404` now also carries `X-Robots-Tag: noindex`, it has no canonical, and
+  it is not in the sitemap or linked from anywhere.
+
 ## Security headers
 
 Set for every response (pages, `/api/*`, the 404 page and the `/spa`

@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useParams } from "react-router-dom";
 import { Accordion, Breadcrumbs, Seo } from "../../components/ui/index.jsx";
 import ArticleBody from "../../components/content/ArticleBody.jsx";
+import RelatedShopping from "../../components/content/RelatedShopping.jsx";
 import {
   ArticleMeta,
   ContentCta,
@@ -156,6 +157,8 @@ function ArticleView({ article }) {
               )}
 
               <SourcesList sources={article.sources} />
+
+              <RelatedShopping article={article} />
 
               <RelatedLinks
                 paths={article.related}

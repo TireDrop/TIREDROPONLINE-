@@ -27,7 +27,10 @@ afterEach(() => {
 
 test("the install price is the catalog's tire-installation service", () => {
   const svc = getService("tire-installation");
-  assert.equal(INSTALL_SERVICE, svc);
+  // The entry bundle reads the facts only (serviceFacts.js); the catalog adds copy.
+  assert.equal(INSTALL_SERVICE.slug, svc.slug);
+  assert.equal(INSTALL_SERVICE.priceFrom, svc.priceFrom);
+  assert.equal(INSTALL_SERVICE.priceUnit, svc.priceUnit);
   const quote = installQuote();
   assert.equal(quote.price, svc.priceFrom);
   assert.equal(quote.unit, svc.priceUnit);

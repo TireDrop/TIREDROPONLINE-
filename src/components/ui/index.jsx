@@ -16,7 +16,7 @@ import { SERVICE_AREA_SCHEMA } from "../../data/serviceArea.js";
 import CITY_INDEX from "virtual:city-index";
 import { getLiveState } from "../../data/stateList.js";
 import { getProduct } from "../../data/products.js";
-import { getService } from "../../data/services.js";
+import { getServiceFacts } from "../../data/serviceFacts.js";
 import { noteFormStart } from "../../data/formGuard.js";
 // Only the switch, the twin table and three small helpers: the Spanish copy
 // itself stays out of this file, which is in every page's bundle.
@@ -561,7 +561,7 @@ function graphFor(
 
   const service = /^\/services\/(.+)$/.exec(pathname);
   if (service) {
-    const found = getService(service[1]);
+    const found = getServiceFacts(service[1]);
     if (found) {
       graph.push(serviceNode(found, url));
       crumbName = found.name;

@@ -63,7 +63,7 @@ author: "TireDrop Team, Extreme Tires, Sunrise FL"
 
 Most cars are **square**: the same tire size on all four wheels. A **staggered** car runs **different sizes front and rear**, usually with wider tires at the back, and often wider or different-diameter wheels there too.
 
-Michelin describes staggered fitments as common on rear-wheel-drive performance cars and some sports models, where the rear axle handles more power. Some EVs are staggered too, as our Tesla guides cover for certain Tesla models.
+Michelin describes staggered fitments as common on rear-wheel-drive performance cars and some sports models, where the rear axle handles more power. Some EVs are staggered too, as our Tesla guides cover for certain Tesla models. If you're shopping a staggered setup, the [wheel fitment page](/wheel-fitment) explains what to match before you order wheels.
 
 Here's how a staggered door placard might read:
 
