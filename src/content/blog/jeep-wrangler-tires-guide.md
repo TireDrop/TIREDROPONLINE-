@@ -69,7 +69,7 @@ author: "TireDrop Team, Extreme Tires, Sunrise FL"
 
 Plenty of Wranglers in Broward never see a trail. They see I-95, school pickup lines, beach parking lots and, from May to October, a lot of afternoon rain. Tire marketing for Jeeps is all mud and rocks, but the right tire starts with where your miles actually happen.
 
-We don't rank brands. This guide covers how to pick a tread type, what the owner's manual says about size, how bigger tires change things, and why the spare belongs in the conversation.
+We don't rank brands. This guide covers how to pick a tread type, what the owner's manual says about size, how bigger tires change things, and why the spare belongs in the conversation. When you're ready, [tires for trucks and SUVs](/tires) are one click away, and the [wheel fitment page](/wheel-fitment) helps if you're changing wheels too.
 
 ## Step 1: Be honest about your driving
 

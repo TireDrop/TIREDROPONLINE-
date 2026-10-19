@@ -16,7 +16,7 @@ SEO file headers and `vite.config.js` all name current paths.
 | Header, footer, mobile call bar, search box | `src/components/layout/` |
 | Shared business facts (name, phone, email, address, hours) | `src/data/business.js` |
 | Service area, towns, counties, ZIPs | `src/data/serviceArea.js`; city landing pages `src/data/cityPages.js`; state shipping pages `src/data/statePages.js`, `src/data/stateList.js` |
-| Service list and service pages | `src/data/services.js`, `src/pages/services/` |
+| Service list and service pages | `src/data/serviceFacts.js` (price, duration; read by the always-loaded header/call bar), `src/data/serviceCopy.js` (page words), `src/data/services.js` (merges both), `src/pages/services/` |
 | Price, installed price | `src/data/pricing.js`, `src/lib/installedPrice.js`, `src/components/shop/InstalledPrice.jsx` |
 | Tire/product data | `src/data/products.js`, `src/data/tireRatings.js`, `src/components/shop/ProductCard.jsx`, `src/pages/shop/` |
 | Tire filters and facets | `src/data/tireFacets.js`, `src/components/shop/TireFilters.jsx`, `Filters.jsx`, `src/lib/tiresUrl.js` (filters in the URL) |
@@ -24,7 +24,7 @@ SEO file headers and `vite.config.js` all name current paths.
 | Fitment and vehicles (year/make/model) | `src/data/fitment.js`, `fitmentCheck.js`, `vehicles.js`, `vehicleList.js`, `vin.js`; UI `src/components/shop/Fitment.jsx`, `VehicleSelect.jsx`, `ModelCombobox.jsx`; state `src/context/VehicleContext.jsx`; server `api/vehicles.js`, `api/_lib/vehicles.js`, `api/_lib/vpic.js`, `api/_lib/fitmentAttrs.js` |
 | The photo scanner | `src/data/scanner.js`, `src/data/scanHandoff.js`, `src/components/shop/ScanTireButton.jsx`, `src/pages/tools/TireSizeFinderPage.jsx`; server `api/scan-tire-size.js`, `api/_lib/scanTireSize.js`; doc `docs/integrations/tire-size-finder.md` |
 | Forms and leads (contact, quote, schedule) | `src/data/forms.js`, `formGuard.js`, `src/components/shop/SizeQuoteForm.jsx`; server `api/forms.js`, `api/_lib/leads.js`, `spam.js`, `validate.js`, `ratelimit.js`; doc `docs/integrations/website-leads.md` |
-| Site chatbot widget (floating button, panel, client) | `src/components/chat/ChatWidget.jsx`, `chatClient.js` (+ `chatClient.test.mjs`); mounted in `src/App.jsx`; server `api/_lib/chat.js` |
+| Site chatbot widget (floating button, panel, client) | `src/components/chat/ChatWidget.jsx`, `chatClient.js` (+ `chatClient.test.mjs`); mounted through the lazy loader `ChatLoader.jsx` in `src/App.jsx` (the widget is not in the entry bundle); server `api/_lib/chat.js` |
 | Newsletter | `src/components/layout/NewsletterSignup.jsx`, `api/newsletter.js`, `api/_lib/newsletter.js` |
 | Install booking, scheduling | `src/data/booking.js`, `src/pages/services/SchedulePage.jsx`, `api/book-install.js`, `api/_lib/booking.js`, `installBooking.js`, `tireguru.js` |
 | Cart, checkout, orders | `src/context/CartContext.jsx`, `src/pages/shop/CartPage.jsx`, `CheckoutPage.jsx`; server `api/checkout.js`, `api/_lib/orders.js`, `api/_lib/shopify.js`; doc `docs/integrations/shopify-checkout.md` |
@@ -34,6 +34,7 @@ SEO file headers and `vite.config.js` all name current paths.
 | Server config, env reading | `api/_lib/config.js`, `api/_lib/http.js`; status endpoint `api/status.js` |
 | Analytics and GA4 events | `src/lib/analytics.js` (all events), `api/track.js` + `api/_lib/track.js` (server hits), `api/csp-report.js` |
 | SEO files (sitemap, robots) | `scripts/generate-seo-files.mjs` writes `public/robots.txt`, `public/sitemap.xml`; prerender `scripts/prerender.mjs`; page schema `src/components/content/schema.js` |
+| Product / Offer JSON-LD (off until the ATD catalog is live) | switches `src/data/seoFlags.js`; builder `src/data/productSchema.js`, test `src/data/productSchema.test.mjs`; wired in `src/pages/shop/ProductPage.jsx`; check `scripts/schema-check.mjs`; doc `docs/integrations/product-structured-data.md` |
 | Site search | `src/lib/siteSearch.js`, `searchData.js`, `sitePages.js`, `src/components/layout/HeaderSearch.jsx`, `src/pages/SearchPage.jsx` |
 | Chatbot knowledge (what the site chat answers from) | `scripts/build-chat-knowledge.mjs` writes `api/_lib/chatKnowledge.generated.json` after the prerender; freshness `npm run check:chat-kb`, test `npm run test:chat-kb` |
 | Blog posts | `src/content/blog/*.md` (loaded by `src/content/index.js`) |

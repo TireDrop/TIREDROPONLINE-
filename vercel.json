@@ -79,6 +79,10 @@
       "headers": [{ "key": "Cache-Control", "value": "no-store" }]
     },
     {
+      "source": "/404",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
+    },
+    {
       "source": "/(robots.txt|sitemap.xml)",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=300" }]
     }

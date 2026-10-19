@@ -63,7 +63,7 @@ author: "TireDrop Team, Extreme Tires, Sunrise FL"
 
 ## The two numbers in a bolt pattern
 
-Every wheel spec starts with a bolt pattern, written like **5x114.3** or **6x5.5**. It's two numbers:
+Every wheel spec starts with a bolt pattern, written like **5x114.3** or **6x5.5**. Our [wheel fitment page](/wheel-fitment) shows how it fits with offset and center bore, and every wheel in the [wheel catalog](/wheels) lists its bolt pattern. It's two numbers:
 
 1. **Lug count.** How many studs or bolts hold the wheel on: 4, 5, 6 or 8 on most cars, SUVs and trucks.
 2. **Bolt circle diameter.** The diameter of an imaginary circle that runs through the **center** of every lug hole. You'll also see it called the **PCD**, for pitch circle diameter.

@@ -30,6 +30,7 @@ import {
 } from "../../components/ui/index.jsx";
 import ProductArt from "../../components/shop/ProductArt.jsx";
 import ProductCard from "../../components/shop/ProductCard.jsx";
+import ProductRelatedLinks from "../../components/shop/ProductRelatedLinks.jsx";
 import {
   InstalledPriceLines,
   InstalledPriceToggle,
@@ -39,8 +40,8 @@ import {
   ShoppingForBar,
 } from "../../components/shop/Fitment.jsx";
 import { getProduct, TIRES, WHEELS } from "../../data/products.js";
+import { productSchema } from "../../data/productSchema.js";
 import { BUSINESS } from "../../data/business.js";
-import { getService } from "../../data/services.js";
 import { SERVICE_AREA_LABEL } from "../../data/serviceArea.js";
 import { useCart, money } from "../../context/CartContext.jsx";
 import { useCompare } from "../../context/CompareContext.jsx";
@@ -48,6 +49,7 @@ import { useFit } from "../../context/VehicleContext.jsx";
 import { trackViewItem } from "../../lib/analytics.js";
 import { loadLbs, speedSymbol } from "../../data/loadSpeedTables.js";
 import { sizeSearch } from "../../data/fitmentCheck.js";
+import { productH1, productTitle, productDescription } from "../../data/productSeo.js";
 import {
   DELIVERY_NOTE,
   SET_SIZE,
@@ -55,8 +57,6 @@ import {
 } from "../../data/pricing.js";
 
 // Installation is not free: name the shop's published starting price.
-const INSTALL = getService("tire-installation");
-const INSTALL_FROM = `from $${INSTALL.priceFrom} ${INSTALL.priceUnit}`;
 
 // One, a pair, a set, or a set plus a full-size spare. Four leads because that
 // is what the overwhelming majority of tire orders actually are.
@@ -345,11 +345,19 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
     setAdded(`${qty}:${install ? "i" : "n"}`);
   };
 
+  // Product / Offer JSON-LD. Null while PRODUCT_SCHEMA_ENABLED is false
+  // (src/data/seoFlags.js), so the page is then exactly as it was. Not built
+  // for /tires/p/:sku (`reportStock`): that route is client-rendered and
+  // noindexed, so there is no served HTML for the markup to live in. Revisit
+  // when those pages are prerendered.
+  const productLd = reportStock ? null : productSchema(product, { kind });
+
   return (
     <>
       <Seo
-        title={`${name} ${sizeLabel}`}
-        description={`${name} ${sizeLabel} — ${money(product.price * SET_SIZE)} for a set of ${SET_SIZE} from TireDrop, shipped free to the 48 contiguous states and DC, or to our South Florida shop to fit ${INSTALL_FROM}.`}
+        title={productTitle(product)}
+        description={productDescription(product)}
+        schema={productLd ? [productLd] : undefined}
       />
       <Breadcrumbs
         trail={[
@@ -403,7 +411,7 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
           {/* Buy box */}
           <div>
             <p className="eyebrow">{product.brand}</p>
-            <h1 className="h1 mt-1">{product.model}</h1>
+            <h1 className="h1 mt-1">{productH1(product)}</h1>
             <p className="tnum mt-2 font-display text-lg text-smoke">
               {sizeLabel}
               {isTire && ` · ${product.loadIndex}${product.speedRating}`}
@@ -896,6 +904,8 @@ export function ProductDetail({ product, kind = "tire", reportStock = false }) {
           </div>
         </div>
       </Section>
+
+      <ProductRelatedLinks product={product} />
 
       {/* Related */}
       {related.length > 0 && (

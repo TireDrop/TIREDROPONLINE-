@@ -76,7 +76,7 @@ export const TIRES = [
       "EcoPlus compound balances wear life against wet braking",
       "Full-depth sipes hold traction in Florida downpours",
       "Comfort Ride technology isolates road noise from the cabin",
-      "Excellent match for Accord, Camry and Altima trims",
+      "Sized for midsize sedans; confirm fit with the vehicle check",
     ],
     specs: {
       "Tire Size": "225/50R17",
@@ -252,11 +252,11 @@ export const TIRES = [
     warranty: "45,000 mile treadwear",
     seasons: "Summer ultra-high performance",
     features: [
-      "Serious summer grip without a premium-brand price",
+      "Summer performance compound built for dry and wet grip",
       "Wide outer shoulder ribs stiffen the tire under cornering load",
       "Four-groove tread channels water at highway speed",
       "Silica-rich compound keeps wet braking distances short",
-      "Popular upgrade for tuned imports and sport compacts",
+      "Summer performance tire for sport compacts and imports",
     ],
     specs: {
       "Tire Size": "235/45R18",
@@ -364,7 +364,7 @@ export const TIRES = [
       "EcoPlus technology improves fuel economy on heavy SUVs",
       "Traction grooves keep wet stopping distances short",
       "Noise breakers on the shoulder blocks quiet the cabin",
-      "Fits the most common family crossover sizes",
+      "Sized for family crossovers; confirm fit with the vehicle check",
     ],
     specs: {
       "Tire Size": "235/65R17",
@@ -719,7 +719,7 @@ export const TIRES = [
     warranty: "50,000 mile commercial treadwear",
     seasons: "All-season commercial",
     features: [
-      "Proven highway tread for dual-wheel work trucks",
+      "Highway tread for dual-wheel work trucks",
       "Defense Groove design helps resist irregular shoulder wear",
       "Steel casing is built to be retreaded once",
       "Even footprint pressure extends fleet rotation intervals",
@@ -775,7 +775,7 @@ const WHEEL_CATALOG = [
       "Ten-spoke split face keeps brake calipers visible",
       "Hub-centric rings included for a vibration-free fit",
       "JWL and VIA certified for street use",
-      "Popular fitment for sport compacts and imports",
+      "Bolt pattern and offset suit many sport compacts and imports",
     ],
     specs: {
       Diameter: "18 in",
@@ -805,7 +805,7 @@ const WHEEL_CATALOG = [
     finish: "Gunmetal",
     style: "Y-spoke",
     features: [
-      "One of the lightest cast wheels at this price point",
+      "Lightweight cast construction",
       "Y-spoke face adds depth without looking busy",
       "Flow-formed rim barrel for strength on broken pavement",
       "Wide fitment range across imports and sport sedans",
@@ -911,7 +911,7 @@ const WHEEL_CATALOG = [
       "Hybrid forged construction — forged face, flow-formed barrel",
       "Available in staggered widths for rear-drive builds",
       "Finish is applied in a controlled powder and clear process",
-      "Our most requested 20-inch show wheel",
+      "20-inch concave wheel with a stepped lip",
     ],
     specs: {
       Diameter: "20 in",
@@ -1009,11 +1009,11 @@ const WHEEL_CATALOG = [
     finish: "Matte Black",
     style: "8-spoke simulated beadlock",
     features: [
-      "Race-proven eight-spoke design with a simulated beadlock ring",
+      "Eight-spoke design with a simulated beadlock ring",
       "Rated for desert and overland abuse, not just the look",
       "Zero offset pushes the tires out for a wider stance",
       "Accepts factory and aftermarket TPMS sensors",
-      "Our top seller for Tacoma, 4Runner and Colorado builds",
+      "Bolt pattern suits Tacoma, 4Runner and Colorado builds; confirm fit before ordering",
     ],
     specs: {
       Diameter: "17 in",

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BRANDS_ALL, BRAND_FILTERS } from "../../data/brandsAll.js";
+import { LOGO_SIZES } from "../../data/brandLogoSizes.js";
 
 /**
  * The Brands page wall (/brands): every brand logo as a tile, with
@@ -24,6 +25,7 @@ const prefersReducedMotion = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function Tile({ brand, tileRef }) {
+  const [logoW, logoH] = LOGO_SIZES[brand.file] || [];
   const classes = [
     "brand-tile flex min-w-0 flex-col border border-ink/10 bg-bone",
     brand.lowRes ? "brand-tile-static" : "",
@@ -44,6 +46,8 @@ function Tile({ brand, tileRef }) {
         <img
           src={`/brand/logos/${brand.file}`}
           alt={`${brand.name} logo`}
+          width={logoW}
+          height={logoH}
           loading="lazy"
           decoding="async"
           className="block max-h-full max-w-full object-contain"

@@ -16,7 +16,7 @@ import { SERVICE_AREA_SCHEMA } from "../../data/serviceArea.js";
 import CITY_INDEX from "virtual:city-index";
 import { getLiveState } from "../../data/stateList.js";
 import { getProduct } from "../../data/products.js";
-import { getService } from "../../data/services.js";
+import { getServiceFacts } from "../../data/serviceFacts.js";
 import { noteFormStart } from "../../data/formGuard.js";
 // Only the switch, the twin table and three small helpers: the Spanish copy
 // itself stays out of this file, which is in every page's bundle.
@@ -324,83 +324,24 @@ function isShopRoute(pathname) {
 }
 
 /* ------------------------------------------------------------------ *
- * Offers: deliberately off.
+ * Product / Offer markup: not built here.
  *
- * An Offer node is a machine-readable commitment — this price, this
- * availability, buyable now — and it is what feeds Google's free product
- * listings. None of those hold yet: data/products.js is a representative
- * catalog rather than live distributor inventory, with no stock counts at all.
- * Publishing price and availability as fact would promise inventory nobody
- * has confirmed.
- *
- * So while this is false, no Product node is emitted at all. Google requires
- * one of offers, review or aggregateRating on a Product; without them it is
- * reported as an invalid item in Search Console and earns no rich result, and
- * the only one of the three this site could honestly add is the offer. The
- * product pages keep their WebPage and BreadcrumbList.
- *
- * WHEN ATD OR U.S. AUTOFORCE PRICING AND INVENTORY ARE LIVE: set this true and
- * the Product, with its offer, starts shipping. Do not flip it before then.
- * `npm run check:schema` checks every Product it finds carries an offer with
- * a price and currency.
+ * It is built by productSchema() in src/data/productSchema.js, handed in by
+ * the product pages through the `schema` prop, and returns nothing at all
+ * while PRODUCT_SCHEMA_ENABLED (src/data/seoFlags.js) is false. That is the
+ * case today: data/products.js is a sample catalog with no stock, SKUs or
+ * photos, and an Offer would promise inventory nobody has confirmed. The
+ * product pages keep their WebPage and BreadcrumbList. See
+ * docs/integrations/product-structured-data.md.
  * ------------------------------------------------------------------ */
-const EMIT_OFFERS = false;
 
-function productNode(product, url) {
-  const name = `${product.brand} ${product.model}`;
-  const isTire = product.kind === "tire";
-  const size = isTire
-    ? product.size
-    : `${product.diameter}x${product.wheelWidth} ${product.boltPattern}`;
-
-  const node = {
-    "@type": "Product",
-    "@id": `${url}#product`,
-    name: `${name} ${size}`,
-    url,
-    sku: product.id,
-    category: product.category,
-    brand: { "@type": "Brand", name: product.brand },
-    model: product.model,
-    description: (product.features ?? [])
-      .slice(0, 3)
-      .map((f) => f.replace(/\.?$/, "."))
-      .join(" "),
-    additionalProperty: Object.entries(product.specs ?? {}).map(([k, v]) => ({
-      "@type": "PropertyValue",
-      name: k,
-      value: String(v),
-    })),
-    // No aggregateRating. The catalog carries no ratings, and rating markup
-    // for ratings nobody left is a policy breach, not a shortcut.
-  };
-
-  // Only a real product photo, the same rule the page uses to show one. The
-  // drawn placeholder art is not a picture of the product.
-  if (typeof product.image === "string" && /^https:\/\//i.test(product.image))
-    node.image = product.image;
-
-  if (isTire && product.warranty) {
-    node.additionalProperty.push({
-      "@type": "PropertyValue",
-      name: "Warranty",
-      value: product.warranty,
-    });
-  }
-
-  if (EMIT_OFFERS) {
-    node.offers = {
-      "@type": "Offer",
-      url,
-      priceCurrency: "USD",
-      price: String(product.price),
-      // `availability` belongs here once the distributor feed supplies real
-      // inventory; the sample catalog has none to report.
-      seller: { "@id": `${ORIGIN}/#organization` },
-    };
-  }
-
-  return node;
+/** The product's page heading, which is also the last breadcrumb's name. */
+function productCrumbName(product) {
+  const size =
+    product.kind === "tire"
+      ? product.size
+      : `${product.diameter}x${product.wheelWidth} ${product.boltPattern}`;
+  return `${product.brand} ${product.model} ${size}`;
 }
 
 function serviceNode(service, url) {
@@ -605,9 +546,7 @@ function graphFor(
       product[2],
     );
     if (found) {
-      const node = productNode(found, url);
-      if (EMIT_OFFERS) graph.push(node);
-      crumbName = node.name;
+      crumbName = productCrumbName(found);
       // The visible trail: Tires > <brand> (the listing filtered to that
       // brand) > the product.
       crumbParents ??= [
@@ -622,7 +561,7 @@ function graphFor(
 
   const service = /^\/services\/(.+)$/.exec(pathname);
   if (service) {
-    const found = getService(service[1]);
+    const found = getServiceFacts(service[1]);
     if (found) {
       graph.push(serviceNode(found, url));
       crumbName = found.name;

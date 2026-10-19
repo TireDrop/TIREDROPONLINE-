@@ -64,7 +64,7 @@ author: "TireDrop Team, Extreme Tires, Sunrise FL"
 
 Every major tire maker sells a range of lines: touring tires for quiet commutes, all-terrain tires for trucks, performance tires for grip, and value lines built to a price. Two tires with the same logo can be further apart than two tires from different makers built for the same job.
 
-So instead of ranking brands (we don't), here's how to compare **tires**, using tools that work across any brand.
+So instead of ranking brands (we don't), here's how to compare **tires**, using tools that work across any brand. If you want to see which makers are in our catalog first, the [brands we list](/brands) are all on one page, and you can [browse tires by size and type](/tires) from there.
 
 ## Step 1: The placard comes before the brand
 
