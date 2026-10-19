@@ -40,15 +40,15 @@ export const BLOG_IMAGES = {
   "florida-sun-dry-rot-tires":
     "A hand flexes the faded gray sidewall of a car tire covered in fine dry rot cracks, parked in strong sun on a Florida driveway.",
   "ford-f-150-tires-p-vs-lt":
-    "A man crouches at a pickup's rear tire, hand on the sidewall marked LT265/70R17 Load Range E, with a boat trailer hitched behind.",
+    "A man crouches at the rear tire of a white Ford F-150 pickup hitched to a boat trailer on a Florida driveway.",
   "get-tires-installed-after-buying-online":
     "A technician and customer inspect a stack of four newly delivered tires on the floor of a tire shop before mounting.",
   "glovebox-tire-kit-florida":
     "An open hatchback trunk with a tire gauge, 12-volt inflator, sealant bottle, flashlight and reflective triangle laid out beside the spare.",
   "honda-civic-tires-guide":
-    "A person points to the tire information sticker on the driver's door pillar of an open silver compact sedan parked in a driveway.",
+    "A man crouches beside the open door of a silver Honda Civic, pointing at the tire information sticker on the door pillar.",
   "honda-cr-v-tires-guide":
-    "A parent checks a rear tire's pressure with a pencil gauge beside a crossover with its hatch open, loaded with luggage and beach chairs.",
+    "A man checks a rear tire with a pencil gauge beside a gray Honda CR-V with its hatch open, loaded with luggage and a cooler.",
   "how-old-are-tires-bought-online":
     "A hand rests on a new tire's sidewall beside the molded DOT 3524 date code while another hand photographs it with a phone.",
   "hurricane-season-tire-check":
@@ -56,7 +56,7 @@ export const BLOG_IMAGES = {
   "hydroplaning-broward-downpours":
     "View from the driver's seat through a rainy windshield at standing water on a multi-lane highway with spray from the trucks ahead.",
   "jeep-wrangler-tires-guide":
-    "A hand measures an all-terrain tire's tread groove on a boxy SUV on wet, sandy pavement in a palm-lined beach parking lot.",
+    "A man crouches at the front tire of a tan Jeep Wrangler on wet pavement in a beach parking lot, checking the tread with a gauge.",
   "king-tide-salt-water-wheels":
     "A white sedan drives slowly through murky tidal floodwater halfway up its wheels on a sunny South Florida waterfront street.",
   "low-rolling-resistance-hybrids":
@@ -82,7 +82,7 @@ export const BLOG_IMAGES = {
   "sidewall-max-psi-myth":
     "A hand holds an air hose to a tire valve beside the sidewall marking MAX. PRESS. 44 PSI at a gas station air pump.",
   "silverado-boat-towing-tires":
-    "A man checks the rear tire pressure of a white full-size pickup hitched to a boat trailer at a Florida boat ramp.",
+    "A man crouches at the rear tire of a white Chevrolet Silverado pickup hitched to a boat on a trailer at a Florida boat ramp.",
   "small-fleet-tire-checklist":
     "A worker in a work shirt checks tire pressure on the first of three white work vans parked in a yard, a log clipboard on the hood.",
   "snowbird-car-sat-all-summer-tires":
@@ -90,7 +90,7 @@ export const BLOG_IMAGES = {
   "storm-cleanup-nail-in-tire":
     "A finger points to a roofing nail head in a sedan's tire tread beside a curbside pile of shingles and storm debris.",
   "tesla-model-y-tires-guide":
-    "A woman reads the tire information sticker on the open door pillar of a silver electric crossover plugged in at a home charger.",
+    "A woman reads the tire information sticker on the open door pillar of a silver Tesla Model Y plugged into a wall charger in a home garage.",
   "thanksgiving-road-trip-tire-check":
     "An adult kneels to check a rear tire's pressure on a hatchback packed with luggage and a cooler in a driveway at dawn.",
   "tire-recall-notice-what-to-do":
@@ -98,9 +98,9 @@ export const BLOG_IMAGES = {
   "tire-rotation-upsell-myth":
     "A technician compares tread wear on two tires on the shop floor, with a sedan on a lift behind him missing two wheels.",
   "toyota-camry-tires-guide":
-    "A gray sedan drives through an afternoon rain shower on a Florida road with its front tire throwing up water from a puddle.",
+    "A gray Toyota Camry drives through an afternoon rain shower on a Florida road, its front tire spraying water from a puddle.",
   "toyota-rav4-tires-guide":
-    "Four identical new tires lined up on a shop floor in front of a compact crossover on a lift with all four wheels off.",
+    "A mechanic beside a Toyota RAV4 raised on a lift, with four new matching tires lined up in a clean tire shop bay.",
   "tpms-still-need-tire-gauge":
     "A person crouches at a slightly soft front tire with a pencil gauge on the valve while the open car door shows a dark dashboard.",
   "turnpike-orlando-drive-tires":
