@@ -25,7 +25,7 @@ export default function SavedOrdersList({ saved, selected, onSelect, onForget, o
                 }`}
               >
                 <span className="min-w-0">
-                  <span className="block truncate font-display font-bold text-ink">
+                  <span className="block line-clamp-2 break-words font-display font-bold text-ink">
                     {item.label || item.order}
                   </span>
                   {item.label && <span className="block text-xs text-smoke">{item.order}</span>}

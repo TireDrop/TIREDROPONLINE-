@@ -12,7 +12,7 @@ const time = (ms) =>
 /**
  * My Orders: the orders remembered on this device (src/lib/savedOrders.js)
  * at the top of /track. The selected one is looked up and then kept fresh:
- * every 60 seconds while the page is visible, paused while it is hidden,
+ * every 5 minutes while the page is visible (two of the ten lookups), paused while it is hidden,
  * backing off after errors, giving way to the rate limit, and stopping after
  * 30 minutes (Refresh starts it again). Only the order on screen is checked,
  * because the lookup is limited to ten per ten minutes (src/lib/orderRefresh.js).
@@ -201,7 +201,7 @@ export default function MyOrders({
               {status === "ok" && checkedAt && (
                 <>
                   Updated {time(checkedAt)}
-                  <span className="text-smoke"> · updates by itself while this page is open</span>
+                  <span className="text-smoke"> · refreshes every few minutes while this page is open</span>
                 </>
               )}
               {status !== "loading" && status !== "ok" && checkedAt && <>Last updated {time(checkedAt)}</>}

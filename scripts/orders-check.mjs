@@ -14,11 +14,11 @@
  *     draws the five-step timeline with the right steps done, plus the
  *     carrier button (https, new tab);
  *   Refresh
- *   - 60 s auto refresh while the page is visible (fake clock): one more
- *     lookup per minute, the timeline moves when the status does;
- *   - hidden page: no lookups; back to visible: one at once if a minute old;
+ *   - 5-minute auto refresh while the page is visible (fake clock): one more
+ *     lookup per five minutes (two of the ten per ten minutes), the timeline moves when the status does;
+ *   - hidden page: no lookups; back to visible: one at once if the last check is five minutes old;
  *   - stops after 30 minutes with a calm message; Refresh starts it again;
- *   - 500s: a calm message, and the gaps double (120 s, then 240 s); 429:
+ *   - 500s: a calm message, and the gaps grow (10 minutes, the cap); 429:
  *     paused message, no hammering; 404: "couldn't find" with Forget;
  *   - offline: message, no lookups, and one when the connection returns;
  *   Forget
@@ -159,6 +159,7 @@ function installApi(page) {
 const browser = await chromium.launch({ executablePath: existsSync(CHROME) ? CHROME : undefined });
 const local = new URL(BASE).host;
 const KEY = "tiredrop.orders.v1";
+const MIN = 60_000;
 
 async function open({ width = 390, height = 844, blockStorage = false, clock = false, seed = null } = {}) {
   const context = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" });
@@ -341,19 +342,22 @@ await check("reload: My Orders first, looked up by itself, five-step timeline an
   await context.close();
 });
 
-await check("auto refresh: every 60 s while visible; the timeline moves with the status", async () => {
+await check("auto refresh: every 5 minutes while visible; the timeline moves with the status", async () => {
   const { page, mock, context } = await open({ seed: SAVED, clock: true });
   mock.stage = "supplier";
   await page.goto(URL_TRACK);
   await page.locator('[data-testid="selected-order"] [data-testid="order-result"]').waitFor();
   assert.deepEqual(await timelineDone(page), ["done", "done", "now", "next", "next"]);
   mock.stage = "shipped";
-  await page.clock.runFor(61_000);
+  await page.clock.runFor(4 * MIN);
   await settle(page);
-  assert.equal(mock.calls.length, 2, "one more after a minute");
+  assert.equal(mock.calls.length, 1, "nothing before five minutes");
+  await page.clock.runFor(MIN + 1000);
+  await settle(page);
+  assert.equal(mock.calls.length, 2, "one more after five minutes");
   assert.deepEqual(await timelineDone(page), ["done", "done", "done", "now", "next"]);
   mock.stage = "delivered";
-  await page.clock.runFor(60_000);
+  await page.clock.runFor(5 * MIN);
   await settle(page);
   assert.equal(mock.calls.length, 3);
   assert.deepEqual(await timelineDone(page), ["done", "done", "done", "done", "done"]);
@@ -375,15 +379,15 @@ await check("hidden page: no lookups; back in view: one at once", async () => {
     }, hidden);
   await setHidden(true);
   const before = mock.calls.length;
-  await page.clock.runFor(5 * 60_000);
+  await page.clock.runFor(12 * MIN);
   await settle(page);
   assert.equal(mock.calls.length, before, "nothing while hidden");
   await setHidden(false);
   await settle(page, 500);
   assert.equal(mock.calls.length, before + 1, "one on return");
-  await page.clock.runFor(61_000);
+  await page.clock.runFor(5 * MIN + 1000);
   await settle(page);
-  assert.equal(mock.calls.length, before + 2, "and the minute rhythm resumes");
+  assert.equal(mock.calls.length, before + 2, "and the five-minute rhythm resumes");
   await context.close();
 });
 
@@ -391,13 +395,13 @@ await check("stops after 30 minutes; Refresh starts it again", async () => {
   const { page, mock, context } = await open({ seed: SAVED, clock: true });
   await page.goto(URL_TRACK);
   await page.locator('[data-testid="selected-order"] [data-testid="order-result"]').waitFor();
-  for (let i = 0; i < 31; i += 1) {
-    await page.clock.runFor(60_000);
+  for (let i = 0; i < 7; i += 1) {
+    await page.clock.runFor(5 * MIN);
     await settle(page, 60);
   }
   await settle(page);
   const stopped = mock.calls.length;
-  assert.ok(stopped <= 31, `lookups stop at about 30 (${stopped})`);
+  assert.ok(stopped >= 5 && stopped <= 7, `lookups stop after 30 minutes (${stopped})`);
   assert.match(await page.locator('[data-testid="refresh-message"]').innerText(), /paused after 30 minutes/i);
   await page.clock.runFor(10 * 60_000);
   await settle(page);
@@ -407,7 +411,7 @@ await check("stops after 30 minutes; Refresh starts it again", async () => {
   await settle(page, 500);
   assert.equal(mock.calls.length, stopped + 1);
   assert.equal(await page.locator('[data-testid="refresh-message"]').count(), 0, "message gone");
-  await page.clock.runFor(61_000);
+  await page.clock.runFor(5 * MIN + 1000);
   await settle(page);
   assert.equal(mock.calls.length, stopped + 2, "watching again");
   const ga = await gaEvents(page);
@@ -420,21 +424,21 @@ await check("server trouble: calm message, the status stays, gaps double", async
   await page.goto(URL_TRACK);
   await page.locator('[data-testid="selected-order"] [data-testid="order-result"]').waitFor();
   mock.mode = "500";
-  await page.clock.runFor(61_000);
+  await page.clock.runFor(5 * MIN + 1000);
   await settle(page);
   assert.equal(mock.calls.length, 2);
   assert.equal(await page.locator('[data-testid="refresh-message"]').getAttribute("data-status"), "error");
   assert.equal(await page.locator('[data-testid="order-result"]').count(), 1, "the last status stays on screen");
-  await page.clock.runFor(60_000);
+  await page.clock.runFor(5 * MIN);
   await settle(page);
-  assert.equal(mock.calls.length, 2, "not at 60 s any more");
-  await page.clock.runFor(61_000); // 121 s after the first failure
+  assert.equal(mock.calls.length, 2, "not after another five minutes: the gap grew");
+  await page.clock.runFor(5 * MIN + 1000);
   await settle(page);
-  assert.equal(mock.calls.length, 3);
-  await page.clock.runFor(200_000);
+  assert.equal(mock.calls.length, 3, "ten minutes after the failure");
+  await page.clock.runFor(9 * MIN);
   await settle(page);
-  assert.equal(mock.calls.length, 3, "and the next gap is 240 s");
-  await page.clock.runFor(45_000);
+  assert.equal(mock.calls.length, 3, "and the gap stays at the ten-minute cap");
+  await page.clock.runFor(2 * MIN);
   await settle(page);
   assert.equal(mock.calls.length, 4);
   mock.mode = "ok";
@@ -449,7 +453,7 @@ await check("rate limit (429): paused message, ten minutes of quiet", async () =
   await page.goto(URL_TRACK);
   await page.locator('[data-testid="selected-order"] [data-testid="order-result"]').waitFor();
   mock.mode = "429";
-  await page.clock.runFor(61_000);
+  await page.clock.runFor(5 * MIN + 1000);
   await settle(page);
   assert.equal(mock.calls.length, 2);
   assert.equal(await page.locator('[data-testid="refresh-message"]').getAttribute("data-status"), "limited");
