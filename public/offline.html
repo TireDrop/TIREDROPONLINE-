@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Offline | TireDrop</title>
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#070E1A" />
+    <!--
+      The page the service worker (src/pwa/sw.js) answers with when a page
+      cannot be fetched and there is no connection. Everything is inline: no
+      script, no font, no image request, because it has to render with nothing
+      else available, and the site's CSP allows no inline script. "Try again"
+      is a link to the same address, so it reloads whatever page was asked for.
+      The phone number and hours are copied from src/data/business.js;
+      `npm run check:pwa` fails if they drift.
+    -->
+    <style>
+      :root {
+        --ink: #070e1a;
+        --steel: #101c2e;
+        --graphite: #22344c;
+        --volt: #00b4fc;
+        --drop: #0068e8;
+        --dive: #0053c4;
+        --bone: #ffffff;
+        --muted: #b6c2d4;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        background: var(--ink);
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+          max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+        background: radial-gradient(120% 70% at 50% 0%, #0d2140 0%, var(--ink) 60%);
+        color: var(--bone);
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+          sans-serif;
+        line-height: 1.5;
+        -webkit-text-size-adjust: 100%;
+      }
+      main {
+        width: 100%;
+        max-width: 26rem;
+        text-align: center;
+      }
+      .mark {
+        width: 84px;
+        height: 84px;
+        margin: 0 auto 20px;
+        display: block;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 1.75rem;
+        line-height: 1.15;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+      }
+      p {
+        margin: 0 0 24px;
+        color: var(--muted);
+        font-size: 1rem;
+      }
+      .actions {
+        display: grid;
+        gap: 12px;
+      }
+      .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 52px;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-size: 1.0625rem;
+        font-weight: 700;
+        text-decoration: none;
+        border: 2px solid transparent;
+      }
+      .btn:focus-visible {
+        outline: 3px solid var(--volt);
+        outline-offset: 3px;
+      }
+      .btn-primary {
+        background: var(--drop);
+        color: var(--bone);
+      }
+      .btn-primary:active {
+        background: var(--dive);
+      }
+      .btn-ghost {
+        border-color: var(--graphite);
+        background: var(--steel);
+        color: var(--bone);
+      }
+      .hours {
+        margin: 28px 0 0;
+        padding-top: 20px;
+        border-top: 1px solid var(--graphite);
+        color: var(--muted);
+        font-size: 0.9375rem;
+      }
+      .hours strong {
+        color: var(--bone);
+      }
+      .hours span {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <svg class="mark" viewBox="0 0 64 64" role="img" aria-label="TireDrop">
+        <rect width="64" height="64" rx="14" fill="#101c2e" />
+        <circle cx="32" cy="32" r="23" fill="none" stroke="#00b4fc" stroke-width="2" opacity=".35" />
+        <circle cx="32" cy="32" r="20" fill="#1c2025" />
+        <circle cx="32" cy="32" r="20" fill="none" stroke="#3a4149" stroke-width="2" />
+        <g fill="#5a6472">
+          <rect x="30.4" y="12.6" width="3.2" height="6" rx="1.2" />
+          <rect x="30.4" y="12.6" width="3.2" height="6" rx="1.2" transform="rotate(45 32 32)" />
+          <rect x="30.4" y="12.6" width="3.2" height="6" rx="1.2" transform="rotate(90 32 32)" />
+          <rect x="30.4" y="12.6" width="3.2" height="6" rx="1.2" transform="rotate(135 32 32)" />
+          <rect x="30.4" y="12.6" width="3.2" height="6" rx="1.2" transform="rotate(180 32 32)" />
+          <rect x="30.4" y="12.6" width="3.2" height="6" rx="1.2" transform="rotate(225 32 32)" />
+          <rect x="30.4" y="12.6" width="3.2" height="6" rx="1.2" transform="rotate(270 32 32)" />
+          <rect x="30.4" y="12.6" width="3.2" height="6" rx="1.2" transform="rotate(315 32 32)" />
+        </g>
+        <circle cx="32" cy="32" r="9.5" fill="#070e1a" />
+        <circle cx="32" cy="32" r="9.5" fill="none" stroke="#00b4fc" stroke-width="2.4" />
+      </svg>
+      <h1>You are offline</h1>
+      <p>
+        TireDrop needs a connection to show tires, sizes and order status. Check your signal, then
+        try again. Your cart and saved orders are still on this device.
+      </p>
+      <div class="actions">
+        <a class="btn btn-primary" href="">Try again</a>
+        <a class="btn btn-ghost" href="tel:+19547731896" id="call">Call (954) 773-1896</a>
+      </div>
+      <p class="hours">
+        <strong>Extreme Tires, Sunrise FL</strong>
+        <span>Mon – Fri 8:00 AM – 6:30 PM</span>
+        <span>Saturday 8:00 AM – 4:00 PM</span>
+        <span>Sunday Closed</span>
+      </p>
+    </main>
+  </body>
+</html>

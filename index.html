@@ -32,8 +32,17 @@
     <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg" sizes="any" />
     <!-- Safari on iOS ignores the SVG favicon, and an SVG cannot be used as a
          home-screen icon at all, so this is a flat 180x180 PNG on brand ink. -->
-    <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+    <!-- Home-screen launch on iOS (there is no install event there; the
+         visitor uses Share, Add to Home Screen, and InstallPrompt.jsx says
+         so). The status bar is translucent over the brand ink, and the page
+         draws under it in app mode (src/lib/appMode.js adds viewport-fit=cover
+         then; the browser site keeps the plain viewport tag above). Android
+         and desktop read the same intent from site.webmanifest. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="TireDrop" />
     <meta
       property="og:title"
@@ -88,5 +97,8 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <!-- Service worker registration and the install/update events; Vite folds
+         it into the same entry chunk as main.jsx (src/pwa/register.js). -->
+    <script type="module" src="/src/pwa/boot.js"></script>
   </body>
 </html>

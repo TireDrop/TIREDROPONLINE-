@@ -14,6 +14,11 @@
  *                 { results: 0 }, and its quote form → generate_lead
  *                 { form_name: "size-quote" }
  *
+ *   the installed app   app_install_prompt_shown { placement: "banner" } on a
+ *                        second visit with an install event, app_installed on
+ *                        appinstalled, app_launch_standalone once when launched
+ *                        from the home screen (src/pwa/, InstallPrompt.jsx)
+ *
  * and that nothing typed into a form (name, email, phone, message) appears
  * in any call.
  *
@@ -247,6 +252,41 @@ try {
     assert.deepEqual(leads.at(-1)[2], { form_name: "size-quote" });
     // Once per search, not once per render.
     assert.equal((await h.events()).filter((c) => c[1] === "view_search_results").length, 1);
+  });
+
+  await check("app: install banner, appinstalled and a standalone launch are sent, with no personal parameter", async () => {
+    const a = await open();
+    await a.page.goto(`${BASE}/`);
+    await a.page.evaluate(() => {
+      localStorage.setItem("tiredrop.pwa.v1", JSON.stringify({ visits: 1 }));
+      sessionStorage.removeItem("tiredrop.pwa.session");
+    });
+    await a.page.reload();
+    await a.page.evaluate(() =>
+      window.dispatchEvent(
+        Object.assign(new Event("beforeinstallprompt", { cancelable: true }), {
+          prompt: async () => {},
+          userChoice: Promise.resolve({ outcome: "dismissed" }),
+        }),
+      ),
+    );
+    const [shown] = await a.waitEvent("app_install_prompt_shown");
+    assert.deepEqual(shown[2], { placement: "banner" });
+    await a.page.evaluate(() => window.dispatchEvent(new Event("appinstalled")));
+    const [installed] = await a.waitEvent("app_installed");
+    assert.deepEqual(installed[2], {});
+    await a.context.close();
+
+    const s = await open();
+    await s.page.addInitScript(() => Object.defineProperty(navigator, "standalone", { get: () => true }));
+    await s.page.goto(`${BASE}/`);
+    const [launch] = await s.waitEvent("app_launch_standalone");
+    assert.deepEqual(launch[2], {});
+    await s.page.reload();
+    await s.page.waitForTimeout(500);
+    assert.equal((await s.events()).filter((c) => c[1] === "app_launch_standalone").length, 1, "once per session");
+    assert.deepEqual([...a.errors, ...s.errors], []);
+    await s.context.close();
   });
 
   await check("no GA call carries anything typed into a form", async () => {

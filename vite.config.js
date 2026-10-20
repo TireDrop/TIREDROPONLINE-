@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { generateSeoFiles } from "./scripts/generate-seo-files.mjs";
+import { swPlugin } from "./scripts/pwa-sw-plugin.mjs";
 import { relative, sep } from "node:path";
 import { CONTENT_DIR, loadContent } from "./src/content/node.js";
 import { articleDetail, articleSummary } from "./src/content/core.js";
@@ -175,6 +176,7 @@ export default defineConfig(({ mode }) => ({
     toolLinks(),
     cityIndex(),
     contentModules(),
+    swPlugin(),
   ],
   base: mode === "preview" ? "./" : "/",
   define: {

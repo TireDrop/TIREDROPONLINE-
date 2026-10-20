@@ -130,6 +130,21 @@ export function trackPageView(key, path = key) {
 //   chat_handoff_click Call or Contact button    method ("call" / "contact")
 //                      under a chat reply
 //
+// The installed app (src/pwa/, src/components/app/, My Orders). None of these
+// carries anything typed: an order number or email is never a parameter.
+//
+//   app_install_prompt_shown  our install banner appeared  placement ("banner" =
+//                      Android/desktop, the browser's own install dialog behind
+//                      its button; "ios_hint" = the Add to Home Screen steps)
+//   app_installed      the browser reported the install (appinstalled)
+//   app_launch_standalone  the site opened from the home screen (once per session)
+//   app_tab_click      a bottom tab bar tab           method (shop, size, orders,
+//                      pressed                       call, more)
+//   track_lookup       /track looked an order up     method ("manual", "saved")
+//   track_saved        "Remember this order" ticked and kept
+//   track_forget       a saved order forgotten
+//   track_refresh      My Orders refreshed           method ("auto", "manual")
+//
 // `purchase` is NOT sent. Checkout is request-only today: no money changes
 // hands on this site. When online payment is switched on, the purchase is
 // recorded on Shopify's checkout (it knows the transaction id and whether
@@ -211,9 +226,33 @@ export function cleanParams(params = {}) {
   return out;
 }
 
+// In-page listeners for the same events, so a component can react to "the
+// visitor just did something meaningful" (the install banner waits for one)
+// without every call site knowing about it. They get the name and the CLEANED
+// parameters, and run whether or not gtag exists (a blocker must not change
+// what the page does).
+const eventListeners = new Set();
+
+/** Calls `listener(name, cleanParams)` for every trackEvent. Returns an unsubscribe. */
+export function onTrackedEvent(listener) {
+  eventListeners.add(listener);
+  return () => eventListeners.delete(listener);
+}
+
 /** Sends one GA4 event with cleaned parameters. No-op without gtag. */
 export function trackEvent(name, params = {}) {
-  if (!gtagReady() || !/^[a-z][a-z0-9_]{0,39}$/.test(name)) return;
+  if (!/^[a-z][a-z0-9_]{0,39}$/.test(name)) return;
+  if (eventListeners.size) {
+    const clean = cleanParams(params);
+    for (const listener of [...eventListeners]) {
+      try {
+        listener(name, clean);
+      } catch {
+        /* a listener must never break the page or the send below */
+      }
+    }
+  }
+  if (!gtagReady()) return;
   try {
     window.gtag("event", name, cleanParams(params));
   } catch {

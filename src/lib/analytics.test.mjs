@@ -8,6 +8,7 @@ import assert from "node:assert/strict";
 import {
   cartParams,
   cleanParams,
+  onTrackedEvent,
   oncePerPage,
   toGaItem,
   trackEvent,
@@ -156,4 +157,45 @@ test("tool_use fires once per page view, again on a new page", () => {
   oncePerPage("k", () => n++);
   oncePerPage("k", () => n++);
   assert.equal(n, 1);
+});
+
+test("app events pass their parameters, and drop anything typed", () => {
+  trackEvent("app_install_prompt_shown", { placement: "ios_hint" });
+  trackEvent("app_installed");
+  trackEvent("app_launch_standalone");
+  trackEvent("app_tab_click", { method: "orders" });
+  trackEvent("track_lookup", { method: "saved", order: "#1001", email: "jo@example.com" });
+  trackEvent("track_saved");
+  trackEvent("track_forget");
+  trackEvent("track_refresh", { method: "auto" });
+  assert.deepEqual(calls.map((c) => [c[1], c[2]]), [
+    ["app_install_prompt_shown", { placement: "ios_hint" }],
+    ["app_installed", {}],
+    ["app_launch_standalone", {}],
+    ["app_tab_click", { method: "orders" }],
+    ["track_lookup", { method: "saved" }],
+    ["track_saved", {}],
+    ["track_forget", {}],
+    ["track_refresh", { method: "auto" }],
+  ]);
+});
+
+test("onTrackedEvent listeners see cleaned params, with or without gtag, and cannot break a send", () => {
+  const seen = [];
+  const off = onTrackedEvent((name, params) => seen.push([name, params]));
+  const off2 = onTrackedEvent(() => {
+    throw new Error("listener bug");
+  });
+  trackEvent("add_to_cart", { currency: "USD", email: "jo@example.com" });
+  assert.deepEqual(seen, [["add_to_cart", { currency: "USD" }]]);
+  assert.equal(calls.length, 1);
+  delete globalThis.window.gtag;
+  trackEvent("tool_use", { tool_id: "x" });
+  assert.equal(seen.length, 2);
+  trackEvent("Bad Name");
+  assert.equal(seen.length, 2);
+  off();
+  off2();
+  trackEvent("tool_use", { tool_id: "y" });
+  assert.equal(seen.length, 2);
 });
