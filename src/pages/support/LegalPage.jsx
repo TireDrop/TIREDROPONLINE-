@@ -56,7 +56,14 @@
 //      visitor picks to Anthropic's API once to read the size or VIN, and a
 //      VIN to NHTSA vPIC to decode it; neither is stored or logged
 //      (sections 1 and 4 say so). The only browser storage
-//      is localStorage for the cart and the comparison tray. The sign-up form
+//      is localStorage for the cart, the comparison tray, the vehicle or tire
+//      size, and, only when the visitor ticks "Remember this order on this
+//      device" on /track (off by default), saved orders: order number, the
+//      email typed for it and an optional name, key tiredrop.orders.v1
+//      (src/lib/savedOrders.js). They are sent only in the visitor's own
+//      lookup request to /api/track (to show its status), never to analytics,
+//      and "Forget" / "Forget all" on /track removes them. Sections 1, 3 and
+//      the rights list say so. The sign-up form
 //      stores nothing; it deletes the old pop-up's "td-nl-popup" entry if a
 //      browser still has one. Section 3 says exactly that. Card payments are taken on Shopify's hosted
 //      checkout page, so the policy names that without claiming the site
@@ -79,7 +86,7 @@ import {
   Seo,
 } from "../../components/ui/index.jsx";
 
-const LAST_UPDATED = "October 4, 2026";
+const LAST_UPDATED = "October 20, 2026";
 
 // The four questions a customer — or anyone reviewing this site — comes to the
 // terms looking for. They are sections of this document rather than separate
@@ -278,6 +285,7 @@ const DOCS = {
           `Messages you send to ${BUSINESS.email} or leave on the phone`,
           "Your email address, if you sign up for TireDrop emails using the sign-up form in the site footer. It asks for nothing else.",
           "Your approximate location, on the local delivery page only. When that page opens, our website host estimates your ZIP code and rough location from your internet connection, and the page uses it once to check whether you are in a local delivery zone and to show you the city it places you in. If you allow it, your browser can also share your device location for a more exact check, which is compared with the delivery zones in your browser. If you allow your device location, the page also sends your approximate coordinates, rounded to about 100 meters, once to BigDataCloud, a mapping service, to look up the name of your neighborhood or city. That name is shown only to you, and we do not store it. We use your location only to check your delivery zone and name where you are, and we do not store it.",
+          "An order number and email you ask your browser to remember, only if you tick \"Remember this order on this device\" on the Track My Order page (it is off by default). They are kept on your device, not on our servers; section 3 says how, and how to forget them.",
           "What you type into the Ask TireDrop chat, only if you use it. Each message, with the earlier messages of that conversation and the page you are on, is sent to our server and to Anthropic's API so an answer can be written; we do not store the conversation. Please do not type card numbers or other private details into it.",
           "A photo or a VIN, only if you use the optional Tire Size Finder. A photo of your door sticker, tire or VIN is sent to our server and to Anthropic's API to read the tire size or VIN off it; we do not store the photo. A VIN, typed or read from a photo, is looked up in NHTSA's public vehicle database to find the year, make and model; we do not store it unless you include it with an order.",
         ],
@@ -302,16 +310,17 @@ const DOCS = {
         paragraphs: [
           "This website uses Google Analytics to measure how the site is used — pages viewed, how visitors arrived, general location at the city or region level, device and browser type, and steps in the shop such as a tire viewed, added to the cart or searched for by size or vehicle, a delivery option chosen, a tool used, or the fact that a form was sent (its name, never what you typed into it). Google Analytics sets its own first-party cookies (named _ga and _ga_ followed by an ID) to tell one visit from the next. We have switched off Google signals and ad personalization, so this measurement is not used to build advertising profiles or to show you ads. We see the results only as aggregate reports, not as a record of what any named person did.",
           "The site loads no advertising or social tracking pixels. You are welcome to check both statements in your browser's developer tools.",
-          "Separately, the site uses local storage in your own browser for three things:",
+          "Separately, the site uses local storage in your own browser for these things:",
         ],
         list: [
           "Your cart — so the tires you picked are still there if you close the tab and come back",
           "The comparison tray — which products you lined up side by side",
           "The vehicle or tire size you choose to shop for — so Shop Tires takes you straight to tires for it next time. It is never sent to us except to look up tires for it and with an order or a form you send, and clearing your site data removes it",
+          "Orders you ask it to remember — only if you tick \"Remember this order on this device\" on the Track My Order page, which is off unless you tick it. For each one it keeps the order number, the email address you typed for it and, if you give one, a name for the order. It is used only to look that order up again for you: the order number and email go to our own order lookup, as they do when you type them in, and are never sent to Google Analytics or anyone else. \"Forget\" on that page removes one order and \"Forget all\" removes every one; clearing your site data removes them too",
         ],
         after: [
           'The Ask TireDrop chat keeps your current conversation in your browser\'s session storage until you close the tab, so it is still there when you move to another page. It is sent only as part of your next chat message, and "Start over" clears it.',
-          "All three stay on your device. The cart and comparison tray are not sent to us; none of the three contains a name, email address, street address or payment detail, and nobody else can read them. Clearing your browsing data deletes them, and you lose your cart.",
+          "All of these stay on your device. The cart, comparison tray and vehicle or tire size are not sent to us, and none of them contains a name, email address, street address or payment detail. The remembered orders are the one exception: they hold the email address you typed, kept only on your device and used only for the lookups described above. Nobody else can read what is stored on your device. Clearing your browsing data deletes it all, and you lose your cart.",
           "The email sign-up form in the site footer saves nothing in your browser. An earlier version of the site had a sign-up pop-up that remembered whether you had closed it, under the name td-nl-popup. The pop-up is gone, and the site now deletes that entry if your browser still has it.",
           "Translating a page is optional. Nothing from Google Translate loads until you open the Language button at the top of the page. Once you do, the site loads Google Translate (or, if that is unavailable, opens the page through translate.google.com), and Google processes the page's text to translate it and may set its own cookies, such as googtrans, which remembers the language you picked. The site keeps your pick in your browser's session storage until you close the tab, and \"English (original)\" switches translation off.",
           "You can block or delete the Google Analytics cookies in your browser settings, or install Google's opt-out add-on at tools.google.com/dlpage/gaoptout; the site works the same either way. If we add any other third-party script, this section gets rewritten before that ships, not after.",
@@ -360,7 +369,7 @@ const DOCS = {
           "Ask us to delete it. Call and request deletion. We will remove what we are not required to keep for warranty, accounting or legal reasons — including an email sign-up and any form messages on your Shopify customer record — and we will tell you plainly what we had to retain and why.",
           `Unsubscribe from TireDrop emails. Use the unsubscribe link in any of those emails, or email ${BUSINESS.email} and ask, and we will unsubscribe you.`,
           "Opt out of reminders. Say the word on the phone, or reply to any message asking to stop, and we will take you off the reminder list.",
-          "Clear what the site stored on your device. Your cart, comparison tray and the vehicle or tire size you shop for live in your own browser; the sign-up form in the site footer stores nothing there. Clearing your browsing data removes them. It does not remove anything you sent us — for that, ask us to delete it.",
+          "Clear what the site stored on your device. Your cart, comparison tray, the vehicle or tire size you shop for and any orders you chose to remember live in your own browser; the sign-up form in the site footer stores nothing there. Use Forget or Forget all on the Track My Order page to remove remembered orders, or clear your browsing data to remove everything. It does not remove anything you sent us — for that, ask us to delete it.",
           "Opt out of analytics. Block or clear the Google Analytics cookies in your browser, or use Google's opt-out add-on (tools.google.com/dlpage/gaoptout). We do not sell personal information or share it for cross-context behavioral advertising.",
         ],
         after: [

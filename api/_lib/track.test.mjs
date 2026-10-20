@@ -5,7 +5,7 @@ import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 
 import { createTrackHandler, resetTrackRateLimit, NOT_FOUND, TRACK_RATE_LIMIT } from "../track.js";
-import { parseLookup, requestSearch, orderSearch, trackingUrl, publicOrder } from "./track.js";
+import { parseLookup, requestSearch, orderSearch, trackingUrl, publicOrder, orderTimeline } from "./track.js";
 
 const ENV = Object.freeze({
   SHOPIFY_STORE_DOMAIN: "tiredrop-test.myshopify.com",
@@ -107,6 +107,18 @@ test("track: a matching order number and email returns only the public status", 
           { number: "1Z999", company: "UPS", url: "https://www.ups.com/track?tracknum=1Z999" },
         ],
         supplier: "ordered",
+        timeline: {
+          steps: [
+            { key: "ordered", label: "Ordered", done: true },
+            { key: "paid", label: "Paid", done: true },
+            { key: "supplier", label: "With our supplier", done: true },
+            { key: "shipped", label: "Shipped", done: true },
+            { key: "final", label: "Delivered", done: false },
+          ],
+          current: "shipped",
+          complete: false,
+          cancelled: false,
+        },
       },
     });
   }
@@ -227,6 +239,38 @@ test("track: helpers", () => {
   assert.deepEqual([refunded.financialStatus, refunded.cancelled, refunded.lines], ["refunded", true, [{ title: "T", quantity: 4 }]]);
   assert.equal(publicOrder({ ...ORDER, tags: ["atd-submitted", "atd-inbound-to-store"] }).supplier, "inbound-to-store");
   assert.equal(publicOrder({ ...ORDER, tags: [], customAttributes: [], shippingLine: { title: "Local pickup" } }).delivery, "pickup");
+});
+
+test("track: the timeline summary follows payment, supplier, shipping and the carrier's delivered status", () => {
+  const steps = (o) => o.timeline.steps.map((s) => (s.done ? "x" : "-")).join("");
+  const base = { ...ORDER, fulfillments: [], displayFulfillmentStatus: "UNFULFILLED", tags: ["ship-to-home"], displayFinancialStatus: "PENDING" };
+  let t = publicOrder(base);
+  assert.deepEqual([steps(t), t.timeline.current, t.timeline.complete], ["x----", "ordered", false]);
+  t = publicOrder({ ...base, displayFinancialStatus: "PAID" });
+  assert.deepEqual([steps(t), t.timeline.current], ["xx---", "paid"]);
+  t = publicOrder({ ...base, displayFinancialStatus: "PAID", tags: ["ship-to-home", "atd-submitted"] });
+  assert.deepEqual([steps(t), t.timeline.current], ["xxx--", "supplier"]);
+  // Shipped with a carrier, then delivered (every fulfilment says so).
+  const ups = { trackingInfo: [{ company: "UPS", number: "1Z1", url: null }] };
+  t = publicOrder({ ...base, displayFinancialStatus: "PAID", displayFulfillmentStatus: "FULFILLED", fulfillments: [{ ...ups, displayStatus: "IN_TRANSIT" }] });
+  assert.deepEqual([steps(t), t.timeline.current], ["xxxx-", "shipped"]);
+  t = publicOrder({ ...base, displayFinancialStatus: "PAID", displayFulfillmentStatus: "FULFILLED", fulfillments: [{ ...ups, displayStatus: "DELIVERED" }, { ...ups, displayStatus: "IN_TRANSIT" }] });
+  assert.equal(t.timeline.complete, false, "one parcel still moving");
+  t = publicOrder({ ...base, displayFinancialStatus: "PAID", displayFulfillmentStatus: "FULFILLED", fulfillments: [{ ...ups, displayStatus: "DELIVERED" }] });
+  assert.deepEqual([steps(t), t.timeline.complete, t.timeline.steps[4].label], ["xxxxx", true, "Delivered"]);
+  // Steps only move forward: shipped with no supplier tag still shows the supplier step done.
+  assert.equal(steps(publicOrder({ ...base, displayFinancialStatus: "PAID", displayFulfillmentStatus: "FULFILLED", fulfillments: [ups] })), "xxxx-");
+  // Ship to store: inbound, then marked done at the shop.
+  const store = { ...base, customAttributes: [], displayFinancialStatus: "PAID", tags: ["ship-to-store", "atd-submitted", "atd-inbound-to-store"] };
+  t = publicOrder(store);
+  assert.deepEqual([steps(t), t.timeline.steps[3].label, t.timeline.steps[4].label], ["xxxx-", "On its way to the shop", "Ready at the shop"]);
+  assert.equal(steps(publicOrder({ ...store, displayFulfillmentStatus: "FULFILLED" })), "xxxxx");
+  // Mobile install, cancelled.
+  assert.equal(orderTimeline({ delivery: "mobile", fulfillmentStatus: "fulfilled", financialStatus: "paid", supplier: "ordered", tracking: [] }).steps[4].label, "Installed");
+  t = publicOrder({ ...ORDER, cancelledAt: "2026-09-21T00:00:00Z" });
+  assert.deepEqual([steps(t), t.timeline.cancelled, t.timeline.current], ["x----", true, "ordered"]);
+  // Nothing that leaks: no dates, prices, address or phone in the summary.
+  assert.ok(!/\d{4}-\d{2}|price|address|phone|@/i.test(JSON.stringify(publicOrder(ORDER).timeline)));
 });
 
 // ---- "Schedule your install" (api/_lib/booking.js) -----------------------------------

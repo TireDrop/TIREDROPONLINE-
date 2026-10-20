@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   AlertCircle,
@@ -29,6 +29,16 @@ import {
 import { hasChanges, readFormValues } from "../../data/forms.js";
 import { guardFields } from "../../data/formGuard.js";
 import { trackEvent } from "../../lib/analytics.js";
+import {
+  MAX_SAVED_ORDERS,
+  canSaveOrders,
+  forgetAll,
+  forgetOrder,
+  listSaved,
+  saveOrder,
+} from "../../lib/savedOrders.js";
+import MyOrders from "../../components/orders/MyOrders.jsx";
+import OrderTimeline from "../../components/orders/OrderTimeline.jsx";
 import {
   Breadcrumbs,
   FormTrap,
@@ -517,13 +527,15 @@ function headline(order) {
   };
 }
 
-function OrderResult({ order, email }) {
+function OrderResult({ order, email, live = true }) {
   const h = headline(order);
   const date = placed(order.createdAt);
+  const carriers = order.tracking.filter((t) => t.url);
   return (
     <div
       className={`card border-l-4 p-6 md:p-8 ${h.tone === "amber" ? "border-l-amber" : "border-l-drop"}`}
-      role="status"
+      role={live ? "status" : undefined}
+      data-testid="order-result"
     >
       <p className="eyebrow mb-2 text-smoke">
         Order {order.name}
@@ -534,6 +546,26 @@ function OrderResult({ order, email }) {
         {h.title}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-smoke">{h.text}</p>
+
+      <OrderTimeline timeline={order.timeline} />
+
+      {carriers.length > 0 && (
+        <div className="mt-5 flex flex-wrap gap-3">
+          {carriers.map((t) => (
+            <a
+              key={t.number}
+              href={t.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="carrier-link"
+              className="btn-primary min-h-11"
+            >
+              Track with {t.company || "the carrier"}
+              <ExternalLink size={15} aria-hidden />
+            </a>
+          ))}
+        </div>
+      )}
 
       {order.booking && (
         <ScheduleInstall
@@ -592,17 +624,6 @@ function OrderResult({ order, email }) {
                       {t.company ? `${t.company} ` : ""}
                       <span className="tnum break-all">{t.number}</span>
                     </span>
-                    {t.url && (
-                      <a
-                        href={t.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-drop underline"
-                      >
-                        Track with {t.company || "the carrier"}
-                        <ExternalLink size={13} aria-hidden />
-                      </a>
-                    )}
                   </li>
                 ))}
               </ul>
@@ -614,7 +635,7 @@ function OrderResult({ order, email }) {
   );
 }
 
-function RequestResult({ request }) {
+function RequestResult({ request, live = true }) {
   const date = placed(request.createdAt);
   let title = "We have your request";
   let text =
@@ -632,7 +653,7 @@ function RequestResult({ request }) {
       : "Thanks. Your confirmation email has the order number to follow it from here.";
   }
   return (
-    <div className="card border-l-4 border-l-drop p-6 md:p-8" role="status">
+    <div className="card border-l-4 border-l-drop p-6 md:p-8" role={live ? "status" : undefined}>
       <p className="eyebrow mb-2 text-smoke">
         Request {request.ref}
         {date && <> · Sent {date}</>}
@@ -694,7 +715,7 @@ function Miss({ result }) {
   );
 }
 
-function TrackForm() {
+function TrackForm({ storageOk, onRemembered }) {
   // /track?order=%231001 (the order confirmation email links here): the
   // order number is filled in. Only the number: the email is typed, never
   // taken from a link.
@@ -708,6 +729,9 @@ function TrackForm() {
   const [errors, setErrors] = useState({});
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState(null);
+  const [remember, setRemember] = useState(false);
+  const [label, setLabel] = useState("");
+  const [note, setNote] = useState("");
   const resultRef = useRef(null);
 
   const update = (field) => (event) => {
@@ -729,8 +753,10 @@ function TrackForm() {
     if (Object.keys(found).length > 0) return;
 
     const website = formElement.elements.namedItem("website")?.value ?? "";
+    trackEvent("track_lookup", { method: "manual" });
     setSending(true);
     setResult(null);
+    setNote("");
     let next;
     try {
       const data = await trackOrder({
@@ -755,6 +781,32 @@ function TrackForm() {
       }
     }
     setSending(false);
+    // Only a found order is ever remembered, and only when asked (the box is
+    // off by default). The order number and email stay on this device.
+    if (remember && storageOk && (next.kind === "order" || next.kind === "request")) {
+      const saved = saveOrder({
+        order: current.order,
+        email: current.email,
+        label,
+      });
+      if (saved.ok) {
+        trackEvent("track_saved");
+        setValues(EMPTY);
+        setRemember(false);
+        setLabel("");
+        onRemembered({
+          list: saved.list,
+          order: saved.list[0].order,
+          data: next.kind === "order" ? { found: true, kind: "order", order: next.order } : { found: true, kind: "request", request: next.request },
+        });
+        return;
+      }
+      setNote(
+        saved.reason === "full"
+          ? `This device already remembers ${MAX_SAVED_ORDERS} orders. Forget one under My Orders to remember this one.`
+          : "This browser would not let us remember the order. You can still see it here.",
+      );
+    }
     setResult(next);
     // Move focus to the answer, so a screen reader hears it and a phone
     // scrolls to it.
@@ -820,6 +872,48 @@ function TrackForm() {
               <FieldError id="track-email-error">{errors.email}</FieldError>
             )}
           </div>
+
+          {storageOk && (
+            <div data-testid="remember-block">
+              <label
+                htmlFor="track-remember"
+                className="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-ink"
+              >
+                <input
+                  id="track-remember"
+                  name="remember"
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="h-5 w-5 shrink-0 accent-drop"
+                  aria-describedby="track-remember-hint"
+                />
+                Remember this order on this device
+              </label>
+              <p id="track-remember-hint" className="text-xs text-smoke">
+                Keeps the order number and email in this browser only, so you can check on it
+                quickly next time. You can forget it whenever you like.
+              </p>
+              {remember && (
+                <div className="mt-3 max-w-xs">
+                  <label className="label" htmlFor="track-label">
+                    Name it <span className="normal-case tracking-normal">(optional)</span>
+                  </label>
+                  <Input
+                    id="track-label"
+                    name="label"
+                    type="text"
+                    autoComplete="off"
+                    maxLength={40}
+                    className="field"
+                    placeholder="Camry tires"
+                    value={label}
+                    onChange={(e) => setLabel(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <button
@@ -833,6 +927,11 @@ function TrackForm() {
       </form>
 
       <div ref={resultRef} tabIndex={-1} className="outline-none" aria-live="polite">
+        {note && (
+          <p className="mb-3 text-sm text-smoke" data-testid="remember-note">
+            {note}
+          </p>
+        )}
         {result?.kind === "order" && (
           <OrderResult order={result.order} email={result.email} />
         )}
@@ -841,6 +940,83 @@ function TrackForm() {
           <Miss result={result} />
         )}
       </div>
+    </div>
+  );
+}
+
+/** What My Orders draws for one answer: the order or the request. */
+const renderAnswer = (data, entry) =>
+  data.kind === "request" ? (
+    <RequestResult request={data.request} live={false} />
+  ) : (
+    <OrderResult order={data.order} email={entry.email} live={false} />
+  );
+
+/**
+ * The left column: My Orders (when this device remembers any) above the
+ * lookup form. A first-time visitor sees the form alone.
+ */
+function TrackColumn() {
+  const [saved, setSaved] = useState([]);
+  const [storageOk, setStorageOk] = useState(false);
+  const [selected, setSelected] = useState(null);
+  const [seed, setSeed] = useState(null);
+  const [notice, setNotice] = useState("");
+  const headingRef = useRef(null);
+
+  // Read after mount: the prerendered page and the first render are the same
+  // for everyone, and storage is never touched on the server.
+  /* eslint-disable react-hooks/set-state-in-effect -- storage is read after mount on purpose */
+  useEffect(() => {
+    setStorageOk(canSaveOrders());
+    const list = listSaved();
+    setSaved(list);
+    setSelected(list[0]?.order ?? null);
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  const remembered = useCallback(({ list, order, data }) => {
+    setSaved(list);
+    setSelected(order);
+    setSeed({ order, data });
+    setNotice("Remembered on this device. Forget it any time.");
+    requestAnimationFrame(() => headingRef.current?.focus());
+  }, []);
+
+  const forget = useCallback((order) => {
+    const left = forgetOrder(order);
+    trackEvent("track_forget");
+    setSaved(left);
+    setSelected((cur) => (cur === order ? (left[0]?.order ?? null) : cur));
+    setNotice(`Forgot order ${order}. This device no longer keeps it.`);
+  }, []);
+
+  const forgetEverything = useCallback(() => {
+    forgetAll();
+    trackEvent("track_forget");
+    setSaved([]);
+    setSelected(null);
+    setSeed(null);
+    setNotice("");
+  }, []);
+
+  return (
+    <div className="min-w-0 space-y-6">
+      <MyOrders
+        saved={saved}
+        selected={selected}
+        onSelect={(order) => {
+          setNotice("");
+          setSelected(order);
+        }}
+        onForget={forget}
+        onForgetAll={forgetEverything}
+        seed={seed}
+        renderResult={renderAnswer}
+        notice={notice}
+        headingRef={headingRef}
+      />
+      <TrackForm storageOk={storageOk} onRemembered={remembered} />
     </div>
   );
 }
@@ -869,7 +1045,7 @@ export default function TrackOrderPage() {
 
       <Section className="bg-bone">
         <div className="grid gap-10 lg:grid-cols-[1.25fr_1fr] lg:gap-14">
-          <TrackForm />
+          <TrackColumn />
 
           <div>
             <SectionHead

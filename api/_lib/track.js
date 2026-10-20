@@ -10,7 +10,8 @@
 // What goes back is deliberately small: order name, date, payment and
 // fulfilment status, how it is delivered, line titles and quantities,
 // tracking numbers with a carrier link, and where the tires are with our
-// supplier (from the forwarder's atd-* tags). No prices, no address, no
+// supplier (from the forwarder's atd-* tags), plus a `timeline` summary of
+// those (orderTimeline: five steps, done or not, no dates). No prices, no address, no
 // phone, no delivery dates. The one exception: a PAID order that involves
 // installation also carries `booking`, the "Schedule your install" call to
 // action (api/_lib/booking.js), which hands the customer's own name, phone
@@ -56,7 +57,7 @@ export const ORDER_FIELDS = `id
       customAttributes { key value }
       shippingLine { title }
       lineItems(first: 20) { nodes { title quantity currentQuantity } }
-      fulfillments(first: 10) { trackingInfo(first: 10) { company number url } }
+      fulfillments(first: 10) { displayStatus trackingInfo(first: 10) { company number url } }
       installBooking: metafield(namespace: "tiredrop", key: "install_booking") { value }`;
 
 export const TRACK_ORDER_QUERY = `query trackOrder($query: String!) {
@@ -199,6 +200,53 @@ export function trackingUrl(company, number) {
 
 const lower = (v) => (typeof v === "string" && v ? v.toLowerCase() : null);
 
+/**
+ * The status timeline /track draws: five fixed steps, each done or not, from
+ * facts the order already exposes (payment and fulfilment status, the
+ * forwarder's atd-* tags, tracking numbers, the carrier's own "delivered"
+ * status). Steps only move forward: a later step done marks the earlier ones
+ * done. No dates and no promises, only where the order stands.
+ *
+ *   ordered   always done (the order exists)
+ *   paid      payment captured
+ *   supplier  placed with our supplier ("With our supplier")
+ *   shipped   shipped (or, for ship-to-store, on its way to the shop)
+ *   final     Delivered | Ready at the shop | Installed, by delivery type
+ *
+ * `current` is the key of the furthest step done; `complete` is true when
+ * the last one is. A cancelled order has `cancelled: true` and no progress
+ * beyond "ordered" (the page shows it as cancelled).
+ */
+export const TIMELINE_KEYS = ["ordered", "paid", "supplier", "shipped", "final"];
+
+const FINAL_LABEL = { ship: "Delivered", "ship-to-store": "Ready at the shop", pickup: "Ready at the shop", mobile: "Installed" };
+
+export function orderTimeline({ delivery, cancelled, financialStatus, fulfillmentStatus, supplier, tracking, carrierDelivered }) {
+  const toShop = delivery === "ship-to-store" || delivery === "pickup";
+  const fulfilled = fulfillmentStatus === "fulfilled";
+  const shipped = toShop
+    ? supplier === "inbound-to-store" || fulfilled
+    : Boolean(tracking?.length) || fulfilled || fulfillmentStatus === "partially_fulfilled";
+  const final = toShop || delivery === "mobile" ? fulfilled : Boolean(carrierDelivered);
+  const flags = [
+    true,
+    financialStatus === "paid" || financialStatus === "partially_refunded",
+    supplier !== null && supplier !== undefined,
+    shipped,
+    final,
+  ];
+  const done = cancelled ? flags.map((_, i) => i === 0) : flags;
+  for (let i = done.length - 2; i >= 0; i -= 1) if (done[i + 1]) done[i] = true;
+  const labels = ["Ordered", "Paid", "With our supplier", toShop ? "On its way to the shop" : "Shipped", FINAL_LABEL[delivery] ?? "Delivered"];
+  const last = done.lastIndexOf(true);
+  return {
+    steps: TIMELINE_KEYS.map((key, i) => ({ key, label: labels[i], done: done[i] })),
+    current: TIMELINE_KEYS[last],
+    complete: done[done.length - 1],
+    cancelled: Boolean(cancelled),
+  };
+}
+
 /** The public view of one order. Only these fields ever leave the server. */
 export function publicOrder(node) {
   const nodes = node.lineItems?.nodes ?? [];
@@ -225,7 +273,7 @@ export function publicOrder(node) {
       });
     }
   }
-  return {
+  const out = {
     name: node.name,
     createdAt: node.createdAt,
     cancelled: Boolean(node.cancelledAt),
@@ -236,6 +284,12 @@ export function publicOrder(node) {
     tracking,
     supplier: supplierState(node),
   };
+  // Every fulfilment the carrier reports delivered (a status, not a date).
+  const shipments = (node.fulfillments ?? []).filter(Boolean);
+  const carrierDelivered =
+    shipments.length > 0 && shipments.every((f) => String(f.displayStatus ?? "").toUpperCase() === "DELIVERED");
+  out.timeline = orderTimeline({ ...out, carrierDelivered });
+  return out;
 }
 
 /** "open" | "invoice_sent" | "completed", plus the order name once paid. */
