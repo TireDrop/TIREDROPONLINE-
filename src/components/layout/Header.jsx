@@ -26,7 +26,7 @@ const INSTALL = getServiceFacts("tire-installation");
 
 function UtilityBar() {
   return (
-    <div className="bg-ink bg-steel-wash text-bone">
+    <div className="app-utility-bar bg-ink bg-steel-wash text-bone">
       <div className="wrap flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-2 text-xs">
         {/* Calling is the primary action on a phone, so below the desktop
             breakpoint it is a full 44px target (`!`: index.css floors every
@@ -301,7 +301,7 @@ export default function Header() {
 
           Only these rows stick. The utility strip scrolls away, because a
           phone number does not need to follow you down a product page. */}
-      <div className="sticky top-0 z-40 border-b border-ink/10 bg-bone/95 backdrop-blur">
+      <div className="app-header-sticky sticky top-0 z-40 border-b border-ink/10 bg-bone/95 backdrop-blur">
         <div className="wrap flex items-center gap-4 py-2 lg:gap-8">
           <Link to="/" className="flex shrink-0 items-center gap-3">
             <Logo className="h-[72px] lg:h-20" variant="full" />

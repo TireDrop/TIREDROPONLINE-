@@ -6,6 +6,7 @@ import { CartProvider } from "./context/CartContext.jsx";
 import { CompareProvider } from "./context/CompareContext.jsx";
 import { VehicleProvider } from "./context/VehicleContext.jsx";
 import { protectEarlyOnProxy } from "./components/layout/LanguageControl.jsx";
+import { syncAppModeAttribute } from "./lib/appMode.js";
 import { watchTyped } from "./lib/keepTyped.js";
 import { preloadPages } from "./lib/lazyPage.js";
 import "./index.css";
@@ -14,6 +15,10 @@ import "./index.css";
 // Static preview hosts have no rewrite, so fall back to hash routing there.
 const HASH = import.meta.env.VITE_HASH_ROUTER === "true";
 const Router = HASH ? HashRouter : BrowserRouter;
+
+// Launched from the home screen: mark <html data-app="standalone"> before the
+// first paint so the app-mode CSS (src/index.css) applies at once.
+syncAppModeAttribute();
 
 const root = document.getElementById("root");
 

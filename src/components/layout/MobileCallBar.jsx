@@ -34,7 +34,7 @@ export default function MobileCallBar() {
   return (
     <nav
       aria-label={es ? "Acciones rápidas" : "Quick actions"}
-      className="fixed inset-x-0 bottom-0 z-40 min-h-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] border-t border-graphite bg-ink/95 shadow-[0_-10px_28px_-12px_rgba(7,14,26,.55)] backdrop-blur lg:hidden"
+      className="mobile-call-bar fixed inset-x-0 bottom-0 z-40 min-h-[calc(var(--call-bar-h)+env(safe-area-inset-bottom))] border-t border-graphite bg-ink/95 shadow-[0_-10px_28px_-12px_rgba(7,14,26,.55)] backdrop-blur lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       {/* The page's action takes the wider share of the row and the lit

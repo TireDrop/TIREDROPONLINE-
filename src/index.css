@@ -788,3 +788,120 @@
     transform: none;
   }
 }
+
+/* ======================================================================
+   App mode (the installed app, <html data-app="standalone">).
+
+   src/lib/appMode.js sets the attribute before the first paint. Everything in
+   this block hangs off it, so the website in a browser tab, on a phone or a
+   desktop, matches none of these selectors and is exactly as it was.
+
+   The tab bar (components/app/AppTabBar.jsx) takes over the phone call bar's
+   job at the bottom edge. It keeps the --call-bar-h contract, so the compare
+   tray, the chat bubble, the product buy bar and the page-end spacer all lift
+   above it without knowing it exists. Phones and tablets only (< 1024px): a
+   desktop-width app window keeps the full header.
+   ====================================================================== */
+@media (max-width: 1023px) {
+  html[data-app="standalone"] {
+    --app-bar-h: 56px;
+    --call-bar-h: var(--app-bar-h);
+    /* The sticky masthead gains the status-bar inset (zero unless the
+       status bar overlays the page) and loses nothing else. */
+    --header-h: calc(89px + env(safe-area-inset-top));
+    /* Pull-down in the page does not refresh or chain into the shell. */
+    overscroll-behavior-y: contain;
+  }
+
+  /* Landscape phone: a compact bar, icon beside label. */
+  @media (orientation: landscape) and (max-height: 500px) {
+    html[data-app="standalone"] {
+      --app-bar-h: 44px;
+    }
+    html[data-app="standalone"] .app-tab {
+      flex-direction: row;
+      gap: 0.4rem;
+      font-size: 12px;
+    }
+    html[data-app="standalone"] .app-tab svg {
+      width: 18px;
+      height: 18px;
+    }
+    html[data-app="standalone"] .app-tab-mark {
+      inset-inline: 1rem;
+    }
+  }
+
+  /* A product page zeroes --call-bar-h for the browser site (its buy bar owns
+     the bottom edge); in the app the tab bar is under the buy bar, so the
+     variable is the tab bar's height there too, and the spacer adds it. */
+  html[data-app="standalone"] .app-root {
+    --call-bar-h: var(--app-bar-h) !important;
+  }
+  html[data-app="standalone"] .app-spacer-product {
+    height: calc(4.5rem + var(--app-bar-h) + env(safe-area-inset-bottom));
+  }
+
+  /* The call bar is replaced by the tab bar; the utility strip repeats the
+     phone number and shipping line the tab bar and footer already carry. */
+  html[data-app="standalone"] .mobile-call-bar,
+  html[data-app="standalone"] .app-utility-bar {
+    display: none;
+  }
+
+  /* Sticky masthead clears the status bar; one sticky row, no second copy. */
+  html[data-app="standalone"] .app-header-sticky {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Notched landscape: keep content out of the side cutouts. */
+  html[data-app="standalone"] .wrap {
+    padding-left: max(1.25rem, env(safe-area-inset-left));
+    padding-right: max(1.25rem, env(safe-area-inset-right));
+  }
+  @media (min-width: 768px) {
+    html[data-app="standalone"] .wrap {
+      padding-left: max(2rem, env(safe-area-inset-left));
+      padding-right: max(2rem, env(safe-area-inset-right));
+    }
+  }
+
+  /* Chat bubble and compare tray follow the side insets too. */
+  html[data-app="standalone"] aside[aria-label="Tire comparison"] {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* No text-selection, callout or tap-highlight flash on interface chrome.
+   Page text, inputs and article copy stay selectable. */
+html[data-app="standalone"] :where(
+    header,
+    nav,
+    button,
+    summary,
+    [role="button"],
+    [role="tab"],
+    .btn,
+    .btn-primary,
+    .btn-dark,
+    .btn-outline,
+    .btn-ghost-light,
+    .app-sheet
+  ) {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+html[data-app="standalone"] :where(a, button, summary, label, [role="button"]) {
+  -webkit-tap-highlight-color: transparent;
+}
+html[data-app="standalone"] :where(input, textarea, select, [contenteditable]) {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Sheets and dialogs keep their scrolling to themselves. */
+html[data-app="standalone"] [role="dialog"] {
+  overscroll-behavior: contain;
+}

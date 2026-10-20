@@ -4,12 +4,15 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-
 import Header from "./components/layout/Header.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import MobileCallBar from "./components/layout/MobileCallBar.jsx";
+import AppTabBar from "./components/app/AppTabBar.jsx";
+import InstallPrompt from "./components/app/InstallPrompt.jsx";
 import CompareTray from "./components/shop/CompareTray.jsx";
 import ChatLoader from "./components/chat/ChatLoader.jsx";
 import { InPageAnchors, ScrollToTop } from "./components/ui/index.jsx";
 import { trackPageView } from "./lib/analytics.js";
 import { lazyPage } from "./lib/lazyPage.js";
 import { isProductPath } from "./data/mobileBar.js";
+import { useStandalone } from "./lib/appMode.js";
 
 // Every route except the home page is loaded on demand.
 //
@@ -223,6 +226,18 @@ function LegacyViewCleanup() {
   return null;
 }
 
+/**
+ * The bottom bar: the phone call bar in a browser, the tab bar in the
+ * installed app. Its own component, so that the one re-render standalone mode
+ * causes after hydration (src/lib/appMode.js) stays here and does not reach
+ * the routes' Suspense boundary, which React 18 reports as error 421 when
+ * updated mid-hydration. The layout side of app mode (heights, spacers) is
+ * CSS on <html data-app>, not state.
+ */
+function BottomBar() {
+  return useStandalone() ? <AppTabBar /> : <MobileCallBar />;
+}
+
 export default function App() {
   const { pathname } = useLocation();
   // A product page has no phone action bar (MobileCallBar): its own buy bar
@@ -231,7 +246,7 @@ export default function App() {
 
   return (
     <div
-      className="flex min-h-screen flex-col"
+      className="app-root flex min-h-screen flex-col"
       style={productPage ? { "--call-bar-h": "0px" } : undefined}
     >
       {/* First thing a keyboard reaches; out of sight until it is focused.
@@ -412,12 +427,13 @@ export default function App() {
         aria-hidden
         className={
           productPage
-            ? "h-[calc(4.5rem+env(safe-area-inset-bottom))] lg:h-0"
+            ? "app-spacer-product h-[calc(4.5rem+env(safe-area-inset-bottom))] lg:h-0"
             : "h-[calc(var(--call-bar-h)+var(--compare-tray-h)+env(safe-area-inset-bottom))] lg:h-[var(--compare-tray-h)]"
         }
       />
       <CompareTray />
-      <MobileCallBar />
+      <BottomBar />
+      <InstallPrompt />
       <ChatLoader />
     </div>
   );
