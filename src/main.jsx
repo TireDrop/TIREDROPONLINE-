@@ -72,7 +72,7 @@ const app = (
  * read by analytics, never by a page, so they do not stop a hydration: a
  * link from an email or an ad hydrates like the bare URL.
  */
-const TRACKING = /^(utm_[a-z_]+|gclid|gbraid|wbraid|dclid|fbclid|msclkid|ttclid|twclid|li_fat_id|mc_cid|mc_eid|_gl|_ga|_kx|srsltid)$/i;
+const TRACKING = /^(utm_[a-z_]+|gclid|gbraid|wbraid|dclid|fbclid|msclkid|ttclid|twclid|li_fat_id|mc_cid|mc_eid|_gl|_ga|_kx|srsltid|source)$/i;
 const prerendered = root.dataset.route;
 const path = window.location.pathname.replace(/(.)\/+$/, "$1");
 const pageQuery = [...new URLSearchParams(window.location.search).keys()].filter(

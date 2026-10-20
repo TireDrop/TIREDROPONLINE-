@@ -627,7 +627,8 @@ for (const file of files) {
   page = relative(ROOT, file);
   const html = readFileSync(file, "utf8");
   const route = routeOf(file);
-  const special = route === "/404" || route === "/spa";
+  // 404, the SPA shell and the offline fallback are not pages a visitor lands on from search.
+  const special = route === "/404" || route === "/spa" || route === "/offline";
   const robots = /<meta name="robots" content="([^"]*)"/.exec(html)?.[1] ?? "";
   const indexable = !special && !/noindex/i.test(robots);
   const canonical = /<link rel="canonical" href="([^"]*)"/.exec(html)?.[1];
