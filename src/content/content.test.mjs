@@ -1082,3 +1082,23 @@ test("the browser-side modules never import the parsers", () => {
   }
 });
 
+
+test("Learn hub body copy: guide notes match real guides, copy rules hold", () => {
+  const store = loadContent();
+  const BANNED = /\b(safe|safer|safely|fine|guaranteed?|OK|A[P]R)\b/i;
+  for (const hub of ["age", "florida", "tread", "basics"]) {
+    const h = store.getHub(hub);
+    const slugs = store.getLearnArticles({ hub }).map((a) => a.slug);
+    assert.deepEqual(Object.keys(h.guideNotes).sort(), [...slugs].sort(), hub);
+    assert.ok(h.sections.length >= 3 && h.audience, hub);
+    assert.ok(h.facts.length >= 4 && h.facts.length <= 6, hub);
+    const text = [h.intro, h.audience, ...h.facts, ...Object.values(h.guideNotes),
+      ...h.sections.flatMap((s) => [s.heading, ...s.paras])].join("\n");
+    assert.doesNotMatch(text, BANNED, hub);
+    assert.doesNotMatch(text, /\$\d|disc[o]unt|coup[o]n|reb[a]te|\bdeals?\b|\bsince\b/i, hub);
+    for (const m of text.matchAll(/\]\((\/[^)\s]+)\)/g)) {
+      const p = m[1];
+      if (p.startsWith("/learn/")) assert.ok(store.getArticleByPath?.(p) || store.getLearnArticles().some((a) => a.path === p), `${hub}: ${p}`);
+    }
+  }
+});

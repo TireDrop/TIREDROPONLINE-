@@ -21,7 +21,30 @@ import {
   getLearnArticles,
   getLearnHubs,
 } from "../../content/index.js";
+import RelatedShopping from "../../components/content/RelatedShopping.jsx";
 import NotFoundPage from "../NotFoundPage.jsx";
+
+const LINK_CLASS =
+  "font-semibold text-drop underline underline-offset-2 hover:text-dive";
+
+/** A paragraph of hub copy; `[text](/path)` becomes an in-site link. */
+function Para({ text }) {
+  const parts = [];
+  const re = /\[([^\]]+)\]\((\/[^)\s]*)\)/g;
+  let last = 0;
+  let m;
+  while ((m = re.exec(text))) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    parts.push(
+      <Link key={m.index} to={m[2]} className={LINK_CLASS}>
+        {m[1]}
+      </Link>,
+    );
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return <p>{parts}</p>;
+}
 
 /** /learn/:hub — one topic's guides. */
 export default function LearnHubPage() {
@@ -37,6 +60,8 @@ export default function LearnHubPage() {
   // A topic with no published guide is an empty page: keep it out of the
   // index until it has one (it is also left out of the sitemap).
   const published = contentRoutes().includes(hub.path);
+
+  const hasBody = hub.sections.length > 0 && articles.length > 0;
 
   return (
     <>
@@ -104,6 +129,66 @@ export default function LearnHubPage() {
                 </a>
               </div>
             }
+          />
+        )}
+        {hasBody && (
+          <div className="mt-12 max-w-[72ch] space-y-10 text-[15px] leading-relaxed text-ink/85">
+            {articles.some((a) => hub.guideNotes[a.slug]) && (
+              <section aria-labelledby="hub-covers">
+                <h2 id="hub-covers" className="h3 mb-3">
+                  What each guide covers
+                </h2>
+                <ul className="space-y-3">
+                  {articles
+                    .filter((a) => hub.guideNotes[a.slug])
+                    .map((a) => (
+                      <li key={a.path}>
+                        <Link to={a.path} className={LINK_CLASS}>
+                          {a.title}
+                        </Link>
+                        <span className="block">{hub.guideNotes[a.slug]}</span>
+                      </li>
+                    ))}
+                </ul>
+              </section>
+            )}
+            {hub.sections.map((sec, i) => (
+              <section key={sec.heading} aria-labelledby={`hub-sec-${i}`}>
+                <h2 id={`hub-sec-${i}`} className="h3 mb-3">
+                  {sec.heading}
+                </h2>
+                <div className="space-y-3">
+                  {sec.paras.map((t) => (
+                    <Para key={t.slice(0, 24)} text={t} />
+                  ))}
+                </div>
+              </section>
+            ))}
+            {hub.audience && (
+              <section aria-labelledby="hub-who">
+                <h2 id="hub-who" className="h3 mb-3">
+                  Who this is for
+                </h2>
+                <p>{hub.audience}</p>
+              </section>
+            )}
+            {hub.facts.length > 0 && (
+              <section aria-labelledby="hub-facts">
+                <h2 id="hub-facts" className="h3 mb-3">
+                  Quick facts
+                </h2>
+                <ul className="list-disc space-y-2 pl-5">
+                  {hub.facts.map((f) => (
+                    <li key={f.slice(0, 24)}>{f}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </div>
+        )}
+        {hasBody && articles.length > 0 && (
+          <RelatedShopping
+            article={{ path: hub.path, hub: hub.slug, section: "learn" }}
           />
         )}
         {hub.note && (
