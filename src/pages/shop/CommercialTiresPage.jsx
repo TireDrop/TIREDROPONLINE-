@@ -169,7 +169,7 @@ export default function CommercialTiresPage() {
     <>
       <Seo
         title="Commercial and Light Truck Tires, Shipped Free"
-        description={`Load-rated commercial and light truck tires for vans, box trucks and fleets, shipped free to the 48 states and DC, or to our South Florida shop to fit ${INSTALL_FROM}.`}
+        description={`Load-rated commercial and light truck tires for vans, box trucks and fleets, shipped free to 48 states + DC or fitted in South Florida ${INSTALL_FROM}.`}
       />
       <PageHero
         eyebrow="Commercial"

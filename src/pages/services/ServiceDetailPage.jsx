@@ -79,15 +79,23 @@ export default function ServiceDetailPage() {
     <>
       <Seo
         title={
-          service.mobile
+          service.seoTitle ??
+          (service.mobile
             ? `${service.name} in South Florida`
-            : `${service.name} in ${BUSINESS.shop.city}, FL`
+            : `${service.name} in ${BUSINESS.shop.city}, FL`)
         }
-        description={`${service.blurb} From $${service.priceFrom} ${service.priceUnit}. ${
+        description={
+          service.seoDescription
+            ? service.seoDescription.replace(
+                "{from}",
+                `$${service.priceFrom} ${service.priceUnit}`,
+              )
+            : `${service.blurb} From $${service.priceFrom} ${service.priceUnit}. ${
           service.mobile
             ? `Performed at your home, office or jobsite across South Florida by ${BUSINESS.parent}.`
             : `Performed at the ${BUSINESS.parent} shop in ${BUSINESS.shop.city}, FL.`
-        }`}
+        }`
+        }
       />
 
       <Breadcrumbs
@@ -282,12 +290,35 @@ export default function ServiceDetailPage() {
         <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="max-w-2xl">
             <p className="eyebrow mb-2">Straight pricing</p>
-            <h2 className="h2">
-              From ${service.priceFrom}{" "}
-              <span className="text-2xl text-smoke md:text-3xl">
-                {service.priceUnit}
-              </span>
-            </h2>
+            {service.costHeading && <h2 className="h2">{service.costHeading}</h2>}
+            {service.costHeading ? (
+              <p className="mt-3 font-display text-3xl font-bold text-ink">
+                From ${service.priceFrom}{" "}
+                <span className="text-xl text-smoke md:text-2xl">
+                  {service.priceUnit}
+                </span>
+              </p>
+            ) : (
+              <h2 className="h2">
+                From ${service.priceFrom}{" "}
+                <span className="text-2xl text-smoke md:text-3xl">
+                  {service.priceUnit}
+                </span>
+              </h2>
+            )}
+            {service.costHeading && service.includes?.length > 0 && (
+              <p className="mt-3 text-sm leading-relaxed text-smoke">
+                The starting price covers:{" "}
+                {service.includes
+                  .map((item) =>
+                    /^[A-Z][a-z]/.test(item)
+                      ? item.charAt(0).toLowerCase() + item.slice(1)
+                      : item,
+                  )
+                  .join("; ")}
+                .
+              </p>
+            )}
             <p className="lede mt-4">
               That is a real starting price, not a teaser. What you actually pay
               depends on your vehicle and what the job needs. We confirm the

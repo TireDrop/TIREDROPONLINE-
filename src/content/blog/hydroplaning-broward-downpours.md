@@ -1,5 +1,5 @@
 ---
-title: "How to Avoid Hydroplaning in Broward's Afternoon Storms"
+title: "How to Avoid Hydroplaning in Broward Storms"
 description: "How to avoid hydroplaning when a Broward storm hits at rush hour: tread and pressure first, habits in the rain, and what to do if the car starts to float."
 keyword: "how to avoid hydroplaning"
 secondaryKeywords:

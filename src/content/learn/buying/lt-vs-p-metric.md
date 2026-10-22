@@ -1,5 +1,5 @@
 ---
-title: "LT vs P-Metric Tires: Load Range C, D and E Explained"
+title: "LT vs P-Metric Tires: Load Range C, D and E"
 description: "LT vs P-metric tires: what load range C, D and E and ply rating mean, why LT tires need different pressures, and when a truck or SUV needs LT tires."
 keyword: "lt vs p metric tires"
 secondaryKeywords:

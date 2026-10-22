@@ -1,5 +1,5 @@
 ---
-title: "Tire Pressure and Temperature: How Much PSI Changes"
+title: "Tire Pressure and Temperature: How PSI Changes"
 description: "How much tire pressure changes with temperature: the 1 to 2 psi per 10°F rule of thumb, the physics behind it, and how to set it right in any weather."
 keyword: "tire pressure temperature"
 secondaryKeywords:

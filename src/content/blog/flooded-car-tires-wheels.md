@@ -1,5 +1,5 @@
 ---
-title: "Car Sat in Floodwater? What to Check on Tires and Wheels"
+title: "Car Sat in Floodwater? Check Tires and Wheels"
 description: "Flooded car, what to do first: don't start it, don't drive it, then what to have checked on the tires, wheels and brakes. Plus NHTSA's flooded-EV rule."
 keyword: "flooded car what to do"
 secondaryKeywords:

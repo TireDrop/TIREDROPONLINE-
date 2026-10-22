@@ -1,5 +1,5 @@
 ---
-title: "A Glovebox Tire Kit for Florida Storms and Road Trips"
+title: "A Glovebox Tire Kit for Florida Storms and Trips"
 description: "A car emergency kit for Florida built around the tires: gauge, inflator, sealant kit limits, the spare, and the numbers to save before storms or a trip."
 keyword: "car emergency kit Florida"
 secondaryKeywords:

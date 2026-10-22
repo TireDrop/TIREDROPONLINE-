@@ -1,5 +1,5 @@
 ---
-title: "All-Terrain vs Highway Tires: A/T, H/T and M/T Explained"
+title: "All-Terrain vs Highway Tires: A/T, H/T and M/T"
 description: "All-terrain vs highway tires for trucks and SUVs: what A/T, H/T and M/T mean, and the trade-offs in noise, tread life and grip on and off the pavement."
 keyword: "all terrain vs highway tires"
 secondaryKeywords:

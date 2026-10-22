@@ -1,5 +1,5 @@
 ---
-title: "Sun, Heat and Dry Rot: How Florida Ages Your Tires"
+title: "Sun, Heat and Dry Rot: How Florida Ages Tires"
 description: "Tire dry rot in Florida: what sidewall cracking looks like, why sun, heat and ozone cause it, which cracks mean replace, and how to slow it down."
 keyword: "tire dry rot"
 secondaryKeywords:

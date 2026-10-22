@@ -1,5 +1,5 @@
 ---
-title: "Tire Plug vs Patch: What a Proper Repair Looks Like"
+title: "Tire Plug vs Patch: A Proper Repair Explained"
 description: "Tire plug vs patch: why industry guidance accepts neither on its own, the 1/4-inch tread-area limit, and why the tire must come off the wheel."
 keyword: "tire plug vs patch"
 secondaryKeywords:

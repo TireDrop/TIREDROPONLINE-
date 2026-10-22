@@ -1,5 +1,5 @@
 ---
-title: "Driving Through Salt Water? King Tides and Your Wheels"
+title: "Driving Through Salt Water? King Tides and Wheels"
 description: "Driving through salt water on a king tide day? What tidal flooding is, why salt is harder on a car than rain, and a simple rinse-and-check routine after."
 keyword: "driving through salt water"
 secondaryKeywords:

@@ -1,5 +1,5 @@
 ---
-title: "TPMS Light On? Solid vs Flashing, and What to Do Next"
+title: "TPMS Light On? Solid vs Flashing and What to Do"
 description: "TPMS light on? Solid usually means a tire is low. Flashing, then solid, means the system has a fault. What the federal rule says and what to do next."
 keyword: "tpms light"
 secondaryKeywords:

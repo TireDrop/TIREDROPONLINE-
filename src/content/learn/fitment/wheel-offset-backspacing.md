@@ -1,5 +1,5 @@
 ---
-title: "Wheel Offset and Backspacing Explained: ET, Poke and Rub"
+title: "Wheel Offset and Backspacing Explained"
 description: "Wheel offset and backspacing explained: what ET45 means, positive vs negative offset, how width and offset move a wheel in or out, and how to avoid rub."
 keyword: "wheel offset"
 secondaryKeywords:

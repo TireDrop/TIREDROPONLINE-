@@ -1,5 +1,5 @@
 ---
-title: "Choosing Tires for a Toyota RAV4: Sizes, AWD, Rain"
+title: "Toyota RAV4 Tires: Sizes, AWD and Rain"
 description: "Best tires for a Toyota RAV4, without rankings: finding your size, why AWD models need matched tires, replacing in pairs, rotation and wet grip in Florida."
 keyword: "best tires for Toyota RAV4"
 secondaryKeywords:

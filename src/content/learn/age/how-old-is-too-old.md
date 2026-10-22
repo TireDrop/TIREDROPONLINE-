@@ -1,5 +1,5 @@
 ---
-title: "How Old Is Too Old for Tires? What Makers Recommend"
+title: "How Old Is Too Old for Tires? What Makers Say"
 description: "How old is too old for tires? NHTSA, Bridgestone and Michelin guidance side by side: yearly inspections from 5 years, replacement at 10, spare included."
 keyword: "how old is too old for tires"
 secondaryKeywords:

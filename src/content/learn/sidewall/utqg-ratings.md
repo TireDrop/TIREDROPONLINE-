@@ -1,5 +1,5 @@
 ---
-title: "UTQG Ratings Explained: Treadwear, Traction, Temperature"
+title: "UTQG Ratings: Treadwear, Traction, Temperature"
 description: "What a UTQG rating like 500 AA A really measures, who assigns the grades, why treadwear isn't a mileage promise and how to use the grades when you shop."
 keyword: "UTQG rating"
 secondaryKeywords:

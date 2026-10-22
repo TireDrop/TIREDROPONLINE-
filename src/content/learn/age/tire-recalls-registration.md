@@ -1,5 +1,5 @@
 ---
-title: "Tire Recalls: Check Your DOT Number and Register Tires"
+title: "Tire Recalls: Check Your DOT Number and Register"
 description: "How to check a tire recall with the full DOT number (TIN), where to find it on the sidewall, and how tire registration gets recall notices to you."
 keyword: "tire recall check"
 secondaryKeywords:

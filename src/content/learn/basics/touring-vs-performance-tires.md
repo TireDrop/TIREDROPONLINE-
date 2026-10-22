@@ -1,5 +1,5 @@
 ---
-title: "Touring vs Performance Tires: Comfort, Grip, Tread Life"
+title: "Touring vs Performance Tires: Comfort and Grip"
 description: "Touring vs performance tires: what each is built for, how speed ratings and UTQG grades hint at the category, and the trade-offs in comfort, grip and wear."
 keyword: "touring vs performance tires"
 secondaryKeywords:

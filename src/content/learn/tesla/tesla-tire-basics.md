@@ -1,5 +1,5 @@
 ---
-title: "Tesla Tire Basics: What's Different About EV Tires"
+title: "Tesla Tire Basics: How EV Tires Differ"
 description: "Why tires work harder on a Tesla: battery weight, instant torque, the low rolling resistance trade-off, cabin noise, and why EV tires tend to wear faster."
 keyword: "tesla tires"
 secondaryKeywords:

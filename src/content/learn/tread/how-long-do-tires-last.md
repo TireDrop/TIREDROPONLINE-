@@ -1,5 +1,5 @@
 ---
-title: "How Long Do Tires Last? Miles, Years and Warranties"
+title: "How Long Do Tires Last? Miles, Years, Warranty"
 description: "How long do tires last? Why tread, age and damage each set a limit, how treadwear warranties differ from UTQG grades, and what Florida heat changes."
 keyword: "how long do tires last"
 secondaryKeywords:

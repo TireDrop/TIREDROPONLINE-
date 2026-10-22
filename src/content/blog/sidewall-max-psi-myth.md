@@ -1,5 +1,5 @@
 ---
-title: "Inflate to the Max PSI on the Sidewall? Here's Why Not"
+title: "Sidewall Max PSI: Why Not to Inflate to It"
 description: "The PSI on your tire's sidewall is a maximum, not a target. Where your vehicle's recommended pressure is, what over-inflation does and how to set it right."
 keyword: "inflate tires to max psi"
 secondaryKeywords:

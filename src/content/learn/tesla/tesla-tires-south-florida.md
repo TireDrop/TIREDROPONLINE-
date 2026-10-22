@@ -1,5 +1,5 @@
 ---
-title: "Best Tire Types for Teslas in South Florida Heat and Rain"
+title: "Best Tire Types for Teslas in South Florida"
 description: "EV-specific touring, all-season and summer performance tires for a Tesla in South Florida, and how to weigh wet grip, tread life, noise and range."
 keyword: "tesla tires florida"
 secondaryKeywords:

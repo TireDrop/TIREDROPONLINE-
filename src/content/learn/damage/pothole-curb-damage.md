@@ -1,5 +1,5 @@
 ---
-title: "Bent Rim After a Pothole or Curb? Wheel and Tire Checks"
+title: "Bent Rim After a Pothole? Wheel and Tire Checks"
 description: "Bent rim symptoms after a pothole or curb: where wheels crack and leak, why tire damage can hide inside, and what to have checked before it costs a tire."
 keyword: "bent rim symptoms"
 secondaryKeywords:

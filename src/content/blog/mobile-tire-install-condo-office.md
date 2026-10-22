@@ -1,5 +1,5 @@
 ---
-title: "Mobile Tire Install at a Condo or Office: What to Know"
+title: "Mobile Tire Install at a Condo or Office"
 description: "Getting tires installed at your condo or office in Broward: the space the van needs, gate codes and garage rules, what the van can and can't do, and prep."
 keyword: "mobile tire installation at a condo"
 secondaryKeywords:

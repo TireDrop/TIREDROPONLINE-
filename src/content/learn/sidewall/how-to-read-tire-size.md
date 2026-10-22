@@ -1,5 +1,5 @@
 ---
-title: "How to Read Tire Size: What 225/65R17 Actually Means"
+title: "How to Read Tire Size: What 225/65R17 Means"
 description: "How to read tire size, one piece at a time: width, aspect ratio, R, rim size, load index and speed symbol, plus LT and flotation sizes like 31x10.50R15."
 keyword: "how to read tire size"
 secondaryKeywords:

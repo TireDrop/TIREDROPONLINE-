@@ -1,5 +1,5 @@
 ---
-title: "Bubble in Tire Sidewall: What It Means and What to Do"
+title: "Bubble in Tire Sidewall: Meaning and What to Do"
 description: "A bubble in the tire sidewall means damaged cords inside, and it can't be repaired. How to tell it from a normal indentation, and what to do next."
 keyword: "bubble in tire sidewall"
 secondaryKeywords:

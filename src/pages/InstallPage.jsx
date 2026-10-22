@@ -155,7 +155,7 @@ export default function InstallPage() {
     <>
       <Seo
         title="Tire Installation in Sunrise, FL: Ship to Store"
-        description={`Choose free ship-to-store at checkout and have your ${BUSINESS.name} order delivered to ${BUSINESS.parent} in ${BUSINESS.shop.city}, FL, then installed. South Florida only — see the local install area, shop hours and directions.`}
+        description={`Choose free ship-to-store at checkout and ${BUSINESS.parent} in ${BUSINESS.shop.city}, FL fits your tires. South Florida only. Install area, hours, directions.`}
       />
 
       <Breadcrumbs

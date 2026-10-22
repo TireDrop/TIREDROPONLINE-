@@ -1,5 +1,5 @@
 ---
-title: "Storm Cleanup Nails: Puncture Season After a Storm"
+title: "Storm Cleanup Nails: Tire Punctures After a Storm"
 description: "Roofing nail in your tire after storm cleanup? What to check first, which punctures industry guidance says can be repaired, and why plug kits fall short."
 keyword: "roofing nail in tire"
 secondaryKeywords:

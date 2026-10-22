@@ -1,5 +1,5 @@
 ---
-title: "Tire Speed Rating Chart: What H, V, W, Y and Z Mean"
+title: "Tire Speed Rating Chart: H, V, W, Y and Z"
 description: "Tire speed rating chart from L to Y, what the letter actually tests, ZR and (Y) markings, mixing ratings, and why heat and low pressure matter in Florida."
 keyword: "tire speed rating chart"
 secondaryKeywords:

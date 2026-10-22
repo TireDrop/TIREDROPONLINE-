@@ -1,5 +1,5 @@
 ---
-title: "Best Tires for Tesla Model Y: A Neutral Buying Guide"
+title: "Best Tires for Tesla Model Y: A Buying Guide"
 description: "Best tires for Tesla Model Y, minus the rankings: what Tesla's manual says about size, load rating, T-marked tires, foam, rotation and replacing in pairs."
 keyword: "best tires for Tesla Model Y"
 secondaryKeywords:
