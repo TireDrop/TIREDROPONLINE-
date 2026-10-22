@@ -1,5 +1,5 @@
 ---
-title: "How Old Are Tires When You Buy Online? Read the DOT Date"
+title: "How Old Are Online Tires? Read the DOT Date"
 description: "New tires can carry any build date. How to read the DOT date code when an online order arrives, what age guidance says, and what to check before mounting."
 keyword: "how old are tires when you buy online"
 secondaryKeywords:

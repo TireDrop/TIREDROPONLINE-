@@ -1,5 +1,5 @@
 ---
-title: "Low Rolling Resistance Tires: Worth It for Hybrids?"
+title: "Low Rolling Resistance Tires for Hybrids"
 description: "Low rolling resistance tires for hybrids: what NHTSA's testing found on fuel economy, why pressure matters as much, and how to keep wet grip first."
 keyword: "low rolling resistance tires"
 secondaryKeywords:

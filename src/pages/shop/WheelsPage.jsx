@@ -205,7 +205,7 @@ export default function WheelsPage() {
     <>
       <Seo
         title="Buy Wheels Online: Alloy, Forged and Off-Road"
-        description="Buy wheels online: alloy, forged, off-road and truck wheels, fitment-checked before they ship, shipped to the 48 contiguous states and DC or free to our South Florida shop."
+        description="Buy wheels online: alloy, forged, off-road and truck wheels, fitment-checked before they ship to the 48 states + DC or free to our South Florida shop."
       />
       <PageHero
         eyebrow="Wheels"

@@ -1,5 +1,5 @@
 ---
-title: "Where to Get Tires Installed After Buying Online: Broward"
+title: "Tires Bought Online: Installation in Broward"
 description: "Where to get tires installed after buying online in Broward: free ship-to-store in Sunrise, a mobile van at home, and what to check when tires arrive."
 keyword: "where to get tires installed after buying online"
 secondaryKeywords:

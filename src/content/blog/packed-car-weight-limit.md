@@ -1,5 +1,5 @@
 ---
-title: "Packing the Car? How to Find Your Real Weight Limit"
+title: "Packing the Car? Find Your Real Weight Limit"
 description: "How much weight can your car carry? Find the number on your door placard, subtract the people, and see what's left for luggage, coolers and a roof box."
 keyword: "how much weight can my car carry"
 secondaryKeywords:

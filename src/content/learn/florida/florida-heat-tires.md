@@ -1,5 +1,5 @@
 ---
-title: "Florida Heat and Tires: Pressure, Aging and Blowouts"
+title: "Florida Heat and Tires: Pressure, Aging, Blowouts"
 description: "How Florida heat works on your tires: why low pressure and heavy loads build heat, what NHTSA found about tire aging in the Sun Belt, and a summer routine."
 keyword: "heat and tires"
 secondaryKeywords:

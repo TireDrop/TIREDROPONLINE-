@@ -1,5 +1,5 @@
 ---
-title: "Changing Tire Size: Diameter, Load and Speedometer"
+title: "Changing Tire Size: Diameter, Load, Speedometer"
 description: "Can you use a different tire size? What to keep the same: overall diameter, load index and speed rating, plus the speedometer effect and clearance checks."
 keyword: "different tire size"
 secondaryKeywords:

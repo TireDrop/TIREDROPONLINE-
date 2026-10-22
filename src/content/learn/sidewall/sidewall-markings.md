@@ -1,5 +1,5 @@
 ---
-title: "Tire Sidewall Markings: M+S, Snowflake, Max Press and More"
+title: "Tire Sidewall Markings: M+S, Snowflake, Max Press"
 description: "The tire sidewall markings beyond the size: M+S, the snowflake, MAX PRESS and MAX LOAD, XL, ply lines, TUBELESS, run-flat marks, arrows and OUTSIDE."
 keyword: "tire sidewall markings"
 secondaryKeywords:

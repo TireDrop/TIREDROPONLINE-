@@ -1,5 +1,5 @@
 ---
-title: "XL vs SL Tires: Extra Load, Standard Load and Pressure"
+title: "XL vs SL Tires: Extra Load vs Standard Load"
 description: "XL vs SL tires: what extra load and standard load mean, why XL capacity depends on pressure, and why it matters on EVs, SUVs and crossovers."
 keyword: "xl vs sl tires"
 secondaryKeywords:

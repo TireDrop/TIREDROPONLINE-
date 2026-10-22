@@ -1,5 +1,5 @@
 ---
-title: "Parts of a Tire: Tread, Belts, Plies, Bead and Sidewall"
+title: "Parts of a Tire: Tread, Belts, Plies, Bead"
 description: "The parts of a tire, from tread and belts to body plies, bead and inner liner, and how each part explains a bulge, a repair limit or a slow leak."
 keyword: "parts of a tire"
 secondaryKeywords:

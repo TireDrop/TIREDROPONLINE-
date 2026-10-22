@@ -1,5 +1,5 @@
 ---
-title: "Tire Tread Depth Chart: When to Replace Your Tires"
+title: "Tire Tread Depth Chart: When to Replace"
 description: "A tire tread depth chart in 32nds and millimeters: what 2/32 and 4/32 mean, why rain changes the math, and how to measure your own tires in five minutes."
 keyword: "tire tread depth"
 secondaryKeywords:

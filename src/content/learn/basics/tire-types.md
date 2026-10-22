@@ -1,5 +1,5 @@
 ---
-title: "Types of Tires Explained: Which Kind Fits Your Car"
+title: "Types of Tires Explained: Which Fits Your Car"
 description: "Types of tires explained by how you drive: all-season, summer, winter, all-weather, touring, performance, all-terrain, run-flat and tread pattern types."
 keyword: "types of tires"
 secondaryKeywords:

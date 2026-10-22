@@ -101,7 +101,7 @@ export default function LocationsPage() {
     <>
       <Seo
         title="Tire Shop in Sunrise, FL: Hours and Directions"
-        description={`${BUSINESS.name} ships free to the 48 states + DC, and ${BUSINESS.parent} at ${BUSINESS.shop.full} fits what we sell. Hours, directions, ship-to-store pickup and the mobile install area: ${SERVICE_AREA_LABEL}.`}
+        description={`Tire shop in ${BUSINESS.shop.city}, FL: hours, directions and ship-to-store pickup at ${BUSINESS.parent}. Mobile install covers ${SERVICE_AREA_LABEL}.`}
       />
 
       <PageHero

@@ -1,5 +1,5 @@
 ---
-title: "EV Tires Wear Faster: How to Budget and Stretch Them"
+title: "EV Tires Wear Faster: How to Budget for Them"
 description: "Do EV tires wear faster? Michelin says about 20% on average. Why weight and torque do it, how to plan for replacement, and the habits that stretch a set."
 keyword: "do EV tires wear faster"
 secondaryKeywords:

@@ -1,5 +1,5 @@
 ---
-title: "Buying Tires Online vs a Local Shop: Honest Trade-offs"
+title: "Buy Tires Online or at a Shop? Compare the Total"
 description: "Buy tires online vs a local shop: where each is strong, how to compare the full installed cost, and the size, fitting and registration steps either way."
 keyword: "buy tires online vs local shop"
 secondaryKeywords:

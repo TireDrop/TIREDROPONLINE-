@@ -79,6 +79,18 @@ export const HUB_NOT_INCLUDED = [
 
 export const HUB_FAQ = [
   {
+    q: "Can I get tires shipped to my house?",
+    a: "Yes. Tires ship free to any street address in the 48 contiguous states and DC, with no order minimum. Tracking is sent as soon as the carrier has a number.",
+  },
+  {
+    q: "Can I have tires shipped to a shop instead?",
+    a: "Yes, to any shop that agrees to take them in. Call the shop first and confirm what it charges to mount. In South Florida you can ship free to our Sunrise shop.",
+  },
+  {
+    q: "Will a tire shop mount tires I bought online?",
+    a: "Many will, but policies differ. Ask about the mounting fee, valve stems or TPMS kits, disposal, and whether the shop wants to see the tire's date code. We confirm the fit before your order ships.",
+  },
+  {
     q: "How much does shipping cost?",
     a: "Nothing. Shipping is free to any street address in the 48 contiguous states and DC, with no order minimum and no handling fee added after you pay.",
   },
@@ -119,7 +131,7 @@ export default function NationwideShippingPage() {
     <>
       <Seo
         title="Tires Shipped to Your House: Free, 48 States + DC"
-        description={`Buy tires online from ${BUSINESS.name} and they ship free to ${BUSINESS.shipping.area}. Fitment checked, tracking emailed, mounted by any local shop. State tire guides inside.`}
+        description={`Buy tires online and they ship free to ${BUSINESS.shipping.area}. Fitment checked, tracking emailed, mounted by any local shop. State guides inside.`}
       />
       <Breadcrumbs trail={[{ label: "Shipping to 48 States + DC" }]} />
 

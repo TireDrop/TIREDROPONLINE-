@@ -1,5 +1,5 @@
 ---
-title: "Ford F-150 Tires: P-Metric, LT and Load Range Basics"
+title: "Ford F-150 Tires: P-Metric, LT and Load Range"
 description: "Best tires for an F-150, answered by load, not logos: P-metric vs LT on your truck, load range, pressure when you switch, and towing in Florida heat."
 keyword: "best tires for F-150"
 secondaryKeywords:

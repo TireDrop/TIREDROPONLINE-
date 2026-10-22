@@ -1,5 +1,5 @@
 ---
-title: "Why Your TPMS Light Comes On After a Florida Cold Front"
+title: "Why Your TPMS Light Comes On After a Cold Front"
 description: "TPMS light on after a South Florida cold front? A cool night drops tire pressure, but rarely 25% on its own. Here's the math and what to do that morning."
 keyword: "TPMS light cold weather"
 secondaryKeywords:

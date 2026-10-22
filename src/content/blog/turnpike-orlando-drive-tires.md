@@ -1,5 +1,5 @@
 ---
-title: "Driving the Turnpike to Orlando: Tire Prep and Stops"
+title: "Driving the Turnpike to Orlando: Tire Prep"
 description: "Driving Florida's Turnpike from South Florida to Orlando: a tire check before you go, the service plazas by milepost, and what Turnpike Road Rangers do."
 keyword: "Florida Turnpike road trip"
 secondaryKeywords:

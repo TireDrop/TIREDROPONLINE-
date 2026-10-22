@@ -1,5 +1,5 @@
 ---
-title: "All-Season vs All-Weather Tires: M+S vs the Snowflake"
+title: "All-Season vs All-Weather Tires: M+S vs Snowflake"
 description: "All-season vs all-weather tires: what M+S and the three-peak mountain snowflake (3PMSF) mean, how the snow test works, and how to pick for where you drive."
 keyword: "all season vs all weather tires"
 secondaryKeywords:

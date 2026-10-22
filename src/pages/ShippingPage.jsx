@@ -135,7 +135,7 @@ export default function ShippingPage() {
     <>
       <Seo
         title="Tires Delivered to Your Door: How Shipping Works"
-        description={`${BUSINESS.name} ships tires and wheels free, direct from a distributor warehouse, to anywhere in ${BUSINESS.shipping.area}. See how ordering, tracking, damaged shipments and out-of-stock sizes are handled.`}
+        description={`${BUSINESS.name} ships tires and wheels free to ${BUSINESS.shipping.area}. See how ordering, tracking, damaged shipments and out-of-stock sizes work.`}
       />
 
       <Breadcrumbs trail={[{ label: "How shipping works" }]} />

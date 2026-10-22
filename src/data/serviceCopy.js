@@ -30,7 +30,14 @@ const AREA = "Miami-Dade, Broward and Palm Beach counties";
 
 export const SERVICE_COPY = {
   "tire-installation": {
-    heading: "Tire Installation in South Florida",
+    heading: "Tire Installation and Balancing in South Florida",
+    // Search wording ("tire installation cost"). {from} is filled with the
+    // starting price in serviceFacts.js by ServiceDetailPage, so a price
+    // change never touches this copy.
+    seoTitle: "Tire Installation Cost: Mounting and Balancing",
+    seoDescription:
+      "Tire installation from {from}: mounting, balancing, new valve stems and old-tire disposal. At the Sunrise shop or by mobile van in South Florida.",
+    costHeading: "What does tire installation cost?",
     fitsOnlineOrders: true,
     intro: [
       `Tire installation is the work of taking your old tires off the wheels, mounting new ones and putting the wheels back on the car. Extreme Tires does it at the shop in Sunrise, Florida, and by mobile van at your home, office or jobsite in ${AREA}.`,

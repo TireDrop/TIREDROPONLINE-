@@ -1,5 +1,5 @@
 ---
-title: "How to Get Tires Installed After Buying Them Online"
+title: "Buy Tires Online, Get Them Installed"
 description: "Bought tires online? How to find an installer anywhere in the US, what to ask before you order, where to ship them, and what to check at the appointment."
 keyword: "how to get tires installed after buying online"
 secondaryKeywords:

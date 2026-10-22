@@ -1,5 +1,5 @@
 ---
-title: "Crossing Alligator Alley: Tires, Spare and Fuel Plan"
+title: "Alligator Alley Drive: Tires, Spare and Fuel Plan"
 description: "Driving Alligator Alley, I-75 across the Everglades: a tire and spare check before you go, fuel planning, and who to call if a tire goes."
 keyword: "Alligator Alley drive"
 secondaryKeywords:

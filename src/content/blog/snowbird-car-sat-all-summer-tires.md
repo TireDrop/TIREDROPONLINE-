@@ -1,5 +1,5 @@
 ---
-title: "Car Sat All Summer? Tire Checks for Returning Snowbirds"
+title: "Car Sat All Summer? Snowbird Tire Checks"
 description: "Back for the season and your car sat all summer? Check tire pressure, flat spots, sun cracking and tire age before the first drive, and plan for spring."
 keyword: "car sitting for months tires"
 secondaryKeywords:

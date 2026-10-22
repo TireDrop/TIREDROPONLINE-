@@ -1,5 +1,5 @@
 ---
-title: "Best Time to Buy Tires in South Florida, by Season"
+title: "Best Time to Buy Tires in South Florida"
 description: "The best time to buy tires in South Florida is before the season that tests them: rain, hurricanes and road trips. A tread and age calendar for the year."
 keyword: "best time to buy tires"
 secondaryKeywords:

@@ -212,7 +212,7 @@ export default function MobileServicePage() {
     <>
       <Seo
         title="Mobile Tire Service in Miami, Broward, Palm Beach"
-        description={`Bought tires on ${BUSINESS.name}? ${BUSINESS.parent} brings a fully equipped van to your home, office or jobsite across ${SERVICE_AREA_LABEL} to fit them — plus balancing, repair, rotation, oil changes and TPMS.`}
+        description={`Bought tires on ${BUSINESS.name}? ${BUSINESS.parent} brings a van to your home, office or jobsite across ${SERVICE_AREA_LABEL} to fit them.`}
         schema={[faqSchema(FAQ, "/mobile-service")]}
       />
 

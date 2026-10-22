@@ -1,5 +1,5 @@
 ---
-title: "Bolt Pattern: How to Read and Measure It (5x114.3)"
+title: "Bolt Pattern: How to Read and Measure (5x114.3)"
 description: "How to read a bolt pattern like 5x114.3, what lug count and PCD mean, how to measure 4, 5, 6 and 8-lug wheels, and the center bore and lug seat checks."
 keyword: "bolt pattern"
 secondaryKeywords:

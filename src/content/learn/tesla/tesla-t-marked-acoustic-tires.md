@@ -1,5 +1,5 @@
 ---
-title: "Tesla-Marked Tires: T0, T1 and Acoustic Foam Explained"
+title: "Tesla-Marked Tires: T0, T1 and Acoustic Foam"
 description: "What the T0, T1 and T2 marks on Tesla tires mean, how sound-absorbing foam works, and what changes when you choose a tire without the Tesla mark."
 keyword: "tesla t0 t1 tires"
 secondaryKeywords:

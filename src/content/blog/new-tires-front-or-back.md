@@ -1,5 +1,5 @@
 ---
-title: "New Tires on the Front or the Back? The Real Answer"
+title: "New Tires on the Front or the Back?"
 description: "Buying two tires? USTMA, TIA, Michelin and Bridgestone say the new pair goes on the rear axle, even with front-wheel drive. Why, and when it differs."
 keyword: "new tires front or back"
 secondaryKeywords:

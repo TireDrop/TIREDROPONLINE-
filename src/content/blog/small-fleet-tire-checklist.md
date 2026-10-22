@@ -1,5 +1,5 @@
 ---
-title: "Small Fleet Tire Checklist for South Florida Businesses"
+title: "Small Fleet Tire Checklist for South Florida"
 description: "Fleet tire management for small South Florida fleets: a weekly and monthly checklist, the federal tread rules for commercial vehicles, and a tire log."
 keyword: "fleet tire management"
 secondaryKeywords:

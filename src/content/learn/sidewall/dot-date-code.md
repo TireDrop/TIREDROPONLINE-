@@ -1,5 +1,5 @@
 ---
-title: "Tire Date Code: How to Read the DOT Number on a Tire"
+title: "Tire Date Code: How to Read the DOT Number"
 description: "Find the tire date code on your sidewall, read the four digits for the week and year it was built, and use the full DOT number to run a tire recall check."
 keyword: "tire date code"
 secondaryKeywords:

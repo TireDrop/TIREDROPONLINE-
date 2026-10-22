@@ -1,5 +1,5 @@
 ---
-title: "Hurricane Car Prep Checklist: The Tire Check First"
+title: "Hurricane Car Prep: The Tire Check First"
 description: "A hurricane car prep checklist for South Florida that starts with tires: tread, pressure, the spare, a half tank, your zone and what to check afterward."
 keyword: "hurricane car prep checklist"
 secondaryKeywords:
