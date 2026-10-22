@@ -1,8 +1,7 @@
-import React, { useSyncExternalStore } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useSyncExternalStore } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ClipboardList,
-  Download,
   Phone,
   Printer,
   Smartphone,
@@ -11,9 +10,10 @@ import {
 
 import { BUSINESS } from "../data/business.js";
 import { trackEvent } from "../lib/analytics.js";
-import { isIosSafari } from "../components/app/InstallPrompt.jsx";
+import AddToHomeButton from "../components/app/AddToHomeButton.jsx";
+import { deviceKind } from "../lib/installHelp.js";
 import { isStandalone } from "../lib/appMode.js";
-import { getServerSnapshot, getSnapshot, setState, subscribe } from "../pwa/state.js";
+import { getServerSnapshot, getSnapshot, subscribe } from "../pwa/state.js";
 import {
   Breadcrumbs,
   PageHero,
@@ -119,9 +119,9 @@ let clientInfo = null;
 const noSubscribe = () => () => {};
 const getClient = () => {
   if (!clientInfo) {
-    const ua = navigator.userAgent || "";
+    const kind = deviceKind();
     clientInfo = {
-      device: isIosSafari() ? "iphone" : /Android/i.test(ua) ? "android" : null,
+      device: kind.platform === "ios" ? "iphone" : kind.platform === "android" ? "android" : null,
       installed: isStandalone(),
     };
   }
@@ -131,19 +131,14 @@ const getClient = () => {
 export default function AppPage() {
   const store = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const { device, installed } = useSyncExternalStore(noSubscribe, getClient, () => UNKNOWN);
+  const navigate = useNavigate();
+  const usingApp = installed || store.installed;
 
-  const install = async () => {
-    const event = store.installEvent;
-    if (!event) return;
-    setState({ installEvent: null }); // a prompt event works once
-    trackEvent("app_install_prompt_shown", { placement: "app_page" });
-    try {
-      await event.prompt();
-      await event.userChoice;
-    } catch {
-      /* the browser refused to show it */
-    }
-  };
+  // Adding from this page on an iPhone saves THIS address, so the app can open
+  // here. Inside the app there is nothing to add: go straight to the shop.
+  useEffect(() => {
+    if (installed && window.history.length <= 2) navigate("/?source=app", { replace: true });
+  }, [installed, navigate]);
 
   return (
     <>
@@ -158,19 +153,12 @@ export default function AppPage() {
         lede="No app store and no download. Put TireDrop on your home screen and open it like an app: shop tires, check your order and call the shop in one tap."
       >
         <div className="flex flex-wrap gap-3">
-          {installed ? (
+          {usingApp ? (
             <p className="inline-flex min-h-[48px] items-center rounded-card border border-volt/40 bg-volt/10 px-4 font-display text-sm font-bold text-volt">
               You are using the app now
             </p>
-          ) : store.installEvent ? (
-            <button type="button" onClick={install} className="btn-primary min-h-[48px]">
-              <Download size={18} aria-hidden />
-              Install the app
-            </button>
           ) : (
-            <a href="#how" className="btn-primary min-h-[48px]">
-              See how, it takes four taps
-            </a>
+            <AddToHomeButton placement="app_page_hero" />
           )}
           <a href={BUSINESS.phoneHref} className="btn-ghost-light min-h-[48px]">
             <Phone size={18} aria-hidden />
@@ -211,6 +199,11 @@ export default function AppPage() {
           title="Four taps, on any phone"
           lede="Pick the one that matches your phone. On a computer, Chrome and Edge show an install icon at the right end of the address bar."
         />
+        {!usingApp && (
+          <div className="mb-6">
+            <AddToHomeButton placement="app_page_steps" />
+          </div>
+        )}
         <div className="grid gap-4 md:grid-cols-2">
           <DeviceCard
             id="iphone"

@@ -23,6 +23,7 @@
     "check:chat-kb": "node scripts/chat-kb-check.mjs",
     "test:chat-kb": "node --test scripts/build-chat-knowledge.test.mjs",
     "check:ga": "node scripts/ga-events-check.mjs",
+    "check:app-page": "node scripts/app-page-check.mjs",
     "check:app-mode": "node scripts/app-mode-check.mjs",
     "check:orders": "node scripts/orders-check.mjs",
     "check:pwa": "node scripts/pwa-check.mjs",
