@@ -10,6 +10,7 @@ the code fits together is in the root [README](../README.md).
 ## business/: running the store
 
 - [shopify-admin-prompts.md](business/shopify-admin-prompts.md): numbered copy-paste Chrome prompts for everything Claude cannot do itself (Shopify admin, Vercel, Flow). Use it when a task needs Justin's browser.
+- [seo-roadmap-to-10.md](business/seo-roadmap-to-10.md): phased plan to take the site SEO score from 6 to 10 (who does what, what is blocked on the ATD feed).
 - [shipping-pricing-plan.md](business/shipping-pricing-plan.md): competitor shipping policies, ATD freight cost per order, the four options (free shipping stays recommended) and the file list to change if shipping pricing changes. Read it before touching any shipping wording.
 - [parent-business-facts.md](business/parent-business-facts.md): where each fact about Extreme Tires (name, review profiles, distributor presence, services) came from and how far to trust it. Check it before the site states a fact about the shop.
 - [2026-09-23-meeting-brief.html](business/2026-09-23-meeting-brief.html): the ATD / Tire Guru / Net Driven meeting brief from 2026-09-23. Open it in a browser for the supplier background and the questions that were asked.
@@ -57,6 +58,7 @@ the code fits together is in the root [README](../README.md).
 - [2026-09-24-functional-audit.md](audits/2026-09-24-functional-audit.md): bugs found by driving the site in Chromium and not yet fixed at the time.
 - [2026-09-24-distributor-readiness.md](audits/2026-09-24-distributor-readiness.md): the site reviewed as an ATD dealer-approval reviewer would see it.
 - [2026-09-29-site-audit.md](audits/2026-09-29-site-audit.md): four parallel audits (UX/conversion, technical, trust/checkout/ops, competitors). The source of most open checklist items.
+- [2026-10-18-site-seo-audit.md](audits/2026-10-18-site-seo-audit.md): site-wide SEO audit scored 6/10 (technical 8, on-page 6.5, structured data/local/off-site 5), ranked fix list, three full reports.
 - [2026-10-04-seo-indexing.md](audits/2026-10-04-seo-indexing.md): sitemap, robots, titles, canonicals, JSON-LD and internal links checked against a real build; URL pattern counts, what changed, and what was left for Justin.
 - [2026-10-04-city-depth.md](audits/2026-10-04-city-depth.md): Tamarac, Weston, Coral Springs and Davie city pages deepened from verified facts (source per fact), where the van brand is named, and /compare and /reviews set to noindex.
 - [2026-10-18-city-facts.md](audits/2026-10-18-city-facts.md): the seven thin batch-2 city pages filled (ZIPs, roads, neighbourhoods, local FAQs) and six new pages added (Miami, Doral, Homestead, Boca Raton, West Palm Beach, Boynton Beach), with the source list per page, the rules applied, what was left out on purpose and the checks run. Branch preview/seo-city-pages.

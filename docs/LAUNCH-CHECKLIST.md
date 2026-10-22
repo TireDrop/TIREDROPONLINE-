@@ -202,6 +202,15 @@ _Last updated: 2026-10-22 (Get-the-app page /app with the Add to Home Screen but
 - [ ] After the ATD feed: brand, category, size and vehicle landing pages; indexable product pages
 
 ## Content & SEO: Blog + Learn (Claude; plan in docs/prompts/blog-learn-build.md)
+- [x] ~~Site-wide SEO audit scored 1 to 10~~ (2026-10-18: 6/10, technical 8, on-page 6.5, structured data/local/off-site 5; docs/audits/2026-10-18-site-seo-audit.md)
+- [ ] SEO fixes from the 2026-10-18 audit, Claude (needs Justin's yes before they go live):
+  - [x] ~~robots.txt: drop `Disallow: /*?view=` and `/*?search=`; give `/wheels?view=fitment` its own indexable route (/wheel-fitment); NUL-byte fix; keyword-led titles and H1s on 11 pages and the 14 city pages~~ (Phase 1 live on main 2026-10-18, c7675cc + fb555c8)
+  - [ ] Justin: re-crawl the changed pages in Search Console → Chrome prompt 29 in docs/business/shopify-admin-prompts.md
+  - [ ] Rewrite money-page titles and H1s (/tires, /install, product pages with brand in the H1); link Learn/Blog articles to product, category and brand pages
+  - [ ] Fill the 7 thin city pages (ZIPs, roads, neighbourhoods); add Palm Beach and more Miami-Dade pages; fix the repeated "a visit and a tow" sentence on all 12 service pages
+  - [ ] Build Product/Offer/shipping/return markup behind a flag, on when the ATD feed is live (Justin: set the return window first)
+  - [ ] Brand, category, size and vehicle landing pages once the ATD feed is live; make the /brands tiles link to them
+- [ ] SEO to-dos for Justin on the websites (Claude writes the Chrome prompts): wire up Google Business Profile (name, Place ID, review link); link extrememobiletires.com and TireDrop to each other; start a backlink and citation plan; set up Bing Webmaster
 - [ ] Local city and neighborhood page plan, top 25 ranked (competitor gap 8); pages not built yet (branch preview/wave1-local-plan, `546a2cf`; docs/audits/2026-10-05-local-pages-plan.md + local-pages-plan.json)
   - [ ] Verify the plan's gaps in Chrome: 2020 populations (all snippet-only), drive times (none sourced), USPS ZIP lists; prompt is in section 8 of the plan
 - [x] ~~Blog batch 5: 10 posts (Florida sun and dry rot, flat on I-95, TPMS vs a gauge, cold-front TPMS light, moving to Florida, glovebox tire kit, back-to-school check, bigger wheels myth, Turnpike to Orlando, Alligator Alley)~~ (`aca62b5`…`e56433c`, shipped to main 2026-10-02)

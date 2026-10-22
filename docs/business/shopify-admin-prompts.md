@@ -1493,3 +1493,32 @@ Do this in my browser. Stop and tell me if anything looks different. Do not chan
 6. Open the Shipping policy (Settings → Policies) and read the sentence about cost: it must say shipping is free to the 48 contiguous states and DC. Tell me if it differs. Do not edit it.
 7. Report back every rate and zone as they are now, and what you changed.
 ```
+
+## 29. Search Console: re-crawl the pages changed by SEO phase 1 (2026-10-18)
+
+Paste into Claude in Chrome. Google allows roughly 10 to 12 "Request indexing" clicks per property per day; if it says the quota is reached, stop and run the rest the next day.
+
+```
+Go to https://search.google.com/search-console and open the property for tiredroponline.com (the Domain property if there are two). If you are asked to sign in, stop and tell me.
+
+Step 1: Sitemaps. Open "Sitemaps" in the left menu. In "Add a new sitemap" type sitemap.xml and click Submit (re-submitting is fine). Tell me the status and "Discovered pages" number it shows.
+
+Step 2: For each URL below, in this order: click the search bar at the top ("Inspect any URL in tiredroponline.com"), paste the URL, press Enter, wait for the result, then click "Request indexing" and wait until it confirms "Indexing requested". If it shows "URL is not on Google" that is fine, still click Request indexing. If a pop-up says the daily quota is exceeded, stop and tell me which URLs are done.
+
+1. https://tiredroponline.com/
+2. https://tiredroponline.com/brands
+3. https://tiredroponline.com/tires
+4. https://tiredroponline.com/wheel-fitment
+5. https://tiredroponline.com/wheels
+6. https://tiredroponline.com/install
+7. https://tiredroponline.com/mobile-service
+8. https://tiredroponline.com/locations
+9. https://tiredroponline.com/tires-shipped
+10. https://tiredroponline.com/shipping
+11. https://tiredroponline.com/commercial-tires
+12. https://tiredroponline.com/mobile-service/hialeah-fl
+
+Do not change any settings, remove any URLs, or add users. When finished, give me a list: each URL and what Search Console said (indexing requested / quota reached / error, with the error text).
+```
+
+The other 13 city pages (`/mobile-service/<city>`) changed only their title; Google picks those up from the re-submitted sitemap, so they do not need a manual request.
