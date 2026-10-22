@@ -260,6 +260,7 @@ export const FOOTER_COLUMNS = [
       { label: "Reviews", to: "/reviews" },
       { label: "Financing", to: "/financing" },
       { label: "Contact", to: "/contact" },
+      { label: "Get the app", to: "/app" },
     ],
   },
 ];

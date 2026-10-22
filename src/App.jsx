@@ -70,6 +70,9 @@ const TireSkuPage = lazyPage("pages/shop/TireSkuPage.jsx", () =>
 const WheelFitmentPage = lazyPage("pages/shop/WheelFitmentPage.jsx", () =>
   import("./pages/shop/WheelFitmentPage.jsx"),
 );
+const AppPage = lazyPage("pages/AppPage.jsx", () =>
+  import("./pages/AppPage.jsx"),
+);
 const BrandsPage = lazyPage("pages/BrandsPage.jsx", () =>
   import("./pages/BrandsPage.jsx"),
 );
@@ -339,6 +342,7 @@ export default function App() {
               element={<DemoToolPage tool="wheel-offset" />}
             />
             <Route path="/tools/:tool" element={<ToolRedirect />} />
+            <Route path="/app" element={<AppPage />} />
             <Route path="/brands" element={<BrandsPage />} />
             <Route path="/wheel-fitment" element={<WheelFitmentPage />} />
             <Route path="/commercial-tires" element={<CommercialTiresPage />} />

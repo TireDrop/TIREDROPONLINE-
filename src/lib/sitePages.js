@@ -52,6 +52,12 @@ export const STATIC_PAGES = [
     boost: 1,
   },
   {
+    path: "/app",
+    title: "Add TireDrop to your phone",
+    keywords: "app install home screen iphone android download mobile qr",
+    text: "TireDrop works like an app with nothing to download: add it to your home screen in four taps.",
+  },
+  {
     path: "/brands",
     title: "Tire brands",
     keywords: "brand brands manufacturer makers",
