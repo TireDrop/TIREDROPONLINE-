@@ -16,6 +16,40 @@
         "label": "Line up speed ratings and UTQG grades side by side",
         "href": "/compare"
       }
+    ],
+    "guideNotes": {
+      "parts-of-a-tire": "Tread, belts, body plies, beads and the inner liner, and what each layer does. It also explains why a sidewall bulge cannot be repaired and why repairs are limited to the tread area.",
+      "tire-types": "Sorts tires by the season and climate they suit, by the job they do (touring, performance, all-terrain) and by how they handle a puncture, and explains tread-pattern layouts and the M+S and three-peak snowflake marks.",
+      "touring-vs-performance-tires": "How touring tires, built for comfort, low noise and long tread life, differ from performance tires built for grip and steering response, and how speed ratings and UTQG treadwear grades hint at which is which."
+    },
+    "sections": [
+      {
+        "heading": "How a tire is built",
+        "paras": [
+          "A tire is a stack of layers. The tread is on top, belts sit under it, body plies carry the load, beads hold the tire to the wheel and an inner liner holds the air. Knowing the layers explains a lot of tire advice. According to the U.S. Tire Manufacturers Association, repairs are limited to the tread area, where the belts reinforce the tire. A sidewall bulge means the cords inside are damaged, which is why it cannot be repaired. The [parts of a tire](/learn/basics/parts-of-a-tire) guide walks through each layer."
+        ]
+      },
+      {
+        "heading": "Choosing a type by how you drive",
+        "paras": [
+          "Tire types sort along three lines: the season and climate a tire is built for, the job it does, and how it handles a puncture. Michelin says summer tires give their best cornering and braking above 45°F, winter tires stay flexible below it, and all-season tires suit moderate climates. Whatever the type, the size, load index and speed rating still have to match your door placard. When you are ready to compare, [browse tires by size, brand and type](/tires) or see [the brands listed in our catalog](/brands)."
+        ]
+      },
+      {
+        "heading": "Touring or performance",
+        "paras": [
+          "Touring tires aim for comfort, low noise and long tread life. Performance tires aim for grip, steering response and high-speed capability. Michelin says high performance summer tires commonly fall in the 200 to 300 treadwear range, while touring tires can reach 700 or higher. Treadwear grades are assigned by each manufacturer, so compare them within one brand rather than across brands."
+        ]
+      }
+    ],
+    "audience": "These guides are for anyone buying tires for the first time, anyone who has been offered a tire type they do not recognize, and anyone curious why a shop talks about plies, belts and beads. You need no tools and no background. Each guide lists its sources at the bottom.",
+    "facts": [
+      "The federal tire standard defines a radial tire as one whose ply cords run at substantially 90 degrees to the centerline of the tread.",
+      "Federal rules require the ply count and cord materials to be marked on the sidewall.",
+      "M+S is the maker's own claim for mud and snow. The three-peak mountain snowflake means the tire met a standardized winter test, per Michelin.",
+      "Tread patterns come in three layouts: symmetrical, asymmetric and directional. Directional tires carry an arrow and must roll the way it points.",
+      "BFGoodrich describes H- and V-rated tires as typically performance touring, and W, Y and Z ratings with aspect ratios under 55 as ultra-high performance.",
+      "A replacement tire has to meet or exceed the load index and speed rating on your door placard."
     ]
   },
   {
@@ -28,7 +62,42 @@
     "slug": "tread",
     "title": "Tread & Wear",
     "description": "Tread depth in 32nds and millimeters, the penny and quarter tests, uneven wear patterns, and how many miles tires last.",
-    "order": 3
+    "order": 3,
+    "intro": "Tread is the part of a tire you can measure, and the measurement tells you when to replace it. These three guides cover the numbers, how to check them with a coin or a gauge, and how tread, age and damage each set a limit on tire life.",
+    "guideNotes": {
+      "tread-depth": "A tread depth chart in 32nds of an inch and millimeters, what the 2/32 and 4/32 lines mean, why rain changes the math, and how to measure your own tires.",
+      "how-to-check-tread-depth": "The penny, quarter and gauge methods, what each one shows, where the wear bars sit, and how to read the inside, center and outside grooves.",
+      "how-long-do-tires-last": "Why tread, age and damage each set a limit, how a treadwear warranty differs from a UTQG treadwear grade, and what Florida heat changes."
+    },
+    "sections": [
+      {
+        "heading": "Reading the numbers",
+        "paras": [
+          "US tread depth is measured in 32nds of an inch. 2/32 is about 1.6 mm and 4/32 is about 3.2 mm. NHTSA says to replace tires at 2/32, the point where the built-in wear bars sit flush with the tread. AAA recommends replacing at 4/32, after its testing found much longer wet stopping distances on tires worn that far. For Florida's legal rules, check the current statutes rather than a blog post. The [tread depth chart](/learn/tread/tread-depth) lays the numbers out side by side."
+        ]
+      },
+      {
+        "heading": "Checking at home",
+        "paras": [
+          "The penny test checks the 2/32 line. Put a penny in a groove with Lincoln's head upside down and facing you. If you can see the top of his head, NHTSA says replace the tire. The quarter test checks the 4/32 line: if you can see all of Washington's head, start shopping. A tread depth gauge gives an actual number in 32nds or millimeters, so you can track wear month to month. Measure the inside, center and outside grooves on every tire and go by the shallowest reading. Step-by-step instructions are in [how to check tread depth](/learn/tread/how-to-check-tread-depth)."
+        ]
+      },
+      {
+        "heading": "How long tires last",
+        "paras": [
+          "A tire is done when it reaches its first limit: tread depth, age or damage. Bridgestone puts a good-quality all-season tire at roughly three to five years for a driver covering 12,000 to 15,000 miles a year. A treadwear warranty is the maker's mileage promise, with conditions. A UTQG treadwear grade is a comparison on a test course, not miles. Heat, low pressure and heavy loads shorten tire life, which makes the monthly check matter more in South Florida. When it is time, [shop tires by size and brand](/tires), then see [how installation works](/install) or [mobile tire service in South Florida](/mobile-service)."
+        ]
+      }
+    ],
+    "audience": "These guides are for drivers who want a number instead of a guess: anyone whose tires are a few years old, anyone who has been told the tread is getting low, and anyone comparing treadwear warranties. All you need is a coin or a gauge.",
+    "facts": [
+      "2/32 of an inch is about 1.6 mm, and 4/32 is about 3.2 mm.",
+      "Every tire has wear bars molded into the grooves at 2/32. Tread flush with the bars means it is time to replace.",
+      "A treadwear grade of 600 does not mean 60,000 miles. NHTSA's consumer guide says real-world results can depart significantly from the norm.",
+      "Bridgestone and Michelin recommend a yearly professional inspection from five years old and replacement at 10 years.",
+      "Measure three grooves on every tire and go by the shallowest reading.",
+      "A tire's treadwear warranty, if it has one, shows the mileage its maker stands behind."
+    ]
   },
   {
     "slug": "pressure",
@@ -46,7 +115,41 @@
     "slug": "florida",
     "title": "Florida Driving & Weather",
     "description": "Rain and hydroplaning, heat and tire aging, hurricane-season prep, Florida tire rules and choosing tires for a no-snow climate.",
-    "order": 6
+    "order": 6,
+    "intro": "South Florida is hot, humid and wet for much of the year, and tires feel all three. These two guides cover how heat, pressure and load affect a tire, how water, speed and tread depth set up hydroplaning, and what to do if the car starts to float.",
+    "guideNotes": {
+      "florida-heat-tires": "Why low pressure and heavy loads build heat, what NHTSA found about tire aging in the Sun Belt, why pressure should be set when the tires are cold, and a summer routine.",
+      "hydroplaning": "What hydroplaning is, how speed, tread depth, water depth and vehicle weight set it up, what to do if the car starts to float, and why tread depth matters in the rainy season."
+    },
+    "sections": [
+      {
+        "heading": "Heat, pressure and load",
+        "paras": [
+          "NHTSA lists excessive speed, underinflation and excessive loading as the conditions that can cause heat build-up and possible tire failure, and it calls underinflation the leading cause of tire failure. That makes the monthly cold pressure check matter more in a hot climate, not less. Hot weather raises the gauge reading, so do not let air out of warm tires. Set pressure to the door placard when the tires are cold, parked for at least three hours."
+        ]
+      },
+      {
+        "heading": "Sun, climate and tire age",
+        "paras": [
+          "NHTSA's research found tire aging is a greater concern in the southern parts of the Sun Belt, and its TireWise guidance lists exposure to sunlight and a warmer climate among the things that contribute to aging. Bridgestone and Michelin recommend a professional inspection at least once a year from five years old. [How old is too old for tires](/learn/age/how-old-is-too-old) has the full guidance."
+        ]
+      },
+      {
+        "heading": "Rain and hydroplaning",
+        "paras": [
+          "Hydroplaning is when a tire rides up on a film of water and loses its grip on the road, so steering and braking stop working the way you expect. Speed, tread depth, water depth and vehicle weight all play a part. Worn tread moves less water: NHTSA's replacement line is 2/32 of an inch, while AAA recommends replacing at 4/32 after its wet-braking tests. If the car starts to float, AAA says to ease off the gas, avoid hard braking and steer gently where you want to go. South Florida's rainy season runs May 15 to October 15, per NWS Miami, so wet roads are part of the normal commute here. [Measure your tread](/learn/tread/how-to-check-tread-depth) before the rains arrive."
+        ]
+      }
+    ],
+    "audience": "These guides are for anyone who drives in South Florida's heat and rain and wants to know what the climate does to their tires, from the monthly pressure check to what to do in a downpour.",
+    "facts": [
+      "NHTSA calls underinflation the leading cause of tire failure.",
+      "Tire pressure rises as tires warm, so a high reading on a hot tire is normal. Check and set pressure when the tires are cold.",
+      "NHTSA's research found tire aging is a greater concern in the more southern parts of the Sun Belt states.",
+      "Bridgestone says hydroplaning can happen at speeds as low as 35 mph, depending on the tires and the water.",
+      "South Florida's rainy season runs May 15 to October 15, per NWS Miami.",
+      "The UTQG temperature grade is A, B or C for a tire's ability to dissipate heat in a lab test, with A the highest."
+    ]
   },
   {
     "slug": "buying",
@@ -106,7 +209,41 @@
     "slug": "age",
     "title": "Tire Age, Storage & Records",
     "description": "How old is too old, dry rot and sidewall cracks, storing tires in the heat, recalls and tire registration.",
-    "order": 10
+    "order": 10,
+    "intro": "A tire has an age as well as a tread depth. Tires age whether or not they are used, so a set with plenty of tread can still be old. These two guides cover how to read a tire's age and what the makers and regulators recommend, and how to check whether a tire has been recalled.",
+    "guideNotes": {
+      "how-old-is-too-old": "What NHTSA, Bridgestone and Michelin recommend: a yearly professional inspection from five years old and replacement at 10 years, spare included. It also explains why a tire's age starts at its DOT date and not the day it went on your car.",
+      "tire-recalls-registration": "How to find the full tire identification number (TIN) on the sidewall, check it in the U.S. Tire Manufacturers Association's free lookup or on NHTSA's recall site, and register your tires so the maker can reach you."
+    },
+    "sections": [
+      {
+        "heading": "Reading a tire's age",
+        "paras": [
+          "A tire's age starts at its DOT date, not the day it went on your car. The last four digits of the tire identification number are the week and year it was made. NHTSA's TireWise guidance says aging comes from service, storage and environmental conditions, so a tire that sat on a shelf or in a trunk is still getting older. That is why NHTSA's Tire Buyers' FAQ suggests checking the date code when you buy, and asking before mounting if a set is older than you would like. The [DOT date code](/learn/sidewall/dot-date-code) guide shows where to look."
+        ]
+      },
+      {
+        "heading": "What the makers recommend",
+        "paras": [
+          "There is no single age that fits every tire. NHTSA notes that some vehicle and tire makers recommend replacing tires 6 to 10 years old regardless of treadwear. Bridgestone and Michelin recommend a professional inspection at least once a year from five years old, and replacement 10 years after manufacture even if the tread looks new. Bridgestone's guidance includes the spare, which is often the oldest tire on the car because it rarely touches the road. Your vehicle maker may set a shorter timeframe, so check the owner's manual."
+        ]
+      },
+      {
+        "heading": "Recalls and registration",
+        "paras": [
+          "A recall check needs the full TIN, which starts with DOT on the sidewall and may be on only one side of the tire, often the inboard side. The free USTMA lookup takes the full TIN for tires its members made from 2000 on, and NHTSA's recall site covers tires by brand and line. Registering your tires is how the maker reaches you if they are recalled. NHTSA suggests asking your retailer whether they registered you on site. If you are having tires fitted in South Florida, [see how installation works](/install)."
+        ]
+      }
+    ],
+    "audience": "These guides are for anyone buying tires online or in a shop who wants to read the date code first, owners of a vehicle with an old spare or one that sits unused for long stretches, and anyone who has never registered their tires.",
+    "facts": [
+      "Bridgestone and Michelin recommend replacing tires 10 years after they were made, and Bridgestone's guidance includes the spare.",
+      "Both makers recommend a professional inspection at least once a year from five years old.",
+      "The last four digits of the DOT number are the week and year the tire was made.",
+      "USTMA's free recall lookup covers tires its members made from 2000 on.",
+      "If a dealer registers you electronically, the federal rule says the invoice must say so.",
+      "Keep a photo of each tire's full DOT number, or ask for it on your invoice."
+    ]
   },
   {
     "slug": "tesla",

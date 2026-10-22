@@ -144,6 +144,26 @@ export function normalizeHubs(hubs) {
           href: canonicalSitePath(asString(l?.href)),
         }))
         .filter((l) => l.label && l.href),
+      // Optional hub body copy (hub page only): a one-line summary per
+      // guide keyed by guide slug, headed sections of paragraphs (with
+      // [text](/path) links), who the hub is for, and a short fact list.
+      guideNotes: Object.fromEntries(
+        Object.entries(h.guideNotes ?? {})
+          .map(([k, v]) => [k, asString(v)])
+          .filter(([, v]) => v),
+      ),
+      sections: (Array.isArray(h.sections) ? h.sections : [])
+        .map((s) => ({
+          heading: asString(s?.heading),
+          paras: (Array.isArray(s?.paras) ? s.paras : [])
+            .map(asString)
+            .filter(Boolean),
+        }))
+        .filter((s) => s.heading && s.paras.length),
+      audience: asString(h.audience) || null,
+      facts: (Array.isArray(h.facts) ? h.facts : [])
+        .map(asString)
+        .filter(Boolean),
     }))
     .sort((a, b) => a.order - b.order);
 }

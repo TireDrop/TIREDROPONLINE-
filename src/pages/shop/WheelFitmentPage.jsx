@@ -33,7 +33,7 @@ export default function WheelFitmentPage() {
     />
     <PageHero
       eyebrow="Wheels"
-      title="Fitment Guidance"
+      title="Wheel fitment guide"
       lede="Six numbers decide whether a wheel bolts on and clears everything. Here is what each one means, and what we check before anything ships."
     />
     <Breadcrumbs
